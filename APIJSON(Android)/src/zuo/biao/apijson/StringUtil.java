@@ -170,7 +170,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String getNoBlankString(String s) {
-		return getString(s).replaceAll(" ", "");
+		return getString(s).replaceAll("\\s", "");
 	}
 
 	//获取去掉所有空格后的string >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

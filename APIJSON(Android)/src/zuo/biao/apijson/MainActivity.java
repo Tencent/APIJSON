@@ -114,14 +114,15 @@ public class MainActivity extends Activity {
 	}
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
-	
+	private String uri;
 	private void toQuery(int way) {
-		startActivity(QueryActivity.createIntent(context, way, StringUtil.getTrimedString(etMainRequest)));
+		startActivityForResult(QueryActivity.createIntent(context, way, uri, StringUtil.getTrimedString(etMainRequest)), REQUEST_TO_QUERY);
 	}
 
 
 
 	private static final int REQUEST_TO_SELECT = 1;
+	private static final int REQUEST_TO_QUERY = 2;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -135,6 +136,13 @@ public class MainActivity extends Activity {
 				return;
 			}
 			etMainRequest.setText(StringUtil.getTrimedString(data.getStringExtra(SelectActivity.RESULT_JSON)));
+			break;
+		case REQUEST_TO_QUERY:
+			if (data == null) {
+				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			uri = data.getStringExtra(QueryActivity.RESULT_URI);
 			break;
 		default:
 			break;

@@ -14,13 +14,19 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import zuo.biao.apijson.HttpManager.OnHttpResponseListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,11 +40,15 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 
 	public static final String INTENT_WAY = "INTENT_WAY";
+	public static final String INTENT_URI = "INTENT_URI";
 	public static final String INTENT_REQUEST = "INTENT_REQUEST";
 
-	public static Intent createIntent(Context context, int way, String request) {
+	public static final String RESULT_URI = "RESULT_URI";
+
+	public static Intent createIntent(Context context, int way, String uri, String request) {
 		return new Intent(context, QueryActivity.class)
 		.putExtra(QueryActivity.INTENT_WAY, way)
+		.putExtra(QueryActivity.INTENT_URI, uri)
 		.putExtra(QueryActivity.INTENT_REQUEST, request);
 	}
 
@@ -46,7 +56,9 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	public static final int WAY_LOCAL = 0;
 	public static final int WAY_SERVER = 1;
 
+
 	private int way = WAY_LOCAL;
+	private String uri;
 	private String request;
 
 	private Activity context;
@@ -62,16 +74,35 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		context = this;
 		isAlive = true;
 
-		way = getIntent().getIntExtra(INTENT_WAY, way);
-		request = getIntent().getStringExtra(INTENT_REQUEST);
+		Intent intent = getIntent();
+		way = intent.getIntExtra(INTENT_WAY, way);
+		uri = intent.getStringExtra(INTENT_URI);
+		request = intent.getStringExtra(INTENT_REQUEST);
 
 		tvQueryResult = (TextView) findViewById(R.id.tvQueryResult);
 		pbQuery = (ProgressBar) findViewById(R.id.pbQuery);
 		etQueryUri = (EditText) findViewById(R.id.etQueryUri);
 
-		etQueryUri.setText(StringUtil.getNoBlankString(way == 0 ? "" : "http://192.168.1.104:8080/get/"));
+		etQueryUri.setText(StringUtil.getNoBlankString(StringUtil.isNotEmpty(uri, true)
+				? uri : (way == 0 ? "" : "http://192.168.1.104:8080/get/")));
 
 		query();
+
+		findViewById(R.id.btnQueryQuery).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				query();
+			}
+		});
+		findViewById(R.id.btnQueryQuery).setOnLongClickListener(new OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				openWebSite();
+				return true;
+			}
+		});
 	}
 
 
@@ -82,12 +113,15 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
-	String uri;
-	private void query() {
-		uri = StringUtil.getNoBlankString(etQueryUri);
-		request = StringUtil.getTrimedString(request);
 
-		tvQueryResult.setText("requesting...\n\n uri = " + uri + "\n\n request = " + request);
+	public void setRequest() {
+		uri = StringUtil.getNoBlankString(etQueryUri);
+	}
+
+	private void query() {
+		setRequest();
+
+		tvQueryResult.setText("requesting...\n\n uri = " + uri + "\n\n request = \n" + request);
 		pbQuery.setVisibility(View.VISIBLE);
 
 		if (StringUtil.isUrl(uri)) {
@@ -96,7 +130,6 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			//TODO
 		}
 	}
-
 
 
 	@Override
@@ -112,7 +145,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 				if (isAlive) {
 					pbQuery.setVisibility(View.GONE);
 					Toast.makeText(context, "received result!", Toast.LENGTH_SHORT).show();
-					
+
 					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
 							? StringUtil.getTrimedString(resultJson) : e.getMessage());
 				}
@@ -121,6 +154,26 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 
 
+	/**打开网站
+	 */
+	public void openWebSite() {
+		setRequest();
+		String webSite = StringUtil.getTrimedString(uri) + request;
+		if (StringUtil.isNotEmpty(webSite, true) == false) {
+			Log.e(TAG, "openWebSite  StringUtil.isNotEmpty(webSite, true) == false >> return;");
+			return;
+		}
+
+		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(webSite)));
+	}
+
+
+
+	//	@Override
+	//	public void finish() {
+	//		setResult(RESULT_OK, new Intent().putExtra(RESULT_URI, uri));
+	//		super.finish();
+	//	}
 
 	@Override
 	protected void onStop() {

@@ -93,18 +93,20 @@ public class HttpManager {
 	 *            在发起请求的类中可以用requestCode来区分各个请求
 	 * @param listener
 	 */
-	public void get(final String url, final String request, final OnHttpResponseListener listener) {
-
+	public void get(final String url_, final String request, final OnHttpResponseListener listener) {
+		Log.d(TAG, "get  url_ = " + url_ + "; request = " + request + " >>>");
 		new AsyncTask<Void, Void, Exception>() {
 
 			String result;
 			@Override
 			protected Exception doInBackground(Void... params) {
-				
-				StringBuffer sb = new StringBuffer();
-				sb.append(StringUtil.getNoBlankString(url));
 				try {
-					OkHttpClient client = getHttpClient(url + URLEncoder.encode(request, UTF_8));
+					String url = StringUtil.getNoBlankString(url_)
+							+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
+					StringBuffer sb = new StringBuffer();
+					sb.append(url);
+
+					OkHttpClient client = getHttpClient(url);
 					if (client == null) {
 						return new Exception(TAG + ".get  AsyncTask.doInBackground  client == null >> return;");
 					}
@@ -141,7 +143,7 @@ public class HttpManager {
 	 *            在发起请求的类中可以用requestCode来区分各个请求
 	 * @param listener
 	 */
-	public void post(final String url, final String request, final OnHttpResponseListener listener) {
+	public void post(final String url_, final String request, final OnHttpResponseListener listener) {
 
 		new AsyncTask<Void, Void, Exception>() {
 
@@ -150,9 +152,11 @@ public class HttpManager {
 			protected Exception doInBackground(Void... params) {
 
 				FormEncodingBuilder fBuilder = new FormEncodingBuilder();
-
 				try {
-					OkHttpClient client = getHttpClient(url + URLEncoder.encode(request, UTF_8));
+					String url = StringUtil.getNoBlankString(url_)
+							+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
+
+					OkHttpClient client = getHttpClient(url);
 					if (client == null) {
 						return new Exception(TAG + ".post  AsyncTask.doInBackground  client == null >> return;");
 					}

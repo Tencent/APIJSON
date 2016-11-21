@@ -14,7 +14,7 @@
             <TextView
                 android:id="@+id/tvQueryResult"
                 style="@style/select_json"
-                android:hint="requesting..."
+                android:hint="result"
                 android:padding="@dimen/activity_horizontal_margin"
                 android:textIsSelectable="true" />
         </LinearLayout>
@@ -30,19 +30,20 @@
             android:id="@+id/pbQuery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-        
+
         <EditText
             android:id="@+id/etQueryUri"
             style="@style/select_name"
             android:layout_gravity="bottom"
             android:layout_weight="1"
+            android:gravity="top|left"
             android:padding="0dp"
             android:text="uri" />
 
         <Button
+            android:id="@+id/btnQueryQuery"
             android:layout_width="90dp"
             android:layout_height="45dp"
-            android:onClick="query"
             android:text="Query" />
     </LinearLayout>
 

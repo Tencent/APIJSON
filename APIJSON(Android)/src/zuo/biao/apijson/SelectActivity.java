@@ -43,6 +43,10 @@ public class SelectActivity extends Activity {
 	}
 
 	//click event,called form layout android:onClick <<<<<<<<<<<<<<<<
+	public void selectSingle(View v) {
+		setResult(v);
+	}
+	
 	public void selectRely(View v) {
 		setResult(v);
 	}

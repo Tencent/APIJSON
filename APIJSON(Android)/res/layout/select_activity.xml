@@ -10,6 +10,15 @@
 
             <TextView
                 style="@style/select_name"
+                android:text="Single" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectSingle"
+                android:text="@string/demo_single" />
+
+            <TextView
+                style="@style/select_name"
                 android:text="Rely" />
 
             <Button
