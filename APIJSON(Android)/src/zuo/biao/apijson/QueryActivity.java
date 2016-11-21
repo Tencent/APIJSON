@@ -14,8 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import zuo.biao.apijson.HttpManager.OnHttpResponseListener;
 import android.app.Activity;
@@ -158,7 +158,13 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	 */
 	public void openWebSite() {
 		setRequest();
-		String webSite = StringUtil.getTrimedString(uri) + request;
+		String webSite = null;
+		try {
+			webSite = StringUtil.getNoBlankString(uri)
+					+ URLEncoder.encode(StringUtil.getNoBlankString(request), HttpManager.UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		if (StringUtil.isNotEmpty(webSite, true) == false) {
 			Log.e(TAG, "openWebSite  StringUtil.isNotEmpty(webSite, true) == false >> return;");
 			return;
@@ -175,11 +181,6 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	//		super.finish();
 	//	}
 
-	@Override
-	protected void onStop() {
-		super.onStop();
-		isAlive = false;
-	}
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();

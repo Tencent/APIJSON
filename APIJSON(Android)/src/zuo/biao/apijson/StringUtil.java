@@ -14,14 +14,14 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import android.util.Log;
-import android.widget.TextView;
-
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import android.util.Log;
+import android.widget.TextView;
 
 /**通用字符串(String)相关类,为null时返回""
  * @author Lemon
@@ -165,7 +165,7 @@ public class StringUtil {
 	public static String getNoBlankString(CharSequence cs) {
 		return getNoBlankString(getString(cs));
 	}
-	/**获取去掉所有空格后的string,为null则返回""
+	/**获取去掉所有空字符(不可见)的string,为null则返回""
 	 * @param s
 	 * @return
 	 */

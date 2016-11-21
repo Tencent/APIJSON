@@ -44,6 +44,7 @@ public class JSON {
 	 * @return
 	 */
 	public static String getCorrectJson(String s) {
+		s = StringUtil.getNoBlankString(s);
 		return isJsonCorrect(s) ? s : "";
 	}
 
