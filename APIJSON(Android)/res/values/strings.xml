@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name="app_name">APIJSON</string>
+<string name="app_version">1.0</string>
+<string name="hello_world">Hello world!</string>
+<string name="action_settings">Settings</string>
+<string name="demo_rely">{\n&#160;\"User\":{\n&#160;&#160;\"id\":38710\n&#160;},\n&#160;\"Work\":{\n&#160;&#160;\"userId\":\"User/id\"\n&#160;}\n}</string>
+<string name="demo_array">{\n&#160;\"User[]\":{\n&#160;&#160;\"count\":10,\n&#160;&#160;\"User\":{\n&#160;&#160;&#160;\"sex\":0\n&#160;&#160;}\n&#160;}\n}</string>
+<string name="demo_complex">{\n&#160;\"[]\":{\n&#160;&#160;\"count\":5,\n&#160;&#160;\"User\":{\n&#160;&#160;&#160;\"sex\":0\n&#160;&#160;},\n&#160;&#160;\"Work\":{\n&#160;&#160;&#160;\"userId\":\"/User/id\"\n&#160;&#160;},\n&#160;&#160;\"Comment[]\":{\n&#160;&#160;&#160;\"count\":3,\n&#160;&#160;&#160;\"Comment\":{\n&#160;&#160;&#160;&#160;\"workId\":\"[]/Work/id\"\n&#160;&#160;&#160;&#160;}\n&#160;&#160;}\n&#160;}\n}</string>
+
+</resources>

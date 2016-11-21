@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/activity_page" >
+
+    <EditText
+        android:id="@+id/etMainRequest"
+        style="@style/match_match"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_weight="1"
+        android:background="@android:color/white"
+        android:gravity="left|top"
+        android:hint="1.select demo or input request json here\n\n2.click any query button" />
+
+    <Button
+        style="@style/match_wrap"
+        android:onClick="select"
+        android:text="Select Demo" />
+
+    <Button
+        style="@style/match_wrap"
+        android:onClick="queryFromLocal"
+        android:text="QueryFromLocal" />
+
+    <Button
+        style="@style/match_wrap"
+        android:onClick="queryFromServer"
+        android:text="QueryFromServer" />
+
+</LinearLayout>

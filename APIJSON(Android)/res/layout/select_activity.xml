@@ -1,0 +1,40 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/activity_page" >
+
+    <ScrollView style="@style/match_match" >
+
+        <LinearLayout
+            style="@style/match_match"
+            android:orientation="vertical" >
+
+            <TextView
+                style="@style/select_name"
+                android:text="Rely" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectRely"
+                android:text="@string/demo_rely" />
+
+            <TextView
+                style="@style/select_name"
+                android:text="Array" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectArray"
+                android:text="@string/demo_array" />
+
+            <TextView
+                style="@style/select_name"
+                android:text="Complex" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectComplex"
+                android:text="@string/demo_complex" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
