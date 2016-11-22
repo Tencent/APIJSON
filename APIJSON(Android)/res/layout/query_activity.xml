@@ -22,28 +22,29 @@
 
     <LinearLayout
         style="@style/match_wrap"
-        android:layout_height="wrap_content"
+        android:layout_height="45dp"
         android:gravity="bottom"
         android:orientation="horizontal" >
 
         <ProgressBar
             android:id="@+id/pbQuery"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent" />
 
         <EditText
             android:id="@+id/etQueryUri"
             style="@style/select_name"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom"
             android:layout_weight="1"
-            android:gravity="top|left"
+            android:gravity="bottom|left"
             android:padding="0dp"
             android:text="uri" />
 
         <Button
             android:id="@+id/btnQueryQuery"
             android:layout_width="90dp"
-            android:layout_height="45dp"
+            android:layout_height="match_parent"
             android:text="Query" />
     </LinearLayout>
 

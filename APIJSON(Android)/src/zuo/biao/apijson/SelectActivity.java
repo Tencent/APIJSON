@@ -19,7 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.Toast;
 
 /**activity for select a request json
  * @author Lemon
@@ -44,26 +44,46 @@ public class SelectActivity extends Activity {
 
 	//click event,called form layout android:onClick <<<<<<<<<<<<<<<<
 	public void selectSingle(View v) {
-		setResult(v);
+		select(QueryActivity.TYPE_SINGLE);
 	}
 	
 	public void selectRely(View v) {
-		setResult(v);
+		select(QueryActivity.TYPE_RELY);
 	}
 	
 	public void selectArray(View v) {
-		setResult(v);
+		select(QueryActivity.TYPE_ARRAY);
 	}
 	
 	public void selectComplex(View v) {
-		setResult(v);
+		select(QueryActivity.TYPE_COMPLEX);
 	}
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 	
-	
-	private void setResult(View v) {
-		setResult(RESULT_OK, new Intent().putExtra(RESULT_JSON, StringUtil.getTrimedString((TextView) v)));
-		finish();
+	private String uri;
+	private void select(int type) {
+		startActivityForResult(QueryActivity.createIntent(context, type, uri), REQUEST_TO_QUERY);
 	}
+	
+	private static final int REQUEST_TO_QUERY = 1;
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode != RESULT_OK) {
+			return;
+		}
+		switch (requestCode) {
+		case REQUEST_TO_QUERY:
+			if (data == null) {
+				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			uri = data.getStringExtra(QueryActivity.RESULT_URI);
+			break;
+		default:
+			break;
+		}
+	}
+
 	
 }

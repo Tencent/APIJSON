@@ -39,27 +39,32 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	private static final String TAG = "QueryActivity";
 
 
-	public static final String INTENT_WAY = "INTENT_WAY";
+	public static final String INTENT_TYPE = "INTENT_TYPE";
 	public static final String INTENT_URI = "INTENT_URI";
-	public static final String INTENT_REQUEST = "INTENT_REQUEST";
 
 	public static final String RESULT_URI = "RESULT_URI";
 
-	public static Intent createIntent(Context context, int way, String uri, String request) {
+	/**
+	 * @param context
+	 * @param type
+	 * @param uri
+	 * @return
+	 */
+	public static Intent createIntent(Context context, int type, String uri) {
 		return new Intent(context, QueryActivity.class)
-		.putExtra(QueryActivity.INTENT_WAY, way)
-		.putExtra(QueryActivity.INTENT_URI, uri)
-		.putExtra(QueryActivity.INTENT_REQUEST, request);
+		.putExtra(QueryActivity.INTENT_TYPE, type)
+		.putExtra(QueryActivity.INTENT_URI, uri);
 	}
 
 
-	public static final int WAY_LOCAL = 0;
-	public static final int WAY_SERVER = 1;
+	public static final int TYPE_SINGLE = 0;
+	public static final int TYPE_RELY = 1;
+	public static final int TYPE_ARRAY = 2;
+	public static final int TYPE_COMPLEX = 3;
 
 
-	private int way = WAY_LOCAL;
+	private int type = TYPE_SINGLE;
 	private String uri;
-	private String request;
 
 	private Activity context;
 	private boolean isAlive;
@@ -75,18 +80,20 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		isAlive = true;
 
 		Intent intent = getIntent();
-		way = intent.getIntExtra(INTENT_WAY, way);
+		type = intent.getIntExtra(INTENT_TYPE, type);
 		uri = intent.getStringExtra(INTENT_URI);
-		request = intent.getStringExtra(INTENT_REQUEST);
+
 
 		tvQueryResult = (TextView) findViewById(R.id.tvQueryResult);
 		pbQuery = (ProgressBar) findViewById(R.id.pbQuery);
 		etQueryUri = (EditText) findViewById(R.id.etQueryUri);
 
-		etQueryUri.setText(StringUtil.getNoBlankString(StringUtil.isNotEmpty(uri, true)
-				? uri : (way == 0 ? "" : "http://192.168.1.104:8080/get/")));
+		etQueryUri.setText(StringUtil.getString(StringUtil.isNotEmpty(uri, true)
+				? uri : "http://192.168.1.104:8080/get/"));
+
 
 		query();
+
 
 		findViewById(R.id.btnQueryQuery).setOnClickListener(new OnClickListener() {
 
@@ -113,9 +120,24 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
-
+	private String request;
 	public void setRequest() {
 		uri = StringUtil.getNoBlankString(etQueryUri);
+		switch (type) {
+		case TYPE_SINGLE:
+			request = JSON.toJSONString(RequestUtil.newSingleRequest());
+			break;
+		case TYPE_RELY:
+			request = JSON.toJSONString(RequestUtil.newRelyRequest());
+			break;
+		case TYPE_ARRAY:
+			request = JSON.toJSONString(RequestUtil.newArrayRequest());
+			break;
+		default:
+			request = JSON.toJSONString(RequestUtil.newComplexRequest());
+			break;
+		}
+		System.out.println("request = " + request);
 	}
 
 	private void query() {
@@ -124,12 +146,10 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		tvQueryResult.setText("requesting...\n\n uri = " + uri + "\n\n request = \n" + request);
 		pbQuery.setVisibility(View.VISIBLE);
 
-		if (StringUtil.isUrl(uri)) {
-			HttpManager.getInstance().get(uri, request, this);
-		} else {
-			//TODO
-		}
+		HttpManager.getInstance().get(uri, request, this);
 	}
+
+
 
 
 	@Override
@@ -175,11 +195,11 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 
 
-	//	@Override
-	//	public void finish() {
-	//		setResult(RESULT_OK, new Intent().putExtra(RESULT_URI, uri));
-	//		super.finish();
-	//	}
+	@Override
+	public void finish() {
+		setResult(RESULT_OK, new Intent().putExtra(RESULT_URI, uri));
+		super.finish();
+	}
 
 	@Override
 	protected void onDestroy() {
