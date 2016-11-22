@@ -12,12 +12,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package zuo.biao.apijson.client;
 
 import com.alibaba.fastjson.JSONObject;
 
-
-/**用户类
+/**用户类，名字对应服务器数据库的table_name，变量名及其类型和table里的column一一对应
  * @author Lemon
  */
 public class User extends BaseModel {

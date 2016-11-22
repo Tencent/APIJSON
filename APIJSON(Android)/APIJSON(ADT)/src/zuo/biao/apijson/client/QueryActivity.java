@@ -12,12 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package zuo.biao.apijson.client;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import zuo.biao.apijson.HttpManager.OnHttpResponseListener;
+import zuo.biao.apijson.client.HttpManager.OnHttpResponseListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;

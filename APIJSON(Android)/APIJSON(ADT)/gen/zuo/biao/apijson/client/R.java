@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package zuo.biao.apijson;
+package zuo.biao.apijson.client;
 
 public final class R {
     public static final class attr {
