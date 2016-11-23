@@ -165,7 +165,7 @@ public class StringUtil {
 	public static String getNoBlankString(CharSequence cs) {
 		return getNoBlankString(getString(cs));
 	}
-	/**获取去掉所有空字符(不可见)的string,为null则返回""
+	/**获取去掉所有空格后的string,为null则返回""
 	 * @param s
 	 * @return
 	 */
@@ -293,46 +293,57 @@ public class StringUtil {
 
 		return p.matcher(email).matches();
 	}
-	//判断是否全是数字
-	public static boolean isNumer(String number) {
-		if (isNotEmpty(number, true) == false) {
-			return false;
-		}
-
-		Pattern pattern = Pattern.compile("[0-9]*");
-		Matcher isNum = pattern.matcher(number);
-		if (!isNum.matches()) {
-			return false;
-		}
-
-		currentString = number;
-
-		return true;
-	}
-	/**判断字符类型是否是号码或字母
-	 * @param inputed
+	/**判断是否全是数字
+	 * @param s
 	 * @return
 	 */
-	public static boolean isNumberOrAlpha(String inputed) {
-		if (inputed == null) {
-			Log.e(TAG, "isNumberOrAlpha  inputed == null >> return false;");
+	public static boolean isNumer(String s) {
+		if (isNotEmpty(s, true) == false) {
 			return false;
 		}
-		Pattern pNumber = Pattern.compile("[0-9]*");
-		Matcher mNumber;
-		Pattern pAlpha = Pattern.compile("[a-zA-Z]");
-		Matcher mAlpha;
-		for (int i = 0; i < inputed.length(); i++) {
-			mNumber = pNumber.matcher(inputed.substring(i, i+1));
-			mAlpha = pAlpha.matcher(inputed.substring(i, i+1));
-			if(! mNumber.matches() && ! mAlpha.matches()){
+
+		Pattern pattern = Pattern.compile("[0-9]");
+		Matcher matcher;
+		for (int i = 0; i < s.length(); i++) {
+			matcher = pattern.matcher(s.substring(i, i+1));
+			if(! matcher.matches()){
 				return false;
 			}
 		}
 
-		currentString = inputed;
+		currentString = s;
+
 		return true;
 	}
+	/**判断是否全是字母
+	 * @param s
+	 * @return
+	 */
+	public static boolean isAlpha(String s) {
+		if (s == null) {
+			System.out.println("isNumberOrAlpha  inputed == null >> return false;");
+			return false;
+		}
+		Pattern pAlpha = Pattern.compile("[a-zA-Z]");
+		Matcher mAlpha;
+		for (int i = 0; i < s.length(); i++) {
+			mAlpha = pAlpha.matcher(s.substring(i, i+1));
+			if(! mAlpha.matches()){
+				return false;
+			}
+		}
+
+		currentString = s;
+		return true;
+	}
+	/**判断是否全是数字或字母
+	 * @param inputed
+	 * @return
+	 */
+	public static boolean isNumberOrAlpha(String s) {
+		return isNumer(s) || isAlpha(s);
+	}
+
 
 	/**判断字符类型是否是身份证号
 	 * @param idCard

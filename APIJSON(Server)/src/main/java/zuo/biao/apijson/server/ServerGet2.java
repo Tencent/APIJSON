@@ -366,7 +366,7 @@ public class ServerGet2 {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
-		return SelectTable3.getInstance().select(config);//SelectTable2.select(config);//
+		return SelectTable2.select(config);//SelectTable3.getInstance().select(config);//
 	}
 
 	/**获取查询配置

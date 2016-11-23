@@ -18,6 +18,7 @@ import java.util.List;
 
 import zuo.biao.apijson.client.StringUtil;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -54,11 +55,11 @@ public class JSON {
 	 * @param s
 	 * @return
 	 */
-	public static JSONObject parseObject(String s) {
+	public static JSONObject parseObject(String json) {
 		try {
 			int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
 			features |= Feature.SortFeidFastMatch.getMask();
-			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(s), JSONObject.class, features);
+			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), JSONObject.class, features);
 		} catch (Exception e) {
 			System.out.println(TAG + "parseObject  catch \n" + e.getMessage());
 		}
@@ -70,25 +71,32 @@ public class JSON {
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> T parseObject(String s, Class<T> clazz) {
+	public static <T> T parseObject(String json, Class<T> clazz) {
 		try {
 			int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
 			features |= Feature.SortFeidFastMatch.getMask();
-			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(s), clazz, features);
+			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, features);
 		} catch (Exception e) {
 			System.out.println(TAG + "parseObject  catch \n" + e.getMessage());
 		}
 		return null;
 	}
-	
+
+	/**json转JSONArray
+	 * @param json
+	 * @return
+	 */
+	public static JSONArray parseArray(String json) {
+		return  com.alibaba.fastjson.JSON.parseArray(json);
+	}
 	/**json转实体类列表
 	 * @param s
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> List<T> parseArray(String s, Class<T> clazz) {
+	public static <T> List<T> parseArray(String json, Class<T> clazz) {
 		try {
-			return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(s), clazz);
+			return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json), clazz);
 		} catch (Exception e) {
 			System.out.println(TAG + "parseArray  catch \n" + e.getMessage());
 		}
@@ -107,5 +115,6 @@ public class JSON {
 		}
 		return null;
 	}
+
 
 }

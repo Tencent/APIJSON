@@ -16,13 +16,19 @@ package zuo.biao.apijson.client.ui;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
+
+import com.alibaba.fastjson.JSONArray;
 
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.client.HttpManager;
 import zuo.biao.apijson.client.HttpManager.OnHttpResponseListener;
+import zuo.biao.apijson.client.JSONResponse;
 import zuo.biao.apijson.client.R;
 import zuo.biao.apijson.client.RequestUtil;
 import zuo.biao.apijson.client.StringUtil;
+import zuo.biao.apijson.client.model.Comment;
+import zuo.biao.apijson.client.model.User;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -163,6 +169,33 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		if (e != null) {
 			Log.e(TAG, "onHttpResponse e = " + e.getMessage());
 		}
+		JSONResponse response = new JSONResponse(resultJson);
+		if (type == TYPE_ARRAY) {
+			List<User> list = JSONResponse.parseList(response.getJSONObject("User[]"), User.class);
+			if (list == null || list.isEmpty()) {
+				Log.e(TAG, "onHttpResponse  type == TYPE_ARRAY >> list == null || list.isEmpty()");
+				return;
+			}
+			for (User user : list) {
+				Log.d(TAG, "\n onHttpResponse  type == TYPE_ARRAY >> user = \n" + JSON.toJSONString(user));
+			}
+		} else if (type == TYPE_COMPLEX) {
+			JSONArray array = JSONResponse.toJSONArray(response.getJSONObject("[]"));//, "Comment[]");//
+			if (array == null || array.isEmpty()) {
+				Log.e(TAG, "onHttpResponse  type == TYPE_COMPLEX >> array == null || array.isEmpty() >> return;");
+				return;
+			}
+			response = new JSONResponse(array.getJSONObject(0));
+			List<Comment> list = JSONResponse.parseList(response.getJSONObject("Comment[]"), Comment.class);//, Comment.class);//
+			if (list == null || list.isEmpty()) {
+				Log.e(TAG, "onHttpResponse  type == TYPE_COMPLEX >> list == null || list.isEmpty() >> return;");
+				return;
+			}
+			for (Comment comment : list) {
+				Log.d(TAG, "\n onHttpResponse  type == TYPE_COMPLEX >> comment = \n" + JSON.toJSONString(comment));
+			}
+		}
+		
 		runOnUiThread(new Runnable() {
 
 			@Override
@@ -173,6 +206,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
 							? StringUtil.getTrimedString(resultJson) : e.getMessage());
+					
 				}
 			}
 		});
