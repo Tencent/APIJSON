@@ -14,17 +14,12 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client.model;
 
-
-
 /**用户类
  * @author Lemon
  */
-public class User {//extends BaseModel {
-	public static final String TAG = "User";
-
-//	private static final long serialVersionUID = 1L;
-
-	public Long id;
+public class User extends BaseModel {
+	private static final long serialVersionUID = -1635551656020732611L;
+	
 	public Integer sex;
 	public String head;
 	public String name;
@@ -45,13 +40,6 @@ public class User {//extends BaseModel {
 		this.name = name;
 	}
 
-	public Long getId() {
-		return id;
-	}
-	public User setId(Long id) {
-		this.id = id;
-		return this;
-	}
 	public Integer getSex() {
 		return sex;
 	}

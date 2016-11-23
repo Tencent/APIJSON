@@ -1,51 +1,64 @@
+/*Copyright ©2015 TommyLemon(https://github.com/TommyLemon)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.*/
+
 package zuo.biao.apijson.client.model;
 
-public class Comment {
-
-	long id;
-	long workId;
-	long parentId;
-	long userId;
-	long targetUserId;
-	String userName;
-	String targetUserName;
-	String content;
+/**评论类
+ * @author Lemon
+ */
+public class Comment extends BaseModel {
+	private static final long serialVersionUID = -1011007127735372824L;
+	
+	
+	public Long workId;
+	public Long parentId;
+	public Long userId;
+	public Long targetUserId;
+	public String userName;
+	public String targetUserName;
+	public String content;
 	public Comment() {
-		// TODO Auto-generated constructor stub
+		super();
 	}
-	public Comment(long id, String content) {
+	public Comment(Long id, String content) {
 		this();
 		this.id = id;
 		this.content = content;
 	}
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
-	public long getWorkId() {
+	
+	public Long getWorkId() {
 		return workId;
 	}
-	public void setWorkId(long workId) {
+	public void setWorkId(Long workId) {
 		this.workId = workId;
 	}
-	public long getParentId() {
+	public Long getParentId() {
 		return parentId;
 	}
-	public void setParentId(long parentId) {
+	public void setParentId(Long parentId) {
 		this.parentId = parentId;
 	}
-	public long getUserId() {
+	public Long getUserId() {
 		return userId;
 	}
-	public void setUserId(long userId) {
+	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
-	public long getTargetUserId() {
+	public Long getTargetUserId() {
 		return targetUserId;
 	}
-	public void setTargetUserId(long targetUserId) {
+	public void setTargetUserId(Long targetUserId) {
 		this.targetUserId = targetUserId;
 	}
 	public String getUserName() {
@@ -66,8 +79,6 @@ public class Comment {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
-	
 	
 	
 }

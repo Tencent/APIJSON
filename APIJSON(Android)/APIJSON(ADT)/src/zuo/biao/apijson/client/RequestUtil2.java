@@ -30,8 +30,6 @@ import zuo.biao.apijson.client.model.Work;
 public class RequestUtil2 {
 
 
-	//	private static final String SEPRATOR = "/";
-
 	/**
 	 * @param object
 	 * @return
@@ -111,7 +109,7 @@ public class RequestUtil2 {
 	public static JSONObject newRelyRequest() {
 		JSONObject object = new JSONObject();
 
-		object.put(User.TAG, new User((long) 38710));
+		object.put(User.class.getSimpleName(), new User((long) 38710));
 
 		JSONObject workObject = new JSONObject();
 		try {
@@ -120,7 +118,7 @@ public class RequestUtil2 {
 			e.printStackTrace();
 			return null;
 		}
-		object.put(Work.TAG, workObject);
+		object.put(Work.class.getSimpleName(), workObject);
 
 		return object;
 	}

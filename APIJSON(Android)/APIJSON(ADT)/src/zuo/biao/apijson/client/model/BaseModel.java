@@ -16,10 +16,6 @@ package zuo.biao.apijson.client.model;
 
 import java.io.Serializable;
 
-import zuo.biao.apijson.JSON;
-
-import com.alibaba.fastjson.JSONObject;
-
 /**基础Model
  * *isCorrect可以用于BaseModel子类的数据校验
  * *implements Serializable 是为了网络传输字节流转换
@@ -27,18 +23,9 @@ import com.alibaba.fastjson.JSONObject;
  * @use extends BaseModel
  */
 public abstract class BaseModel implements Serializable {
-	private static final String TAG = "BaseModel";
-
-	/**
-	 * default, 怎么设置子类都有warning
-	 */
-	private static final long serialVersionUID = 1L;
-
-
-
+	private static final long serialVersionUID = 7560533944342381808L;
 
 	public Long id;
-
 
 	public Long getId() {
 		return id;
@@ -61,54 +48,4 @@ public abstract class BaseModel implements Serializable {
 //	 */
 //	public abstract boolean isCorrect();
 
-	/**把这个类的实例转为JSONObject
-	 * @return
-	 */
-	public JSONObject toJSONObject() {
-		return toJSONObject(this);
-	}
-	/**通过反射把这个类的实例转为JSONObject<变量类型名, 变量值>
-	 * @param <T> 类型
-	 * @param object 实现类
-	 * @return
-	 */
-	public <T> JSONObject toJSONObject(T object) {
-		return object == null ? null : JSON.parseObject(object.toString());
-
-		//		ObjectRequest jsonObject = new ObjectRequest(true);
-		//
-		//		Field[] fields = object == null ? null : object.getClass().getDeclaredFields();
-		//		if (fields != null) {
-		//			Object value;
-		//			for (Field field : fields) {
-		//				field.setAccessible(true);
-		//				try {
-		//					value = field.get(object);
-		//					if (value != null) {
-		//						jsonObject.put(field.getName(), field.get(object));
-		//					}
-		//				} catch (IllegalAccessException e) {
-		//					e.printStackTrace();
-		//				} catch (IllegalArgumentException e) {
-		//					e.printStackTrace();
-		//				}
-		//			}
-		//		}
-		//
-		//		return jsonObject;
-	}
-
-	@Override
-	public String toString() {
-		return JSON.toJSONString(this);
-	}
-
-	public static String getFieldPath(String fieldName) {
-		return fieldName == null ? null : TAG + "/" + fieldName;
-	}
-
-	//	public void getFieldName(Object object) {
-	//		Field field = Field.DECLARED;
-	//return object.get
-	//	}
 }

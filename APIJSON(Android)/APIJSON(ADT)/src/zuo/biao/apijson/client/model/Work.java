@@ -14,18 +14,11 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client.model;
 
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 /**作品类，名字对应服务器数据库的table_name，变量名及其类型和table里的column一一对应
  * @author Lemon
  */
 public class Work extends BaseModel {
-	public static final String TAG = "Work";
-
 	private static final long serialVersionUID = -7437225320551780084L;
-
 
 	public long userId;
 	public String title;
@@ -72,15 +65,5 @@ public class Work extends BaseModel {
 //		return getId() > 0 && getUserId() > 0
 //				&& (StringUtil.isNotEmpty(getTitle(), true) || StringUtil.isNotEmpty(getContent(), true));
 //	}
-
-	@Override
-	public JSONObject toJSONObject() {
-		return toJSONObject(this);
-	}
-
-	@Override
-	public String toString() {
-		return JSON.toJSONString(this);
-	}
 
 }

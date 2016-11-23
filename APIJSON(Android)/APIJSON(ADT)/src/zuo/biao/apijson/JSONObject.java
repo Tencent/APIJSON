@@ -24,8 +24,5 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		super(true);
 	}
 	
-//	public Object put(Field key, Object value) {
-//		return put(key.getName(), value);
-//	}
 	
 }
