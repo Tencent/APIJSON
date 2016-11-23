@@ -51,20 +51,20 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 
 	public static final String INTENT_TYPE = "INTENT_TYPE";
-	public static final String INTENT_URI = "INTENT_URI";
+	public static final String INTENT_URL = "INTENT_URL";
 
-	public static final String RESULT_URI = "RESULT_URI";
+	public static final String RESULT_URL = "RESULT_URL";
 
 	/**
 	 * @param context
 	 * @param type
-	 * @param uri
+	 * @param url
 	 * @return
 	 */
-	public static Intent createIntent(Context context, int type, String uri) {
+	public static Intent createIntent(Context context, int type, String url) {
 		return new Intent(context, QueryActivity.class)
 		.putExtra(QueryActivity.INTENT_TYPE, type)
-		.putExtra(QueryActivity.INTENT_URI, uri);
+		.putExtra(QueryActivity.INTENT_URL, url);
 	}
 
 
@@ -75,7 +75,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 
 	private int type = TYPE_SINGLE;
-	private String uri;
+	private String url;
 
 	private Activity context;
 	private boolean isAlive;
@@ -92,15 +92,15 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 		Intent intent = getIntent();
 		type = intent.getIntExtra(INTENT_TYPE, type);
-		uri = intent.getStringExtra(INTENT_URI);
+		url = intent.getStringExtra(INTENT_URL);
 
 
 		tvQueryResult = (TextView) findViewById(R.id.tvQueryResult);
 		pbQuery = (ProgressBar) findViewById(R.id.pbQuery);
 		etQueryUri = (EditText) findViewById(R.id.etQueryUri);
 
-		etQueryUri.setText(StringUtil.getString(StringUtil.isNotEmpty(uri, true)
-				? uri : "http://192.168.1.104:8080/get/"));
+		etQueryUri.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
+				? url : "http://192.168.1.104:8080/get/"));//TODO my computer ipv4 address,you need to change it
 
 
 		query();
@@ -133,7 +133,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	private String request;
 	public void setRequest() {
-		uri = StringUtil.getNoBlankString(etQueryUri);
+		url = StringUtil.getNoBlankString(etQueryUri);
 		switch (type) {
 		case TYPE_SINGLE:
 			request = JSON.toJSONString(RequestUtil.newSingleRequest());
@@ -154,10 +154,11 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	private void query() {
 		setRequest();
 
-		tvQueryResult.setText("requesting...\n\n uri = " + uri + "\n\n request = \n" + request);
+		tvQueryResult.setText("requesting...\n\n url = " + url + "\n\n request = \n" + request
+				+ "\n\n\n" + getResources().getString(R.string.query_error));
 		pbQuery.setVisibility(View.VISIBLE);
 
-		HttpManager.getInstance().get(uri, request, this);
+		HttpManager.getInstance().get(url, request, this);
 	}
 
 
@@ -171,14 +172,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		}
 		JSONResponse response = new JSONResponse(resultJson);
 		if (type == TYPE_ARRAY) {
-			List<User> list = JSONResponse.parseList(response.getJSONObject("User[]"), User.class);
-			if (list == null || list.isEmpty()) {
-				Log.e(TAG, "onHttpResponse  type == TYPE_ARRAY >> list == null || list.isEmpty()");
-				return;
-			}
-			for (User user : list) {
-				Log.d(TAG, "\n onHttpResponse  type == TYPE_ARRAY >> user = \n" + JSON.toJSONString(user));
-			}
+			logList(JSONResponse.parseList(response.getJSONObject("User[]"), User.class));
 		} else if (type == TYPE_COMPLEX) {
 			JSONArray array = JSONResponse.toJSONArray(response.getJSONObject("[]"));//, "Comment[]");//
 			if (array == null || array.isEmpty()) {
@@ -186,14 +180,9 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 				return;
 			}
 			response = new JSONResponse(array.getJSONObject(0));
-			List<Comment> list = JSONResponse.parseList(response.getJSONObject("Comment[]"), Comment.class);//, Comment.class);//
-			if (list == null || list.isEmpty()) {
-				Log.e(TAG, "onHttpResponse  type == TYPE_COMPLEX >> list == null || list.isEmpty() >> return;");
-				return;
-			}
-			for (Comment comment : list) {
-				Log.d(TAG, "\n onHttpResponse  type == TYPE_COMPLEX >> comment = \n" + JSON.toJSONString(comment));
-			}
+			
+			logList(JSONResponse.parseList(response, User.class));
+			logList(JSONResponse.parseList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
 		}
 		
 		runOnUiThread(new Runnable() {
@@ -205,12 +194,26 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 					Toast.makeText(context, "received result!", Toast.LENGTH_SHORT).show();
 
 					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
-							? StringUtil.getTrimedString(resultJson) : e.getMessage());
+							? StringUtil.getTrimedString(resultJson)
+									: e.getMessage() + "\n\n\n" + getResources().getString(R.string.query_error));
 					
 				}
 			}
 		});
 	}
+
+
+	private <T> void logList(List<T> list) {
+		if (list == null || list.isEmpty()) {
+			Log.e(TAG, "logList  list == null || list.isEmpty() >> return;");
+			return;
+		}
+		for (T data : list) {
+			Log.d(TAG, "\n logList  " + (data == null ? "data" : data.getClass().getSimpleName())
+					+ " = \n" + JSON.toJSONString(data));
+		}		
+	}
+
 
 
 	/**打开网站
@@ -219,7 +222,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		setRequest();
 		String webSite = null;
 		try {
-			webSite = StringUtil.getNoBlankString(uri)
+			webSite = StringUtil.getNoBlankString(url)
 					+ URLEncoder.encode(StringUtil.getNoBlankString(request), HttpManager.UTF_8);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -236,7 +239,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	@Override
 	public void finish() {
-		setResult(RESULT_OK, new Intent().putExtra(RESULT_URI, uri));
+		setResult(RESULT_OK, new Intent().putExtra(RESULT_URL, url));
 		super.finish();
 	}
 

@@ -115,6 +115,11 @@ public class JSONResponse extends JSONObject {
 	 * @return
 	 */
 	public static JSONArray toJSONArray(com.alibaba.fastjson.JSONObject arrayObject, String className) {
+		Set<String> set = arrayObject == null ? null : arrayObject.keySet();
+		if (set == null || set.isEmpty()) {
+			return null;
+		}
+
 		String parentString = StringUtil.getTrimedString(com.alibaba.fastjson.JSON.toJSONString(arrayObject));
 		if (parentString.isEmpty()) {
 			return null;
@@ -125,12 +130,8 @@ public class JSONResponse extends JSONObject {
 			}
 			return JSON.parseArray(parentString);
 		}
-
+		
 		//{"0":{...}, "1":{...}...}
-		Set<String> set = arrayObject == null ? null : arrayObject.keySet();
-		if (set == null || set.isEmpty()) {
-			return null;
-		}
 
 		className = StringUtil.getTrimedString(className);
 

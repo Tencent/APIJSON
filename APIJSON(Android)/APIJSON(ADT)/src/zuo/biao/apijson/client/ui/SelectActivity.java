@@ -61,9 +61,9 @@ public class SelectActivity extends Activity {
 	}
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 	
-	private String uri;
+	private String url;
 	private void select(int type) {
-		startActivityForResult(QueryActivity.createIntent(context, type, uri), REQUEST_TO_QUERY);
+		startActivityForResult(QueryActivity.createIntent(context, type, url), REQUEST_TO_QUERY);
 	}
 	
 	private static final int REQUEST_TO_QUERY = 1;
@@ -79,7 +79,7 @@ public class SelectActivity extends Activity {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
 				return;
 			}
-			uri = data.getStringExtra(QueryActivity.RESULT_URI);
+			url = data.getStringExtra(QueryActivity.RESULT_URL);
 			break;
 		default:
 			break;
