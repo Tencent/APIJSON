@@ -35,7 +35,7 @@ public class ServerGet2 {
 		parseRelation = true;
 		requestObject = getObject(null, null, null, requestObject);
 		System.out.println(TAG + "\n\n最终返回至客户端的json:\n" + JSON.toJSONString(requestObject));
-		
+
 		/**
 		 * TODO 格式化json，去除标记array内object位置的数字，转为[]形式，比如
 		 * "Comment[]":{"0":{"Comment":{...}}, ...}
@@ -68,7 +68,7 @@ public class ServerGet2 {
 		}
 		boolean nameIsNumber = StringUtil.isNumer(name);
 		final int position = nameIsNumber ? Integer.valueOf(0 + StringUtil.getNumber(name)) : 0;
-		
+
 		boolean containRelation = false;
 
 		Set<String> set = request.keySet();
@@ -116,7 +116,7 @@ public class ServerGet2 {
 				QueryConfig config2 = getQueryConfig(name, transferredRequest);
 				if (parentConfig != null) {
 					config2.setLimit(parentConfig.getLimit()).setPage(parentConfig.getPage())
-					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
+							.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 				JSONObject result = getSQLObject(config2);
 				//				if (result != null) {
@@ -152,12 +152,14 @@ public class ServerGet2 {
 		int page = 0, count = 0;
 		try {
 			page = request.getIntValue("page");
-//			request.remove("page");
 			count = request.getIntValue("count");
-//			request.remove("count");
 		} catch (Exception e) {
 			//			System.out.println(TAG + "getArray   try { page = arrayObject.getIntValue(page); ..." +
 			//					" >> } catch (Exception e) {\n" + e.getMessage());
+		}
+		if (parseRelation) {
+			request.remove("page");
+			request.remove("count");
 		}
 		System.out.println(TAG + "getArray page = " + page + "; count = " + count);
 
@@ -180,7 +182,7 @@ public class ServerGet2 {
 						if (child == null) {//key - value
 							//array里不允许关联，只能在object中关联
 							transferredRequest.put(key, value);
-						} else { 
+						} else {
 							config.setPosition(i);
 							if (isArrayKey(key)) {//json array
 								result = getArray(getPath(path, "" + i), config, key, child);
@@ -190,7 +192,7 @@ public class ServerGet2 {
 							System.out.println(TAG + "getArray  parseRelation == false >>  i = " + i + "result = " + result);
 							if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
 								parent.put(key, result);
-								
+
 								//更新关系path中对应改变字段
 								Set<String> relationSet = relationMap == null ? null : relationMap.keySet();
 								if (relationSet != null) {
@@ -364,7 +366,7 @@ public class ServerGet2 {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
-		return SelectTable2.select(config);//SelectTable3.getInstance().select(config);//
+		return SelectTable3.getInstance().select(config);//SelectTable2.select(config);//
 	}
 
 	/**获取查询配置

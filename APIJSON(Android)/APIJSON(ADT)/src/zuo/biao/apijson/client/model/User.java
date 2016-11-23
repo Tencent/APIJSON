@@ -12,19 +12,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.client;
+package zuo.biao.apijson.client.model;
 
-import com.alibaba.fastjson.JSONObject;
 
-/**用户类，名字对应服务器数据库的table_name，变量名及其类型和table里的column一一对应
+
+/**用户类
  * @author Lemon
  */
-public class User extends BaseModel {
+public class User {//extends BaseModel {
 	public static final String TAG = "User";
 
-	private static final long serialVersionUID = 1L;
+//	private static final long serialVersionUID = 1L;
 
-
+	public Long id;
 	public Integer sex;
 	public String head;
 	public String name;
@@ -44,8 +44,14 @@ public class User extends BaseModel {
 		this(id);
 		this.name = name;
 	}
-	
 
+	public Long getId() {
+		return id;
+	}
+	public User setId(Long id) {
+		this.id = id;
+		return this;
+	}
 	public Integer getSex() {
 		return sex;
 	}
@@ -78,13 +84,13 @@ public class User extends BaseModel {
 		this.picture = picture;
 	}
 
-//	@Override
-//	public boolean isCorrect() {//根据自己的需求决定，也可以直接 return true
-//		return id != null && id > 0;// && StringUtil.isNotEmpty(phone, true);
-//	}
-
-	@Override
-	public JSONObject toJSONObject() {
-		return toJSONObject(this);
-	}
+	////	@Override
+	////	public boolean isCorrect() {//根据自己的需求决定，也可以直接 return true
+	////		return id != null && id > 0;// && StringUtil.isNotEmpty(phone, true);
+	////	}
+	//
+	//	@Override
+	//	public JSONObject toJSONObject() {
+	//		return toJSONObject(this);
+	//	}
 }

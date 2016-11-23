@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="zuo.biao.apijson.client.SelectActivity"
+            android:name="zuo.biao.apijson.client.ui.SelectActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="zuo.biao.apijson.client.QueryActivity"
+            android:name="zuo.biao.apijson.client.ui.QueryActivity"
             android:label="Query" >
         </activity>
     </application>

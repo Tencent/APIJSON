@@ -12,12 +12,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.client;
+package zuo.biao.apijson.client.ui;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.client.HttpManager;
 import zuo.biao.apijson.client.HttpManager.OnHttpResponseListener;
+import zuo.biao.apijson.client.R;
+import zuo.biao.apijson.client.RequestUtil;
+import zuo.biao.apijson.client.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +37,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**activity for query from a SQL database
+/**activity for request a query in Server
  * @author Lemon
  */
 public class QueryActivity extends Activity implements OnHttpResponseListener {

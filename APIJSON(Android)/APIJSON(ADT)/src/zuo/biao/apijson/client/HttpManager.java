@@ -81,7 +81,7 @@ public class HttpManager {
 
 	public static final String KEY_TOKEN = "token";
 	public static final String KEY_COOKIE = "cookie";
-	protected static final String UTF_8 = "utf-8";
+	public static final String UTF_8 = "utf-8";
 
 
 	/**GET请求

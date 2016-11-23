@@ -12,8 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.client;
+package zuo.biao.apijson.client.ui;
 
+import zuo.biao.apijson.client.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;

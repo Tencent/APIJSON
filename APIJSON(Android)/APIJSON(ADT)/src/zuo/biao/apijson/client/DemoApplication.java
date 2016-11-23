@@ -17,7 +17,7 @@ package zuo.biao.apijson.client;
 import android.app.Application;
 import android.util.Log;
 
-/**基础Application
+/**Application
  * @author Lemon
  * @see #init
  */

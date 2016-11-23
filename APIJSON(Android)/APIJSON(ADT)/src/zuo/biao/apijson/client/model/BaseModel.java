@@ -12,9 +12,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.client;
+package zuo.biao.apijson.client.model;
 
 import java.io.Serializable;
+
+import zuo.biao.apijson.JSON;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -45,7 +47,7 @@ public abstract class BaseModel implements Serializable {
 		this.id = id;
 	}
 
-
+//  导致JSON.toJSONString写入correct字段
 //	/**数据正确性校验
 //	 * @param data
 //	 * @return
@@ -73,7 +75,7 @@ public abstract class BaseModel implements Serializable {
 	public <T> JSONObject toJSONObject(T object) {
 		return object == null ? null : JSON.parseObject(object.toString());
 
-		//		JSONObject jsonObject = new JSONObject(true);
+		//		ObjectRequest jsonObject = new ObjectRequest(true);
 		//
 		//		Field[] fields = object == null ? null : object.getClass().getDeclaredFields();
 		//		if (fields != null) {
