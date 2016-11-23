@@ -52,52 +52,66 @@ public class JSONResponse extends JSONObject {
 
 
 	/**
+	 * @param object
+	 * @param clazz
+	 * @return
+	 */
+	public static <T> T getObject(com.alibaba.fastjson.JSONObject object, Class<T> clazz) {
+		return JSON.parseObject(JSON.toJSONString(clazz == null ? object : object.getJSONObject(clazz.getSimpleName())), clazz);
+	}
+//	/**
+//	 * @param json
+//	 * @param clazz
+//	 * @return
+//	 */
+//	public static <T> T getObject(String json, Class<T> clazz) {
+//		return getObject(JSON.parseObject(json, clazz), clazz);
+//	}
+
+	
+	/**
 	 * arrayObject = this
 	 * @param clazz
 	 * @return
 	 */
-	public <T> List<T> parseList(Class<T> clazz) {
-		return parseList(this, clazz);
+	public <T> List<T> getList(Class<T> clazz) {
+		return getList(this, clazz);
 	}
 	/**
 	 * @param arrayObject
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> List<T> parseList(com.alibaba.fastjson.JSONObject arrayObject, Class<T> clazz) {
-		return JSON.parseArray(JSON.toJSONString(toJSONArray(arrayObject
+	public static <T> List<T> getList(com.alibaba.fastjson.JSONObject arrayObject, Class<T> clazz) {
+		return JSON.parseArray(JSON.toJSONString(getJSONArray(arrayObject
 				, clazz == null ? null : clazz.getSimpleName())), clazz);
 	}
 
 	/**
-	 * need try-catch
+	 * @param arrayKey
+	 * @param className
+	 * @return
 	 */
 	public JSONArray getJSONArray(String arrayKey, String className) {
-		return isArrayKey(arrayKey) ? toJSONArray(getJSONObject(arrayKey), className) : super.getJSONArray(arrayKey);
+		if (StringUtil.isNotEmpty(arrayKey, true) == false) {
+			arrayKey = StringUtil.getString(className) + "[]";
+		}
+		return isArrayKey(arrayKey) ? getJSONArray(getJSONObject(arrayKey), className) : super.getJSONArray(arrayKey);
 	}
 
 	/**
 	 * arrayObject = this
 	 * @return
 	 */
-	public JSONArray toJSONArray() {
-		return toJSONArray(this, null);
+	public JSONArray getJSONArray() {
+		return getJSONArray(this, null);
 	}
 	/**
 	 * arrayObject = this
-	 * @param <T>
 	 * @return
 	 */
-	public <T> JSONArray toJSONArray(String className) {
-		return toJSONArray(this, className);
-	}
-	/**
-	 * @param <T>
-	 * @param arrayJson
-	 * @return
-	 */
-	public static <T> JSONArray toJSONArray(String arrayJson, String className) {
-		return toJSONArray(JSON.parseObject(arrayJson), className);
+	public JSONArray getJSONArray(String className) {
+		return getJSONArray(this, className);
 	}
 	/**
 	 * @param <T>
@@ -105,8 +119,8 @@ public class JSONResponse extends JSONObject {
 	 * @param clazz 
 	 * @return
 	 */
-	public static JSONArray toJSONArray(com.alibaba.fastjson.JSONObject arrayObject) {
-		return toJSONArray(arrayObject, null);
+	public static JSONArray getJSONArray(com.alibaba.fastjson.JSONObject arrayObject) {
+		return getJSONArray(arrayObject, null);
 	}
 	/**
 	 * @param <T>
@@ -114,7 +128,7 @@ public class JSONResponse extends JSONObject {
 	 * @param clazz 
 	 * @return
 	 */
-	public static JSONArray toJSONArray(com.alibaba.fastjson.JSONObject arrayObject, String className) {
+	public static JSONArray getJSONArray(com.alibaba.fastjson.JSONObject arrayObject, String className) {
 		Set<String> set = arrayObject == null ? null : arrayObject.keySet();
 		if (set == null || set.isEmpty()) {
 			return null;
@@ -130,7 +144,7 @@ public class JSONResponse extends JSONObject {
 			}
 			return JSON.parseArray(parentString);
 		}
-		
+
 		//{"0":{...}, "1":{...}...}
 
 		className = StringUtil.getTrimedString(className);
@@ -151,5 +165,6 @@ public class JSONResponse extends JSONObject {
 		}
 		return array;
 	}
+
 
 }

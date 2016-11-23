@@ -18,8 +18,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
-import com.alibaba.fastjson.JSONArray;
-
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.client.HttpManager;
 import zuo.biao.apijson.client.HttpManager.OnHttpResponseListener;
@@ -29,6 +27,7 @@ import zuo.biao.apijson.client.RequestUtil;
 import zuo.biao.apijson.client.StringUtil;
 import zuo.biao.apijson.client.model.Comment;
 import zuo.biao.apijson.client.model.User;
+import zuo.biao.apijson.client.model.Work;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +41,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.alibaba.fastjson.JSONArray;
 
 /**activity for request a query in Server
  * @author Lemon
@@ -172,17 +173,20 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		}
 		JSONResponse response = new JSONResponse(resultJson);
 		if (type == TYPE_ARRAY) {
-			logList(JSONResponse.parseList(response.getJSONObject("User[]"), User.class));
+			logList(JSONResponse.getList(response.getJSONObject("User[]"), User.class));
 		} else if (type == TYPE_COMPLEX) {
-			JSONArray array = JSONResponse.toJSONArray(response.getJSONObject("[]"));//, "Comment[]");//
+			JSONArray array = JSONResponse.getJSONArray(response.getJSONObject("[]"));//, "Comment[]");//
 			if (array == null || array.isEmpty()) {
 				Log.e(TAG, "onHttpResponse  type == TYPE_COMPLEX >> array == null || array.isEmpty() >> return;");
 				return;
 			}
 			response = new JSONResponse(array.getJSONObject(0));
 			
-			logList(JSONResponse.parseList(response, User.class));
-			logList(JSONResponse.parseList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
+			User user = JSONResponse.getObject(response, User.class);
+			Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  user = " + JSON.toJSONString(user));
+			Work work = JSONResponse.getObject(response, Work.class);
+			Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  work = " + JSON.toJSONString(work));
+			logList(JSONResponse.getList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
 		}
 		
 		runOnUiThread(new Runnable() {
