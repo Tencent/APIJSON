@@ -359,6 +359,13 @@ public class StringUtil {
 	}
 
 	public static String[] splitPath(String path) {
+		path = getString(path);
+		if(path.startsWith("/")){
+			path = path.substring(1);
+		}
+		if(path.endsWith("/")){
+			path = path.substring(0, path.length() - 1);
+		}
 		return isPath(path) ? path.split(SEPARATOR) : new String[] {path};
 	}
 
