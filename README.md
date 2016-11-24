@@ -1,11 +1,11 @@
 # APIJSON
-A Functional JSON Format Protocal.</p>
+A Functional JSON Format Protocal.
 
-<p>You can set any JSON structure and your server will return a JSON String with the structure you had set like this:</p>
+You can set any JSON structure and your server will return a JSON String with the structure you had set like this:
 
-## Request:
-{<br />
-&nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  //request an array<br />
+## Request: 
+{
+&nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //request an array<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//array condition<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 2, &nbsp; &nbsp; &nbsp; &nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an object form the table named User<br />
@@ -13,7 +13,7 @@ A Functional JSON Format Protocal.</p>
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp;&nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;work&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//rely path with default parent path,starts from the same level object's path<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//rely path with default parent path,starts from the same level object&#39;s path<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an array named Comment<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 0,<br />
@@ -25,8 +25,10 @@ A Functional JSON Format Protocal.</p>
 &nbsp; &nbsp; }<br />
 }</p>
 
-## Response:
-{<br />
+<p>&nbsp;</p>
+
+## Response: 
+{
 &nbsp; &nbsp; &quot;[]&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;0&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;:{<br />
@@ -141,5 +143,12 @@ A Functional JSON Format Protocal.</p>
 &nbsp; &nbsp; }<br />
 }</p>
 
-<p>APIJSON, let interfaces go to hell!&nbsp;<br />
-&nbsp;</p>
+
+## Welcome star, welcome fork
+[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
+
+## Download Client&nbsp;App
+
+[ZBLibraryDemoApp.apk](http://files.cnblogs.com/files/tommylemon/ZBLibraryDemoApp.apk)
+
+# APIJSON, let interfaces go to hell !
