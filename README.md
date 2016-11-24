@@ -1,4 +1,4 @@
-<p># APIJSON<br />
+# APIJSON
 A Functional JSON Format Protocal.</p>
 
 <p>You can set any JSON structure and your server will return a JSON String with the structure you had set like this:</p>
