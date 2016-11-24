@@ -1,10 +1,6 @@
 package zuo.biao.apijson.server.sql;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +17,22 @@ public class SelectTable2 {
 //		System.out.println(TAG + JSON.toJSONString(select("stu")));
 	}
 
-	public static Connection getConnection() throws Exception {
+	private static Connection connection;
+	private static Statement statement;
+	private static DatabaseMetaData metaData;
+	private SelectTable2() {
+	}
+
+	private static SelectTable2 instance;
+	public static synchronized SelectTable2 getInstance() {
+		if (instance == null) {
+			instance = new SelectTable2();
+		}
+		return instance;
+	}
+
+
+	public Connection getConnection() throws Exception {
 		//调用Class.forName()方法加载驱动程序
 		Class.forName("com.mysql.jdbc.Driver");
 		System.out.println(TAG + "成功加载MySQL驱动！");
@@ -29,29 +40,44 @@ public class SelectTable2 {
 		return DriverManager.getConnection(url,    "root", "199531tommy");
 	}
 
-	
-	public static JSONObject select(String table) {
-		return select(new QueryConfig(table));
+	public void close() {
+		try {
+			statement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		metaData = null;
+		statement = null;
 	}
-	public static JSONObject select(QueryConfig config) {
+
+	public JSONObject select(QueryConfig config) {
 		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
 			System.out.println(TAG + "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
 			return null;
 		}
+		final String sql = config.getSQL();
+
 		try{
-			Connection conn = getConnection();
-			Statement stmt = conn.createStatement(); //创建Statement对象
+
+
 			System.out.println(TAG + "成功连接到数据库！");
 
-			List<String> list = getColumnList(config.getTable(), conn.getMetaData());
+			if (connection == null || connection.isClosed()) {
+				System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+				connection = getConnection();
+				statement = connection.createStatement(); //创建Statement对象
+				metaData = connection.getMetaData();
+			}
+
+			List<String> list = getColumnList(config.getTable());
 			if (list == null || list.isEmpty()) {
 				return null;
 			}
 
-			String sql = "select * from " + config.getTable() + config.getWhereString() + config.getLimitString();    //要执行的SQL
 			System.out.println(TAG + "select  sql = " + sql);
-			
-			ResultSet rs = stmt.executeQuery(sql);//创建数据对象
+
+			ResultSet rs = statement.executeQuery(sql);//创建数据对象
 
 			JSONObject object  = null;//new JSONObject();//null;
 			int position = -1;
@@ -74,8 +100,6 @@ public class SelectTable2 {
 			}
 
 			rs.close();
-			stmt.close();
-			conn.close();
 
 			return object;
 		} catch(Exception e) {
@@ -90,11 +114,11 @@ public class SelectTable2 {
 	 * @param table
 	 * @return
 	 */
-	public static List<String> getColumnList(String table, DatabaseMetaData meta) {
+	public List<String> getColumnList(String table) {
 		List<String> list = new ArrayList<String>();
 		ResultSet rs;
 		try {
-			rs = meta.getColumns("sys", null, table, "%");
+			rs = metaData.getColumns("sys", null, table, "%");
 			while (rs.next()) {
 				System.out.println(TAG + rs.getString(4));
 				list.add(rs.getString(4));

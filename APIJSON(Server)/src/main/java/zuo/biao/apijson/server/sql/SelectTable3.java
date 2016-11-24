@@ -1,10 +1,6 @@
 package zuo.biao.apijson.server.sql;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +16,7 @@ public class SelectTable3 {
 
 	private Map<String, List<JSONObject>> cacheMap;
 	private SelectTable3() {
-		cacheMap = new HashMap<String, List<JSONObject>>();
+
 	}
 
 	private static SelectTable3 instance;
@@ -59,7 +55,21 @@ public class SelectTable3 {
 		return list == null || position < 0 || position >= list.size() ? null : list.get(position);
 	}
 
-	
+	private static Connection connection;
+	private static Statement statement;
+	private static DatabaseMetaData metaData;
+	public void close() {
+		try {
+			statement.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		metaData = null;
+		statement = null;
+		cacheMap = null;
+	}
+
 	public JSONObject select(QueryConfig config) {
 		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
 			System.out.println(TAG + "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
@@ -68,17 +78,22 @@ public class SelectTable3 {
 		final String sql = config.getSQL();
 		final int position = config.getPosition();
 
+		if (cacheMap == null) {
+			cacheMap = new HashMap<String, List<JSONObject>>();
+		}
 		JSONObject object = getFromCache(sql, position);
 		if (object != null) {
 			return object;
 		}
 
 		try{
-			Connection conn = getConnection();
-			Statement stmt = conn.createStatement(); //创建Statement对象
-			System.out.println(TAG + "成功连接到数据库！");
-
-			List<String> list = getColumnList(config.getTable(), conn.getMetaData());
+			if (connection == null || connection.isClosed()) {
+				System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+				connection = getConnection();
+				statement = connection.createStatement(); //创建Statement对象
+				metaData = connection.getMetaData();
+			}
+			List<String> list = getColumnList(config.getTable(), metaData);
 			if (list == null || list.isEmpty()) {
 				return null;
 			}
@@ -86,7 +101,7 @@ public class SelectTable3 {
 
 			System.out.println(TAG + "select  sql = " + sql);
 
-			ResultSet rs = stmt.executeQuery(sql);//创建数据对象
+			ResultSet rs = statement.executeQuery(sql);//创建数据对象
 
 			List<JSONObject> resultList = new ArrayList<JSONObject>();
 			while (rs.next()){
@@ -104,8 +119,6 @@ public class SelectTable3 {
 				resultList.add(object);
 			}
 			rs.close();
-			stmt.close();
-			conn.close();
 
 			//从缓存存取，避免 too many connections崩溃
 			if (position < config.getLimit() - 1) {
