@@ -1,7 +1,8 @@
 # APIJSON
+
 A Functional JSON Format Protocal.
 
-You can set any JSON structure and your server will return a JSON String with the structure you had set like this:
+You can set any JSON structure and your server will return a JSON String with the structure you had set like this: 
 
 ## Request: 
 {<br />
@@ -24,8 +25,6 @@ You can set any JSON structure and your server will return a JSON String with th
 &nbsp; &nbsp; &nbsp; &nbsp; }<br />
 &nbsp; &nbsp; }<br />
 }</p>
-
-<p>&nbsp;</p>
 
 ## Response: 
 {<br />
@@ -144,8 +143,34 @@ You can set any JSON structure and your server will return a JSON String with th
 }</p>
 
 
+## Usage
+
+### 1.Download and Unzip APIJSON project
+
+Clone or download > Download ZIP > Unzip to a path and remember it.
+
+### 2.Import MySQL table files
+
+Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select download path</p>
+
+of APIJSON-Master/table > Start Import > refresh SCHEMAS, and you'll see the tables were already added.</p>
+
+### 3.Run Server project with IntellIJ IDEA
+
+If you don't have installed it, please download and install before run.
+
+### 4.Run Client project with ADT or Android Studio
+
+If you don't have installed any editor above, please download and install before run.
+
+### 5.Operate Client app
+
+Select a json request to send to server and wait. It will show the result received.
+
+
 ## Welcome star, welcome fork
-[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
+
+[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON) 
 
 ## Download Client&nbsp;App
 
