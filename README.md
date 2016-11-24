@@ -13,7 +13,7 @@ A Functional JSON Format Protocal.</p>
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp;&nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;work&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//rely path with default parent path,starts from the same level object path<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//rely path with default parent path,starts from the same level object's path<br />
 &nbsp; &nbsp; &nbsp; &nbsp; }<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an array named Comment<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 0,<br />
