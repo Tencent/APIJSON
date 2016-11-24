@@ -3,7 +3,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-
 import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.StringUtil;
@@ -43,8 +42,8 @@ public class ServerGet2 {
 		 * "Comment[]":[{...}, ...]
 		 */
 
-//		SelectTable2.getInstance().close();
-		SelectTable3.getInstance().close();
+		SelectTable2.getInstance().close();
+//		SelectTable3.getInstance().close();
 
 		return requestObject;
 	}
@@ -369,7 +368,7 @@ public class ServerGet2 {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
-		return SelectTable3.getInstance().select(config);//SelectTable2.getInstance().select(config);//
+		return SelectTable2.getInstance().select(config);//SelectTable3.getInstance().select(config);//
 	}
 
 	/**获取查询配置

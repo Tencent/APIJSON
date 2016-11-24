@@ -14,17 +14,19 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client.ui;
 
+import static zuo.biao.apijson.StringUtil.UTF_8;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.client.HttpManager;
 import zuo.biao.apijson.client.HttpManager.OnHttpResponseListener;
 import zuo.biao.apijson.client.JSONResponse;
 import zuo.biao.apijson.client.R;
 import zuo.biao.apijson.client.RequestUtil;
-import zuo.biao.apijson.client.StringUtil;
 import zuo.biao.apijson.client.model.Comment;
 import zuo.biao.apijson.client.model.User;
 import zuo.biao.apijson.client.model.Work;
@@ -227,7 +229,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		String webSite = null;
 		try {
 			webSite = StringUtil.getNoBlankString(url)
-					+ URLEncoder.encode(StringUtil.getNoBlankString(request), HttpManager.UTF_8);
+					+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

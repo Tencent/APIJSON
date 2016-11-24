@@ -14,13 +14,13 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client;
 
-import static zuo.biao.apijson.client.HttpManager.UTF_8;
+import static zuo.biao.apijson.StringUtil.UTF_8;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONObject;
+import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.client.model.User;
 import zuo.biao.apijson.client.model.Work;
 
@@ -141,7 +141,7 @@ public class RequestUtil2 {
 		JSONObject workObject = new JSONObject();
 		//		workObject.put("userId", "/User/id");
 		try {
-			workObject.put("userId", URLEncoder.encode("/User/id", HttpManager.UTF_8));
+			workObject.put("userId", URLEncoder.encode("/User/id", UTF_8));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -149,7 +149,7 @@ public class RequestUtil2 {
 		JSONObject commentObject = new JSONObject();
 		//		commentObject.put("workId", "[]/Work/id");
 		try {
-			commentObject.put("workId", URLEncoder.encode("[]/Work/id", HttpManager.UTF_8));
+			commentObject.put("workId", URLEncoder.encode("[]/Work/id", UTF_8));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -165,7 +165,7 @@ public class RequestUtil2 {
 		arrayObject.put("User", userObject);
 		arrayObject.put("Work", workObject);
 		try {
-			arrayObject.put(URLEncoder.encode("Comment[]", HttpManager.UTF_8), commentArrayObject);
+			arrayObject.put(URLEncoder.encode("Comment[]", UTF_8), commentArrayObject);
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
 		}

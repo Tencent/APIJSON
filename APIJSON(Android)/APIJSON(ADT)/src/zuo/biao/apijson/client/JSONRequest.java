@@ -14,7 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client;
 
-import zuo.biao.apijson.JSONObject;
+import zuo.biao.apijson.StringUtil;
+
 
 /**auto formatted request JSONObject
  * @author Lemon

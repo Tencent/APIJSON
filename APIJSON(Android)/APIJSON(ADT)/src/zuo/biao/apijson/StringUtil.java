@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.client;
+package zuo.biao.apijson;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -33,6 +33,8 @@ public class StringUtil {
 	public StringUtil() {
 	}
 
+	public static final String UTF_8 = "utf-8";
+	
 	public static final String EMPTY = "无";
 	public static final String UNKNOWN = "未知";
 	public static final String UNLIMITED = "不限";

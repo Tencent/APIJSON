@@ -29,6 +29,8 @@ public class StringUtil {
 	public StringUtil() {
 	}
 
+	public static final String UTF_8 = "utf-8";
+
 	public static final String EMPTY = "无";
 	public static final String UNKNOWN = "未知";
 	public static final String UNLIMITED = "不限";
@@ -294,7 +296,7 @@ public class StringUtil {
 		return true;
 	}
 	/**判断是否全是数字或字母
-	 * @param inputed
+	 * @param s
 	 * @return
 	 */
 	public static boolean isNumberOrAlpha(String s) {

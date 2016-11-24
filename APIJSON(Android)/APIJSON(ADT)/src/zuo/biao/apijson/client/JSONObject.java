@@ -12,16 +12,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package zuo.biao.apijson.client;
 
-import static zuo.biao.apijson.client.HttpManager.UTF_8;
+import static zuo.biao.apijson.StringUtil.UTF_8;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Set;
 
-import zuo.biao.apijson.client.StringUtil;
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.StringUtil;
 
 /**use this class instead of com.alibaba.fastjson.JSONObject
  * @author Lemon

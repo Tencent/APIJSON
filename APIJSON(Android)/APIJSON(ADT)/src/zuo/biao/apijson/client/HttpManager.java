@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client;
 
+import static zuo.biao.apijson.StringUtil.UTF_8;
+
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.URI;
@@ -27,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import zuo.biao.apijson.StringUtil;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -81,7 +84,6 @@ public class HttpManager {
 
 	public static final String KEY_TOKEN = "token";
 	public static final String KEY_COOKIE = "cookie";
-	public static final String UTF_8 = "utf-8";
 
 
 	/**GET请求

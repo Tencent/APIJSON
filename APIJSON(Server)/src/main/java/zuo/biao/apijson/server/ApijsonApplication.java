@@ -14,6 +14,6 @@ public class ApijsonApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ApijsonApplication.class, args);
-//		ClientPost.main(null);
+//		ClientTest.main(null);
 	}
 }

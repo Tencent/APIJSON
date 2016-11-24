@@ -7,6 +7,8 @@ import zuo.biao.apijson.JSON;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import static zuo.biao.apijson.StringUtil.UTF_8;
+
 /**
  * @author Lemon
  */
@@ -17,7 +19,7 @@ public class UserController {
     @RequestMapping("get/{request}")
     public String get(@PathVariable String request) {
         try {
-            request = URLDecoder.decode(request, "utf-8");
+            request = URLDecoder.decode(request, UTF_8);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

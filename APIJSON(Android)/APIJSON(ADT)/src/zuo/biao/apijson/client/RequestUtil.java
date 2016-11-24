@@ -14,7 +14,6 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client;
 
-import zuo.biao.apijson.JSONObject;
 import zuo.biao.apijson.client.model.Comment;
 import zuo.biao.apijson.client.model.User;
 import zuo.biao.apijson.client.model.Work;

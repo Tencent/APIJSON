@@ -1,8 +1,8 @@
-package zuo.biao.apijson.client;
+package zuo.biao.apijson.server;
 
 import zuo.biao.apijson.server.ServerGet2;
 
-public class ClientPost {
+public class ClientTest {
 
 	/**
 	 * @param args
@@ -44,7 +44,6 @@ public class ClientPost {
 				        "\"page\": 1, " +
 				        "\"count\": 10," +
 				        " \"User\": {" +
-//				               "\"range\": 1," +
 				               "\"sex\": 0" +
 				         "}," +
 				         "\"Work\": {" +
