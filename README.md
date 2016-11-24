@@ -1,8 +1,7 @@
 # APIJSON
 A Functional JSON Format Protocal.
-You can set any JSON structure
 
-APIJSON, let interfaces go to hell! 
+You can set any JSON structure and your server will return a JSON String with the structure you had set like this:
 
 ## Request:
 {
@@ -143,3 +142,5 @@ APIJSON, let interfaces go to hell!
 }
 
 
+
+APIJSON, let interfaces go to hell! 
