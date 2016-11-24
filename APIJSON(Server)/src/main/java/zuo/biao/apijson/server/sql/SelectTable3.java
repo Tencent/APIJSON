@@ -14,6 +14,11 @@ import zuo.biao.apijson.server.QueryConfig;
 public class SelectTable3 {
 	private static final String TAG = "SelectTable3: ";
 
+	private static final String YOUR_MYSQL_URL = "jdbc:mysql://localhost:3306/";//TODO edit to an available one
+	private static final String YOUR_MYSQL_CATALOG = "sys";//TODO edit to an available one
+	private static final String YOUR_MYSQL_ACCOUNT = "root";//TODO edit to an available one
+	private static final String YOUR_MYSQL_PASSWORD = "apijson";//TODO edit to an available one
+
 	private Map<String, List<JSONObject>> cacheMap;
 	private SelectTable3() {
 
@@ -31,8 +36,7 @@ public class SelectTable3 {
 		//调用Class.forName()方法加载驱动程序
 		Class.forName("com.mysql.jdbc.Driver");
 		System.out.println(TAG + "成功加载MySQL驱动！");
-		String url="jdbc:mysql://localhost:3306/sys";    //JDBC的URL    
-		return DriverManager.getConnection(url,    "root", "199531tommy");
+		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_CATALOG, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
 	private void saveCache(String key, List<JSONObject> list) {
@@ -150,7 +154,7 @@ public class SelectTable3 {
 		List<String> list = new ArrayList<String>();
 		ResultSet rs;
 		try {
-			rs = meta.getColumns("sys", null, table, "%");
+			rs = meta.getColumns(YOUR_MYSQL_CATALOG, null, table, "%");
 			while (rs.next()) {
 				System.out.println(TAG + rs.getString(4));
 				list.add(rs.getString(4));

@@ -12,15 +12,13 @@ import zuo.biao.apijson.server.QueryConfig;
 public class SelectTable2 {
 	private static final String TAG = "SelectTable2: ";
 
+	private static final String YOUR_MYSQL_URL = "jdbc:mysql://localhost:3306/";//TODO edit to an available one
+	private static final String YOUR_MYSQL_CATALOG = "sys";//TODO edit to an available one
+	private static final String YOUR_MYSQL_ACCOUNT = "root";//TODO edit to an available one
+	private static final String YOUR_MYSQL_PASSWORD = "apijson";//TODO edit to an available one
 
-	public static void main(String[] args){
-//		System.out.println(TAG + JSON.toJSONString(select("stu")));
-	}
-
-	private static Connection connection;
-	private static Statement statement;
-	private static DatabaseMetaData metaData;
 	private SelectTable2() {
+
 	}
 
 	private static SelectTable2 instance;
@@ -31,15 +29,17 @@ public class SelectTable2 {
 		return instance;
 	}
 
-
 	public Connection getConnection() throws Exception {
 		//调用Class.forName()方法加载驱动程序
 		Class.forName("com.mysql.jdbc.Driver");
 		System.out.println(TAG + "成功加载MySQL驱动！");
-		String url="jdbc:mysql://localhost:3306/sys";    //JDBC的URL    
-		return DriverManager.getConnection(url,    "root", "199531tommy");
+		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_CATALOG, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
+
+	private static Connection connection;
+	private static Statement statement;
+	private static DatabaseMetaData metaData;
 	public void close() {
 		try {
 			statement.close();
