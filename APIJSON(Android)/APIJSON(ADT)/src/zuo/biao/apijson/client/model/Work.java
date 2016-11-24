@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client.model;
 
-/**作品类，名字对应服务器数据库的table_name，变量名及其类型和table里的column一一对应
+/**作品类
  * @author Lemon
  */
 public class Work extends BaseModel {

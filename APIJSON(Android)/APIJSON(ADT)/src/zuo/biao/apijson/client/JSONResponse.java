@@ -19,14 +19,19 @@ import java.util.Set;
 
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.client.ui.QueryActivity;
 
 import com.alibaba.fastjson.JSONArray;
 
-/**
- * TODO 格式化json，去除标记array内object位置的数字，转为[]形式，比如
- * "Comment[]":{"0":{"Comment":{...}}, ...}
- * 转为
- * "Comment[]":[{...}, ...]
+/**parser for response JSON String
+ * @author Lemon
+ * @see #getList
+ * @see #getJSONArray
+ * @see QueryActivity#onHttpResponse
+ * @use JSONResponse response = new JSONResponse(...);
+ * <br> JSONArray array = JSONResponse.getJSONArray(response.getJSONObject("[]"));//not a must
+ * <br> User user = JSONResponse.getObject(response, User.class);//not a must
+ * <br> List<Comment> list = JSONResponse.getList(response.getJSONObject("Comment[]"), Comment.class);//not a must
  */
 public class JSONResponse extends JSONObject {
 	private static final long serialVersionUID = -6707531287941223427L;
@@ -52,6 +57,13 @@ public class JSONResponse extends JSONObject {
 
 
 	/**
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T getObject(Class<T> clazz) {
+		return getObject(this, clazz);
+	}
+	/**
 	 * @param object
 	 * @param clazz
 	 * @return
@@ -59,16 +71,16 @@ public class JSONResponse extends JSONObject {
 	public static <T> T getObject(com.alibaba.fastjson.JSONObject object, Class<T> clazz) {
 		return JSON.parseObject(JSON.toJSONString(clazz == null ? object : object.getJSONObject(clazz.getSimpleName())), clazz);
 	}
-//	/**
-//	 * @param json
-//	 * @param clazz
-//	 * @return
-//	 */
-//	public static <T> T getObject(String json, Class<T> clazz) {
-//		return getObject(JSON.parseObject(json, clazz), clazz);
-//	}
+	//	/**
+	//	 * @param json
+	//	 * @param clazz
+	//	 * @return
+	//	 */
+	//	public static <T> T getObject(String json, Class<T> clazz) {
+	//		return getObject(JSON.parseObject(json, clazz), clazz);
+	//	}
 
-	
+
 	/**
 	 * arrayObject = this
 	 * @param clazz

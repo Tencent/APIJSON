@@ -16,13 +16,13 @@ package zuo.biao.apijson.client;
 
 import zuo.biao.apijson.StringUtil;
 
-
-/**auto formatted request JSONObject
+/**encapsulator for request JSONObject
  * @author Lemon
+ * @see #toArray
+ * @see RequestUtil
  * @use JSONRequest request = new JSONRequest(...);
  * <br> request.put(...);//not a must
- * <br> request.toArray(...);//not a must,you can use  new JSONRequest(...).put("[]", request);  instead
- * @see #toArray
+ * <br> request.toArray(...);//not a must
  */
 public class JSONRequest extends JSONObject {
 

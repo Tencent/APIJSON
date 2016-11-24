@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-/**activity for select a request json
+/**activity for selecting a request
  * @author Lemon
  */
 public class SelectActivity extends Activity {

@@ -18,7 +18,7 @@ import zuo.biao.apijson.client.model.Comment;
 import zuo.biao.apijson.client.model.User;
 import zuo.biao.apijson.client.model.Work;
 
-/**
+/**create request JSONObjects
  * @author Lemon
  */
 public class RequestUtil {
@@ -47,7 +47,7 @@ public class RequestUtil {
 		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId", "[]/Work/id")).
 				toArray(3, 0, Comment.class.getSimpleName()));
 
-		return request.toArray(10, 1);
+		return request.toArray(2, 1);
 	}
 
 }

@@ -24,7 +24,7 @@ import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.client.model.User;
 import zuo.biao.apijson.client.model.Work;
 
-/**
+/**RequestUtil is suggested
  * @author Lemon
  */
 public class RequestUtil2 {

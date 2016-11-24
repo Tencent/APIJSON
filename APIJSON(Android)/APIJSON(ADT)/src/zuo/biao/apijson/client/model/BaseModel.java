@@ -16,9 +16,7 @@ package zuo.biao.apijson.client.model;
 
 import java.io.Serializable;
 
-/**基础Model
- * *isCorrect可以用于BaseModel子类的数据校验
- * *implements Serializable 是为了网络传输字节流转换
+/**base model for reduce model codes
  * @author Lemon
  * @use extends BaseModel
  */
@@ -33,19 +31,5 @@ public abstract class BaseModel implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-//  导致JSON.toJSONString写入correct字段
-//	/**数据正确性校验
-//	 * @param data
-//	 * @return
-//	 */
-//	public static boolean isCorrect(BaseModel data) {
-//		return data != null && data.isCorrect();
-//	}
-//
-//	/**数据正确性校验
-//	 * @return
-//	 */
-//	public abstract boolean isCorrect();
 
 }

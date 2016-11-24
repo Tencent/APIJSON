@@ -46,7 +46,7 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONArray;
 
-/**activity for request a query in Server
+/**activity for requesting a query in Server
  * @author Lemon
  */
 public class QueryActivity extends Activity implements OnHttpResponseListener {
@@ -103,7 +103,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		etQueryUri = (EditText) findViewById(R.id.etQueryUri);
 
 		etQueryUri.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
-				? url : "http://192.168.1.104:8080/get/"));//TODO my computer ipv4 address,you need to change it
+				? url : "http://192.168.1.104:8080/get/"));//TODO my computer ipv4 address,edit it to an available one
 
 
 		query();
@@ -151,9 +151,11 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			request = JSON.toJSONString(RequestUtil.newComplexRequest());
 			break;
 		}
-		System.out.println("request = " + request);
+		Log.d(TAG, "setRequest  url = " + url + ";\n request = " + request);
 	}
 
+	/**request a query from server,and the result will be received by onHttpResponse method
+	 */
 	private void query() {
 		setRequest();
 
@@ -165,8 +167,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 
 
-
-
+	
 	@Override
 	public void onHttpResponse(int requestCode, final String resultJson, final Exception e) {
 		Log.d(TAG, "onHttpResponse  resultJson = " + resultJson);
@@ -222,7 +223,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 
 
-	/**打开网站
+	/**open request URL String with a browser
 	 */
 	public void openWebSite() {
 		setRequest();
