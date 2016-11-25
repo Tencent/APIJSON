@@ -1,6 +1,6 @@
 # APIJSON
 
-A Functional JSON Format Protocal.
+A Functional JSON Structure Protocal.
 
 You can set any JSON structure and your server will return a JSON String with the structure you had set like this: 
 
@@ -142,6 +142,10 @@ You can set any JSON structure and your server will return a JSON String with th
 &nbsp; &nbsp; }<br />
 }</p>
 
+
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/apijson_all_pages.jpg?raw=true)
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg)
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true)
 
 ## Usage
 
