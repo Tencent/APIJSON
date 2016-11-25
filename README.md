@@ -178,5 +178,8 @@ Select a json request to send to server and wait. It will show the result receiv
 ## Download Client App
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
+If you haven't config your sever yet, you can use my ip address 192.168.1.107. But it's not stable because of the interruption of power supply every night from 23:00 to 6:00. I'll boot my computer and MySQL if I remember. Good lock ^_^
+
+### If you have any questions about APIJSON, you can send me an e-mail to tommylemon@qq.com.
 
 # APIJSON, let interfaces go to hell !
