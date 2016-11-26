@@ -1,8 +1,10 @@
 # APIJSON
 
+[English Document](https://github.com/TommyLemon/APIJSON/blob/master/README.md)
+
 一种JSON传输结构协议。客户端可以定义任何JSON结构去向服务端发起请求，服务端就会返回对应结构的JSON字符串，所求即所得：
 
-## 请求：
+### 请求：
 
 <p>{<br />
 &nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求一个array<br />
@@ -26,7 +28,7 @@
 
 
 
-## 返回：
+### 返回：
 
 <p>{<br />
 &nbsp; &nbsp; &quot;[]&quot;:{<br />
