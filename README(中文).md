@@ -1,32 +1,34 @@
 # APIJSON
 
-A Functional JSON Structure Protocal.
+一种JSON传输结构协议。客户端可以定义任何JSON结构去向服务端发起请求，服务端就会返回对应结构的JSON字符串，所求即所得：
 
-You can set any JSON structure and your server will return a JSON String with the structure you had set like this: 
+## 请求：
 
-## Request: 
-{<br />
-&nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //request an array<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//array condition<br />
+<p>{<br />
+&nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //请求一个array<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //array条件<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 2, &nbsp; &nbsp; &nbsp; &nbsp;<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an object form the table named User<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object condition<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求查询名为User的table，返回名为User的JSONObject<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object条件<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;work&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//rely path with default parent path,starts from the same level object&#39;s path<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//缺省依赖路径，从同级object的路径开始<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an array named Comment<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求一个名为Comment的array&nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 0,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 3,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId&quot;: &ldquo;[]/Work/id&rdquo; &nbsp;//full rely path<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId&quot;: &ldquo;[]/Work/id&rdquo; &nbsp;//完整依赖路径<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br />
 &nbsp; &nbsp; &nbsp; &nbsp; }<br />
 &nbsp; &nbsp; }<br />
 }</p>
 
-## Response: 
-{<br />
+
+
+## 返回：
+
+<p>{<br />
 &nbsp; &nbsp; &quot;[]&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;0&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;:{<br />
@@ -142,46 +144,46 @@ You can set any JSON structure and your server will return a JSON String with th
 }</p>
 
 
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/apijson_all_pages.jpg?raw=true)
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg)
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true)
 
-## Usage
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/apijson_all_pages.jpg?raw=true) ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) ##
 
-### 1.Download and Unzip APIJSON project
+## 使用方法
 
-Clone or download > Download ZIP > Unzip to a path and remember it.
+### 1.下载后解压APIJSO工程
 
-### 2.Import MySQL table files
+Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
-Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select download path</p>
+### 2.导入MySQL table文件
 
-of APIJSON-Master/table > Start Import > refresh SCHEMAS, and you'll see the tables were already added.</p>
+启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径
 
-### 3.Run Server project with IntellIJ IDEA
-
-If you don't have installed it, please download and install before run.
-
-### 4.Run Client project with ADT or Android Studio
-
-If you don't have installed any editor above, please download and install before run.
-
-### 5.Operate Client app
-
-Select a json request to send to server and wait. It will show the result received.
+下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
 
-## Download Client App
+
+### 3.用IntellIJ IDEA Ultimate运行服务端工程
+
+如果没有安装这个编辑器，运行前先下载安装。
+
+### 4.用ADT或Android Studio运行客户端工程
+
+如果以上编辑器一个都没安装, 运行前先下载安装一个。
+
+### 5.操作客户端App
+
+选择发送APIJSON请求并等待显示结果。
+
+
+## 下载试用客户端App
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
-If you haven't config your sever yet, you can use my ip address 192.168.1.107(The last number 7 may be reset to any one from 4 to 7 automatically). But it's not stable because of the interruption of power supply every night from 23:00 to 6:00. I'll boot my computer and MySQL if I remember. Good lock ^_^
 
-### If you have any questions about APIJSON, you can send me an e-mail to tommylemon@qq.com.
+如果你还没配置好服务端工程及MySQL，可以把请求的IP地址改为192.168.1.107(最后一个数字7可能被自动重置为4-7间的任意数字)，但我的电脑每晚23:00-6:00都会断电。如果我记得的话就会启动电脑运行MySQL和服务端工程，祝你好运^_^
 
+### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
 
-## Welcome star, welcome fork
+## 欢迎Star, 欢迎Fork
 
-[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON) 
+[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)&nbsp;
 
-
-# APIJSON, let interfaces go to hell !
+# APIJSON, 让接口见鬼去吧！
