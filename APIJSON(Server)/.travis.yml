@@ -1,5 +1,0 @@
-language: java
-jdk:
-  - oraclejdk7
-exclude: 
-  -ant
