@@ -4,12 +4,12 @@ A Functional JSON Structure Protocal.
 
 You can set any JSON structure and your server will return a JSON String with the structure you had set like this: 
 
-## Request: 
+### Request: 
 {<br />
 &nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //request an array<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//array condition<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 2, &nbsp; &nbsp; &nbsp; &nbsp;<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an object form the table named User<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an object from the table named User<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object condition<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;work&quot;: {<br />
@@ -25,7 +25,7 @@ You can set any JSON structure and your server will return a JSON String with th
 &nbsp; &nbsp; }<br />
 }</p>
 
-## Response: 
+### Response: 
 {<br />
 &nbsp; &nbsp; &quot;[]&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;0&quot;:{<br />
@@ -148,35 +148,36 @@ You can set any JSON structure and your server will return a JSON String with th
 
 ## Usage
 
-### 1.Download and Unzip APIJSON project
+### 1.Download and unzip APIJSON project
 
 Clone or download > Download ZIP > Unzip to a path and remember it.
 
 ### 2.Import MySQL table files
 
-Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select download path</p>
+Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path
 
-of APIJSON-Master/table > Start Import > refresh SCHEMAS, and you'll see the tables were already added.</p>
+of APIJSON-Master/table > Start Import > Refresh SCHEMAS, and you'll see the tables were already added.
 
-### 3.Run Server project with IntellIJ IDEA
+### 3.Run Server project with IntellIJ IDEA Ultimate
 
 If you don't have installed it, please download and install before run.
 
 ### 4.Run Client project with ADT or Android Studio
 
-If you don't have installed any editor above, please download and install before run.
+If you don't have installed any editor above, please download and install one before run.
 
 ### 5.Operate Client app
 
-Select a json request to send to server and wait. It will show the result received.
+Select an APIJSON request to send to server and wait. It will show the result received.
 
 
 ## Download Client App
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
-If you haven't config your sever yet, you can use my ip address 192.168.1.107(The last number 7 may be reset to any one from 4 to 7 automatically). But it's not stable because of the interruption of power supply every night from 23:00 to 6:00. I'll boot my computer and MySQL if I remember. Good lock ^_^
 
-### If you have any questions about APIJSON, you can send me an e-mail to tommylemon@qq.com.
+If you haven't config your Sever yet, you can use my IP address 192.168.1.107(The last number 7 may be reset to any one from 4 to 7 automatically). But it's not stable because of the interruption of power supply every night from 23:00 to 6:00. I'll boot my computer and start MySQL and APIJSON Server project if I remember. Good lock ^_^
+
+### If you have any questions or suggestions about APIJSON, you can send me an e-mail to tommylemon@qq.com.
 
 
 ## Welcome star, welcome fork
