@@ -2,7 +2,7 @@
 
 A Functional JSON Structure Protocal.
 
-You can set any JSON structure and your server will return a JSON String with the structure you had set like this: 
+You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set like this: 
 
 ### Request: 
 {<br />
@@ -175,7 +175,7 @@ Select an APIJSON request to send to server and wait. It will show the result re
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
 
-If you haven't config your Sever yet, you can use my IP address 192.168.1.107(The last number 7 may be reset to any one from 4 to 7 automatically). But it's not stable because of the interruption of power supply every night from 23:00 to 6:00. I'll boot my computer and start MySQL and APIJSON Server project if I remember. Good lock ^_^
+If you haven't config your sever yet, you can use my IP address 192.168.1.107(The last number 7 may be reset to any one from 4 to 7 automatically). But it's not stable because of the interruption of power supply every night from 23:00 to 6:00. I'll boot my computer and start MySQL and APIJSON Server project if I remember. Good lock ^_^
 
 ### If you have any questions or suggestions about APIJSON, you can send me an e-mail to tommylemon@qq.com.
 
