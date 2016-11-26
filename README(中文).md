@@ -6,7 +6,7 @@
 
 <p>{<br />
 &nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //请求一个array<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //array条件<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //array条件<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 2, &nbsp; &nbsp; &nbsp; &nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求查询名为User的table，返回名为User的JSONObject<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object条件<br />
@@ -145,11 +145,13 @@
 
 
 
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/apijson_all_pages.jpg?raw=true) ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) ##
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/apijson_all_pages.jpg?raw=true) 
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) 
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) 
 
 ## 使用方法
 
-### 1.下载后解压APIJSO工程
+### 1.下载后解压APIJSON工程
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
@@ -167,7 +169,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 ### 4.用ADT或Android Studio运行客户端工程
 
-如果以上编辑器一个都没安装, 运行前先下载安装一个。
+如果以上编辑器一个都没安装，运行前先下载安装一个。
 
 ### 5.操作客户端App
 
@@ -182,8 +184,8 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 ### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
 
-## 欢迎Star, 欢迎Fork
+## 欢迎Star，欢迎Fork
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)&nbsp;
 
-# APIJSON, 让接口见鬼去吧！
+# APIJSON，让接口见鬼去吧！
