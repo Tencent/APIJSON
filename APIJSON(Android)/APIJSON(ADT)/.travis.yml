@@ -1,3 +1,28 @@
-language: java
+language: android
+sudo: false
 jdk:
   - oraclejdk7
+android:
+  components:
+    - build-tools-23.0.2
+    - android-21
+    - extra-android-m2repository
+    - extra-android-support
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - export JAVA_HOME=/usr/lib/jvm/java-7-oraclejdk7-amd64
+  - export ANDROID_HOME=/usr/local/android-sdk
+  - echo yes | android update sdk --all --no-ui --force
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/apijson start
+before_script:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install 4
+  - nvm use 4
+  - npm install
+  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
+  - emulator -avd test -no-audio -no-window &
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+script: "make test"
+after_script: "npm install coveralls@2 && cat ./coverage/lcov.info | coveralls"
