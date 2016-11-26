@@ -1,6 +1,6 @@
 # APIJSON
 
-A Functional JSON Structure Protocal.
+A JSON Transmission Structure Protocal.
 
 You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set like this: 
 
