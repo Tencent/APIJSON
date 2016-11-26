@@ -162,11 +162,11 @@ of APIJSON-Master/table > Start Import > Refresh SCHEMAS, and you'll see the tab
 
 ### 3.Run Server project with IntellIJ IDEA Ultimate
 
-If you don't have installed it, please download and install before run.
+If you haven't installed it, please download and install before run.
 
 ### 4.Run Client project with ADT or Android Studio
 
-If you don't have installed any editor above, please download and install one before run.
+If you haven't installed any editor above, please download and install one before run.
 
 ### 5.Operate Client app
 
