@@ -148,6 +148,46 @@ You can set any JSON structure and request your server, and the server will retu
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg)
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true)
 
+## Compare with Previous HTTP Transmission Way
+ 
+ Process | Previous way | APIJSON
+-------- | ------------ | ------------
+ Transmission | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码
+ Compatibility | 服务端编辑新接口，用v2表示第2版接口，然后更新文档 | 什么都不用做
+ 
+ Client request | Previous way | APIJSON
+-------- | ------------ | ------------
+ Requirement | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
+ Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&currentUserPassword=1234<br />其中currentUserId和currentUserPassword只在请求部分接口时需要 | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, currentUserPassword:1234}<br />其中currentUserId和currentUserPassword只在请求部分接口时需要
+ URL | 不同请求方法(GET，POST等)或不同功能对应不同url | 相同请求方法(GET，POST等)都用同一个url
+ Key-Value Pair | key=value | key:value
+ 
+ Server operation | Previous way | APIJSON
+-------- | ------------ | ------------
+ Parse and response | 取出键值对，用键值对作为条件去查询预设的table，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端
+ Way of setting JSON structure to return | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
+ 
+ Client parse | Previous way | APIJSON
+-------- | ------------ | ------------
+ View | 查文档或等请求成功后看log | 看请求，所求即所得。也可以等请求成功后看log
+ Operate | 解析JSONObject | 可以用JSONResponse解析JSONObject或传统方式
+
+ Client requests for different requirements | Previous way | APIJSON
+-------- | ------------ | ------------
+ User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
+ User and his Work | 分两次请求<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
+ User list | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
+ Work list of which type is 1, each Work contains publisher User and top 3 Comments | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ Work list of an User, each Work contains publisher User and top 3 Comments | 把以上请求里的type=1改为userId=1 | ①把以上请求里的"Work":{"type":1}, "User":{"workId":"/Work/id"}改为"User":{"id":1}, "Work":{"userId":"/User/id"}<br />②或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ 
+ Server responses for different requests | Previous way | APIJSON
+-------- | ------------ | ------------
+ User | {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}}
+ User和对应的Work | 分别返回两次请求的结果<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />Work: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}, "Work":{"id":1, "content":"xxx"...}}
+ User列表 | {"status":200, "message":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}}, "1":{"User":{"id":2...}}...}}
+ type为1的Work列表，每个Work包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
+ 1个User发布的Work列表，每个Work包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | ①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Work":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />③{"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
+
 ## Usage
 
 ### 1.Download and unzip APIJSON project
