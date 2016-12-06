@@ -151,8 +151,7 @@
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) 
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) 
 
-## 对应关系
-
+## 和传统比较
  客户端请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
