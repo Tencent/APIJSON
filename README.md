@@ -153,7 +153,7 @@ You can set any JSON structure and request your server, and the server will retu
  Process | Previous way | APIJSON
 -------- | ------------ | ------------
  Transmission | Server developers edit interfaces and update docs, then client developers request server and parse responses according to the docs | Client developers request server and parse responses for their requirements. No inteface! No doc! No communication for any interface or doc between client and server developers! 
- Compatibility | Server developers add new interfaces tagged with v2 and update docs | Nothing need to do
+ Compatibility | Server developers add new interfaces tagged with v2 and update docs | Nothing need to do!
  
  Client request | Previous way | APIJSON
 -------- | ------------ | ------------
