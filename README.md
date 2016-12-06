@@ -164,7 +164,7 @@ You can set any JSON structure and request your server, and the server will retu
  
  Server operation | Previous way | APIJSON
 -------- | ------------ | ------------
- Parse and response | Get key-value pairs and query tables with them by the default way, then encapsulate a JSON, finally return the JSON to client | Just return what RequestParser#parse returned
+ Parse and response | Get key-value pairs and query the database with them by the default way, then encapsulate a JSON, finally return the JSON to client | Just return what RequestParser#parse returned
  Way of setting JSON structure to return | Designed in server and cannot be modified by any client apps | Designed by client apps and cannot be modified by sever
  
  Client parse | Previous way | APIJSON
