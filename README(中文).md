@@ -151,7 +151,7 @@
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) 
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) 
 
-## 和传统HTTP传输方式比较
+## 对比传统HTTP传输方式
  
  开发流程 | 传统方式 | APIJSON
 -------- | ------------ | ------------
