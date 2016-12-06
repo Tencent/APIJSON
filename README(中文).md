@@ -167,7 +167,7 @@
  
  服务端操作 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- 解析和返回 | 拆分base_url、lowercase_table_name、键值对，然后查找lowercase_table_name对应的table，再用键值对作为条件去查询table，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端
+ 解析和返回 | 取出键值对，用键值对作为条件去查询预设的table，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端
  返回JSON结构的设定方式 | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
  
  客户端解析 | 传统方式 | APIJSON
