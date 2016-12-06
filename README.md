@@ -152,25 +152,25 @@ You can set any JSON structure and request your server, and the server will retu
  
  Process | Previous way | APIJSON
 -------- | ------------ | ------------
- Transmission | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码
- Compatibility | 服务端编辑新接口，用v2表示第2版接口，然后更新文档 | do nothing
+ Transmission | Server developers edit interfaces and update docs, then client developers request server and parse server responses according to the docs | Client developers request server and parse server responses for their requirements
+ Compatibility | Server developers add new interfaces tagged with v2 and update docs | do nothing
  
  Client request | Previous way | APIJSON
 -------- | ------------ | ------------
- Requirement | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
- Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&currentUserPassword=1234<br />其中currentUserId和currentUserPassword只在请求部分接口时需要 | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, currentUserPassword:1234}<br />其中currentUserId和currentUserPassword只在请求部分接口时需要
- URL | 不同请求方法(GET，POST等)或不同功能对应不同url | 相同请求方法(GET，POST等)都用同一个url
+ Requirement | Client developers append key-value pairs to the urls for requests in docs | Client developers append JSON  for their requirements
+ Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&currentUserPassword=1234<br />the currentUserId and currentUserPassword is only for parts of interfaces | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, currentUserPassword:1234}<br />the currentUserId and currentUserPassword is only for parts of interfaces
+ URL | Different urls for different method(GET,POST...) or requirements | One url for one method(GET,POST...)
  Key-Value Pair | key=value | key:value
  
  Server operation | Previous way | APIJSON
 -------- | ------------ | ------------
- Parse and response | 取出键值对，用键值对作为条件去查询预设的table，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端
- Way of setting JSON structure to return | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
+ Parse and response | Get key-value pairs and query tables with them by the default way, and return JSON to client | Just return what RequestParser#parse returned
+ Way of setting JSON structure to return | Designed in server and cannot be modified by any client apps | Designed by client apps and cannot be modified by sever
  
  Client parse | Previous way | APIJSON
 -------- | ------------ | ------------
- View | 查文档或等请求成功后看log | 看请求，所求即所得。也可以等请求成功后看log
- Operate | 解析JSONObject | 可以用JSONResponse解析JSONObject或传统方式
+ View | Search docs or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
+ Operate | Parse JSON String from responses to a JSONObject | Parse with JSONResponse or use previous way
 
  Client requests for different requirements | Previous way | APIJSON
 -------- | ------------ | ------------
