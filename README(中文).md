@@ -153,29 +153,43 @@
 
 ## 对应关系
 
- 请求 | 传统方式 | APIJSON
+ 客户端请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
  结构 | base_url/lowercase_table_name?key0=value0&key1=value1 ... | base_url/{TableName:{key0:value0, key1:value1 ...}}
  URL | 不同请求方法(GET，POST等)或不同功能对应不同url | 相同请求方法(GET，POST等)都用同一个
  键值对 | key=value | key:value
  
- 返回 | 传统方式 | APIJSON
+ 服务端操作 | 传统方式 | APIJSON
+-------- | ------------ | ------------
+ 解析和返回 | 拆分base_url、lowercase_table_name、键值对，然后查找lowercase_table_name对应的table，再用键值对作为条件去查询table，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端
+ 返回JSON结构的设定方式 | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
+ 
+ 客户端解析 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  查看方式 | 查文档或等请求成功后看log | 看请求，所求即所得
- JSON结构 | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
+ 方法 | 解析JSONObject | 可以用JSONResponse解析JSONObject或传统方式
  
  开发流程 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  接口变动 | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码
  兼容旧版 | 服务端编辑新接口，用v2表示第2版接口，然后更新文档 | 什么都不用做
  
- 使用场景 | 传统方式 | APIJSON
+ 请求使用场景 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  获取User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
  获取User和对应的Work | 分两次请求<br /> User: http://localhost:8080/user?id=1 <br /> Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
  获取User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
- 获取Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list/userId=1&page=1&count=5&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"id":1}, "Work":{"userId":"/User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ 获取type为1的Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ 获取1个User发布的Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br />http://localhost:8080/work/list?page=1&count=5&userId=1&commentCount=3 | 同上或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br />如果User之前已经获取到了，可以这样省去所有重复User<br />http://localhost:8080/work/list?page=1&count=5&userId=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ 
+ 返回使用场景 | 传统方式 | APIJSON
+-------- | ------------ | ------------
+ 获取User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
+ 获取User和对应的Work | 分两次请求<br /> User: http://localhost:8080/user?id=1 <br /> Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
+ 获取User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
+ 获取Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&userId=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"id":1}, "Work":{"userId":"/User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+
 
 ## 使用方法
 
