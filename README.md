@@ -153,7 +153,7 @@ You can set any JSON structure and request your server, and the server will retu
  Process | Previous way | APIJSON
 -------- | ------------ | ------------
  Transmission | Server developers edit interfaces and update docs, then client developers request server and parse server responses according to the docs | Client developers request server and parse server responses for their requirements
- Compatibility | Server developers add new interfaces tagged with v2 and update docs | do nothing
+ Compatibility | Server developers add new interfaces tagged with v2 and update docs | Nothing need to do
  
  Client request | Previous way | APIJSON
 -------- | ------------ | ------------
@@ -170,20 +170,20 @@ You can set any JSON structure and request your server, and the server will retu
  Client parse | Previous way | APIJSON
 -------- | ------------ | ------------
  View | Search docs or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
- Operate | Parse JSON String from responses to a JSONObject | Parse with JSONResponse or use previous way
+ Operate | Parse JSON String from responses | Parse with JSONResponse or use previous way
 
  Client requests for different requirements | Previous way | APIJSON
 -------- | ------------ | ------------
  User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
- User and his Work | 分两次请求<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
+ User and his Work | Request twice<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
  User list | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
- Work list of which type is 1, each Work contains publisher User and top 3 Comments | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
- Work list of an User, each Work contains publisher User and top 3 Comments | 把以上请求里的type=1改为userId=1 | ①把以上请求里的"Work":{"type":1}, "User":{"workId":"/Work/id"}改为"User":{"id":1}, "Work":{"userId":"/User/id"}<br />②或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ Work list of which type is 1, each Work contains the publisher User and top 3 Comments | The Work must contains the User Object and Comment Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ Work list of an User, each Work contains the publisher User and top 3 Comments | Change type=1 to userId=1 above | ①Change  "Work":{"type":1}, "User":{"workId":"/Work/id"} to "User":{"id":1}, "Work":{"userId":"/User/id"} above<br />②Or save 4 repeated User by this way<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br />③If the User is already obtained, you can also save all repeated User by this way<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
  
  Server responses for different requests | Previous way | APIJSON
 -------- | ------------ | ------------
  User | {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}}
- User and his Work | 分别返回两次请求的结果<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />Work: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}, "Work":{"id":1, "content":"xxx"...}}
+ User and his Work | Reponse twice<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />Work: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}, "Work":{"id":1, "content":"xxx"...}}
  User list | {"status":200, "message":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}}, "1":{"User":{"id":2...}}...}}
  Work list of which type is 1, each Work contains publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
  Work list of an User, each Work contains publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | ①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Work":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />③{"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
