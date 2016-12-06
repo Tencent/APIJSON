@@ -151,6 +151,30 @@
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) 
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) 
 
+## 对应关系
+
+ 请求 | 传统方式 | APIJSON
+-------- | ------------ | ------------
+ 概览 | base_url/lowercase_table_name?key0=value0&key1=value1 ... | base_url/{TableName:{key0:value0, key1:value1 ...}}
+ 要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己需要的结构在固定url后拼接JSON
+ 
+ 返回 | 传统方式 | APIJSON
+-------- | ------------ | ------------
+ 查看方式 | 查文档或等请求成功后看log | 看请求，所求即所得
+ JSON结构 | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
+ 
+ 开发流程 | 传统方式 | APIJSON
+-------- | ------------ | ------------
+ 接口变动 | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码
+ 兼容旧版 | 服务端编辑新接口，用v2表示第2版接口，然后更新文档，客户端再按照文档修改请求和解析代码 | 什么都不用做
+ 
+ 使用场景 | 传统方式 | APIJSON
+-------- | ------------ | ------------
+ 获取User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
+ 获取User和对应的Work | 分两次请求<br /> User: http://localhost:8080/user?id=1 <br /> Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
+ 获取User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
+ 获取Work列表，每个Work包括发布者User和前3条评论 | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list/userId=1&page=1&count=5&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"id":1}, "Work":{"userId":"/User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+
 ## 使用方法
 
 ### 1.下载后解压APIJSON工程
