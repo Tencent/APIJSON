@@ -172,7 +172,7 @@
  
  客户端解析 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- 查看方式 | 查文档或等请求成功后看log | 看请求，所求即所得
+ 查看方式 | 查文档或等请求成功后看log | 看请求，所求即所得。也可以等请求成功后看log
  方法 | 解析JSONObject | 可以用JSONResponse解析JSONObject或传统方式
 
  客户端对应不同需求的请求 | 传统方式 | APIJSON
@@ -199,11 +199,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 ### 2.导入MySQL table文件
 
-启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径
-
-下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
-
-
+启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
 ### 3.用IntellIJ IDEA Ultimate运行服务端工程
 
@@ -222,7 +218,6 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
 
-如果你还没配置好服务端工程及MySQL，可以把请求的IP地址改为192.168.1.107(最后一个数字7可能被自动重置为0-9间的任意数字)，但我的电脑每晚23:00-6:00都会断电。如果我记得的话就会启动电脑运行MySQL和服务端工程，祝你好运^_^
 
 ### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
 
