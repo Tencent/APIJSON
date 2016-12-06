@@ -152,14 +152,14 @@ You can set any JSON structure and request your server, and the server will retu
  
  Process | Previous way | APIJSON
 -------- | ------------ | ------------
- Transmission | Server developers edit interfaces and update docs, then client developers request server and parse server responses according to the docs | Client developers request server and parse server responses for their requirements
+ Transmission | Server developers edit interfaces and update docs, then client developers request server and parse responses according to the docs | Client developers request server and parse responses for their requirements
  Compatibility | Server developers add new interfaces tagged with v2 and update docs | Nothing need to do
  
  Client request | Previous way | APIJSON
 -------- | ------------ | ------------
- Requirement | Client developers append key-value pairs to the urls for requests in docs | Client developers append JSON  for their requirements
- Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&currentUserPassword=1234<br />the currentUserId and currentUserPassword is only for parts of interfaces | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, currentUserPassword:1234}<br />the currentUserId and currentUserPassword is only for parts of interfaces
- URL | Different urls for different method(GET,POST...) or requirements | One url for one method(GET,POST...)
+ Requirement | Client developers append key-value pairs to an url for a request in docs | Client developers append JSON for their requirements
+ Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&currentUserPassword=1234<br /><br />The currentUserId and currentUserPassword is only for parts of interfaces | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, currentUserPassword:1234}<br /><br />The currentUserId and currentUserPassword is only for parts of interfaces
+ URL | Different urls for different methods(GET,POST...) or requirements | One url for one method(GET,POST...)
  Key-Value Pair | key=value | key:value
  
  Server operation | Previous way | APIJSON
@@ -169,7 +169,7 @@ You can set any JSON structure and request your server, and the server will retu
  
  Client parse | Previous way | APIJSON
 -------- | ------------ | ------------
- View | Search docs or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
+ View structure | Search docs or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
  Operate | Parse JSON String from responses | Parse with JSONResponse or use previous way
 
  Client requests for different requirements | Previous way | APIJSON
@@ -177,7 +177,7 @@ You can set any JSON structure and request your server, and the server will retu
  User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
  User and his Work | Request twice<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
  User list | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
- Work list of which type is 1, each Work contains the publisher User and top 3 Comments | The Work must contains the User Object and Comment Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ Work list of which type is 1, each Work contains it's publisher User and top 3 Comments | The Work must contains the User Object and Comment Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
  Work list of an User, each Work contains the publisher User and top 3 Comments | Change type=1 to userId=1 above | ①Change  "Work":{"type":1}, "User":{"workId":"/Work/id"} to "User":{"id":1}, "Work":{"userId":"/User/id"} above<br />②Or save 4 repeated User by this way<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br />③If the User is already obtained, you can also save all repeated User by this way<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
  
  Server responses for different requests | Previous way | APIJSON
@@ -185,8 +185,8 @@ You can set any JSON structure and request your server, and the server will retu
  User | {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}}
  User and his Work | Reponse twice<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />Work: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}, "Work":{"id":1, "content":"xxx"...}}
  User list | {"status":200, "message":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}}, "1":{"User":{"id":2...}}...}}
- Work list of which type is 1, each Work contains publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
- Work list of an User, each Work contains publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | ①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Work":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />③{"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
+ Work list of which type is 1, each Work contains it's publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
+ Work list of an User, each Work contains the publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | ①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Work":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />③{"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
 
 ## Usage
 
