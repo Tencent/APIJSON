@@ -155,8 +155,10 @@
 
  请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- 概览 | base_url/lowercase_table_name?key0=value0&key1=value1 ... | base_url/{TableName:{key0:value0, key1:value1 ...}}
- 要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己需要的结构在固定url后拼接JSON
+ 要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
+ 结构 | base_url/lowercase_table_name?key0=value0&key1=value1 ... | base_url/{TableName:{key0:value0, key1:value1 ...}}
+ URL | 不同请求方法(GET，POST等)或不同功能对应不同url | 相同请求方法(GET，POST等)都用同一个
+ 键值对 | key=value | key:value
  
  返回 | 传统方式 | APIJSON
 -------- | ------------ | ------------
@@ -173,7 +175,7 @@
  获取User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
  获取User和对应的Work | 分两次请求<br /> User: http://localhost:8080/user?id=1 <br /> Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
  获取User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
- 获取Work列表，每个Work包括发布者User和前3条评论 | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list/userId=1&page=1&count=5&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"id":1}, "Work":{"userId":"/User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ 获取Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list/userId=1&page=1&count=5&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"id":1}, "Work":{"userId":"/User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
 
 ## 使用方法
 
