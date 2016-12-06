@@ -152,6 +152,12 @@
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) 
 
 ## 和传统HTTP传输方式比较
+ 
+ 开发流程 | 传统方式 | APIJSON
+-------- | ------------ | ------------
+ 接口变动 | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码
+ 兼容旧版 | 服务端编辑新接口，用v2表示第2版接口，然后更新文档 | 什么都不用做
+ 
  客户端请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
@@ -168,27 +174,22 @@
 -------- | ------------ | ------------
  查看方式 | 查文档或等请求成功后看log | 看请求，所求即所得
  方法 | 解析JSONObject | 可以用JSONResponse解析JSONObject或传统方式
- 
- 开发流程 | 传统方式 | APIJSON
--------- | ------------ | ------------
- 接口变动 | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码
- 兼容旧版 | 服务端编辑新接口，用v2表示第2版接口，然后更新文档 | 什么都不用做
- 
- 请求使用场景 | 传统方式 | APIJSON
+
+ 客户端对应不同需求的请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  获取User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
  获取User和对应的Work | 分两次请求<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
  获取User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
  获取type为1的Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
- 获取1个User发布的Work列表，每个Work包括发布者User和前3条Comment | 把以上请求里的type=1改为userId=1 | 把以上请求里的"Work":{"type":1}, "User":{"workId":"/Work/id"}改为"User":{"id":1}, "Work":{"userId":"/User/id"}<br />或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br />如果User之前已经获取到了，可以这样省去所有重复User<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ 获取1个User发布的Work列表，每个Work包括发布者User和前3条Comment | 把以上请求里的type=1改为userId=1 | ①把以上请求里的"Work":{"type":1}, "User":{"workId":"/Work/id"}改为"User":{"id":1}, "Work":{"userId":"/User/id"}<br />②或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
  
- 返回使用场景 | 传统方式 | APIJSON
+ 服务端对应不同请求的返回结果 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- 获取User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
- 获取User和对应的Work | 分两次请求<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
- 获取User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
- 获取Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&userId=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"id":1}, "Work":{"userId":"/User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
-
+ 获取User | {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}}
+ 获取User和对应的Work | 分别返回两次请求的结果<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />Work: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}, "Work":{"id":1, "content":"xxx"...}}
+ 获取User列表 | {"status":200, "message":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}}, "1":{"User":{"id":2...}}...}}
+ 获取type为1的Work列表，每个Work包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
+ 获取1个User发布的Work列表，每个Work包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | ①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Work":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br />③{"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
 
 ## 使用方法
 
@@ -221,7 +222,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
 
-如果你还没配置好服务端工程及MySQL，可以把请求的IP地址改为192.168.1.107(最后一个数字7可能被自动重置为4-7间的任意数字)，但我的电脑每晚23:00-6:00都会断电。如果我记得的话就会启动电脑运行MySQL和服务端工程，祝你好运^_^
+如果你还没配置好服务端工程及MySQL，可以把请求的IP地址改为192.168.1.107(最后一个数字7可能被自动重置为0-9间的任意数字)，但我的电脑每晚23:00-6:00都会断电。如果我记得的话就会启动电脑运行MySQL和服务端工程，祝你好运^_^
 
 ### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
 
