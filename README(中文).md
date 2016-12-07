@@ -203,7 +203,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 ### 3.用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程
 
-如果以上编辑器一个都没安装，运行前先下载安装一个。JDK暂不支持1.8，建议用1.7。<br />
+如果以上编辑器一个都没安装，运行前先下载安装一个。暂不支持JDK 1.8，建议用1.7。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.2.5
 
 #### Eclipse for JavaEE
