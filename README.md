@@ -196,17 +196,57 @@ Clone or download > Download ZIP > Unzip to a path and remember it.
 
 ### 2.Import MySQL table files
 
-Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path
+Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path of APIJSON-Master/table > Start Import > Refresh SCHEMAS, and you'll see the tables were already added.
 
-of APIJSON-Master/table > Start Import > Refresh SCHEMAS, and you'll see the tables were already added.
+### 3.Run Server project with Eclipse for JavaEE or IntellIJ IDEA Ultimate
 
-### 3.Run Server project with IntellIJ IDEA Ultimate
+If you haven't installed any editor above, please download and install one before run. JDK 1.8 is not supported yet, and 1.7 is suggested.<br />
+My config is Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 and OSX EI Capitan + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.2.5. The systems and softwares are all 64 bit.
 
-If you haven't installed it, please download and install before run.
+#### Eclipse for JavaEE
 
-### 4.Run Client project with ADT or Android Studio
+1.Import
 
-If you haven't installed any editor above, please download and install one before run.
+File > Import > Maven > Existing Maven Projects > Next > Browse > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
+
+2.Run
+
+Run > Run As > Java Application > Select APIJSONApplication > OK
+
+#### IntellIJ IDEA Ultimate
+
+1.Import
+
+Open > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
+
+2.Run
+
+Run > Run APIJSONApplication
+
+### 4.Run Client project with ADT Bundle or Android Studio
+
+If you haven't installed any editor above, please download and install one before run. You can skip this step and download the Client App below.<br />
+My config is Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.1.2. The systems and softwares are all 64 bit.
+
+#### ADT Bundle
+
+1.Import
+
+File > Import > Android > Existing Android Code Into Workspace > Next > Browse > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
+
+2.Run
+
+Run > Run As > Android Application
+
+#### Android Studio
+
+1.Import
+
+Open an existing Android Studio project > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
+
+2.Run
+
+Run > Run app
 
 ### 5.Operate Client app
 
