@@ -242,8 +242,8 @@ Run > Run app
 
 ### 5.Operate Client app
 
-Select an APIJSON request to send to server and wait. It will show the result received.
-
+Select an APIJSON request to send to server and wait. It will show the result received.<br />
+If the default url is not available, change it to an available one, such as an IPV4 address of a computer running APIJSON Server project. Then click the Query button to request again.
 
 ## Download Client App
 
