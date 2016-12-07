@@ -208,22 +208,18 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 #### Eclipse for JavaEE
 
-1.导入
-
+1.导入<br />
 File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
 
-2.运行
-
+2.运行<br />
 Run > Run As > Java Application > 选择APIJSONApplication > OK
 
 #### IntellIJ IDEA Ultimate
 
-1.导入
-
+1.导入<br />
 Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
 
-2.运行
-
+2.运行<br />
 Run > Run APIJSONApplication
 
 ### 4.用ADT Bundle或Android Studio运行客户端工程
@@ -233,22 +229,18 @@ Run > Run APIJSONApplication
 
 #### ADT Bundle
 
-1.导入
-
+1.导入<br />
 File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
 
-2.运行
-
+2.运行<br />
 Run > Run As > Android Application
 
 #### Android Studio
 
-1.导入
-
+1.导入<br />
 Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
 
-2.运行
-
+2.运行<br />
 Run > Run app
 
 ### 5.操作客户端App
