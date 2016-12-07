@@ -205,22 +205,18 @@ My config is Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 and OSX 
 
 #### Eclipse for JavaEE
 
-1.Import
-
+1.Import<br />
 File > Import > Maven > Existing Maven Projects > Next > Browse > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
 
-2.Run
-
+2.Run<br />
 Run > Run As > Java Application > Select APIJSONApplication > OK
 
 #### IntellIJ IDEA Ultimate
 
-1.Import
-
+1.Import<br />
 Open > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
 
-2.Run
-
+2.Run<br />
 Run > Run APIJSONApplication
 
 ### 4.Run Client project with ADT Bundle or Android Studio
@@ -230,22 +226,18 @@ My config is Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2
 
 #### ADT Bundle
 
-1.Import
-
+1.Import<br />
 File > Import > Android > Existing Android Code Into Workspace > Next > Browse > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
 
-2.Run
-
+2.Run<br />
 Run > Run As > Android Application
 
 #### Android Studio
 
-1.Import
-
+1.Import<br />
 Open an existing Android Studio project > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
 
-2.Run
-
+2.Run<br />
 Run > Run app
 
 ### 5.Operate Client app
