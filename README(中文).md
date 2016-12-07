@@ -201,13 +201,53 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
-### 3.用IntellIJ IDEA Ultimate运行服务端工程
+### 3.用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程
 
-如果没有安装这个编辑器，运行前先下载安装。
+如果以上编辑器一个都没安装，运行前先下载安装一个。JDK暂不支持1.8，建议用1.7。
 
-### 4.用ADT或Android Studio运行客户端工程
+#### Eclipse for JavaEE
+
+1.导入
+
+File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
+
+2.运行
+
+Run > Run As > Java Application > 选择APIJSONApplication > OK
+
+#### IntellIJ IDEA Ultimate
+
+1.导入
+
+Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
+
+2.运行
+
+Run > Run APIJSONApplication
+
+### 4.用ADT Bundle或Android Studio运行客户端工程
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。
+
+#### ADT Bundle
+
+1.导入
+
+File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
+
+2.运行
+
+Run > Run As > Android Application
+
+#### Android Studio
+
+1.导入
+
+Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
+
+2.运行
+
+Run > Run app
 
 ### 5.操作客户端App
 
