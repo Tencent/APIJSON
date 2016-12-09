@@ -205,7 +205,8 @@ Clone or download > Download ZIP > Unzip to a path and remember it.
 ### 2.Import MySQL table files
 
 This Server project needs MySQL Server and MySQLWorkbench. And you must ensure that both of them were installed.<br />
-My config is Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 and OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8. The systems and softwares are all 64 bit.<br />
+My config is Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 and OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8. The systems and softwares are all 64 bit.
+
 Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path of APIJSON-Master/table > Start Import > Refresh SCHEMAS, and you'll see the tables were already added.
 
 ### 3.Run Server project with Eclipse for JavaEE or IntellIJ IDEA Ultimate
