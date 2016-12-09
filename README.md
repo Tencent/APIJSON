@@ -5,7 +5,7 @@
 APIJSON is a JSON Transmission Structure Protocal.
 
 You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set.<br />
-You can get any data with any JSON structure by requesting server just once. It's convenient and flexible, and does not require a special interface or multiple requests.<br />
+You can get any data with any JSON structure by requesting server just once. It's very convenient and flexible, and does not require a special interface or multiple requests.<br />
 And you can save duplicate data and improve transmission speed as well!<br />
 
 Now you can realize JSON Transmissions without interface or doc anymore!<br />
