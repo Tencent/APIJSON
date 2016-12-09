@@ -210,7 +210,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 ### 2.导入MySQL table文件
 
 服务端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
-我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8<br />
+我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。<br />
 启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
 ### 3.用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程
