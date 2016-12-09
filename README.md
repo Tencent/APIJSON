@@ -2,9 +2,17 @@
 
 [查看中文文档](https://github.com/TommyLemon/APIJSON/blob/master/README(%E4%B8%AD%E6%96%87).md)
 
-A JSON Transmission Structure Protocal.
+APIJSON is a JSON Transmission Structure Protocal.
 
-You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set like this: 
+You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set.<br />
+You can get any data with any JSON structure by requesting server just once. It's convenient and flexible, and does not require a special interface or multiple requests.<br />
+And you can save duplicate data and improve transmission speed as well!<br />
+
+Now you can realize JSON Transmissions without interface or doc anymore!<br />
+Client developers will no longer be suffered from various error in docs, and don't have to communicate with server developers about interfaces or docs anymore!<br />
+And server developers no longer have to write new interfaces and docs for compatibility with legacy apps! And they will no longer be endlessly disturbed by client developers at any time!
+
+Here is an example:
 
 ### Request: 
 {<br />
