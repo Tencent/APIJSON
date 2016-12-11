@@ -58,8 +58,12 @@ public class QueryHelper {
 	private static DatabaseMetaData metaData;
 	public void close() {
 		try {
-			statement.close();
-			connection.close();
+			if (statement != null && statement.isClosed() == false) {
+				statement.close();
+			}
+			if (connection != null && connection.isClosed() == false) {
+				connection.close();
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
