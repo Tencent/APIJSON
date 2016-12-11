@@ -29,6 +29,7 @@ import zuo.biao.apijson.client.R;
 import zuo.biao.apijson.client.RequestUtil;
 import zuo.biao.apijson.client.model.Comment;
 import zuo.biao.apijson.client.model.User;
+import zuo.biao.apijson.client.model.Wallet;
 import zuo.biao.apijson.client.model.Work;
 import android.app.Activity;
 import android.content.Context;
@@ -198,6 +199,10 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			Work work = JSONResponse.getObject(response, Work.class);
 			Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  work = " + JSON.toJSONString(work));
 			logList(JSONResponse.getList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
+		} else if (type == TYPE_ACCESS_PERMITTED) {
+			response = new JSONResponse(resultJson);
+			Wallet wallet = JSONResponse.getObject(response, Wallet.class);
+			Log.d(TAG, "onHttpResponse  type == TYPE_ACCESS_PERMITTED >>  wallet = " + JSON.toJSONString(wallet));
 		}
 		
 		runOnUiThread(new Runnable() {
