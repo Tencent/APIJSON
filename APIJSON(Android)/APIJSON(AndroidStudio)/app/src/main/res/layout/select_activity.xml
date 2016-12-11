@@ -10,7 +10,7 @@
 
             <TextView
                 style="@style/select_name"
-                android:text="Single" />
+                android:text="@string/single" />
 
             <Button
                 style="@style/select_json"
@@ -19,7 +19,7 @@
 
             <TextView
                 style="@style/select_name"
-                android:text="Rely" />
+                android:text="@string/rely" />
 
             <Button
                 style="@style/select_json"
@@ -28,7 +28,7 @@
 
             <TextView
                 style="@style/select_name"
-                android:text="Array" />
+                android:text="@string/array" />
 
             <Button
                 style="@style/select_json"
@@ -37,7 +37,7 @@
 
             <TextView
                 style="@style/select_name"
-                android:text="Complex" />
+                android:text="@string/complex" />
 
             <Button
                 style="@style/select_json"
@@ -46,7 +46,7 @@
 
             <TextView
                 style="@style/select_name"
-                android:text="Access Error" />
+                android:text="@string/access_error" />
 
             <Button
                 style="@style/select_json"
@@ -55,7 +55,7 @@
 
             <TextView
                 style="@style/select_name"
-                android:text="Access Permitted" />
+                android:text="@string/access_permitted" />
 
             <Button
                 style="@style/select_json"
