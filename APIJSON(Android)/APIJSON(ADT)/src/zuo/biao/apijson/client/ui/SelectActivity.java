@@ -59,9 +59,11 @@ public class SelectActivity extends Activity {
 	public void selectComplex(View v) {
 		select(QueryActivity.TYPE_COMPLEX);
 	}
+	
 	public void selectAccessError(View v) {
 		select(QueryActivity.TYPE_ACCESS_ERROR);
 	}
+	
 	public void selectAccessPermitted(View v) {
 		select(QueryActivity.TYPE_ACCESS_PERMITTED);
 	}
