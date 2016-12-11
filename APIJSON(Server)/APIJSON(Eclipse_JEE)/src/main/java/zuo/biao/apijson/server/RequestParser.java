@@ -13,18 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 package zuo.biao.apijson.server;
+import static zuo.biao.apijson.StringUtil.UTF_8;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.rmi.AccessException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
+
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.sql.AccessVerifyer;
 import zuo.biao.apijson.server.sql.QueryHelper;
-
-import static zuo.biao.apijson.StringUtil.UTF_8;
 
 /**parser for parsing request to JSONObject
  * @author Lemon
@@ -54,10 +57,12 @@ public class RequestParser {
 
 		relationMap = new HashMap<String, String>();
 		parseRelation = false;
-		requestObject = getObject(null, null, null, JSON.parseObject(json));
+		requestObject = JSON.parseObject(json);
+		requestObject = getObject(null, null, null, requestObject);
 		parseRelation = true;
 		requestObject = getObject(null, null, null, requestObject);
-		System.out.println(TAG + "\n\n最终返回至客户端的json:\n" + JSON.toJSONString(requestObject));
+		
+		requestObject = AccessVerifyer.removeAccessInfo(requestObject);
 
 		/**
 		 * TODO 格式化json，去除标记array内object位置的数字，转为[]形式，比如
@@ -68,7 +73,8 @@ public class RequestParser {
 
 		QueryHelper.getInstance().close();
 //		QueryHelper2.getInstance().close();
-
+		
+		System.out.println(TAG + "\n\n最终返回至客户端的json:\n" + JSON.toJSONString(requestObject));
 		return requestObject;
 	}
 
@@ -144,7 +150,15 @@ public class RequestParser {
 					config2.setLimit(parentConfig.getLimit()).setPage(parentConfig.getPage())
 							.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
-				JSONObject result = getSQLObject(config2);
+				JSONObject result = null;
+				try {
+					result = getSQLObject(config2);
+				} catch (AccessException e) {
+//					e.printStackTrace();
+					result = new JSONObject(true);
+					result.put("status", 403);
+					result.put("message", e.getMessage());
+				}
 				//				if (result != null) {
 				transferredRequest = result;
 				if (parseRelation) {
@@ -389,9 +403,11 @@ public class RequestParser {
 	/**获取数据库返回的String
 	 * @param config
 	 * @return
+	 * @throws AccessException 
 	 */
-	private synchronized JSONObject getSQLObject(QueryConfig config) {
+	private synchronized JSONObject getSQLObject(QueryConfig config) throws AccessException {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
+		AccessVerifyer.verify(requestObject, config == null ? null : config.getTable());
 		return QueryHelper.getInstance().select(config);//QueryHelper2.getInstance().select(config);//
 	}
 
