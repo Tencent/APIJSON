@@ -9,8 +9,8 @@ import zuo.biao.apijson.StringUtil;
 /**权限验证类
  * @author Lemon
  */
-public class AccessVerifyer {
-	private static final String TAG = "AccessVerifyer: ";
+public class AccessVerifier {
+	private static final String TAG = "AccessVerifier: ";
 
 	private static final int ACCESS_LOGIN = 1;
 	private static final int ACCESS_PAY = 2;
@@ -108,7 +108,7 @@ public class AccessVerifyer {
 	 * @param userId
 	 * @return
 	 */
-	public static String getPayPassword(long currentUserId) {
+	public static String getPayPassword(long userId) {
 		// TODO 查询并返回对应userId的支付密码
 		return "123456";//仅测试用
 	}

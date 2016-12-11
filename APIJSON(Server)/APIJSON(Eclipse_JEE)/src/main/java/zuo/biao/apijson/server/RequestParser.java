@@ -26,7 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.sql.AccessVerifyer;
+import zuo.biao.apijson.server.sql.AccessVerifier;
 import zuo.biao.apijson.server.sql.QueryHelper;
 
 /**parser for parsing request to JSONObject
@@ -62,7 +62,7 @@ public class RequestParser {
 		parseRelation = true;
 		requestObject = getObject(null, null, null, requestObject);
 		
-		requestObject = AccessVerifyer.removeAccessInfo(requestObject);
+		requestObject = AccessVerifier.removeAccessInfo(requestObject);
 
 		/**
 		 * TODO 格式化json，去除标记array内object位置的数字，转为[]形式，比如
@@ -407,7 +407,7 @@ public class RequestParser {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) throws AccessException {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
-		AccessVerifyer.verify(requestObject, config == null ? null : config.getTable());
+		AccessVerifier.verify(requestObject, config == null ? null : config.getTable());
 		return QueryHelper.getInstance().select(config);//QueryHelper2.getInstance().select(config);//
 	}
 
