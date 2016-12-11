@@ -14,13 +14,14 @@ limitations under the License.*/
 
 package zuo.biao.apijson.client.ui;
 
-import zuo.biao.apijson.client.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
+
+import zuo.biao.apijson.client.R;
 
 /**activity for selecting a request
  * @author Lemon
@@ -58,6 +59,14 @@ public class SelectActivity extends Activity {
 	
 	public void selectComplex(View v) {
 		select(QueryActivity.TYPE_COMPLEX);
+	}
+
+	public void selectAccessError(View v) {
+		select(QueryActivity.TYPE_ACCESS_ERROR);
+	}
+
+	public void selectAccessPermitted(View v) {
+		select(QueryActivity.TYPE_ACCESS_PERMITTED);
 	}
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 	

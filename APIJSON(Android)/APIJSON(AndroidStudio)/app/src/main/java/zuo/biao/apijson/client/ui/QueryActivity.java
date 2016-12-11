@@ -75,6 +75,8 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	public static final int TYPE_RELY = 1;
 	public static final int TYPE_ARRAY = 2;
 	public static final int TYPE_COMPLEX = 3;
+	public static final int TYPE_ACCESS_ERROR = 4;
+	public static final int TYPE_ACCESS_PERMITTED = 5;
 
 
 	private int type = TYPE_SINGLE;
@@ -146,6 +148,12 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			break;
 		case TYPE_ARRAY:
 			request = JSON.toJSONString(RequestUtil.newArrayRequest());
+			break;
+		case TYPE_ACCESS_ERROR:
+			request = JSON.toJSONString(RequestUtil.newAccessErrorRequest());
+			break;
+		case TYPE_ACCESS_PERMITTED:
+			request = JSON.toJSONString(RequestUtil.newAccessPermittedRequest());
 			break;
 		default:
 			request = JSON.toJSONString(RequestUtil.newComplexRequest());

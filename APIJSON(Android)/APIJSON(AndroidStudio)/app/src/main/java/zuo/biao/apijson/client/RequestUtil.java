@@ -16,6 +16,7 @@ package zuo.biao.apijson.client;
 
 import zuo.biao.apijson.client.model.Comment;
 import zuo.biao.apijson.client.model.User;
+import zuo.biao.apijson.client.model.Wallet;
 import zuo.biao.apijson.client.model.Work;
 
 /**create request JSONObjects
@@ -48,6 +49,18 @@ public class RequestUtil {
 				toArray(3, 0, Comment.class.getSimpleName()));
 
 		return request.toArray(2, 1);
+	}
+
+	public static JSONObject newAccessErrorRequest() {
+		return new JSONRequest(new Wallet((long) 38710));
+	}
+	
+	public static JSONObject newAccessPermittedRequest() {
+		JSONRequest request = new JSONRequest();
+		request.put(new Wallet().setUserId((long) 38710));
+		request.put("currentUserId", 38710);
+		request.put("payPassword", "123456");
+		return request;
 	}
 
 }
