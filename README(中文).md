@@ -239,7 +239,8 @@ Run > Run APIJSONApplication
 
 ### 4.用ADT Bundle或Android Studio运行客户端工程
 
-可以跳过这个步骤，直接下载下方提供的客户端App。<br />
+可以跳过这个步骤，直接下载下方提供的客户端App。
+
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 和 OSX EI Capitan + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.1.2，其中系统和软件都是64位的。
 
