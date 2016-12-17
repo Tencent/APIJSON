@@ -211,6 +211,7 @@ Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Se
 
 ### 3.Run Server project with Eclipse for JavaEE or IntellIJ IDEA Ultimate
 
+You can skip this step and use my server IP address 139.140.0.118:8080.<br />
 If you haven't installed any editor above, please download and install one before run. JDK 1.8 is not supported yet, and 1.7 is suggested.<br />
 My config is Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 and OSX EI Capitan + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.2.5. The systems and softwares are all 64 bit.
 
@@ -232,7 +233,8 @@ Run > Run APIJSONApplication
 
 ### 4.Run Client project with ADT Bundle or Android Studio
 
-If you haven't installed any editor above, please download and install one before run. You can skip this step and download the Client App below.<br />
+You can skip this step and download the Client App below.<br />
+If you haven't installed any editor above, please download and install one before run.<br />
 My config is Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.1.2. The systems and softwares are all 64 bit.
 
 #### ADT Bundle
