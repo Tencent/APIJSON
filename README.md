@@ -202,7 +202,7 @@ Here is an example:
 
 Clone or download > Download ZIP > Unzip to a path and remember it.
 
-#### You can skip step 2 and 3, and test server response with my server IP address 139.140.0.118:8080.<br />
+#### You can skip step 2 and 3, and test server response with my server IP address 139.196.140.118:8080.<br />
 
 ### 2.Import MySQL table files
 
