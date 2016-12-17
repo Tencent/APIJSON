@@ -234,7 +234,8 @@ Run > Run APIJSONApplication
 
 ### 4.Run Client project with ADT Bundle or Android Studio
 
-You can skip this step and download the Client App below.<br />
+You can skip this step and download the Client App below.
+
 If you haven't installed any editor above, please download and install one before run.<br />
 My config is Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.1.2. The systems and softwares are all 64 bit.
 
