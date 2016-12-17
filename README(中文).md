@@ -207,6 +207,8 @@ APIJSON是一种JSON传输结构协议。<br />
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
+#### 你可以跳过步骤2和步骤3，用我的服务器IP地址 139.140.0.118:8080 来测试服务端对客户端请求的返回结果。
+
 ### 2.导入MySQL table文件
 
 服务端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
@@ -237,7 +239,8 @@ Run > Run APIJSONApplication
 
 ### 4.用ADT Bundle或Android Studio运行客户端工程
 
-如果以上编辑器一个都没安装，运行前先下载安装一个。可以跳过这个步骤，直接下载下方提供的客户端App。<br />
+可以跳过这个步骤，直接下载下方提供的客户端App。<br />
+如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 和 OSX EI Capitan + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.1.2，其中系统和软件都是64位的。
 
 #### ADT Bundle
