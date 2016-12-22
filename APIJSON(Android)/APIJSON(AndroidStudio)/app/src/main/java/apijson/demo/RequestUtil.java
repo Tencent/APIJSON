@@ -38,7 +38,7 @@ public class RequestUtil {
 	}
 	
 	public static JSONObject newArrayRequest() {
-		return new JSONRequest(new User().setSex(0)).toArray(10, 0, User.class.getSimpleName());
+		return new JSONRequest(new User()).toArray(5, 1, User.class.getSimpleName());
 	}
 
 	public static JSONObject newComplexRequest() {
@@ -50,7 +50,7 @@ public class RequestUtil {
 		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId", "[]/Work/id")).
 				toArray(3, 0, Comment.class.getSimpleName()));
 
-		return request.toArray(2, 1);
+		return request.toArray(2, 0);
 	}
 
 	public static JSONObject newAccessErrorRequest() {

@@ -33,8 +33,13 @@ public class JSON {
 	 */
 	public static boolean isJsonCorrect(String s) {
 		System.out.println(TAG + "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
-		if (s == null || s.equals("[]") 
-				|| s.equals("{}") || s.equals("") || s.equals("[null]") || s.equals("{null}") || s.equals("null")) {
+		if (s == null 
+//				|| s.equals("[]") 
+//				|| s.equals("{}") 
+				|| s.equals("")
+				|| s.equals("[null]")
+				|| s.equals("{null}")
+				|| s.equals("null")) {
 			return false;
 		}
 		return true;
