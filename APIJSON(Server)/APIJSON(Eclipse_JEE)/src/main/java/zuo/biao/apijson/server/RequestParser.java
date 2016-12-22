@@ -197,10 +197,14 @@ public class RequestParser {
 			//			System.out.println(TAG + "getArray   try { page = arrayObject.getIntValue(page); ..." +
 			//					" >> } catch (Exception e) {\n" + e.getMessage());
 		}
-		if (parseRelation) {
-			request.remove("page");
-			request.remove("count");
+		if (count <= 0) {//解决count<=0导致没有查询结果
+			count = 100;
 		}
+		
+//		if (parseRelation) {
+//			request.remove("page");
+//			request.remove("count");
+//		}
 		System.out.println(TAG + "getArray page = " + page + "; count = " + count);
 
 		QueryConfig config = new QueryConfig(count, page);

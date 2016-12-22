@@ -111,14 +111,14 @@ public class QueryConfig {
 	 * @return
 	 */
 	public String getLimitString() {
-		return getLimitString(limit);// + 1);
+		return getLimitString(page, limit);// + 1);
 	}
 	/**获取限制数量
 	 * @param limit
 	 * @return
 	 */
-	public static String getLimitString(int limit) {
-		return limit <= 0 ? "" : " limit " + limit;
+	public static String getLimitString(int page, int limit) {
+		return limit <= 0 ? "" : " limit " + page*limit + ", " + limit;
 	}
 
 	/**获取筛选方法
@@ -135,7 +135,6 @@ public class QueryConfig {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
 			String whereString = " where ";
-			Object value;
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
 				if (key == null) {

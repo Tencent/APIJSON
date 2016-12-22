@@ -14,14 +14,13 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.web.bind.annotation.*;
+
 import zuo.biao.apijson.JSON;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
-import static zuo.biao.apijson.StringUtil.UTF_8;
 
 /**request receiver and controller
  * @author Lemon

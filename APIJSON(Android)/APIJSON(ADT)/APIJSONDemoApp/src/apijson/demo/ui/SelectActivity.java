@@ -28,18 +28,18 @@ import apijson.demo.R;
 public class SelectActivity extends Activity {
 
 	public static final String RESULT_JSON = "RESULT_JSON";
-	
+
 	public static Intent createIntent(Context context) {
 		return new Intent(context, SelectActivity.class);
 	}
-	
-	
+
+
 	private Activity context;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.select_activity);
-		
+
 		context = this;
 	}
 
@@ -47,33 +47,33 @@ public class SelectActivity extends Activity {
 	public void selectSingle(View v) {
 		select(QueryActivity.TYPE_SINGLE);
 	}
-	
+
 	public void selectRely(View v) {
 		select(QueryActivity.TYPE_RELY);
 	}
-	
+
 	public void selectArray(View v) {
 		select(QueryActivity.TYPE_ARRAY);
 	}
-	
+
 	public void selectComplex(View v) {
 		select(QueryActivity.TYPE_COMPLEX);
 	}
-	
+
 	public void selectAccessError(View v) {
 		select(QueryActivity.TYPE_ACCESS_ERROR);
 	}
-	
+
 	public void selectAccessPermitted(View v) {
 		select(QueryActivity.TYPE_ACCESS_PERMITTED);
 	}
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
-	
+
 	private String url;
 	private void select(int type) {
 		startActivityForResult(QueryActivity.createIntent(context, type, url), REQUEST_TO_QUERY);
 	}
-	
+
 	private static final int REQUEST_TO_QUERY = 1;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -85,14 +85,14 @@ public class SelectActivity extends Activity {
 		case REQUEST_TO_QUERY:
 			if (data == null) {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
-				return;
+			} else {
+				url = data.getStringExtra(QueryActivity.RESULT_URL);
 			}
-			url = data.getStringExtra(QueryActivity.RESULT_URL);
 			break;
 		default:
 			break;
 		}
 	}
 
-	
+
 }
