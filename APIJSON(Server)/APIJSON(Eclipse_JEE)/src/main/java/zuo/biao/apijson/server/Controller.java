@@ -14,10 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import javax.validation.Valid;
-
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,12 +38,12 @@ public class Controller {
 		return JSON.toJSONString(object);
 	}
 
-	@RequestMapping(value="post/", method = RequestMethod.POST)
-	public String post(@PathVariable String request) {
-		System.out.println("post/request = " + request);
-		JSONObject object = new RequestParser(RequestMethod.POST).parse(request);
-		System.out.println("post/return " + JSON.toJSONString(object));
-		return JSON.toJSONString(object);
-	}
+//	@RequestMapping(value="post/{request}", method = RequestMethod.POST)
+//	public String post(@PathVariable String request) {
+//		System.out.println("post/request = " + request);
+//		JSONObject object = new RequestParser(RequestMethod.POST).parse(request);
+//		System.out.println("post/return " + JSON.toJSONString(object));
+//		return JSON.toJSONString(object);
+//	}
 
 }

@@ -6,6 +6,7 @@
 <string name="hello_world">Hello world!</string>
 <string name="action_settings">Settings</string>
 <string name="single">Single</string>
+<string name="columns">Columns</string>
 <string name="rely">Rely</string>
 <string name="array">Array</string>
 <string name="complex">Complex</string>
@@ -14,6 +15,7 @@
 <string name="query">Query</string>
 <string name="query_error">There may be something wrong,you can follow by the steps:\n\n1.Check your net connection\n\n2.Check the url whether it\'s an available ipv4 address\n\n3.Long click the [Query] button to open the request by web browser\n\n4.Check logs outputed on the target server\n\n5.Try again</string>
 <string name="demo_single">{\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":38710\n&#160;&#160;&#160;}\n}</string>
+<string name="demo_columns">{\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"columns\":\"id,name,phone\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":38710\n&#160;&#160;&#160;}\n}</string>
 <string name="demo_rely">{\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":70793\n&#160;&#160;&#160;},\n&#160;&#160;&#160;\"Work\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"userId\":\"User/id\"\n&#160;&#160;&#160;}\n}</string>
 <string name="demo_array">{\n&#160;&#160;&#160;\"User[]\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"count\":5,\n&#160;&#160;&#160;&#160;&#160;&#160;\"page\":1,\n&#160;&#160;&#160;&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;}\n&#160;&#160;&#160;}\n}</string>
 <string name="demo_complex">{\n&#160;&#160;&#160;\"[]\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"count\":2,\n&#160;&#160;&#160;&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"sex\":0\n&#160;&#160;&#160;&#160;&#160;&#160;},\n&#160;&#160;&#160;&#160;&#160;&#160;\"Work\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"userId\":\"/User/id\"\n&#160;&#160;&#160;&#160;&#160;&#160;},\n&#160;&#160;&#160;&#160;&#160;&#160;\"Comment[]\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"count\":3,\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"Comment\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"workId\":\"[]/Work/id\"\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}\n&#160;&#160;&#160;&#160;&#160;&#160;}\n&#160;&#160;&#160;}\n}</string>

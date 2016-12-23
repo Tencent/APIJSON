@@ -29,6 +29,12 @@ public class RequestUtil {
 	public static JSONObject newSingleRequest() {
 		return new JSONRequest(new User((long) 38710));
 	}
+	
+	public static JSONObject newColumnsRequest() {
+		JSONObject object = new JSONObject(new User((long) 38710));
+		object.setColumns("id,name,phone");//StringUtil.getString(new String[]{"id", "name", "phone"}));//
+		return new JSONRequest(User.class.getSimpleName(), object);
+	}
 
 	public static JSONObject newRelyRequest() {
 		JSONRequest request = new JSONRequest();

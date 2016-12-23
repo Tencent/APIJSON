@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.RequestMethod;
+
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
@@ -36,12 +38,19 @@ public class RequestParser {
 	private static final String TAG = "RequestParser: ";
 
 	public static final String SEPARATOR = StringUtil.SEPARATOR;
+	public static final String KEY_COLUMNS = "columns";
 
+	private RequestMethod requestMethod;
+	public RequestParser(RequestMethod requestMethod) {
+		this.requestMethod = requestMethod;
+	}
 
+	
 	private JSONObject requestObject;
 
 	private boolean parseRelation;
 	private Map<String, String> relationMap;
+
 
 
 	/**
@@ -96,7 +105,7 @@ public class RequestParser {
 
 		QueryConfig config = StringUtil.isNumer(name) ? parentConfig : null;
 		if (config == null) {
-			config = new QueryConfig(name);
+			config = new QueryConfig(requestMethod, name);
 		}
 		boolean nameIsNumber = StringUtil.isNumer(name);
 		final int position = nameIsNumber ? Integer.valueOf(0 + StringUtil.getNumber(name)) : 0;
@@ -145,7 +154,8 @@ public class RequestParser {
 		if (containRelation == false && isObjectKey(name)) {
 			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
 				//			relationMap.remove(path);
-				QueryConfig config2 = getQueryConfig(name, transferredRequest);
+				transferredRequest.remove(KEY_COLUMNS);
+				QueryConfig config2 = getQueryConfig(name, transferredRequest).setColumns(request.getString(KEY_COLUMNS));
 				if (parentConfig != null) {
 					config2.setLimit(parentConfig.getLimit()).setPage(parentConfig.getPage())
 							.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
@@ -207,7 +217,7 @@ public class RequestParser {
 //		}
 		System.out.println(TAG + "getArray page = " + page + "; count = " + count);
 
-		QueryConfig config = new QueryConfig(count, page);
+		QueryConfig config = new QueryConfig(requestMethod, count, page);
 
 		Set<String> set = request.keySet();
 		JSONObject transferredRequest = new JSONObject(true);
@@ -411,7 +421,7 @@ public class RequestParser {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) throws AccessException {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
-		AccessVerifier.verify(requestObject, config == null ? null : config.getTable());
+		AccessVerifier.verify(requestMethod, requestObject, config == null ? null : config.getTable());
 		return QueryHelper.getInstance().select(config);//QueryHelper2.getInstance().select(config);//
 	}
 
@@ -421,7 +431,7 @@ public class RequestParser {
 	 * @return
 	 */
 	public QueryConfig getQueryConfig(String table, JSONObject request) {
-		return QueryConfig.getQueryConfig(table, request);
+		return QueryConfig.getQueryConfig(requestMethod, table, request);
 	}
 	/**获取查询配置
 	 * @param table
@@ -429,7 +439,7 @@ public class RequestParser {
 	 * @return
 	 */
 	public QueryConfig newQueryConfig(String table, JSONObject request) {
-		return QueryConfig.getQueryConfig(table, request);
+		return QueryConfig.getQueryConfig(requestMethod, table, request);
 	}
 	/**把parentConfig的array属性继承下来
 	 * @param config

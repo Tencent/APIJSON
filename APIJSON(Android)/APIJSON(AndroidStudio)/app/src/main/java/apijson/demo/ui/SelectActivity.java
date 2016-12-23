@@ -48,6 +48,10 @@ public class SelectActivity extends Activity {
 		select(QueryActivity.TYPE_SINGLE);
 	}
 
+	public void selectColumns(View v) {
+		select(QueryActivity.TYPE_COLUMNS);
+	}
+
 	public void selectRely(View v) {
 		select(QueryActivity.TYPE_RELY);
 	}

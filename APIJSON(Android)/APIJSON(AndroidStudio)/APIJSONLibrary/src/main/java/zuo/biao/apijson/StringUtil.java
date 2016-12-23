@@ -107,7 +107,31 @@ public class StringUtil {
 	public static String getString(String s) {
 		return s == null ? "" : s;
 	}
-
+	/**获取string,为null则返回""
+	 * @param array
+	 * @return
+	 */
+	public static String getString(String[] array) {
+		return getString(array, null);
+	}
+	/**获取string,为null则返回""
+	 * @param array
+	 * @param split
+	 * @return
+	 */
+	public static String getString(String[] array, String split) {
+		String s = "";
+		if (array != null) {
+			if (split == null) {
+				split = ",";
+			}
+			for (int i = 0; i < array.length; i++) {
+				s += ((i >= array.length - 1 ? "" : split) + array[i]);
+			}
+		}
+		return getString(s);
+	}
+	
 	//获取string,为null时返回"" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	//获取去掉前后空格后的string<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

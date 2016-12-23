@@ -93,6 +93,30 @@ public class StringUtil {
 	public static String getString(String s) {
 		return s == null ? "" : s;
 	}
+	/**获取string,为null则返回""
+	 * @param array
+	 * @return
+	 */
+	public static String getString(String[] array) {
+		return getString(array, null);
+	}
+	/**获取string,为null则返回""
+	 * @param array
+	 * @param split
+	 * @return
+	 */
+	public static String getString(String[] array, String split) {
+		String s = "";
+		if (array != null) {
+			if (split == null) {
+				split = ",";
+			}
+			for (int i = 0; i < array.length; i++) {
+				s += ((i >= array.length - 1 ? "" : split) + array[i]);
+			}
+		}
+		return getString(s);
+	}
 
 	//获取string,为null时返回"" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -251,7 +275,7 @@ public class StringUtil {
 
 		return p.matcher(email).matches();
 	}
-	
+
 	/**判断是否全是数字
 	 * @param s
 	 * @return
@@ -508,7 +532,7 @@ public class StringUtil {
 	public static final int PRICE_FORMAT_PREFIX_WITH_BLANK = 3;
 	public static final int PRICE_FORMAT_SUFFIX_WITH_BLANK = 4;
 	public static final String[] PRICE_FORMATS = {
-		"", "￥", "元", "￥ ", " 元"
+			"", "￥", "元", "￥ ", " 元"
 	};
 
 	/**获取价格，保留两位小数

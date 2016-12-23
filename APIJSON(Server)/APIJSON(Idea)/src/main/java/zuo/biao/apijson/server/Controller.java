@@ -14,12 +14,11 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.alibaba.fastjson.JSONObject;
-
 import zuo.biao.apijson.JSON;
 
 /**request receiver and controller
@@ -29,21 +28,20 @@ import zuo.biao.apijson.JSON;
 @RequestMapping("")
 public class Controller {
 
-    @RequestMapping("get/{request}")
-    public String get(@PathVariable String request) {
-        System.out.println("request = " + request);
-        JSONObject object = new RequestParser().parse(request);
-        System.out.println("return " + JSON.toJSONString(object));
-        return JSON.toJSONString(object);
-    }
+	@RequestMapping("get/{request}")
+	public String get(@PathVariable String request) {
+		System.out.println("get/request = " + request);
+		JSONObject object = new RequestParser(RequestMethod.GET).parse(request);
+		System.out.println("get/return " + JSON.toJSONString(object));
+		return JSON.toJSONString(object);
+	}
 
-//    @RequestMapping(value="/request",produces="application/json")
-//    public String get2(@RequestBody JSONObject request){
-//        return JSON.toJSONString(request);
-//    }
-//    @RequestMapping(method = RequestMethod.GET)
-//    public String create(@RequestBody @Valid JSONObject request) {
-//        return JSON.toJSONString(request);
-//    }
+//	@RequestMapping(value="post/{request}", method = RequestMethod.POST)
+//	public String post(@PathVariable String request) {
+//		System.out.println("post/request = " + request);
+//		JSONObject object = new RequestParser(RequestMethod.POST).parse(request);
+//		System.out.println("post/return " + JSON.toJSONString(object));
+//		return JSON.toJSONString(object);
+//	}
 
 }

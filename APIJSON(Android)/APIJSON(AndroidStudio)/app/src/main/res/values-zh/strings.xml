@@ -6,7 +6,8 @@
 <string name="hello_world">Hello world!</string>
 <string name="action_settings">Settings</string>
 <string name="single">单个Object</string>
-<string name="rely">Object之间的依赖</string>
+<string name="columns">指定字段</string>
+<string name="rely">向上依赖</string>
 <string name="array">Object数组</string>
 <string name="complex">复杂结构</string>
 <string name="access_error">没有访问权限</string>
