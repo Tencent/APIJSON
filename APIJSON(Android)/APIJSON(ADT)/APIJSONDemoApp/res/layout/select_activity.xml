@@ -19,6 +19,15 @@
 
             <TextView
                 style="@style/select_name"
+                android:text="@string/columns" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectColumns"
+                android:text="@string/demo_columns" />
+
+            <TextView
+                style="@style/select_name"
                 android:text="@string/rely" />
 
             <Button

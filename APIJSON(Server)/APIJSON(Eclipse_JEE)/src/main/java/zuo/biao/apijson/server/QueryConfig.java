@@ -18,45 +18,61 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.alibaba.fastjson.JSONObject;
+
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.StringUtil;
 
 /**config model for query
  * @author Lemon
  */
 public class QueryConfig {
 
+	private RequestMethod method;
 	private String table;
-	private String[] columns;
-	private String[][] values;
+	private String columns;
+	private String values;
 	private Map<String, Object> where;
 	private int limit;
 	private int page;
 	private int position;
 
-	public QueryConfig() {
+	public QueryConfig(RequestMethod method) {
+		setMethod(method);
 	}
-	public QueryConfig(String table) {
-		this();
+	public QueryConfig(RequestMethod method, String table) {
+		this(method);
 		setTable(table);
 	}
-	public QueryConfig(String table, Map<String, Object> where) {
-		this(table);
+	public QueryConfig(RequestMethod method, String table, Map<String, Object> where) {
+		this(method, table);
 		setWhere(where);
 	}
-	public QueryConfig(String table, String[] columns, String[][] values) {
-		this(table);
+	public QueryConfig(RequestMethod method, String table, String columns, String values) {
+		this(method, table);
 		setColumns(columns);
 		setValues(values);
 	}
-	public QueryConfig(int limit, int page) {
-		this();
+	public QueryConfig(RequestMethod method, String table, String[] columns, String[][] values) {
+		this(method, table);
+		setColumns(columns);
+		setValues(values);
+	}
+	public QueryConfig(RequestMethod method, int limit, int page) {
+		this(method);
 		setLimit(limit);
 		setPage(page);
 	}
 
-
+	public RequestMethod getMethod() {
+		return method;
+	}
+	public QueryConfig setMethod(RequestMethod method) {
+		this.method = method;
+		return this;
+	}
 	public String getTable() {
 		return table;
 	}
@@ -64,17 +80,39 @@ public class QueryConfig {
 		this.table = table;
 		return this;
 	}
-	public String[] getColumns() {
+	public String getColumns() {
 		return columns;
 	}
 	public QueryConfig setColumns(String[] columns) {
-		this.columns = columns;
+		return setColumns(StringUtil.getString(columns));
+	}
+	public QueryConfig setColumns(String columns) {
+		columns = StringUtil.getTrimedString(columns);
+		this.columns = columns.endsWith(",") ? columns.substring(0, columns.length() - 1) : columns;
 		return this;
 	}
-	public String[][] getValues() {
+	private String getColumnsString() {
+		return StringUtil.isNotEmpty(columns, true) ? columns : "*";
+	}
+
+	public String getValues() {
+		return values;
+	}
+	public String getValuesString() {
 		return values;
 	}
 	public QueryConfig setValues(String[][] values) {
+		String s = "";
+		if (values != null && values.length > 0) {
+			String[] items = new String[values.length];
+			for (int i = 0; i < values.length; i++) {
+				items[i] = "(" + StringUtil.getString(values[i]) + ")";
+			}
+			s = StringUtil.getString(items);
+		}
+		return setValues(s);
+	}
+	public QueryConfig setValues(String values) {
 		this.values = values;
 		return this;
 	}
@@ -158,7 +196,7 @@ public class QueryConfig {
 	 * @param request
 	 * @return
 	 */
-	public static synchronized QueryConfig getQueryConfig(String table, JSONObject request) {
+	public static synchronized QueryConfig getQueryConfig(RequestMethod method, String table, JSONObject request) {
 		Set<String> set = request == null ? null : request.keySet();
 		Map<String, Object> transferredRequest = null;
 		if (set != null) {
@@ -169,9 +207,9 @@ public class QueryConfig {
 				}
 			}
 		}
-		return new QueryConfig(table).setWhere(transferredRequest);
+		return new QueryConfig(method, table).setWhere(transferredRequest);
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -183,7 +221,24 @@ public class QueryConfig {
 	 * @return
 	 */
 	public static String getSQL(QueryConfig config) {
-		return config == null ? null : "select * from " + config.getTable() + config.getWhereString() + config.getLimitString();
+		if (config == null) {
+			System.out.println("QueryConfig: getSQL  config == null >> return null;");
+			return null;
+		}
+		if (config.getMethod() == null) {
+			config.setMethod(RequestMethod.GET);
+		}
+		switch (config.getMethod()) {
+		case GET:
+			return "select "+ config.getColumnsString() + " from " + config.getTable()
+			+ config.getWhereString() + config.getLimitString();
+		case POST:
+			return "insert into " + config.getTable() + config.getWhereString() + " values " + config.getValuesString();
+		default:
+			break;
+		}
+		return null;
 	}
+
 
 }

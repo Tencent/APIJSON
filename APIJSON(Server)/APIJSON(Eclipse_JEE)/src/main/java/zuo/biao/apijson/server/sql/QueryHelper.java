@@ -90,8 +90,8 @@ public class QueryHelper {
 				metaData = connection.getMetaData();
 			}
 
-			List<String> list = getColumnList(config.getTable());
-			if (list == null || list.isEmpty()) {
+			String[] columnArray = getColumnArray(config);
+			if (columnArray == null || columnArray.length <= 0) {
 				return null;
 			}
 
@@ -108,8 +108,8 @@ public class QueryHelper {
 				}
 				object = new JSONObject(true);
 				try {
-					for (int i = 0; i < list.size(); i++) {
-						object.put(list.get(i), rs.getObject(rs.findColumn(list.get(i))));
+					for (int i = 0; i < columnArray.length; i++) {
+						object.put(columnArray[i], rs.getObject(rs.findColumn(columnArray[i])));
 					}
 				} catch (Exception e) {
 					System.out.println(TAG + "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +
@@ -134,8 +134,16 @@ public class QueryHelper {
 	 * @param table
 	 * @return
 	 */
-	public List<String> getColumnList(String table) {
+	public String[] getColumnArray(QueryConfig config) {
+		if (config == null) {
+			return null;
+		}
+		String columns = config.getColumns();
+		if (StringUtil.isNotEmpty(columns, true)) {
+		 	return columns.contains(",") ? columns.split(",") : new String[]{columns};
+		}
 		List<String> list = new ArrayList<String>();
+		String table = config.getTable();
 		ResultSet rs;
 		try {
 			rs = metaData.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
@@ -149,6 +157,6 @@ public class QueryHelper {
 					"} catch (Exception e) {\n" + e.getMessage());
 			e.printStackTrace();
 		}
-		return list;
+		return list.toArray(new String[]{});
 	}
 }

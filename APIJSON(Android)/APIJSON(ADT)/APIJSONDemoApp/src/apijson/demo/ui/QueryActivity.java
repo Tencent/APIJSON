@@ -73,11 +73,12 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 
 	public static final int TYPE_SINGLE = 0;
-	public static final int TYPE_RELY = 1;
-	public static final int TYPE_ARRAY = 2;
-	public static final int TYPE_COMPLEX = 3;
-	public static final int TYPE_ACCESS_ERROR = 4;
-	public static final int TYPE_ACCESS_PERMITTED = 5;
+	public static final int TYPE_COLUMNS = 1;
+	public static final int TYPE_RELY = 2;
+	public static final int TYPE_ARRAY = 3;
+	public static final int TYPE_COMPLEX = 4;
+	public static final int TYPE_ACCESS_ERROR = 5;
+	public static final int TYPE_ACCESS_PERMITTED = 6;
 
 
 	private int type = TYPE_SINGLE;
@@ -143,6 +144,9 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		switch (type) {
 		case TYPE_SINGLE:
 			request = JSON.toJSONString(RequestUtil.newSingleRequest());
+			break;
+		case TYPE_COLUMNS:
+			request = JSON.toJSONString(RequestUtil.newColumnsRequest());
 			break;
 		case TYPE_RELY:
 			request = JSON.toJSONString(RequestUtil.newRelyRequest());

@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import org.springframework.web.bind.annotation.RequestMethod;
+
 /**mock test of client
  * @author Lemon
  */
@@ -54,7 +56,7 @@ public class ClientTest {
 //		"}");
 		
 		//已经过bejson校验和传输校验
-		new RequestParser().parse("{" +
+		new RequestParser(RequestMethod.GET).parse("{" +
 				     "\"[]\": {" +
 				        "\"page\": 1, " +
 				        "\"count\": 10," +

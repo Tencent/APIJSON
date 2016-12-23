@@ -2,6 +2,8 @@ package zuo.biao.apijson.server.sql;
 
 import java.rmi.AccessException;
 
+import org.springframework.web.bind.annotation.RequestMethod;
+
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.StringUtil;
@@ -23,34 +25,37 @@ public class AccessVerifier {
 	public static final String[] PAY_ACCESS_TABLE_NAMES = {"Wallet"};
 
 	/**验证权限是否通过
+	 * @param method 
 	 * @param request
 	 * @param tableName
 	 * @return
 	 */
-	public static boolean verify(JSONObject request, String tableName) throws AccessException {
+	public static boolean verify(RequestMethod method, JSONObject request, String tableName) throws AccessException {
 		try {
-			verify(request, getAccessId(tableName));
+			verify(method, request, getAccessId(tableName));
 		} catch (AccessException e) {
-			throw new AccessException(TAG + "verify  tableName = " + tableName + ", error = " + e.getMessage());
+			throw new AccessException(TAG +  tableName + " : " + e.getMessage());
 		}
 		return true;
 	}
 
 
 	/**验证权限是否通过
+	 * @param method 
 	 * @param request
 	 * @param accessId 可以直接在代码里写ACCESS_LOGIN等，或者建一个Access表，包括id和需要改权限的table的tableName列表
 	 * @return
 	 * @throws AccessException 
 	 */
-	public static boolean verify(JSONObject request, int accessId) throws AccessException {
+	public static boolean verify(RequestMethod method, JSONObject request, int accessId) throws AccessException {
 		if (accessId < 0 || request == null) {
 			return true;
 		}
 		long currentUserId = request.getLongValue(KEY_CURRENT_USER_ID);
 		if (currentUserId <= 0) {
-			throw new AccessException(TAG + "verify accessId = " + accessId
+			System.out.println(TAG + "verify accessId = " + accessId
 					+ " >>  currentUserId <= 0, currentUserId = " + currentUserId);
+			throw new AccessException(TAG + "请设置"+ KEY_CURRENT_USER_ID + "和对应的password！");
 		}
 		String password;
 
@@ -58,16 +63,18 @@ public class AccessVerifier {
 		case ACCESS_LOGIN:
 			password = StringUtil.getString(request.getString(KEY_LOGIN_PASSWORD));
 			if (password.equals(StringUtil.getString(getLoginPassword(currentUserId))) == false) {
-				throw new AccessException(TAG + "verify accessId = " + accessId
+				System.out.println(TAG + "verify accessId = " + accessId
 						+ " >> currentUserId or loginPassword error"
 						+ "  currentUserId = " + currentUserId + ", loginPassword = " + password);
+				throw new AccessException(TAG + KEY_CURRENT_USER_ID + "或" + KEY_LOGIN_PASSWORD + "错误！");
 			}
 		case ACCESS_PAY:
 			password = StringUtil.getString(request.getString(KEY_PAY_PASSWORD));
 			if (password.equals(StringUtil.getString(getPayPassword(currentUserId))) == false) {
-				throw new AccessException(TAG + "verify accessId = " + accessId
+				System.out.println(TAG + "verify accessId = " + accessId
 						+ " >> currentUserId or payPassword error"
 						+ "  currentUserId = " + currentUserId + ", payPassword = " + password);
+				throw new AccessException(TAG + KEY_CURRENT_USER_ID + "或" + KEY_PAY_PASSWORD + "错误！");
 			}
 		default:
 			return true;

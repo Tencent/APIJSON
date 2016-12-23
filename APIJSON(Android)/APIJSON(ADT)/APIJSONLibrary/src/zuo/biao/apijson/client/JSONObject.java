@@ -35,6 +35,15 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject() {
 		super(true);
 	}
+	/**transfer Object to JSONObject
+	 * @param object
+	 */
+	public JSONObject(Object object) {
+		this(JSON.toJSONString(object));
+	}
+	/**parse JSONObject with JSON String
+	 * @param json
+	 */
 	public JSONObject(String json) {
 		this(JSON.parseObject(json));
 	}
@@ -45,6 +54,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		this();
 		add(object);
 	}
+
 
 
 
@@ -100,6 +110,21 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 			}
 		}
 	}
+	
+	
+	public static final String KEY_COLUMNS = "columns";
+	/**set columns need to be returned
+	 * @param columns  "column0,column1,column2..."
+	 * @return
+	 */
+	public JSONObject setColumns(String columns) {
+		put(KEY_COLUMNS, columns);
+		return this;
+	}
+	public String getColumns() {
+		return getString(KEY_COLUMNS);
+	}
+	
 
 
 	//array object <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
