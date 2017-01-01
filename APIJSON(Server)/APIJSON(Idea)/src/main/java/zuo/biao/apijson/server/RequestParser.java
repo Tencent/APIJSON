@@ -38,14 +38,13 @@ public class RequestParser {
 	private static final String TAG = "RequestParser: ";
 
 	public static final String SEPARATOR = StringUtil.SEPARATOR;
-	public static final String KEY_COLUMNS = "columns";
 
 	private RequestMethod requestMethod;
 	public RequestParser(RequestMethod requestMethod) {
 		this.requestMethod = requestMethod;
 	}
 
-	
+
 	private JSONObject requestObject;
 
 	private boolean parseRelation;
@@ -70,7 +69,7 @@ public class RequestParser {
 		requestObject = getObject(null, null, null, requestObject);
 		parseRelation = true;
 		requestObject = getObject(null, null, null, requestObject);
-		
+
 		requestObject = AccessVerifier.removeAccessInfo(requestObject);
 
 		/**
@@ -81,8 +80,8 @@ public class RequestParser {
 		 */
 
 		QueryHelper.getInstance().close();
-//		QueryHelper2.getInstance().close();
-		
+		//		QueryHelper2.getInstance().close();
+
 		System.out.println(TAG + "\n\n最终返回至客户端的json:\n" + JSON.toJSONString(requestObject));
 		return requestObject;
 	}
@@ -154,17 +153,17 @@ public class RequestParser {
 		if (containRelation == false && isObjectKey(name)) {
 			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
 				//			relationMap.remove(path);
-				transferredRequest.remove(KEY_COLUMNS);
-				QueryConfig config2 = getQueryConfig(name, transferredRequest).setColumns(request.getString(KEY_COLUMNS));
+				QueryConfig config2 = getQueryConfig(name, transferredRequest);
+
 				if (parentConfig != null) {
 					config2.setLimit(parentConfig.getLimit()).setPage(parentConfig.getPage())
-							.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
+					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 				JSONObject result = null;
 				try {
 					result = getSQLObject(config2);
-				} catch (AccessException e) {
-//					e.printStackTrace();
+				} catch (Exception e) {
+					//					e.printStackTrace();
 					result = new JSONObject(true);
 					result.put("status", 403);
 					result.put("message", e.getMessage());
@@ -210,11 +209,11 @@ public class RequestParser {
 		if (count <= 0) {//解决count<=0导致没有查询结果
 			count = 100;
 		}
-		
-//		if (parseRelation) {
-//			request.remove("page");
-//			request.remove("count");
-//		}
+
+		//		if (parseRelation) {
+		//			request.remove("page");
+		//			request.remove("count");
+		//		}
 		System.out.println(TAG + "getArray page = " + page + "; count = " + count);
 
 		QueryConfig config = new QueryConfig(requestMethod, count, page);
@@ -419,7 +418,7 @@ public class RequestParser {
 	 * @return
 	 * @throws AccessException 
 	 */
-	private synchronized JSONObject getSQLObject(QueryConfig config) throws AccessException {
+	private synchronized JSONObject getSQLObject(QueryConfig config) throws Exception {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
 		AccessVerifier.verify(requestMethod, requestObject, config == null ? null : config.getTable());
 		return QueryHelper.getInstance().select(config);//QueryHelper2.getInstance().select(config);//

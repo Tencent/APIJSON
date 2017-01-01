@@ -112,7 +112,20 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 	
 	
+	public static final String KEY_TAG = "tag";
 	public static final String KEY_COLUMNS = "columns";
+	/**set tag
+	 * @param tag
+	 * @return
+	 */
+	public JSONObject setTag(String tag) {
+		put(KEY_TAG, tag);
+		return this;
+	}
+	public String getTag() {
+		return getString(KEY_TAG);
+	}
+	
 	/**set columns need to be returned
 	 * @param columns  "column0,column1,column2..."
 	 * @return

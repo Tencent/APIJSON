@@ -71,62 +71,67 @@ public class QueryHelper {
 		statement = null;
 	}
 
-	public JSONObject select(QueryConfig config) {
+	public JSONObject select(QueryConfig config) throws SQLException, Exception {
 		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
 			System.out.println(TAG + "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
 			return null;
 		}
 		final String sql = config.getSQL();
 
-		try{
+		System.out.println(TAG + "成功连接到数据库！");
 
-
-			System.out.println(TAG + "成功连接到数据库！");
-
-			if (connection == null || connection.isClosed()) {
-				System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
-				connection = getConnection();
-				statement = connection.createStatement(); //创建Statement对象
-				metaData = connection.getMetaData();
-			}
-
-			String[] columnArray = getColumnArray(config);
-			if (columnArray == null || columnArray.length <= 0) {
-				return null;
-			}
-
-			System.out.println(TAG + "select  sql = " + sql);
-
-			ResultSet rs = statement.executeQuery(sql);//创建数据对象
-
-			JSONObject object  = null;//new JSONObject();//null;
-			int position = -1;
-			while (rs.next()){
-				position ++;
-				if (position != config.getPosition()) {
-					continue;
-				}
-				object = new JSONObject(true);
-				try {
-					for (int i = 0; i < columnArray.length; i++) {
-						object.put(columnArray[i], rs.getObject(rs.findColumn(columnArray[i])));
-					}
-				} catch (Exception e) {
-					System.out.println(TAG + "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +
-							" >> } catch (Exception e) {\n" + e.getMessage());
-					e.printStackTrace();
-				}
-				break;
-			}
-
-			rs.close();
-
-			return object;
-		} catch(Exception e) {
-			e.printStackTrace();
+		if (connection == null || connection.isClosed()) {
+			System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+			connection = getConnection();
+			statement = connection.createStatement(); //创建Statement对象
+			metaData = connection.getMetaData();
 		}
 
-		return null;
+		String[] columnArray = getColumnArray(config);
+		if (columnArray == null || columnArray.length <= 0) {
+			return null;
+		}
+
+		System.out.println(TAG + "select  sql = " + sql);
+
+		JSONObject object  = null;//new JSONObject();//null;
+		ResultSet rs = null;
+		switch (config.getMethod()) {
+		case POST:
+		case PUT:
+		case DELETE:
+			int updateCount = statement.executeUpdate(sql);//创建数据对象
+			object = new JSONObject();
+			object.put("message", updateCount > 0 ? "success" : "failed");
+			return object;
+		default:
+			rs = statement.executeQuery(sql);//创建数据对象
+			break;
+		}
+
+
+		int position = -1;
+		while (rs.next()){
+			position ++;
+			if (position != config.getPosition()) {
+				continue;
+			}
+			object = new JSONObject(true);
+			try {
+				for (int i = 0; i < columnArray.length; i++) {
+					object.put(columnArray[i], rs.getObject(rs.findColumn(columnArray[i])));
+				}
+			} catch (Exception e) {
+				System.out.println(TAG + "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +
+						" >> } catch (Exception e) {\n" + e.getMessage());
+				e.printStackTrace();
+			}
+			break;
+		}
+
+		rs.close();
+
+		return object;
 	}
 
 
@@ -140,7 +145,7 @@ public class QueryHelper {
 		}
 		String columns = config.getColumns();
 		if (StringUtil.isNotEmpty(columns, true)) {
-		 	return columns.contains(",") ? columns.split(",") : new String[]{columns};
+			return columns.contains(",") ? columns.split(",") : new String[]{columns};
 		}
 		List<String> list = new ArrayList<String>();
 		String table = config.getTable();

@@ -31,7 +31,7 @@ public class Wallet extends BaseModel {
 	public Wallet() {
 		super();
 	}
-	public Wallet(Long id) {
+	public Wallet(long id) {
 		this();
 		this.id = id;
 	}

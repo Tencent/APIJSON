@@ -48,6 +48,16 @@ public class AccessVerifier {
 	 * @throws AccessException 
 	 */
 	public static boolean verify(RequestMethod method, JSONObject request, int accessId) throws AccessException {
+		request = getCorrectRequest(method, request, accessId);
+		switch (method) {
+		case POST:
+			if (request.containsKey("id")) {
+				throw new AccessException(TAG + "POST请求不能设置table的id！");
+			}
+			break;
+		default:
+			break;
+		}
 		if (accessId < 0 || request == null) {
 			return true;
 		}
@@ -80,6 +90,18 @@ public class AccessVerifier {
 			return true;
 		}
 	}
+
+	
+	
+	private static JSONObject getCorrectRequest(RequestMethod method, JSONObject request, int accessId) {
+//		if ("update_user".equals(request.getString("tag"))) {
+//			
+//		} else {
+//
+//		}
+		return request;
+	}
+
 
 	/**获取权限id
 	 * @param tableName

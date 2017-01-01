@@ -32,6 +32,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -59,6 +60,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	public static final String RESULT_URL = "RESULT_URL";
 
+
 	/**
 	 * @param context
 	 * @param type
@@ -72,13 +74,17 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 
 
-	public static final int TYPE_SINGLE = 0;
-	public static final int TYPE_COLUMNS = 1;
-	public static final int TYPE_RELY = 2;
-	public static final int TYPE_ARRAY = 3;
-	public static final int TYPE_COMPLEX = 4;
-	public static final int TYPE_ACCESS_ERROR = 5;
-	public static final int TYPE_ACCESS_PERMITTED = 6;
+	public static final int TYPE_POST = 0;
+	public static final int TYPE_DELETE = 1;
+	public static final int TYPE_PUT = 2;
+
+	public static final int TYPE_SINGLE = 10;
+	public static final int TYPE_COLUMNS = 11;
+	public static final int TYPE_RELY = 12;
+	public static final int TYPE_ARRAY = 13;
+	public static final int TYPE_COMPLEX = 14;
+	public static final int TYPE_ACCESS_ERROR = 15;
+	public static final int TYPE_ACCESS_PERMITTED = 16;
 
 
 	private int type = TYPE_SINGLE;
@@ -89,7 +95,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	private TextView tvQueryResult;
 	private ProgressBar pbQuery;
-	private EditText etQueryUri;
+	private EditText etQueryUrl;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -104,23 +110,25 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 		tvQueryResult = (TextView) findViewById(R.id.tvQueryResult);
 		pbQuery = (ProgressBar) findViewById(R.id.pbQuery);
-		etQueryUri = (EditText) findViewById(R.id.etQueryUri);
+		etQueryUrl = (EditText) findViewById(R.id.etQueryUrl);
 
-		etQueryUri.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
-				? url : "http://139.196.140.118:8080/get/"));//TODO my server ipv4 address, edit it to your server url
-
+		etQueryUrl.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
+				? url : "http://139.196.140.118:8080/"));//TODO my server ipv4 address, edit it to your server url
 
 		query();
 
 
-		findViewById(R.id.btnQueryQuery).setOnClickListener(new OnClickListener() {
+		Button btnQueryQuery = (Button) findViewById(R.id.btnQueryQuery);
+		btnQueryQuery.setText(getMethod(type));
+
+		btnQueryQuery.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				query();
 			}
 		});
-		findViewById(R.id.btnQueryQuery).setOnLongClickListener(new OnLongClickListener() {
+		btnQueryQuery.setOnLongClickListener(new OnLongClickListener() {
 
 			@Override
 			public boolean onLongClick(View v) {
@@ -131,17 +139,75 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 
 
+	/**request a query from server,and the result will be received by onHttpResponse method
+	 */
+	private void query() {
+		setRequest();
 
-	//click event,called form layout android:onClick <<<<<<<<<<<<<<<<
-	public void query(View v) {
-		query();
+		tvQueryResult.setText("requesting...\n\n url = " + url + "\n\n request = \n" + request
+				+ "\n\n\n" + getResources().getString(R.string.query_error));
+		pbQuery.setVisibility(View.VISIBLE);
+
+		if (type < 10) {
+			HttpManager.getInstance().post(getUrl(type), request, this);
+		} else {
+			HttpManager.getInstance().get(getUrl(type), request, this);
+		}
 	}
-	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
+	/**open request URL String with a browser
+	 */
+	public void openWebSite() {
+		setRequest();
+		String webSite = null;
+		try {
+			webSite = StringUtil.getNoBlankString(getUrl(type))
+					+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		if (StringUtil.isNotEmpty(webSite, true) == false) {
+			Log.e(TAG, "openWebSite  StringUtil.isNotEmpty(webSite, true) == false >> return;");
+			return;
+		}
+
+		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(webSite)));
+	}
+
+
+	
+	
+	private String getUrl(int type) {
+		return url + getMethod(type) + "/";
+	}
+	
+	private String getMethod(int type) {
+		switch (type) {
+		case TYPE_POST:
+			return "post";
+		case TYPE_DELETE:
+			return "delete";
+		case TYPE_PUT:
+			return "put";
+		default:
+			return "get";
+		}
+	}
+	
 	private String request;
 	public void setRequest() {
-		url = StringUtil.getNoBlankString(etQueryUri);
+		url = StringUtil.getNoBlankString(etQueryUrl);
 		switch (type) {
+		case TYPE_POST:
+			request = JSON.toJSONString(RequestUtil.newPostRequest());
+			break;
+		case TYPE_DELETE:
+			request = JSON.toJSONString(RequestUtil.newDeleteRequest());
+			break;
+		case TYPE_PUT:
+			request = JSON.toJSONString(RequestUtil.newPutRequest());
+			break;
+
 		case TYPE_SINGLE:
 			request = JSON.toJSONString(RequestUtil.newSingleRequest());
 			break;
@@ -167,20 +233,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		Log.d(TAG, "setRequest  url = " + url + ";\n request = " + request);
 	}
 
-	/**request a query from server,and the result will be received by onHttpResponse method
-	 */
-	private void query() {
-		setRequest();
 
-		tvQueryResult.setText("requesting...\n\n url = " + url + "\n\n request = \n" + request
-				+ "\n\n\n" + getResources().getString(R.string.query_error));
-		pbQuery.setVisibility(View.VISIBLE);
-
-		HttpManager.getInstance().get(url, request, this);
-	}
-
-
-	
 	@Override
 	public void onHttpResponse(int requestCode, final String resultJson, final Exception e) {
 		Log.d(TAG, "onHttpResponse  resultJson = " + resultJson);
@@ -197,7 +250,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 				return;
 			}
 			response = new JSONResponse(array.getJSONObject(0));
-			
+
 			User user = JSONResponse.getObject(response, User.class);
 			Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  user = " + JSON.toJSONString(user));
 			Work work = JSONResponse.getObject(response, Work.class);
@@ -208,7 +261,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			Wallet wallet = JSONResponse.getObject(response, Wallet.class);
 			Log.d(TAG, "onHttpResponse  type == TYPE_ACCESS_PERMITTED >>  wallet = " + JSON.toJSONString(wallet));
 		}
-		
+
 		runOnUiThread(new Runnable() {
 
 			@Override
@@ -220,7 +273,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
 							? StringUtil.getTrimedString(resultJson)
 									: e.getMessage() + "\n\n\n" + getResources().getString(R.string.query_error));
-					
+
 				}
 			}
 		});
@@ -236,27 +289,6 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			Log.d(TAG, "\n logList  " + (data == null ? "data" : data.getClass().getSimpleName())
 					+ " = \n" + JSON.toJSONString(data));
 		}		
-	}
-
-
-
-	/**open request URL String with a browser
-	 */
-	public void openWebSite() {
-		setRequest();
-		String webSite = null;
-		try {
-			webSite = StringUtil.getNoBlankString(url)
-					+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		if (StringUtil.isNotEmpty(webSite, true) == false) {
-			Log.e(TAG, "openWebSite  StringUtil.isNotEmpty(webSite, true) == false >> return;");
-			return;
-		}
-
-		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(webSite)));
 	}
 
 
