@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,8 @@ import zuo.biao.apijson.StringUtil;
  */
 public class QueryConfig {
 
+	public static final String KEY_COLUMNS = "columns";
+	
 	private RequestMethod method;
 	private String table;
 	private String columns;
@@ -87,12 +90,16 @@ public class QueryConfig {
 		return setColumns(StringUtil.getString(columns));
 	}
 	public QueryConfig setColumns(String columns) {
-		columns = StringUtil.getTrimedString(columns);
-		this.columns = columns.endsWith(",") ? columns.substring(0, columns.length() - 1) : columns;
+		this.columns = columns;
 		return this;
 	}
 	private String getColumnsString() {
-		return StringUtil.isNotEmpty(columns, true) ? columns : "*";
+		switch (method) {
+		case POST:
+			return StringUtil.isNotEmpty(columns, true) ? "(" + columns + ")" : "";
+		default:
+			return StringUtil.isNotEmpty(columns, true) ? columns : "*";
+		}
 	}
 
 	public String getValues() {
@@ -189,6 +196,39 @@ public class QueryConfig {
 		}
 		return "";
 	}
+	/**获取筛选方法
+	 * @return
+	 */
+	public String getSetString() {
+		return getSetString(where);
+	}
+	/**获取筛选方法
+	 * @param where
+	 * @return
+	 */
+	public static String getSetString(Map<String, Object> where) {
+		Set<String> set = where == null ? null : where.keySet();
+		if (set != null && set.size() > 0) {
+			if (where.containsKey("id") == false) {
+				return "";
+			}
+			String setString = " set ";
+			for (String key : set) {
+				//避免筛选到全部	value = key == null ? null : where.get(key);
+				if (key == null || "id".equals(key)) {
+					continue;
+				}
+				setString += (key + "='" + where.get(key) + "' ,");
+			}
+			if (setString.endsWith(",")) {
+				setString = setString.substring(0, setString.length() - 1);
+			}
+			if (setString.trim().endsWith("set") == false) {
+				return setString + " where id=" + where.get("id");
+			}
+		}
+		return "";
+	}
 
 
 	/**获取查询配置
@@ -197,17 +237,39 @@ public class QueryConfig {
 	 * @return
 	 */
 	public static synchronized QueryConfig getQueryConfig(RequestMethod method, String table, JSONObject request) {
+		QueryConfig config = new QueryConfig(method, table);
+
 		Set<String> set = request == null ? null : request.keySet();
-		Map<String, Object> transferredRequest = null;
 		if (set != null) {
-			transferredRequest = new HashMap<String, Object>();
-			for (String key : set) {
-				if (JSON.parseObject(request.getString(key)) == null) {//非key-value
-					transferredRequest.put(key, request.get(key));
+			String columns = request.getString(KEY_COLUMNS);
+			if (method == RequestMethod.POST) {
+				config.setColumns(StringUtil.getString(set.toArray(new String[]{})));
+				String valuesString = "";
+				Collection<Object> valueCollection = request.values();
+				Object[] values = valueCollection == null || valueCollection.isEmpty() ? null : valueCollection.toArray(new String[]{});
+				for (int i = 0; i < values.length; i++) {
+					valuesString += ((i > 0 ? "," : "") + "'" + values[i] + "'");
 				}
+				config.setValues("(" + valuesString + ")");
+			} else {
+				request.remove(KEY_COLUMNS);
+				
+				Map<String, Object> transferredRequest = new HashMap<String, Object>();
+				for (String key : set) {
+					if (JSON.parseObject(request.getString(key)) == null) {//非key-value
+						transferredRequest.put(key, request.get(key));
+					}
+				}
+				config.setWhere(transferredRequest);
+			}
+			
+			
+			if (StringUtil.isNotEmpty(columns, true)) {
+				config.setColumns(columns);
 			}
 		}
-		return new QueryConfig(method, table).setWhere(transferredRequest);
+
+		return config;
 	}
 
 	/**
@@ -229,15 +291,16 @@ public class QueryConfig {
 			config.setMethod(RequestMethod.GET);
 		}
 		switch (config.getMethod()) {
-		case GET:
+		case POST:
+			return "insert into " + config.getTable() + config.getColumnsString() + " values" + config.getValuesString();
+		case PUT:
+			return "update " + config.getTable() + config.getSetString();
+		case DELETE:
+			return "delete from " + config.getTable() + config.getWhereString();
+		default:
 			return "select "+ config.getColumnsString() + " from " + config.getTable()
 			+ config.getWhereString() + config.getLimitString();
-		case POST:
-			return "insert into " + config.getTable() + config.getWhereString() + " values " + config.getValuesString();
-		default:
-			break;
 		}
-		return null;
 	}
 
 

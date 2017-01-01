@@ -32,7 +32,7 @@
             android:layout_height="match_parent" />
 
         <EditText
-            android:id="@+id/etQueryUri"
+            android:id="@+id/etQueryUrl"
             style="@style/select_name"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"
@@ -45,7 +45,7 @@
             android:id="@+id/btnQueryQuery"
             android:layout_width="90dp"
             android:layout_height="match_parent"
-            android:text="@string/query" />
+            android:text="Query" />
     </LinearLayout>
 
 </LinearLayout>

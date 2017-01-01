@@ -112,7 +112,7 @@ public class StringUtil {
 				split = ",";
 			}
 			for (int i = 0; i < array.length; i++) {
-				s += ((i >= array.length - 1 ? "" : split) + array[i]);
+				s += ((i > 0 ? split : "") + array[i]);
 			}
 		}
 		return getString(s);

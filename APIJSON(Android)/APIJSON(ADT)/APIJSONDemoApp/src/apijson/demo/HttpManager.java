@@ -36,9 +36,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import apijson.demo.application.DemoApplication;
 
-import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 /**HTTP请求管理类
@@ -136,7 +137,8 @@ public class HttpManager {
 
 	}
 
-
+	public static final MediaType TYPE_JSON =MediaType.parse("application/json; charset=utf-8");
+	
 	/**POST请求
 	 * @param paramList 请求参数列表，（可以一个键对应多个值）
 	 * @param url 接口url
@@ -154,18 +156,19 @@ public class HttpManager {
 			@Override
 			protected Exception doInBackground(Void... params) {
 
-				FormEncodingBuilder fBuilder = new FormEncodingBuilder();
 				try {
-					String url = StringUtil.getNoBlankString(url_)
-							+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
+					String url = StringUtil.getNoBlankString(url_);
 
 					OkHttpClient client = getHttpClient(url);
 					if (client == null) {
 						return new Exception(TAG + ".post  AsyncTask.doInBackground  client == null >> return;");
 					}
+					
+					RequestBody requestBody = RequestBody.create(TYPE_JSON, request);
+					
 					result = getResponseJson(client, new Request.Builder()
 					.addHeader(KEY_TOKEN, getToken(url)).url(StringUtil.getNoBlankString(url))
-					.post(fBuilder.build()).build());
+					.post(requestBody).build());
 				} catch (Exception e) {
 					Log.e(TAG, "post  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
 							"} catch (Exception e) {\n" + e.getMessage());

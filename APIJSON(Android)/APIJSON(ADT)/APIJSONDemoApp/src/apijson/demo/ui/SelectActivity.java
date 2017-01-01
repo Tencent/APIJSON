@@ -44,10 +44,23 @@ public class SelectActivity extends Activity {
 	}
 
 	//click event,called form layout android:onClick <<<<<<<<<<<<<<<<
+	public void selectPost(View v) {
+		select(QueryActivity.TYPE_POST);
+	}
+	
+	public void selectDelete(View v) {
+		select(QueryActivity.TYPE_DELETE);
+	}
+
+	public void selectPut(View v) {
+		select(QueryActivity.TYPE_PUT);
+	}
+	
+	//get <<<<<<<<<<<<<<<<<<<<<<<<<<<
 	public void selectSingle(View v) {
 		select(QueryActivity.TYPE_SINGLE);
 	}
-
+	
 	public void selectColumns(View v) {
 		select(QueryActivity.TYPE_COLUMNS);
 	}
@@ -59,7 +72,7 @@ public class SelectActivity extends Activity {
 	public void selectArray(View v) {
 		select(QueryActivity.TYPE_ARRAY);
 	}
-
+	
 	public void selectComplex(View v) {
 		select(QueryActivity.TYPE_COMPLEX);
 	}
@@ -71,6 +84,8 @@ public class SelectActivity extends Activity {
 	public void selectAccessPermitted(View v) {
 		select(QueryActivity.TYPE_ACCESS_PERMITTED);
 	}
+	//get >>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
 	private String url;

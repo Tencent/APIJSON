@@ -31,11 +31,11 @@ public class User extends BaseModel {
 	public User() {
 		super();
 	}
-	public User(Long id) {
+	public User(long id) {
 		this();
 		this.id = id;
 	}
-	public User(Long id, String name) {
+	public User(long id, String name) {
 		this(id);
 		this.name = name;
 	}

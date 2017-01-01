@@ -10,6 +10,40 @@
 
             <TextView
                 style="@style/select_name"
+                android:text="@string/post"
+                android:textColor="@android:color/black" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectPost"
+                android:text="@string/demo_post" />
+
+            <TextView
+                style="@style/select_name"
+                android:text="@string/delete"
+                android:textColor="@android:color/black" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectDelete"
+                android:text="@string/demo_delete" />
+
+            <TextView
+                style="@style/select_name"
+                android:text="@string/put" />
+
+            <Button
+                style="@style/select_json"
+                android:onClick="selectPut"
+                android:text="@string/demo_put" />
+
+            <TextView
+                style="@style/select_name"
+                android:text="@string/get"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                style="@style/select_name"
                 android:text="@string/single" />
 
             <Button
