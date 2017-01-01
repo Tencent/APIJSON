@@ -23,14 +23,15 @@ DROP TABLE IF EXISTS `User`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `User` (
-  `id` int(5) NOT NULL,
+  `id` int(5) NOT NULL AUTO_INCREMENT,
   `head` varchar(300) DEFAULT NULL,
   `name` varchar(20) NOT NULL,
   `phone` varchar(14) DEFAULT NULL,
   `picture` varchar(3000) DEFAULT NULL,
   `sex` int(11) NOT NULL,
+  `certified` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=93835 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +40,7 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES (38710,'http://www.tooopen.com/view/38710.html','Name-38710','1300038710','',0),(70793,'http://www.tooopen.com/view/70793.html','Name-70793','1300070793','',0),(82001,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',0),(82002,'http','Name-82002','1300082002','sd',1),(82003,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','sd',1),(82005,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',1),(82006,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',1),(82012,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',0),(90814,'http://www.tooopen.com/view/90814.html','Name-90814','1300090814','',0),(93793,'http://www.tooopen.com/view/93793.html','Name-93793','1300093793','',0);
+INSERT INTO `User` VALUES (38710,'http://www.tooopen.com/view/38710.html','Name-38710','1300038710',NULL,0,0),(70793,'http://www.tooopen.com/view/70793.html','Name-70793','1300070793','',0,0),(82001,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',0,1),(82002,'http','Name-82002','1300082002','',1,1),(82003,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',1,1),(82005,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','[\"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000\",\"http://common.cnblogs.com/images/icon_weibo_24.png\",\"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000\"]',1,0),(82006,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',1,0),(82012,'http://www.tooopen.com/view/82002.html','Name-82002','1300082002','',0,0),(90814,'http://www.tooopen.com/view/90814.html','Name-90814','1300090814','',0,1),(93793,'http://www.tooopen.com/view/93793.html','Name-93793','1300093793','',0,1),(93794,NULL,'Lemon','999999999',NULL,0,0);
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-11-24 19:27:04
+-- Dump completed on 2017-01-01 19:21:36
