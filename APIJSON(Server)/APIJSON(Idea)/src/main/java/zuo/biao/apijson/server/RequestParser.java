@@ -50,8 +50,6 @@ public class RequestParser {
 	private boolean parseRelation;
 	private Map<String, String> relationMap;
 
-
-
 	/**
 	 * @param json
 	 */
@@ -61,7 +59,7 @@ public class RequestParser {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		System.out.println(TAG + "get  json = " + json);
+		System.out.println(TAG + "parse  json = " + json);
 
 		relationMap = new HashMap<String, String>();
 		parseRelation = false;
@@ -71,13 +69,6 @@ public class RequestParser {
 		requestObject = getObject(null, null, null, requestObject);
 
 		requestObject = AccessVerifier.removeAccessInfo(requestObject);
-
-		/**
-		 * TODO 格式化json，去除标记array内object位置的数字，转为[]形式，比如
-		 * "Comment[]":{"0":{"Comment":{...}}, ...}
-		 * 转为
-		 * "Comment[]":[{...}, ...]
-		 */
 
 		QueryHelper.getInstance().close();
 		//		QueryHelper2.getInstance().close();

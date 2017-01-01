@@ -47,6 +47,9 @@ public class Controller {
 		return JSON.toJSONString(object);
 	}
 	
+	/**以下接口继续用POST接口是为了客户端方便，只需要做get，post请求。也可以改用实际对应的方法。
+	 * post，put方法名可以改为add，update等更客户端容易懂的名称
+	*/
 	@RequestMapping(value="delete", method = RequestMethod.POST)
 	public String delete(@RequestBody String request) {
 		System.out.println("delete/request = " + request);
