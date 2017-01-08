@@ -87,15 +87,19 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	public static final int TYPE_ACCESS_PERMITTED = 16;
 
 
-	private int type = TYPE_SINGLE;
-	private String url;
 
 	private Activity context;
 	private boolean isAlive;
 
+	private int type = TYPE_COMPLEX;
+	private String url;
+	private String error;
+
 	private TextView tvQueryResult;
 	private ProgressBar pbQuery;
 	private EditText etQueryUrl;
+	private Button btnQueryQuery;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -111,15 +115,18 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		tvQueryResult = (TextView) findViewById(R.id.tvQueryResult);
 		pbQuery = (ProgressBar) findViewById(R.id.pbQuery);
 		etQueryUrl = (EditText) findViewById(R.id.etQueryUrl);
+		btnQueryQuery = (Button) findViewById(R.id.btnQueryQuery);
+
 
 		etQueryUrl.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
 				? url : "http://139.196.140.118:8080/"));//TODO my server ipv4 address, edit it to your server url
+		btnQueryQuery.setText(getMethod(type));
+
+
+		error = String.format(getResources().getString(R.string.query_error), StringUtil.getTrimedString(btnQueryQuery));
 
 		query();
 
-
-		Button btnQueryQuery = (Button) findViewById(R.id.btnQueryQuery);
-		btnQueryQuery.setText(getMethod(type));
 
 		btnQueryQuery.setOnClickListener(new OnClickListener() {
 
@@ -144,14 +151,15 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	private void query() {
 		setRequest();
 
-		tvQueryResult.setText("requesting...\n\n url = " + url + "\n\n request = \n" + request
-				+ "\n\n\n" + getResources().getString(R.string.query_error));
+		final String fullUrl = getUrl(type);
+
+		tvQueryResult.setText("requesting...\n\n url = " + fullUrl + "\n\n request = \n" + request + "\n\n\n" + error);
 		pbQuery.setVisibility(View.VISIBLE);
 
 		if (type < 10) {
-			HttpManager.getInstance().post(getUrl(type), request, this);
+			HttpManager.getInstance().post(fullUrl, request, this);
 		} else {
-			HttpManager.getInstance().get(getUrl(type), request, this);
+			HttpManager.getInstance().get(fullUrl, request, this);
 		}
 	}
 
@@ -175,12 +183,12 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 
 
-	
-	
+
+
 	private String getUrl(int type) {
-		return url + getMethod(type) + "/";
+		return url + StringUtil.getTrimedString(btnQueryQuery) + "/";
 	}
-	
+
 	private String getMethod(int type) {
 		switch (type) {
 		case TYPE_POST:
@@ -193,7 +201,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			return "get";
 		}
 	}
-	
+
 	private String request;
 	public void setRequest() {
 		url = StringUtil.getNoBlankString(etQueryUrl);
@@ -247,15 +255,15 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			JSONArray array = JSONResponse.getJSONArray(response.getJSONObject("[]"));//, "Comment[]");//
 			if (array == null || array.isEmpty()) {
 				Log.e(TAG, "onHttpResponse  type == TYPE_COMPLEX >> array == null || array.isEmpty() >> return;");
-				return;
-			}
-			response = new JSONResponse(array.getJSONObject(0));
+			} else {
+				response = new JSONResponse(array.getJSONObject(0));
 
-			User user = JSONResponse.getObject(response, User.class);
-			Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  user = " + JSON.toJSONString(user));
-			Work work = JSONResponse.getObject(response, Work.class);
-			Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  work = " + JSON.toJSONString(work));
-			logList(JSONResponse.getList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
+				User user = JSONResponse.getObject(response, User.class);
+				Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  user = " + JSON.toJSONString(user));
+				Work work = JSONResponse.getObject(response, Work.class);
+				Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  work = " + JSON.toJSONString(work));
+				logList(JSONResponse.getList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
+			}
 		} else if (type == TYPE_ACCESS_PERMITTED) {
 			response = new JSONResponse(resultJson);
 			Wallet wallet = JSONResponse.getObject(response, Wallet.class);
@@ -271,8 +279,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 					Toast.makeText(context, "received result!", Toast.LENGTH_SHORT).show();
 
 					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
-							? StringUtil.getTrimedString(resultJson)
-									: e.getMessage() + "\n\n\n" + getResources().getString(R.string.query_error));
+							? StringUtil.getTrimedString(resultJson) : e.getMessage() + "\n\n\n" + error);
 
 				}
 			}
