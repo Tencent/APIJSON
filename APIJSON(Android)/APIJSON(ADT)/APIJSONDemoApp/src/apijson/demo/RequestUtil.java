@@ -46,11 +46,14 @@ public class RequestUtil {
 	
 	public static JSONObject newPutRequest() {
 		User data = new User(38710);
+		data.setName("Lemon");
+		
 		List<String> list = new ArrayList<String>();
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
 		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
 		list.add("http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000");
 		data.setPicture(JSON.toJSONString(list));
+		
 		return new JSONRequest(data).setTag("put_user");
 	}
 
