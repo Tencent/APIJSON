@@ -59,7 +59,7 @@ public class Controller {
 	}
 	
 	@RequestMapping(value="put", method = RequestMethod.POST)
-	public String update(@RequestBody String request) {
+	public String put(@RequestBody String request) {
 		System.out.println("put/request = " + request);
 		JSONObject object = new RequestParser(RequestMethod.PUT).parse(request);
 		System.out.println("put/return " + JSON.toJSONString(object));
