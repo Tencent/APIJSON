@@ -172,7 +172,7 @@ APIJSON是一种JSON传输结构协议。<br />
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
  结构 | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&currentUserPassword=1234<br /><br />其中currentUserId和currentUserPassword只在请求部分接口时需要 | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, currentUserPassword:1234}<br /><br />其中currentUserId和currentUserPassword只在请求部分接口时需要
- URL | 不同请求方法(GET，POST等)或不同功能对应不同url | 相同请求方法(GET，POST等)都用同一个url
+ URL | 不同的请求对应不同的url | 相同的请求方法(GET，POST等)都用同一个url
  键值对 | key=value | key:value
  
  服务端操作 | 传统方式 | APIJSON
