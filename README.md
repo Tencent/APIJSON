@@ -167,7 +167,7 @@ Here is an example:
 -------- | ------------ | ------------
  Requirement | Client developers append key-value pairs to an url for a request in docs | Client developers append JSON to the url for their requirements
  Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&currentUserPassword=1234<br /><br />The currentUserId and currentUserPassword is only for parts of interfaces | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, currentUserPassword:1234}<br /><br />The currentUserId and currentUserPassword is only for parts of interfaces
- URL | Different urls for different methods(GET,POST...) or requirements | One url for one method(GET,POST...)
+ URL | Different urls for different requests | One url for one method(GET,POST...)
  Key-Value Pair | key=value | key:value
  
  Server operation | Previous way | APIJSON
