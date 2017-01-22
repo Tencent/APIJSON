@@ -15,6 +15,8 @@
     <string name="complex">Complex</string>
     <string name="access_error">Access Error</string>
     <string name="access_permitted">Access Permitted</string>
+    <string name="received_result">received result!</string>
+    <string name="browser_can_only_receive_get_response">Browsers can only receive GET responses</string>
     <string name="query_error">There may be something wrong,you can follow by the steps:\n\n1.Check your net connection\n\n2.Check the url whether it\'s an available ipv4 address\n\n3.Long click the [ %1$s ] button to open the request by web browser\n\n4.Check logs outputed on the target server\n\n5.Try again</string>
     <string name="demo_post">{\n&#160;&#160;&#160;\"tag\":\"post_user\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"name\":\"Tommy\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"sex\":0,\n&#160;&#160;&#160;&#160;&#160;&#160;\"phone\":\"1234567890\"\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_delete">{\n&#160;&#160;&#160;\"tag\":\"delete_user\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":93794\n&#160;&#160;&#160;}\n}</string>

@@ -15,6 +15,8 @@
     <string name="complex">复杂结构</string>
     <string name="access_error">没有访问权限</string>
     <string name="access_permitted">允许使用权限</string>
+    <string name="received_result">已获得结果！</string>
+    <string name="browser_can_only_receive_get_response">用浏览器只能获取GET结果</string>
     <string name="query_error">可能出现了一些问题，可以按照以下步骤解决：\n\n1.检查网络连接\n\n2.检查url是否为一个可用的IPV4地址\n\n3.长按[ %1$s ]按钮用浏览器发送请求\n\n4.查看目标服务器上的log\n\n5.再试一次</string>
 
 </resources>

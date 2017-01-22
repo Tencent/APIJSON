@@ -166,6 +166,9 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	/**open request URL String with a browser
 	 */
 	public void openWebSite() {
+		if (type < 10) {
+			Toast.makeText(context, R.string.browser_can_only_receive_get_response, Toast.LENGTH_LONG).show();
+		}
 		setRequest();
 		String webSite = null;
 		try {
@@ -276,7 +279,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			public void run() {
 				if (isAlive) {
 					pbQuery.setVisibility(View.GONE);
-					Toast.makeText(context, "received result!", Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, R.string.received_result, Toast.LENGTH_SHORT).show();
 
 					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
 							? StringUtil.getTrimedString(resultJson) : e.getMessage() + "\n\n\n" + error);
