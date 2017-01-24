@@ -101,9 +101,7 @@ public class QueryHelper {
 		case PUT:
 		case DELETE:
 			int updateCount = statement.executeUpdate(sql);//创建数据对象
-			object = new JSONObject();
-			object.put("message", updateCount > 0 ? "success" : "failed");
-			return object;
+			return newJSONObject(updateCount > 0 ? 200 : 1149, updateCount > 0 ? "success" : "failed，可能对象不存在！");
 		default:
 			rs = statement.executeQuery(sql);//创建数据对象
 			break;
@@ -145,7 +143,7 @@ public class QueryHelper {
 		}
 		String columns = config.getColumns();
 		if (StringUtil.isNotEmpty(columns, true)) {
-			return columns.contains(",") ? columns.split(",") : new String[]{columns};
+			return StringUtil.split(columns);//columns.contains(",") ? columns.split(",") : new String[]{columns};
 		}
 		List<String> list = new ArrayList<String>();
 		String table = config.getTable();
@@ -163,5 +161,17 @@ public class QueryHelper {
 			e.printStackTrace();
 		}
 		return list.toArray(new String[]{});
+	}
+	
+	/**新建JSONObject，一般用于错误提示结果
+	 * @param status
+	 * @param message
+	 * @return
+	 */
+	public static JSONObject newJSONObject(int status, String message) {
+		JSONObject object = new JSONObject(true);
+		object.put("status", status);
+		object.put("message", message);
+		return object;
 	}
 }

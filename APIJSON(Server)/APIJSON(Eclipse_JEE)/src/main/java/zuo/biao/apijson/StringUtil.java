@@ -379,20 +379,49 @@ public class StringUtil {
 	}
 
 	public static final String SEPARATOR = "/";
+	/**判断是否为路径
+	 * @param path
+	 * @return
+	 */
 	public static boolean isPath(String path) {
 		return StringUtil.isNotEmpty(path, true) && path.contains(SEPARATOR) 
 				&& path.contains(SEPARATOR + SEPARATOR) == false && path.endsWith(SEPARATOR) == false;
 	}
 
+	/**分割路径
+	 * @param path
+	 * @return
+	 */
 	public static String[] splitPath(String path) {
-		path = getString(path);
-		if(path.startsWith("/")){
-			path = path.substring(1);
+		return isPath(path) ? split(path, SEPARATOR) : new String[] {path};
+	}
+	/**将s分割成String[]
+	 * @param s
+	 * @return
+	 */
+	public static String[] split(String s) {
+		return split(s, null);
+	}
+	/**将s用split分割成String[]
+	 * @param s
+	 * @param split
+	 * @return
+	 */
+	public static String[] split(String s, String split) {
+		s = getString(s);
+		if (s.isEmpty()) {
+			return null;
 		}
-		if(path.endsWith("/")){
-			path = path.substring(0, path.length() - 1);
+		if (isNotEmpty(split, false) == false) {
+			split = ",";
 		}
-		return isPath(path) ? path.split(SEPARATOR) : new String[] {path};
+		while (s.startsWith(split)) {
+			s = s.substring(1);
+		}
+		while (s.endsWith(split)) {
+			s = s.substring(0, s.length() - 1);
+		}
+		return s.contains(split) ? s.split(split) : new String[]{s};
 	}
 
 
@@ -618,7 +647,6 @@ public class StringUtil {
 			return s;
 		}
 	}
-
 
 	//校正（自动补全等）字符串>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

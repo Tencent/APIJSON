@@ -18,7 +18,10 @@ import static zuo.biao.apijson.StringUtil.UTF_8;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.rmi.AccessException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,6 +57,8 @@ public class RequestParser {
 	 * @param json
 	 */
 	public JSONObject parse(String json) {
+
+
 		try {
 			json = URLDecoder.decode(json, UTF_8);
 		} catch (UnsupportedEncodingException e) {
@@ -63,7 +68,13 @@ public class RequestParser {
 
 		relationMap = new HashMap<String, String>();
 		parseRelation = false;
-		requestObject = JSON.parseObject(json);
+		try {
+			requestObject = getCorrectRequest(requestMethod, JSON.parseObject(json));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return QueryHelper.newJSONObject(403, e.getMessage());
+		}
+
 		requestObject = getObject(null, null, null, requestObject);
 		parseRelation = true;
 		requestObject = getObject(null, null, null, requestObject);
@@ -77,6 +88,349 @@ public class RequestParser {
 		return requestObject;
 	}
 
+
+	/**获取正确的请求，非GET请求必须是服务器指定的
+	 * @param method
+	 * @param request
+	 * @return
+	 */
+	public JSONObject getCorrectRequest(RequestMethod method, JSONObject request) throws Exception {
+		if (method == null || method == RequestMethod.GET) {
+			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
+		}
+
+		String tag = request.getString("tag");
+		if (StringUtil.isNotEmpty(tag, true) == false) {
+			throw new NullPointerException("请指定tag！一般是table名称");
+		}
+
+		//获取指定的JSON结构 <<<<<<<<<<<<<<
+		QueryConfig config = new QueryConfig(RequestMethod.GET, "Request");
+		config.setColumns("structure");
+
+		Map<String, Object> where = new HashMap<String, Object>();
+		where.put("method", method.name());
+		where.put("tag", tag);
+		config.setWhere(where);
+
+		JSONObject object = null;
+		String error = "";
+		try {
+			object = QueryHelper.getInstance().select(config);
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = e.getMessage();
+		}
+		if (object == null || object.isEmpty()) {
+			throw new IllegalAccessException("非GET请求必须是服务端允许的操作！ \n " + error);
+		}
+		object = object.getJSONObject("structure");//解决返回值套了一层 "structure":{}
+
+		JSONObject target = null;
+		if (isObjectKey(tag) && object.containsKey(tag) == false) {//tag是table名
+			target = new JSONObject(true);
+			target.put(tag, object);
+		} else {
+			target = object;
+		}
+		//获取指定的JSON结构 >>>>>>>>>>>>>>
+		
+		request.remove("tag");
+		return fillTarget(target, request, "");
+	}
+
+
+	public static final String NECESSARY_COLUMNS = "necessaryColumns";
+	public static final String DISALLOW_COLUMNS = "disallowColumns";
+
+	/**从request提取target指定的内容
+	 * @param target
+	 * @param request
+	 * @return
+	 */
+	private JSONObject fillTarget(JSONObject target, final JSONObject request, String requestName) throws Exception {
+		System.out.println(TAG + "filterTarget  requestName = " + requestName + " target = \n" + JSON.toJSONString(target)
+		+ "\n request = \n" + JSON.toJSONString(request) + "\n >> return null;");
+		if (target == null || request == null) {// || request.isEmpty()) {
+			System.out.println(TAG + "filterTarget  target == null || request == null >> return null;");
+			return null;
+		}
+
+		//	//TODO 方法一	 ：逻辑错了，不是填充target里的key，而是把request对应的所有key-value填充至target
+		//		Set<String> set = target.keySet();
+		//		if (set != null) {
+		//			String value;
+		//			JSONObject child;
+		//			for (String key : set) {
+		//				value = target.getString(key);
+		//				if (DISALLOW_COLUMNS.equals(key)) {
+		//					if (isContainKeyInArray(request, StringUtil.split(value))) {
+		//						throw new IllegalArgumentException("不允许传[" + value + "]内的任何字段！");
+		//					}
+		//				} else if (NECESSARY_COLUMNS.equals(key)) {
+		//					if (isContainAllKeyInArray(request, StringUtil.split(value)) == false) {
+		//						throw new IllegalArgumentException(requestName + "缺少[" + value + "]内的某些字段！");
+		//					}
+		//				}
+		//
+		//				child = JSON.parseObject(value);
+		//				if (child == null) {//key - value
+		//					target.put(key, request.getString(key));//提取key-value
+		//				} else { //object
+		//					target.put(key, filterTarget(child, request.getJSONObject(key), key));//往下一级提取
+		//				}
+		//			}
+		//		}
+
+
+
+
+		//		// 方法二：行不通，target外层可能加上tag，也可能不加
+		//		String necessarys = StringUtil.getNoBlankString(target.getString(NECESSARY_COLUMNS));
+		//		String disallows = StringUtil.getNoBlankString(target.getString(DISALLOW_COLUMNS));
+		//
+		//
+		//		//提取必须的字段 <<<<<<<<<<<<<<<<<<<
+		//		String[] necessaryColumns = StringUtil.split(necessarys);
+		//		String value;
+		//		if (necessaryColumns != null) {
+		//			for (String column : necessaryColumns) {
+		//				if (StringUtil.isNotEmpty(column, true) == false) {
+		//					continue;
+		//				}
+		//				value = request.getString(column);
+		//				if (StringUtil.isNotEmpty(value, true) == false) {
+		//					throw new IllegalArgumentException(requestName + "缺少[" + necessarys + "]内的字段 " + column + " ！");
+		//				}
+		//				target.put(column, value);//提取key-value
+		//				request.remove(column);
+		//			}
+		//			target.put(NECESSARY_COLUMNS, necessarys);
+		//			target.put(DISALLOW_COLUMNS, disallows);
+		//		}
+		//		//提取提取必须的字段 >>>>>>>>>>>>>>>>>>>
+		//
+		//		//排除不允许的字段，提取可选字段 <<<<<<<<<<<<<<<<<<<
+		//		String[] disallowColumns = null;
+		//		Set<String> set = request.keySet();
+		//		if ("!".equals(disallows)) {//所有非necessaryColumns
+		//			if (set != null && set.isEmpty() == false) {
+		//				throw new IllegalArgumentException("不允许传[" + disallows + "]内的任何字段！");
+		//			}
+		//		} else {
+		//			disallowColumns = StringUtil.split(disallows);
+		//		}
+		//		if (set != null) {
+		//			for (String column : set) {
+		//				if (StringUtil.isNotEmpty(column, true) == false) {
+		//					continue;
+		//				}
+		//				if (isContainInArray(column, disallowColumns)) {
+		//					throw new IllegalArgumentException("不允许传[" + disallows + "]内的任何字段！");
+		//				}
+		//				target.put(column, request.getString(column));//提取可选字段
+		////				request.remove(column);
+		//			}
+		//			
+		//			target.put(NECESSARY_COLUMNS, necessarys);
+		//			target.put(DISALLOW_COLUMNS, disallows);
+		//		}
+		//		//排除不允许的字段，提取可选字段 >>>>>>>>>>>>>>>>>>>
+		//
+		//
+		//		set = target.keySet();
+		//		if (set != null) {
+		//			JSONObject child;
+		//			for (String key : set) {
+		//				child = JSON.parseObject(target.getString(key));
+		//				if (child != null) { //object
+		//					target.put(key, fillTarget(child, request.getJSONObject(key), key));//往下一级提取
+		//				}
+		//			}
+		//		}
+		//
+		//		target.remove(DISALLOW_COLUMNS);
+		//		target.remove(NECESSARY_COLUMNS);
+
+
+
+
+
+		// 方法三：遍历request，transferredRequest只添加target所包含的object，且移除target中DISALLOW_COLUMNS，期间判断NECESSARY_COLUMNS是否都有
+		String necessarys = StringUtil.getNoBlankString(target.getString(NECESSARY_COLUMNS));
+		String[] necessaryColumns = StringUtil.split(necessarys);
+
+		//判断必要字段是否都有
+		if (necessaryColumns != null) {
+			for (String s : necessaryColumns) {
+				if (request.containsKey(s) == false) {
+					throw new IllegalArgumentException(requestName
+							+ "不能缺少 " + s + ":" + "\"" + "\"" + " 等[" + necessarys + "]内的任何字段！");
+				}
+			}
+		}
+
+		String disallows = StringUtil.getNoBlankString(target.getString(DISALLOW_COLUMNS));
+		String[] disallowColumns = null;
+
+		Set<String> set = request.keySet();
+		if ("!".equals(disallows)) {//所有非necessaryColumns，改成 !necessary 更好
+			if (set != null) {
+				List<String> disallowList = new ArrayList<>();
+				for (String key : set) {
+					if (isContainInArray(key, necessaryColumns) == false) {
+						disallowList.add(key);
+					}
+				}
+				disallowColumns = disallowList.toArray(new String[]{});
+			}
+		} else {
+			disallowColumns = StringUtil.split(disallows);
+		}
+
+
+		//填充target
+		JSONObject transferredRequest = new JSONObject(true);
+		if (set != null) {
+			String value;
+			JSONObject child;
+			JSONObject result;
+			for (String key : set) {
+				value = request.getString(key);
+				child = JSON.parseObject(value);
+				if (child == null) {//key - value
+					if (isContainInArray(key, disallowColumns)) {
+						throw new IllegalArgumentException("不允许传 " + key + " 等[" + disallows + "]内的任何字段！");
+					}
+					transferredRequest.put(key, value);
+				} else {//object
+					if (target.containsKey(key)) {//只填充target有的object
+						result = fillTarget(target.getJSONObject(key), child, key);//往下一级提取
+						System.out.println(TAG + "fillTarget  key = " + key + "; result = " + result);
+						if (result == null || result.isEmpty()) {//只添加!=null的值，可能数据库返回数据不够count
+							throw new IllegalArgumentException(requestName
+									+ "不能缺少 " + key + ":{} 等[" + necessarys + "]内的任何JSONObject！");
+						}
+						transferredRequest.put(key, result);
+					}
+				}
+			}
+		}
+
+		System.out.println(TAG + "filterTarget  return target = " + JSON.toJSONString(target));
+		return transferredRequest;
+	}
+
+	/**array至少有一个值在request的key中
+	 * @param request
+	 * @param array
+	 * @return
+	 */
+	private boolean isContainInArray(String key, String[] array) {
+		if (array == null || array.length <= 0) {
+			System.out.println(TAG + "isContainKeyInArray  array == null || array.length <= 0 >> return false;");
+			return false;
+		}
+		if (key == null) {
+			System.out.println(TAG + "isContainKeyInArray  key == null >> return false;");
+			return false;
+		}
+
+		for (String s : array) {
+			if (key.equals(s) == true) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**array至少有一个值在request的key中
+	 * @param request
+	 * @param array
+	 * @return
+	 */
+	private boolean isContainKeyInArray(JSONObject request, String[] array) {
+		if (array == null || array.length <= 0) {
+			System.out.println(TAG + "isContainKeyInArray  array == null || array.length <= 0 >> return false;");
+			return false;
+		}
+		if (request == null) {
+			System.out.println(TAG + "isContainKeyInArray  request == null >> return false;");
+			return false;
+		}
+
+		for (String s : array) {
+			if (request.containsKey(s) == true) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	/**array的所有值都在request的key中
+	 * @param request
+	 * @param array
+	 * @return
+	 */
+	private boolean isContainAllKeyInArray(JSONObject request, String[] array) {
+		if (array == null || array.length <= 0) {
+			System.out.println(TAG + "isContainAllKeyInArray  array == null || array.length <= 0 >> return true;");
+			return true;
+		}
+		if (request == null) {
+			System.out.println(TAG + "isContainAllKeyInArray  request == null >> return false;");
+			return false;
+		}
+
+		for (String s : array) {
+			if (request.containsKey(s) == false) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+	//	/**array至少有一个值在request的key中
+	//	 * @param request
+	//	 * @param array
+	//	 * @return
+	//	 */
+	//	private boolean isContainKeyInArray(JSONObject request, String[] array) {
+	//		return verifyContainKeyInArray(request, array, true);
+	//	}
+	//	/**array的所有值都在request的key中
+	//	 * @param request
+	//	 * @param array
+	//	 * @return
+	//	 */
+	//	private boolean isContainAllKeyInArray(JSONObject request, String[] array) {
+	//		return verifyContainKeyInArray(request, array, false);
+	//	}
+	/**判断array的值和request的key的相同性
+	 * @param request
+	 * @param array
+	 * @param contain
+	 * @return
+	 */
+	private boolean verifyContainKeyInArray(JSONObject request, String[] array, boolean contain) {
+		if (array == null || array.length <= 0) {
+			System.out.println(TAG + "verifyContainKeyInArray  array == null || array.length <= 0 >> return ! contain;");
+			return ! contain;
+		}
+		if (request == null) {
+			System.out.println(TAG + "verifyContainKeyInArray  request == null >> return false;");
+			return false;
+		}
+
+		for (String s : array) {
+			if (request.containsKey(s) == contain) {
+				return contain;
+			}
+		}
+
+		return ! contain;
+	}
 
 	/**获取单个对象，该对象处于parentObject内
 	 * @param parentPath parentObject的路径
@@ -155,9 +509,7 @@ public class RequestParser {
 					result = getSQLObject(config2);
 				} catch (Exception e) {
 					//					e.printStackTrace();
-					result = new JSONObject(true);
-					result.put("status", 403);
-					result.put("message", e.getMessage());
+					result = QueryHelper.newJSONObject(403, e.getMessage());
 				}
 				//				if (result != null) {
 				transferredRequest = result;
@@ -337,7 +689,6 @@ public class RequestParser {
 		if (requestObject == null) {
 			requestObject = new JSONObject(true);
 		}
-		//		synchronized (requestObject) {
 		JSONObject parent = requestObject;
 		JSONObject child = null;
 		String key;
@@ -359,7 +710,6 @@ public class RequestParser {
 					"} catch (Exception e) {\n" + e.getMessage());
 		}
 		System.out.println(TAG + "putValueByPath  requestObject" + JSON.toJSONString(requestObject) + "\n >>>>>>>>>>>>>>>>>>");
-		//		}
 	}
 	/**根据路径获取值
 	 * @param path
@@ -456,7 +806,7 @@ public class RequestParser {
 		return StringUtil.isNotEmpty(key, false) && isArrayKey(key) == false && StringUtil.isAlpha(key.substring(0, 1));
 	}
 	public boolean isArrayKey(String key) {
-		return key.endsWith("[]");//[key]改为了key[]，更符合常规逻辑。 key.startsWith("[") && key.endsWith("]");
+		return key != null && key.endsWith("[]");//[key]改为了key[]，更符合常规逻辑。 key.startsWith("[") && key.endsWith("]");
 	}
 
 }

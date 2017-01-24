@@ -31,22 +31,26 @@ import apijson.demo.model.Work;
 public class RequestUtil {
 
 	public static JSONObject newPostRequest() {
-		User data = new User();
-		data.setName("Tommy");
+		User data = new User();//10000);// 测试disallowColumns = [id]通过
+		data.setName("Tommy");// 测试necessaryColumns = [name,phone]通过
 		data.setSex(0);
-		data.setPhone("1234567890");
+		data.setPhone("1234567890");// 测试necessaryColumns = [name,phone]通过
+		data.setHead("http://common.cnblogs.com/images/icon_weibo_24.png");
 		JSONRequest request = new JSONRequest();
 		request.put(data);
-		return request.setTag("post_user");
+		return request.setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
 	}
 	
 	public static JSONObject newDeleteRequest() {
-		return new JSONRequest(new User(93794)).setTag("delete_user");
+		// 测试necessaryColumns = [id]通过
+		// 测试对象不存在通过，存在返回success通过
+		return new JSONRequest(new User(10000)).setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
 	}
 	
 	public static JSONObject newPutRequest() {
-		User data = new User(38710);
+		User data = new User(38710);//);// 测试necessaryColumns = [id]通过
 		data.setName("Lemon");
+		//测试disallowColumns = [phone]通过 data.setPhone("1234567890");
 		
 		List<String> list = new ArrayList<String>();
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
@@ -54,7 +58,7 @@ public class RequestUtil {
 		list.add("http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000");
 		data.setPicture(JSON.toJSONString(list));
 		
-		return new JSONRequest(data).setTag("put_user");
+		return new JSONRequest(data).setTag(User.class.getSimpleName());
 	}
 
 	
