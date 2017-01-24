@@ -416,10 +416,10 @@ public class StringUtil {
 			split = ",";
 		}
 		while (s.startsWith(split)) {
-			s = s.substring(1);
+			s = s.substring(split.length());
 		}
 		while (s.endsWith(split)) {
-			s = s.substring(0, s.length() - 1);
+			s = s.substring(0, s.length() - split.length());
 		}
 		return s.contains(split) ? s.split(split) : new String[]{s};
 	}
