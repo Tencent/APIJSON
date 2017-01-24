@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.QueryConfig;
 
 /**helper for query MySQL database
@@ -101,7 +102,10 @@ public class QueryHelper {
 		case PUT:
 		case DELETE:
 			int updateCount = statement.executeUpdate(sql);//创建数据对象
-			return newJSONObject(updateCount > 0 ? 200 : 1149, updateCount > 0 ? "success" : "failed，可能对象不存在！");
+			
+			JSONObject result = newJSONObject(updateCount > 0 ? 200 : 1149, updateCount > 0 ? "success" : "failed，可能对象不存在！");
+			result.put(Table.ID, config.getId());
+			return result;
 		default:
 			rs = statement.executeQuery(sql);//创建数据对象
 			break;

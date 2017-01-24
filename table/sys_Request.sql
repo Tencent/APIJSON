@@ -23,12 +23,13 @@ DROP TABLE IF EXISTS `Request`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Request` (
-  `id` int(11) NOT NULL,
-  `name` varchar(45) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `method` varchar(10) DEFAULT 'GET',
+  `tag` varchar(20) NOT NULL,
   `structure` varchar(1000) NOT NULL,
   `description` varchar(10000) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +38,7 @@ CREATE TABLE `Request` (
 
 LOCK TABLES `Request` WRITE;
 /*!40000 ALTER TABLE `Request` DISABLE KEYS */;
-INSERT INTO `Request` VALUES (1,'获取用户','{\"User\":{}}','传id'),(2,'获取作品','{\"Work\":{}}',NULL),(3,'获取用户及作品列表','{\"User\":{}, \"[]\":{\"Work\":{}}}','作品按发布时间倒序排列');
+INSERT INTO `Request` VALUES (1,'POST','User','{\"disallowColumns\":\"id\", \"necessaryColumns\":\"name,phone\"}',NULL),(2,'POST','Work','{\"disallowColumns\":\"id\", \"necessaryColumns\":\"userId,title,content,picture\"}',NULL),(3,'POST','Comment','{\"disallowColumns\":\"id\", \"necessaryColumns\":\"userId,workId,content\"}',NULL),(4,'PUT','User','{\"disallowColumns\":\"phone\", \"necessaryColumns\":\"id\"}',NULL),(6,'PUT','userPhone','{\"User\":{\"disallowColumns\":\"!\", \"necessaryColumns\":\"id,phone\"}}','! 表示其它所有，这里指necessaryColumns所有未包含的字段'),(7,'DELETE','Work','{\"id\":\"\", \"currentUserId\":\"\", \"loginPassword\":\"\"}',NULL),(8,'DELETE','Comment','{\"id\":\"\", \"currentUserId\":\"\", \"loginPassword\":\"\"}',NULL),(9,'PUT','loginPassword','{\"currentUserId\":\"\", \"oldPassword\":\"\", \"newPassword\":\"\"}',NULL),(10,'PUT','payPassword','{\"currentUserId\":\"\", \"oldPassword\":\"\", \"newPassword\":\"\"}',NULL),(12,'DELETE','Work','{\"disallowColumns\":\"!\", \"necessaryColumns\":\"id\"}',NULL),(13,'POST','WorkWithComment','{\"Work\":{\"disallowColumns\":\"id\", \"necessaryColumns\":\"userId,title,content,picture\", \"Comment\":{\"disallowColumns\":\"id\", \"necessaryColumns\":\"userId,workId,content\"}}}','用的极少，可能根本用不上'),(14,'DELETE','Comment[]','{table:\"Comment\", \"id[]\":\",\"}','用的极少。多个table不好处理'),(15,'POST','User[]','{\"id[]\":\",\"}','用的比较少，导入联系人、添加进群常用。特殊处理：服务端指定table'),(16,'POST','User[]','{\"[]\":{\"User\":{\"id\":\"\"}}}','不用RequetParser，用单独的方法批量处理'),(17,'POST','User[]','{\"User\":[\"id\":\"\"]}','解释成16这种'),(18,'DELETE','User','{\"disallowColumns\":\"!\", \"necessaryColumns\":\"id\"}',NULL);
 /*!40000 ALTER TABLE `Request` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-01 19:21:36
+-- Dump completed on 2017-01-24 16:19:11

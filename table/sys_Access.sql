@@ -16,28 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Wallet`
+-- Table structure for table `Access`
 --
 
-DROP TABLE IF EXISTS `Wallet`;
+DROP TABLE IF EXISTS `Access`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Wallet` (
-  `id` bigint(20) NOT NULL,
-  `userId` int(11) NOT NULL,
-  `balance` decimal(10,2) DEFAULT NULL,
+CREATE TABLE `Access` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `table` varchar(10) NOT NULL,
+  `method` varchar(10) DEFAULT 'GET',
+  `password` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Wallet`
+-- Dumping data for table `Access`
 --
 
-LOCK TABLES `Wallet` WRITE;
-/*!40000 ALTER TABLE `Wallet` DISABLE KEYS */;
-INSERT INTO `Wallet` VALUES (1,38710,10000.50),(2,70793,500.00),(4,82003,2000.00),(5,82003,2000.00),(6,82005,700.00),(7,82005,100.00),(8,82005,700.00);
-/*!40000 ALTER TABLE `Wallet` ENABLE KEYS */;
+LOCK TABLES `Access` WRITE;
+/*!40000 ALTER TABLE `Access` DISABLE KEYS */;
+INSERT INTO `Access` VALUES (1,'Wallet','GET','loginPassword, payPassword'),(2,'Wallet','DELETE','loginPassword, payPassword'),(3,'Work','DELETE','loginPassword'),(4,'User','PUT','loginPassword'),(5,'User','DELETE','loginPassword'),(6,'Comment','DELETE','loginPassword');
+/*!40000 ALTER TABLE `Access` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

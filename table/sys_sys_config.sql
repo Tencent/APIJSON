@@ -16,28 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Wallet`
+-- Table structure for table `sys_config`
 --
 
-DROP TABLE IF EXISTS `Wallet`;
+DROP TABLE IF EXISTS `sys_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Wallet` (
-  `id` bigint(20) NOT NULL,
-  `userId` int(11) NOT NULL,
-  `balance` decimal(10,2) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+CREATE TABLE `sys_config` (
+  `variable` varchar(128) NOT NULL,
+  `value` varchar(128) DEFAULT NULL,
+  `set_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `set_by` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`variable`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Wallet`
+-- Dumping data for table `sys_config`
 --
 
-LOCK TABLES `Wallet` WRITE;
-/*!40000 ALTER TABLE `Wallet` DISABLE KEYS */;
-INSERT INTO `Wallet` VALUES (1,38710,10000.50),(2,70793,500.00),(4,82003,2000.00),(5,82003,2000.00),(6,82005,700.00),(7,82005,100.00),(8,82005,700.00);
-/*!40000 ALTER TABLE `Wallet` ENABLE KEYS */;
+LOCK TABLES `sys_config` WRITE;
+/*!40000 ALTER TABLE `sys_config` DISABLE KEYS */;
+INSERT INTO `sys_config` VALUES ('diagnostics.allow_i_s_tables','OFF','2016-11-24 12:11:30',NULL),('diagnostics.include_raw','OFF','2016-11-24 12:11:30',NULL),('ps_thread_trx_info.max_length','65535','2016-11-24 12:11:30',NULL),('statement_performance_analyzer.limit','100','2016-11-24 12:11:30',NULL),('statement_performance_analyzer.view',NULL,'2016-11-24 12:11:30',NULL),('statement_truncate_len','64','2016-11-24 12:11:30',NULL);
+/*!40000 ALTER TABLE `sys_config` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -49,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-24 16:19:12
+-- Dump completed on 2017-01-24 16:19:13

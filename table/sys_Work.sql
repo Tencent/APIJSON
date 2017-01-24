@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `Work`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Work` (
-  `id` int(5) NOT NULL,
+  `id` bigint(20) NOT NULL,
   `title` varchar(45) DEFAULT NULL,
   `content` varchar(300) DEFAULT NULL,
   `userId` int(5) NOT NULL,
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-01 19:21:36
+-- Dump completed on 2017-01-24 16:19:10
