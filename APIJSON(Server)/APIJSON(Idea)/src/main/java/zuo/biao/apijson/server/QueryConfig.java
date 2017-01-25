@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.Table;
 
 /**config model for query
  * @author Lemon
@@ -32,7 +33,8 @@ import zuo.biao.apijson.StringUtil;
 public class QueryConfig {
 
 	public static final String KEY_COLUMNS = "columns";
-	
+
+	private long id;
 	private RequestMethod method;
 	private String table;
 	private String columns;
@@ -102,6 +104,14 @@ public class QueryConfig {
 		}
 	}
 
+	public long getId() {
+		return id;
+	}
+	public QueryConfig setId(long id) {
+		this.id = id;
+		return this;
+	}
+	
 	public String getValues() {
 		return values;
 	}
@@ -185,10 +195,10 @@ public class QueryConfig {
 				if (key == null) {
 					continue;
 				}
-				whereString += (key + "=" + where.get(key) + " &");
+				whereString += (key + "='" + where.get(key) + "' and ");
 			}
-			if (whereString.endsWith("&")) {
-				whereString = whereString.substring(0, whereString.length() - 1);
+			if (whereString.endsWith("and ")) {
+				whereString = whereString.substring(0, whereString.length() - "and ".length());
 			}
 			if (whereString.trim().endsWith("where") == false) {
 				return whereString;
@@ -209,13 +219,13 @@ public class QueryConfig {
 	public static String getSetString(Map<String, Object> where) {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
-			if (where.containsKey("id") == false) {
+			if (where.containsKey(Table.ID) == false) {
 				return "";
 			}
 			String setString = " set ";
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
-				if (key == null || "id".equals(key)) {
+				if (key == null || Table.ID.equals(key)) {
 					continue;
 				}
 				setString += (key + "='" + where.get(key) + "' ,");
@@ -224,7 +234,7 @@ public class QueryConfig {
 				setString = setString.substring(0, setString.length() - 1);
 			}
 			if (setString.trim().endsWith("set") == false) {
-				return setString + " where id=" + where.get("id");
+				return setString + " where " + Table.ID + "='" + where.get(Table.ID) + "' ";
 			}
 		}
 		return "";
@@ -247,13 +257,15 @@ public class QueryConfig {
 				String valuesString = "";
 				Collection<Object> valueCollection = request.values();
 				Object[] values = valueCollection == null || valueCollection.isEmpty() ? null : valueCollection.toArray(new String[]{});
-				for (int i = 0; i < values.length; i++) {
-					valuesString += ((i > 0 ? "," : "") + "'" + values[i] + "'");
+				if (values != null) {
+					for (int i = 0; i < values.length; i++) {
+						valuesString += ((i > 0 ? "," : "") + "'" + values[i] + "'");
+					}
 				}
 				config.setValues("(" + valuesString + ")");
 			} else {
 				request.remove(KEY_COLUMNS);
-				
+
 				Map<String, Object> transferredRequest = new HashMap<String, Object>();
 				for (String key : set) {
 					if (JSON.parseObject(request.getString(key)) == null) {//非key-value
@@ -262,14 +274,14 @@ public class QueryConfig {
 				}
 				config.setWhere(transferredRequest);
 			}
-			
-			
+
+
 			if (StringUtil.isNotEmpty(columns, true)) {
 				config.setColumns(columns);
 			}
 		}
 
-		return config;
+		return config.setId(request.getLongValue(Table.ID));
 	}
 
 	/**

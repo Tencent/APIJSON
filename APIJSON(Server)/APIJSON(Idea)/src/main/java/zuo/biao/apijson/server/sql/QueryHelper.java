@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.QueryConfig;
 
 /**helper for query MySQL database
@@ -94,16 +95,17 @@ public class QueryHelper {
 
 		System.out.println(TAG + "select  sql = " + sql);
 
-		JSONObject object  = null;//new JSONObject();//null;
+		JSONObject object  = null;//new JSONObject(true);
 		ResultSet rs = null;
 		switch (config.getMethod()) {
 		case POST:
 		case PUT:
 		case DELETE:
 			int updateCount = statement.executeUpdate(sql);//创建数据对象
-			object = new JSONObject();
-			object.put("message", updateCount > 0 ? "success" : "failed");
-			return object;
+			
+			JSONObject result = newJSONObject(updateCount > 0 ? 200 : 1149, updateCount > 0 ? "success" : "可能对象不存在！");
+			result.put(Table.ID, config.getId());
+			return result;
 		default:
 			rs = statement.executeQuery(sql);//创建数据对象
 			break;
@@ -145,7 +147,7 @@ public class QueryHelper {
 		}
 		String columns = config.getColumns();
 		if (StringUtil.isNotEmpty(columns, true)) {
-			return columns.contains(",") ? columns.split(",") : new String[]{columns};
+			return StringUtil.split(columns);//columns.contains(",") ? columns.split(",") : new String[]{columns};
 		}
 		List<String> list = new ArrayList<String>();
 		String table = config.getTable();
@@ -163,5 +165,17 @@ public class QueryHelper {
 			e.printStackTrace();
 		}
 		return list.toArray(new String[]{});
+	}
+	
+	/**新建JSONObject，一般用于错误提示结果
+	 * @param status
+	 * @param message
+	 * @return
+	 */
+	public static JSONObject newJSONObject(int status, String message) {
+		JSONObject object = new JSONObject(true);
+		object.put("status", status);
+		object.put("message", message);
+		return object;
 	}
 }
