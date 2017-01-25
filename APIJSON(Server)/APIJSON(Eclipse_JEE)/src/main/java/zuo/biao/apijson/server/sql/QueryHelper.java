@@ -95,7 +95,7 @@ public class QueryHelper {
 
 		System.out.println(TAG + "select  sql = " + sql);
 
-		JSONObject object  = null;//new JSONObject();//null;
+		JSONObject object  = null;//new JSONObject(true);
 		ResultSet rs = null;
 		switch (config.getMethod()) {
 		case POST:
@@ -103,7 +103,7 @@ public class QueryHelper {
 		case DELETE:
 			int updateCount = statement.executeUpdate(sql);//创建数据对象
 			
-			JSONObject result = newJSONObject(updateCount > 0 ? 200 : 1149, updateCount > 0 ? "success" : "failed，可能对象不存在！");
+			JSONObject result = newJSONObject(updateCount > 0 ? 200 : 1149, updateCount > 0 ? "success" : "可能对象不存在！");
 			result.put(Table.ID, config.getId());
 			return result;
 		default:

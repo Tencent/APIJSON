@@ -153,7 +153,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 		final String fullUrl = getUrl(type);
 
-		tvQueryResult.setText("requesting...\n\n url = " + fullUrl + "\n\n request = \n" + request + "\n\n\n" + error);
+		tvQueryResult.setText("requesting...\n\n url = " + fullUrl + "\n\n request = \n" + JSON.format(request) + "\n\n\n" + error);
 		pbQuery.setVisibility(View.VISIBLE);
 
 		if (type < 10) {
@@ -282,8 +282,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 					Toast.makeText(context, R.string.received_result, Toast.LENGTH_SHORT).show();
 
 					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
-							? StringUtil.getTrimedString(resultJson) : e.getMessage() + "\n\n\n" + error);
-
+							? JSON.format(resultJson) : e.getMessage() + "\n\n\n" + error);
 				}
 			}
 		});

@@ -69,7 +69,7 @@ public class RequestUtil {
 
 	public static JSONObject newColumnsRequest() {
 		JSONObject object = new JSONObject(new User(38710));
-		object.setColumns("id,name,phone");//StringUtil.getString(new String[]{"id", "name", "phone"}));//
+		object.setColumns("id,name,phone");//测试排序通过 //StringUtil.getString(new String[]{"id", "name", "phone"}));//
 		return new JSONRequest(User.class.getSimpleName(), object);
 	}
 
