@@ -45,14 +45,14 @@ public class SelectActivity extends Activity {
 		select(QueryActivity.TYPE_POST);
 	}
 	
-	public void selectDelete(View v) {
-		select(QueryActivity.TYPE_DELETE);
-	}
-
 	public void selectPut(View v) {
 		select(QueryActivity.TYPE_PUT);
 	}
 	
+	public void selectDelete(View v) {
+		select(QueryActivity.TYPE_DELETE);
+	}
+
 	//get <<<<<<<<<<<<<<<<<<<<<<<<<<<
 	public void selectSingle(View v) {
 		select(QueryActivity.TYPE_SINGLE);
@@ -92,8 +92,9 @@ public class SelectActivity extends Activity {
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
 	private String url;
+	private long id;
 	private void select(int type) {
-		startActivityForResult(QueryActivity.createIntent(context, type, url), REQUEST_TO_QUERY);
+		startActivityForResult(QueryActivity.createIntent(context, type, url, id), REQUEST_TO_QUERY);
 	}
 
 	
@@ -111,6 +112,7 @@ public class SelectActivity extends Activity {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
 			} else {
 				url = data.getStringExtra(QueryActivity.RESULT_URL);
+				id = data.getLongExtra(QueryActivity.RESULT_ID, id);
 			}
 			break;
 		default:

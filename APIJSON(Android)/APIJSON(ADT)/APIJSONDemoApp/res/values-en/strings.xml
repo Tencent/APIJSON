@@ -15,6 +15,7 @@
     <string name="access_permitted">Access Permitted</string>
     <string name="update_log">Update Log</string>
     <string name="received_result">received result!</string>
+    <string name="user_id_changed">"userId was changed to %1$s ,you can restore it by [DELETE]"</string>
     <string name="browser_can_only_receive_get_response">Browsers can only receive GET responses</string>
     <string name="query_error">There may be something wrong,you can follow by the steps:\n\n1.Check your net connection\n\n2.Check the url whether it\'s an available ipv4 address\n\n3.Long click the [ %1$s ] button to open the request by web browser\n\n4.Check logs outputed on the target server\n\n5.Try again</string>
 

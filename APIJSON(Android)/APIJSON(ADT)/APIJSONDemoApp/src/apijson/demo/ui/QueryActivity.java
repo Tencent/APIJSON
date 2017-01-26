@@ -47,6 +47,7 @@ import apijson.demo.model.Wallet;
 import apijson.demo.model.Work;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 /**activity for requesting a query in Server
  * @author Lemon
@@ -57,26 +58,30 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	public static final String INTENT_TYPE = "INTENT_TYPE";
 	public static final String INTENT_URL = "INTENT_URL";
+	public static final String INTENT_ID = "INTENT_ID";
 
 	public static final String RESULT_URL = "RESULT_URL";
+	public static final String RESULT_ID = "RESULT_ID";
 
 
 	/**
 	 * @param context
 	 * @param type
 	 * @param url
+	 * @param id
 	 * @return
 	 */
-	public static Intent createIntent(Context context, int type, String url) {
+	public static Intent createIntent(Context context, int type, String url, long id) {
 		return new Intent(context, QueryActivity.class)
 		.putExtra(QueryActivity.INTENT_TYPE, type)
-		.putExtra(QueryActivity.INTENT_URL, url);
+		.putExtra(QueryActivity.INTENT_URL, url)
+		.putExtra(QueryActivity.INTENT_ID, id);
 	}
 
 
 	public static final int TYPE_POST = 0;
-	public static final int TYPE_DELETE = 1;
-	public static final int TYPE_PUT = 2;
+	public static final int TYPE_PUT = 1;
+	public static final int TYPE_DELETE = 2;
 
 	public static final int TYPE_SINGLE = 10;
 	public static final int TYPE_COLUMNS = 11;
@@ -93,12 +98,14 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	private int type = TYPE_COMPLEX;
 	private String url;
-	private String error;
+	private long id;
 
 	private TextView tvQueryResult;
 	private ProgressBar pbQuery;
 	private EditText etQueryUrl;
 	private Button btnQueryQuery;
+
+	private String error;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -110,23 +117,26 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		Intent intent = getIntent();
 		type = intent.getIntExtra(INTENT_TYPE, type);
 		url = intent.getStringExtra(INTENT_URL);
+		id = intent.getLongExtra(INTENT_ID, id);
 
-
+		
+		
 		tvQueryResult = (TextView) findViewById(R.id.tvQueryResult);
 		pbQuery = (ProgressBar) findViewById(R.id.pbQuery);
 		etQueryUrl = (EditText) findViewById(R.id.etQueryUrl);
 		btnQueryQuery = (Button) findViewById(R.id.btnQueryQuery);
 
 
+		
 		etQueryUrl.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
 				? url : "http://139.196.140.118:8080/"));//TODO my server ipv4 address, edit it to your server url
 		btnQueryQuery.setText(getMethod(type));
-
 
 		error = String.format(getResources().getString(R.string.query_error), StringUtil.getTrimedString(btnQueryQuery));
 
 		query();
 
+		
 
 		btnQueryQuery.setOnClickListener(new OnClickListener() {
 
@@ -143,6 +153,13 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 				return true;
 			}
 		});
+
+		
+		
+		if (id > 0) {
+			Toast.makeText(context, String.format(getResources().getString(R.string.user_id_changed), "" + id)
+					, Toast.LENGTH_LONG).show();
+		}
 	}
 
 
@@ -196,10 +213,10 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		switch (type) {
 		case TYPE_POST:
 			return "post";
-		case TYPE_DELETE:
-			return "delete";
 		case TYPE_PUT:
 			return "put";
+		case TYPE_DELETE:
+			return "delete";
 		default:
 			return "get";
 		}
@@ -212,30 +229,30 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		case TYPE_POST:
 			request = JSON.toJSONString(RequestUtil.newPostRequest());
 			break;
-		case TYPE_DELETE:
-			request = JSON.toJSONString(RequestUtil.newDeleteRequest());
-			break;
 		case TYPE_PUT:
-			request = JSON.toJSONString(RequestUtil.newPutRequest());
+			request = JSON.toJSONString(RequestUtil.newPutRequest(id));
+			break;
+		case TYPE_DELETE:
+			request = JSON.toJSONString(RequestUtil.newDeleteRequest(id));
 			break;
 
 		case TYPE_SINGLE:
-			request = JSON.toJSONString(RequestUtil.newSingleRequest());
+			request = JSON.toJSONString(RequestUtil.newSingleRequest(id));
 			break;
 		case TYPE_COLUMNS:
-			request = JSON.toJSONString(RequestUtil.newColumnsRequest());
+			request = JSON.toJSONString(RequestUtil.newColumnsRequest(id));
 			break;
 		case TYPE_RELY:
-			request = JSON.toJSONString(RequestUtil.newRelyRequest());
+			request = JSON.toJSONString(RequestUtil.newRelyRequest(id));
 			break;
 		case TYPE_ARRAY:
 			request = JSON.toJSONString(RequestUtil.newArrayRequest());
 			break;
 		case TYPE_ACCESS_ERROR:
-			request = JSON.toJSONString(RequestUtil.newAccessErrorRequest());
+			request = JSON.toJSONString(RequestUtil.newAccessErrorRequest(id));
 			break;
 		case TYPE_ACCESS_PERMITTED:
-			request = JSON.toJSONString(RequestUtil.newAccessPermittedRequest());
+			request = JSON.toJSONString(RequestUtil.newAccessPermittedRequest(id));
 			break;
 		default:
 			request = JSON.toJSONString(RequestUtil.newComplexRequest());
@@ -252,9 +269,22 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			Log.e(TAG, "onHttpResponse e = " + e.getMessage());
 		}
 		JSONResponse response = new JSONResponse(resultJson);
-		if (type == TYPE_ARRAY) {
+		switch (type) {
+		case TYPE_POST:
+			User postedUser = JSONResponse.getObject(response, User.class);
+			id = postedUser == null ? 0 : postedUser.getId();
+			Log.d(TAG, "onHttpResponse  id = " + id);
+			break;
+		case TYPE_DELETE:
+			JSONObject result = response.getJSONObject(User.class.getSimpleName());
+			if (result != null && result.getIntValue("status") == 200) {//delete succeed
+				id = 0;//reuse default value
+			}
+			break;
+		case TYPE_ARRAY:
 			logList(JSONResponse.getList(response.getJSONObject("User[]"), User.class));
-		} else if (type == TYPE_COMPLEX) {
+			break; 
+		case TYPE_COMPLEX:
 			JSONArray array = JSONResponse.getJSONArray(response.getJSONObject("[]"));//, "Comment[]");//
 			if (array == null || array.isEmpty()) {
 				Log.e(TAG, "onHttpResponse  type == TYPE_COMPLEX >> array == null || array.isEmpty() >> return;");
@@ -267,10 +297,13 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 				Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  work = " + JSON.toJSONString(work));
 				logList(JSONResponse.getList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
 			}
-		} else if (type == TYPE_ACCESS_PERMITTED) {
+			break; 
+		case TYPE_ACCESS_PERMITTED:
 			response = new JSONResponse(resultJson);
 			Wallet wallet = JSONResponse.getObject(response, Wallet.class);
 			Log.d(TAG, "onHttpResponse  type == TYPE_ACCESS_PERMITTED >>  wallet = " + JSON.toJSONString(wallet));
+		default:
+			break;
 		}
 
 		runOnUiThread(new Runnable() {
@@ -304,7 +337,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	@Override
 	public void finish() {
-		setResult(RESULT_OK, new Intent().putExtra(RESULT_URL, url));
+		setResult(RESULT_OK, new Intent().putExtra(RESULT_URL, url).putExtra(RESULT_ID, id));
 		super.finish();
 	}
 
