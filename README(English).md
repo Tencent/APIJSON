@@ -271,5 +271,7 @@ If the default url is not available, change it to an available one, such as an I
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON) 
 
+## Update Log
+[https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
 # APIJSON, let interfaces go to hell !
