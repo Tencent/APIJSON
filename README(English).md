@@ -1,6 +1,6 @@
 # APIJSON
 
-[查看中文文档](https://github.com/TommyLemon/APIJSON/blob/master/README(%E4%B8%AD%E6%96%87).md)
+[查看中文文档](https://github.com/TommyLemon/APIJSON/blob/master/README.md)
 
 APIJSON is a JSON Transmission Structure Protocal.
 
