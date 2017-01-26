@@ -272,11 +272,11 @@ Run > Run app
 
 ### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
 
+## 更新日志
+[https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
+
 ## 欢迎Star，欢迎Fork
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
-
-## 更新日志
-[https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
 # APIJSON，让接口见鬼去吧！
