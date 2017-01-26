@@ -3,21 +3,6 @@
 
     <string name="app_name">APIJSON</string>
     <string name="app_version">1.0</string>
-    <string name="query">Query</string>
-    <string name="post">POST</string>
-    <string name="delete">DELETE</string>
-    <string name="put">PUT</string>
-    <string name="get">GET</string>
-    <string name="single">Single</string>
-    <string name="columns">Columns</string>
-    <string name="rely">Rely</string>
-    <string name="array">Array</string>
-    <string name="complex">Complex</string>
-    <string name="access_error">Access Error</string>
-    <string name="access_permitted">Access Permitted</string>
-    <string name="received_result">received result!</string>
-    <string name="browser_can_only_receive_get_response">Browsers can only receive GET responses</string>
-    <string name="query_error">There may be something wrong,you can follow by the steps:\n\n1.Check your net connection\n\n2.Check the url whether it\'s an available ipv4 address\n\n3.Long click the [ %1$s ] button to open the request by web browser\n\n4.Check logs outputed on the target server\n\n5.Try again</string>
     <string name="demo_post">{\n&#160;&#160;&#160;\"tag\":\"User\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"name\":\"Tommy\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"sex\":0,\n&#160;&#160;&#160;&#160;&#160;&#160;\"phone\":\"1234567890\"\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_delete">{\n&#160;&#160;&#160;\"tag\":\"User\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":10000\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_put">{\n&#160;&#160;&#160;\"tag\":\"User\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":38710,\n&#160;&#160;&#160;&#160;&#160;&#160;\"name\":\"Lemon\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"picture\":\"[\"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000\", \"http://common.cnblogs.com/images/icon_weibo_24.png\", \"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000\"]\"\n&#160;&#160;&#160;}\n}</string>
@@ -29,5 +14,21 @@
     <string name="demo_wallet">{\n&#160;&#160;&#160;\"Wallet\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"userId\":38710\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_wallet_with_access">{\n&#160;&#160;&#160;\"Wallet\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"userId\":38710\n&#160;&#160;&#160;},\n&#160;&#160;&#160;\"currentUserId\":38710,\n&#160;&#160;&#160;\"payPassword\":\"123456\"\n}</string>
     <string name="demo_complex_post">{\n&#160;&#160;&#160;\"tag\":"add_work",\n&#160;&#160;&#160;\"[]\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"count\":2,\n&#160;&#160;&#160;&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"sex\":0\n&#160;&#160;&#160;&#160;&#160;&#160;},\n&#160;&#160;&#160;&#160;&#160;&#160;\"Work\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"userId\":\"/User/id\"\n&#160;&#160;&#160;&#160;&#160;&#160;},\n&#160;&#160;&#160;&#160;&#160;&#160;\"Comment[]\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"count\":3,\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"Comment\":{\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;\"workId\":\"[]/Work/id\"\n&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}\n&#160;&#160;&#160;&#160;&#160;&#160;}\n&#160;&#160;&#160;}\n}</string>
+    <string name="query">请求</string>
+    <string name="post">增</string>
+    <string name="delete">删</string>
+    <string name="put">改</string>
+    <string name="get">查</string>
+    <string name="single">单个Object</string>
+    <string name="columns">指定字段</string>
+    <string name="rely">向上依赖</string>
+    <string name="array">Object数组</string>
+    <string name="complex">复杂结构</string>
+    <string name="access_error">没有访问权限</string>
+    <string name="access_permitted">允许使用权限</string>
+    <string name="update_log">更新日志</string>
+    <string name="received_result">已获得结果！</string>
+    <string name="browser_can_only_receive_get_response">用浏览器只能获取GET结果</string>
+    <string name="query_error">可能出现了一些问题，可以按照以下步骤解决：\n\n1.检查网络连接\n\n2.检查url是否为一个可用的IPV4地址\n\n3.长按[ %1$s ]按钮用浏览器发送请求\n\n4.查看目标服务器上的log\n\n5.再试一次</string>
 
 </resources>
