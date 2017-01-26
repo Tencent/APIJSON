@@ -274,6 +274,9 @@ Run > Run app
 
 ## 欢迎Star，欢迎Fork
 
-[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)&nbsp;
+[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
+
+## 更新日志
+[https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
 # APIJSON，让接口见鬼去吧！
