@@ -14,9 +14,10 @@ limitations under the License.*/
 
 package apijson.demo.ui;
 
+import zuo.biao.apijson.StringUtil;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -29,10 +30,6 @@ public class SelectActivity extends Activity {
 
 	public static final String RESULT_JSON = "RESULT_JSON";
 
-	public static Intent createIntent(Context context) {
-		return new Intent(context, SelectActivity.class);
-	}
-
 
 	private Activity context;
 	@Override
@@ -43,6 +40,8 @@ public class SelectActivity extends Activity {
 		context = this;
 	}
 
+	
+	
 	//click event,called form layout android:onClick <<<<<<<<<<<<<<<<
 	public void selectPost(View v) {
 		select(QueryActivity.TYPE_POST);
@@ -85,6 +84,12 @@ public class SelectActivity extends Activity {
 		select(QueryActivity.TYPE_ACCESS_PERMITTED);
 	}
 	//get >>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	
+	public void toUpdateLog(View v) {
+		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
+				StringUtil.getCorrectUrl("github.com/TommyLemon/Android-ZBLibrary/commits/master"))));
+	}
 	
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
@@ -93,6 +98,8 @@ public class SelectActivity extends Activity {
 		startActivityForResult(QueryActivity.createIntent(context, type, url), REQUEST_TO_QUERY);
 	}
 
+	
+	
 	private static final int REQUEST_TO_QUERY = 1;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

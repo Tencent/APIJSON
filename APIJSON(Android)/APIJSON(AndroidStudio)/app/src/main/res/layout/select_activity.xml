@@ -104,6 +104,12 @@
                 style="@style/select_json"
                 android:onClick="selectAccessPermitted"
                 android:text="@string/demo_wallet_with_access" />
+
+            <Button
+                style="@style/match_wrap"
+                android:layout_marginTop="30dp"
+                android:onClick="toUpdateLog"
+                android:text="@string/update_log" />
         </LinearLayout>
     </ScrollView>
 
