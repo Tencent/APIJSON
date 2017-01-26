@@ -1,46 +1,42 @@
 # APIJSON
 
-[English Document](https://github.com/TommyLemon/APIJSON/blob/master/README.md)
+[查看中文文档](https://github.com/TommyLemon/APIJSON/blob/master/README(%E4%B8%AD%E6%96%87).md)
 
-APIJSON是一种JSON传输结构协议。<br />
+APIJSON is a JSON Transmission Structure Protocal.
 
-客户端可以定义任何JSON结构去向服务端发起请求，服务端就会返回对应结构的JSON字符串，所求即所得。<br />
-一次请求任意结构任意数据，方便灵活，不需要专门接口或多次请求。<br />
-还能去除重复数据，节省流量提高速度！<br />
+You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set.<br />
+You can get any data with any JSON structure by requesting server just once. It's very convenient and flexible, and does not require a special interface or multiple requests.<br />
+And you can save duplicate data and improve transmission speed as well!<br />
 
-从此HTTP传输JSON数据没有接口，更不需要文档！<br />
-客户端再也不用和服务端沟通接口或文档问题了！再也不会被文档各种错误坑了！<br />
-服务端再也不用为了兼容旧版客户端写新版接口和文档了！再也不会被客户端随时随地没完没了地烦了！
+Now you can realize JSON Transmissions without interface or doc anymore!<br />
+Client developers will no longer be suffered from various error in docs, and don't have to communicate with server developers about interfaces or docs anymore!<br />
+And server developers no longer have to write new interfaces and docs for compatibility with legacy apps! And they will no longer be endlessly disturbed by client developers at any time!
 
-举个栗子:
+Here is an example:
 
-### 请求：
-
-<p>{<br />
-&nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //请求一个array<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//array条件<br />
+### Request: 
+{<br />
+&nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //request an array<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//array condition<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 2, &nbsp; &nbsp; &nbsp; &nbsp;<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求查询名为User的table，返回名为User的JSONObject<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object条件<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an object from the table named User<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object condition<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;Work&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//缺省依赖路径，从同级object的路径开始<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//rely path with default parent path,starts from the same level object&#39;s path<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求一个名为Comment的array&nbsp;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//request an array named Comment<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 0,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 3,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId&quot;: &ldquo;[]/Work/id&rdquo; &nbsp;//完整依赖路径<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId&quot;: &ldquo;[]/Work/id&rdquo; &nbsp;//full rely path<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br />
 &nbsp; &nbsp; &nbsp; &nbsp; }<br />
 &nbsp; &nbsp; }<br />
 }</p>
 
-
-
-### 返回：
-
-<p>{<br />
+### Response: 
+{<br />
 &nbsp; &nbsp; &quot;[]&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;0&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;:{<br />
@@ -156,124 +152,124 @@ APIJSON是一种JSON传输结构协议。<br />
 }</p>
 
 
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/apijson_all_pages.jpg?raw=true)
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg)
+![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true)
 
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/apijson_all_pages.jpg?raw=true) 
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) 
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) 
+## Compare with Previous HTTP Transmission Way
+ 
+ Process | Previous way | APIJSON
+-------- | ------------ | ------------
+ Transmission | Server developers edit interfaces and update docs, then client developers request server and parse responses according to the docs | Client developers request server and parse responses for their requirements. No inteface! No doc! No communication for any interface or doc between client and server developers! 
+ Compatibility | Server developers add new interfaces tagged with v2 and update docs | Nothing need to do!
+ 
+ Client request | Previous way | APIJSON
+-------- | ------------ | ------------
+ Requirement | Client developers append key-value pairs to an url for a request in docs | Client developers append JSON to the url for their requirements
+ Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&loginPassword=1234<br /><br />The currentUserId and loginPassword is only for parts of interfaces | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, loginPassword:1234}<br /><br />The currentUserId and loginPassword is only for parts of interfaces
+ URL | Different urls for different requests | One url for one method(GET,POST...)
+ Key-Value Pair | key=value | key:value
+ 
+ Server operation | Previous way | APIJSON
+-------- | ------------ | ------------
+ Parse and response | Get key-value pairs and query the database with them by the default way, then encapsulate a JSON, finally return the JSON to client | Just return what RequestParser#parse returned
+ Way of setting JSON structure to return | Designed in server and cannot be modified by any client apps | Designed by client apps and cannot be modified by sever
+ 
+ Client parse | Previous way | APIJSON
+-------- | ------------ | ------------
+ View structure | Search docs or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
+ Operate | Parse JSON String from responses | Parse with JSONResponse or use previous way
 
-## 对比传统HTTP传输方式
- 
- 开发流程 | 传统方式 | APIJSON
--------- | ------------ | ------------
- 接口传输 | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码。没有接口，更不需要文档！客户端再也不用和服务端沟通接口或文档问题了！
- 兼容旧版 | 服务端增加新接口，用v2表示第2版接口，然后更新文档 | 什么都不用做！
- 
- 客户端请求 | 传统方式 | APIJSON
--------- | ------------ | ------------
- 要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
- 结构 | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&loginPassword=1234<br /><br />其中currentUserId和loginPassword只在请求部分接口时需要 | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, loginPassword:1234}<br /><br />其中currentUserId和loginPassword只在请求部分接口时需要
- URL | 不同的请求对应不同的url | 相同的请求方法(GET，POST等)都用同一个url
- 键值对 | key=value | key:value
- 
- 服务端操作 | 传统方式 | APIJSON
--------- | ------------ | ------------
- 解析和返回 | 取出键值对，把键值对作为条件用预设的的方式去查询数据库，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端就行
- 返回JSON结构的设定方式 | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
- 
- 客户端解析 | 传统方式 | APIJSON
--------- | ------------ | ------------
- 查看方式 | 查文档或等请求成功后看log | 看请求就行，所求即所得。也可以等请求成功后看log
- 方法 | 解析JSONObject | 可以用JSONResponse解析JSONObject或传统方式
-
- 客户端对应不同需求的请求 | 传统方式 | APIJSON
+ Client requests for different requirements | Previous way | APIJSON
 -------- | ------------ | ------------
  User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
- User和对应的Work | 分两次请求<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
- User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
- type为1的Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
- 1个User发布的Work列表，每个Work包括发布者User和前3条Comment | 把以上请求里的type=1改为userId=1 | ①把以上请求里的"Work":{"type":1}, "User":{"workId":"/Work/id"}改为"User":{"id":1}, "Work":{"userId":"/User/id"}<br /><br />②或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br /><br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ User and his Work | Request twice<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId":"User/id"}}
+ User list | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
+ Work list of which type is 1, each Work contains it's publisher User and top 3 Comments | The Work must contains the User Object and Comment Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId":"/Work/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
+ Work list of an User, each Work contains the publisher User and top 3 Comments | Change type=1 to userId=1 above | ①Change  "Work":{"type":1}, "User":{"workId":"/Work/id"} to "User":{"id":1}, "Work":{"userId":"/User/id"} above<br /><br />②Or save 4 repeated User by this way<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId":"User/id"}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}<br /><br />③If the User is already obtained, you can also save all repeated User by this way<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId":"[]/Work/id"}}}}
  
- 服务端对应不同请求的返回结果 | 传统方式 | APIJSON
+ Server responses for different requests | Previous way | APIJSON
 -------- | ------------ | ------------
  User | {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}}
- User和对应的Work | 分别返回两次请求的结果<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />Work: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}, "Work":{"id":1, "content":"xxx"...}}
- User列表 | {"status":200, "message":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}}, "1":{"User":{"id":2...}}...}}
- type为1的Work列表，每个Work包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
- 1个User发布的Work列表，每个Work包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | ①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Work":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />③{"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
+ User and his Work | Reponse twice<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />Work: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}, "Work":{"id":1, "content":"xxx"...}}
+ User list | {"status":200, "message":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}}, "1":{"User":{"id":2...}}...}}
+ Work list of which type is 1, each Work contains it's publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
+ Work list of an User, each Work contains the publisher User and top 3 Comments | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | ①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Work":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />③{"status":200, "message":"success", "[]":{"0":{"Work":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
 
-## 使用方法
+## Usage
 
-### 1.下载后解压APIJSON工程
+### 1.Download and unzip APIJSON project
 
-Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
+Clone or download > Download ZIP > Unzip to a path and remember it.
 
-#### 你可以跳过步骤2和步骤3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
+#### You can skip step 2 and 3, and test server response with my server IP address 139.196.140.118:8080.<br />
 
-### 2.导入MySQL table文件
+### 2.Import MySQL table files
 
-服务端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
-我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。
+This Server project needs MySQL Server and MySQLWorkbench. And you must ensure that both of them were installed.<br />
+My config is Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 and OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8. The systems and softwares are all 64 bit.
 
-启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
+Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path of APIJSON-Master/table > Start Import > Refresh SCHEMAS, and you'll see the tables were already added.
 
-### 3.用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程
+### 3.Run Server project with Eclipse for JavaEE or IntellIJ IDEA Ultimate
 
-如果以上编辑器一个都没安装，运行前先下载安装一个。暂不支持JDK 1.8，建议用1.7。<br />
-我的配置是Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.2.5
+If you haven't installed any editor above, please download and install one before run. JDK 1.8 is not supported yet, and 1.7 is suggested.<br />
+My config is Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 and OSX EI Capitan + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.2.5. The systems and softwares are all 64 bit.
 
 #### Eclipse for JavaEE
 
-1.导入<br />
-File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
+1.Import<br />
+File > Import > Maven > Existing Maven Projects > Next > Browse > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
 
-2.运行<br />
-Run > Run As > Java Application > 选择APIJSONApplication > OK
+2.Run<br />
+Run > Run As > Java Application > Select APIJSONApplication > OK
 
 #### IntellIJ IDEA Ultimate
 
-1.导入<br />
-Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
+1.Import<br />
+Open > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
 
-2.运行<br />
+2.Run<br />
 Run > Run APIJSONApplication
 
-### 4.用ADT Bundle或Android Studio运行客户端工程
+### 4.Run Client project with ADT Bundle or Android Studio
 
-可以跳过这个步骤，直接下载下方提供的客户端App。
+You can skip this step and download the Client App below.
 
-如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
-我的配置是Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 和 OSX EI Capitan + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.1.2，其中系统和软件都是64位的。
+If you haven't installed any editor above, please download and install one before run.<br />
+My config is Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.1.2. The systems and softwares are all 64 bit.
 
 #### ADT Bundle
 
-1.导入<br />
-File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
+1.Import<br />
+File > Import > Android > Existing Android Code Into Workspace > Next > Browse > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
 
-2.运行<br />
+2.Run<br />
 Run > Run As > Android Application
 
 #### Android Studio
 
-1.导入<br />
-Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
+1.Import<br />
+Open an existing Android Studio project > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
 
-2.运行<br />
+2.Run<br />
 Run > Run app
 
-### 5.操作客户端App
+### 5.Operate Client app
 
-选择发送APIJSON请求并等待显示结果。<br />
-如果默认url不可用，修改为一个可用的，比如正在运行APIJSON服务端工程的电脑的IPV4地址，然后点击查询按钮重新请求。
+Select an APIJSON request to send to server and wait. It will show the result received.<br />
+If the default url is not available, change it to an available one, such as an IPV4 address of a computer running APIJSON Server project. Then click the Query button to request again.
 
-## 下载试用客户端App
+## Download Client App
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
 
+### If you have any questions or suggestions about APIJSON, you can send me an e-mail to tommylemon@qq.com.
 
-### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
 
-## 欢迎Star，欢迎Fork
+## Welcome star, welcome fork
 
-[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)&nbsp;
+[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON) 
 
-# APIJSON，让接口见鬼去吧！
+
+# APIJSON, let interfaces go to hell !
