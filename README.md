@@ -1,6 +1,6 @@
 # APIJSON
 
-[English Document](https://github.com/TommyLemon/APIJSON/blob/master/README.md)
+[English Document](https://github.com/TommyLemon/APIJSON/blob/master/README(English).md)
 
 APIJSON是一种JSON传输结构协议。<br />
 
