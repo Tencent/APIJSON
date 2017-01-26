@@ -14,15 +14,14 @@ limitations under the License.*/
 
 package apijson.demo.ui;
 
+import zuo.biao.apijson.StringUtil;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-
 import apijson.demo.R;
-import zuo.biao.apijson.StringUtil;
 
 /**activity for selecting a request
  * @author Lemon
@@ -39,26 +38,26 @@ public class SelectActivity extends Activity {
 		context = this;
 	}
 
-
-
+	
+	
 	//click event,called form layout android:onClick <<<<<<<<<<<<<<<<
 	public void selectPost(View v) {
 		select(QueryActivity.TYPE_POST);
 	}
-
-	public void selectDelete(View v) {
-		select(QueryActivity.TYPE_DELETE);
-	}
-
+	
 	public void selectPut(View v) {
 		select(QueryActivity.TYPE_PUT);
+	}
+	
+	public void selectDelete(View v) {
+		select(QueryActivity.TYPE_DELETE);
 	}
 
 	//get <<<<<<<<<<<<<<<<<<<<<<<<<<<
 	public void selectSingle(View v) {
 		select(QueryActivity.TYPE_SINGLE);
 	}
-
+	
 	public void selectColumns(View v) {
 		select(QueryActivity.TYPE_COLUMNS);
 	}
@@ -70,7 +69,7 @@ public class SelectActivity extends Activity {
 	public void selectArray(View v) {
 		select(QueryActivity.TYPE_ARRAY);
 	}
-
+	
 	public void selectComplex(View v) {
 		select(QueryActivity.TYPE_COMPLEX);
 	}
@@ -84,21 +83,22 @@ public class SelectActivity extends Activity {
 	}
 	//get >>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
+	
 	public void toUpdateLog(View v) {
 		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
 				StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));
 	}
-
+	
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
 
 	private String url;
+	private long id;
 	private void select(int type) {
-		startActivityForResult(QueryActivity.createIntent(context, type, url), REQUEST_TO_QUERY);
+		startActivityForResult(QueryActivity.createIntent(context, type, url, id), REQUEST_TO_QUERY);
 	}
 
-
-
+	
+	
 	private static final int REQUEST_TO_QUERY = 1;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -112,6 +112,7 @@ public class SelectActivity extends Activity {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
 			} else {
 				url = data.getStringExtra(QueryActivity.RESULT_URL);
+				id = data.getLongExtra(QueryActivity.RESULT_ID, id);
 			}
 			break;
 		default:

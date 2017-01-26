@@ -41,41 +41,41 @@ public class RequestUtil {
 		return request.setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
 	}
 
-	public static JSONObject newDeleteRequest() {
-		// 测试necessaryColumns = [id]通过
-		// 测试对象不存在通过，存在返回success通过
-		return new JSONRequest(new User(10000)).setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
-	}
-
-	public static JSONObject newPutRequest() {
-		User data = new User(38710);//);// 测试necessaryColumns = [id]通过
+	public static JSONObject newPutRequest(long id) {
+		User data = new User(id <= 0 ? 38710 : id);//);// 测试necessaryColumns = [id]通过
 		data.setName("Lemon");
 		//测试disallowColumns = [phone]通过 data.setPhone("1234567890");
 
 		List<String> list = new ArrayList<String>();
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
 		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
-		list.add("http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000");
 		data.setPicture(JSON.toJSONString(list));//"\"" + JSON.toJSONString(new JSONObject("{\"id\":2}")) + "\"");//
 
 		return new JSONRequest(data).setTag(User.class.getSimpleName());
 	}
-
-
-
-	public static JSONObject newSingleRequest() {
-		return new JSONRequest(new User(38710));
+	
+	public static JSONObject newDeleteRequest(long id) {
+		// 测试necessaryColumns = [id]通过
+		// 测试对象不存在通过，存在返回success通过
+		return new JSONRequest(new User(id <= 0 ? 10000 : id)).setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
 	}
 
-	public static JSONObject newColumnsRequest() {
-		JSONObject object = new JSONObject(new User(38710));
+	
+	
+
+	public static JSONObject newSingleRequest(long id) {
+		return new JSONRequest(new User(id <= 0 ? 38710 : id));
+	}
+
+	public static JSONObject newColumnsRequest(long id) {
+		JSONObject object = new JSONObject(new User(id <= 0 ? 38710 : id));
 		object.setColumns("id,name,phone");//测试排序通过 //StringUtil.getString(new String[]{"id", "name", "phone"}));//
 		return new JSONRequest(User.class.getSimpleName(), object);
 	}
 
-	public static JSONObject newRelyRequest() {
+	public static JSONObject newRelyRequest(long id) {
 		JSONRequest request = new JSONRequest();
-		request.put(new User(70793));
+		request.put(new User(id <= 0 ? 70793 : id));
 		request.put(Work.class.getSimpleName(), new JSONRequest("userId", "User/id"));
 		return request;
 	}
@@ -95,13 +95,13 @@ public class RequestUtil {
 		return request.toArray(2, 0);
 	}
 
-	public static JSONObject newAccessErrorRequest() {
-		return new JSONRequest(new Wallet(38710));
+	public static JSONObject newAccessErrorRequest(long id) {
+		return new JSONRequest(new Wallet().setUserId(id <= 0 ? 38710 : id));
 	}
 
-	public static JSONObject newAccessPermittedRequest() {
+	public static JSONObject newAccessPermittedRequest(long id) {
 		JSONRequest request = new JSONRequest();
-		request.put(new Wallet().setUserId((long) 38710));
+		request.put(new Wallet().setUserId(id <= 0 ? 38710 : id));
 		request.put("currentUserId", 38710);
 		request.put("payPassword", "123456");
 		return request;

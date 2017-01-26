@@ -4,8 +4,8 @@
     <string name="app_name">APIJSON</string>
     <string name="app_version">1.0</string>
     <string name="demo_post">{\n&#160;&#160;&#160;\"tag\":\"User\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"name\":\"Tommy\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"sex\":0,\n&#160;&#160;&#160;&#160;&#160;&#160;\"phone\":\"1234567890\"\n&#160;&#160;&#160;}\n}</string>
+    <string name="demo_put">{\n&#160;&#160;&#160;\"tag\":\"User\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":38710,\n&#160;&#160;&#160;&#160;&#160;&#160;\"name\":\"Lemon\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"picture\":\"[\"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000\", \"http://common.cnblogs.com/images/icon_weibo_24.png\"]\"\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_delete">{\n&#160;&#160;&#160;\"tag\":\"User\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":10000\n&#160;&#160;&#160;}\n}</string>
-    <string name="demo_put">{\n&#160;&#160;&#160;\"tag\":\"User\",\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":38710,\n&#160;&#160;&#160;&#160;&#160;&#160;\"name\":\"Lemon\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"picture\":\"[\"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000\", \"http://common.cnblogs.com/images/icon_weibo_24.png\", \"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000\"]\"\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_single">{\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":38710\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_columns">{\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"columns\":\"id,name,phone\",\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":38710\n&#160;&#160;&#160;}\n}</string>
     <string name="demo_rely">{\n&#160;&#160;&#160;\"User\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"id\":70793\n&#160;&#160;&#160;},\n&#160;&#160;&#160;\"Work\":{\n&#160;&#160;&#160;&#160;&#160;&#160;\"userId\":\"User/id\"\n&#160;&#160;&#160;}\n}</string>
@@ -28,6 +28,7 @@
     <string name="access_permitted">允许使用权限</string>
     <string name="update_log">更新日志</string>
     <string name="received_result">已获得结果！</string>
+    <string name="user_id_changed">"userId已改为 %1$s ，【删】后会恢复默认值"</string>
     <string name="browser_can_only_receive_get_response">用浏览器只能获取GET结果</string>
     <string name="query_error">可能出现了一些问题，可以按照以下步骤解决：\n\n1.检查网络连接\n\n2.检查url是否为一个可用的IPV4地址\n\n3.长按[ %1$s ]按钮用浏览器发送请求\n\n4.查看目标服务器上的log\n\n5.再试一次</string>
 
