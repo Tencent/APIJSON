@@ -28,8 +28,6 @@ import apijson.demo.R;
  */
 public class SelectActivity extends Activity {
 
-	public static final String RESULT_JSON = "RESULT_JSON";
-
 
 	private Activity context;
 	@Override
@@ -88,7 +86,7 @@ public class SelectActivity extends Activity {
 	
 	public void toUpdateLog(View v) {
 		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-				StringUtil.getCorrectUrl("github.com/TommyLemon/Android-ZBLibrary/commits/master"))));
+				StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));
 	}
 	
 	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
