@@ -14,14 +14,21 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.sql;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
+
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.QueryConfig;
+import zuo.biao.apijson.server.RequestParser;
 
 /**helper for query MySQL database
  * @author Lemon
@@ -72,7 +79,7 @@ public class QueryHelper {
 		statement = null;
 	}
 
-	public JSONObject select(QueryConfig config) throws SQLException, Exception {
+	public JSONObject select(QueryConfig config) throws Exception {
 		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
 			System.out.println(TAG + "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
 			return null;
@@ -102,8 +109,9 @@ public class QueryHelper {
 		case PUT:
 		case DELETE:
 			int updateCount = statement.executeUpdate(sql);//创建数据对象
-			
-			JSONObject result = newJSONObject(updateCount > 0 ? 200 : 1149, updateCount > 0 ? "success" : "可能对象不存在！");
+
+			JSONObject result = RequestParser.newResult(updateCount > 0 ? 200 : 404
+					, updateCount > 0 ? "success" : "可能对象不存在！");
 			result.put(Table.ID, config.getId());
 			return result;
 		default:
@@ -140,8 +148,9 @@ public class QueryHelper {
 	/**获取全部字段名列表
 	 * @param table
 	 * @return
+	 * @throws SQLException 
 	 */
-	public String[] getColumnArray(QueryConfig config) {
+	public String[] getColumnArray(QueryConfig config) throws SQLException {
 		if (config == null) {
 			return null;
 		}
@@ -152,30 +161,13 @@ public class QueryHelper {
 		List<String> list = new ArrayList<String>();
 		String table = config.getTable();
 		ResultSet rs;
-		try {
-			rs = metaData.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
-			while (rs.next()) {
-				System.out.println(TAG + rs.getString(4));
-				list.add(rs.getString(4));
-			}
-			rs.close();
-		} catch (Exception e) {
-			System.out.println(TAG + "getColumnList   try { DatabaseMetaData meta = conn.getMetaData(); ... >>  " +
-					"} catch (Exception e) {\n" + e.getMessage());
-			e.printStackTrace();
+		rs = metaData.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
+		while (rs.next()) {
+			System.out.println(TAG + rs.getString(4));
+			list.add(rs.getString(4));
 		}
+		rs.close();
 		return list.toArray(new String[]{});
 	}
-	
-	/**新建JSONObject，一般用于错误提示结果
-	 * @param status
-	 * @param message
-	 * @return
-	 */
-	public static JSONObject newJSONObject(int status, String message) {
-		JSONObject object = new JSONObject(true);
-		object.put("status", status);
-		object.put("message", message);
-		return object;
-	}
+
 }

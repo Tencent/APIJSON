@@ -31,12 +31,7 @@ public class AccessVerifier {
 	 * @return
 	 */
 	public static boolean verify(RequestMethod method, JSONObject request, String tableName) throws AccessException {
-		try {
-			verify(method, request, getAccessId(tableName));
-		} catch (AccessException e) {
-			throw new AccessException(TAG +  tableName + " : " + e.getMessage());
-		}
-		return true;
+		return verify(method, request, getAccessId(tableName));
 	}
 
 
@@ -48,16 +43,6 @@ public class AccessVerifier {
 	 * @throws AccessException 
 	 */
 	public static boolean verify(RequestMethod method, JSONObject request, int accessId) throws AccessException {
-		request = getCorrectRequest(method, request, accessId);
-		switch (method) {
-		case POST:
-			if (request.containsKey("id")) {
-				throw new AccessException(TAG + "POST请求不能设置table的id！");
-			}
-			break;
-		default:
-			break;
-		}
 		if (accessId < 0 || request == null) {
 			return true;
 		}
@@ -65,7 +50,7 @@ public class AccessVerifier {
 		if (currentUserId <= 0) {
 			System.out.println(TAG + "verify accessId = " + accessId
 					+ " >>  currentUserId <= 0, currentUserId = " + currentUserId);
-			throw new AccessException(TAG + "请设置"+ KEY_CURRENT_USER_ID + "和对应的password！");
+			throw new AccessException("请设置"+ KEY_CURRENT_USER_ID + "和对应的password！");
 		}
 		String password;
 
@@ -76,7 +61,7 @@ public class AccessVerifier {
 				System.out.println(TAG + "verify accessId = " + accessId
 						+ " >> currentUserId or loginPassword error"
 						+ "  currentUserId = " + currentUserId + ", loginPassword = " + password);
-				throw new AccessException(TAG + KEY_CURRENT_USER_ID + "或" + KEY_LOGIN_PASSWORD + "错误！");
+				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_LOGIN_PASSWORD + "错误！");
 			}
 		case ACCESS_PAY:
 			password = StringUtil.getString(request.getString(KEY_PAY_PASSWORD));
@@ -84,23 +69,13 @@ public class AccessVerifier {
 				System.out.println(TAG + "verify accessId = " + accessId
 						+ " >> currentUserId or payPassword error"
 						+ "  currentUserId = " + currentUserId + ", payPassword = " + password);
-				throw new AccessException(TAG + KEY_CURRENT_USER_ID + "或" + KEY_PAY_PASSWORD + "错误！");
+				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_PAY_PASSWORD + "错误！");
 			}
 		default:
 			return true;
 		}
 	}
 
-	
-	
-	private static JSONObject getCorrectRequest(RequestMethod method, JSONObject request, int accessId) {
-//		if ("update_user".equals(request.getString("tag"))) {
-//			
-//		} else {
-//
-//		}
-		return request;
-	}
 
 
 	/**获取权限id
