@@ -75,6 +75,9 @@ public class QueryConfig {
 		return method;
 	}
 	public QueryConfig setMethod(RequestMethod method) {
+		if (method == null) {
+			method = RequestMethod.GET;
+		}
 		this.method = method;
 		return this;
 	}

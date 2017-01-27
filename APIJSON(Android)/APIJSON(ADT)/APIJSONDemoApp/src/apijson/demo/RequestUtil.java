@@ -53,15 +53,15 @@ public class RequestUtil {
 
 		return new JSONRequest(data).setTag(User.class.getSimpleName());
 	}
-	
+
 	public static JSONObject newDeleteRequest(long id) {
 		// 测试necessaryColumns = [id]通过
 		// 测试对象不存在通过，存在返回success通过
 		return new JSONRequest(new User(id <= 0 ? 10000 : id)).setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
 	}
 
-	
-	
+
+
 
 	public static JSONObject newSingleRequest(long id) {
 		return new JSONRequest(new User(id <= 0 ? 38710 : id));
