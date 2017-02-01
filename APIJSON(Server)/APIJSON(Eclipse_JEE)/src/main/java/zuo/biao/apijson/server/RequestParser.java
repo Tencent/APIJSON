@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -210,7 +211,7 @@ public class RequestParser {
 		object = object.getJSONObject("structure");//解决返回值套了一层 "structure":{}
 
 		JSONObject target = null;
-		if (isObjectKey(tag) && object.containsKey(tag) == false) {//tag是table名
+		if (isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
 			target = new JSONObject(true);
 			target.put(tag, object);
 		} else {
@@ -240,9 +241,9 @@ public class RequestParser {
 			System.out.println(TAG + "filterTarget  target == null || request == null >> return null;");
 			return null;
 		}
-//		if (method == null) {
-//			method = RequestMethod.GET;
-//		}
+		//		if (method == null) {
+		//			method = RequestMethod.GET;
+		//		}
 
 		/**方法三：遍历request，transferredRequest只添加target所包含的object
 		 *  ，且移除target中DISALLOW_COLUMNS，期间判断NECESSARY_COLUMNS是否都有
@@ -405,7 +406,7 @@ public class RequestParser {
 			}
 		}
 
-		if (containRelation == false && isObjectKey(name)) {
+		if (containRelation == false && isTableKey(name)) {//提高性能 isObjectKey(name)) {
 			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
 				//			relationMap.remove(path);
 				QueryConfig config2 = newQueryConfig(name, transferredRequest);
@@ -415,9 +416,12 @@ public class RequestParser {
 					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 
-				transferredRequest = getSQLObject(config2);
-				if (parseRelation) {
-					putValueByPath(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
+				JSONObject result = getSQLObject(config2);
+				if (result != null && result.isEmpty() == false) {//解决获取失败导致不能获取里面JSONObject
+					transferredRequest = result;
+					if (parseRelation) {
+						putValueByPath(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
+					}
 				}
 			}
 		}
@@ -703,9 +707,13 @@ public class RequestParser {
 		return JSON.parseObject(json) != null;//json.startsWith("{") && json.endsWith("}");
 	}
 
-	public static boolean isObjectKey(String key) {
+	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
+
+	public static boolean isTableKey(String key) {
 		key = StringUtil.getString(key);
-		return StringUtil.isNotEmpty(key, false) && isArrayKey(key) == false && StringUtil.isAlpha(key.substring(0, 1));
+
+		return StringUtil.isNotEmpty(key, false) && isArrayKey(key) == false
+				&& bigAlphaPattern.matcher(key.substring(0, 1)).matches();
 	}
 	public static boolean isArrayKey(String key) {
 		return key != null && key.endsWith("[]");
