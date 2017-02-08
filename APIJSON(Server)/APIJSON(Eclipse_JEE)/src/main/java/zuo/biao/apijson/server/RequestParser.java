@@ -80,16 +80,12 @@ public class RequestParser {
 		Exception error = null;
 		try {
 			requestObject = getObject(null, null, null, requestObject);
-		} catch (Exception e) {
-			e.printStackTrace();
-			error = e;
-		}
-		parseRelation = true;
-		try {
+
+			parseRelation = true;
 			requestObject = getObject(null, null, null, requestObject);
 		} catch (Exception e) {
 			e.printStackTrace();
-			error = error == null ? e : new Exception("e1:" + error.getMessage() + " \n e2:" + e.getMessage());
+			error = e;
 		}
 
 		QueryHelper.getInstance().close();
@@ -416,13 +412,15 @@ public class RequestParser {
 					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 
-				JSONObject result = getSQLObject(config2);
-				if (result != null && result.isEmpty() == false) {//解决获取失败导致不能获取里面JSONObject
-					transferredRequest = result;
-					if (parseRelation) {
-						putValueByPath(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
-					}
+				transferredRequest = getSQLObject(config2);//不管用：暂时用这个解决返回多余空数据
+				//				
+				//				JSONObject result = getSQLObject(config2);
+				//				if (result != null && result.isEmpty() == false) {//解决获取失败导致不能获取里面JSONObject
+				//					transferredRequest = result;
+				if (parseRelation) {
+					putValueByPath(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
 				}
+				//				}
 			}
 		}
 
@@ -456,7 +454,26 @@ public class RequestParser {
 			System.out.println(TAG + "getArray   try { page = arrayObject.getIntValue(page); ..." +
 					" >> } catch (Exception e) {\n" + e.getMessage());
 		}
-		if (count <= 0) {//解决count<=0导致没有查询结果
+
+		//最好先获取第一个table的所有项（where条件），填充一个列表
+		Set<String> set = request.keySet();
+		if (parseRelation == false && set != null) {
+			JSONObject object;
+			int totalCount = 0;
+			for (String key : set) {
+				if (isTableKey(key)) {
+					object = request.getJSONObject(key);
+					if (object != null) {// && object.isEmpty() == false) {
+						totalCount = QueryHelper.getInstance().getCount(key);
+						break;
+					}
+				}
+			}
+			if (count > totalCount) {
+				count = totalCount;
+			}
+		}
+		if (count <= 0 || count > 100) {
 			count = 100;
 		}
 
@@ -468,7 +485,6 @@ public class RequestParser {
 
 		QueryConfig config = new QueryConfig(requestMethod, count, page);
 
-		Set<String> set = request.keySet();
 		JSONObject transferredRequest = new JSONObject(true);
 		if (set != null) {
 			JSONObject parent = null;
@@ -635,7 +651,7 @@ public class RequestParser {
 				key = keys[i];
 				child = getJSONObject(parent, key);
 				if (child == null) {//不存在
-					return "";
+					return path;
 				}
 				parent = child;
 			}
@@ -644,7 +660,8 @@ public class RequestParser {
 				return parent.get(keys[keys.length - 1]);
 			} catch (Exception e) {
 				System.out.println("getValueByPath  try { return parent.get(keys[keys.length - 1]); " +
-						"} catch (Exception e) {\n" + e.getMessage());
+						"} catch (Exception e) {\n" + e.getMessage() + "\n >> return '';");
+				return path;
 			}
 		}
 
@@ -684,28 +701,7 @@ public class RequestParser {
 	private QueryConfig newQueryConfig(String table, JSONObject request) {
 		return QueryConfig.getQueryConfig(requestMethod, table, request);
 	}
-	/**把parentConfig的array属性继承下来
-	 * @param config
-	 * @param parentConfig
-	 * @return
-	 */
-	private QueryConfig extendQueryConfig(QueryConfig config, QueryConfig parentConfig) {
-		if (parentConfig != null) {
-			if (config == null) {
-				return parentConfig;
-			}
-			config
-			.setLimit(parentConfig.getLimit())
-			.setPage(parentConfig.getPage())
-			.setPosition(parentConfig.getPosition());
-		}
-		return config;
-	}
 
-
-	public static boolean isObject(String json) {
-		return JSON.parseObject(json) != null;//json.startsWith("{") && json.endsWith("}");
-	}
 
 	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
 

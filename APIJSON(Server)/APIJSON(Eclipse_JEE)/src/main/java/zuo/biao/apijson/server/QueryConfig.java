@@ -284,7 +284,12 @@ public class QueryConfig {
 			}
 		}
 
-		return config.setId(request.getLongValue(Table.ID));
+		try {
+			config.setId(request.getLongValue(Table.ID));
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return config;
 	}
 
 	/**

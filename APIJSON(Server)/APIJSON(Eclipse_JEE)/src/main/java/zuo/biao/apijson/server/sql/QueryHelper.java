@@ -160,14 +160,39 @@ public class QueryHelper {
 		}
 		List<String> list = new ArrayList<String>();
 		String table = config.getTable();
-		ResultSet rs;
-		rs = metaData.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
+		ResultSet rs = metaData.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
 		while (rs.next()) {
 			System.out.println(TAG + rs.getString(4));
 			list.add(rs.getString(4));
 		}
 		rs.close();
 		return list.toArray(new String[]{});
+	}
+
+	/**
+	 * @param table
+	 * @return
+	 * @throws Exception
+	 */
+	public int getCount(String table) throws Exception {
+		if (connection == null || connection.isClosed()) {
+			System.out.println(TAG + "getCount  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+			connection = getConnection();
+			statement = connection.createStatement(); //创建Statement对象
+			metaData = connection.getMetaData();
+		}
+
+		ResultSet rs = statement.executeQuery("SELECT Count(*) FROM " + table);//创建数据对象
+		
+		int count = 0;
+		if (rs.next()) {
+			count = rs.getInt(1);
+		}
+		System.out.println(TAG + "getCount  count = " + count) ;
+		
+		rs.close();
+		
+		return count;
 	}
 
 }
