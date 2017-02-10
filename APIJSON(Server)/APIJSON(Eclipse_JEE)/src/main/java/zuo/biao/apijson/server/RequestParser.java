@@ -455,25 +455,27 @@ public class RequestParser {
 					" >> } catch (Exception e) {\n" + e.getMessage());
 		}
 
-		//最好先获取第一个table的所有项（where条件），填充一个列表
+		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = request.keySet();
-		if (parseRelation == false && set != null) {
-			JSONObject object;
-			int totalCount = 0;
-			for (String key : set) {
-				if (isTableKey(key)) {
-					object = request.getJSONObject(key);
-					if (object != null) {// && object.isEmpty() == false) {
-						totalCount = QueryHelper.getInstance().getCount(key);
-						break;
+		if (count <= 0 || count > 10) {//10以下不优化长度
+			if(parseRelation == false && set != null) {
+				JSONObject object;
+				int totalCount = 0;
+				for (String key : set) {
+					if (isTableKey(key)) {
+						object = request.getJSONObject(key);
+						if (object != null) {// && object.isEmpty() == false) {
+							totalCount = QueryHelper.getInstance().getCount(key);
+							break;
+						}
 					}
 				}
-			}
-			if (count > totalCount) {
-				count = totalCount;
+				if (count > totalCount) {
+					count = totalCount;
+				}
 			}
 		}
-		if (count <= 0 || count > 100) {
+		if (count <= 0 || count > 100) {//count最大为100
 			count = 100;
 		}
 
