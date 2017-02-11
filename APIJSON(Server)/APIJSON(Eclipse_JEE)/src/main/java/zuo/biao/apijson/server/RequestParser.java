@@ -366,16 +366,18 @@ public class RequestParser {
 		Set<String> set = request.keySet();
 		JSONObject transferredRequest = new JSONObject(true);
 		if (set != null) {
-			String value;
+			Object value;
+			String valueString;
 			JSONObject child;
 			JSONObject result;
 			boolean isFirst = true;
 			for (String key : set) {
-				value = transferredRequest.containsKey(key) ? transferredRequest.getString(key) : request.getString(key);
-				child = JSON.parseObject(value);
+				value = transferredRequest.containsKey(key) ? transferredRequest.get(key) : request.get(key);
+				valueString = value == null ? null : String.valueOf(value);
+				child = JSON.parseObject(valueString);
 				if (child == null) {//key - value
 					transferredRequest.put(key, value);
-					if (StringUtil.isPath(value)) {
+					if (StringUtil.isPath(valueString)) {
 						System.out.println("getObject  StringUtil.isPath(value) >> parseRelation = " + parseRelation);
 						if (parseRelation) {
 							transferredRequest.put(key, getValueByPath(relationMap.get(getPath(path, key))));
@@ -383,7 +385,7 @@ public class RequestParser {
 						} else {
 							containRelation = true;
 							relationMap.put(getPath(path, key)//value.contains(parentPath)会因为结构变化而改变
-									, getPath((value.startsWith(SEPARATOR) ? parentPath : ""), value));
+									, getPath((valueString.startsWith(SEPARATOR) ? parentPath : ""), valueString));
 						}
 					}
 				} else {
@@ -463,7 +465,7 @@ public class RequestParser {
 				int totalCount = 0;
 				for (String key : set) {
 					if (isTableKey(key)) {
-						object = request.getJSONObject(key);
+						object = getJSONObject(request, key);
 						if (object != null) {// && object.isEmpty() == false) {
 							totalCount = QueryHelper.getInstance().getCount(key);
 							break;
