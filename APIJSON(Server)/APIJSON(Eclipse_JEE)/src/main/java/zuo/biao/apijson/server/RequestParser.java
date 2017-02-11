@@ -98,7 +98,7 @@ public class RequestParser {
 					: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		}
 
-		System.out.println(TAG + "\n\n最终返回至客户端的json:\n" + JSON.toJSONString(requestObject));
+//		System.out.println(TAG + "\n\n最终返回至客户端的json:\n" + JSON.toJSONString(requestObject));
 		return requestObject;
 	}
 
