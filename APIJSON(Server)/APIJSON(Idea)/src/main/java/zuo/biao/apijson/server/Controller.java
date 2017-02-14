@@ -33,18 +33,12 @@ public class Controller {
 
 	@RequestMapping("get/{request}")
 	public String get(@PathVariable String request) {
-		System.out.println("get/request = " + request);
-		JSONObject object = new RequestParser(RequestMethod.GET).parse(request);
-		System.out.println("get/return " + JSON.toJSONString(object));
-		return JSON.toJSONString(object);
+		return new RequestParser(RequestMethod.GET).parse(request);
 	}
 
 	@RequestMapping(value="post", method = RequestMethod.POST)
 	public String post(@RequestBody String request) {
-		System.out.println("post/request = " + request);
-		JSONObject object = new RequestParser(RequestMethod.POST).parse(request);
-		System.out.println("post/return " + JSON.toJSONString(object));
-		return JSON.toJSONString(object);
+		return new RequestParser(RequestMethod.POST).parse(request);
 	}
 	
 	/**以下接口继续用POST接口是为了客户端方便，只需要做get，post请求。也可以改用实际对应的方法。
@@ -52,18 +46,12 @@ public class Controller {
 	*/
 	@RequestMapping(value="delete", method = RequestMethod.POST)
 	public String delete(@RequestBody String request) {
-		System.out.println("delete/request = " + request);
-		JSONObject object = new RequestParser(RequestMethod.DELETE).parse(request);
-		System.out.println("delete/return " + JSON.toJSONString(object));
-		return JSON.toJSONString(object);
+		return new RequestParser(RequestMethod.DELETE).parse(request);
 	}
 	
 	@RequestMapping(value="put", method = RequestMethod.POST)
 	public String put(@RequestBody String request) {
-		System.out.println("put/request = " + request);
-		JSONObject object = new RequestParser(RequestMethod.PUT).parse(request);
-		System.out.println("put/return " + JSON.toJSONString(object));
-		return JSON.toJSONString(object);
+		return new RequestParser(RequestMethod.PUT).parse(request);
 	}
 
 }
