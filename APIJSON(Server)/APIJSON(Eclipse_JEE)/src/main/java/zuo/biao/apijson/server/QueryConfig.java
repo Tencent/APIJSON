@@ -259,7 +259,7 @@ public class QueryConfig {
 				config.setColumns(StringUtil.getString(set.toArray(new String[]{})));
 				String valuesString = "";
 				Collection<Object> valueCollection = request.values();
-				Object[] values = valueCollection == null || valueCollection.isEmpty() ? null : valueCollection.toArray(new String[]{});
+				Object[] values = valueCollection == null || valueCollection.isEmpty() ? null : valueCollection.toArray();
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
 						valuesString += ((i > 0 ? "," : "") + "'" + values[i] + "'");

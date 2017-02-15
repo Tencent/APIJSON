@@ -146,7 +146,7 @@ public class QueryHelper {
 
 
 	/**获取全部字段名列表
-	 * @param table
+	 * @param config
 	 * @return
 	 * @throws SQLException 
 	 */

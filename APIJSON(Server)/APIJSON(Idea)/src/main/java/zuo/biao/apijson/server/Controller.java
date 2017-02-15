@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONObject;
-
-import zuo.biao.apijson.JSON;
-
 /**request receiver and controller
  * @author Lemon
  */
@@ -40,15 +36,24 @@ public class Controller {
 	public String post(@RequestBody String request) {
 		return new RequestParser(RequestMethod.POST).parse(request);
 	}
-	
+
+	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value="post_get", method = RequestMethod.POST)
+	public String post_get(@RequestBody String request) {
+		return new RequestParser(RequestMethod.GET).parse(request);
+	}
+
 	/**以下接口继续用POST接口是为了客户端方便，只需要做get，post请求。也可以改用实际对应的方法。
 	 * post，put方法名可以改为add，update等更客户端容易懂的名称
-	*/
+	 */
 	@RequestMapping(value="delete", method = RequestMethod.POST)
 	public String delete(@RequestBody String request) {
 		return new RequestParser(RequestMethod.DELETE).parse(request);
 	}
-	
+
 	@RequestMapping(value="put", method = RequestMethod.POST)
 	public String put(@RequestBody String request) {
 		return new RequestParser(RequestMethod.PUT).parse(request);

@@ -57,22 +57,35 @@ public class RequestParser {
 	private Map<String, String> relationMap;
 
 	/**解析请求json并获取对应结果
-	 * @param json
+	 * @param request
+	 * @return
+	 */
+	public String parse(String request) {
+		String response = JSON.toJSONString(parseResponse(request));
+
+		System.out.println(TAG + "parse  return response = \n" + response
+				+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+		return response;
+	}
+	/**解析请求json并获取对应结果
+	 * @param request
 	 * @return requestObject
 	 */
-	public JSONObject parse(String json) {
+	public JSONObject parseResponse(String request) {
 
 		try {
-			json = URLDecoder.decode(json, UTF_8);
+			request = URLDecoder.decode(request, UTF_8);
 		} catch (UnsupportedEncodingException e) {
 			return newErrorResult(e);
 		}
-		System.out.println(TAG + "parse  json = " + json);
+		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + requestMethod.name()
+				+ "/parseResponse  request = " + request);
 
 		relationMap = new HashMap<String, String>();
 		parseRelation = false;
 		try {
-			requestObject = getCorrectRequest(requestMethod, JSON.parseObject(json));
+			requestObject = getCorrectRequest(requestMethod, JSON.parseObject(request));
 		} catch (Exception e) {
 			return newErrorResult(e);
 		}
@@ -98,7 +111,7 @@ public class RequestParser {
 					: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		}
 
-//		System.out.println(TAG + "\n\n最终返回至客户端的json:\n" + JSON.toJSONString(requestObject));
+		System.out.println("\n\n\n\n" + TAG + requestMethod.name() + "/parseResponse  request = \n" + request);
 		return requestObject;
 	}
 
@@ -313,7 +326,7 @@ public class RequestParser {
 	}
 
 	/**array至少有一个值在request的key中
-	 * @param request
+	 * @param key
 	 * @param array
 	 * @return
 	 */

@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSONObject;
-
-import zuo.biao.apijson.JSON;
-
 /**request receiver and controller
  * @author Lemon
  */
@@ -33,20 +29,21 @@ public class Controller {
 
 	@RequestMapping("get/{request}")
 	public String get(@PathVariable String request) {
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n get/request = \n" + request);
-		String response = JSON.toJSONString(new RequestParser(RequestMethod.GET).parse(request));
-		System.out.println("get/request = \n" + request + "\n return response = \n" + response
-		+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		return response;
+		return new RequestParser(RequestMethod.GET).parse(request);
 	}
 
 	@RequestMapping(value="post", method = RequestMethod.POST)
 	public String post(@RequestBody String request) {
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n post/request = \n" + request);
-		String response = JSON.toJSONString(new RequestParser(RequestMethod.POST).parse(request));
-		System.out.println("post/request = \n" + request + "\n return response = \n" + response
-		+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		return response;
+		return new RequestParser(RequestMethod.POST).parse(request);
+	}
+
+	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value="post_get", method = RequestMethod.POST)
+	public String post_get(@RequestBody String request) {
+		return new RequestParser(RequestMethod.GET).parse(request);
 	}
 	
 	/**以下接口继续用POST接口是为了客户端方便，只需要做get，post请求。也可以改用实际对应的方法。
@@ -54,20 +51,12 @@ public class Controller {
 	*/
 	@RequestMapping(value="delete", method = RequestMethod.POST)
 	public String delete(@RequestBody String request) {
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n delete/request = \n" + request);
-		String response = JSON.toJSONString(new RequestParser(RequestMethod.DELETE).parse(request));
-		System.out.println("delete/request = \n" + request + "\n return response = \n" + response
-		+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		return response;
+		return new RequestParser(RequestMethod.DELETE).parse(request);
 	}
 	
 	@RequestMapping(value="put", method = RequestMethod.POST)
 	public String put(@RequestBody String request) {
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n put/request = \n" + request);
-		String response = JSON.toJSONString(new RequestParser(RequestMethod.PUT).parse(request));
-		System.out.println("put/request = \n" + request + "\n return response = \n" + response
-		+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		return response;
+		return new RequestParser(RequestMethod.PUT).parse(request);
 	}
 
 }
