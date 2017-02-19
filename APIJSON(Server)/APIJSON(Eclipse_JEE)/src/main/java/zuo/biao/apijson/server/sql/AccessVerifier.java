@@ -50,7 +50,6 @@ public class AccessVerifier {
 			break;
 		case POST:
 		case PUT:
-		case PATCH:
 		case DELETE:
 			verifyUserId(currentUserId, config);
 			break;

@@ -119,7 +119,6 @@ public class QueryHelper {
 			break;
 		case POST:
 		case PUT:
-		case PATCH:
 		case DELETE:
 			int updateCount = statement.executeUpdate(sql);
 
