@@ -1,6 +1,14 @@
 package zuo.biao.apijson.server.sql;
 
+import static zuo.biao.apijson.RequestMethod.DELETE;
+import static zuo.biao.apijson.RequestMethod.GET;
+import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.RequestMethod.POST_GET;
+import static zuo.biao.apijson.RequestMethod.PUT;
+
 import java.rmi.AccessException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -24,6 +32,20 @@ public class AccessVerifier {
 	public static final String[] LOGIN_ACCESS_TABLE_NAMES = {"Wallet"};
 	public static final String[] PAY_ACCESS_TABLE_NAMES = {};
 
+
+	private static Map<String, RequestMethod[]> accessMap;
+
+	public static void init() {
+		accessMap = new HashMap<String, RequestMethod[]>();
+		accessMap.put("User", RequestMethod.values());
+		accessMap.put("Moment", RequestMethod.values());
+		accessMap.put("Comment", RequestMethod.values());
+		accessMap.put("Wallet", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
+		accessMap.put("Password", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
+		accessMap.put("Login", new RequestMethod[]{POST_GET, POST, DELETE});
+		accessMap.put("Request", new RequestMethod[]{GET, POST_GET});
+	}
+
 	/**验证权限是否通过
 	 * @param request
 	 * @param config
@@ -38,6 +60,10 @@ public class AccessVerifier {
 		if (request == null) {
 			return false;
 		}
+		RequestMethod method = config.getMethod();
+
+		verifyMethod(table, method);
+
 
 		long currentUserId = request.getLongValue(KEY_CURRENT_USER_ID);
 
@@ -57,7 +83,7 @@ public class AccessVerifier {
 			break;
 		}
 
-		return verifyAccess(request, table, config.getMethod(), currentUserId);
+		return verifyAccess(request, table, method, currentUserId);
 	}
 
 	/**
@@ -184,10 +210,27 @@ public class AccessVerifier {
 	}
 
 
-	//	public static class Access {
-	//		public static class Get {
-	//			public static final String[] LOGIN_ACCESS_TABLE_NAMES = {"Wallet"};
-	//		}
-	//	}
+	/**
+	 * @param table
+	 * @param method
+	 * @return
+	 * @throws AccessException 
+	 */
+	public static boolean verifyMethod(String table, RequestMethod method) throws AccessException {
+		RequestMethod[] methods = table == null ? null : accessMap.get(table);
+		if (methods == null) {
+			throw new AccessException(table + "不允许访问！");
+		}
+		if (method == null) {
+			method = GET;
+		}
+		for (int i = 0; i < methods.length; i++) {
+			if (method == methods[i]) {
+				return true;
+			}
+		}
+
+		throw new AccessException(table + "不支持" + method + "方法！");
+	}
 
 }

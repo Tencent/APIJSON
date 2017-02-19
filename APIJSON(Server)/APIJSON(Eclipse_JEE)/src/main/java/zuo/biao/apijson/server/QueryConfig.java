@@ -71,12 +71,12 @@ public class QueryConfig {
 	}
 
 	public RequestMethod getMethod() {
-		return method;
-	}
-	public QueryConfig setMethod(RequestMethod method) {
 		if (method == null) {
 			method = RequestMethod.GET;
 		}
+		return method;
+	}
+	public QueryConfig setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}

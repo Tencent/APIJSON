@@ -25,7 +25,6 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.QueryConfig;
@@ -39,7 +38,6 @@ public class QueryHelper {
 
 	private static final String YOUR_MYSQL_URL = "jdbc:mysql://localhost:3306/";//TODO edit to an available one
 	private static final String YOUR_MYSQL_SCHEMA = "sys";//TODO edit to an available one
-	private static final String YOUR_MYSQL_SCHEMA_SECURITY = "security";//TODO edit to an available one
 	private static final String YOUR_MYSQL_ACCOUNT = "root";//TODO edit to an available one
 	private static final String YOUR_MYSQL_PASSWORD = "apijson";//TODO edit to an available one
 
@@ -56,16 +54,10 @@ public class QueryHelper {
 	}
 
 	public Connection getConnection() throws Exception {
-		return getConnection(null);
-	}
-	public Connection getConnection(String schema) throws Exception {
-		if (schema == null) {
-			schema = YOUR_MYSQL_SCHEMA;
-		}
 		//调用Class.forName()方法加载驱动程序
 		Class.forName("com.mysql.jdbc.Driver");
 		System.out.println(TAG + "成功加载MySQL驱动！");
-		return DriverManager.getConnection(YOUR_MYSQL_URL + schema, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
+		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_SCHEMA, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
 
@@ -98,7 +90,7 @@ public class QueryHelper {
 
 		if (connection == null || connection.isClosed()) {
 			System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
-			connection = getConnection(getSchema(config.getMethod()));
+			connection = getConnection();
 			statement = connection.createStatement(); //创建Statement对象
 			metaData = connection.getMetaData();
 		}
@@ -182,40 +174,15 @@ public class QueryHelper {
 	}
 
 	/**
-	 * @param method
-	 * @return
-	 */
-	public static String getSchema(RequestMethod method) {
-		return method == RequestMethod.POST_GET ? YOUR_MYSQL_SCHEMA_SECURITY : YOUR_MYSQL_SCHEMA;
-	}
-
-	/**
-	 * @param table
-	 * @return
-	 * @throws Exception
-	 */
-	public int getCount(String table) throws Exception {
-		return getCount(table, RequestMethod.GET);
-	}
-	/**
-	 * @param table
-	 * @param method
-	 * @return
-	 * @throws Exception
-	 */
-	public int getCount(String table, RequestMethod method) throws Exception {
-		return getCount(table, getSchema(method));
-	}
-	/**
 	 * @param table
 	 * @param schema
 	 * @return
 	 * @throws Exception
 	 */
-	public int getCount(String table, String schema) throws Exception {
+	public int getCount(String table) throws Exception {
 		if (connection == null || connection.isClosed()) {
 			System.out.println(TAG + "getCount  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
-			connection = getConnection(schema);
+			connection = getConnection();
 			statement = connection.createStatement(); //创建Statement对象
 			metaData = connection.getMetaData();
 		}

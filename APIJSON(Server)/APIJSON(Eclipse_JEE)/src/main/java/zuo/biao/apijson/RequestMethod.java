@@ -19,5 +19,5 @@ package zuo.biao.apijson;
  */
 public enum RequestMethod {
 
-	GET, POST, POST_GET, PUT, DELETE
+	GET, POST_GET, POST, PUT, DELETE
 }

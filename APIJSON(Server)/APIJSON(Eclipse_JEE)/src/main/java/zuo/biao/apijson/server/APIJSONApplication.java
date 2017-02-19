@@ -17,6 +17,8 @@ package zuo.biao.apijson.server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import zuo.biao.apijson.server.sql.AccessVerifier;
+
 /**application
  * @author Lemon
  */
@@ -25,5 +27,7 @@ public class APIJSONApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(APIJSONApplication.class, args);
+		
+		AccessVerifier.init();
 	}
 }
