@@ -43,6 +43,7 @@ public class Controller {
 	 */
 	@RequestMapping(value="post_get", method = RequestMethod.POST)
 	public String post_get(@RequestBody String request) {
+		return new RequestParser(zuo.biao.apijson.RequestMethod.POST_GET).parse(request);
 	}
 	
 	/**以下接口继续用POST接口是为了客户端方便，只需要做get，post请求。也可以改用实际对应的方法。

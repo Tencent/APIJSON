@@ -141,7 +141,7 @@ public class QueryHelper2 {
 			rs.close();
 
 			//从缓存存取，避免 too many connections崩溃
-			if (position < config.getLimit() - 1) {
+			if (position < config.getCount() - 1) {
 				System.out.println("select  position < config.getLimit() - 1 >> saveCache(sql, resultList);");
 				saveCache(sql, resultList);
 			} else {

@@ -119,6 +119,9 @@ public class JSON {
 	 * @return
 	 */
 	public static String toJSONString(Object obj) {
+		if (obj instanceof String) {
+			return (String) obj;
+		}
 		try {
 			return com.alibaba.fastjson.JSON.toJSONString(obj);
 		} catch (Exception e) {
@@ -133,6 +136,9 @@ public class JSON {
 	 * @return
 	 */
 	public static String toJSONString(Object obj, SerializerFeature... features) {
+		if (obj instanceof String) {
+			return (String) obj;
+		}
 		try {
 			return com.alibaba.fastjson.JSON.toJSONString(obj, features);
 		} catch (Exception e) {
@@ -146,7 +152,14 @@ public class JSON {
 	 * @return
 	 */
 	public static String format(String json) {
-		return toJSONString(parseObject(json), SerializerFeature.PrettyFormat);
+		return format(parseObject(json));
+	}
+	/**格式化，显示更好看
+	 * @param object
+	 * @return
+	 */
+	public static String format(JSONObject object) {
+		return toJSONString(object, SerializerFeature.PrettyFormat);
 	}
 
 
