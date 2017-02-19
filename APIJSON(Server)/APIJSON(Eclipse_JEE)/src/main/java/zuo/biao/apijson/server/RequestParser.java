@@ -24,11 +24,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.sql.AccessVerifier;
@@ -80,7 +79,7 @@ public class RequestParser {
 			return newErrorResult(e);
 		}
 		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + requestMethod.name()
-				+ "/parseResponse  request = " + request);
+		+ "/parseResponse  request = " + request);
 
 		relationMap = new HashMap<String, String>();
 		parseRelation = false;
@@ -106,7 +105,7 @@ public class RequestParser {
 
 
 		requestObject = AccessVerifier.removeAccessInfo(requestObject);
-		if (isGetMethod(requestMethod)) {
+		if (isGetMethod(requestMethod) || requestMethod == RequestMethod.POST_GET) {
 			requestObject = error == null ? extendSuccessResult(requestObject)
 					: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		}
@@ -706,7 +705,7 @@ public class RequestParser {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) throws Exception {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
-		AccessVerifier.verify(requestMethod, requestObject, config == null ? null : config.getTable());
+		AccessVerifier.verify(requestObject, config);
 		return QueryHelper.getInstance().select(config);//QueryHelper2.getInstance().select(config);//
 	}
 
@@ -721,12 +720,12 @@ public class RequestParser {
 
 
 	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
+	private static final Pattern namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
 
 	public static boolean isTableKey(String key) {
-		key = StringUtil.getString(key);
-
-		return StringUtil.isNotEmpty(key, false) && isArrayKey(key) == false
-				&& bigAlphaPattern.matcher(key.substring(0, 1)).matches();
+		return StringUtil.isNotEmpty(key, false)
+				&& bigAlphaPattern.matcher(key.substring(0, 1)).matches()
+				&& namePattern.matcher(key.substring(1)).matches();
 	}
 	public static boolean isArrayKey(String key) {
 		return key != null && key.endsWith("[]");

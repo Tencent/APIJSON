@@ -29,12 +29,12 @@ public class Controller {
 
 	@RequestMapping("get/{request}")
 	public String get(@PathVariable String request) {
-		return new RequestParser(RequestMethod.GET).parse(request);
+		return new RequestParser(zuo.biao.apijson.RequestMethod.GET).parse(request);
 	}
 
 	@RequestMapping(value="post", method = RequestMethod.POST)
 	public String post(@RequestBody String request) {
-		return new RequestParser(RequestMethod.POST).parse(request);
+		return new RequestParser(zuo.biao.apijson.RequestMethod.POST).parse(request);
 	}
 
 	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
@@ -43,7 +43,6 @@ public class Controller {
 	 */
 	@RequestMapping(value="post_get", method = RequestMethod.POST)
 	public String post_get(@RequestBody String request) {
-		return new RequestParser(RequestMethod.GET).parse(request);
 	}
 	
 	/**以下接口继续用POST接口是为了客户端方便，只需要做get，post请求。也可以改用实际对应的方法。
@@ -51,12 +50,12 @@ public class Controller {
 	*/
 	@RequestMapping(value="delete", method = RequestMethod.POST)
 	public String delete(@RequestBody String request) {
-		return new RequestParser(RequestMethod.DELETE).parse(request);
+		return new RequestParser(zuo.biao.apijson.RequestMethod.DELETE).parse(request);
 	}
 	
 	@RequestMapping(value="put", method = RequestMethod.POST)
 	public String put(@RequestBody String request) {
-		return new RequestParser(RequestMethod.PUT).parse(request);
+		return new RequestParser(zuo.biao.apijson.RequestMethod.PUT).parse(request);
 	}
 
 }

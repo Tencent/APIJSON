@@ -19,11 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 

@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import org.springframework.web.bind.annotation.RequestMethod;
+import zuo.biao.apijson.RequestMethod;
 
 /**mock test of client
  * @author Lemon
