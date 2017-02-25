@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.StringUtil;
@@ -132,8 +133,22 @@ public class QueryHelper {
 			}
 			object = new JSONObject(true);
 			try {
+				Object value;
+				Object json;
 				for (int i = 0; i < columnArray.length; i++) {
-					object.put(columnArray[i], rs.getObject(rs.findColumn(columnArray[i])));
+					value = rs.getObject(rs.findColumn(columnArray[i]));
+					if (value instanceof String) {
+						try {
+							json = JSON.parse((String) value);
+							if (json != null && StringUtil.isNotEmpty(json, true)) {
+								value = json;
+							}
+						} catch (Exception e) {
+//							System.out.println(TAG + "select  while (rs.next()){  >> i = " + i + "  try { json = JSON.parse((String) value);"
+//									+ ">> } catch (Exception e) {\n" + e.getMessage());
+						}
+					}
+					object.put(columnArray[i], value);
 				}
 			} catch (Exception e) {
 				System.out.println(TAG + "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +

@@ -599,11 +599,14 @@ public class RequestParser {
 	 * @return
 	 */
 	private boolean isInRelationMap(String path) {
+		if (path == null) {
+			return false;
+		}
 		//		return relationMap == null ? false : relationMap.containsKey(path);
 		Set<String> set = relationMap == null ? null : relationMap.keySet();
 		if (set != null) {
 			for (String key : set) {
-				if (key != null && key.contains(path)) {
+				if (path.equals(key) || key.startsWith(path + "/")) {//解决相同字符导致的错误) {//key.contains(path)) {//
 					return true;
 				}
 			}

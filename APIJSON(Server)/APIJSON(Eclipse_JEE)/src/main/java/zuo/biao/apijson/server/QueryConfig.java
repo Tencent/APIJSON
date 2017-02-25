@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.RequestMethod;
@@ -113,7 +114,7 @@ public class QueryConfig {
 		this.id = id;
 		return this;
 	}
-	
+
 	public String getValues() {
 		return values;
 	}
@@ -142,6 +143,7 @@ public class QueryConfig {
 		this.where = where;
 		return this;
 	}
+
 	public int getCount() {
 		return count;
 	}
@@ -202,14 +204,17 @@ public class QueryConfig {
 					&& where.containsKey(Table.ID) == false) {
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
-			
+
 			String whereString = " where ";
+			Object value;
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
 				if (key == null) {
 					continue;
 				}
-				whereString += (key + "='" + where.get(key) + "' and ");
+				value = where.get(key);
+				whereString += (key + (value instanceof JSONArray
+						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") + " and ");
 			}
 			if (whereString.endsWith("and ")) {
 				whereString = whereString.substring(0, whereString.length() - "and ".length());
@@ -220,6 +225,22 @@ public class QueryConfig {
 		}
 		return "";
 	}
+	/**where key in ('key0', 'key1', ... )
+	 * @param in
+	 * @return in ('key0', 'key1', ... )
+	 */
+	public static String getInString(Object[] in) {
+		if (in == null || in.length <= 0) {
+			return "";
+		}
+		String inString = "";
+		for (int i = 0; i < in.length; i++) {
+			inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
+		}
+		return " in (" + inString + ") ";
+	}
+	
+	
 	/**获取筛选方法
 	 * @return
 	 */

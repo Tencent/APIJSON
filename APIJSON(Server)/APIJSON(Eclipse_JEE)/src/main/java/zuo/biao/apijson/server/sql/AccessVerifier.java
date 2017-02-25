@@ -218,7 +218,7 @@ public class AccessVerifier {
 	 */
 	public static boolean verifyMethod(String table, RequestMethod method) throws AccessException {
 		RequestMethod[] methods = table == null ? null : accessMap.get(table);
-		if (methods == null) {
+		if (methods == null || methods.length <= 0) {
 			throw new AccessException(table + "不允许访问！");
 		}
 		if (method == null) {
