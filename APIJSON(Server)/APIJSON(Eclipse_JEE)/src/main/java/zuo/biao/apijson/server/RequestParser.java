@@ -364,11 +364,11 @@ public class RequestParser {
 		}
 		String path = getPath(parentPath, name);
 
-		QueryConfig config = StringUtil.isNumer(name) ? parentConfig : null;
+		boolean nameIsNumber = StringUtil.isNumer(name);
+		QueryConfig config = nameIsNumber ? parentConfig : null;
 		if (config == null) {
 			config = new QueryConfig(requestMethod, name);
 		}
-		boolean nameIsNumber = StringUtil.isNumer(name);
 		final int position = nameIsNumber ? Integer.valueOf(0 + StringUtil.getNumber(name)) : 0;
 
 		boolean containRelation = false;

@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.StringUtil;
@@ -105,18 +106,22 @@ public class QueryHelper {
 		JSONObject object  = null;//new JSONObject(true);
 		ResultSet rs = null;
 		switch (config.getMethod()) {
+		case GET:
+		case POST_GET:
+			rs = statement.executeQuery(sql);
+			break;
 		case POST:
 		case PUT:
 		case DELETE:
-			int updateCount = statement.executeUpdate(sql);//创建数据对象
+			int updateCount = statement.executeUpdate(sql);
 
 			JSONObject result = RequestParser.newResult(updateCount > 0 ? 200 : 404
 					, updateCount > 0 ? "success" : "可能对象不存在！");
 			result.put(Table.ID, config.getId());
 			return result;
-		default:
-			rs = statement.executeQuery(sql);//创建数据对象
-			break;
+		default://HEAD, OPTIONS, TRACE等
+			System.out.println(TAG + "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
+			return null;
 		}
 
 
@@ -128,8 +133,22 @@ public class QueryHelper {
 			}
 			object = new JSONObject(true);
 			try {
+				Object value;
+				Object json;
 				for (int i = 0; i < columnArray.length; i++) {
-					object.put(columnArray[i], rs.getObject(rs.findColumn(columnArray[i])));
+					value = rs.getObject(rs.findColumn(columnArray[i]));
+					if (value instanceof String) {
+						try {
+							json = JSON.parse((String) value);
+							if (json != null && StringUtil.isNotEmpty(json, true)) {
+								value = json;
+							}
+						} catch (Exception e) {
+//							System.out.println(TAG + "select  while (rs.next()){  >> i = " + i + "  try { json = JSON.parse((String) value);"
+//									+ ">> } catch (Exception e) {\n" + e.getMessage());
+						}
+					}
+					object.put(columnArray[i], value);
 				}
 			} catch (Exception e) {
 				System.out.println(TAG + "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +
@@ -171,6 +190,7 @@ public class QueryHelper {
 
 	/**
 	 * @param table
+	 * @param schema
 	 * @return
 	 * @throws Exception
 	 */
@@ -183,15 +203,15 @@ public class QueryHelper {
 		}
 
 		ResultSet rs = statement.executeQuery("SELECT Count(*) FROM " + table);//创建数据对象
-		
+
 		int count = 0;
 		if (rs.next()) {
 			count = rs.getInt(1);
 		}
 		System.out.println(TAG + "getCount  count = " + count) ;
-		
+
 		rs.close();
-		
+
 		return count;
 	}
 

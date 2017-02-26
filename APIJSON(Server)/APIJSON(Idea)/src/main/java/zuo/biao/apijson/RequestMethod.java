@@ -12,22 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package zuo.biao.apijson;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import zuo.biao.apijson.server.sql.AccessVerifier;
-
-/**application
+/**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出一个POST_GET方法
  * @author Lemon
  */
-@SpringBootApplication
-public class APIJSONApplication {
+public enum RequestMethod {
 
-	public static void main(String[] args) {
-		SpringApplication.run(APIJSONApplication.class, args);
-		
-		AccessVerifier.init();
-	}
+	GET, POST_GET, POST, PUT, DELETE
 }

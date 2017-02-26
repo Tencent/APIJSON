@@ -19,11 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.web.bind.annotation.RequestMethod;
-
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 
@@ -40,8 +39,9 @@ public class QueryConfig {
 	private String columns;
 	private String values;
 	private Map<String, Object> where;
-	private int limit;
+	private int count;
 	private int page;
+	private String sort;
 	private int position;
 
 	public QueryConfig(RequestMethod method) {
@@ -65,19 +65,19 @@ public class QueryConfig {
 		setColumns(columns);
 		setValues(values);
 	}
-	public QueryConfig(RequestMethod method, int limit, int page) {
+	public QueryConfig(RequestMethod method, int count, int page) {
 		this(method);
-		setLimit(limit);
+		setCount(count);
 		setPage(page);
 	}
 
 	public RequestMethod getMethod() {
-		return method;
-	}
-	public QueryConfig setMethod(RequestMethod method) {
 		if (method == null) {
 			method = RequestMethod.GET;
 		}
+		return method;
+	}
+	public QueryConfig setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}
@@ -99,7 +99,7 @@ public class QueryConfig {
 		return this;
 	}
 	private String getColumnsString() {
-		switch (method) {
+		switch (getMethod()) {
 		case POST:
 			return StringUtil.isNotEmpty(columns, true) ? "(" + columns + ")" : "";
 		default:
@@ -114,7 +114,7 @@ public class QueryConfig {
 		this.id = id;
 		return this;
 	}
-	
+
 	public String getValues() {
 		return values;
 	}
@@ -143,11 +143,12 @@ public class QueryConfig {
 		this.where = where;
 		return this;
 	}
-	public int getLimit() {
-		return limit;
+
+	public int getCount() {
+		return count;
 	}
-	public QueryConfig setLimit(int limit) {
-		this.limit = limit;
+	public QueryConfig setCount(int count) {
+		this.count = count;
 		return this;
 	}
 	public int getPage() {
@@ -155,6 +156,13 @@ public class QueryConfig {
 	}
 	public QueryConfig setPage(int page) {
 		this.page = page;
+		return this;
+	}
+	public String getSort() {
+		return sort;
+	}
+	public QueryConfig setSort(String sort) {
+		this.sort = sort;
 		return this;
 	}
 	public int getPosition() {
@@ -169,36 +177,44 @@ public class QueryConfig {
 	 * @return
 	 */
 	public String getLimitString() {
-		return getLimitString(page, limit);// + 1);
+		return getLimitString(getPage(), getCount());// + 1);
 	}
 	/**获取限制数量
 	 * @param limit
 	 * @return
 	 */
-	public static String getLimitString(int page, int limit) {
-		return limit <= 0 ? "" : " limit " + page*limit + ", " + limit;
+	public static String getLimitString(int page, int count) {
+		return count <= 0 ? "" : " limit " + page*count + ", " + count;
 	}
 
 	/**获取筛选方法
 	 * @return
 	 */
 	public String getWhereString() {
-		return getWhereString(where);
+		return getWhereString(getMethod(), getWhere());
 	}
 	/**获取筛选方法
 	 * @param where
 	 * @return
 	 */
-	public static String getWhereString(Map<String, Object> where) {
+	public static String getWhereString(RequestMethod method, Map<String, Object> where) {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
+			if (RequestParser.isGetMethod(method) == false && method != RequestMethod.POST_GET
+					&& where.containsKey(Table.ID) == false) {
+				throw new IllegalArgumentException("请设置" + Table.ID + "！");
+			}
+
 			String whereString = " where ";
+			Object value;
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
 				if (key == null) {
 					continue;
 				}
-				whereString += (key + "='" + where.get(key) + "' and ");
+				value = where.get(key);
+				whereString += (key + (value instanceof JSONArray
+						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") + " and ");
 			}
 			if (whereString.endsWith("and ")) {
 				whereString = whereString.substring(0, whereString.length() - "and ".length());
@@ -209,6 +225,22 @@ public class QueryConfig {
 		}
 		return "";
 	}
+	/**where key in ('key0', 'key1', ... )
+	 * @param in
+	 * @return in ('key0', 'key1', ... )
+	 */
+	public static String getInString(Object[] in) {
+		if (in == null || in.length <= 0) {
+			return "";
+		}
+		String inString = "";
+		for (int i = 0; i < in.length; i++) {
+			inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
+		}
+		return " in (" + inString + ") ";
+	}
+	
+	
 	/**获取筛选方法
 	 * @return
 	 */
@@ -223,7 +255,7 @@ public class QueryConfig {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
 			if (where.containsKey(Table.ID) == false) {
-				return "";
+				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
 			String setString = " set ";
 			for (String key : set) {
@@ -270,9 +302,11 @@ public class QueryConfig {
 				request.remove(KEY_COLUMNS);
 
 				Map<String, Object> transferredRequest = new HashMap<String, Object>();
+				Object value;
 				for (String key : set) {
-					if (JSON.parseObject(request.getString(key)) == null) {//非key-value
-						transferredRequest.put(key, request.get(key));
+					value = request.get(key);
+					if (value instanceof JSONObject == false) {//只允许常规Object
+						transferredRequest.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 					}
 				}
 				config.setWhere(transferredRequest);

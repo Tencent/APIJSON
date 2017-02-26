@@ -24,11 +24,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.sql.AccessVerifier;
@@ -80,7 +79,7 @@ public class RequestParser {
 			return newErrorResult(e);
 		}
 		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + requestMethod.name()
-				+ "/parseResponse  request = " + request);
+		+ "/parseResponse  request = " + request);
 
 		relationMap = new HashMap<String, String>();
 		parseRelation = false;
@@ -106,7 +105,7 @@ public class RequestParser {
 
 
 		requestObject = AccessVerifier.removeAccessInfo(requestObject);
-		if (isGetMethod(requestMethod)) {
+		if (isGetMethod(requestMethod) || requestMethod == RequestMethod.POST_GET) {
 			requestObject = error == null ? extendSuccessResult(requestObject)
 					: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		}
@@ -217,7 +216,7 @@ public class RequestParser {
 		if (object == null || object.isEmpty()) {
 			throw new UnsupportedOperationException("非GET请求必须是服务端允许的操作！ \n " + error);
 		}
-		object = object.getJSONObject("structure");//解决返回值套了一层 "structure":{}
+		object = getJSONObject(object, "structure");//解决返回值套了一层 "structure":{}
 
 		JSONObject target = null;
 		if (isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
@@ -292,21 +291,13 @@ public class RequestParser {
 		//填充target
 		JSONObject transferredRequest = new JSONObject(true);
 		if (set != null) {
-			String value;
-			JSONObject child;
+			Object value;
 			JSONObject result;
 			for (String key : set) {
-				value = request.getString(key);
-				child = JSON.parseObject(value);//是不是更准确，key:"{}"可能会让child!=null?? request.getJSONObject(key);
-				if (child == null) {//key - value
-					if (isContainKeyInArray(key, disallowColumns)) {
-						throw new IllegalArgumentException(requestName
-								+ "不允许传 " + key + " 等[" + disallows + "]内的任何字段！");
-					}
-					transferredRequest.put(key, value);
-				} else {//object
+				value = request.get(key);
+				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					if (target.containsKey(key)) {//只填充target有的object
-						result = fillTarget(method, target.getJSONObject(key), child, key);//往下一级提取
+						result = fillTarget(method, getJSONObject(target, key), (JSONObject) value, key);//往下一级提取
 						System.out.println(TAG + "fillTarget  key = " + key + "; result = " + result);
 						if (result == null || result.isEmpty()) {//只添加!=null的值，可能数据库返回数据不够count
 							throw new IllegalArgumentException(requestName
@@ -317,6 +308,12 @@ public class RequestParser {
 						}
 						transferredRequest.put(key, result);
 					}
+				} else {//JSONArray或其它Object
+					if (isContainKeyInArray(key, disallowColumns)) {
+						throw new IllegalArgumentException(requestName
+								+ "不允许传 " + key + " 等[" + disallows + "]内的任何字段！");
+					}
+					transferredRequest.put(key, value);
 				}
 			}
 		}
@@ -367,11 +364,11 @@ public class RequestParser {
 		}
 		String path = getPath(parentPath, name);
 
-		QueryConfig config = StringUtil.isNumer(name) ? parentConfig : null;
+		boolean nameIsNumber = StringUtil.isNumer(name);
+		QueryConfig config = nameIsNumber ? parentConfig : null;
 		if (config == null) {
 			config = new QueryConfig(requestMethod, name);
 		}
-		boolean nameIsNumber = StringUtil.isNumer(name);
 		final int position = nameIsNumber ? Integer.valueOf(0 + StringUtil.getNumber(name)) : 0;
 
 		boolean containRelation = false;
@@ -380,17 +377,27 @@ public class RequestParser {
 		JSONObject transferredRequest = new JSONObject(true);
 		if (set != null) {
 			Object value;
-			String valueString;
-			JSONObject child;
 			JSONObject result;
 			boolean isFirst = true;
 			for (String key : set) {
 				value = transferredRequest.containsKey(key) ? transferredRequest.get(key) : request.get(key);
-				valueString = value == null ? null : String.valueOf(value);
-				child = JSON.parseObject(valueString);
-				if (child == null) {//key - value
+				if (value instanceof JSONObject) {//JSONObject，往下一级提取
+					config.setPosition(isFirst && nameIsNumber ? position : 0);
+					if (isArrayKey(key)) {//json array
+						result = getArray(path, config, key, (JSONObject) value);
+					} else {//json object
+						isFirst = false;
+						result = getObject(path, config, key, (JSONObject) value);
+					}
+					System.out.println(TAG + "getObject  key = " + key + "; result = " + result);
+					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
+						transferredRequest.put(key, result);
+					}
+				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
-					if (StringUtil.isPath(valueString)) {
+					
+					//替换path
+					if (value instanceof String && StringUtil.isPath((String) value)) {
 						System.out.println("getObject  StringUtil.isPath(value) >> parseRelation = " + parseRelation);
 						if (parseRelation) {
 							transferredRequest.put(key, getValueByPath(relationMap.get(getPath(path, key))));
@@ -398,20 +405,8 @@ public class RequestParser {
 						} else {
 							containRelation = true;
 							relationMap.put(getPath(path, key)//value.contains(parentPath)会因为结构变化而改变
-									, getPath((valueString.startsWith(SEPARATOR) ? parentPath : ""), valueString));
+									, getPath((((String) value).startsWith(SEPARATOR) ? parentPath : ""), (String) value));
 						}
-					}
-				} else {
-					config.setPosition(isFirst && nameIsNumber ? position : 0);
-					if (isArrayKey(key)) {//json array
-						result = getArray(path, config, key, child);
-					} else {//json object
-						isFirst = false;
-						result = getObject(path, config, key, child);
-					}
-					System.out.println(TAG + "getObject  key = " + key + "; result = " + result);
-					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
-						transferredRequest.put(key, result);
 					}
 				}
 			}
@@ -423,7 +418,7 @@ public class RequestParser {
 				QueryConfig config2 = newQueryConfig(name, transferredRequest);
 
 				if (parentConfig != null) {
-					config2.setLimit(parentConfig.getLimit()).setPage(parentConfig.getPage())
+					config2.setCount(parentConfig.getCount()).setPage(parentConfig.getPage())
 					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 
@@ -485,6 +480,9 @@ public class RequestParser {
 						}
 					}
 				}
+				if (totalCount <= 0) {//request内部没有JSONObject或者不存在适合条件的table内容
+					return null;
+				}
 				if (count > totalCount) {
 					count = totalCount;
 				}
@@ -505,25 +503,20 @@ public class RequestParser {
 		JSONObject transferredRequest = new JSONObject(true);
 		if (set != null) {
 			JSONObject parent = null;
-			String value;
-			JSONObject child;
+			Object value;
 			JSONObject result;
 			if (parseRelation == false) {
 				//生成count个
 				for (int i = 0; i < count; i++) {
 					parent = new JSONObject(true);
 					for (String key : set) {
-						value = request.getString(key);
-						child = JSON.parseObject(value);
-						if (child == null) {//key - value
-							//array里不允许关联，只能在object中关联
-							transferredRequest.put(key, value);
-						} else {
+						value = request.get(key);
+						if (value instanceof JSONObject) {//JSONObject
 							config.setPosition(i);
 							if (isArrayKey(key)) {//json array
-								result = getArray(getPath(path, "" + i), config, key, child);
+								result = getArray(getPath(path, "" + i), config, key, (JSONObject) value);
 							} else {//json object
-								result = getObject(getPath(path, "" + i), config, key, child);
+								result = getObject(getPath(path, "" + i), config, key, (JSONObject) value);
 							}
 							System.out.println(TAG + "getArray  parseRelation == false"
 									+ " >> i = " + i + "result = " + result);
@@ -547,6 +540,8 @@ public class RequestParser {
 									}
 								}
 							}
+						} else {//JSONArray或其它Object，直接填充
+							transferredRequest.put(key, value);//array里不允许关联，只能在object中关联
 						}
 					}
 					if (parent.isEmpty() == false) {//可能数据库返回数据不够count
@@ -555,19 +550,19 @@ public class RequestParser {
 				}
 			} else {
 				for (String key : set) {
-					child = JSON.parseObject(request.getString(key));
-					if (child == null) {//key - value
-						//array里不允许关联，只能在object中关联
-					} else {
+					value = request.get(key);
+					if (value instanceof JSONObject) {//JSONObject，往下一级提取
 						config.setPosition(Integer.valueOf(0 + StringUtil.getNumber(key, true)));
 						if (isArrayKey(key)) {//json array
-							result = getArray(path, config, key, child);
+							result = getArray(path, config, key, (JSONObject) value);
 						} else {//json object
-							result = getObject(path, config, key, child);
+							result = getObject(path, config, key, (JSONObject) value);
 						}
 						if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
 							transferredRequest.put(key, result);
 						}
+					} else {//JSONArray或其它Object
+						//array里不允许关联，只能在object中关联
 					}
 				}
 			}
@@ -604,11 +599,14 @@ public class RequestParser {
 	 * @return
 	 */
 	private boolean isInRelationMap(String path) {
+		if (path == null) {
+			return false;
+		}
 		//		return relationMap == null ? false : relationMap.containsKey(path);
 		Set<String> set = relationMap == null ? null : relationMap.keySet();
 		if (set != null) {
 			for (String key : set) {
-				if (key != null && key.contains(path)) {
+				if (path.equals(key) || key.startsWith(path + "/")) {//解决相同字符导致的错误) {//key.contains(path)) {//
 					return true;
 				}
 			}
@@ -706,7 +704,7 @@ public class RequestParser {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) throws Exception {
 		System.out.println("getSQLObject  config = " + JSON.toJSONString(config));
-		AccessVerifier.verify(requestMethod, requestObject, config == null ? null : config.getTable());
+		AccessVerifier.verify(requestObject, config);
 		return QueryHelper.getInstance().select(config);//QueryHelper2.getInstance().select(config);//
 	}
 
@@ -721,12 +719,12 @@ public class RequestParser {
 
 
 	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
+	private static final Pattern namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
 
 	public static boolean isTableKey(String key) {
-		key = StringUtil.getString(key);
-
-		return StringUtil.isNotEmpty(key, false) && isArrayKey(key) == false
-				&& bigAlphaPattern.matcher(key.substring(0, 1)).matches();
+		return StringUtil.isNotEmpty(key, false)
+				&& bigAlphaPattern.matcher(key.substring(0, 1)).matches()
+				&& namePattern.matcher(key.substring(1)).matches();
 	}
 	public static boolean isArrayKey(String key) {
 		return key != null && key.endsWith("[]");
