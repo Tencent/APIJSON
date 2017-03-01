@@ -17,7 +17,6 @@ package apijson.demo;
 import java.util.ArrayList;
 import java.util.List;
 
-import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.client.JSONObject;
 import zuo.biao.apijson.client.JSONRequest;
 import apijson.demo.model.Comment;
@@ -49,7 +48,7 @@ public class RequestUtil {
 		List<String> list = new ArrayList<String>();
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
 		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
-		data.setPicture(JSON.toJSONString(list));//"\"" + JSON.toJSONString(new JSONObject("{\"id\":2}")) + "\"");//
+		data.setPictureList(list);
 
 		return new JSONRequest(data).setTag(User.class.getSimpleName());
 	}
