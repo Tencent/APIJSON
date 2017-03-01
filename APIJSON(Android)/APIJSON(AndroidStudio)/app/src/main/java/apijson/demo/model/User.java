@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package apijson.demo.model;
 
+import java.util.List;
+
 /**用户类
  * @author Lemon
  */
@@ -24,7 +26,7 @@ public class User extends BaseModel {
 	public String head;
 	public String name;
 	public String phone;
-	public String picture;
+	public List<String> pictureList;
 
 	/**默认构造方法，JSON等解析时必须要有
 	 */
@@ -65,20 +67,10 @@ public class User extends BaseModel {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	public String getPicture() {
-		return picture;
+	public List<String> getPictureList() {
+		return pictureList;
 	}
-	public void setPicture(String picture) {
-		this.picture = picture;
+	public void setPictureList(List<String> pictureList) {
+		this.pictureList = pictureList;
 	}
-
-	////	@Override
-	////	public boolean isCorrect() {//根据自己的需求决定，也可以直接 return true
-	////		return id != null && id > 0;// && StringUtil.isNotEmpty(phone, true);
-	////	}
-	//
-	//	@Override
-	//	public JSONObject toJSONObject() {
-	//		return toJSONObject(this);
-	//	}
 }

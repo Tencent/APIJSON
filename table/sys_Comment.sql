@@ -23,15 +23,14 @@ DROP TABLE IF EXISTS `Comment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Comment` (
-  `id` bigint(20) NOT NULL,
-  `parentId` int(5) NOT NULL,
-  `workId` int(5) NOT NULL,
-  `userId` int(5) NOT NULL,
-  `targetUserId` int(5) NOT NULL,
+  `id` bigint(15) NOT NULL,
+  `parentId` bigint(15) NOT NULL,
+  `momentId` bigint(15) NOT NULL,
+  `userId` bigint(15) NOT NULL,
+  `toUserId` bigint(15) NOT NULL,
   `content` varchar(1000) DEFAULT NULL,
-  `targetUserName` varchar(20) NOT NULL,
-  `userName` varchar(20) NOT NULL,
-  `title` varchar(60) DEFAULT NULL,
+  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `workId` bigint(15) NOT NULL COMMENT '兼容测试以前的Work（被Moment替代）',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -42,7 +41,7 @@ CREATE TABLE `Comment` (
 
 LOCK TABLES `Comment` WRITE;
 /*!40000 ALTER TABLE `Comment` DISABLE KEYS */;
-INSERT INTO `Comment` VALUES (3,0,371,82002,59960,'This is a Content...-3','targetUserName-59960','userName-85560',NULL),(4,0,470,310,14604,'This is a Content...-4','targetUserName-14604','userName-93781',NULL),(13,0,58,64,6914,'This is a Content...-13','targetUserName-6914','userName-70118',NULL),(22,221,470,332,5904,'This is a Content...-22','targetUserName-5904','userName-11679',NULL),(44,0,170,7073,6378,'This is a Content...-44','targetUserName-6378','userName-88645',NULL),(45,0,301,93793,99700,'This is a Content...-45','targetUserName-99700','userName-30075',NULL),(47,4,470,10,5477,'This is a Content...-47','targetUserName-5477','userName-80271',NULL),(51,45,301,903,8711,'This is a Content...-51','targetUserName-8711','userName-97675',NULL),(54,0,170,3,62122,'This is a Content...-54','targetUserName-62122','userName-82381',NULL),(68,0,371,2314,959,'This is a Content...-68','targetUserName-959','userName-92565',NULL),(76,45,301,93793,42688,'This is a Content...-76','targetUserName-42688','userName-20740',NULL),(77,13,58,90814,35234,'This is a Content...-77','targetUserName-35234','userName-94888',NULL),(97,13,58,90814,14326,'This is a Content...-97','targetUserName-14326','userName-6289',NULL),(99,44,170,793,7166,'This is a Content...-99','targetUserName-7166','userName-22949',NULL),(157,0,371,34,7162,'This is a Content...-13','targetUserName-7162','userName-5526',NULL);
+INSERT INTO `Comment` VALUES (3,0,371,82002,59960,'This is a Content...-3','2017-02-01 11:20:50',371),(4,0,470,38710,82002,'This is a Content...-4','2017-02-01 11:20:50',470),(13,0,58,82005,93793,'This is a Content...-13','2017-02-01 11:20:50',58),(22,221,470,82001,70793,'This is a Content...-22','2017-02-01 11:20:50',470),(44,0,170,82003,93793,'This is a Content...-44','2017-02-01 11:20:50',170),(45,0,301,93793,99700,'This is a Content...-45','2017-02-01 11:20:50',301),(47,4,470,70793,70793,'This is a Content...-47','2017-02-01 11:20:50',470),(51,45,301,82003,70793,'This is a Content...-51','2017-02-01 11:20:50',301),(54,0,170,82004,93793,'This is a Content...-54','2017-02-01 11:20:50',170),(68,0,371,82005,70793,'This is a Content...-68','2017-02-01 11:20:50',371),(76,45,301,93793,70793,'This is a Content...-76','2017-02-01 11:20:50',301),(77,13,58,93793,35234,'This is a Content...-77','2017-02-01 11:20:50',58),(97,13,58,82006,14326,'This is a Content...-97','2017-02-01 11:20:50',58),(99,44,170,70793,7166,'This is a Content...-99','2017-02-01 11:20:50',170),(157,0,371,93793,70793,'This is a Content...-13','2017-02-01 11:20:50',371);
 /*!40000 ALTER TABLE `Comment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-24 16:19:11
+-- Dump completed on 2017-03-01 12:33:40

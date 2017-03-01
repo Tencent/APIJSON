@@ -16,30 +16,30 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Work`
+-- Table structure for table `Visit`
 --
 
-DROP TABLE IF EXISTS `Work`;
+DROP TABLE IF EXISTS `Visit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Work` (
+CREATE TABLE `Visit` (
   `id` bigint(20) NOT NULL,
-  `title` varchar(45) DEFAULT NULL,
-  `content` varchar(300) DEFAULT NULL,
-  `userId` int(5) NOT NULL,
-  `pictureList` json DEFAULT NULL,
+  `table` varchar(20) NOT NULL,
+  `tableId` bigint(15) DEFAULT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `lastDate` timestamp NULL DEFAULT NULL,
+  `count` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Work`
+-- Dumping data for table `Visit`
 --
 
-LOCK TABLES `Work` WRITE;
-/*!40000 ALTER TABLE `Work` DISABLE KEYS */;
-INSERT INTO `Work` VALUES (58,'Title-435','This is a Content...-435',90814,'[\"http://www.tooopen.com/view/435.html\"]'),(170,'Title-73','This is a Content...-73',70793,'[\"http://www.tooopen.com/view/73.html\"]'),(301,'Title-301','This is a Content...-301',93793,'[\"http://www.tooopen.com/view/301.html\"]'),(371,'Title-371','This is a Content...-371',82002,'[\"http://www.tooopen.com/view/371.html\"]'),(470,'Title-470','This is a Content...-470',38710,'[\"http://www.tooopen.com/view/470.html\"]');
-/*!40000 ALTER TABLE `Work` ENABLE KEYS */;
+LOCK TABLES `Visit` WRITE;
+/*!40000 ALTER TABLE `Visit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Visit` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

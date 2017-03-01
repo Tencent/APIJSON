@@ -17,7 +17,6 @@ package apijson.demo;
 import java.util.ArrayList;
 import java.util.List;
 
-import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.client.JSONObject;
 import zuo.biao.apijson.client.JSONRequest;
 import apijson.demo.model.Comment;
@@ -49,19 +48,19 @@ public class RequestUtil {
 		List<String> list = new ArrayList<String>();
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
 		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
-		data.setPicture(JSON.toJSONString(list));//"\"" + JSON.toJSONString(new JSONObject("{\"id\":2}")) + "\"");//
+		data.setPictureList(list);
 
 		return new JSONRequest(data).setTag(User.class.getSimpleName());
 	}
-	
+
 	public static JSONObject newDeleteRequest(long id) {
 		// 测试necessaryColumns = [id]通过
 		// 测试对象不存在通过，存在返回success通过
 		return new JSONRequest(new User(id <= 0 ? 10000 : id)).setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
 	}
 
-	
-	
+
+
 
 	public static JSONObject newSingleRequest(long id) {
 		return new JSONRequest(new User(id <= 0 ? 38710 : id));
@@ -96,15 +95,15 @@ public class RequestUtil {
 	}
 
 	public static JSONObject newAccessErrorRequest(long id) {
-		return new JSONRequest(new Wallet().setUserId(id <= 0 ? 38710 : id));
+		return new JSONRequest(new Wallet().setUserId(id <= 0 ? 38710 : id)).setTag(Wallet.class.getSimpleName());
 	}
 
 	public static JSONObject newAccessPermittedRequest(long id) {
 		JSONRequest request = new JSONRequest();
 		request.put(new Wallet().setUserId(id <= 0 ? 38710 : id));
 		request.put("currentUserId", 38710);
-		request.put("payPassword", "123456");
-		return request;
+		request.put("loginPassword", "apijson");
+		return request.setTag(Wallet.class.getSimpleName());
 	}
 
 }
