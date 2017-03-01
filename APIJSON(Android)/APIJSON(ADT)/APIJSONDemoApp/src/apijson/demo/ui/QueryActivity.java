@@ -88,8 +88,8 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	public static final int TYPE_RELY = 12;
 	public static final int TYPE_ARRAY = 13;
 	public static final int TYPE_COMPLEX = 14;
-	public static final int TYPE_ACCESS_ERROR = 15;
-	public static final int TYPE_ACCESS_PERMITTED = 16;
+	public static final int TYPE_ACCESS_ERROR = 5;
+	public static final int TYPE_ACCESS_PERMITTED = 6;
 
 
 
@@ -217,6 +217,9 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			return "put";
 		case TYPE_DELETE:
 			return "delete";
+		case TYPE_ACCESS_ERROR:
+		case TYPE_ACCESS_PERMITTED:
+			return "post_get";
 		default:
 			return "get";
 		}

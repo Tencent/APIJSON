@@ -43,7 +43,7 @@
 
         <Button
             android:id="@+id/btnQueryQuery"
-            android:layout_width="90dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Query" />
     </LinearLayout>

@@ -96,15 +96,15 @@ public class RequestUtil {
 	}
 
 	public static JSONObject newAccessErrorRequest(long id) {
-		return new JSONRequest(new Wallet().setUserId(id <= 0 ? 38710 : id));
+		return new JSONRequest(new Wallet().setUserId(id <= 0 ? 38710 : id)).setTag(Wallet.class.getSimpleName());
 	}
 
 	public static JSONObject newAccessPermittedRequest(long id) {
 		JSONRequest request = new JSONRequest();
 		request.put(new Wallet().setUserId(id <= 0 ? 38710 : id));
 		request.put("currentUserId", 38710);
-		request.put("payPassword", "123456");
-		return request;
+		request.put("loginPassword", "apijson");
+		return request.setTag(Wallet.class.getSimpleName());
 	}
 
 }

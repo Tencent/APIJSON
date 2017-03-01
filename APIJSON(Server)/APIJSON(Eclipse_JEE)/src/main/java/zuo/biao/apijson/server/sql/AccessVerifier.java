@@ -35,9 +35,12 @@ public class AccessVerifier {
 
 	private static Map<String, RequestMethod[]> accessMap;
 
+	/**初始化，建议在Applicaiton的onCreate方法中调用
+	 */
 	public static void init() {
 		accessMap = new HashMap<String, RequestMethod[]>();
 		accessMap.put("User", RequestMethod.values());
+		accessMap.put("Work", RequestMethod.values());
 		accessMap.put("Moment", RequestMethod.values());
 		accessMap.put("Comment", RequestMethod.values());
 		accessMap.put("Wallet", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
@@ -184,7 +187,7 @@ public class AccessVerifier {
 	 */
 	public static String getLoginPassword(long userId) {
 		// TODO 查询并返回对应userId的登录密码
-		return "apijson123";//仅测试用
+		return "apijson";//仅测试用
 	}
 
 	/**获取支付密码
