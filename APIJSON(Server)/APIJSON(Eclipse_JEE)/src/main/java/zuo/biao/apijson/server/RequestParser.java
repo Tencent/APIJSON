@@ -55,6 +55,7 @@ public class RequestParser {
 	private boolean parseRelation;
 	private Map<String, String> relationMap;
 
+
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return
@@ -66,6 +67,20 @@ public class RequestParser {
 				+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
 		return response;
+	}
+	/**解析请求json并获取对应结果
+	 * @param request
+	 * @return
+	 */
+	public String parse(JSONObject request) {
+		return JSON.toJSONString(parseResponse(request));
+	}
+	/**解析请求json并获取对应结果
+	 * @param request
+	 * @return requestObject
+	 */
+	public JSONObject parseResponse(JSONObject request) {
+		return parseResponse(JSON.toJSONString(request));
 	}
 	/**解析请求json并获取对应结果
 	 * @param request
@@ -395,7 +410,7 @@ public class RequestParser {
 					}
 				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
-					
+
 					//替换path
 					if (value instanceof String && StringUtil.isPath((String) value)) {
 						System.out.println("getObject  StringUtil.isPath(value) >> parseRelation = " + parseRelation);
