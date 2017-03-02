@@ -75,7 +75,7 @@ public class RequestUtil {
 	public static JSONObject newRelyRequest(long id) {
 		JSONRequest request = new JSONRequest();
 		request.put(new User(id <= 0 ? 70793 : id));
-		request.put(Work.class.getSimpleName(), new JSONRequest("userId", "User/id"));
+		request.put(Work.class.getSimpleName(), new JSONRequest("userId@", "User/id"));
 		return request;
 	}
 
@@ -86,9 +86,9 @@ public class RequestUtil {
 	public static JSONObject newComplexRequest() {
 		JSONRequest request = new JSONRequest();
 		request.put(new User().setSex(0));
-		request.put(Work.class.getSimpleName(), new JSONRequest("userId", "/User/id"));
+		request.put(Work.class.getSimpleName(), new JSONRequest("userId@", "/User/id"));
 
-		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId", "[]/Work/id")).
+		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId@", "[]/Work/id")).
 				toArray(3, 0, Comment.class.getSimpleName()));
 
 		return request.toArray(2, 0);

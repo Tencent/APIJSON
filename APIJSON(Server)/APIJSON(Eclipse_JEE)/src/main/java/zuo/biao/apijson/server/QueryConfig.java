@@ -231,7 +231,7 @@ public class QueryConfig {
 				
 				key = RequestParser.getRealKey(key, false);
 				
-				whereString += (key + (keyType == 1 ? " like " + value + "'" : (keyType == 2
+				whereString += (key + (keyType == 1 ? " like '" + value + "'" : (keyType == 2
 						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") ) + " and ");
 			}
 			if (whereString.endsWith("and ")) {
