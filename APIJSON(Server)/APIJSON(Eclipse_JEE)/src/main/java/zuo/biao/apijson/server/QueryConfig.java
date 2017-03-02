@@ -25,11 +25,13 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
+import zuo.biao.apijson.TypeValueKeyEntry;
 
 /**config model for query
  * @author Lemon
  */
 public class QueryConfig {
+	private static final String TAG = "QueryConfig";
 
 	public static final String KEY_COLUMNS = "columns";
 
@@ -207,14 +209,30 @@ public class QueryConfig {
 
 			String whereString = " where ";
 			Object value;
+			int keyType = 0;// 0 - =; 1 - $, 2 - {} 
 			for (String key : set) {
+				Log.d(TAG, "getWhereString  key = " + key);
 				//避免筛选到全部	value = key == null ? null : where.get(key);
-				if (key == null) {
+				if (key == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法
+					Log.d(TAG, "getWhereString  key.startsWith(@) >> continue;");
 					continue;
 				}
+				if (key.endsWith("@")) {//引用
+					key = key.substring(0, key.lastIndexOf("@"));
+//					throw new IllegalArgumentException(TAG + ".getWhereString: 字符 " + key + " 不合法！");
+				}
+				if (key.endsWith("$")) {
+					keyType = 1;
+				} else if (key.endsWith("{}")) {
+					keyType = 2;
+				}
+				
 				value = where.get(key);
-				whereString += (key + (value instanceof JSONArray
-						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") + " and ");
+				
+				key = RequestParser.getRealKey(key, false);
+				
+				whereString += (key + (keyType == 1 ? " like " + value + "'" : (keyType == 2
+						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") ) + " and ");
 			}
 			if (whereString.endsWith("and ")) {
 				whereString = whereString.substring(0, whereString.length() - "and ".length());
@@ -280,7 +298,7 @@ public class QueryConfig {
 	 * @param request
 	 * @return
 	 */
-	public static synchronized QueryConfig getQueryConfig(RequestMethod method, String table, JSONObject request) {
+	public static synchronized QueryConfig newQueryConfig(RequestMethod method, String table, JSONObject request) {
 		QueryConfig config = new QueryConfig(method, table);
 
 		Set<String> set = request == null ? null : request.keySet();

@@ -34,10 +34,7 @@ public class AccessVerifier {
 
 
 	private static Map<String, RequestMethod[]> accessMap;
-
-	/**初始化，建议在Applicaiton的onCreate方法中调用
-	 */
-	public static void init() {
+	static {
 		accessMap = new HashMap<String, RequestMethod[]>();
 		accessMap.put("User", RequestMethod.values());
 		accessMap.put("Work", RequestMethod.values());
@@ -237,5 +234,5 @@ public class AccessVerifier {
 		throw new AccessException(table + "不支持" + method + "方法！");
 	}
 
-	
+
 }

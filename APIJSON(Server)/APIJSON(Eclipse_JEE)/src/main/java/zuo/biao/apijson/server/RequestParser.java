@@ -30,6 +30,7 @@ import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
+import zuo.biao.apijson.TypeValueKeyEntry;
 import zuo.biao.apijson.server.sql.AccessVerifier;
 import zuo.biao.apijson.server.sql.QueryHelper;
 
@@ -412,14 +413,19 @@ public class RequestParser {
 					transferredRequest.put(key, value);
 
 					//替换path
-					if (value instanceof String && StringUtil.isPath((String) value)) {
+					if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
+						if (value instanceof String == false) {
+							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
+						}
 						System.out.println("getObject  StringUtil.isPath(value) >> parseRelation = " + parseRelation);
+						String replaceKey = getRealKey(key, false);
 						if (parseRelation) {
-							transferredRequest.put(key, getValueByPath(relationMap.get(getPath(path, key))));
+							transferredRequest.put(replaceKey, getValueByPath(relationMap.get(getPath(path, replaceKey))));
 							//							relationMap.remove(path + SEPARATOR + key);
+							updateRelation(path, getPath(path, replaceKey));//request结构已改变，需要更新依赖关系
 						} else {
 							containRelation = true;
-							relationMap.put(getPath(path, key)//value.contains(parentPath)会因为结构变化而改变
+							relationMap.put(getPath(path, replaceKey)//value.contains(parentPath)会因为结构变化而改变
 									, getPath((((String) value).startsWith(SEPARATOR) ? parentPath : ""), (String) value));
 						}
 					}
@@ -538,22 +544,7 @@ public class RequestParser {
 							if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
 								parent.put(key, result);
 
-								//更新关系path中对应改变字段
-								Set<String> relationSet = relationMap == null ? null : relationMap.keySet();
-								if (relationSet != null) {
-									String relationValue;
-									String replacePath = getPath(path, "" + i);
-									for (String relationKey : relationSet) {
-										if (relationKey == null || relationKey.startsWith(replacePath) == false) {
-											continue;
-										}
-										relationValue = relationMap.get(relationKey);
-										if (relationValue != null && relationValue.startsWith(path)
-												&& relationValue.startsWith(replacePath) == false) {
-											relationMap.put(relationKey, relationValue.replace(path, replacePath));
-										}
-									}
-								}
+								updateRelation(path, getPath(path, "" + i));//request结构已改变，需要更新依赖关系
 							}
 						} else {//JSONArray或其它Object，直接填充
 							transferredRequest.put(key, value);//array里不允许关联，只能在object中关联
@@ -588,6 +579,27 @@ public class RequestParser {
 		return transferredRequest;
 	}
 
+	/**
+	 * @param path
+	 * @param replacePath
+	 */
+	private void updateRelation(String path, String replacePath) {
+		//更新关系path中对应改变字段
+		Set<String> relationSet = replacePath == null || relationMap == null ? null : relationMap.keySet();
+		if (relationSet != null) {
+			String relationValue;
+			for (String relationKey : relationSet) {
+				if (relationKey == null || relationKey.startsWith(replacePath) == false) {
+					continue;
+				}
+				relationValue = relationMap.get(relationKey);
+				if (relationValue != null && relationValue.startsWith(path)
+						&& relationValue.startsWith(replacePath) == false) {
+					relationMap.put(relationKey, relationValue.replace(path, replacePath));
+				}
+			}
+		}		
+	}
 
 	/**获取拼接路径
 	 * @param path
@@ -729,20 +741,92 @@ public class RequestParser {
 	 * @return
 	 */
 	private QueryConfig newQueryConfig(String table, JSONObject request) {
-		return QueryConfig.getQueryConfig(requestMethod, table, request);
+		return QueryConfig.newQueryConfig(requestMethod, table, request);
 	}
 
 
 	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
 	private static final Pattern namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
 
-	public static boolean isTableKey(String key) {
-		return StringUtil.isNotEmpty(key, false)
-				&& bigAlphaPattern.matcher(key.substring(0, 1)).matches()
-				&& namePattern.matcher(key.substring(1)).matches();
-	}
+	/**判断是否为Array的key
+	 * @param key
+	 * @return
+	 */
 	public static boolean isArrayKey(String key) {
 		return key != null && key.endsWith("[]");
+	}
+	/**判断是否为对应Table的key
+	 * @param key
+	 * @return
+	 */
+	public static boolean isTableKey(String key) {
+		return isWord(key) && bigAlphaPattern.matcher(key.substring(0, 1)).matches();
+	}
+	/**判断是否为词，只能包含字母，数字或下划线
+	 * @param key
+	 * @return
+	 */
+	public static boolean isWord(String key) {
+		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
+	}
+
+	/**这些符号会对@依赖引用造成影响。[]/Moment/User:toUser/id@ ? 解决方法：
+	 * 方法1(最佳)：在所有修改带操作符的地方更新依赖关系 #updateRelation
+	 * 优点：替换key后结构成为客户端所需的，不带转义；可能增加updateRelation次数后性能比方法2遍历keySet找到映射key后好点
+	 * 缺点：修改代码分散
+	 * 
+	 * 方法2：在所有用到key的地方用getRealKey(key)代替key
+	 * 优点：修改代码集中
+	 * 缺点：完成查询后key没有替换为客户端所需的，要么不解决，要么最后增加一次遍历来替换key；需要在getValueByPath和putValueByPath中遍历keySet找到映射key
+	 * 
+	 * 方法3：方法1，2结合。增加一个keyMap<origin, real>，
+	 * getValueByPath和putValueByPath中path中的realKey如果有映射就替换为originKey，
+	 * 每次替换key为realkey后keyMap.remove(realkey)
+	 * 
+	 * 优点：替换key后结构成为客户端所需的，不带转义
+	 * 缺点：逻辑复杂，而且不能单独origin-real映射，origin必须要完整路径，否则当不同Object种含有相同origin时就会出错！！！
+	 * 
+	 * 综上，方法1最好。
+	 */
+
+	/**获取客户端实际需要的key
+	 * #作为方法引用符号，()作为包含关系？% & | {} [] <> < 这些呢？
+	 * <br> "userId@":"/User/id"           //@根据路径依赖，@始终在最后。value是'/'分隔的字符串。
+	 * <br> "isPraised()":"isContain(Collection:idList,long:id)"  //()使用方法，value是方法表达式。不能与@并用。
+	 * <br> "content$":"%searchKey%"       //$搜索，右边紧跟key。value是搜索表达式。
+	 * <br> "@columns":"id,sex,name"       //关键字，左边紧跟key。暂时不用，因为目前关键字很少，几乎不会发生冲突。value是','分隔的字符串。
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static String getRealKey(String originKey, boolean isTableKey) {
+		Log.i(TAG, "getRealKey  originKey = " + originKey);
+		if (originKey == null || isArrayKey(originKey)) {
+			Log.w(TAG, "getRealKey  originKey == null || isArrayKey(originKey) >>  return originKey;");
+			return originKey;
+		}
+
+		String key = new String(originKey);
+		if (key.endsWith("$")) {//搜索，查询时处理
+			key = key.substring(0, key.indexOf("$"));
+		} else if (key.endsWith("{}")) {//被包含，或者说处于value的范围内。查询时处理 "key[]":{} 和 "key{}":[]正好反过来
+			key = key.substring(0, key.indexOf("{}"));
+		} else if (key.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存？
+			key = key.substring(0, key.indexOf("()"));
+		} else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
+			key = key.substring(0, key.lastIndexOf("@"));
+		}
+
+		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好？不，查询就得截取
+		if (isTableKey) {//不允许在column key中使用Type:key形式
+			key = TypeValueKeyEntry.parseKeyEntry(key).getKey();
+		}
+
+		if (isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
+			throw new IllegalArgumentException(TAG + " getRealKey: 字符 " + originKey + " 不合法！");
+		}
+
+		return key;
 	}
 
 }
