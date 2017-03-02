@@ -121,10 +121,10 @@ public class RequestParser {
 
 
 		requestObject = AccessVerifier.removeAccessInfo(requestObject);
-		if (isGetMethod(requestMethod) || requestMethod == RequestMethod.POST_GET) {
+//		if (isGetMethod(requestMethod) || requestMethod == RequestMethod.POST_GET) {//分情况把我都搞晕了@_@
 			requestObject = error == null ? extendSuccessResult(requestObject)
 					: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
-		}
+//		}
 
 		System.out.println("\n\n\n\n" + TAG + requestMethod.name() + "/parseResponse  request = \n" + request);
 		return requestObject;

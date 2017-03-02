@@ -25,7 +25,6 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
-import zuo.biao.apijson.TypeValueKeyEntry;
 
 /**config model for query
  * @author Lemon
