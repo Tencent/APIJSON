@@ -47,6 +47,7 @@ public class AccessVerifier {
 		accessMap.put("Password", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
 		accessMap.put("Login", new RequestMethod[]{POST_GET, POST, DELETE});
 		accessMap.put("Request", new RequestMethod[]{GET, POST_GET});
+		accessMap.put("Verify", new RequestMethod[]{POST_GET, POST, DELETE});
 	}
 
 	/**验证权限是否通过
@@ -236,4 +237,5 @@ public class AccessVerifier {
 		throw new AccessException(table + "不支持" + method + "方法！");
 	}
 
+	
 }

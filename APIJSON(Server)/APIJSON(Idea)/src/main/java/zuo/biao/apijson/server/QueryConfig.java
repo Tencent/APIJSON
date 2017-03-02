@@ -230,17 +230,16 @@ public class QueryConfig {
 	 * @return in ('key0', 'key1', ... )
 	 */
 	public static String getInString(Object[] in) {
-		if (in == null || in.length <= 0) {
-			return "";
-		}
 		String inString = "";
-		for (int i = 0; i < in.length; i++) {
-			inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
+		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
+			for (int i = 0; i < in.length; i++) {
+				inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
+			}
 		}
 		return " in (" + inString + ") ";
 	}
-	
-	
+
+
 	/**获取筛选方法
 	 * @return
 	 */
