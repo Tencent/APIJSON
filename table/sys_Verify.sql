@@ -16,32 +16,28 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Password`
+-- Table structure for table `Verify`
 --
 
-DROP TABLE IF EXISTS `Password`;
+DROP TABLE IF EXISTS `Verify`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Password` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `table` varchar(20) NOT NULL DEFAULT 'User',
-  `tableId` bigint(15) NOT NULL,
-  `type` varchar(20) DEFAULT NULL,
-  `value` varchar(20) NOT NULL,
+CREATE TABLE `Verify` (
+  `code` int(6) NOT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `phone` varchar(11) NOT NULL,
+  `id` bigint(15) NOT NULL COMMENT '一般存phone',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Password`
+-- Dumping data for table `Verify`
 --
 
-LOCK TABLES `Password` WRITE;
-/*!40000 ALTER TABLE `Password` DISABLE KEYS */;
-INSERT INTO `Password` VALUES (1,'User',38710,NULL,'apijson','2017-02-19 13:28:58','12345678900'),(2,'User',82001,NULL,'123456','2017-02-19 13:28:58','13000082001');
-/*!40000 ALTER TABLE `Password` ENABLE KEYS */;
+LOCK TABLES `Verify` WRITE;
+/*!40000 ALTER TABLE `Verify` DISABLE KEYS */;
+INSERT INTO `Verify` VALUES (5387,'2017-03-02 03:01:01',13000082001),(5542,'2017-03-02 04:25:23',15988125475);
+/*!40000 ALTER TABLE `Verify` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-03-02 12:31:57
+-- Dump completed on 2017-03-02 12:31:56
