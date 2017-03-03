@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.Entry;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
@@ -78,38 +77,31 @@ public class RequestParser {
 	public String parse(JSONObject request) {
 		return JSON.toJSONString(parseResponse(request));
 	}
+
 	/**解析请求json并获取对应结果
-	 * @param request
-	 * @return requestObject
+	 * @param request 先parseRequest中URLDecoder.decode(request, UTF_8);再parseResponse(getCorrectRequest(...))
+	 * @return parseResponse(requestObject);
 	 */
-	public JSONObject parseResponse(JSONObject request) {
-		return parseResponse(JSON.toJSONString(request));
+	public JSONObject parseResponse(String request) {
+		System.out.println("\n\n\n\n" + TAG + requestMethod.name() + "/parseResponse  request = \n" + request);
+		try {
+			requestObject = getCorrectRequest(requestMethod, parseRequest(request, requestMethod));
+		} catch (Exception e) {
+			return newErrorResult(e);
+		}
+		return parseResponse(requestObject);
 	}
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return requestObject
 	 */
-	public JSONObject parseResponse(String request) {
-
-		try {
-			request = URLDecoder.decode(request, UTF_8);
-		} catch (UnsupportedEncodingException e) {
-			return newErrorResult(e);
-		}
-		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + requestMethod.name()
-		+ "/parseResponse  request = " + request);
-
+	public JSONObject parseResponse(JSONObject request) {
 		relationMap = new HashMap<String, String>();
 		parseRelation = false;
-		try {
-			requestObject = getCorrectRequest(requestMethod, JSON.parseObject(request));
-		} catch (Exception e) {
-			return newErrorResult(e);
-		}
 
 		Exception error = null;
 		try {
-			requestObject = getObject(null, null, null, requestObject);
+			requestObject = getObject(null, null, null, request);
 
 			parseRelation = true;
 			requestObject = getObject(null, null, null, requestObject);
@@ -128,8 +120,25 @@ public class RequestParser {
 				: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		//		}
 
-		System.out.println("\n\n\n\n" + TAG + requestMethod.name() + "/parseResponse  request = \n" + request);
 		return requestObject;
+	}
+
+	/**解析请求JSONObject
+	 * @param request => URLDecoder.decode(request, UTF_8);
+	 * @return
+	 */
+	public static JSONObject parseRequest(String request, RequestMethod method) {
+		try {
+			request = URLDecoder.decode(request, UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			return newErrorResult(e);
+		}
+		if (method == null) {
+			method = RequestMethod.GET;
+		}
+		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + method.name()
+		+ "/parseResponse  request = " + request);
+		return JSON.parseObject(request);
 	}
 
 
@@ -138,7 +147,7 @@ public class RequestParser {
 	 * @return
 	 */
 	public static boolean isGetMethod(RequestMethod method) {
-		return method == null || method == RequestMethod.GET;
+		return method == null || method == RequestMethod.GET || method == RequestMethod.HEAD;
 	}
 
 	/**新建带状态内容的JSONObject
@@ -170,6 +179,14 @@ public class RequestParser {
 	public static JSONObject extendSuccessResult(JSONObject object) {
 		return extendResult(object, 200, "success");
 	}
+	/**添加请求成功的状态内容
+	 * @param object
+	 * @return
+	 */
+	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
+		JSONObject error = newErrorResult(e);
+		return extendResult(object, error.getIntValue("status"), error.getString("message"));
+	}
 	/**新建错误状态内容
 	 * @param e
 	 * @return
@@ -187,6 +204,8 @@ public class RequestParser {
 				status = 403;
 			} else if (e instanceof IllegalArgumentException) {
 				status = 406;
+			} else if (e instanceof ConflictException) {
+				status = 409;
 			}
 
 			return newResult(status, e.getMessage());
@@ -838,11 +857,11 @@ public class RequestParser {
 
 		String key = new String(originKey);
 		if (key.endsWith("$")) {//搜索，查询时处理
-			key = key.substring(0, key.indexOf("$"));
+			key = key.substring(0, key.lastIndexOf("$"));
 		} else if (key.endsWith("{}")) {//被包含，或者说处于value的范围内。查询时处理 "key[]":{} 和 "key{}":[]正好反过来
-			key = key.substring(0, key.indexOf("{}"));
+			key = key.substring(0, key.lastIndexOf("{}"));
 		} else if (key.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存？
-			key = key.substring(0, key.indexOf("()"));
+			key = key.substring(0, key.lastIndexOf("()"));
 		} else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
 			key = key.substring(0, key.lastIndexOf("@"));
 		}

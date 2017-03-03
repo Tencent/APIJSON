@@ -1,10 +1,11 @@
 package zuo.biao.apijson.server.sql;
 
-import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
 import static zuo.biao.apijson.RequestMethod.POST_GET;
+import static zuo.biao.apijson.RequestMethod.POST_HEAD;
 import static zuo.biao.apijson.RequestMethod.PUT;
+import static zuo.biao.apijson.RequestMethod.DELETE;
 
 import java.rmi.AccessException;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class AccessVerifier {
 		accessMap.put("Password", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
 		accessMap.put("Login", new RequestMethod[]{POST_GET, POST, DELETE});
 		accessMap.put("Request", new RequestMethod[]{GET, POST_GET});
-		accessMap.put("Verify", new RequestMethod[]{POST_GET, POST, DELETE});
+		accessMap.put("Verify", new RequestMethod[]{POST_HEAD, POST_GET, POST, DELETE});
 	}
 
 	/**验证权限是否通过

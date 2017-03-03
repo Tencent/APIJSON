@@ -250,6 +250,9 @@ public class StringUtil {
 
 	//判断字符类型 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	public static final Pattern alphaPattern = Pattern.compile("[a-zA-Z]");
+	public static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
+	public static final Pattern smallAlphaPattern = Pattern.compile("[a-z]");
 	//判断手机格式是否正确
 	public static boolean isPhone(String phone) {
 		if (isNotEmpty(phone, true) == false) {

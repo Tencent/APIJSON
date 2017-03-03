@@ -103,6 +103,9 @@ public class QueryConfig {
 		switch (getMethod()) {
 		case POST:
 			return StringUtil.isNotEmpty(columns, true) ? "(" + columns + ")" : "";
+		case HEAD:
+		case POST_HEAD:
+			return " COUNT(0) COUNT ";
 		default:
 			return StringUtil.isNotEmpty(columns, true) ? columns : "*";
 		}
@@ -185,7 +188,7 @@ public class QueryConfig {
 	 * @return
 	 */
 	public static String getLimitString(int page, int count) {
-		return count <= 0 ? "" : " limit " + page*count + ", " + count;
+		return count <= 0 ? "" : " LIMIT " + page*count + ", " + count;
 	}
 
 	/**获取筛选方法
@@ -206,7 +209,7 @@ public class QueryConfig {
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
 
-			String whereString = " where ";
+			String whereString = " WHERE ";
 			Object value;
 			int keyType = 0;// 0 - =; 1 - $, 2 - {} 
 			for (String key : set) {
@@ -236,13 +239,13 @@ public class QueryConfig {
 					e.printStackTrace();
 				}
 				
-				whereString += (key + (keyType == 1 ? " like '" + value + "'" : (keyType == 2
-						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") ) + " and ");
+				whereString += (key + (keyType == 1 ? " LIKE '" + value + "'" : (keyType == 2
+						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") ) + " AND ");
 			}
-			if (whereString.endsWith("and ")) {
-				whereString = whereString.substring(0, whereString.length() - "and ".length());
+			if (whereString.endsWith("AND ")) {
+				whereString = whereString.substring(0, whereString.length() - "AND ".length());
 			}
-			if (whereString.trim().endsWith("where") == false) {
+			if (whereString.trim().endsWith("WHERE") == false) {
 				return whereString;
 			}
 		}
@@ -259,7 +262,7 @@ public class QueryConfig {
 				inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
 			}
 		}
-		return " in (" + inString + ") ";
+		return " IN (" + inString + ") ";
 	}
 
 
@@ -279,7 +282,7 @@ public class QueryConfig {
 			if (where.containsKey(Table.ID) == false) {
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
-			String setString = " set ";
+			String setString = " SET ";
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
 				if (key == null || Table.ID.equals(key)) {
@@ -290,8 +293,8 @@ public class QueryConfig {
 			if (setString.endsWith(",")) {
 				setString = setString.substring(0, setString.length() - 1);
 			}
-			if (setString.trim().endsWith("set") == false) {
-				return setString + " where " + Table.ID + "='" + where.get(Table.ID) + "' ";
+			if (setString.trim().endsWith("SET") == false) {
+				return setString + " WHERE " + Table.ID + "='" + where.get(Table.ID) + "' ";
 			}
 		}
 		return "";
@@ -368,13 +371,13 @@ public class QueryConfig {
 		}
 		switch (config.getMethod()) {
 		case POST:
-			return "insert into " + config.getTable() + config.getColumnsString() + " values" + config.getValuesString();
+			return "INSERT INTO " + config.getTable() + config.getColumnsString() + " VALUES" + config.getValuesString();
 		case PUT:
-			return "update " + config.getTable() + config.getSetString();
+			return "UPDATE " + config.getTable() + config.getSetString();
 		case DELETE:
-			return "delete from " + config.getTable() + config.getWhereString();
+			return "DELETE FROM " + config.getTable() + config.getWhereString();
 		default:
-			return "select "+ config.getColumnsString() + " from " + config.getTable()
+			return "SELECT "+ config.getColumnsString() + " FROM " + config.getTable()
 			+ config.getWhereString() + config.getLimitString();
 		}
 	}

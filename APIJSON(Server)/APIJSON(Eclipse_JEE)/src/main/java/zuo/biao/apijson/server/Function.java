@@ -55,11 +55,11 @@ public class Function {
 			System.out.println("duration=" + (System.currentTimeMillis()-time0));
 		}
 
-		System.out.println("" + invoke(jsonMap, "plus(int:i0,int:i1)"));
-		System.out.println("" + invoke(jsonMap, "count(Collection:collection)"));
-		System.out.println("" + invoke(jsonMap, "contains(Collection:collection,Object:id)"));
-		System.out.println("" + invoke(jsonMap, "get(Map:map,key)"));
-		System.out.println("" + invoke(jsonMap, "Integer:get(Map:map,key)"));
+		System.out.println("plus = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
+		System.out.println("count = " + invoke(jsonMap, "count(Collection:collection)"));
+		System.out.println("contains = " + invoke(jsonMap, "contains(Collection:collection,Object:id)"));
+		System.out.println("get = " + invoke(jsonMap, "get(Map:map,key)"));
+		System.out.println("Integer:get = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
 	}
 
 	/**反射调用
@@ -122,9 +122,14 @@ public class Function {
 		return null;
 	}
 
-	public static int plus(int i0, int i1) {
+	public static long plus(long i0, long i1) {
 		return i0 + i1;
 	}
+	
+	public static String newVerify(String phone) {
+		return new Controller().postAuthCode(phone);
+	}
+
 
 	/**判断collection是否包含object
 	 * @param collection
