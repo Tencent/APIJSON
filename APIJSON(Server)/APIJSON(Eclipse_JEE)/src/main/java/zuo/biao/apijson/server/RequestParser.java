@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.Entry;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
@@ -121,10 +123,10 @@ public class RequestParser {
 
 
 		requestObject = AccessVerifier.removeAccessInfo(requestObject);
-//		if (isGetMethod(requestMethod) || requestMethod == RequestMethod.POST_GET) {//分情况把我都搞晕了@_@
-			requestObject = error == null ? extendSuccessResult(requestObject)
-					: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
-//		}
+		//		if (isGetMethod(requestMethod) || requestMethod == RequestMethod.POST_GET) {//分情况把我都搞晕了@_@
+		requestObject = error == null ? extendSuccessResult(requestObject)
+				: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
+		//		}
 
 		System.out.println("\n\n\n\n" + TAG + requestMethod.name() + "/parseResponse  request = \n" + request);
 		return requestObject;
@@ -394,6 +396,7 @@ public class RequestParser {
 
 		Set<String> set = request.keySet();
 		JSONObject transferredRequest = new JSONObject(true);
+		Map<String, String> functionMap = new LinkedHashMap<>();
 		if (set != null) {
 			Object value;
 			JSONObject result;
@@ -414,9 +417,12 @@ public class RequestParser {
 					}
 				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
-
-					//替换path
-					if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
+					if (key.endsWith("()")) {
+						if (value instanceof String == false) {
+							throw new IllegalArgumentException("\"key()\": 后面必须为函数String！");
+						}
+						functionMap.put(key, (String) value);
+					} else if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
 						if (value instanceof String == false) {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
@@ -451,6 +457,27 @@ public class RequestParser {
 				//				JSONObject result = getSQLObject(config2);
 				//				if (result != null && result.isEmpty() == false) {//解决获取失败导致不能获取里面JSONObject
 				//					transferredRequest = result;
+
+
+				if (transferredRequest != null && transferredRequest.isEmpty() == false) {//避免返回空的
+					//解析函数function
+					Set<String> functionSet = functionMap.keySet();
+					if (functionSet != null && functionSet.isEmpty() == false) {
+						for (String key : functionSet) {
+							try {
+								transferredRequest.put(getRealKey(key, false)
+										, Function.invoke(transferredRequest, functionMap.get(key)));
+							} catch (Exception e) {
+								Log.e(TAG, "getObject  containRelation == false && isTableKey(name)"
+										+ " >> transferredRequest.put(getRealKey(key, false),"
+										+ " Function.invoke(transferredRequest, functionMap.get(key)));"
+										+ " >> } catch (Exception e) {");
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+
 				if (parseRelation) {
 					putValueByPath(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
 				}
@@ -802,7 +829,7 @@ public class RequestParser {
 	 * @param key
 	 * @return
 	 */
-	public static String getRealKey(String originKey, boolean isTableKey) {
+	public static String getRealKey(String originKey, boolean isTableKey) throws Exception {
 		Log.i(TAG, "getRealKey  originKey = " + originKey);
 		if (originKey == null || isArrayKey(originKey)) {
 			Log.w(TAG, "getRealKey  originKey == null || isArrayKey(originKey) >>  return originKey;");

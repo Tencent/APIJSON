@@ -228,7 +228,13 @@ public class QueryConfig {
 				
 				value = where.get(key);
 				
-				key = RequestParser.getRealKey(key, false);
+				try {
+					key = RequestParser.getRealKey(key, false);
+				} catch (Exception e) {
+					Log.e(TAG, "getObject  getWhereString  try { key = RequestParser.getRealKey(key, false);"
+							+ " >> } catch (Exception e) {");
+					e.printStackTrace();
+				}
 				
 				whereString += (key + (keyType == 1 ? " like '" + value + "'" : (keyType == 2
 						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") ) + " and ");
