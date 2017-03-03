@@ -383,7 +383,7 @@ public class RequestParser {
 		boolean nameIsNumber = StringUtil.isNumer(name);
 		QueryConfig config = nameIsNumber ? parentConfig : null;
 		if (config == null) {
-			config = new QueryConfig(requestMethod, name);//性能会更好吗？.setCount(1);
+			config = new QueryConfig(requestMethod, name).setCount(1);
 		}
 		//避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
 		if (nameIsNumber && ("" + config.getPosition()).equals(name) == false) {
