@@ -383,9 +383,12 @@ public class RequestParser {
 		boolean nameIsNumber = StringUtil.isNumer(name);
 		QueryConfig config = nameIsNumber ? parentConfig : null;
 		if (config == null) {
-			config = new QueryConfig(requestMethod, name);
+			config = new QueryConfig(requestMethod, name);//性能会更好吗？.setCount(1);
 		}
-		final int position = nameIsNumber ? Integer.valueOf(0 + StringUtil.getNumber(name)) : 0;
+		//避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
+		if (nameIsNumber && ("" + config.getPosition()).equals(name) == false) {
+			config.setPosition(0).setCount(1).setPage(0);
+		}
 
 		boolean containRelation = false;
 
@@ -398,12 +401,12 @@ public class RequestParser {
 			for (String key : set) {
 				value = transferredRequest.containsKey(key) ? transferredRequest.get(key) : request.get(key);
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					config.setPosition(isFirst && nameIsNumber ? position : 0);
 					if (isArrayKey(key)) {//json array
 						result = getArray(path, config, key, (JSONObject) value);
 					} else {//json object
+						result = getObject(path, isFirst == false || nameIsNumber == false //[]里第一个不能为[]
+								? null : config, key, (JSONObject) value);
 						isFirst = false;
-						result = getObject(path, config, key, (JSONObject) value);
 					}
 					System.out.println(TAG + "getObject  key = " + key + "; result = " + result);
 					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
