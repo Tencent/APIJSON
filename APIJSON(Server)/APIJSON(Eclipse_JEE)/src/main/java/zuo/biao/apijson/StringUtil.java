@@ -250,9 +250,17 @@ public class StringUtil {
 
 	//判断字符类型 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final Pattern alphaPattern = Pattern.compile("[a-zA-Z]");
-	public static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
-	public static final Pattern smallAlphaPattern = Pattern.compile("[a-z]");
+	public static final Pattern alphaPattern;
+	public static final Pattern bigAlphaPattern;
+	public static final Pattern namePattern;
+	public static final Pattern smallAlphaPattern;
+	static {
+		alphaPattern = Pattern.compile("[a-zA-Z]");
+		bigAlphaPattern = Pattern.compile("[A-Z]");
+		namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
+		smallAlphaPattern = Pattern.compile("[a-z]");
+	}
+	
 	//判断手机格式是否正确
 	public static boolean isPhone(String phone) {
 		if (isNotEmpty(phone, true) == false) {

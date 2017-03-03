@@ -52,34 +52,35 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	
 	public static final int STATUS_SUCCEED = 200;
 	
-	public static final String ID = "id";
-	public static final String STATUS = "status";
-	public static final String COUNT = "count";
-	public static final String MESSAGE = "message";
+	
+	public static final String KEY_ID = "id";
+	public static final String KEY_STATUS = "status";
+	public static final String KEY_COUNT = "count";
+	public static final String KEY_MESSAGE = "message";
 
 	/**获取id
 	 * @return
 	 */
 	public long getId() {
-		return getLongValue(ID);
+		return getLongValue(KEY_ID);
 	}
 	/**获取状态
 	 * @return
 	 */
 	public int getStatus() {
-		return getIntValue(STATUS);
+		return getIntValue(KEY_STATUS);
 	}
 	/**获取数量
 	 * @return
 	 */
 	public int getCount() {
-		return getIntValue(COUNT);
+		return getIntValue(KEY_COUNT);
 	}
 	/**获取信息
 	 * @return
 	 */
 	public String getMessage() {
-		return getString(MESSAGE);
+		return getString(KEY_MESSAGE);
 	}
 	
 	/**是否成功

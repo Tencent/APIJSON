@@ -15,6 +15,7 @@ limitations under the License.*/
 package zuo.biao.apijson;
 
 import static zuo.biao.apijson.StringUtil.bigAlphaPattern;
+import static zuo.biao.apijson.StringUtil.namePattern;
 
 import java.util.Set;
 
@@ -66,46 +67,34 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		}
 		return this;
 	}
-	
-	public static final String KEY_ARRAY = "[]";
-	public static final String KEY_TAG = "tag";
-	public static final String KEY_COLUMNS = "columns";
-	/**set tag
-	 * @param tag
-	 * @return
-	 */
-	public JSONObject setTag(String tag) {
-		put(KEY_TAG, tag);
-		return this;
-	}
-	public String getTag() {
-		return getString(KEY_TAG);
-	}
-	
-	/**set columns need to be returned
-	 * @param columns  "column0,column1,column2..."
-	 * @return
-	 */
-	public JSONObject setColumns(String columns) {
-		put(KEY_COLUMNS, columns);
-		return this;
-	}
-	public String getColumns() {
-		return getString(KEY_COLUMNS);
-	}
-	
+
 
 
 
 
 	//judge <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-	public static boolean isTableKey(String key) {
-		return StringUtil.isNotEmpty(key, false) && isArrayKey(key) == false
-				&& bigAlphaPattern.matcher(key.substring(0, 1)).matches();
-	}
+	public static final String KEY_ARRAY = "[]";
+	
+	/**判断是否为Array的key
+	 * @param key
+	 * @return
+	 */
 	public static boolean isArrayKey(String key) {
-		return key != null && key.endsWith(KEY_ARRAY);
+		return key != null && key.endsWith("[]");
+	}
+	/**判断是否为对应Table的key
+	 * @param key
+	 * @return
+	 */
+	public static boolean isTableKey(String key) {
+		return isWord(key) && bigAlphaPattern.matcher(key.substring(0, 1)).matches();
+	}
+	/**判断是否为词，只能包含字母，数字或下划线
+	 * @param key
+	 * @return
+	 */
+	public static boolean isWord(String key) {
+		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
 	}
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

@@ -43,10 +43,39 @@ public class JSONRequest extends JSONObject {
 		this();
 		put(name, object);
 	}
+	
+	
+	
+	public static final String KEY_TAG = "tag";
+	public static final String KEY_COLUMNS = "columns";
+	/**set tag
+	 * @param tag
+	 * @return
+	 */
+	public JSONObject setTag(String tag) {
+		put(KEY_TAG, tag);
+		return this;
+	}
+	public String getTag() {
+		return getString(KEY_TAG);
+	}
 
-	
+	/**set columns need to be returned
+	 * @param columns  "column0,column1,column2..."
+	 * @return
+	 */
+	public JSONObject setColumns(String columns) {
+		put(KEY_COLUMNS, columns);
+		return this;
+	}
+	public String getColumns() {
+		return getString(KEY_COLUMNS);
+	}
+
+
+
 	//array object <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	
+
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
 
@@ -54,7 +83,7 @@ public class JSONRequest extends JSONObject {
 		put(KEY_COUNT, count);
 		return this;
 	}
-	public long getCount() {
+	public int getCount() {
 		return getIntValue(KEY_COUNT);
 	}
 
@@ -66,9 +95,10 @@ public class JSONRequest extends JSONObject {
 		return getIntValue(KEY_PAGE);
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	
+	
 
-	
-	
 	/**
 	 * @param value
 	 * @param parts path = parts[0] + "/" + parts[1] + "/" + parts[2] + ...
