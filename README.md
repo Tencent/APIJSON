@@ -24,13 +24,13 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object条件<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;Work&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;: &ldquo;/User/id&rdquo; &nbsp;//缺省依赖路径，从同级object的路径开始<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId@&quot;: &ldquo;/User/id&rdquo; &nbsp;//缺省依赖路径，从同级object的路径开始<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求一个名为Comment的array&nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 0,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 3,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId&quot;: &ldquo;[]/Work/id&rdquo; &nbsp;//完整依赖路径<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId@&quot;: &ldquo;[]/Work/id&rdquo; &nbsp;//完整依赖路径<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br />
 &nbsp; &nbsp; &nbsp; &nbsp; }<br />
 &nbsp; &nbsp; }<br />
@@ -166,10 +166,10 @@ APIJSON是一种JSON传输结构协议。<br />
  
   格式 | 功能 | 示例
 ---------- | ------------ | ----------
- "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 表示依赖引用关系 | "userId":"/User/id"，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成"userId":1
+ "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 表示依赖引用 | "userId@":"/User/id"，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成"userId":1
  "key$":"SQL搜索表达式"，任意标准SQL搜索表达式字符串，如"%key%", "%k%e%y%"等 | 表示搜索查询 | "name$":"%Tommy%"，搜索包含Tommy的名字。一般用于查询一个数组。请求{"[]":{"User":{"name$":"%Tommy%"}}}会返回name包含"Tommy"的User数组
  "key{}":JSONArray，JSONArray类似[object0,object1...]这种 | 表示匹配Array中任意一个 | "id{}":[38710,82001,70793]，查询id符合38710,82001,70793中任意一个的Object。一般用于查询一个数组。请求{"[]":{"User":{"id{}":[38710,82001,70793]}}}会返回id为38710,82001,70793其中任意一个的User数组。
- "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 表示远程调用服务器的函数 | "isPraised()":"contains(Collection:praiseUserIdList,userId)"，请求完成会变为 "isPraised":true 这种（contains返回类型为boolean，假设点赞用户id列表包含了userId，即这个User点了赞）
+ "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 表示远程调用函数 | "isPraised()":"contains(Collection:praiseUserIdList,userId)"，请求完成会变为 "isPraised":true 这种（contains返回类型为boolean，假设点赞用户id列表包含了userId，即这个User点了赞）
  
 ## 对比传统HTTP传输方式
  
