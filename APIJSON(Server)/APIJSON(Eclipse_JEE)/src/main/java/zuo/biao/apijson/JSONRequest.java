@@ -38,8 +38,8 @@ public class JSONRequest extends JSONObject {
 	
 	
 	
-	public static final String KEY_TAG = "tag";
-	public static final String KEY_COLUMNS = "columns";
+	public static final String KEY_TAG = "tag";//放最外层及[]里的不会和其它字段冲突
+	public static final String KEY_COLUMNS = "@columns";//只有放在请求table的Object里的关键字才用@key形式
 	/**set tag
 	 * @param tag
 	 * @return

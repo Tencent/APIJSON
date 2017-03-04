@@ -293,7 +293,7 @@ public class Controller {
 		JSONObject request = new JSONObject(true);
 		request.put(name, object);
 		if (needTag) {
-			request.put("tag", name);
+			request.put(JSONRequest.KEY_TAG, name);
 		}
 		return request;
 	}

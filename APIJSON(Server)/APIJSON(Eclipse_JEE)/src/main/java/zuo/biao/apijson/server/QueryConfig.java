@@ -22,6 +22,7 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
@@ -31,8 +32,6 @@ import zuo.biao.apijson.Table;
  */
 public class QueryConfig {
 	private static final String TAG = "QueryConfig";
-
-	public static final String KEY_COLUMNS = "columns";
 
 	private long id;
 	private RequestMethod method;
@@ -216,7 +215,7 @@ public class QueryConfig {
 				Log.d(TAG, "getWhereString  key = " + key);
 				//避免筛选到全部	value = key == null ? null : where.get(key);
 				if (key == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法
-					Log.d(TAG, "getWhereString  key.startsWith(@) >> continue;");
+					Log.d(TAG, "getWhereString  key == null || key.startsWith(@) || key.endsWith(()) >> continue;");
 					continue;
 				}
 				if (key.endsWith("@")) {//引用
@@ -311,7 +310,7 @@ public class QueryConfig {
 
 		Set<String> set = request == null ? null : request.keySet();
 		if (set != null) {
-			String columns = request.getString(KEY_COLUMNS);
+			String columns = request.getString(JSONRequest.KEY_COLUMNS);
 			if (method == RequestMethod.POST) {
 				config.setColumns(StringUtil.getString(set.toArray(new String[]{})));
 				String valuesString = "";
@@ -324,7 +323,7 @@ public class QueryConfig {
 				}
 				config.setValues("(" + valuesString + ")");
 			} else {
-				request.remove(KEY_COLUMNS);
+				request.remove(JSONRequest.KEY_COLUMNS);
 
 				Map<String, Object> transferredRequest = new HashMap<String, Object>();
 				Object value;

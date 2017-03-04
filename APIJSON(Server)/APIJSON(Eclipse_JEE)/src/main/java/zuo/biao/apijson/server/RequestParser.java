@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
@@ -141,7 +142,7 @@ public class RequestParser {
 			method = RequestMethod.GET;
 		}
 		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + method.name()
-		+ "/parseResponse  request = " + request);
+		+ "/parseResponse  request = \n" + request);
 		return JSON.parseObject(request);
 	}
 
@@ -234,7 +235,7 @@ public class RequestParser {
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
 
-		String tag = request.getString("tag");
+		String tag = request.getString(JSONRequest.KEY_TAG);
 		if (StringUtil.isNotEmpty(tag, true) == false) {
 			throw new IllegalArgumentException("请指定tag！一般是table名称");
 		}
@@ -245,7 +246,7 @@ public class RequestParser {
 
 		Map<String, Object> where = new HashMap<String, Object>();
 		where.put("method", method.name());
-		where.put("tag", tag);
+		where.put(JSONRequest.KEY_TAG, tag);
 		config.setWhere(where);
 
 		JSONObject object = null;
@@ -270,7 +271,7 @@ public class RequestParser {
 		}
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
 
-		request.remove("tag");
+		request.remove(JSONRequest.KEY_TAG);
 		return fillTarget(method, target, request, "");
 	}
 
@@ -534,8 +535,8 @@ public class RequestParser {
 
 		int page = 0, count = 0;
 		try {
-			page = request.getIntValue("page");
-			count = request.getIntValue("count");
+			page = request.getIntValue(JSONRequest.KEY_PAGE);
+			count = request.getIntValue(JSONRequest.KEY_COUNT);
 		} catch (Exception e) {
 			System.out.println(TAG + "getArray   try { page = arrayObject.getIntValue(page); ..." +
 					" >> } catch (Exception e) {\n" + e.getMessage());

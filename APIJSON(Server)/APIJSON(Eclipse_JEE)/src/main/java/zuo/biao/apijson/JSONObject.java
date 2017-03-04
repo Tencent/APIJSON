@@ -80,7 +80,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return
 	 */
 	public static boolean isArrayKey(String key) {
-		return key != null && key.endsWith("[]");
+		return key != null && key.endsWith(KEY_ARRAY);
 	}
 	/**判断是否为对应Table的key
 	 * @param key
