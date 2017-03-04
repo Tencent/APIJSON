@@ -21,8 +21,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.client.JSONResponse;
+import zuo.biao.apijson.JSONResponse;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +40,7 @@ import apijson.demo.HttpManager;
 import apijson.demo.HttpManager.OnHttpResponseListener;
 import apijson.demo.R;
 import apijson.demo.RequestUtil;
+import apijson.demo.StringUtil;
 import apijson.demo.model.Comment;
 import apijson.demo.model.User;
 import apijson.demo.model.Wallet;
@@ -274,7 +274,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		JSONResponse response = new JSONResponse(resultJson);
 		switch (type) {
 		case TYPE_POST:
-			User postedUser = JSONResponse.getObject(response, User.class);
+			User postedUser = response.getObject(User.class);
 			id = postedUser == null ? 0 : postedUser.getId();
 			Log.d(TAG, "onHttpResponse  id = " + id);
 			break;
@@ -285,25 +285,25 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			}
 			break;
 		case TYPE_ARRAY:
-			logList(JSONResponse.getList(response.getJSONObject("User[]"), User.class));
+			logList(response.getList(User.class.getSimpleName(), User.class));
 			break; 
 		case TYPE_COMPLEX:
-			JSONArray array = JSONResponse.getJSONArray(response.getJSONObject("[]"));//, "Comment[]");//
+			JSONArray array = response.getArray(null);//, "Comment[]");//
 			if (array == null || array.isEmpty()) {
 				Log.e(TAG, "onHttpResponse  type == TYPE_COMPLEX >> array == null || array.isEmpty() >> return;");
 			} else {
 				response = new JSONResponse(array.getJSONObject(0));
 
-				User user = JSONResponse.getObject(response, User.class);
+				User user = response.getObject(User.class);
 				Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  user = " + JSON.toJSONString(user));
-				Work work = JSONResponse.getObject(response, Work.class);
+				Work work = response.getObject(Work.class);
 				Log.d(TAG, "onHttpResponse  type == TYPE_COMPLEX >>  work = " + JSON.toJSONString(work));
-				logList(JSONResponse.getList(response == null ? null : response.getJSONObject("Comment[]"), Comment.class));
+				logList(response.getList("Comment[]", Comment.class));
 			}
 			break; 
 		case TYPE_ACCESS_PERMITTED:
 			response = new JSONResponse(resultJson);
-			Wallet wallet = JSONResponse.getObject(response, Wallet.class);
+			Wallet wallet = response.getObject(Wallet.class);
 			Log.d(TAG, "onHttpResponse  type == TYPE_ACCESS_PERMITTED >>  wallet = " + JSON.toJSONString(wallet));
 		default:
 			break;

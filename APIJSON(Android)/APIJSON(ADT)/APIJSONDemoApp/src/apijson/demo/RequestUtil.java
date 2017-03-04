@@ -17,8 +17,8 @@ package apijson.demo;
 import java.util.ArrayList;
 import java.util.List;
 
-import zuo.biao.apijson.client.JSONObject;
-import zuo.biao.apijson.client.JSONRequest;
+import zuo.biao.apijson.JSONObject;
+import zuo.biao.apijson.JSONRequest;
 import apijson.demo.model.Comment;
 import apijson.demo.model.User;
 import apijson.demo.model.Wallet;
