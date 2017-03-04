@@ -19,5 +19,38 @@ package zuo.biao.apijson;
  */
 public enum RequestMethod {
 
-	GET, POST_GET, POST, PUT, DELETE
+	/**
+	 * 常规获取数据方式
+	 */
+	GET,
+	
+	/**
+	 * 通过POST来HEAD数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
+	 */
+	POST_HEAD,
+	
+	/**
+	 * 通过POST来GET数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
+	 */
+	POST_GET,
+	
+	/**
+	 * 新增(或者说插入)数据
+	 */
+	POST,
+	
+	/**
+	 * 修改数据，只修改传入字段对应的值
+	 */
+	PUT,
+	
+	/**
+	 * 删除数据
+	 */
+	DELETE,
+	
+	/**
+	 * 检查，默认是非空检查，返回数据总数
+	 */
+	HEAD
 }

@@ -22,6 +22,7 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
@@ -30,8 +31,7 @@ import zuo.biao.apijson.Table;
  * @author Lemon
  */
 public class QueryConfig {
-
-	public static final String KEY_COLUMNS = "columns";
+	private static final String TAG = "QueryConfig";
 
 	private long id;
 	private RequestMethod method;
@@ -102,6 +102,9 @@ public class QueryConfig {
 		switch (getMethod()) {
 		case POST:
 			return StringUtil.isNotEmpty(columns, true) ? "(" + columns + ")" : "";
+		case HEAD:
+		case POST_HEAD:
+			return " COUNT(0) COUNT ";
 		default:
 			return StringUtil.isNotEmpty(columns, true) ? columns : "*";
 		}
@@ -184,7 +187,7 @@ public class QueryConfig {
 	 * @return
 	 */
 	public static String getLimitString(int page, int count) {
-		return count <= 0 ? "" : " limit " + page*count + ", " + count;
+		return count <= 0 ? "" : " LIMIT " + page*count + ", " + count;
 	}
 
 	/**获取筛选方法
@@ -205,21 +208,43 @@ public class QueryConfig {
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
 
-			String whereString = " where ";
+			String whereString = " WHERE ";
 			Object value;
+			int keyType = 0;// 0 - =; 1 - $, 2 - {} 
 			for (String key : set) {
+				Log.d(TAG, "getWhereString  key = " + key);
 				//避免筛选到全部	value = key == null ? null : where.get(key);
-				if (key == null) {
+				if (key == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法
+					Log.d(TAG, "getWhereString  key == null || key.startsWith(@) || key.endsWith(()) >> continue;");
 					continue;
 				}
+				if (key.endsWith("@")) {//引用
+					key = key.substring(0, key.lastIndexOf("@"));
+//					throw new IllegalArgumentException(TAG + ".getWhereString: 字符 " + key + " 不合法！");
+				}
+				if (key.endsWith("$")) {
+					keyType = 1;
+				} else if (key.endsWith("{}")) {
+					keyType = 2;
+				}
+				
 				value = where.get(key);
-				whereString += (key + (value instanceof JSONArray
-						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") + " and ");
+				
+				try {
+					key = RequestParser.getRealKey(key, false);
+				} catch (Exception e) {
+					Log.e(TAG, "getObject  getWhereString  try { key = RequestParser.getRealKey(key, false);"
+							+ " >> } catch (Exception e) {");
+					e.printStackTrace();
+				}
+				
+				whereString += (key + (keyType == 1 ? " LIKE '" + value + "'" : (keyType == 2
+						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") ) + " AND ");
 			}
-			if (whereString.endsWith("and ")) {
-				whereString = whereString.substring(0, whereString.length() - "and ".length());
+			if (whereString.endsWith("AND ")) {
+				whereString = whereString.substring(0, whereString.length() - "AND ".length());
 			}
-			if (whereString.trim().endsWith("where") == false) {
+			if (whereString.trim().endsWith("WHERE") == false) {
 				return whereString;
 			}
 		}
@@ -236,7 +261,7 @@ public class QueryConfig {
 				inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
 			}
 		}
-		return " in (" + inString + ") ";
+		return " IN (" + inString + ") ";
 	}
 
 
@@ -256,7 +281,7 @@ public class QueryConfig {
 			if (where.containsKey(Table.ID) == false) {
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
-			String setString = " set ";
+			String setString = " SET ";
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
 				if (key == null || Table.ID.equals(key)) {
@@ -267,8 +292,8 @@ public class QueryConfig {
 			if (setString.endsWith(",")) {
 				setString = setString.substring(0, setString.length() - 1);
 			}
-			if (setString.trim().endsWith("set") == false) {
-				return setString + " where " + Table.ID + "='" + where.get(Table.ID) + "' ";
+			if (setString.trim().endsWith("SET") == false) {
+				return setString + " WHERE " + Table.ID + "='" + where.get(Table.ID) + "' ";
 			}
 		}
 		return "";
@@ -280,12 +305,12 @@ public class QueryConfig {
 	 * @param request
 	 * @return
 	 */
-	public static synchronized QueryConfig getQueryConfig(RequestMethod method, String table, JSONObject request) {
+	public static synchronized QueryConfig newQueryConfig(RequestMethod method, String table, JSONObject request) {
 		QueryConfig config = new QueryConfig(method, table);
 
 		Set<String> set = request == null ? null : request.keySet();
 		if (set != null) {
-			String columns = request.getString(KEY_COLUMNS);
+			String columns = request.getString(JSONRequest.KEY_COLUMNS);
 			if (method == RequestMethod.POST) {
 				config.setColumns(StringUtil.getString(set.toArray(new String[]{})));
 				String valuesString = "";
@@ -298,7 +323,7 @@ public class QueryConfig {
 				}
 				config.setValues("(" + valuesString + ")");
 			} else {
-				request.remove(KEY_COLUMNS);
+				request.remove(JSONRequest.KEY_COLUMNS);
 
 				Map<String, Object> transferredRequest = new HashMap<String, Object>();
 				Object value;
@@ -345,13 +370,13 @@ public class QueryConfig {
 		}
 		switch (config.getMethod()) {
 		case POST:
-			return "insert into " + config.getTable() + config.getColumnsString() + " values" + config.getValuesString();
+			return "INSERT INTO " + config.getTable() + config.getColumnsString() + " VALUES" + config.getValuesString();
 		case PUT:
-			return "update " + config.getTable() + config.getSetString();
+			return "UPDATE " + config.getTable() + config.getSetString();
 		case DELETE:
-			return "delete from " + config.getTable() + config.getWhereString();
+			return "DELETE FROM " + config.getTable() + config.getWhereString();
 		default:
-			return "select "+ config.getColumnsString() + " from " + config.getTable()
+			return "SELECT "+ config.getColumnsString() + " FROM " + config.getTable()
 			+ config.getWhereString() + config.getLimitString();
 		}
 	}

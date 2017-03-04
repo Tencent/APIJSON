@@ -12,5 +12,6 @@ public class Table {
 	public static final String PASSWORD = "password";
 	public static final String TITLE = "title";
 	public static final String CONTENT = "content";
+	public static final String COUNT = "count";
 	
 }

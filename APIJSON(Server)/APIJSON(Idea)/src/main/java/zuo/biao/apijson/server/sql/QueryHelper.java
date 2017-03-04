@@ -86,8 +86,8 @@ public class QueryHelper {
 			return null;
 		}
 		final String sql = config.getSQL();
+		System.out.println(TAG + "select  sql = " + sql);
 
-		System.out.println(TAG + "成功连接到数据库！");
 
 		if (connection == null || connection.isClosed()) {
 			System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
@@ -95,35 +95,49 @@ public class QueryHelper {
 			statement = connection.createStatement(); //创建Statement对象
 			metaData = connection.getMetaData();
 		}
+		System.out.println(TAG + "成功连接到数据库！");
+
+		JSONObject object = null;//new JSONObject(true);
+		ResultSet rs = null;
+		switch (config.getMethod()) {
+		case HEAD:
+		case POST_HEAD:
+			rs = statement.executeQuery(sql);
+
+			object = rs.next() ? RequestParser.newResult(200, "success")
+					: RequestParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
+			object.put(Table.COUNT, rs.getLong(1));
+			
+			rs.close();
+			return object;
+
+		case POST:
+		case PUT:
+		case DELETE:
+			long updateCount = statement.executeUpdate(sql);
+
+			object = RequestParser.newResult(updateCount > 0 ? 200 : 404
+					, updateCount > 0 ? "success" : "可能对象不存在！");
+			object.put(Table.ID, config.getId());
+			return object;
+
+		case GET:
+		case POST_GET:
+			break;
+
+		default://OPTIONS, TRACE等
+			System.out.println(TAG + "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
+			return null;
+		}
+
+
 
 		String[] columnArray = getColumnArray(config);
 		if (columnArray == null || columnArray.length <= 0) {
 			return null;
 		}
 
-		System.out.println(TAG + "select  sql = " + sql);
-
-		JSONObject object  = null;//new JSONObject(true);
-		ResultSet rs = null;
-		switch (config.getMethod()) {
-		case GET:
-		case POST_GET:
-			rs = statement.executeQuery(sql);
-			break;
-		case POST:
-		case PUT:
-		case DELETE:
-			int updateCount = statement.executeUpdate(sql);
-
-			JSONObject result = RequestParser.newResult(updateCount > 0 ? 200 : 404
-					, updateCount > 0 ? "success" : "可能对象不存在！");
-			result.put(Table.ID, config.getId());
-			return result;
-		default://HEAD, OPTIONS, TRACE等
-			System.out.println(TAG + "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
-			return null;
-		}
-
+		rs = statement.executeQuery(sql);
 
 		int position = -1;
 		while (rs.next()){
@@ -132,28 +146,30 @@ public class QueryHelper {
 				continue;
 			}
 			object = new JSONObject(true);
-			try {
-				Object value;
-				Object json;
-				for (int i = 0; i < columnArray.length; i++) {
+			Object value = null;
+			Object json;
+			for (int i = 0; i < columnArray.length; i++) {
+				try {
 					value = rs.getObject(rs.findColumn(columnArray[i]));
-					if (value instanceof String) {
-						try {
-							json = JSON.parse((String) value);
-							if (json != null && StringUtil.isNotEmpty(json, true)) {
-								value = json;
-							}
-						} catch (Exception e) {
-//							System.out.println(TAG + "select  while (rs.next()){  >> i = " + i + "  try { json = JSON.parse((String) value);"
-//									+ ">> } catch (Exception e) {\n" + e.getMessage());
-						}
-					}
-					object.put(columnArray[i], value);
+				} catch (Exception e) {
+					System.out.println(TAG + "select while (rs.next()){ ..."
+							+ " >>  try { value = rs.getObject(rs.findColumn(columnArray[i])); ..."
+							+ " >> } catch (Exception e) {");
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				System.out.println(TAG + "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +
-						" >> } catch (Exception e) {\n" + e.getMessage());
-				e.printStackTrace();
+				if (value != null && value instanceof String) {
+					try {
+						json = JSON.parse((String) value);
+						if (json != null && StringUtil.isNotEmpty(json, true)) {
+							value = json;
+						}
+					} catch (Exception e) {
+						//太长 System.out.println(TAG + "select  while (rs.next()){  >> i = "
+						//  + i + "  try { json = JSON.parse((String) value);"
+						//	+ ">> } catch (Exception e) {\n" + e.getMessage());
+					}
+				}
+				object.put(columnArray[i], value);
 			}
 			break;
 		}

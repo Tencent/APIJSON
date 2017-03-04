@@ -21,6 +21,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
+import zuo.biao.apijson.server.Log;
+
 /**阿里json封装类 防止解析时异常
  * @author Lemon
  */
@@ -32,7 +34,7 @@ public class JSON {
 	 * @return
 	 */
 	public static boolean isJsonCorrect(String s) {
-		System.out.println(TAG + "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
+		Log.i(TAG, "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
 		if (s == null 
 				//				|| s.equals("[]") 
 				//				|| s.equals("{}") 
@@ -50,10 +52,33 @@ public class JSON {
 	 * @return
 	 */
 	public static String getCorrectJson(String s) {
-		s = StringUtil.getNoBlankString(s);
-		return isJsonCorrect(s) ? s : "";
+		return getCorrectJson(s, false);
+	}
+	/**获取有效的json
+	 * @param s
+	 * @param isArray
+	 * @return
+	 */
+	public static String getCorrectJson(String s, boolean isArray) {
+		s = StringUtil.getTrimedString(s);
+		//		if (isArray) {
+		//			if (s.startsWith("\"")) {
+		//				s = s.substring(1);
+		//			}
+		//			if (s.endsWith("\"")) {
+		//				s = s.substring(0, s.length() - 1);
+		//			}
+		//		}
+		return s;//isJsonCorrect(s) ? s : null;
 	}
 
+	/**json转JSONObject
+	 * @param json
+	 * @return
+	 */
+	public static JSONObject parseObject(Object obj) {
+		return parseObject(toJSONString(obj));
+	}
 	/**json转JSONObject
 	 * @param json
 	 * @return
@@ -72,11 +97,19 @@ public class JSON {
 		try {
 			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), JSONObject.class, features);
 		} catch (Exception e) {
-			System.out.println(TAG + "parseObject  catch \n" + e.getMessage());
+			Log.i(TAG, "parseObject  catch \n" + e.getMessage());
 		}
 		return null;
 	}
 
+	/**JSONObject转实体类
+	 * @param object
+	 * @param clazz
+	 * @return
+	 */
+	public static <T> T parseObject(JSONObject object, Class<T> clazz) {
+		return parseObject(toJSONString(object), clazz);
+	}
 	/**json转实体类
 	 * @param json
 	 * @param clazz
@@ -88,7 +121,7 @@ public class JSON {
 			features |= Feature.OrderedField.getMask();
 			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, features);
 		} catch (Exception e) {
-			System.out.println(TAG + "parseObject  catch \n" + e.getMessage());
+			Log.i(TAG, "parseObject  catch \n" + e.getMessage());
 		}
 		return null;
 	}
@@ -98,7 +131,20 @@ public class JSON {
 	 * @return
 	 */
 	public static JSONArray parseArray(String json) {
-		return  com.alibaba.fastjson.JSON.parseArray(json);
+		try {
+			return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json, true));
+		} catch (Exception e) {
+			Log.i(TAG, "parseArray  catch \n" + e.getMessage());
+		}
+		return null;
+	}
+	/**JSONArray转实体类列表
+	 * @param array
+	 * @param clazz
+	 * @return
+	 */
+	public static <T> List<T> parseArray(JSONArray array, Class<T> clazz) {
+		return parseArray(toJSONString(array), clazz);
 	}
 	/**json转实体类列表
 	 * @param json
@@ -107,9 +153,9 @@ public class JSON {
 	 */
 	public static <T> List<T> parseArray(String json, Class<T> clazz) {
 		try {
-			return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json), clazz);
+			return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json, true), clazz);
 		} catch (Exception e) {
-			System.out.println(TAG + "parseArray  catch \n" + e.getMessage());
+			Log.i(TAG, "parseArray  catch \n" + e.getMessage());
 		}
 		return null;
 	}
@@ -125,7 +171,7 @@ public class JSON {
 		try {
 			return com.alibaba.fastjson.JSON.toJSONString(obj);
 		} catch (Exception e) {
-			System.out.println(TAG + "toJSONString  catch \n" + e.getMessage());
+			Log.i(TAG, "toJSONString  catch \n" + e.getMessage());
 		}
 		return null;
 	}
@@ -142,7 +188,7 @@ public class JSON {
 		try {
 			return com.alibaba.fastjson.JSON.toJSONString(obj, features);
 		} catch (Exception e) {
-			System.out.println(TAG + "toJSONString  catch \n" + e.getMessage());
+			Log.i(TAG, "toJSONString  catch \n" + e.getMessage());
 		}
 		return null;
 	}

@@ -12,20 +12,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-/**application
- * @author Lemon
+/**
+ * 服务端给出的model
+ * the names of classes equal the names of tables in Server database one by one, so do the variables and columns
+ * (name) : model <=> table
+ * (name, type) : variable <=> column
+ * @warn don't use any base type like int or char in models, use Integer and String instead
  */
-@SpringBootApplication
-public class APIJSONApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(APIJSONApplication.class, args);
-
-		Function.test();
-	}
-}
+/**
+ * @author Lemon
+ *
+ */
+package zuo.biao.apijson.server.model;

@@ -12,20 +12,42 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package zuo.biao.apijson.server.model;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-/**application
+/**登录类
  * @author Lemon
  */
-@SpringBootApplication
-public class APIJSONApplication {
+@SuppressWarnings("serial")
+public class Login extends BaseModel {
 
-	public static void main(String[] args) {
-		SpringApplication.run(APIJSONApplication.class, args);
+	public static final int TYPE_PASSWORD = 0;
+	public static final int TYPE_VERIFY = 1;
+	
+	private Long userId;
+	private Integer type;
 
-		Function.test();
+	public Login() {
+		super();
 	}
+	public Login(long userId) {
+		this();
+		setUserId(userId);
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+	public Login setUserId(Long userId) {
+		this.userId = userId;
+		return this;
+	}
+	
+	public Integer getType() {
+		return type;
+	}
+	public Login setType(Integer type) {
+		this.type = type;
+		return this;
+	}
+
 }
