@@ -161,6 +161,16 @@ APIJSON是一种JSON传输结构协议。<br />
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/server_idea_log_complex.jpg) 
 ![](https://github.com/TommyLemon/APIJSON/blob/master/picture/complex_json_cn.jpg?raw=true) 
 
+
+## 功能符
+ 
+  格式 | 功能 | 示例
+---------- | ------------ | ----------
+ "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 表示依赖引用关系，表达式会被替换为被依赖的值 | "userId":"/User/id"，userId依赖引用同级User内的id值
+ "key$":"SQL搜索表达式"，任意标准SQL搜索表达式字符串，如"%key%", "%k%e%y%"等 | 表示搜索查询 | "name$":"%Tommy%"，搜索包含Tommy的名字
+ "key{}":JSONArray，例如[object0,object1...] | 表示匹配Array中任意一个 | "id{}":[38710,82001,70793]，查询id符合38710,82001,70793中任意一个的Object
+ "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 表示远程调用服务器的函数 | "isPraised()":"contains(Collection:praiseUserIdList,userId)"，查询后会变为 "isPraised":true 这种（contains返回类型为boolean，假设点赞用户id列表包含了userId，即这个User点了赞）
+ 
 ## 对比传统HTTP传输方式
  
  开发流程 | 传统方式 | APIJSON
