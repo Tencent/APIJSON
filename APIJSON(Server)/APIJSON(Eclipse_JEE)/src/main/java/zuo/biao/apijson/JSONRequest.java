@@ -14,17 +14,9 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import static zuo.biao.apijson.StringUtil.UTF_8;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-
-
 /**encapsulator for request JSONObject
  * @author Lemon
  * @see #toArray
- * @see RequestUtil
  * @use JSONRequest request = new JSONRequest(...);
  * <br> request.put(...);//not a must
  * <br> request.toArray(...);//not a must
@@ -114,85 +106,22 @@ public class JSONRequest extends JSONObject {
 		return put(key, path);
 	}
 
-	/**
-	 * return getWithDecode(key);
-	 */
-	@Override
-	public Object get(Object key) {
-		return getWithDecode(key);
-	}
-	/**
-	 * @param key
-	 * @return if value is String, return URLDecoder.decode((String) value, UTF_8);
-	 */
-	public Object getWithDecode(Object key) {
-		Object value = super.get(key);
-		if (value instanceof String) {
-			try {
-				return URLDecoder.decode((String) value, UTF_8);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return value;
-	}
 
 	/**put(value.getClass().getSimpleName(), value);
 	 * @param value
 	 * @return
 	 */
 	public Object put(Object value) {
-		return putWithEncode(value);
+		return put(null, value);
 	}	
 	/**
 	 * return putWithEncode(key, value);
 	 */
 	@Override
 	public Object put(String key, Object value) {
-		return putWithEncode(key, value);
+		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), JSON.parseObject(value));
 	}
 
-
-	/**put(value.getClass().getSimpleName(), value);
-	 * @param value
-	 * @return
-	 */
-	public Object putWithEncode(Object value) {
-		return putWithEncode(null, value);
-	}
-	/**
-	 * @param key
-	 * @param value if is String, value = URLEncoder.encode((String) value, UTF_8);
-	 * @return
-	 */
-	public Object putWithEncode(String key, Object value) {
-		if (value instanceof String) {
-			try {
-				value = URLEncoder.encode((String) value, UTF_8);
-				//just encode /, not need to encode [] 	? URLEncoder.encode(key, UTF_8) 
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), value);
-	}
-	/**用于不需要被encode的情况，比如搜索 %key% 用put(调用putWithEncode)/putWithEncode会encode，加上HttpManager再次encode
-	 * ，到服务端decode一次就成了%25key%25。
-	 * @param key
-	 * @param value
-	 * @return
-	 */
-	public Object putWithoutEncode(String key, Object value) {
-		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), value);
-	}
-	/**用于不需要被decode的情况
-	 * @param key
-	 * @param value
-	 * @return
-	 */
-	public Object getWithoutDecode(String key) {
-		return super.get(key);
-	}
 
 	/**create a parent JSONObject named KEY_ARRAY
 	 * @param count
@@ -233,7 +162,7 @@ public class JSONRequest extends JSONObject {
 		if (key.endsWith("$") == false) {
 			key += "$";
 		}
-		putWithoutEncode(key, getSearch(value, type));
+		put(key, getSearch(value, type));
 	}
 
 	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;

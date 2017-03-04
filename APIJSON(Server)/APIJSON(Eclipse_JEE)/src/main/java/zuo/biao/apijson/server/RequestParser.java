@@ -44,7 +44,11 @@ public class RequestParser {
 	public static final String SEPARATOR = StringUtil.SEPARATOR;
 
 	private RequestMethod requestMethod;
+	public RequestParser() {
+		this(null);
+	}
 	public RequestParser(RequestMethod requestMethod) {
+		super();
 		if (requestMethod == null) {
 			requestMethod = RequestMethod.GET;
 		}
@@ -206,6 +210,8 @@ public class RequestParser {
 				status = 406;
 			} else if (e instanceof ConflictException) {
 				status = 409;
+			} else if (e instanceof ConditionNotMatchException) {
+				status = 412;
 			}
 
 			return newResult(status, e.getMessage());
