@@ -279,7 +279,7 @@ Run > Run app
 
 ## 下载试用客户端App
 
-[APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
+[APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
 
 ### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
