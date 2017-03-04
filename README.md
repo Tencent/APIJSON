@@ -164,13 +164,13 @@ APIJSON是一种JSON传输结构协议。<br />
 
 ## 功能符
  
-  格式 | 功能 | 示例
----------- | ------------ | ----------
+  格式 | 功能与作用 | 示例
+------------ | ------------ | ------------
  "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 表示依赖引用 | "userId@":"/User/id"，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成"userId":1
  "key$":"SQL搜索表达式"，任意标准SQL搜索表达式字符串，如"%key%", "%k%e%y%"等 | 表示查询时模糊搜索 | "name$":"%Tommy%"，搜索包含Tommy的名字。一般用于查询一个数组。请求 {"[]":{"User":{"name$":"%Tommy%"}}} 会返回name包含"Tommy"的User数组
  "key{}":JSONArray，JSONArray类似[object0,object1...]这种 | 表示查询时匹配范围 | "id{}":[38710,82001,70793]，查询id符合38710,82001,70793中任意一个的Object。一般用于查询一个数组。请求{"[]":{"User":{"id{}":[38710,82001,70793]}}}会返回id为38710,82001,70793其中任意一个的User数组。
  "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 表示查询后远程调用函数 |  "isPraised()":"contains(Collection:praiseUserIdList,userId)"，请求完成会变为 "isPraised":true 这种（contains返回类型为boolean，假设点赞用户id列表包含了userId，即这个User点了赞）
- "@key":任意Object | @key为关键字，作用各不相同，但都不作为查询匹配条件 | "@columns":"id,sex,name"，只查询id,sex,name这几个字段；<br />"@count":10，数组长度最大为10；<br />"@page":1，页码为1；<br />"@userId@":"User/id","head":"get(Collection:pictureList,Object:@userId)"，从pictureList获取第一张图片作为头像...
+ "@key":任意Object | @key为关键字，作用各不相同，但都不作为查询匹配条件 | ① "@columns":"id,sex,name"，只查询id,sex,name这几个字段；<br /> ② "@count":10，数组长度最大为10；<br /> ③ "@page":1，页码为1；<br /> ④ <br />{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0,<br /> &nbsp; "head":"get(Collection:pictureList,Object:@position)"<br />}<br />，从pictureList获取第0张图片作为头像...
  
 ## 对比传统HTTP传输方式
  
