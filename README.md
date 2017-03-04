@@ -18,8 +18,8 @@ APIJSON是一种JSON传输结构协议。<br />
 
 <p>{<br />
 &nbsp; &nbsp; &quot;[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //请求一个array<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;@page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //array条件<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;@count&quot;: 2, &nbsp; &nbsp; &nbsp; &nbsp;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 1, &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //array条件<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 2, &nbsp; &nbsp; &nbsp; &nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求查询名为User的table，返回名为User的JSONObject<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object条件<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
@@ -27,8 +27,8 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId@&quot;: &ldquo;/User/id&rdquo; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //缺省依赖路径，从同级object的路径开始<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //请求一个名为Comment的array&nbsp;<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;@page&quot;: 0,<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;@count&quot;: 3,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 0,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 3,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;: {<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId@&quot;: &ldquo;[]/Work/id&rdquo; &nbsp; //完整依赖路径<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br />
@@ -171,7 +171,7 @@ APIJSON是一种JSON传输结构协议。<br />
  "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 表示查询后远程调用函数 |  "isPraised()":"contains(Collection:praiseUserIdList,userId)"，请求完成后会调用 boolean contains(Collection collection, Object object) 函数，然后变为 "isPraised":true 这种（假设点赞用户id列表包含了userId，即这个User点了赞）。函数参数类型为Object时可用 value 替代 Object:value。
  "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 表示依赖引用 | "userId@":"/User/id"，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成 "userId":1
  "key$":"SQL搜索表达式"，任意标准SQL搜索表达式字符串，如 %key%, %k%e%y% 等 | 表示查询时模糊搜索 | "name$":"%Tommy%"，搜索包含Tommy的名字。一般用于查询一个数组。请求 {"[]":{"User":{"name$":"%Tommy%"}}} 会返回name包含"Tommy"的User数组。
- "@key":任意Object | @key为关键字，作用各不相同，但都不作为查询匹配条件 | ① "@page":1，页码为1；<br /> ② "@count":10，数组长度最大为10；<br /> ③ "@columns":"id,sex,name"，只查询id,sex,name这几个字段；<br />④ 从pictureList获取第0张图片作为头像；<br />{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0,<br /> &nbsp; "head()":"get(Collection:pictureList,Object:@position)"<br />}<br /> ...
+ "@key":任意Object | @key为JSONObject中的关键字，作用各不相同，但都不作为查询匹配条件 | ① "@columns":"id,sex,name"，只查询id,sex,name这几个字段；<br /> ② 从pictureList获取第0张图片作为头像；<br />{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0,<br /> &nbsp; "head()":"get(Collection:pictureList,Object:@position)"<br />}<br /> ...
  
 ## 对比传统HTTP传输方式
  
@@ -201,9 +201,9 @@ APIJSON是一种JSON传输结构协议。<br />
 -------- | ------------ | ------------
  User | http://localhost:8080/user?id=1 | http://localhost:8080/{"User":{"id":1}}
  User和对应的Work | 分两次请求<br />User: http://localhost:8080/user?id=1<br />Work: http://localhost:8080/work?userId=1 | http://localhost:8080/{"User":{"id":1}, "Work":{"userId@":"User/id"}}
- User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"@page":1, "@count":5, "User":{"sex":0}}}
- type为1的Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"@page":1, "@count":5, "Work":{"type":1}, "User":{"workId@":"/Work/id"}, "[]":{"@count":3, "Comment":{"workId@":"[]/Work/id"}}}}
- 1个User发布的Work列表，每个Work包括发布者User和前3条Comment | 把以上请求里的type=1改为userId=1 | 有以下几种方法:<br />①把以上请求里的"Work":{"type":1}, "User":{"workId@":"/Work/id"}改为"User":{"id":1}, "Work":{"userId@":"/User/id"}<br /><br />②或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"@page":1, "@count":5, "Work":{"userId@":"User/id"}, "[]":{"@count":3, "Comment":{"workId@":"[]/Work/id"}}}}<br /><br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />http://localhost:8080/{"[]":{"@page":1, "@count":5, "Work":{"userId":1}, "[]":{"@count":3, "Comment":{"workId@":"[]/Work/id"}}}}
+ User列表 | http://localhost:8080/user/list?page=1&count=5&sex=0 | http://localhost:8080/{"[]":{"page":1, "count":5, "User":{"sex":0}}}
+ type为1的Work列表，每个Work包括发布者User和前3条Comment | Work里必须有User的Object和Comment的Array<br /> http://localhost:8080/work/list?page=1&count=5&type=1&commentCount=3 | http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"type":1}, "User":{"workId@":"/Work/id"}, "[]":{"count":3, "Comment":{"workId@":"[]/Work/id"}}}}
+ 1个User发布的Work列表，每个Work包括发布者User和前3条Comment | 把以上请求里的type=1改为userId=1 | 有以下几种方法:<br />①把以上请求里的"Work":{"type":1}, "User":{"workId@":"/Work/id"}改为"User":{"id":1}, "Work":{"userId@":"/User/id"}<br /><br />②或这样省去4条重复User<br />http://localhost:8080/{"User":{"id":1}, "[]":{"page":1, "count":5, "Work":{"userId@":"User/id"}, "[]":{"count":3, "Comment":{"workId@":"[]/Work/id"}}}}<br /><br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />http://localhost:8080/{"[]":{"page":1, "count":5, "Work":{"userId":1}, "[]":{"count":3, "Comment":{"workId@":"[]/Work/id"}}}}
  
  服务端对应不同请求的返回结果 | 传统方式 | APIJSON
 -------- | ------------ | ------------
