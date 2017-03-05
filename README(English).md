@@ -2,7 +2,7 @@
 
 [查看中文文档](https://github.com/TommyLemon/APIJSON/blob/master/README.md)
 
-APIJSON is a JSON Transmission Structure Protocal.
+APIJSON is a JSON Transmission Structure Protocol.
 
 You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set.<br />
 You can get any data with any JSON structure by requesting server just once. It's very convenient and flexible, and does not require a special interface or multiple requests.<br />
