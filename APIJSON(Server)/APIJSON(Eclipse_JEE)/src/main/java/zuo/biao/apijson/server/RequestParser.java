@@ -108,8 +108,10 @@ public class RequestParser {
 		try {
 			requestObject = getObject(null, null, null, request);
 
-			parseRelation = true;
-			requestObject = getObject(null, null, null, requestObject);
+			if (relationMap.isEmpty() == false) {//优化性能，没有依赖引用的就不用再遍历了
+				parseRelation = true;
+				requestObject = getObject(null, null, null, requestObject);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e;
