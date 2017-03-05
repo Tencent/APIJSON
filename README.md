@@ -36,7 +36,7 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; }<br />
 }</p>
 
-[点击这里测试](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22User%22%3A%7B%22sex%22%3A0%7D%2C%22Moment%22%3A%7B%22userId%40%22%3A%22%252FUser%252Fid%22%7D%2C%22Comment%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A2%2C%22page%22%3A1%7D%7D)
+[点击这里测试](http://192.168.1.102:8080/get/%7B%22%5B%5D%22%3A%7B%22User%22%3A%7B%22sex%22%3A0%7D%2C%22Moment%22%3A%7B%22userId%40%22%3A%22%252FUser%252Fid%22%7D%2C%22Comment%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A2%2C%22page%22%3A1%7D%7D)
 
 ### 返回：
 
