@@ -105,14 +105,14 @@ public class RequestUtil {
 		return request.toArray(3, 0);
 	}
 
-	public static JSONObject newAccessErrorRequest(long id, boolean encode) {
-		return new JSONRequest(new Wallet().setUserId(id <= 0 ? DEFAULT_USER_ID : id), encode)
+	public static JSONObject newAccessErrorRequest(boolean encode) {
+		return new JSONRequest(new Wallet().setUserId(DEFAULT_USER_ID), encode)
 		.setTag(Wallet.class.getSimpleName());
 	}
 
-	public static JSONObject newAccessPermittedRequest(long id, boolean encode) {
+	public static JSONObject newAccessPermittedRequest(boolean encode) {
 		JSONRequest request = new JSONRequest();
-		request.put(new Wallet().setUserId(id <= 0 ? DEFAULT_USER_ID : id), encode);
+		request.put(new Wallet().setUserId(DEFAULT_USER_ID), encode);
 		request.put("currentUserId", DEFAULT_USER_ID, encode);
 		request.put("loginPassword", "apijson", encode);
 		return request.setTag(Wallet.class.getSimpleName());

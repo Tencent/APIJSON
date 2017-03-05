@@ -250,7 +250,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 	@Override
 	public void finish() {
-		setResult(RESULT_OK, new Intent().putExtra(RESULT_URL, url).putExtra(RESULT_ID, id));
+		setResult(RESULT_OK, new Intent().putExtra(RESULT_ID, id).putExtra(RESULT_URL, url));
 		super.finish();
 	}
 

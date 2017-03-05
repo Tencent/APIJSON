@@ -13,8 +13,7 @@
 
         <Button
             android:id="@+id/btnSelectPost"
-            style="@style/select_json"
-            android:text="@string/demo_post" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -22,8 +21,7 @@
 
         <Button
             android:id="@+id/btnSelectPut"
-            style="@style/select_json"
-            android:text="@string/demo_put" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -32,8 +30,7 @@
 
         <Button
             android:id="@+id/btnSelectDelete"
-            style="@style/select_json"
-            android:text="@string/demo_delete" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -46,8 +43,7 @@
 
         <Button
             android:id="@+id/btnSelectSingle"
-            style="@style/select_json"
-            android:text="@string/demo_single" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -55,8 +51,7 @@
 
         <Button
             android:id="@+id/btnSelectColumns"
-            style="@style/select_json"
-            android:text="@string/demo_columns" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -64,8 +59,7 @@
 
         <Button
             android:id="@+id/btnSelectRely"
-            style="@style/select_json"
-            android:text="@string/demo_rely" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -73,8 +67,7 @@
 
         <Button
             android:id="@+id/btnSelectArray"
-            style="@style/select_json"
-            android:text="@string/demo_array" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -82,8 +75,7 @@
 
         <Button
             android:id="@+id/btnSelectComplex"
-            style="@style/select_json"
-            android:text="@string/demo_complex" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -91,8 +83,7 @@
 
         <Button
             android:id="@+id/btnSelectAccessError"
-            style="@style/select_json"
-            android:text="@string/demo_wallet" />
+            style="@style/select_json" />
 
         <TextView
             style="@style/select_name"
@@ -100,8 +91,7 @@
 
         <Button
             android:id="@+id/btnSelectAccessPermitted"
-            style="@style/select_json"
-            android:text="@string/demo_wallet_with_access" />
+            style="@style/select_json" />
 
         <Button
             android:id="@+id/btnSelectUpdateLog"

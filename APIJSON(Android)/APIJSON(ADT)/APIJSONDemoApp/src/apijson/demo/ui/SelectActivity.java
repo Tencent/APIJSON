@@ -111,9 +111,9 @@ public class SelectActivity extends Activity implements OnClickListener {
 			return RequestUtil.newArrayRequest(encode);
 
 		case R.id.btnSelectAccessError:
-			return RequestUtil.newAccessErrorRequest(id, encode);
+			return RequestUtil.newAccessErrorRequest(encode);
 		case R.id.btnSelectAccessPermitted:
-			return RequestUtil.newAccessPermittedRequest(id, encode);
+			return RequestUtil.newAccessPermittedRequest(encode);
 		default:
 			return RequestUtil.newComplexRequest(encode);
 		}
