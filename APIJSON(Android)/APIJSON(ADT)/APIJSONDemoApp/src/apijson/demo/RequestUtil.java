@@ -19,90 +19,102 @@ import java.util.List;
 
 import zuo.biao.apijson.JSONObject;
 import zuo.biao.apijson.JSONRequest;
+import android.content.Context;
+import apijson.demo.application.DemoApplication;
 import apijson.demo.model.Comment;
+import apijson.demo.model.Moment;
 import apijson.demo.model.User;
 import apijson.demo.model.Wallet;
-import apijson.demo.model.Work;
 
 /**create request JSONObjects
  * @author Lemon
  */
 public class RequestUtil {
 
-	public static JSONObject newPostRequest() {
-		User data = new User();//10000);// 测试disallowColumns = [id]通过
-		data.setName("Tommy");// 测试necessaryColumns = [name,phone]通过
-		data.setSex(0);
-		data.setPhone("1234567890");// 测试necessaryColumns = [name,phone]通过
-		//		data.setHead("http://common.cnblogs.com/images/icon_weibo_24.png");
-		JSONRequest request = new JSONRequest();
-		request.put(data);
-		return request.setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
+	private static Context context;
+	static {
+		context = DemoApplication.getInstance();
 	}
 
-	public static JSONObject newPutRequest(long id) {
-		User data = new User(id <= 0 ? 38710 : id);//);// 测试necessaryColumns = [id]通过
-		data.setName("Lemon");
-		//测试disallowColumns = [phone]通过 data.setPhone("1234567890");
+	private static final long DEFAULT_MOMENT_ID = 15;
+	private static final long DEFAULT_USER_ID = 38710;
+	
+	
 
+	public static JSONObject newPostRequest(boolean encode) {
+		Moment data = new Moment();
+		data.setUserId(DEFAULT_USER_ID);
+		data.setContent(context.getString(R.string.apijson_slogan));
 		List<String> list = new ArrayList<String>();
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
 		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
 		data.setPictureList(list);
-
-		return new JSONRequest(data).setTag(User.class.getSimpleName());
+		return new JSONRequest(data, encode).setTag(Moment.class.getSimpleName());
 	}
 
-	public static JSONObject newDeleteRequest(long id) {
-		// 测试necessaryColumns = [id]通过
-		// 测试对象不存在通过，存在返回success通过
-		return new JSONRequest(new User(id <= 0 ? 10000 : id)).setTag(User.class.getSimpleName());//;// 测试必须指定tag通过
+	public static JSONObject newPutRequest(long id, boolean encode) {
+		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
+		data.setContent(context.getString(R.string.apijson_info));
+		return new JSONRequest(data, encode).setTag(Moment.class.getSimpleName());
+	}
+
+	public static JSONObject newDeleteRequest(long id, boolean encode) {
+		return new JSONRequest(new Moment(id <= 0 ? 10000 : id), encode).setTag(Moment.class.getSimpleName());
 	}
 
 
 
 
-	public static JSONObject newSingleRequest(long id) {
-		return new JSONRequest(new User(id <= 0 ? 38710 : id));
+	public static JSONObject newSingleRequest(long id, boolean encode) {
+		return new JSONRequest(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id), encode);
 	}
 
-	public static JSONObject newColumnsRequest(long id) {
-		JSONObject object = new JSONObject(new User(id <= 0 ? 38710 : id));
-		object.setColumns("id,name,phone");//测试排序通过 //StringUtil.getString(new String[]{"id", "name", "phone"}));//
-		return new JSONRequest(User.class.getSimpleName(), object);
+	public static JSONObject newColumnsRequest(long id, boolean encode) {
+		JSONObject object = new JSONObject(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id));
+		object.setColumns("id,userId,content");
+		return new JSONRequest(Moment.class.getSimpleName(), object, encode);
 	}
 
-	public static JSONObject newRelyRequest(long id) {
+	public static JSONObject newRelyRequest(long id, boolean encode) {
 		JSONRequest request = new JSONRequest();
-		request.put(new User(id <= 0 ? 70793 : id));
-		request.put(Work.class.getSimpleName(), new JSONRequest("userId@", "User/id"));
+		request.put(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id), encode);
+		request.put(User.class.getSimpleName(), new JSONRequest("id@", "Moment/userId", encode));
 		return request;
 	}
 
-	public static JSONObject newArrayRequest() {
-		return new JSONRequest(new User()).toArray(5, 1, User.class.getSimpleName());
+	public static JSONObject newArrayRequest(boolean encode) {
+		JSONRequest dataObject = new JSONRequest();
+		dataObject.put("name$", "%o%", encode);
+		JSONRequest request = new JSONRequest(User.class.getSimpleName(), dataObject, encode);
+		return request.toArray(5, 1, User.class.getSimpleName());
 	}
 
-	public static JSONObject newComplexRequest() {
+	public static JSONObject newComplexRequest(boolean encode) {
 		JSONRequest request = new JSONRequest();
-		request.put(new User().setSex(0));
-		request.put(Work.class.getSimpleName(), new JSONRequest("userId@", "/User/id"));
 
-		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId@", "[]/Work/id")).
+		List<Long> idList = new ArrayList<Long>();
+		idList.add(DEFAULT_USER_ID);
+		idList.add((long) 93793);
+		request.put(Moment.class.getSimpleName(), new JSONRequest("userId{}", idList, encode), encode);
+
+		request.put(User.class.getSimpleName(), new JSONRequest("id@", "/Moment/userId", encode), encode);
+
+		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId@", "[]/Moment/id", encode)).
 				toArray(3, 0, Comment.class.getSimpleName()));
 
-		return request.toArray(2, 0);
+		return request.toArray(3, 0);
 	}
 
-	public static JSONObject newAccessErrorRequest(long id) {
-		return new JSONRequest(new Wallet().setUserId(id <= 0 ? 38710 : id)).setTag(Wallet.class.getSimpleName());
+	public static JSONObject newAccessErrorRequest(long id, boolean encode) {
+		return new JSONRequest(new Wallet().setUserId(id <= 0 ? DEFAULT_USER_ID : id), encode)
+		.setTag(Wallet.class.getSimpleName());
 	}
 
-	public static JSONObject newAccessPermittedRequest(long id) {
+	public static JSONObject newAccessPermittedRequest(long id, boolean encode) {
 		JSONRequest request = new JSONRequest();
-		request.put(new Wallet().setUserId(id <= 0 ? 38710 : id));
-		request.put("currentUserId", 38710);
-		request.put("loginPassword", "apijson");
+		request.put(new Wallet().setUserId(id <= 0 ? DEFAULT_USER_ID : id), encode);
+		request.put("currentUserId", DEFAULT_USER_ID, encode);
+		request.put("loginPassword", "apijson", encode);
 		return request.setTag(Wallet.class.getSimpleName());
 	}
 

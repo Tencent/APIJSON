@@ -36,16 +36,44 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest() {
 		super();
 	}
+	/**
+	 * encode = true
+	 * {@link #JSONRequest(String, Object)}
+	 * @param object
+	 */
 	public JSONRequest(Object object) {
 		this(null, object);
 	}
+	/**
+	 * encode = true
+	 * {@link #JSONRequest(String, Object, boolean)}
+	 * @param name
+	 * @param object
+	 */
 	public JSONRequest(String name, Object object) {
-		this();
-		put(name, object);
+		this(name, object, true);
 	}
-	
-	
-	
+	/**
+	 * {@link #JSONRequest(String, Object, boolean)}
+	 * @param object
+	 * @param encode
+	 */
+	public JSONRequest(Object object, boolean encode) {
+		this(null, object, encode);
+	}
+	/**
+	 * {@link #put(String, Object, boolean)}
+	 * @param name
+	 * @param object
+	 * @param encode
+	 */
+	public JSONRequest(String name, Object object, boolean encode) {
+		this();
+		put(name, object, encode);
+	}
+
+
+
 	public static final String KEY_TAG = "tag";
 	/**set tag
 	 * @param tag
@@ -83,9 +111,9 @@ public class JSONRequest extends JSONObject {
 		return getIntValue(KEY_PAGE);
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
-	
-	
+
+
+
 
 	/**
 	 * @param value
@@ -103,19 +131,22 @@ public class JSONRequest extends JSONObject {
 	}
 
 	/**
-	 * return getWithDecode(key);
+	 * decode = true
+	 * @param key
+	 * return {@link #get(Object, boolean)}
 	 */
 	@Override
 	public Object get(Object key) {
-		return getWithDecode(key);
+		return get(key, true);
 	}
 	/**
 	 * @param key
-	 * @return if value is String, return URLDecoder.decode((String) value, UTF_8);
+	 * @param decode if decode && value instanceof String, value = URLDecoder.decode((String) value, UTF_8)
+	 * @return 
 	 */
-	public Object getWithDecode(Object key) {
+	public Object get(Object key, boolean decode) {
 		Object value = super.get(key);
-		if (value instanceof String) {
+		if (decode && value instanceof String) {
 			try {
 				return URLDecoder.decode((String) value, UTF_8);
 			} catch (UnsupportedEncodingException e) {
@@ -125,36 +156,40 @@ public class JSONRequest extends JSONObject {
 		return value;
 	}
 
-	/**put(value.getClass().getSimpleName(), value);
+	/**
+	 * encode = true
 	 * @param value
-	 * @return
+	 * @return {@link #put(String, Object)}
 	 */
 	public Object put(Object value) {
-		return putWithEncode(value);
+		return put(value, true);
+	}
+	/**
+	 * @param value
+	 * @param encode
+	 * @return {@link #put(String, Object, boolean)}
+	 */
+	public Object put(Object value, boolean encode) {
+		return put(null, value, encode);
 	}	
 	/**
-	 * return putWithEncode(key, value);
+	 * encode = true
+	 * @param key
+	 * @param value
+	 * return {@link #put(String, Object, boolean)}
 	 */
 	@Override
 	public Object put(String key, Object value) {
-		return putWithEncode(key, value);
-	}
-
-
-	/**put(value.getClass().getSimpleName(), value);
-	 * @param value
-	 * @return
-	 */
-	public Object putWithEncode(Object value) {
-		return putWithEncode(null, value);
+		return put(key, value, true);
 	}
 	/**
-	 * @param key
-	 * @param value if is String, value = URLEncoder.encode((String) value, UTF_8);
+	 * @param key => StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName()
+	 * @param value URLEncoder.encode((String) value, UTF_8);
+	 * @param encode if value instanceof String >> value = URLEncoder.encode((String) value, UTF_8);
 	 * @return
 	 */
-	public Object putWithEncode(String key, Object value) {
-		if (value instanceof String) {
+	public Object put(String key, Object value, boolean encode) {
+		if (encode && value instanceof String) {
 			try {
 				value = URLEncoder.encode((String) value, UTF_8);
 				//just encode /, not need to encode [] 	? URLEncoder.encode(key, UTF_8) 
@@ -164,23 +199,7 @@ public class JSONRequest extends JSONObject {
 		}
 		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), value);
 	}
-	/**用于不需要被encode的情况，比如搜索 %key% 用put(调用putWithEncode)/putWithEncode会encode，加上HttpManager再次encode
-	 * ，到服务端decode一次就成了%25key%25。
-	 * @param key
-	 * @param value
-	 * @return
-	 */
-	public Object putWithoutEncode(String key, Object value) {
-		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), value);
-	}
-	/**用于不需要被decode的情况
-	 * @param key
-	 * @param value
-	 * @return
-	 */
-	public Object getWithoutDecode(String key) {
-		return super.get(key);
-	}
+
 
 	/**create a parent JSONObject named KEY_ARRAY
 	 * @param count
@@ -199,7 +218,6 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest toArray(int count, int page, String name) {
 		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page));
 	}
-
 
 
 	/**设置搜索
@@ -221,7 +239,7 @@ public class JSONRequest extends JSONObject {
 		if (key.endsWith("$") == false) {
 			key += "$";
 		}
-		putWithoutEncode(key, getSearch(value, type));
+		put(key, getSearch(value, type), true);
 	}
 
 	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;
@@ -304,4 +322,5 @@ public class JSONRequest extends JSONObject {
 		}
 	}
 
+	
 }

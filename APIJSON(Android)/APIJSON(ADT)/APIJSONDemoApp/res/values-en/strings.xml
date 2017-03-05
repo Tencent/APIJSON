@@ -18,5 +18,6 @@
     <string name="user_id_changed">"userId was changed to %1$s ,you can restore it by [DELETE]"</string>
     <string name="browser_can_only_receive_get_response">Browsers can only receive GET responses</string>
     <string name="query_error">There may be something wrong,you can follow by the steps:\n\n1.Check your net connection\n\n2.Check the url whether it\'s an available ipv4 address\n\n3.Long click the [ %1$s ] button to open the request by web browser\n\n4.Check logs outputed on the target server\n\n5.Try again</string>
-
+    <string name="apijson_slogan">APIJSON,&#160;let&#160;interfaces&#160;go&#160;to&#160;hell!</string>
+    <string name="apijson_info">APIJSON&#160;is&#160;a&#160;JSON&#160;Transmission&#160;Structure&#160;Protocol&#8230;</string>
 </resources>

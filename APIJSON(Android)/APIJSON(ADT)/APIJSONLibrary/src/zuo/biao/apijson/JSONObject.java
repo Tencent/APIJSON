@@ -69,21 +69,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 	
-	
-	public static final String KEY_COLUMNS = "@columns";//@key关键字都放这个类
-
-	/**set columns need to be returned
-	 * @param columns  "column0,column1,column2..."
-	 * @return
-	 */
-	public JSONObject setColumns(String columns) {
-		put(KEY_COLUMNS, columns);
-		return this;
-	}
-	public String getColumns() {
-		return getString(KEY_COLUMNS);
-	}
-
 
 
 	//judge <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -111,5 +96,22 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
 	}
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	
+	
+	public static final String KEY_COLUMNS = "@columns";//@key关键字都放这个类
 
+	/**set columns need to be returned
+	 * @param columns  "column0,column1,column2..."
+	 * @return
+	 */
+	public JSONObject setColumns(String columns) {
+		put(KEY_COLUMNS, columns);
+		return this;
+	}
+	public String getColumns() {
+		return getString(KEY_COLUMNS);
+	}
+	
+	
 }

@@ -31,5 +31,6 @@
     <string name="user_id_changed">"userId已改为 %1$s ，【删】后会恢复默认值"</string>
     <string name="browser_can_only_receive_get_response">用浏览器只能获取GET结果</string>
     <string name="query_error">可能出现了一些问题，可以按照以下步骤解决：\n\n1.检查网络连接\n\n2.检查url是否为一个可用的IPV4地址\n\n3.长按[ %1$s ]按钮用浏览器发送请求\n\n4.查看目标服务器上的log\n\n5.再试一次</string>
-
+    <string name="apijson_slogan">APIJSON,&#160;let&#160;interfaces&#160;go&#160;to&#160;hell!</string>
+    <string name="apijson_info">APIJSON&#160;is&#160;a&#160;JSON&#160;Transmission&#160;Structure&#160;Protocol&#8230;</string>
 </resources>
