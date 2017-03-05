@@ -14,6 +14,13 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import static zuo.biao.apijson.StringUtil.UTF_8;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
+
 /**encapsulator for request JSONObject
  * @author Lemon
  * @see #toArray
@@ -28,18 +35,45 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest() {
 		super();
 	}
+	/**
+	 * encode = true
+	 * {@link #JSONRequest(String, Object)}
+	 * @param object
+	 */
 	public JSONRequest(Object object) {
 		this(null, object);
 	}
+	/**
+	 * encode = true
+	 * {@link #JSONRequest(String, Object, boolean)}
+	 * @param name
+	 * @param object
+	 */
 	public JSONRequest(String name, Object object) {
-		this();
-		put(name, object);
+		this(name, object, true);
 	}
-	
-	
-	
-	public static final String KEY_TAG = "tag";//放最外层及[]里的不会和其它字段冲突
-	public static final String KEY_COLUMNS = "@columns";//只有放在请求table的Object里的关键字才用@key形式
+	/**
+	 * {@link #JSONRequest(String, Object, boolean)}
+	 * @param object
+	 * @param encode
+	 */
+	public JSONRequest(Object object, boolean encode) {
+		this(null, object, encode);
+	}
+	/**
+	 * {@link #put(String, Object, boolean)}
+	 * @param name
+	 * @param object
+	 * @param encode
+	 */
+	public JSONRequest(String name, Object object, boolean encode) {
+		this();
+		put(name, object, encode);
+	}
+
+
+
+	public static final String KEY_TAG = "tag";
 	/**set tag
 	 * @param tag
 	 * @return
@@ -52,17 +86,6 @@ public class JSONRequest extends JSONObject {
 		return getString(KEY_TAG);
 	}
 
-	/**set columns need to be returned
-	 * @param columns  "column0,column1,column2..."
-	 * @return
-	 */
-	public JSONObject setColumns(String columns) {
-		put(KEY_COLUMNS, columns);
-		return this;
-	}
-	public String getColumns() {
-		return getString(KEY_COLUMNS);
-	}
 
 
 
@@ -87,9 +110,9 @@ public class JSONRequest extends JSONObject {
 		return getIntValue(KEY_PAGE);
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
-	
-	
+
+
+
 
 	/**
 	 * @param value
@@ -106,20 +129,74 @@ public class JSONRequest extends JSONObject {
 		return put(key, path);
 	}
 
+	/**
+	 * decode = true
+	 * @param key
+	 * return {@link #get(Object, boolean)}
+	 */
+	@Override
+	public Object get(Object key) {
+		return get(key, true);
+	}
+	/**
+	 * @param key
+	 * @param decode if decode && value instanceof String, value = URLDecoder.decode((String) value, UTF_8)
+	 * @return 
+	 */
+	public Object get(Object key, boolean decode) {
+		Object value = super.get(key);
+		if (decode && value instanceof String) {
+			try {
+				return URLDecoder.decode((String) value, UTF_8);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return value;
+	}
 
-	/**put(value.getClass().getSimpleName(), value);
+	/**
+	 * encode = true
 	 * @param value
-	 * @return
+	 * @return {@link #put(String, Object)}
 	 */
 	public Object put(Object value) {
-		return put(null, value);
+		return put(value, true);
+	}
+	/**
+	 * @param value
+	 * @param encode
+	 * @return {@link #put(String, Object, boolean)}
+	 */
+	public Object put(Object value, boolean encode) {
+		return put(null, value, encode);
 	}	
 	/**
-	 * return putWithEncode(key, value);
+	 * encode = true
+	 * @param key
+	 * @param value
+	 * return {@link #put(String, Object, boolean)}
 	 */
 	@Override
 	public Object put(String key, Object value) {
-		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), JSON.parseObject(value));
+		return put(key, value, true);
+	}
+	/**
+	 * @param key => StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName()
+	 * @param value URLEncoder.encode((String) value, UTF_8);
+	 * @param encode if value instanceof String >> value = URLEncoder.encode((String) value, UTF_8);
+	 * @return
+	 */
+	public Object put(String key, Object value, boolean encode) {
+		if (encode && value instanceof String) {
+			try {
+				value = URLEncoder.encode((String) value, UTF_8);
+				//just encode /, not need to encode [] 	? URLEncoder.encode(key, UTF_8) 
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), value);
 	}
 
 
@@ -142,7 +219,6 @@ public class JSONRequest extends JSONObject {
 	}
 
 
-
 	/**设置搜索
 	 * @param key
 	 * @param value
@@ -162,7 +238,7 @@ public class JSONRequest extends JSONObject {
 		if (key.endsWith("$") == false) {
 			key += "$";
 		}
-		put(key, getSearch(value, type));
+		put(key, getSearch(value, type), true);
 	}
 
 	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;
@@ -245,4 +321,5 @@ public class JSONRequest extends JSONObject {
 		}
 	}
 
+	
 }
