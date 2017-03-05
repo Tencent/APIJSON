@@ -23,14 +23,14 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;User&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//请求查询名为User的table，返回名为User的JSONObject<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;sex&quot;: 0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //object条件<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &quot;Work&quot;: {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &quot;Moment&quot;: {<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId@&quot;: &ldquo;/User/id&rdquo; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //缺省依赖路径，从同级object的路径开始<br />
 &nbsp; &nbsp; &nbsp; &nbsp; },<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment[]&quot;: { &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //请求一个名为Comment的array&nbsp;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;page&quot;: 0,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;count&quot;: 3,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;: {<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;workId@&quot;: &ldquo;[]/Work/id&rdquo; &nbsp; //完整依赖路径<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;momentId@&quot;: &ldquo;[]/Moment/id&rdquo; &nbsp; //完整依赖路径<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br />
 &nbsp; &nbsp; &nbsp; &nbsp; }<br />
 &nbsp; &nbsp; }<br />
@@ -51,7 +51,7 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;name&quot;:&quot;Name-38710&quot;,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;head&quot;:&quot;http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000&quot;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; },<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Work&quot;:{<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Moment&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;id&quot;:470,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;title&quot;:&quot;Title-470&quot;,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;content&quot;:&quot;This is a Content...-470&quot;,<br />
@@ -63,7 +63,7 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;id&quot;:4,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;parentId&quot;:0,<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;workId&quot;:470,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;momentId&quot;:470,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;:310,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;targetUserId&quot;:14604,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;content&quot;:&quot;This is a Content...-4&quot;,<br />
@@ -75,7 +75,7 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;id&quot;:22,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;parentId&quot;:221,<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;workId&quot;:470,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;momentId&quot;:470,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;:332,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;targetUserId&quot;:5904,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;content&quot;:&quot;This is a Content...-22&quot;,<br />
@@ -87,7 +87,7 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Comment&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;id&quot;:47,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;parentId&quot;:4,<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;workId&quot;:470,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;momentId&quot;:470,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;userId&quot;:10,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;targetUserId&quot;:5477,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;content&quot;:&quot;This is a Content...-47&quot;,<br />
@@ -106,7 +106,7 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;name&quot;:&quot;Name-70793&quot;,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;head&quot;:&quot;http://static.oschina.net/uploads/user/1174/2348263_50.png?t=1439773471000&quot;<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; },<br />
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Work&quot;:{<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;Moment&quot;:{<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;id&quot;:170,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;title&quot;:&quot;Title-73&quot;,<br />
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &quot;content&quot;:&quot;This is a Content...-73&quot;,<br />
@@ -207,7 +207,7 @@ APIJSON是一种JSON传输结构协议。<br />
  客户端对应不同需求的请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  User | http://localhost:8080/get/user?id=1 | [http://localhost:8080/get/{"User":{"id":1}}](http://192.168.1.102:8080/get/{"User":{"id":38710}})
- Moment和对应的User | 分两次请求<br />Moment: http://localhost:8080/get/moment?userId=1<br />User: http://localhost:8080/get/user?id=1 | [http://localhost:8080/get/{"Moment":{"id":1}, "User":{"id@":"Moment/id"}}](http://192.168.1.102:8080/get/%7B%22Moment%22%3A%7B%22id%22%3A15%7D%2C%22User%22%3A%7B%22id%40%22%3A%22Moment%252FuserId%22%7D%7D)
+ Moment和对应的User | 分两次请求<br />Moment: http://localhost:8080/get/moment?userId=1<br />User: http://localhost:8080/get/user?id=1 | [http://localhost:8080/get/{"Moment":{"id":1}, "User":{"id@":"Moment/userId"}}](http://192.168.1.102:8080/get/%7B%22Moment%22%3A%7B%22id%22%3A15%7D%2C%22User%22%3A%7B%22id%40%22%3A%22Moment%252FuserId%22%7D%7D)
  User列表 | http://localhost:8080/get/user/list?page=0&count=3&sex=0 | [http://localhost:8080/get/{"[]":{"page":0, "count":3, "User":{"sex":0}}}](http://192.168.1.102:8080/get/{"[]":{"page":0,"count":3,"User":{"sex":0}}})
  Moment列表，每个Moment包括发布者User和前3条Comment | Moment里必须有User的Object和Comment的Array<br /> http://localhost:8080/get/moment/list?page=0&count=3&commentCount=3 | [http://localhost:8080/get/{"[]":{"page":0, "count":3, "Moment":{}, "User":{"momentId@":"/Moment/id"}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://192.168.1.102:8080/get/%7B%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%7D%2C%22User%22%3A%7B%22id%40%22%3A%22%252FMoment%252FuserId%22%7D%2C%22Comment%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D)
  1个User发布的Moment列表，每个Moment包括发布者User和前3条Comment | http://localhost:8080/get/moment/list?page=0&count=3&commentCount=3&userId=1 | 有以下几种方法:<br />①把以上请求里的"Moment":{}, "User":{"momentId@":"/Moment/id"}改为["Moment":{"userId":1}, "User":{"id":1}](http://192.168.1.102:8080/get/%7B%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%22userId%22%3A38710%7D%2C%22User%22%3A%7B%22id%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D) <br /><br />②或这样省去4条重复User<br />[http://localhost:8080/get/{"User":{"id":1}, "[]":{"page":0, "count":3, "Moment":{"userId":1}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://192.168.1.102:8080/get/%7B%22User%22%3A%7B%22id%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%22userId%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D)<br /><br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />[http://localhost:8080/get/{"[]":{"page":0, "count":3, "Moment":{"userId":1}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://192.168.1.102:8080/get/%7B%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%22userId%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D)
