@@ -408,7 +408,12 @@ public class RequestParser {
 		if (request == null) {//key-value条件
 			return null;
 		}
-		String path = getPath(parentPath, name);
+		final String path = getPath(parentPath, name);
+		if (parseRelation //优化性能：第二遍遍历时如果内部没有依赖引用其它就跳过
+				&& StringUtil.isNotEmpty(path, true)//避免最外层返回true而不能parseRelation
+				&& isInRelationMap(path) == false) {
+			return request;
+		}
 
 		boolean nameIsNumber = StringUtil.isNumer(name);
 		QueryConfig config = nameIsNumber ? parentConfig : null;
