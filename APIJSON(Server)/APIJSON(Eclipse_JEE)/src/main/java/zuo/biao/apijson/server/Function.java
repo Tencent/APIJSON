@@ -18,7 +18,7 @@ public class Function {
 	private static final String TAG = "Function";
 
 
-	public static void test() {
+	public static void test() throws Exception {
 		int i0 = 1, i1 = -2;
 		Map<String, Object> jsonMap = new HashMap<String, Object>(); 
 		jsonMap.put("id", 10);
@@ -36,10 +36,11 @@ public class Function {
 		jsonMap.put("collection", collection);
 
 		jsonMap.put("position", 1);
+		jsonMap.put("@position", 0);
 
 		jsonMap.put("key", "key");
-		Map<String, Integer> map = new HashMap<String, Integer>();
-		map.put("key", 111);
+		Map<String, Boolean> map = new HashMap<String, Boolean>();
+		map.put("key", true);
 		jsonMap.put("map", map);
 
 		String function = "get(Collection:collection,int:position)";//只允许引用，不能直接传值//"plus(@i0,@i1)";
@@ -58,8 +59,9 @@ public class Function {
 		System.out.println("plus = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
 		System.out.println("count = " + invoke(jsonMap, "count(Collection:collection)"));
 		System.out.println("contains = " + invoke(jsonMap, "contains(Collection:collection,Object:id)"));
-		System.out.println("get = " + invoke(jsonMap, "get(Map:map,key)"));
-		System.out.println("Integer:get = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
+		System.out.println("get(Map:map,key) = " + invoke(jsonMap, "get(Map:map,key)"));
+		System.out.println("get(Collection:collection,int:@position) = " + invoke(jsonMap, "get(Collection:collection,int:@position)"));
+		System.out.println("Integer:get(Map:map,key) = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
 	}
 
 	/**反射调用
@@ -67,7 +69,7 @@ public class Function {
 	 * @param function 例如get(Map:map,key)，参数只允许引用，不能直接传值
 	 * @return
 	 */
-	public static Object invoke(Map<String, Object> jsonMap, String function) {
+	public static Object invoke(Map<String, Object> jsonMap, String function) throws Exception {
 
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
@@ -103,15 +105,15 @@ public class Function {
 	 * @param args
 	 * @return
 	 */
-	public static Object invoke(String methodName, Class<?>[] parameterTypes, Object[] args) {
+	public static Object invoke(String methodName, Class<?>[] parameterTypes, Object[] args) throws Exception {
 		Function obj = new Function();
 		Class<?> clazz = obj.getClass();
-		try {
+//		try {
 			return clazz.getDeclaredMethod(methodName, parameterTypes).invoke(obj, args);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return null;
 	}
 	
 

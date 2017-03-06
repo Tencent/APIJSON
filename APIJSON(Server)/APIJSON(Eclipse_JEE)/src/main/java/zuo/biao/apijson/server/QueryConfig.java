@@ -14,8 +14,10 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +35,14 @@ import zuo.biao.apijson.Table;
 public class QueryConfig {
 	private static final String TAG = "QueryConfig";
 
+	public static final List<String> keyList;
+	static {
+		keyList = new ArrayList<String>();
+		keyList.add(JSONRequest.KEY_COLUMNS);
+	}
+	
+	
+	
 	private long id;
 	private RequestMethod method;
 	private String table;
