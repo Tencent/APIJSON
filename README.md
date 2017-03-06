@@ -278,5 +278,3 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 ## 欢迎Star，欢迎Fork
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
-
-# APIJSON，让接口见鬼去吧！
