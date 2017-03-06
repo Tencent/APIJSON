@@ -430,6 +430,7 @@ public class RequestParser {
 		Set<String> set = request.keySet();
 		JSONObject transferredRequest = new JSONObject(true);
 		Map<String, String> functionMap = new LinkedHashMap<>();
+		Map<String, Object> selfDefineKeyMap = new LinkedHashMap<>();
 		if (set != null) {
 			Object value;
 			JSONObject result;
@@ -450,6 +451,9 @@ public class RequestParser {
 					}
 				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
+					if (key.startsWith("@") && QueryConfig.keyList.contains(key) == false) {
+						selfDefineKeyMap.put(key, value);
+					}//可@key@
 					if (key.endsWith("()")) {
 						if (value instanceof String == false) {
 							throw new IllegalArgumentException("\"key()\": 后面必须为函数String！");
@@ -493,22 +497,25 @@ public class RequestParser {
 
 
 				if (transferredRequest != null && transferredRequest.isEmpty() == false) {//避免返回空的
+					transferredRequest.putAll(selfDefineKeyMap);
 					//解析函数function
 					Set<String> functionSet = functionMap.keySet();
 					if (functionSet != null && functionSet.isEmpty() == false) {
 						for (String key : functionSet) {
-							try {
-								transferredRequest.put(getRealKey(key, false)
-										, Function.invoke(transferredRequest, functionMap.get(key)));
-							} catch (Exception e) {
-								Log.e(TAG, "getObject  containRelation == false && isTableKey(name)"
-										+ " >> transferredRequest.put(getRealKey(key, false),"
-										+ " Function.invoke(transferredRequest, functionMap.get(key)));"
-										+ " >> } catch (Exception e) {");
-								e.printStackTrace();
-							}
+							//							try {
+							transferredRequest.put(getRealKey(key, false)
+									, Function.invoke(transferredRequest, functionMap.get(key)));
+							//							} catch (Exception e) {
+							//								Log.e(TAG, "getObject  containRelation == false && isTableKey(name)"
+							//										+ " >> transferredRequest.put(getRealKey(key, false),"
+							//										+ " Function.invoke(transferredRequest, functionMap.get(key)));"
+							//										+ " >> } catch (Exception e) {");
+							//								e.printStackTrace();
+							//							}
 						}
 					}
+
+					//可能客户端还有用，客户端自己解决，况且已知Android用fastjson解析不会崩溃 //移除自定义key
 				}
 
 				if (parseRelation) {

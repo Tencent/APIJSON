@@ -26,6 +26,10 @@ public class APIJSONApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(APIJSONApplication.class, args);
 
-		Function.test();
+		try {
+			Function.test();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -260,9 +260,10 @@ public class QueryConfig {
 		}
 		return "";
 	}
-	/**where key in ('key0', 'key1', ... )
-	 * @param in
-	 * @return in ('key0', 'key1', ... )
+	/**where key > 'key0' and key <= 'key1' and ...
+	 * @param key
+	 * @param range "condition0,condition1..."
+	 * @return key > 'key0' and key <= 'key1' and ...
 	 */
 	public static String getRangeString(String key, Object range) {
 		if (range instanceof JSONArray) {
