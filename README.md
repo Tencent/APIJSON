@@ -194,6 +194,10 @@ APIJSON是一种JSON传输结构协议。<br />
  Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
  User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | 以上不同请求方法的结果:<br />①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Moment":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />③{"status":200, "message":"success", "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
 
+
+(注：APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在大部分请求都是GET请求)
+
+
 ## 使用方法
 
 ### 1.下载后解压APIJSON工程
