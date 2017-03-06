@@ -147,8 +147,8 @@ APIJSON是一种JSON传输结构协议。<br />
  
   键值对格式 | 功能与作用 | 使用示例
 ------------ | ------------ | ------------
- "key[]":{}，后面是标准的JSONObject | 查询数组 | "User[]":{"User":{"sex":0}}，查询性别为男的一个的User数组，请求完成后会变为 "User[]":{"0":{"User":{"id":38710,"sex":0,"name":"Tommy"...}}, "1":{"User":{"id":82001,"sex":0,"name":"Lemon"...}} ...}
- "key{}":[]，后面是标准的JSONArray，作为key可取的范围 | 匹配范围 | "id{}":[38710,82001,70793]，查询id符合38710,82001,70793中任意一个的Object。一般用于查询一个数组。请求{"[]":{"User":{"id{}":[38710,82001,70793]}}}会返回一个User数组，例如上面那个。
+ "key[]":{}，后面是标准的JSONObject | 查询数组 | ["User[]":{"User":{"sex":1}}](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"sex":1}}})，查询性别为女的一个的User数组，请求完成后会变为 "User[]":{"0":{"User":{"id":38710,"sex":1,"name":"Tommy"...}}, "1":{"User":{"id":82001,"sex":1,"name":"Lemon"...}} ...}
+ "key{}":[]，后面是标准的JSONArray，作为key可取的范围 | 匹配范围 | "id{}":[38710,82001,70793]，查询id符合38710,82001,70793中任意一个的Object。一般用于查询一个数组。请求[{"[]":{"User":{"id{}":[38710,82001,70793]}}}](http://139.196.140.118:8080/get/{"[]":{"count":3,"User":{"id{}":[38710,82001,70793]}}})会返回一个User数组，例如上面那个。
  "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 远程调用函数 |  "isPraised()":"contains(Collection:praiseUserIdList,userId)"，请求完成后会调用 boolean contains(Collection collection, Object object) 函数，然后变为 "isPraised":true 这种（假设点赞用户id列表包含了userId，即这个User点了赞）。函数参数类型为Object时可用 value 替代 Object:value。
  "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 依赖引用 | "userId@":"/User/id"，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成 "userId":1
  "key$":"SQL搜索表达式"，任意标准SQL搜索表达式字符串，如 %key%, %k%e%y% 等 | 模糊搜索 | "name$":"%Tommy%"，搜索包含Tommy的名字。一般用于查询一个数组。请求 {"[]":{"User":{"name$":"%Tommy%"}}} 会返回name包含"Tommy"的User数组。
