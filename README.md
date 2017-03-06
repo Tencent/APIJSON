@@ -214,7 +214,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
-### 3.运行服务端工程
+### 3.用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.8.0_91 + Eclipse 4.6.1 + IntellIJ 2016.2.5
@@ -235,7 +235,7 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea
 2.运行<br />
 Run > Run APIJSONApplication
 
-### 4.运行客户端工程
+### 4.用ADT Bundle或Android Studio运行客户端工程
 
 可以跳过这个步骤，直接下载下方提供的客户端App。
 
