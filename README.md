@@ -263,12 +263,14 @@ Run > Run app
 选择发送APIJSON请求并等待显示结果。<br />
 如果默认url不可用，修改为一个可用的，比如正在运行APIJSON服务端工程的电脑的IPV4地址，然后点击查询按钮重新请求。
 
+##关于作者
+TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
+如果有什么问题或建议可以发我邮件，交流技术，分享经验 ^_^
+
 ## 下载试用客户端App
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
-
-### 关于APIJSON如果你有任何问题或建议，都可以发我邮件 tommylemon@qq.com.
 
 ## 更新日志
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
