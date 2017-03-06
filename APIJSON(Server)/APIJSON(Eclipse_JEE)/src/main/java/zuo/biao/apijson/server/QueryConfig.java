@@ -40,9 +40,9 @@ public class QueryConfig {
 		keyList = new ArrayList<String>();
 		keyList.add(JSONRequest.KEY_COLUMNS);
 	}
-	
-	
-	
+
+
+
 	private long id;
 	private RequestMethod method;
 	private String table;
@@ -230,16 +230,16 @@ public class QueryConfig {
 				}
 				if (key.endsWith("@")) {//引用
 					key = key.substring(0, key.lastIndexOf("@"));
-//					throw new IllegalArgumentException(TAG + ".getWhereString: 字符 " + key + " 不合法！");
+					//					throw new IllegalArgumentException(TAG + ".getWhereString: 字符 " + key + " 不合法！");
 				}
 				if (key.endsWith("$")) {
 					keyType = 1;
 				} else if (key.endsWith("{}")) {
 					keyType = 2;
 				}
-				
+
 				value = where.get(key);
-				
+
 				try {
 					key = RequestParser.getRealKey(key, false);
 				} catch (Exception e) {
@@ -247,9 +247,9 @@ public class QueryConfig {
 							+ " >> } catch (Exception e) {");
 					e.printStackTrace();
 				}
-				
+
 				whereString += (key + (keyType == 1 ? " LIKE '" + value + "'" : (keyType == 2
-						? getInString(((JSONArray)value).toArray()) : "='" + value + "'") ) + " AND ");
+						? getRangeString(key, value) : "='" + value + "'") ) + " AND ");
 			}
 			if (whereString.endsWith("AND ")) {
 				whereString = whereString.substring(0, whereString.length() - "AND ".length());
@@ -259,6 +259,20 @@ public class QueryConfig {
 			}
 		}
 		return "";
+	}
+	/**where key in ('key0', 'key1', ... )
+	 * @param in
+	 * @return in ('key0', 'key1', ... )
+	 */
+	public static String getRangeString(String key, Object range) {
+		if (range instanceof JSONArray) {
+			return getInString(((JSONArray) range).toArray());
+		}
+		if (range instanceof String) {
+			return ((String) range).replaceAll(",", " AND " + key);//非Number类型的可能需要客户端拼接成 < 'value0', >= 'value1'这种
+		}
+
+		throw new IllegalArgumentException("\"key{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
 	}
 	/**where key in ('key0', 'key1', ... )
 	 * @param in
