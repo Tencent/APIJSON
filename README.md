@@ -186,6 +186,17 @@ APIJSON是一种JSON传输结构协议。<br />
 
 (注：APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在这两个在所有请求里占大部分)
 
+## 请求方法、URL、Request、Response对应关系总览
+  方法及说明 | URL | Request | Response
+------------ | ------------ | ------------ | ------------
+GET：普通获取请求，明文，方便，可直接用浏览器调试 | base_url/get/ | {TableName:{…}}，Table内为限制条件。<br >例如{"Moment":{"id":1}}，获取一个id为1的Moment | {TableName:{...}, "status":200, "message":"success"}，例如{"Moment":{"id":1, "userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "status":200, "message":"success"}
+HEAD：普通获取数量请求，明文，方便，可直接用浏览器调试 | base_url/head/ | {"Table":{…}}，Table内为限制条件。<br >例如{"Moment":{"userId":1}}，获取一个id为1的User发布的Moment总数 | {"Table":{"status":200, "message":"success", "count":10}，例如{"Moment":{"status":200, "message":"success", "count":10}, "status":200, "message":"success"}
+POST_GET：安全/私密获取请求，请求内容和返回数据都不显示，用于获取密码、钱包等对安全性要求高的数据 | base_url/post_get/ | 最外层加一个"tag":tag，其它同GET | 同GET
+POST_HEAD：安全/私密获取数量请求，请求内容和返回数据都不显示，用于获取密码数量、钱包数量等对安全性要求高的数据 | base_url/post_head/ | 最外层加一个"tag":tag，其它同HEAD | 同HEAD
+POST | base_url/post/ | {"Table":{…}, "tag":tag}，例如{"Moment":{"userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"}| {"Table":{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}，例如{"Moment":{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}
+PUT | base_url/put/ | {"Table":{"id":id,…}, "tag":tag}，例如{"Moment":{"id":1,"content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"}| 同POST
+DELETE | base_url/delete/ | {"Table":{"id":id}, "tag":tag}，例如{"Moment":{"id":1}, "tag":"Moment"} | 同POST
+
 
 ## 功能符
  
