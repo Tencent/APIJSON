@@ -183,9 +183,11 @@ APIJSON是一种JSON传输结构协议。<br />
  Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
  User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | 以上不同请求方法的结果:<br />①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Moment":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />③{"status":200, "message":"success", "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
 
-1.base_url指基地址，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.xxx.com/ ，对应的GET分支url:http://www.xxx.com/get/ ，下同。<br >
-2.APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在这两个在所有请求里占大部分。
-
+1.APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在这两个在所有请求里占大部分。<br >
+2.base_url指基地址，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.xxx.com/ ，对应的GET分支url:http://www.xxx.com/get/ ，下同。<br >
+3.status，指返回结果中的状态码，200表示成功，其它都是错误码，值全部都是HTTP标准状态码。下同。<br >
+4.message，指返回结果中的状态信息，对成功结果或错误原因的详细说明。下同。<br >
+5.status和message总是在返回结果的同一层级成对出现。对所有请求的返回结果都会在最外层有一对总结式status和message。对非GET、HEAD请求，返回结果里面的每个JSONObject里
 
 ## 请求方法、URL、Request、Response对应关系总览
 
@@ -202,6 +204,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 1.TableName至要查询的table的名称字符串。第一个字符为大写字母，剩下的字符要符合英语字母、数字、下划线中的任何一种。对应的值为内部所传字段符合对应Table的JSONObject，结构是{...}<br >
 2."tag":tag 后面的tag是非GET、HEAD请求中匹配请求的JSON结构的key，一般是要查询的table的名称，由服务端Request表中指定。<br >
 3.非GET、HEAD请求的方法、tag、结构必须和服务端Request表中指定的一一对应，否则请求将不被通过。
+
 
 
 ## 功能符
