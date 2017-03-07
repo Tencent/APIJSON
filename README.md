@@ -183,10 +183,12 @@ APIJSON是一种JSON传输结构协议。<br />
  Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "User":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
  User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | 以上不同请求方法的结果:<br />①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Moment":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />③{"status":200, "message":"success", "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
 
+1.base_url指基础url，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.xxx.com/ ，对应的GET分支url:http://www.xxx.com/get/ ，下同。<br >
+2.APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在这两个在所有请求里占大部分。
 
-(注：APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在这两个在所有请求里占大部分)
 
 ## 请求方法、URL、Request、Response对应关系总览
+
   方法及说明 | URL | Request | Response
 ------------ | ------------ | ------------ | ------------
 GET：普通获取请求，明文，方便，可直接用浏览器调试 | base_url/get/ | {TableName:{…}}，Table内为限制条件。<br >例如获取一个id为1的Moment：<br >{"Moment":{"id":1}} | {TableName:{...}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"id":1, "userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "status":200, "message":"success"}
@@ -197,9 +199,8 @@ POST：新增数据，非明文 | base_url/post/ | {TableName:{…}, "tag":tag}<
 PUT：修改数据，非明文 | base_url/put/ | {TableName:{"id":id,…}, "tag":tag}<br >例如<br >{"Moment":{"id":1,"content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"}| 同POST
 DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "tag":tag}<br >例如<br >{"Moment":{"id":1}, "tag":"Moment"} | 同POST
 
-1.base_url指基础url，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.xxx.com/，对应的GET分支url:http://www.xxx.com/get/<br >
-2.TableName至要查询的table的名称，第一个字符为大写字母，剩下的字符要符合英语字母、数字、下划线中的任何一种。<br >
-3."tag":tag 后面的tag是非GET、HEAD请求中匹配结构的key，一般是要查询的table的名称。由服务端Request表中指定，加上这个是为了保证请求安全。
+1.TableName至要查询的table的名称字符串。第一个字符为大写字母，剩下的字符要符合英语字母、数字、下划线中的任何一种。对应的值为内部所传字段符合对应Table的JSONObject<br >
+2."tag":tag 后面的tag是非GET、HEAD请求中匹配请求的JSON结构的key，一般是要查询的table的名称。由服务端Request表中指定，加上这个是为了保证请求安全。
 
 
 ## 功能符
