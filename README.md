@@ -142,18 +142,6 @@ APIJSON是一种JSON传输结构协议。<br />
 }</p>
 
 
-
-## 功能符
- 
-  键值对格式 | 功能与作用 | 使用示例
------------- | ------------ | ------------
- "key[]":{}，后面是标准的JSONObject | 查询数组 | ["User[]":{"User":{"sex":1}}](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"sex":1}}})，查询性别为女的一个的User数组，请求完成后会变为 "User[]":{"0":{"User":{"id":38710,"sex":1,"name":"Tommy"...}}, "1":{"User":{"id":82001,"sex":1,"name":"Lemon"...}} ...}
- "key{}":[]，后面是标准的JSONArray，作为key可取的值的选项 | 匹配选项范围 | "id{}":[38710,82001,70793]，查询id符合38710,82001,70793中任意一个的Object。一般用于查询一个数组。请求[{"[]":{"User":{"id{}":[38710,82001,70793]}}}](http://139.196.140.118:8080/get/{"[]":{"count":3,"User":{"id{}":[38710,82001,70793]}}})会返回一个User数组，例如上面那个。
- "key{}":"条件0,条件1..."，条件为任意SQL比较表达式字符串，非Number类型必须用''包含条件的值，如'a' | 匹配条件范围 | "id{}":">=80000,\<=100000"，查询id在80000,100000中任意一个的Object。一般用于查询一个数组。请求[{"[]":{"User":{"id{}":">=80000,\<=100000"}}}](http://139.196.140.118:8080/get/{"[]":{"count":3,"User":{"id{}":">=80000,\<=100000"}}})会返回一个User数组，例如上面那个。
- "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 远程调用函数 |  ["isPraised()":"contains(Collection:praiseUserIdList,userId)"](http://139.196.140.118:8080/get/{"Moment":{"id":301,"isPraised()":"contains(Collection:praiseUserIdList,userId)"}})，请求完成后会调用 boolean contains(Collection collection, Object object) 函数，然后变为 "isPraised":true 这种（假设点赞用户id列表包含了userId，即这个User点了赞）。函数参数类型为Object时可用 value 替代 Object:value。
- "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 依赖引用 | ["userId@":"/User/id"](http://139.196.140.118:8080/get/%7B%22User%22%3A%7B%22id%22%3A38710%7D%2C%22Moment%22%3A%7B%22userId%40%22%3A%22%252FUser%252Fid%22%7D%7D)，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成 "userId":1
- "key$":"SQL搜索表达式"，任意SQL搜索表达式字符串，如 %key%, %k%e%y% 等 | 模糊搜索 | "name$":"%Tommy%"，搜索包含Tommy的名字。一般用于查询一个数组。请求 [{"[]":{"User":{"name$":"%Tommy%"}}}](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22User%22%3A%7B%22name%24%22%3A%22%2525Tommy%2525%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D) 会返回name包含"Tommy"的User数组。
- "@key":key指定类型的Object | @key为JSONObject中的关键字，作用各不相同，但都不作为查询匹配条件 | ① 只查询id,sex,name这几列并且请求结果也按照这个顺序：<br />["@columns":"id,sex,name"](http://139.196.140.118:8080/get/{"User":{"@columns":"id,sex,name","id":38710}})<br />返回<br />{<br /> &nbsp; "id":1,<br /> &nbsp; "sex":0,<br /> &nbsp; "name":"Lemon"<br />}<br /> ② 从pictureList获取第0张图片：<br />[{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0, //这里@position为自定义关键词<br /> &nbsp; "firstPicture()":"get(Collection:pictureList,int:@position)"<br />}](http://139.196.140.118:8080/get/{"User":{"id":38710,"@position":0,"firstPicture()":"get(Collection:pictureList,int:@position)"}})<br />返回<br />{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0,<br /> &nbsp; "firstPicture":"url0"<br />}<br /> ...
  
 ## 对比传统HTTP传输方式
  
@@ -198,6 +186,18 @@ APIJSON是一种JSON传输结构协议。<br />
 
 (注：APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在这两个在所有请求里占大部分)
 
+
+## 功能符
+ 
+  键值对格式 | 功能与作用 | 使用示例
+------------ | ------------ | ------------
+ "key[]":{}，后面是标准的JSONObject | 查询数组 | ["User[]":{"User":{"sex":1}}](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"sex":1}}})，查询性别为女的一个User数组，请求完成后会变为 "User[]":{"0":{"User":{"id":38710,"sex":1,"name":"Tommy"...}}, "1":{"User":{"id":82001,"sex":1,"name":"Lemon"...}} ...}
+ "key{}":[]，后面是标准的JSONArray，作为key可取的值的选项 | 匹配选项范围 | "id{}":[38710,82001,70793]，查询id符合38710,82001,70793中任意一个的Object。一般用于查询一个数组。请求[{"[]":{"User":{"id{}":[38710,82001,70793]}}}](http://139.196.140.118:8080/get/{"[]":{"count":3,"User":{"id{}":[38710,82001,70793]}}})会返回一个User数组，例如上面那个。
+ "key{}":"条件0,条件1..."，条件为任意SQL比较表达式字符串，非Number类型必须用''包含条件的值，如'a' | 匹配条件范围 | "id{}":">=80000,\<=100000"，查询id在80000,100000中任意一个的Object。一般用于查询一个数组。请求[{"[]":{"User":{"id{}":">=80000,\<=100000"}}}](http://139.196.140.118:8080/get/{"[]":{"count":3,"User":{"id{}":">=80000,\<=100000"}}})会返回一个User数组，例如上面那个。
+ "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 远程调用函数 |  ["isPraised()":"contains(Collection:praiseUserIdList,userId)"](http://139.196.140.118:8080/get/{"Moment":{"id":301,"isPraised()":"contains(Collection:praiseUserIdList,userId)"}})，请求完成后会调用 boolean contains(Collection collection, Object object) 函数，然后变为 "isPraised":true 这种（假设点赞用户id列表包含了userId，即这个User点了赞）。函数参数类型为Object时可用 value 替代 Object:value。
+ "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 依赖引用 | ["userId@":"/User/id"](http://139.196.140.118:8080/get/%7B%22User%22%3A%7B%22id%22%3A38710%7D%2C%22Moment%22%3A%7B%22userId%40%22%3A%22%252FUser%252Fid%22%7D%7D)，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成 "userId":1
+ "key$":"SQL搜索表达式"，任意SQL搜索表达式字符串，如 %key%, %k%e%y% 等 | 模糊搜索 | "name$":"%m%"，搜索包含m的名字。一般用于查询一个数组。请求 [{"[]":{"User":{"name$":"%m%"}}}](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22User%22%3A%7B%22name%24%22%3A%22%2525m%2525%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D) 会返回name包含"m"的User数组。
+ "@key":key指定类型的Object | @key为JSONObject中的关键字，作用各不相同，但都不作为查询匹配条件 | ① 只查询id,sex,name这几列并且请求结果也按照这个顺序：<br />["@columns":"id,sex,name"](http://139.196.140.118:8080/get/{"User":{"@columns":"id,sex,name","id":38710}})<br />返回<br />{<br /> &nbsp; "id":1,<br /> &nbsp; "sex":0,<br /> &nbsp; "name":"Lemon"<br />}<br /> ② 从pictureList获取第0张图片：<br />[{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0, //这里@position为自定义关键词<br /> &nbsp; "firstPicture()":"get(Collection:pictureList,int:@position)"<br />}](http://139.196.140.118:8080/get/{"User":{"id":38710,"@position":0,"firstPicture()":"get(Collection:pictureList,int:@position)"}})<br />返回<br />{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0,<br /> &nbsp; "firstPicture":"url0"<br />}<br /> ...
 
 ## 使用方法
 
