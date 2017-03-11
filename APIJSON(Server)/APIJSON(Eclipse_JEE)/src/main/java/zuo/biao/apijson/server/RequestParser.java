@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
@@ -555,20 +555,25 @@ public class RequestParser {
 			System.out.println(TAG + "getArray   try { page = arrayObject.getIntValue(page); ..." +
 					" >> } catch (Exception e) {\n" + e.getMessage());
 		}
-
+		if (count <= 0 || count > 100) {//count最大为100
+			count = 100;
+		}
+		
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = request.keySet();
 		if (count <= 0 || count > 10) {//10以下不优化长度
 			if(parseRelation == false && set != null) {
-				JSONObject object;
+				Object object;
 				int totalCount = 0;
 				for (String key : set) {
-					if (isTableKey(key)) {
-						object = getJSONObject(request, key);
-						if (object != null) {// && object.isEmpty() == false) {
-							totalCount = QueryHelper.getInstance().getCount(key);
-							break;
-						}
+					object = isTableKey(key) ? request.get(key) : null;
+					if (object != null && object instanceof JSONObject) {// && object.isEmpty() == false) {
+						//							totalCount = QueryHelper.getInstance().getCount(key);
+						JSONObject response = new RequestParser(RequestMethod.HEAD)
+								.parseResponse(new JSONRequest(key, object));
+						JSONObject target = response == null ? null : response.getJSONObject(key);
+						totalCount = target == null ? 0 : target.getIntValue(JSONResponse.KEY_COUNT);
+						break;
 					}
 				}
 				if (totalCount <= 0) {//request内部没有JSONObject或者不存在适合条件的table内容
@@ -576,17 +581,12 @@ public class RequestParser {
 				}
 				if (count > totalCount) {
 					count = totalCount;
+					request.put(JSONRequest.KEY_COUNT, count);
 				}
 			}
 		}
-		if (count <= 0 || count > 100) {//count最大为100
-			count = 100;
-		}
 
-		//		if (parseRelation) {
-		//			request.remove("page");
-		//			request.remove("count");
-		//		}
+
 		System.out.println(TAG + "getArray page = " + page + "; count = " + count);
 
 		QueryConfig config = new QueryConfig(requestMethod, count, page);
@@ -625,6 +625,9 @@ public class RequestParser {
 					}
 				}
 			} else {
+				//				request.remove(JSONRequest.KEY_PAGE);
+				//				request.remove(JSONRequest.KEY_COUNT);
+
 				for (String key : set) {
 					value = request.get(key);
 					if (value instanceof JSONObject) {//JSONObject，往下一级提取
