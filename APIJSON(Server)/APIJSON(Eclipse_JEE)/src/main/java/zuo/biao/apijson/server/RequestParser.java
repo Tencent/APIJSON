@@ -558,7 +558,7 @@ public class RequestParser {
 		if (count <= 0 || count > 100) {//count最大为100
 			count = 100;
 		}
-		
+
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = request.keySet();
 		if (count <= 0 || count > 10) {//10以下不优化长度
@@ -625,9 +625,6 @@ public class RequestParser {
 					}
 				}
 			} else {
-				//				request.remove(JSONRequest.KEY_PAGE);
-				//				request.remove(JSONRequest.KEY_COUNT);
-
 				for (String key : set) {
 					value = request.get(key);
 					if (value instanceof JSONObject) {//JSONObject，往下一级提取
@@ -649,6 +646,11 @@ public class RequestParser {
 
 		System.out.println(TAG + "getArray  return " + JSON.toJSONString(transferredRequest) + "\n>>>>>>>>>>>>>>>\n\n\n");
 
+		if (parseRelation == false && isInRelationMap(path) == false) {//parseRelation == true时不会添加进去
+			transferredRequest.remove(JSONRequest.KEY_PAGE);
+			transferredRequest.remove(JSONRequest.KEY_COUNT);
+		}
+		
 		return transferredRequest;
 	}
 
