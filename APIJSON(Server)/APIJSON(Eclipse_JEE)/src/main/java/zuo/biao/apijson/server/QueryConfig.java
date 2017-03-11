@@ -202,15 +202,17 @@ public class QueryConfig {
 
 	/**获取筛选方法
 	 * @return
+	 * @throws Exception 
 	 */
-	public String getWhereString() {
+	public String getWhereString() throws Exception {
 		return getWhereString(getMethod(), getWhere());
 	}
 	/**获取筛选方法
 	 * @param where
 	 * @return
+	 * @throws Exception 
 	 */
-	public static String getWhereString(RequestMethod method, Map<String, Object> where) {
+	public static String getWhereString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
 			if (RequestParser.isGetMethod(method) == false && method != RequestMethod.POST_GET
@@ -224,7 +226,7 @@ public class QueryConfig {
 			for (String key : set) {
 				Log.d(TAG, "getWhereString  key = " + key);
 				//避免筛选到全部	value = key == null ? null : where.get(key);
-				if (key == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法
+				if (key == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
 					Log.d(TAG, "getWhereString  key == null || key.startsWith(@) || key.endsWith(()) >> continue;");
 					continue;
 				}
@@ -241,7 +243,7 @@ public class QueryConfig {
 				value = where.get(key);
 
 				try {
-					key = RequestParser.getRealKey(key, false);
+					key = RequestParser.getRealKey(method, key, false);
 				} catch (Exception e) {
 					Log.e(TAG, "getObject  getWhereString  try { key = RequestParser.getRealKey(key, false);"
 							+ " >> } catch (Exception e) {");
@@ -377,15 +379,17 @@ public class QueryConfig {
 
 	/**
 	 * @return
+	 * @throws Exception 
 	 */
-	public String getSQL() {
+	public String getSQL() throws Exception {
 		return getSQL(this);
 	}
 	/**
 	 * @param config
 	 * @return
+	 * @throws Exception 
 	 */
-	public static String getSQL(QueryConfig config) {
+	public static String getSQL(QueryConfig config) throws Exception {
 		if (config == null) {
 			System.out.println("QueryConfig: getSQL  config == null >> return null;");
 			return null;

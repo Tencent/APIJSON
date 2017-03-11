@@ -95,7 +95,13 @@ public class QueryHelper2 {
 			System.out.println(TAG + "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
 			return null;
 		}
-		final String sql = config.getSQL();
+		String sql = null;
+		try {
+			sql = config.getSQL();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		final int position = config.getPosition();
 
 		if (cacheMap == null) {

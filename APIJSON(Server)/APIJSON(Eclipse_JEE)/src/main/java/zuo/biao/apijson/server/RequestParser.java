@@ -17,6 +17,7 @@ import static zuo.biao.apijson.StringUtil.UTF_8;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.rmi.AlreadyBoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -25,6 +26,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.management.OperationsException;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
@@ -45,9 +49,15 @@ public class RequestParser {
 	public static final String SEPARATOR = StringUtil.SEPARATOR;
 
 	private RequestMethod requestMethod;
+	/**
+	 * GET
+	 */
 	public RequestParser() {
 		this(null);
 	}
+	/**
+	 * @param requestMethod null ? requestMethod = GET
+	 */
 	public RequestParser(RequestMethod requestMethod) {
 		super();
 		if (requestMethod == null) {
@@ -438,9 +448,9 @@ public class RequestParser {
 			for (String key : set) {
 				value = transferredRequest.containsKey(key) ? transferredRequest.get(key) : request.get(key);
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					if (isArrayKey(key)) {//json array
+					if (isArrayKey(key)) {//APIJSON Array
 						result = getArray(path, config, key, (JSONObject) value);
-					} else {//json object
+					} else {//APIJSON Object
 						result = getObject(path, isFirst == false || nameIsNumber == false //[]里第一个不能为[]
 								? null : config, key, (JSONObject) value);
 						isFirst = false;
@@ -448,6 +458,60 @@ public class RequestParser {
 					System.out.println(TAG + "getObject  key = " + key + "; result = " + result);
 					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
 						transferredRequest.put(key, result);
+					}
+				} else if (requestMethod == RequestMethod.PUT && JSON.isJSONArray(value)) {//PUT JSONArray
+					JSONArray array = ((JSONArray) value);
+					if (array != null && array.isEmpty() == false && isTableKey(name)) {
+						int putType = 0;
+						if (key.endsWith("+")) {//add
+							putType = 1;
+						} else if (key.endsWith("-")) {//remove
+							putType = 2;
+						} else {//replace
+							throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + " 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
+						}
+						String realKey = getRealKey(requestMethod, key, false);
+
+						//GET > add all 或 remove all > PUT > remove key
+
+						//GET <<<<<<<<<<<<<<<<<<<<<<<<<
+						JSONObject arrayRequest = new JSONObject();
+						arrayRequest.put(Table.ID, request.get(Table.ID));
+						//						arrayRequest.setColumns(realKey);//put请求会对id添加功能符？
+						arrayRequest.put(JSONRequest.KEY_COLUMNS, realKey);
+						JSONRequest getRequest = new JSONRequest(name, arrayRequest);
+						JSONObject response = new RequestParser().parseResponse(getRequest);
+						//GET >>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+						//add all 或 remove all <<<<<<<<<<<<<<<<<<<<<<<<<
+						response = response == null ? null : response.getJSONObject(name);
+						JSONArray targetArray = response == null ? null : response.getJSONArray(realKey);
+						if (targetArray == null) {
+							targetArray = new JSONArray();
+						}
+						for (Object obj : array) {
+							if (obj == null) {
+								continue;
+							}
+							if (putType == 1) {
+								if (targetArray.contains(obj)) {
+									throw new ConflictException("PUT " + path + ", " + realKey + ":" + obj + " 已存在！");
+								}
+								targetArray.add(obj);
+							} else if (putType == 2) {
+								if (targetArray.contains(obj) == false) {
+									throw new NullPointerException("PUT " + path + ", " + realKey + ":" + obj + " 不存在！");
+								}
+								targetArray.remove(obj);
+							}
+						}
+
+						//add all 或 remove all >>>>>>>>>>>>>>>>>>>>>>>>>
+
+						//PUT <<<<<<<<<<<<<<<<<<<<<<<<<
+						transferredRequest.put(realKey, targetArray);
+						//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
 					}
 				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
@@ -464,7 +528,7 @@ public class RequestParser {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
 						System.out.println("getObject  StringUtil.isPath(value) >> parseRelation = " + parseRelation);
-						String replaceKey = getRealKey(key, false);
+						String replaceKey = getRealKey(requestMethod, key, false);
 						if (parseRelation) {
 							transferredRequest.put(replaceKey, getValueByPath(relationMap.get(getPath(path, replaceKey))));
 							//							relationMap.remove(path + SEPARATOR + key);
@@ -479,7 +543,7 @@ public class RequestParser {
 			}
 		}
 
-		if (containRelation == false && isTableKey(name)) {//提高性能 isObjectKey(name)) {
+		if (containRelation == false && isTableKey(name)) {//提高性能
 			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
 				//			relationMap.remove(path);
 				QueryConfig config2 = newQueryConfig(name, transferredRequest);
@@ -489,7 +553,7 @@ public class RequestParser {
 					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 
-				transferredRequest = getSQLObject(config2);//不管用：暂时用这个解决返回多余空数据
+				transferredRequest = getSQLObject(config2);
 				//				
 				//				JSONObject result = getSQLObject(config2);
 				//				if (result != null && result.isEmpty() == false) {//解决获取失败导致不能获取里面JSONObject
@@ -502,16 +566,8 @@ public class RequestParser {
 					Set<String> functionSet = functionMap.keySet();
 					if (functionSet != null && functionSet.isEmpty() == false) {
 						for (String key : functionSet) {
-							//							try {
-							transferredRequest.put(getRealKey(key, false)
+							transferredRequest.put(getRealKey(requestMethod, key, false)
 									, Function.invoke(transferredRequest, functionMap.get(key)));
-							//							} catch (Exception e) {
-							//								Log.e(TAG, "getObject  containRelation == false && isTableKey(name)"
-							//										+ " >> transferredRequest.put(getRealKey(key, false),"
-							//										+ " Function.invoke(transferredRequest, functionMap.get(key)));"
-							//										+ " >> } catch (Exception e) {");
-							//								e.printStackTrace();
-							//							}
 						}
 					}
 
@@ -646,11 +702,12 @@ public class RequestParser {
 
 		System.out.println(TAG + "getArray  return " + JSON.toJSONString(transferredRequest) + "\n>>>>>>>>>>>>>>>\n\n\n");
 
+		//可能部分情况下还是会返回，应该在getObject内解析了relation后 relationMap.remove(path + SEPARATOR + key);
 		if (parseRelation == false && isInRelationMap(path) == false) {//parseRelation == true时不会添加进去
 			transferredRequest.remove(JSONRequest.KEY_PAGE);
 			transferredRequest.remove(JSONRequest.KEY_COUNT);
 		}
-		
+
 		return transferredRequest;
 	}
 
@@ -865,7 +922,6 @@ public class RequestParser {
 	 */
 
 	/**获取客户端实际需要的key
-	 * #作为方法引用符号，()作为包含关系？% & | {} [] <> < 这些呢？
 	 * <br> "userId@":"/User/id"           //@根据路径依赖，@始终在最后。value是'/'分隔的字符串。
 	 * <br> "isPraised()":"isContain(Collection:idList,long:id)"  //()使用方法，value是方法表达式。不能与@并用。
 	 * <br> "content$":"%searchKey%"       //$搜索，右边紧跟key。value是搜索表达式。
@@ -874,7 +930,7 @@ public class RequestParser {
 	 * @param key
 	 * @return
 	 */
-	public static String getRealKey(String originKey, boolean isTableKey) throws Exception {
+	public static String getRealKey(RequestMethod method, String originKey, boolean isTableKey) throws Exception {
 		Log.i(TAG, "getRealKey  originKey = " + originKey);
 		if (originKey == null || isArrayKey(originKey)) {
 			Log.w(TAG, "getRealKey  originKey == null || isArrayKey(originKey) >>  return originKey;");
@@ -890,7 +946,16 @@ public class RequestParser {
 			key = key.substring(0, key.lastIndexOf("()"));
 		} else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
 			key = key.substring(0, key.lastIndexOf("@"));
+		} else if (key.endsWith("+")) {//延长，PUT查询时处理
+			if (method == RequestMethod.PUT) {//不为PUT就抛异常
+				key = key.substring(0, key.lastIndexOf("+"));
+			}
+		} else if (key.endsWith("-")) {//缩减，PUT查询时处理
+			if (method == RequestMethod.PUT) {//不为PUT就抛异常
+				key = key.substring(0, key.lastIndexOf("-"));
+			}
 		}
+
 
 		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好？不，查询就得截取
 		if (isTableKey) {//不允许在column key中使用Type:key形式
