@@ -14,17 +14,9 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import static zuo.biao.apijson.StringUtil.UTF_8;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-
-
-/**encapsulator for request JSONObject
+/**encapsulator for request JSONObject, encode in default cases
  * @author Lemon
  * @see #toArray
- * @see RequestUtil
  * @use JSONRequest request = new JSONRequest(...);
  * <br> request.put(...);//not a must
  * <br> request.toArray(...);//not a must
@@ -38,34 +30,34 @@ public class JSONRequest extends JSONObject {
 	}
 	/**
 	 * encode = true
-	 * {@link #JSONRequest(String, Object)}
 	 * @param object
+	 * @see	{@link #JSONRequest(String, Object)}
 	 */
 	public JSONRequest(Object object) {
 		this(null, object);
 	}
 	/**
 	 * encode = true
-	 * {@link #JSONRequest(String, Object, boolean)}
 	 * @param name
 	 * @param object
+	 * @see {@link #JSONRequest(String, Object, boolean)}
 	 */
 	public JSONRequest(String name, Object object) {
 		this(name, object, true);
 	}
 	/**
-	 * {@link #JSONRequest(String, Object, boolean)}
 	 * @param object
 	 * @param encode
+	 * @see {@link #JSONRequest(String, Object, boolean)}
 	 */
 	public JSONRequest(Object object, boolean encode) {
 		this(null, object, encode);
 	}
 	/**
-	 * {@link #put(String, Object, boolean)}
 	 * @param name
 	 * @param object
 	 * @param encode
+	 * @see {@link #put(String, Object, boolean)}
 	 */
 	public JSONRequest(String name, Object object, boolean encode) {
 		this();
@@ -74,11 +66,11 @@ public class JSONRequest extends JSONObject {
 
 
 
+
+
+
 	public static final String KEY_TAG = "tag";
-	/**set tag
-	 * @param tag
-	 * @return
-	 */
+
 	public JSONObject setTag(String tag) {
 		put(KEY_TAG, tag);
 		return this;
@@ -86,8 +78,6 @@ public class JSONRequest extends JSONObject {
 	public String getTag() {
 		return getString(KEY_TAG);
 	}
-
-
 
 
 	//array object <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -139,39 +129,15 @@ public class JSONRequest extends JSONObject {
 	public Object get(Object key) {
 		return get(key, true);
 	}
-	/**
-	 * @param key
-	 * @param decode if decode && value instanceof String, value = URLDecoder.decode((String) value, UTF_8)
-	 * @return 
-	 */
-	public Object get(Object key, boolean decode) {
-		Object value = super.get(key);
-		if (decode && value instanceof String) {
-			try {
-				return URLDecoder.decode((String) value, UTF_8);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return value;
-	}
 
 	/**
 	 * encode = true
 	 * @param value
-	 * @return {@link #put(String, Object)}
+	 * @return {@link #put(String, boolean)}
 	 */
 	public Object put(Object value) {
 		return put(value, true);
 	}
-	/**
-	 * @param value
-	 * @param encode
-	 * @return {@link #put(String, Object, boolean)}
-	 */
-	public Object put(Object value, boolean encode) {
-		return put(null, value, encode);
-	}	
 	/**
 	 * encode = true
 	 * @param key
@@ -182,64 +148,80 @@ public class JSONRequest extends JSONObject {
 	public Object put(String key, Object value) {
 		return put(key, value, true);
 	}
-	/**
-	 * @param key => StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName()
-	 * @param value URLEncoder.encode((String) value, UTF_8);
-	 * @param encode if value instanceof String >> value = URLEncoder.encode((String) value, UTF_8);
-	 * @return
-	 */
-	public Object put(String key, Object value, boolean encode) {
-		if (encode && value instanceof String) {
-			try {
-				value = URLEncoder.encode((String) value, UTF_8);
-				//just encode /, not need to encode [] 	? URLEncoder.encode(key, UTF_8) 
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName(), value);
-	}
 
 
 	/**create a parent JSONObject named KEY_ARRAY
+	 * encode = true;
 	 * @param count
 	 * @param page
-	 * @return {KEY_ARRAY:this}
+	 * @return {@link #toArray(int, int, boolean)}
 	 */
 	public JSONRequest toArray(int count, int page) {
-		return toArray(count, page, null);
+		return toArray(count, page, true);
+	}
+	/**create a parent JSONObject named KEY_ARRAY
+	 * encode = true;
+	 * @param count
+	 * @param page
+	 * @return {@link #toArray(int, int, String, boolean)}
+	 */
+	public JSONRequest toArray(int count, int page, boolean encode) {
+		return toArray(count, page, null, encode);
+	}
+	/**create a parent JSONObject named name+KEY_ARRAY
+	 * encode = true;
+	 * @param count
+	 * @param page
+	 * @param name
+	 * @return {@link #toArray(int, int, String, boolean)}
+	 */
+	public JSONRequest toArray(int count, int page, String name) {
+		return toArray(count, page, name, true);
 	}
 	/**create a parent JSONObject named name+KEY_ARRAY
 	 * @param count
 	 * @param page
 	 * @param name
+	 * @param encode
 	 * @return {name+KEY_ARRAY : this}
 	 */
-	public JSONRequest toArray(int count, int page, String name) {
-		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page));
+	public JSONRequest toArray(int count, int page, String name, boolean encode) {
+		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page), encode);
 	}
 
 
 	/**设置搜索
 	 * @param key
 	 * @param value
+	 * @see {@link #putSearch(String, String, int)}
 	 */
 	public void putSearch(String key, String value) {
 		putSearch(key, value, SEARCH_TYPE_CONTAIN_FULL);
 	}
 	/**设置搜索
+	 * encode = true
 	 * @param key
 	 * @param value
 	 * @param type
+	 * @see {@link #putSearch(String, String, int, boolean)}
 	 */
 	public void putSearch(String key, String value, int type) {
+		putSearch(key, value, type, true);
+	}
+	/**设置搜索
+	 * @param key
+	 * @param value
+	 * @param type
+	 * @param encode
+	 */
+	public void putSearch(String key, String value, int type, boolean encode) {
 		if (key == null) {
 			key = "";
 		}
 		if (key.endsWith("$") == false) {
 			key += "$";
 		}
-		put(key, getSearch(value, type), true);
+		put(key, getSearch(value, type), encode);
 	}
 
 	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;
@@ -322,5 +304,5 @@ public class JSONRequest extends JSONObject {
 		}
 	}
 
-	
+
 }

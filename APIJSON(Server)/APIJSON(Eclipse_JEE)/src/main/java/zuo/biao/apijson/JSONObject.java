@@ -14,13 +14,17 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import static zuo.biao.apijson.StringUtil.UTF_8;
 import static zuo.biao.apijson.StringUtil.bigAlphaPattern;
 import static zuo.biao.apijson.StringUtil.namePattern;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Set;
 
 
-/**use this class instead of com.alibaba.fastjson.JSONObject
+/**use this class instead of com.alibaba.fastjson.JSONObject, not encode in default cases
  * @author Lemon
  */
 public class JSONObject extends com.alibaba.fastjson.JSONObject {
@@ -32,33 +36,72 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		super(true);
 	}
 	/**transfer Object to JSONObject
+	 * encode = false;
 	 * @param object
+	 * @see {@link #JSONObject(Object, boolean)}
 	 */
 	public JSONObject(Object object) {
-		this(toJSONString(object));
+		this(object, false);
+	}
+	/**transfer Object to JSONObject
+	 * @param object
+	 * @param encode
+	 * @see {@link #JSONObject(String, boolean)}
+	 */
+	public JSONObject(Object object, boolean encode) {
+		this(toJSONString(object), encode);
+	}
+	/**parse JSONObject with JSON String
+	 * encode = false;
+	 * @param json
+	 * @see {@link #JSONObject(String, boolean)}
+	 */
+	public JSONObject(String json) {
+		this(json, false);
 	}
 	/**parse JSONObject with JSON String
 	 * @param json
+	 * @param encode
+	 * @see {@link #JSONObject(com.alibaba.fastjson.JSONObject, boolean)}
 	 */
-	public JSONObject(String json) {
-		this(parseObject(json));
+	public JSONObject(String json, boolean encode) {
+		this(parseObject(json), encode);
+	}
+	/**transfer com.alibaba.fastjson.JSONObject to JSONObject
+	 * encode = false;
+	 * @param object
+	 * @see {@link #JSONObject(com.alibaba.fastjson.JSONObject, boolean)}
+	 */
+	public JSONObject(com.alibaba.fastjson.JSONObject object) {
+		this(object, false);
 	}
 	/**transfer com.alibaba.fastjson.JSONObject to JSONObject
 	 * @param object
+	 * @param encode
+	 * @see {@link #add(com.alibaba.fastjson.JSONObject, boolean)}
 	 */
-	public JSONObject(com.alibaba.fastjson.JSONObject object) {
+	public JSONObject(com.alibaba.fastjson.JSONObject object, boolean encode) {
 		this();
-		add(object);
+		add(object, encode);
 	}
 
 
 
 
 	/**put key-value in object into this
+	 * encode = false;
 	 * @param object
-	 * @return this
+	 * @return {@link #add(com.alibaba.fastjson.JSONObject, boolean)}
 	 */
 	public JSONObject add(com.alibaba.fastjson.JSONObject object) {
+		return add(object, false);
+	}
+	/**put key-value in object into this
+	 * @param object
+	 * @param encode
+	 * @return this
+	 */
+	public JSONObject add(com.alibaba.fastjson.JSONObject object, boolean encode) {
 		Set<String> set = object == null ? null : object.keySet();
 		if (set != null) {
 			for (String key : set) {
@@ -68,12 +111,83 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return this;
 	}
 
-	
+
+
+	/**
+	 * @param key if decode && key instanceof String, key = URLDecoder.decode((String) key, UTF_8)
+	 * @param decode if decode && value instanceof String, value = URLDecoder.decode((String) value, UTF_8)
+	 * @return 
+	 */
+	public Object get(Object key, boolean decode) {
+		if (decode) {
+			if (key instanceof String) {
+				try {
+					key = URLDecoder.decode((String) key, UTF_8);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+			Object value = super.get(key);
+			if (value instanceof String) {
+				try {
+					return URLDecoder.decode((String) value, UTF_8);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+		return super.get(key);
+	}
+
+	/**
+	 * encode = false
+	 * @param value
+	 * @return {@link #put(String, boolean)}
+	 */
+	public Object put(Object value) {
+		return put(value, false);
+	}
+	/**
+	 * @param value
+	 * @param encode
+	 * @return {@link #put(String, Object, boolean)}
+	 */
+	public Object put(Object value, boolean encode) {
+		return put(null, value, encode);
+	}	
+	/**
+	 * @param key  StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName()
+	 *             <br> >> if decode && key instanceof String, key = URLDecoder.decode((String) key, UTF_8)
+	 * @param value URLEncoder.encode((String) value, UTF_8);
+	 * @param encode if value instanceof String, value = URLEncoder.encode((String) value, UTF_8);
+	 * @return
+	 */
+	public Object put(String key, Object value, boolean encode) {
+		key = StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName();
+		if (encode) {
+			try {
+				key = URLEncoder.encode(key, UTF_8);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			if (value instanceof String) {
+				try {
+					value = URLEncoder.encode((String) value, UTF_8);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return super.put(key, value);
+	}
+
 
 
 	//judge <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	public static final String KEY_ARRAY = "[]";
-	
+
 	/**判断是否为Array的key
 	 * @param key
 	 * @return
@@ -96,9 +210,9 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
 	}
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
-	
-	
+
+
+
 	public static final String KEY_COLUMNS = "@columns";//@key关键字都放这个类
 
 	/**set columns need to be returned
@@ -112,6 +226,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public String getColumns() {
 		return getString(KEY_COLUMNS);
 	}
-	
-	
+
+
 }

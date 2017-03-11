@@ -38,8 +38,8 @@ public class RequestUtil {
 
 	private static final long DEFAULT_MOMENT_ID = 15;
 	private static final long DEFAULT_USER_ID = 38710;
-	
-	
+
+
 
 	public static JSONObject newPostRequest(boolean encode) {
 		Moment data = new Moment();
@@ -54,8 +54,14 @@ public class RequestUtil {
 
 	public static JSONObject newPutRequest(long id, boolean encode) {
 		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
-		data.setContent(context.getString(R.string.apijson_info));
-		return new JSONRequest(data, encode).setTag(Moment.class.getSimpleName());
+		//		data.setContent(context.getString(R.string.apijson_info));
+		//		List<Long> list = new ArrayList<>();
+		//		list.add((long) 10000);
+		//		list.add((long) 10001);
+		JSONObject momentObject = new JSONObject(data, encode);
+		//		momentObject.put("praiseUserIdList+", list);//测试 +和- 通过
+		momentObject.put("content", context.getString(R.string.apijson_info), encode);//测试 +和- 通过
+		return new JSONRequest(Moment.class.getSimpleName(), momentObject, encode).setTag(Moment.class.getSimpleName());
 	}
 
 	public static JSONObject newDeleteRequest(long id, boolean encode) {
@@ -70,7 +76,7 @@ public class RequestUtil {
 	}
 
 	public static JSONObject newColumnsRequest(long id, boolean encode) {
-		JSONObject object = new JSONObject(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id));
+		JSONObject object = new JSONObject(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id), encode);
 		object.setColumns("id,userId,content");
 		return new JSONRequest(Moment.class.getSimpleName(), object, encode);
 	}
@@ -86,7 +92,7 @@ public class RequestUtil {
 		JSONRequest dataObject = new JSONRequest();
 		dataObject.put("name$", "%o%", encode);
 		JSONRequest request = new JSONRequest(User.class.getSimpleName(), dataObject, encode);
-		return request.toArray(5, 1, User.class.getSimpleName());
+		return request.toArray(5, 1, User.class.getSimpleName(), encode);
 	}
 
 	public static JSONObject newComplexRequest(boolean encode) {
@@ -100,9 +106,9 @@ public class RequestUtil {
 		request.put(User.class.getSimpleName(), new JSONRequest("id@", "/Moment/userId", encode), encode);
 
 		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId@", "[]/Moment/id", encode)).
-				toArray(3, 0, Comment.class.getSimpleName()));
+				toArray(3, 0, Comment.class.getSimpleName()), encode);
 
-		return request.toArray(3, 0);
+		return request.toArray(3, 0, encode);
 	}
 
 	public static JSONObject newAccessErrorRequest(boolean encode) {

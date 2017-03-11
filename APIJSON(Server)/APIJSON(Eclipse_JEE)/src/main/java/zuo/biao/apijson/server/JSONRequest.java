@@ -77,13 +77,13 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	}
 
 	/**
-	 * encode = true
+	 * encode = false
 	 * @param value
-	 * @return {@link #put(String, Object)}
+	 * @return {@link #put(String, boolean)}
 	 */
 	@Override
 	public Object put(Object value) {
-		return put(null, value);
+		return put(value, false);
 	}
 	/**
 	 * @param value
@@ -92,10 +92,10 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	 */
 	@Override
 	public Object put(Object value, boolean encode) {
-		return put(null, value, false);
+		return put(null, value, encode);
 	}
 	/**
-	 * encode = true
+	 * encode = false
 	 * @param key
 	 * @param value
 	 * return {@link #put(String, Object, boolean)}
@@ -115,6 +115,7 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	/**设置搜索
 	 * @param key
 	 * @param value
+	 * @see {@link #putSearch(String, String, int)}
 	 */
 	@Override
 	public void putSearch(String key, String value) {
@@ -124,10 +125,11 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	 * @param key
 	 * @param value
 	 * @param type
+	 * @see {@link #putSearch(String, String, int, boolean)}
 	 */
 	@Override
 	public void putSearch(String key, String value, int type) {
-		put(key, getSearch(value, type));
+		putSearch(key, value, type, false);
 	}
 
 }
