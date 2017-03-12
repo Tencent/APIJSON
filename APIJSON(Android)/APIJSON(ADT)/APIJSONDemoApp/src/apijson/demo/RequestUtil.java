@@ -55,11 +55,11 @@ public class RequestUtil {
 	public static JSONObject newPutRequest(long id, boolean encode) {
 		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
 		//		data.setContent(context.getString(R.string.apijson_info));
-		//		List<Long> list = new ArrayList<>();
-		//		list.add((long) 10000);
-		//		list.add((long) 10001);
+				List<Long> list = new ArrayList<>();
+				list.add((long) 10000);
+				list.add((long) 10001);
 		JSONObject momentObject = new JSONObject(data, encode);
-		//		momentObject.put("praiseUserIdList+", list);//测试 +和- 通过
+				momentObject.put("praiseUserIdList+", list, encode);//测试 +和- 通过
 		momentObject.put("content", context.getString(R.string.apijson_info), encode);//测试 +和- 通过
 		return new JSONRequest(Moment.class.getSimpleName(), momentObject, encode).setTag(Moment.class.getSimpleName());
 	}
@@ -105,7 +105,8 @@ public class RequestUtil {
 
 		request.put(User.class.getSimpleName(), new JSONRequest("id@", "/Moment/userId", encode), encode);
 
-		request.add(new JSONRequest(Comment.class.getSimpleName(), new JSONRequest("workId@", "[]/Moment/id", encode)).
+		request.add(new JSONRequest(Comment.class.getSimpleName()
+				, new JSONRequest("workId@", "[]/Moment/id", encode), encode).
 				toArray(3, 0, Comment.class.getSimpleName()), encode);
 
 		return request.toArray(3, 0, encode);

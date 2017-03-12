@@ -120,15 +120,16 @@ public class JSONRequest extends JSONObject {
 		return put(key, path);
 	}
 
-	/**
-	 * decode = true
-	 * @param key
-	 * return {@link #get(Object, boolean)}
-	 */
-	@Override
-	public Object get(Object key) {
-		return get(key, true);
-	}
+	// 导致JSONObject add >> get = null
+	//	/**
+	//	 * decode = true
+	//	 * @param key
+	//	 * return {@link #get(Object, boolean)}
+	//	 */
+	//	@Override
+	//	public Object get(Object key) {
+	//		return get(key, true);
+	//	}
 
 	/**
 	 * encode = true

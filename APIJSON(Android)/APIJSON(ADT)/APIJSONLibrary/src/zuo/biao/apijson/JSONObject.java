@@ -105,7 +105,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		Set<String> set = object == null ? null : object.keySet();
 		if (set != null) {
 			for (String key : set) {
-				put(key, object.get(key));
+				put(key, object.get(key), encode);
 			}
 		}
 		return this;
@@ -121,22 +121,24 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public Object get(Object key, boolean decode) {
 		if (decode) {
 			if (key instanceof String) {
-				try {
-					key = URLDecoder.decode((String) key, UTF_8);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-					return null;
+				if (((String) key).endsWith("+") || ((String) key).endsWith("-")) {
+					try {//多层encode导致内部Comment[]传到服务端decode后最终变为Comment%5B%5D
+						key = URLDecoder.decode((String) key, UTF_8);
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+						return null;
+					}
 				}
 			}
 			Object value = super.get(key);
 			if (value instanceof String) {
 				try {
-					return URLDecoder.decode((String) value, UTF_8);
+					value = URLDecoder.decode((String) value, UTF_8);
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
 			}
-			return null;
+			return value;
 		}
 		return super.get(key);
 	}
@@ -150,6 +152,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return put(value, false);
 	}
 	/**
+	 * key = value.getClass().getSimpleName()
 	 * @param value
 	 * @param encode
 	 * @return {@link #put(String, Object, boolean)}
@@ -158,21 +161,26 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return put(null, value, encode);
 	}	
 	/**
-	 * @param key  StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName()
+	 * @param key  if StringUtil.isNotEmpty(key, true) == false,
+	 *             <br> key = value == null ? null : value.getClass().getSimpleName();
 	 *             <br> >> if decode && key instanceof String, key = URLDecoder.decode((String) key, UTF_8)
 	 * @param value URLEncoder.encode((String) value, UTF_8);
 	 * @param encode if value instanceof String, value = URLEncoder.encode((String) value, UTF_8);
 	 * @return
 	 */
 	public Object put(String key, Object value, boolean encode) {
-		key = StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName();
+		if (StringUtil.isNotEmpty(key, true) == false) {
+			key = value == null ? null : value.getClass().getSimpleName();
+		}
 		if (encode) {
-			try {
-				key = URLEncoder.encode(key, UTF_8);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			if (key.endsWith("+") || key.endsWith("-")) {
+				try {//多层encode导致内部Comment[]传到服务端decode后最终变为Comment%5B%5D
+					key = URLEncoder.encode(key, UTF_8);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 			}
-			if (value instanceof String) {
+			if (value instanceof String) {//只在value instanceof String时encode key？{@link #get(Object, boolean)}内做不到
 				try {
 					value = URLEncoder.encode((String) value, UTF_8);
 				} catch (UnsupportedEncodingException e) {
