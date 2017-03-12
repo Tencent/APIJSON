@@ -17,7 +17,9 @@ package apijson.demo.ui;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.StringUtil;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -29,13 +31,20 @@ import apijson.demo.RequestUtil;
 
 import com.alibaba.fastjson.JSONObject;
 
-/**activity for selecting a request
+/**activity for request selections
  * @author Lemon
  */
 public class SelectActivity extends Activity implements OnClickListener {
 
+	
+	private static final String KEY_ID = "id";
+	private static final String KEY_URL = "url";
+	
 
 	private Activity context;
+
+	private long id;
+	private String url;
 
 	private Button[] buttons;
 	@Override
@@ -43,7 +52,13 @@ public class SelectActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.select_activity);
 		context = this;
-		
+
+
+		//read last config
+		SharedPreferences sp = getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE);
+		id = sp.getLong(KEY_ID, id);
+		url = sp.getString(KEY_URL, null);
+
 
 		buttons = new Button[10];
 		buttons[0] = (Button) findViewById(R.id.btnSelectPost);
@@ -57,12 +72,10 @@ public class SelectActivity extends Activity implements OnClickListener {
 		buttons[8] = (Button) findViewById(R.id.btnSelectAccessError);
 		buttons[9] = (Button) findViewById(R.id.btnSelectAccessPermitted);
 
-
 		
 		setRequest();
 
 
-		
 		for (int i = 0; i < buttons.length; i++) {
 			buttons[i].setOnClickListener(this);
 		}
@@ -79,7 +92,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 	}
 
 
-	
+
 	/**
 	 */
 	public void setRequest() {
@@ -118,8 +131,8 @@ public class SelectActivity extends Activity implements OnClickListener {
 			return RequestUtil.newComplexRequest(encode);
 		}
 	}
-	
-	
+
+
 
 
 	@Override
@@ -149,8 +162,6 @@ public class SelectActivity extends Activity implements OnClickListener {
 	}
 
 
-	private long id;
-	private String url;
 	private void select(JSONObject request, String method) {
 		startActivityForResult(QueryActivity.createIntent(context, id, url, method, request), REQUEST_TO_QUERY);
 	}
@@ -171,13 +182,24 @@ public class SelectActivity extends Activity implements OnClickListener {
 			} else {
 				id = data.getLongExtra(QueryActivity.RESULT_ID, id);
 				url = data.getStringExtra(QueryActivity.RESULT_URL);
+
 				setRequest();
+
+				//save config
+				getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE)
+				.edit()
+				.remove(KEY_ID)
+				.putLong(KEY_ID, id)
+				.remove(KEY_URL)
+				.putString(KEY_URL, url)
+				.commit();
 			}
 			break;
 		default:
 			break;
 		}
 	}
+
 
 
 
