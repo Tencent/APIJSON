@@ -22,5 +22,5 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile files('libs/fastjson-1.2.21.jar')
+    compile files('libs/fastjson-1.2.24.jar')
 }

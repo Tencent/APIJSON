@@ -20,7 +20,6 @@ package apijson.demo.model;
 public class Comment extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;
 	
-	
 	public Long workId;
 	public Long parentId;
 	public Long userId;

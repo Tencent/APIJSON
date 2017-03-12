@@ -14,92 +14,162 @@ limitations under the License.*/
 
 package apijson.demo.ui;
 
+import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.StringUtil;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.Toast;
 import apijson.demo.R;
+import apijson.demo.RequestUtil;
 
-/**activity for selecting a request
+import com.alibaba.fastjson.JSONObject;
+
+/**选择Activity
+ * 选择向服务器发起的请求
  * @author Lemon
  */
-public class SelectActivity extends Activity {
+public class SelectActivity extends Activity implements OnClickListener {
 
+	
+	private static final String KEY_ID = "id";
+	private static final String KEY_URL = "url";
+	
 
 	private Activity context;
+
+	private long id;
+	private String url;
+
+	private Button[] buttons;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.select_activity);
-
 		context = this;
+
+
+		//读取保存的配置
+		SharedPreferences sp = getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE);
+		id = sp.getLong(KEY_ID, id);
+		url = sp.getString(KEY_URL, null);
+
+
+		buttons = new Button[10];
+		buttons[0] = (Button) findViewById(R.id.btnSelectPost);
+		buttons[1] = (Button) findViewById(R.id.btnSelectPut);
+		buttons[2] = (Button) findViewById(R.id.btnSelectDelete);
+		buttons[3] = (Button) findViewById(R.id.btnSelectSingle);
+		buttons[4] = (Button) findViewById(R.id.btnSelectColumns);
+		buttons[5] = (Button) findViewById(R.id.btnSelectRely);
+		buttons[6] = (Button) findViewById(R.id.btnSelectArray);
+		buttons[7] = (Button) findViewById(R.id.btnSelectComplex);
+		buttons[8] = (Button) findViewById(R.id.btnSelectAccessError);
+		buttons[9] = (Button) findViewById(R.id.btnSelectAccessPermitted);
+
+		
+		setRequest();
+
+
+		for (int i = 0; i < buttons.length; i++) {
+			buttons[i].setOnClickListener(this);
+		}
+
+		findViewById(R.id.btnSelectUpdateLog).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
+						StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));
+			}
+		});
+
 	}
 
-	
-	
-	//click event,called form layout android:onClick <<<<<<<<<<<<<<<<
-	public void selectPost(View v) {
-		select(QueryActivity.TYPE_POST);
-	}
-	
-	public void selectPut(View v) {
-		select(QueryActivity.TYPE_PUT);
-	}
-	
-	public void selectDelete(View v) {
-		select(QueryActivity.TYPE_DELETE);
+
+
+	/**
+	 */
+	public void setRequest() {
+		for (int i = 0; i < buttons.length; i++) {
+			buttons[i].setText(JSON.format(getRequest(buttons[i], false)));
+		}
 	}
 
-	//get <<<<<<<<<<<<<<<<<<<<<<<<<<<
-	public void selectSingle(View v) {
-		select(QueryActivity.TYPE_SINGLE);
-	}
-	
-	public void selectColumns(View v) {
-		select(QueryActivity.TYPE_COLUMNS);
+	/**
+	 * @param v
+	 * @return
+	 */
+	public JSONObject getRequest(View v, boolean encode) {
+		switch (v.getId()) {
+		case R.id.btnSelectPost:
+			return RequestUtil.newPostRequest(encode);
+		case R.id.btnSelectPut:
+			return RequestUtil.newPutRequest(id, encode);
+		case R.id.btnSelectDelete:
+			return RequestUtil.newDeleteRequest(id, encode);
+
+		case R.id.btnSelectSingle:
+			return RequestUtil.newSingleRequest(id, encode);
+		case R.id.btnSelectColumns:
+			return RequestUtil.newColumnsRequest(id, encode);
+		case R.id.btnSelectRely:
+			return RequestUtil.newRelyRequest(id, encode);
+		case R.id.btnSelectArray:
+			return RequestUtil.newArrayRequest(encode);
+
+		case R.id.btnSelectAccessError:
+			return RequestUtil.newAccessErrorRequest(encode);
+		case R.id.btnSelectAccessPermitted:
+			return RequestUtil.newAccessPermittedRequest(encode);
+		default:
+			return RequestUtil.newComplexRequest(encode);
+		}
 	}
 
-	public void selectRely(View v) {
-		select(QueryActivity.TYPE_RELY);
+
+
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btnSelectPost:
+			select(getRequest(v, true), "post");
+			break;
+		case R.id.btnSelectPut:
+			select(getRequest(v, true), "put");
+			break;
+		case R.id.btnSelectDelete:
+			select(getRequest(v, true), "delete");
+			break;
+
+		case R.id.btnSelectAccessError:
+			select(getRequest(v, true), "post_get");
+			break;
+		case R.id.btnSelectAccessPermitted:
+			select(getRequest(v, true), "post_get");
+			break;
+
+		default:
+			select(getRequest(v, true), "get");
+			break;
+		}
 	}
 
-	public void selectArray(View v) {
-		select(QueryActivity.TYPE_ARRAY);
-	}
-	
-	public void selectComplex(View v) {
-		select(QueryActivity.TYPE_COMPLEX);
+
+	private void select(JSONObject request, String method) {
+		startActivityForResult(RequestActivity.createIntent(context, id, url, method, request), REQUEST_TO_REQUEST);
 	}
 
-	public void selectAccessError(View v) {
-		select(QueryActivity.TYPE_ACCESS_ERROR);
-	}
 
-	public void selectAccessPermitted(View v) {
-		select(QueryActivity.TYPE_ACCESS_PERMITTED);
-	}
-	//get >>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	
-	public void toUpdateLog(View v) {
-		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-				StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));
-	}
-	
-	//click event,called form layout android:onClick >>>>>>>>>>>>>>>>
-
-	private String url;
-	private long id;
-	private void select(int type) {
-		startActivityForResult(QueryActivity.createIntent(context, type, url, id), REQUEST_TO_QUERY);
-	}
-
-	
-	
-	private static final int REQUEST_TO_QUERY = 1;
+	private static final int REQUEST_TO_REQUEST = 1;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -107,18 +177,31 @@ public class SelectActivity extends Activity {
 			return;
 		}
 		switch (requestCode) {
-		case REQUEST_TO_QUERY:
+		case REQUEST_TO_REQUEST:
 			if (data == null) {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
 			} else {
-				url = data.getStringExtra(QueryActivity.RESULT_URL);
-				id = data.getLongExtra(QueryActivity.RESULT_ID, id);
+				id = data.getLongExtra(RequestActivity.RESULT_ID, id);
+				url = data.getStringExtra(RequestActivity.RESULT_URL);
+
+				setRequest();
+
+				//保存配置
+				getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE)
+				.edit()
+				.remove(KEY_ID)
+				.putLong(KEY_ID, id)
+				.remove(KEY_URL)
+				.putString(KEY_URL, url)
+				.commit();
 			}
 			break;
 		default:
 			break;
 		}
 	}
+
+
 
 
 }

@@ -16,7 +16,7 @@ package apijson.demo.model;
 
 import java.io.Serializable;
 
-/**base model for reduce model codes
+/**基础model，继承它可减少部分代码
  * @author Lemon
  * @use extends BaseModel
  */

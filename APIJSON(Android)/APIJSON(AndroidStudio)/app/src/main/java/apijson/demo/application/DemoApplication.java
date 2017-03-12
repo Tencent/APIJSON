@@ -20,7 +20,6 @@ import apijson.demo.R;
 
 /**Application
  * @author Lemon
- * @see #init
  */
 public class DemoApplication extends Application {
 	private static final String TAG = "DemoApplication";
@@ -34,23 +33,11 @@ public class DemoApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		instance = this;
 		Log.d(TAG, "项目启动 >>>>>>>>>>>>>>>>>>>> \n\n");
 		
-		init(this);
 	}
 
-	/**初始化方法
-	 * @param application
-	 * @must 调用init方法且只能调用一次，如果extends BaseApplication会自动调用
-	 */
-	public static void init(Application application) {
-		instance = application;
-		if (instance == null) {
-			Log.e(TAG, "\n\n\n\n\n !!!!!! 调用BaseApplication中的init方法，instance不能为null !!!" +
-					"\n <<<<<< init  instance == null ！！！ >>>>>>>> \n\n\n\n");
-		}
-		
-	}
 
 	/**获取应用名
 	 * @return

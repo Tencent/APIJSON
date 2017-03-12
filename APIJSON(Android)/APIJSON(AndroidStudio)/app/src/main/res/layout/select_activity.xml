@@ -1,116 +1,103 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/activity_page" >
 
-    <ScrollView style="@style/match_match" >
+    <LinearLayout
+        style="@style/match_match"
+        android:orientation="vertical" >
 
-        <LinearLayout
-            style="@style/match_match"
-            android:orientation="vertical" >
+        <TextView
+            style="@style/select_name"
+            android:text="@string/post"
+            android:textColor="@android:color/black" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/post"
-                android:textColor="@android:color/black" />
+        <Button
+            android:id="@+id/btnSelectPost"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectPost"
-                android:text="@string/demo_post" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/put" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/put" />
+        <Button
+            android:id="@+id/btnSelectPut"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectPut"
-                android:text="@string/demo_put" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/delete"
+            android:textColor="@android:color/black" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/delete"
-                android:textColor="@android:color/black" />
+        <Button
+            android:id="@+id/btnSelectDelete"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectDelete"
-                android:text="@string/demo_delete" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/get"
+            android:textColor="@android:color/black" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/get"
-                android:textColor="@android:color/black" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/single" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/single" />
+        <Button
+            android:id="@+id/btnSelectSingle"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectSingle"
-                android:text="@string/demo_single" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/columns" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/columns" />
+        <Button
+            android:id="@+id/btnSelectColumns"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectColumns"
-                android:text="@string/demo_columns" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/rely" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/rely" />
+        <Button
+            android:id="@+id/btnSelectRely"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectRely"
-                android:text="@string/demo_rely" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/array" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/array" />
+        <Button
+            android:id="@+id/btnSelectArray"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectArray"
-                android:text="@string/demo_array" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/complex" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/complex" />
+        <Button
+            android:id="@+id/btnSelectComplex"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectComplex"
-                android:text="@string/demo_complex" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/access_error" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/access_error" />
+        <Button
+            android:id="@+id/btnSelectAccessError"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectAccessError"
-                android:text="@string/demo_wallet" />
+        <TextView
+            style="@style/select_name"
+            android:text="@string/access_permitted" />
 
-            <TextView
-                style="@style/select_name"
-                android:text="@string/access_permitted" />
+        <Button
+            android:id="@+id/btnSelectAccessPermitted"
+            style="@style/select_json" />
 
-            <Button
-                style="@style/select_json"
-                android:onClick="selectAccessPermitted"
-                android:text="@string/demo_wallet_with_access" />
+        <Button
+            android:id="@+id/btnSelectUpdateLog"
+            style="@style/match_wrap"
+            android:layout_marginTop="30dp"
+            android:text="@string/update_log" />
+    </LinearLayout>
 
-            <Button
-                style="@style/match_wrap"
-                android:layout_marginTop="30dp"
-                android:onClick="toUpdateLog"
-                android:text="@string/update_log" />
-        </LinearLayout>
-    </ScrollView>
-
-</LinearLayout>
+</ScrollView>

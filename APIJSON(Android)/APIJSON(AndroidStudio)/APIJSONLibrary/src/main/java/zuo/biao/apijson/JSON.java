@@ -76,6 +76,13 @@ public class JSON {
 	 * @param json
 	 * @return
 	 */
+	public static JSONObject parseObject(Object obj) {
+		return parseObject(toJSONString(obj));
+	}
+	/**json转JSONObject
+	 * @param json
+	 * @return
+	 */
 	public static JSONObject parseObject(String json) {
 		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
 		features |= Feature.OrderedField.getMask();
@@ -199,6 +206,49 @@ public class JSON {
 	 */
 	public static String format(JSONObject object) {
 		return toJSONString(object, SerializerFeature.PrettyFormat);
+	}
+
+	/**判断是否为JSONObject
+	 * @param obj instanceof String ? parseObject
+	 * @return
+	 */
+	public static boolean isJSONObject(Object obj) {
+		if (obj instanceof JSONObject) {
+			return true;
+		}
+		if (obj instanceof String) {
+			try {
+				JSONObject json = parseObject((String) obj);
+				return json != null && json.isEmpty() == false;
+			} catch (Exception e) {
+				//太长 System.out.println(TAG + "select  while (rs.next()){  >> i = "
+				//  + i + "  try { json = JSON.parse((String) value);"
+				//	+ ">> } catch (Exception e) {\n" + e.getMessage());
+			}
+		}
+		
+		return false;
+	}
+	/**判断是否为JSONArray
+	 * @param obj instanceof String ? parseArray
+	 * @return
+	 */
+	public static boolean isJSONArray(Object obj) {
+		if (obj instanceof JSONArray) {
+			return true;
+		}
+		if (obj instanceof String) {
+			try {
+				JSONArray json = parseArray((String) obj);
+				return json != null && json.isEmpty() == false;
+			} catch (Exception e) {
+				//太长 System.out.println(TAG + "select  while (rs.next()){  >> i = "
+				//  + i + "  try { json = JSON.parse((String) value);"
+				//	+ ">> } catch (Exception e) {\n" + e.getMessage());
+			}
+		}
+		
+		return false;
 	}
 
 

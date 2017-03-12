@@ -22,9 +22,8 @@ import java.math.BigDecimal;
 public class Wallet extends BaseModel {
 	private static final long serialVersionUID = 4298571449155754300L;
 	
-	public BigDecimal balance;
-	
 	public Long userId;
+	public BigDecimal balance;
 	
 	/**默认构造方法，JSON等解析时必须要有
 	 */

@@ -29,7 +29,6 @@ import com.alibaba.fastjson.JSONObject;
  * @author Lemon
  * @see #getList
  * @see #toArray
- * @see QueryActivity#onHttpResponse
  * @use JSONResponse response = new JSONResponse(...);
  * <br> JSONArray array = JSONResponse.toArray(response.getJSONObject(KEY_ARRAY));//not a must
  * <br> User user = JSONResponse.getObject(response, User.class);//not a must
