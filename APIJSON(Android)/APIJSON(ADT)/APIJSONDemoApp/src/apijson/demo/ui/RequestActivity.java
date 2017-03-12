@@ -44,11 +44,12 @@ import apijson.demo.model.Wallet;
 
 import com.alibaba.fastjson.JSONObject;
 
-/**activity for requesting a query in Server
+/**请求Activity
+ * 向服务器发起请求查询或操作相应数据
  * @author Lemon
  */
-public class QueryActivity extends Activity implements OnHttpResponseListener {
-	private static final String TAG = "QueryActivity";
+public class RequestActivity extends Activity implements OnHttpResponseListener {
+	private static final String TAG = "RequestActivity";
 
 
 	public static final String INTENT_ID = "INTENT_ID";
@@ -68,11 +69,11 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	 * @return
 	 */
 	public static Intent createIntent(Context context, long id, String url, String method, JSONObject request) {
-		return new Intent(context, QueryActivity.class)
-		.putExtra(QueryActivity.INTENT_ID, id)
-		.putExtra(QueryActivity.INTENT_URL, url)
-		.putExtra(QueryActivity.INTENT_METHOD, method)
-		.putExtra(QueryActivity.INTENT_REQUEST, JSON.toJSONString(request));
+		return new Intent(context, RequestActivity.class)
+		.putExtra(RequestActivity.INTENT_ID, id)
+		.putExtra(RequestActivity.INTENT_URL, url)
+		.putExtra(RequestActivity.INTENT_METHOD, method)
+		.putExtra(RequestActivity.INTENT_REQUEST, JSON.toJSONString(request));
 	}
 
 
@@ -87,17 +88,17 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	private String method;   
 	private String request; 
 
-	private TextView tvQueryResult;
-	private ProgressBar pbQuery;
-	private EditText etQueryUrl;
-	private Button btnQueryQuery;
+	private TextView tvRequestResult;
+	private ProgressBar pbRequest;
+	private EditText etRequestUrl;
+	private Button btnRequestRequest;
 
 	private String error;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.query_activity);
+		setContentView(R.layout.request_activity);
 		context = this;
 		isAlive = true;
 
@@ -111,31 +112,31 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		url = StringUtil.getCorrectUrl(url);
 
 
-		tvQueryResult = (TextView) findViewById(R.id.tvQueryResult);
-		pbQuery = (ProgressBar) findViewById(R.id.pbQuery);
-		etQueryUrl = (EditText) findViewById(R.id.etQueryUrl);
-		btnQueryQuery = (Button) findViewById(R.id.btnQueryQuery);
+		tvRequestResult = (TextView) findViewById(R.id.tvRequestResult);
+		pbRequest = (ProgressBar) findViewById(R.id.pbRequest);
+		etRequestUrl = (EditText) findViewById(R.id.etRequestUrl);
+		btnRequestRequest = (Button) findViewById(R.id.btnRequestRequest);
 
 
 
-		etQueryUrl.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
-				? url : "http://139.196.140.118:8080/"));//TODO my server ipv4 address, edit it to your server url
-		btnQueryQuery.setText(method);
+		etRequestUrl.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
+				? url : "http://139.196.140.118:8080/"));//TODO 把这个ip地址改成你自己服务器的
+		btnRequestRequest.setText(method);
 
-		error = String.format(getResources().getString(R.string.query_error), StringUtil.getTrimedString(btnQueryQuery));
+		error = String.format(getResources().getString(R.string.request_error), StringUtil.getTrimedString(btnRequestRequest));
 
-		query();
+		request();
 
 
 
-		btnQueryQuery.setOnClickListener(new OnClickListener() {
+		btnRequestRequest.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				query();
+				request();
 			}
 		});
-		btnQueryQuery.setOnLongClickListener(new OnLongClickListener() {
+		btnRequestRequest.setOnLongClickListener(new OnLongClickListener() {
 
 			@Override
 			public boolean onLongClick(View v) {
@@ -147,15 +148,15 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 	}
 
 
-	/**request a query from server,and the result will be received by onHttpResponse method
+	/**向服务器发起请求，通过 {@link #onHttpResponse(int, String, Exception)} 返回结果
 	 */
-	private void query() {
+	private void request() {
 		setRequest();
 
 		final String fullUrl = getUrl();
 
-		tvQueryResult.setText("requesting...\n\n url = " + fullUrl + "\n\n request = \n" + JSON.format(request) + "\n\n\n" + error);
-		pbQuery.setVisibility(View.VISIBLE);
+		tvRequestResult.setText("requesting...\n\n url = " + fullUrl + "\n\n request = \n" + JSON.format(request) + "\n\n\n" + error);
+		pbRequest.setVisibility(View.VISIBLE);
 
 		if ("get".equals(method)) {
 			HttpManager.getInstance().get(fullUrl, request, this);
@@ -164,7 +165,7 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 		}
 	}
 
-	/**open request URL String with a browser
+	/**用浏览器请求，只有GET请求才能正常访问
 	 */
 	public void openWebSite() {
 		if ("get".endsWith(method) == false) {
@@ -190,16 +191,19 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 
 
 	private String getUrl() {
-		return url + StringUtil.getTrimedString(btnQueryQuery) + "/";
+		return url + StringUtil.getTrimedString(btnRequestRequest) + "/";
 	}
 
 
 	public void setRequest() {
-		url = StringUtil.getNoBlankString(etQueryUrl);
+		url = StringUtil.getNoBlankString(etRequestUrl);
 		Log.d(TAG, "setRequest  url = " + url + ";\n request = " + request);
 	}
 
 
+	
+	/*Http请求响应回调函数，返回数据在这里处理
+	 */
 	@Override
 	public void onHttpResponse(int requestCode, final String resultJson, final Exception e) {
 		Log.d(TAG, "onHttpResponse  resultJson = " + resultJson);
@@ -235,10 +239,10 @@ public class QueryActivity extends Activity implements OnHttpResponseListener {
 			@Override
 			public void run() {
 				if (isAlive) {
-					pbQuery.setVisibility(View.GONE);
+					pbRequest.setVisibility(View.GONE);
 					Toast.makeText(context, R.string.received_result, Toast.LENGTH_SHORT).show();
 
-					tvQueryResult.setText(e == null || JSON.isJsonCorrect(resultJson)
+					tvRequestResult.setText(e == null || JSON.isJsonCorrect(resultJson)
 							? JSON.format(resultJson) : e.getMessage() + "\n\n\n" + error);
 				}
 			}

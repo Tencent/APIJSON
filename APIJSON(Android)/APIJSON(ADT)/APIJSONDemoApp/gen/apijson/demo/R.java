@@ -20,7 +20,7 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int btnQueryQuery=0x7f070003;
+        public static final int btnRequestRequest=0x7f070003;
         public static final int btnSelectAccessError=0x7f07000c;
         public static final int btnSelectAccessPermitted=0x7f07000d;
         public static final int btnSelectArray=0x7f07000a;
@@ -32,12 +32,12 @@ public final class R {
         public static final int btnSelectRely=0x7f070009;
         public static final int btnSelectSingle=0x7f070007;
         public static final int btnSelectUpdateLog=0x7f07000e;
-        public static final int etQueryUrl=0x7f070002;
-        public static final int pbQuery=0x7f070001;
-        public static final int tvQueryResult=0x7f070000;
+        public static final int etRequestUrl=0x7f070002;
+        public static final int pbRequest=0x7f070001;
+        public static final int tvRequestResult=0x7f070000;
     }
     public static final class layout {
-        public static final int query_activity=0x7f030000;
+        public static final int request_activity=0x7f030000;
         public static final int select_activity=0x7f030001;
     }
     public static final class string {
@@ -55,10 +55,10 @@ public final class R {
         public static final int get=0x7f050006;
         public static final int post=0x7f050003;
         public static final int put=0x7f050005;
-        public static final int query=0x7f050002;
-        public static final int query_error=0x7f050011;
         public static final int received_result=0x7f05000f;
         public static final int rely=0x7f050009;
+        public static final int request=0x7f050002;
+        public static final int request_error=0x7f050011;
         public static final int single=0x7f050007;
         public static final int update_log=0x7f05000e;
     }

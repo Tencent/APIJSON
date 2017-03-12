@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 /**
- * manager or util files package, you can put them to different packages if they are too many to scan
+ * 管理类或工具类所在包，如果类很多的话可以把它们单独分到一个或多个包
  */
 /**
  * @author Lemon

@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 /**
- * views show messages on screen
+ * 界面相关类所在包
  */
 /**
  * @author Lemon

@@ -28,8 +28,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="apijson.demo.ui.QueryActivity"
-            android:label="@string/query" >
+            android:name="apijson.demo.ui.RequestActivity"
+            android:label="@string/request" >
         </activity>
     </application>
 

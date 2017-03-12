@@ -26,7 +26,8 @@ import apijson.demo.model.Moment;
 import apijson.demo.model.User;
 import apijson.demo.model.Wallet;
 
-/**create request JSONObjects
+/**请求工具类
+ * 设置encode参数只为方便展示，实际使用时并不需要
  * @author Lemon
  */
 public class RequestUtil {
@@ -54,12 +55,12 @@ public class RequestUtil {
 
 	public static JSONObject newPutRequest(long id, boolean encode) {
 		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
-		//		data.setContent(context.getString(R.string.apijson_info));
-				List<Long> list = new ArrayList<>();
-				list.add((long) 10000);
-				list.add((long) 10001);
+		//		data.setContent(context.getString(R.string.apijson_info));//一般可用这种方式，encode是为了展示方便
+		List<Long> list = new ArrayList<>();
+		list.add((long) 10000);
+		list.add((long) 10001);
 		JSONObject momentObject = new JSONObject(data, encode);
-				momentObject.put("praiseUserIdList+", list, encode);//测试 +和- 通过
+		momentObject.put("praiseUserIdList+", list, encode);//测试 +和- 通过
 		momentObject.put("content", context.getString(R.string.apijson_info), encode);//测试 +和- 通过
 		return new JSONRequest(Moment.class.getSimpleName(), momentObject, encode).setTag(Moment.class.getSimpleName());
 	}

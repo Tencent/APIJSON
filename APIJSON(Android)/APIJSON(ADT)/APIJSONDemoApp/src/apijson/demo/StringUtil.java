@@ -2,7 +2,9 @@ package apijson.demo;
 
 import android.widget.TextView;
 
-
+/**String工具类
+ * @author Lemon
+ */
 public class StringUtil extends zuo.biao.apijson.StringUtil {
 
 	public static String getString(TextView tv) {

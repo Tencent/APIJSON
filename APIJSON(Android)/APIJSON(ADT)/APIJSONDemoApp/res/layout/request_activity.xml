@@ -12,7 +12,7 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/tvQueryResult"
+                android:id="@+id/tvRequestResult"
                 style="@style/select_json"
                 android:hint="result"
                 android:padding="@dimen/activity_horizontal_margin"
@@ -27,12 +27,12 @@
         android:orientation="horizontal" >
 
         <ProgressBar
-            android:id="@+id/pbQuery"
+            android:id="@+id/pbRequest"
             android:layout_width="wrap_content"
             android:layout_height="match_parent" />
 
         <EditText
-            android:id="@+id/etQueryUrl"
+            android:id="@+id/etRequestUrl"
             style="@style/select_name"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"
@@ -42,10 +42,10 @@
             android:text="uri" />
 
         <Button
-            android:id="@+id/btnQueryQuery"
+            android:id="@+id/btnRequestRequest"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Query" />
+            android:text="Request" />
     </LinearLayout>
 
 </LinearLayout>

@@ -31,7 +31,8 @@ import apijson.demo.RequestUtil;
 
 import com.alibaba.fastjson.JSONObject;
 
-/**activity for request selections
+/**选择Activity
+ * 选择向服务器发起的请求
  * @author Lemon
  */
 public class SelectActivity extends Activity implements OnClickListener {
@@ -54,7 +55,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 		context = this;
 
 
-		//read last config
+		//读取保存的配置
 		SharedPreferences sp = getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE);
 		id = sp.getLong(KEY_ID, id);
 		url = sp.getString(KEY_URL, null);
@@ -163,12 +164,12 @@ public class SelectActivity extends Activity implements OnClickListener {
 
 
 	private void select(JSONObject request, String method) {
-		startActivityForResult(QueryActivity.createIntent(context, id, url, method, request), REQUEST_TO_QUERY);
+		startActivityForResult(RequestActivity.createIntent(context, id, url, method, request), REQUEST_TO_REQUEST);
 	}
 
 
 
-	private static final int REQUEST_TO_QUERY = 1;
+	private static final int REQUEST_TO_REQUEST = 1;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -176,16 +177,16 @@ public class SelectActivity extends Activity implements OnClickListener {
 			return;
 		}
 		switch (requestCode) {
-		case REQUEST_TO_QUERY:
+		case REQUEST_TO_REQUEST:
 			if (data == null) {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
 			} else {
-				id = data.getLongExtra(QueryActivity.RESULT_ID, id);
-				url = data.getStringExtra(QueryActivity.RESULT_URL);
+				id = data.getLongExtra(RequestActivity.RESULT_ID, id);
+				url = data.getStringExtra(RequestActivity.RESULT_URL);
 
 				setRequest();
 
-				//save config
+				//保存配置
 				getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE)
 				.edit()
 				.remove(KEY_ID)
