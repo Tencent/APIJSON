@@ -223,10 +223,11 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 
 		} else if ("delete".equals(method)) {
 			response = response.getJSONResponse(Moment.class.getSimpleName());
-			if (JSONResponse.isSucceed(response)) {//delete succeed
+//			if (JSONResponse.isSucceed(response)) {//delete succeed
 				id = 0;//reuse default value
-			}
-			Log.d(TAG, "onHttpResponse  delete.equals(method) >>  id = " + id);
+//			}
+			Log.d(TAG, "onHttpResponse  delete.equals(method) >>  id = " + id
+					+ "; isSucceed = " + JSONResponse.isSucceed(response));
 
 		} else if ("post_get".equals(method)) {
 			Wallet wallet = response.getObject(Wallet.class);

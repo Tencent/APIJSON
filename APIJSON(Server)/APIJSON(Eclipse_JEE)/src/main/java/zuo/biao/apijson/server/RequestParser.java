@@ -96,7 +96,7 @@ public class RequestParser {
 	 * @return parseResponse(requestObject);
 	 */
 	public JSONObject parseResponse(String request) {
-		System.out.println("\n\n\n\n" + TAG + requestMethod.name() + "/parseResponse  request = \n" + request);
+		System.out.println("\n\n\n\n" + TAG + requestMethod + "/parseResponse  request = \n" + request);
 		try {
 			requestObject = getCorrectRequest(requestMethod, parseRequest(request, requestMethod));
 		} catch (Exception e) {
@@ -135,6 +135,9 @@ public class RequestParser {
 				: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		//		}
 
+		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
+		+ TAG + requestMethod + "/parseResponse  request = \n" + JSON.toJSONString(request));
+		
 		return requestObject;
 	}
 
@@ -151,7 +154,7 @@ public class RequestParser {
 		if (method == null) {
 			method = RequestMethod.GET;
 		}
-		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + method.name()
+		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + method
 		+ "/parseResponse  request = \n" + request);
 		return JSON.parseObject(request);
 	}
@@ -961,7 +964,7 @@ public class RequestParser {
 		}
 
 		if (isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
-			throw new IllegalArgumentException(TAG + " getRealKey: 字符 " + originKey + " 不合法！");
+			throw new IllegalArgumentException(TAG + "/" + method + "  getRealKey: 字符 " + originKey + " 不合法！");
 		}
 
 		return key;
