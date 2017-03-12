@@ -54,15 +54,21 @@ public class RequestUtil {
 	}
 
 	public static JSONObject newPutRequest(long id, boolean encode) {
-		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
-		//		data.setContent(context.getString(R.string.apijson_info));//一般可用这种方式，encode是为了展示方便
-		List<Long> list = new ArrayList<>();
-		list.add((long) 10000);
-		list.add((long) 10001);
-		JSONObject momentObject = new JSONObject(data, encode);
-		momentObject.put("praiseUserIdList+", list, encode);//测试 +和- 通过
-		momentObject.put("content", context.getString(R.string.apijson_info), encode);//测试 +和- 通过
-		return new JSONRequest(Moment.class.getSimpleName(), momentObject, encode).setTag(Moment.class.getSimpleName());
+//		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
+//		//		data.setContent(context.getString(R.string.apijson_info));//一般可用这种方式，encode是为了展示方便
+//		List<Long> list = new ArrayList<>();
+//		list.add((long) 10000);
+//		list.add((long) 10001);
+//		JSONObject momentObject = new JSONObject(data, encode);
+////		momentObject.put("praiseUserIdList+", list, encode);//测试 +和- 通过
+////		momentObject.put("content-", "00", encode);//context.getString(R.string.apijson_info), encode);//测试 +和- 通过
+//		return new JSONRequest(Moment.class.getSimpleName(), momentObject, encode).setTag(Moment.class.getSimpleName());
+		
+		//测试Number类型+和-通过
+		User data = new User(id <= 0 ? DEFAULT_USER_ID : id);
+		JSONObject object = new JSONObject(data, encode);
+		object.put("sex-", false, encode);
+		return new JSONRequest(User.class.getSimpleName(), object, encode).setTag(User.class.getSimpleName());
 	}
 
 	public static JSONObject newDeleteRequest(long id, boolean encode) {

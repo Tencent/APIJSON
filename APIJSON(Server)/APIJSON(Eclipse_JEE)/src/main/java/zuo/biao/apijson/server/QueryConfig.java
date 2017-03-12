@@ -200,14 +200,16 @@ public class QueryConfig {
 		return count <= 0 ? "" : " LIMIT " + page*count + ", " + count;
 	}
 
-	/**获取筛选方法
+	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**获取WHERE
 	 * @return
 	 * @throws Exception 
 	 */
 	public String getWhereString() throws Exception {
 		return getWhereString(getMethod(), getWhere());
 	}
-	/**获取筛选方法
+	/**获取WHERE
+	 * @param method
 	 * @param where
 	 * @return
 	 * @throws Exception 
@@ -221,8 +223,9 @@ public class QueryConfig {
 			}
 
 			String whereString = " WHERE ";
-			Object value;
+			boolean isFirst = true;
 			int keyType = 0;// 0 - =; 1 - $, 2 - {} 
+			Object value;
 			for (String key : set) {
 				Log.d(TAG, "getWhereString  key = " + key);
 				//避免筛选到全部	value = key == null ? null : where.get(key);
@@ -239,47 +242,40 @@ public class QueryConfig {
 				} else if (key.endsWith("{}")) {
 					keyType = 2;
 				}
-
 				value = where.get(key);
+				key = RequestParser.getRealKey(method, key, false);
 
-				try {
-					key = RequestParser.getRealKey(method, key, false);
-				} catch (Exception e) {
-					Log.e(TAG, "getObject  getWhereString  try { key = RequestParser.getRealKey(key, false);"
-							+ " >> } catch (Exception e) {");
-					e.printStackTrace();
-				}
+				whereString += (isFirst ? "" : " AND ") + (key + (keyType == 1 ? " LIKE '" + value + "'" : (keyType == 2
+						? getRangeString(key, value) : "='" + value + "'") ));
 
-				whereString += (key + (keyType == 1 ? " LIKE '" + value + "'" : (keyType == 2
-						? getRangeString(key, value) : "='" + value + "'") ) + " AND ");
+				isFirst = false;
 			}
-			if (whereString.endsWith("AND ")) {
-				whereString = whereString.substring(0, whereString.length() - "AND ".length());
-			}
+
 			if (whereString.trim().endsWith("WHERE") == false) {
 				return whereString;
 			}
 		}
 		return "";
 	}
-	/**where key > 'key0' and key <= 'key1' and ...
+	
+	/**WHERE key > 'key0' AND key <= 'key1' AND ...
 	 * @param key
 	 * @param range "condition0,condition1..."
-	 * @return key > 'key0' and key <= 'key1' and ...
+	 * @return key condition0 AND key condition1 AND ...
 	 */
 	public static String getRangeString(String key, Object range) {
 		if (range instanceof JSONArray) {
 			return getInString(((JSONArray) range).toArray());
 		}
 		if (range instanceof String) {
-			return ((String) range).replaceAll(",", " AND " + key);//非Number类型的可能需要客户端拼接成 < 'value0', >= 'value1'这种
+			return ((String) range).replaceAll(",", " AND " + key);//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
 		}
 
 		throw new IllegalArgumentException("\"key{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
 	}
-	/**where key in ('key0', 'key1', ... )
+	/**WHERE key IN ('key0', 'key1', ... )
 	 * @param in
-	 * @return in ('key0', 'key1', ... )
+	 * @return IN ('key0', 'key1', ... )
 	 */
 	public static String getInString(Object[] in) {
 		String inString = "";
@@ -290,35 +286,53 @@ public class QueryConfig {
 		}
 		return " IN (" + inString + ") ";
 	}
+	//WHERE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-	/**获取筛选方法
+	//SET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**获取SET
 	 * @return
+	 * @throws Exception 
 	 */
-	public String getSetString() {
-		return getSetString(where);
+	public String getSetString() throws Exception {
+		return getSetString(getMethod(), getWhere());
 	}
-	/**获取筛选方法
+	/**获取SET
+	 * @param method
 	 * @param where
 	 * @return
+	 * @throws Exception 
 	 */
-	public static String getSetString(Map<String, Object> where) {
+	public static String getSetString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
 			if (where.containsKey(Table.ID) == false) {
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
 			String setString = " SET ";
+			boolean isFirst = true;
+			int keyType = 0;// 0 - =; 1 - +, 2 - -
+			Object value;
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
 				if (key == null || Table.ID.equals(key)) {
 					continue;
 				}
-				setString += (key + "='" + where.get(key) + "' ,");
+
+				if (key.endsWith("+")) {
+					keyType = 1;
+				} else if (key.endsWith("-")) {
+					keyType = 2;
+				}
+				value = where.get(key);
+				key = RequestParser.getRealKey(method, key, false);
+
+				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
+						? getRemoveString(key, value) : "'" + value + "'") ) );
+
+				isFirst = false;
 			}
-			if (setString.endsWith(",")) {
-				setString = setString.substring(0, setString.length() - 1);
-			}
+
 			if (setString.trim().endsWith("SET") == false) {
 				return setString + " WHERE " + Table.ID + "='" + where.get(Table.ID) + "' ";
 			}
@@ -326,6 +340,38 @@ public class QueryConfig {
 		return "";
 	}
 
+	/**SET key = CONCAT (key, 'value')
+	 * @param key
+	 * @param value
+	 * @return CONCAT (key, 'value')
+	 * @throws IllegalArgumentException
+	 */
+	public static String getAddString(String key, Object value) throws IllegalArgumentException {
+		if (value instanceof Number) {
+			return key + " + " + value;
+		}
+		if (value instanceof String) {
+			return " CONCAT (" + key + ", '" + value + "') ";
+		}
+		throw new IllegalArgumentException(key + "+ 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
+	}
+	/**SET key = REPLACE (key, 'value', '')
+	 * @param key
+	 * @param value
+	 * @return REPLACE (key, 'value', '')
+	 * @throws IllegalArgumentException
+	 */
+	public static String getRemoveString(String key, Object value) throws IllegalArgumentException {
+		if (value instanceof Number) {
+			return key + " - " + value;
+		}
+		if (value instanceof String) {
+			return " REPLACE (" + key + ", '" + value + "', '') ";
+		}
+		throw new IllegalArgumentException(key + "- 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
+	}
+	//SET >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
 
 	/**获取查询配置
 	 * @param table
