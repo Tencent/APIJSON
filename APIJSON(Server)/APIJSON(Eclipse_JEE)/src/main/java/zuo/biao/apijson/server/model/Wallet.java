@@ -16,16 +16,24 @@ package zuo.biao.apijson.server.model;
 
 import java.math.BigDecimal;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**钱包类
  * @author Lemon
  */
+@APIJSONRequest(
+		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		POST_GET = "{Wallet:{disallowColumns:!, necessaryColumns:userId}, necessaryColumns:currentUserId,loginPassword}",
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Wallet extends BaseModel {
 	private static final long serialVersionUID = 4298571449155754300L;
-	
+
 	public BigDecimal balance;
-	
+
 	private Long userId;
-	
+
 	/**默认构造方法，JSON等解析时必须要有
 	 */
 	public Wallet() {
@@ -35,7 +43,7 @@ public class Wallet extends BaseModel {
 		this();
 		setId(id);
 	}
-	
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -43,7 +51,7 @@ public class Wallet extends BaseModel {
 		this.userId = userId;
 		return this;
 	}
-	
+
 	public BigDecimal getBalance() {
 		return balance;
 	}

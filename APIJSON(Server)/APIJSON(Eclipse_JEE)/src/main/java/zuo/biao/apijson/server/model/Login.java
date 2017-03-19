@@ -14,10 +14,17 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.model;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**登录类
  * @author Lemon
  */
 @SuppressWarnings("serial")
+@APIJSONRequest(
+		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Login extends BaseModel {
 
 	public static final int TYPE_PASSWORD = 0;

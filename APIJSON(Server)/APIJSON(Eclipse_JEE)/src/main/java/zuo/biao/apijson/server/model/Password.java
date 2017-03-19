@@ -14,12 +14,18 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.model;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
 /**登录类
  * @author Lemon
  */
 @SuppressWarnings("serial")
+@APIJSONRequest(
+		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Password extends BaseModel {
 
 	private String model;//table是MySQL关键字不能用！
