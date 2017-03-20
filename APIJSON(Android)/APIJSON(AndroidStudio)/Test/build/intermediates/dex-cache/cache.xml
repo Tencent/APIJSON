@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/libs/okhttp-2.1.0.jar"
+        jumboMode="true"
+        revision="23.0.2"
+        sha1="9b51f7d0c19f179b52beab7cb433f8ba5cf786a4">
+        <dex dex="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/transforms/dex/debug/folders/1000/2/okhttp-2.1.0_9e7d8690e99bba3ade3d3b8591744a1490e44d24/classes.dex" />
+    </item>
+    <item
+        jar="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/libs/okio-1.0.0.jar"
+        jumboMode="true"
+        revision="23.0.2"
+        sha1="02534c458682c73f5b9871131ab3098d3f987ca3">
+        <dex dex="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/transforms/dex/debug/folders/1000/2/okio-1.0.0_0e68d10ce4908e631e09685b6fb8854c7ba630a7/classes.dex" />
+    </item>
+    <item
+        jar="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        revision="23.0.2"
+        sha1="5fa6979314467f9fc275e14c0465343dcb8c5b82">
+        <dex dex="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_873c502e12503dfa73458dd0e5f7fec5f323cb79/classes.dex" />
+    </item>
+    <item
+        jar="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        revision="23.0.2"
+        sha1="a0c20703b00bf36da00220e5f8f34dbf405eed92">
+        <dex dex="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_77daa03009d22cfb2baafd83560327ccd6a4fcd8/classes.dex" />
+    </item>
+    <item
+        jar="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/exploded-aar/Test/APIJSONLibrary/unspecified/jars/libs/fastjson-1.2.24.jar"
+        jumboMode="true"
+        revision="23.0.2"
+        sha1="79705108f5c77b3c6e441ed1b5b892e58819b7da">
+        <dex dex="/Users/Tommy/Documents/java/OpenSource/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/Test/app/build/intermediates/transforms/dex/debug/folders/1000/8/fastjson-1.2.24_695d8a71aa3dda8b1af5ca5c9f67a0c9577ae289/classes.dex" />
+    </item>
+
+</items>
