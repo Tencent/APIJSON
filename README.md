@@ -184,11 +184,10 @@ APIJSON是一种JSON传输结构协议。<br />
  User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | 以上不同请求方法的结果:<br />①{"status":200, "message":"success", "[]":{"0":{"User":{"id":1, "name":"xxx"...}, "Moment":{...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />②{"status":200, "message":"success", "User":{...}, "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}<br /><br />③{"status":200, "message":"success", "[]":{"0":{"Moment":{"id":1, "content":"xxx"...}, "[]":{"0":{"Comment":{...}...}}}, "1":{...}...}}
 
 
-1.APIJSON不需要接口、文档及兼容旧版客户端的特性仅针对GET和HEAD请求，好在这两个在所有请求里占大部分。<br >
-2.base_url指基地址，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.google.com/ ，对应的GET分支url:http://www.google.com/get/ ，下同。<br >
-3.status，指返回结果中的状态码，200表示成功，其它都是错误码，值全部都是HTTP标准状态码。下同。<br >
-4.message，指返回结果中的状态信息，对成功结果或错误原因的详细说明。下同。<br >
-5.status和message总是在返回结果的同一层级成对出现。对所有请求的返回结果都会在最外层有一对总结式status和message。对非GET、HEAD请求，返回结果里面的每个JSONObject里都会有一对status和message说明这个JSONObject的状态。下同。
+1.base_url指基地址，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.google.com/ ，对应的GET分支url:http://www.google.com/get/ ，下同。<br >
+2.status，指返回结果中的状态码，200表示成功，其它都是错误码，值全部都是HTTP标准状态码。下同。<br >
+3.message，指返回结果中的状态信息，对成功结果或错误原因的详细说明。下同。<br >
+4.status和message总是在返回结果的同一层级成对出现。对所有请求的返回结果都会在最外层有一对总结式status和message。对非GET、HEAD请求，返回结果里面的每个JSONObject里都会有一对status和message说明这个JSONObject的状态。下同。
 
 
 
