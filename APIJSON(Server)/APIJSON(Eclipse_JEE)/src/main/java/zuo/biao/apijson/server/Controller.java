@@ -174,6 +174,15 @@ public class Controller {
 			response = new JSONResponse(new RequestParser(RequestMethod.HEAD).parseResponse(
 					new JSONRequest(new Password(User.class.getSimpleName(), phone, password))));
 		} else {//verify
+			response = new JSONResponse(new RequestParser(RequestMethod.POST_GET).parseResponse(new JSONRequest(
+					new Verify(phone)).setTag(Verify.class.getSimpleName())));
+			Verify verify = response.getObject(Verify.class);
+			//验证码过期
+			if (verify != null && System.currentTimeMillis() - verify.getDate() > 60000) {
+				new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Verify(phone))
+						.setTag(Verify.class.getSimpleName()));
+				verify = null;
+			}
 			response = new JSONResponse(new RequestParser(RequestMethod.HEAD).parseResponse(
 					new JSONRequest(new Verify(phone, password))));
 		}
@@ -233,7 +242,7 @@ public class Controller {
 		//		}
 
 		JSONResponse response = new JSONResponse(new RequestParser(RequestMethod.POST_GET).parseResponse(new JSONRequest(
-				new Verify(phone))));
+				new Verify(phone)).setTag(Verify.class.getSimpleName())));
 		Verify verify = response.getObject(Verify.class);
 		//验证码过期
 		if (verify != null && System.currentTimeMillis() - verify.getDate() > 60000) {
