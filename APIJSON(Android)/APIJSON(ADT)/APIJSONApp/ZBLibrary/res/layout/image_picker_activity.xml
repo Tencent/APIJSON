@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/activity_page" >
+
+    <RelativeLayout style="@style/topbar_bg" >
+
+        <TextView style="@style/topbar_return_tv" />
+
+        <TextView
+            style="@style/topbar_title"
+            android:layout_centerHorizontal="true"
+            android:text="选择图片" />
+    </RelativeLayout>
+
+    <View style="@style/divider_horizontal_1dp" />
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/dlImagePicker"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" >
+
+        <GridView
+            android:id="@+id/gvImagePicker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:columnWidth="90dp"
+            android:focusable="false"
+            android:gravity="center"
+            android:horizontalSpacing="5dp"
+            android:listSelector="@null"
+            android:numColumns="auto_fit"
+            android:padding="5dp"
+            android:scrollbars="none"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="5dp" />
+
+        <ListView
+            android:id="@+id/lvImagePicker"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@android:color/white" />
+    </android.support.v4.widget.DrawerLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:background="#FFFFFFFF"
+        android:padding="8dp" >
+
+        <Button
+            android:id="@+id/btnImagePickerFolder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/edit_item_text_bg"
+            android:maxLength="10"
+            android:minWidth="70dp"
+            android:padding="10dp"
+            android:textColor="#474747" />
+
+        <Button
+            android:id="@+id/btnImagePickerOK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/edit_item_text_bg"
+            android:padding="8dp"
+            android:textColor="#FFFFFFFF"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+</LinearLayout>

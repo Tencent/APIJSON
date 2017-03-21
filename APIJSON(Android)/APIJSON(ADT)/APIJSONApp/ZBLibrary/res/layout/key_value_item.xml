@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/edit_item"
+    android:background="@drawable/bg_white_to_gray" >
+
+    <TextView
+        android:id="@+id/tvKeyValueItemKey"
+        style="@style/edit_item_left_tv_gravity_right"
+        android:textColor="@color/gray_2" />
+
+    <LinearLayout
+        android:id="@+id/llKeyValueItemValueContainer"
+        style="@style/wrap_wrap"
+        android:gravity="center_vertical" >
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvKeyValueItemValue"
+        style="@style/edit_item_right_et"
+        android:layout_weight="1"
+        android:textColor="@color/gray_4" />
+
+</LinearLayout>

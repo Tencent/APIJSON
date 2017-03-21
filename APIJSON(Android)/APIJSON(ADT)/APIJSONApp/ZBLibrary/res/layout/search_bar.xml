@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llSearchBarSearchBar"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/bottombar_height"
+    android:background="@color/white"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="6dp" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/common_search_bar_et_height"
+        android:layout_weight="1"
+        android:background="@drawable/input_bg"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingRight="4dp" >
+
+        <!-- ibtnCommonSearchBarSearch为了实现一些特殊功能，如搜索类型：号码、内容 -->
+
+        <ImageButton
+            android:id="@+id/ibtnSearchBarSearch"
+            style="@style/img_btn"
+            android:layout_marginLeft="2dp"
+            android:background="@drawable/bg_item_to_alpha"
+            android:clickable="false"
+            android:paddingBottom="4dp"
+            android:paddingLeft="4dp"
+            android:paddingTop="4dp"
+            android:src="@drawable/search_light" />
+
+        <EditText
+            android:id="@+id/etSearchBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="搜索"
+            android:maxLength="24"
+            android:paddingLeft="4dp"
+            android:singleLine="true"
+            android:textColor="@color/gray_bold"
+            android:textSize="@dimen/text_size_big" />
+
+        <ImageButton
+            android:id="@+id/ibtnSearchBarClear"
+            style="@style/img_btn"
+            android:layout_marginLeft="2dp"
+            android:background="@drawable/bg_item_to_alpha"
+            android:padding="4dp"
+            android:src="@drawable/cancel_light"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/ibtnSearchBarMenu"
+        style="@style/img_btn"
+        android:layout_marginLeft="6dp"
+        android:background="@drawable/bg_item_to_alpha"
+        android:padding="2dp"
+        android:src="@drawable/menu_light" />
+
+</LinearLayout>

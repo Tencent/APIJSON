@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/match_wrap"
+    android:descendantFocusability="blocksDescendants" >
+
+    <LinearLayout
+        android:id="@+id/llMomentViewContainer"
+        style="@style/ll_horizontal_match_wrap"
+        android:background="@color/white"
+        android:gravity="top"
+        android:padding="10dp" >
+
+        <RelativeLayout
+            android:id="@+id/rlWorkShowItemHead"
+            android:layout_width="@dimen/work_view_head_width"
+            android:layout_height="@dimen/work_view_head_height"
+            android:paddingRight="@dimen/work_view_head_padding_right" >
+
+            <ImageView
+                android:id="@+id/ivMomentViewHead"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop" />
+        </RelativeLayout>
+
+        <LinearLayout
+            style="@style/ll_vertical_match_wrap"
+            android:layout_below="@+id/rlWorkShowItemHead"
+            android:layout_toRightOf="@+id/rlWorkShowItemHead"
+            android:gravity="left" >
+
+            <LinearLayout
+                style="@style/ll_horizontal_match_wrap"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:id="@+id/tvMomentViewName"
+                    style="@style/text_middle_blue"
+                    android:layout_width="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_item_to_alpha"
+                    android:gravity="left"
+                    android:text="Name" />
+
+                <TextView
+                    android:id="@+id/tvMomentViewStatus"
+                    style="@style/text_small_blue"
+                    android:text="发布中" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvMomentViewContent"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/bg_item_to_alpha"
+                android:maxLines="8"
+                android:paddingBottom="5dp"
+                android:text="This is a content..."
+                android:textColor="@color/black" />
+
+            <apijson.demo.client.view.EmptyEventGridView
+                android:id="@+id/gvMomentView"
+                style="@style/wrap_wrap"
+                android:layout_marginTop="10dp"
+                android:focusable="false"
+                android:horizontalSpacing="4dp"
+                android:listSelector="@drawable/bg_item_to_alpha"
+                android:numColumns="3"
+                android:scrollbars="none"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="4dp" />
+
+            <LinearLayout
+                style="@style/ll_horizontal_match_wrap"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp" >
+
+                <TextView
+                    android:id="@+id/tvMomentViewDate"
+                    style="@style/text_small_black"
+                    android:layout_width="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="left"
+                    android:text="2015年12月" />
+
+                <LinearLayout
+                    android:id="@+id/llMomentViewPraise"
+                    style="@style/ll_horizontal_wrap_wrap"
+                    android:background="@drawable/bg_item_to_alpha"
+                    android:padding="5dp" >
+
+                    <ImageView
+                        android:id="@+id/ivMomentViewPraise"
+                        style="@style/img_btn"
+                        android:src="@drawable/praise_light" />
+
+                    <TextView
+                        android:id="@+id/tvMomentViewPraise"
+                        style="@style/text_small"
+                        android:paddingLeft="3dp"
+                        android:paddingRight="5dp"
+                        android:text="点赞" />
+                </LinearLayout>
+
+                <View
+                    style="@style/divider_vertical_1px"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp" />
+
+                <LinearLayout
+                    android:id="@+id/llMomentViewComment"
+                    style="@style/ll_horizontal_wrap_wrap"
+                    android:layout_marginLeft="6dp"
+                    android:background="@drawable/bg_item_to_alpha"
+                    android:padding="5dp" >
+
+                    <ImageView
+                        android:id="@+id/ivMomentViewComment"
+                        style="@style/img_btn"
+                        android:src="@drawable/comment_light" />
+
+                    <TextView
+                        android:id="@+id/tvMomentViewComment"
+                        style="@style/text_small"
+                        android:paddingLeft="3dp"
+                        android:text="评论" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llMomentViewCommentContainer"
+                style="@style/ll_vertical_match_wrap"
+                android:layout_marginTop="5dp"
+                android:background="@color/alpha_3" >
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

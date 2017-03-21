@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    style="@style/text_middle"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/common_item_height"
+    android:background="@drawable/bg_item_to_alpha"
+    android:gravity="center_vertical|left"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    android:paddingLeft="30dp"
+    android:text="Item" />

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llBottomMenuViewMainItemContainer"
+    style="@style/ll_horizontal_match_wrap"
+    android:background="@color/white"
+    android:gravity="center"
+    android:padding="2dp" >
+
+    <!-- 直接在下方弹出listView菜单这种不好搞 -->
+
+</LinearLayout>

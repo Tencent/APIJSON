@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/ll_vertical_match_wrap"
+    tools:context=".ui.GridPickerView" >
+
+    <HorizontalScrollView
+        style="@style/match_wrap"
+        android:layout_height="36dp"
+        android:background="@color/alpha_3" >
+
+        <LinearLayout
+            android:id="@+id/llGridPickerViewTabContainer"
+            style="@style/ll_horizontal_wrap_match" >
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <View style="@style/divider_horizontal_1px" />
+
+    <LinearLayout
+        android:id="@+id/llGridPickerViewHeaderViewContainer"
+        style="@style/ll_horizontal_match_wrap"
+        android:layout_height="20dp"
+        android:background="@color/white_slight"
+        android:visibility="gone" >
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/gvGridPickerView"
+        style="@style/match_match"
+        android:layout_height="@dimen/grid_picker_content_height"
+        android:listSelector="@drawable/null_drawable"
+        android:numColumns="3" >
+    </GridView>
+
+</LinearLayout>

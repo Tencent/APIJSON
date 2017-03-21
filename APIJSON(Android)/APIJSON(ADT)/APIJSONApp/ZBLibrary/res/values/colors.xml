@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="activity_bg">#f7f8f8</color>
+    <color name="topbar_bg">#33cc99</color>
+    <color name="topbar_bg_white">#ffffffff</color>
+    <color name="topbar_bg_black">#272e2a</color>
+    <color name="divider">#dddddd</color>
+    <color name="indicator_enter">#999999</color>
+    <color name="red_interest">#ee3b3b</color>
+    <color name="white_selected">#ffffff</color>
+    <color name="green">#33cc66</color>
+    <color name="green_deep">#33cc99</color>
+    <color name="gray_interest">#d2d2d2</color>
+    <color name="gray_unslected">#999999</color>
+    <color name="gray_4">#333333</color>
+    <color name="gray_3">#666666</color>
+    <color name="gray_2">#999999</color>
+    <color name="gray_1">#b5b5b5</color>
+    <color name="red">#ee3b3b</color>
+    <color name="pink">#ff6666</color>
+    <color name="yellow">#ffd400</color>
+
+    <color name="alpha_complete">#0000</color>
+    <color name="alpha_9">#9000</color>
+    <color name="alpha_6">#6000</color>
+    <color name="alpha_3">#3000</color>
+    <color name="alpha_1">#1000</color>
+    <color name="white">#ffffff</color>
+    <color name="white_slight">#eeeeee</color>
+    <color name="white_alpha">#ddffffff</color>
+    <color name="white_alpha_6">#bbdddddd</color>
+    <color name="black">#000000</color>
+    <color name="black_slight">#666666</color>
+    <color name="blue">#009ed3</color>
+    <color name="blue_btn">#2c6ed2</color>
+    <color name="blue_sky">#62c8f9</color>
+    <color name="orangered">#ff5900</color>
+    <color name="gray_deep">#999999</color>
+    <color name="gray_bold">#303133</color>
+    <color name="gray">#666666</color>
+    <color name="gray_slight">#dcdcdc</color>
+    <color name="red_text">#ff3d01</color>
+    <color name="red_line">#ff3d01</color>
+    <color name="silver">#c0c0c0</color>
+    <color name="readed">#ffc05500</color>
+    <color name="noread">#ff4b4b4b</color>
+    <color name="transparent01">#9000</color>
+    <color name="transparent">#00000000</color>
+    <color name="window_bg">#fff0f3f6</color>
+    <color name="title_bg">#ff54acea</color>
+    <color name="button_unselected">#ff54acea</color>
+    <color name="button_selected">#ff419de4</color>
+    <color name="green_btn">#33b422</color>
+    <color name="orange_btn">#e87a22</color>
+
+    <color name="btn_blue_normal">#009ed3</color>
+    <color name="btn_blue_pressed">#2c6ed2</color>
+    <color name="btn_gray_normal">#c0c0c0</color>
+    <color name="btn_gray_pressed">#666667</color>
+    <color name="btn_red_normal">#ff3b3b</color>
+    <color name="btn_red_pressed">#dd0000</color>
+
+</resources>

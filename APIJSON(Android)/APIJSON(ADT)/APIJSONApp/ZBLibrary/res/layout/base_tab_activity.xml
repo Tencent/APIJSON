@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/activity_page" >
+
+    <LinearLayout
+        style="@style/ll_vertical_match_wrap"
+        android:background="@color/topbar_bg" >
+
+        <RelativeLayout
+            style="@style/topbar_bg"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:id="@id/ivBaseTabReturn"
+                style="@style/topbar_return_img"
+                android:layout_height="@dimen/topbar_height" />
+
+            <TextView
+                android:id="@id/tvBaseTabReturn"
+                style="@style/topbar_return_tv"
+                android:layout_height="@dimen/topbar_height" />
+
+            <LinearLayout
+                style="@style/ll_vertical_wrap_wrap"
+                android:layout_centerHorizontal="true"
+                android:minHeight="@dimen/topbar_height" >
+
+                <TextView
+                    android:id="@id/tvBaseTabTitle"
+                    style="@style/topbar_title"
+                    android:layout_height="@dimen/topbar_height"
+                    android:text="标题" />
+
+                <LinearLayout
+                    android:id="@id/llBaseTabTabContainer"
+                    style="@style/ll_vertical_wrap_match"
+                    android:gravity="center"
+                    android:minHeight="@dimen/topbar_height" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@id/llBaseTabTopRightButtonContainer"
+                style="@style/ll_horizontal_wrap_wrap"
+                android:layout_height="@dimen/topbar_height"
+                android:layout_alignParentRight="true" >
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@id/flBaseTabFragmentContainer"
+        style="@style/match_match"
+        android:background="@color/activity_bg" >
+    </FrameLayout>
+
+</LinearLayout>

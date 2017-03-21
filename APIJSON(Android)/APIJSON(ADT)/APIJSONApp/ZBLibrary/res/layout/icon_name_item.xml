@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/ll_vertical_wrap_wrap"
+    android:background="@drawable/bg_item_to_alpha"
+    android:padding="4dp" >
+
+    <ImageView
+        android:id="@+id/ivIconNameIcon"
+        style="@style/wrap_wrap"
+        android:minHeight="36dp"
+        android:minWidth="36dp" />
+
+    <TextView
+        android:id="@+id/tvIconNameName"
+        style="@style/text_small_black"
+        android:maxWidth="60dp"
+        android:text="名称" />
+
+</LinearLayout>

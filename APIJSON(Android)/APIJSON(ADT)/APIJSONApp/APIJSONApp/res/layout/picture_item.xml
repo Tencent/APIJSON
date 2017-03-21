@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zuo.biao.library.ui.SquareRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/match_wrap" >
+
+    <ImageView
+        android:id="@+id/ivGridItemHead"
+        style="@style/match_match"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/tvGridItemName"
+        style="@style/text_middle_black"
+        android:visibility="gone" />
+
+</zuo.biao.library.ui.SquareRelativeLayout>

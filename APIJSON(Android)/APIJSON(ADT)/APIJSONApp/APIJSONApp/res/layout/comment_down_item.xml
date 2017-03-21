@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/common_item_height"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/tvCommentName"
+        style="@style/text_middle"
+        android:textSize="13dp"
+        android:layout_marginRight="6dp"
+        android:text="Name:"
+        android:textColor="@color/green"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvCommentContent"
+        style="@style/text_middle"
+        android:textSize="13dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_item_to_alpha"
+        android:gravity="left|center_vertical"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:singleLine="false"
+        android:text="Content"
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/tvCommentTime"
+        style="@style/text_middle"
+        android:textSize="13dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:text="Time"
+        android:textColor="@color/gray"
+        android:visibility="gone" />
+
+</LinearLayout>

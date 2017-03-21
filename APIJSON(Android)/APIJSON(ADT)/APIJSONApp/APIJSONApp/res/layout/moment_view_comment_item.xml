@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<apijson.demo.client.view.CommentTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvmomentViewCommentItemContent"
+    style="@style/text_small_black"
+    android:layout_width="match_parent"
+    android:background="@drawable/bg_item_to_alpha"
+    android:gravity="left|center_vertical"
+    android:text="This is a comment..." />

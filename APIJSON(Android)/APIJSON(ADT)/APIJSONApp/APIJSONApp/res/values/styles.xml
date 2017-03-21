@@ -1,0 +1,30 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="SplashTheme" parent="android:Theme.NoTitleBar.Fullscreen">
+
+        <!-- 闪屏背景，可用图片 -->
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="bottom_tab_ll" parent="ll_vertical_match_match">
+        <item name="android:width">0dp</item>
+    </style>
+
+    <style name="bottom_tab_iv" parent="img_btn"></style>
+
+    <style name="bottom_tab_tv" parent="text_micro">
+        <item name="android:textColor">@color/black_to_white_selector</item>
+    </style>
+
+    
+    <style name="select_name" parent="match_wrap">
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">15dp</item>
+    </style>
+
+    <style name="select_json" parent="match_wrap">
+        <item name="android:gravity">left|top</item>
+    </style>
+    
+</resources>

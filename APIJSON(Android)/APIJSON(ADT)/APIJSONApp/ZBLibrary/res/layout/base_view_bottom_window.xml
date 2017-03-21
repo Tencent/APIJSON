@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/vBaseBottomWindowRoot"
+    style="@style/bottom_window_page"
+    android:layout_gravity="bottom" >
+
+    <TextView
+        android:id="@id/tvBaseTitle"
+        style="@style/topbar_bg"
+        android:background="@color/white"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
+    <View
+        style="@style/divider_horizontal_1px"
+        android:background="@color/black" />
+
+    <LinearLayout
+        android:id="@id/llBaseViewBottomWindowContainer"
+        style="@style/ll_vertical_match_wrap"
+        android:background="@color/white_slight" >
+    </LinearLayout>
+
+    <View style="@style/divider_horizontal_1px_gray" />
+
+    <LinearLayout
+        style="@style/ll_horizontal_match_wrap"
+        android:background="@color/white" >
+
+        <TextView
+            style="@style/bottom_menu_btn_return"
+            android:layout_weight="1" />
+
+        <View style="@style/divider_vertical_1px_gray" />
+
+        <TextView
+            style="@style/bottom_menu_btn_forward"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</LinearLayout>

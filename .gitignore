@@ -1,3 +1,5 @@
 .DS_Store
 APIJSON(Android)/APIJSON(ADT)/APIJSONDemoApp/bin
 APIJSON(Android)/APIJSON(ADT)/APIJSONLibrary/bin
+
+*.class

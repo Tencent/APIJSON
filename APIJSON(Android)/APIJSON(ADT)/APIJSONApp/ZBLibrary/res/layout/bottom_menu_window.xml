@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/vBaseBottomWindowRoot"
+    style="@style/bottom_window_page"
+    android:paddingTop="240dp" >
+
+    <zuo.biao.library.ui.MaxHeightWrapLayout
+        style="@style/ll_vertical_match_wrap"
+        android:background="@color/white" >
+
+        <TextView
+            android:id="@id/tvBaseTitle"
+            style="@style/text_big_black"
+            android:layout_width="match_parent"
+            android:padding="12dp"
+            android:text="tvBottomMenuTitle"
+            android:visibility="gone" />
+
+        <View style="@style/divider_horizontal_1px" />
+
+        <ListView
+            android:id="@+id/lvBottomMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:divider="@color/alpha_3"
+            android:dividerHeight="1px"
+            android:listSelector="@drawable/bg_item_to_alpha" >
+        </ListView>
+
+        <TextView
+            android:id="@+id/tvBottomMenuCancel"
+            style="@style/text_middle"
+            android:onClick="onReturnClick"
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/menu_member_manage_cancel_bg"
+            android:padding="10dp"
+            android:text="取消"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+    </zuo.biao.library.ui.MaxHeightWrapLayout>
+
+</LinearLayout>

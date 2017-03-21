@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llSelectBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/alpha_3"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="4dp">
+
+    <TextView
+        android:id="@+id/tvSelectBarBetween"
+        style="@style/text_middle"
+        android:background="@drawable/bg_pressed_common"
+        android:drawableLeft="@drawable/select_all_light"
+        android:gravity="center"
+        android:text="填充(两个间全选或全不选)" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <CheckBox
+        android:id="@+id/cbSelectBarAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingRight="4dp"
+        android:text="全选" />
+
+</LinearLayout>

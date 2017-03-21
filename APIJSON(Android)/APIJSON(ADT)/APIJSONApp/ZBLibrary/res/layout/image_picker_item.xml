@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zuo.biao.library.ui.SquareRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:id="@+id/ivPicture"
+        style="@style/match_match"
+        android:scaleType="centerCrop"/>
+
+    <ImageView
+        android:id="@+id/ivCheck"
+        style="@style/img_btn"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="24dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp"
+        android:src="@drawable/circle_blue" />
+
+</zuo.biao.library.ui.SquareRelativeLayout>

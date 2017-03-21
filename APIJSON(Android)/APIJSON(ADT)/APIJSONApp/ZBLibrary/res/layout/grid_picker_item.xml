@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/match_wrap"
+    android:padding="4dp" >
+
+    <TextView
+        android:id="@+id/tvGridPickerItem"
+        style="@style/text_middle_black"
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp" >
+    </TextView>
+
+</FrameLayout>
