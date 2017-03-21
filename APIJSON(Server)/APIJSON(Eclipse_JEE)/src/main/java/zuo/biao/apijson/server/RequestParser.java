@@ -332,7 +332,7 @@ public class RequestParser {
 		Set<String> set = request.keySet();
 		if ("!".equals(disallows)) {//所有非necessaryColumns，改成 !necessary 更好
 			if (set != null) {
-				List<String> disallowList = new ArrayList<>();
+				List<String> disallowList = new ArrayList<String>();
 				for (String key : set) {
 					if (isContainKeyInArray(key, necessaryColumns) == false) {
 						disallowList.add(key);
@@ -440,8 +440,8 @@ public class RequestParser {
 
 		Set<String> set = request.keySet();
 		JSONObject transferredRequest = new JSONObject(true);
-		Map<String, String> functionMap = new LinkedHashMap<>();
-		Map<String, Object> selfDefineKeyMap = new LinkedHashMap<>();
+		Map<String, String> functionMap = new LinkedHashMap<String, String>();
+		Map<String, Object> selfDefineKeyMap = new LinkedHashMap<String, Object>();
 		if (set != null) {
 			Object value;
 			JSONObject result;
@@ -516,7 +516,7 @@ public class RequestParser {
 					}
 				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
-					if (key.startsWith("@") && QueryConfig.keyList.contains(key) == false) {
+					if (key.startsWith("@") && QueryConfig.tableKeyList.contains(key) == false) {
 						selfDefineKeyMap.put(key, value);
 					}//可@key@
 					if (key.endsWith("()")) {

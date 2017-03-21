@@ -53,8 +53,9 @@ public class AccessVerifier {
 
 	private static Map<String, RequestMethod[]> accessMap;
 	static {
-		//兼容JDK 1.8以上，见getDeclaredAnnotation的@since
 		accessMap = new HashMap<String, RequestMethod[]>();
+		
+		//兼容JDK 1.8以上，见getDeclaredAnnotation的@since
 		accessMap.put(User.class.getSimpleName(), User.class.getDeclaredAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Work.class.getSimpleName(), Work.class.getDeclaredAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Moment.class.getSimpleName(), Moment.class.getDeclaredAnnotation(APIJSONRequest.class).method());

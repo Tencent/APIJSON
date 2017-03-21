@@ -84,6 +84,7 @@ public class JSONRequest extends JSONObject {
 
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
+	public static final String KEY_TOTAL = "total";
 
 	public JSONRequest setCount(int count) {
 		put(KEY_COUNT, count);
@@ -99,6 +100,15 @@ public class JSONRequest extends JSONObject {
 	}
 	public int getPage() {
 		return getIntValue(KEY_PAGE);
+	}
+	//	private int total;
+	public JSONRequest setTotal(int total) {
+		//		this.total = total;
+		put(KEY_TOTAL, total);
+		return this;
+	}
+	public int getTotal() {
+		return getIntValue(KEY_TOTAL);//total;//
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

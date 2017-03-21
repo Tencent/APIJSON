@@ -237,8 +237,8 @@ public class Controller {
 		Verify verify = response.getObject(Verify.class);
 		//验证码过期
 		if (verify != null && System.currentTimeMillis() - verify.getDate() > 60000) {
-			new JSONResponse(new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(
-					new Verify(phone))));
+			new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Verify(phone))
+					.setTag(Verify.class.getSimpleName()));
 			verify = null;
 		}
 		//手机号或验证码错误

@@ -35,10 +35,16 @@ import zuo.biao.apijson.Table;
 public class QueryConfig {
 	private static final String TAG = "QueryConfig";
 
-	public static final List<String> keyList;
+	public static final List<String> arrayKeyList;
 	static {
-		keyList = new ArrayList<String>();
-		keyList.add(JSONRequest.KEY_COLUMNS);
+		arrayKeyList = new ArrayList<String>();
+		arrayKeyList.add(JSONRequest.KEY_COUNT);
+		arrayKeyList.add(JSONRequest.KEY_PAGE);
+	}
+	public static final List<String> tableKeyList;
+	static {
+		tableKeyList = new ArrayList<String>();
+		tableKeyList.add(JSONRequest.KEY_COLUMNS);
 	}
 
 

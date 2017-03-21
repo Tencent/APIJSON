@@ -25,7 +25,7 @@ public class TypeValueKeyEntry extends Entry<String, String> {
 
 	private static Map<String, Class<?>> classMap;
 	static {
-		classMap = new HashMap<>();
+		classMap = new HashMap<String, Class<?>>();
 		classMap.put(boolean.class.getSimpleName(), boolean.class);
 		classMap.put(int.class.getSimpleName(), int.class);
 		classMap.put(long.class.getSimpleName(), long.class);
@@ -110,7 +110,7 @@ public class TypeValueKeyEntry extends Entry<String, String> {
 		}
 		int index = typeValue.contains(":") ? typeValue.indexOf(":") : -1;
 		
-		Entry<Class<?>, Object> entry = new Entry<>();
+		Entry<Class<?>, Object> entry = new Entry<Class<?>, Object>();
 		entry.setKey(classMap.get(index < 0 ? Object.class.getSimpleName() : typeValue.substring(0, index)));
 		entry.setValue(valueMap == null ? null : valueMap.get(typeValue.substring(index + 1, typeValue.length())));
 		
