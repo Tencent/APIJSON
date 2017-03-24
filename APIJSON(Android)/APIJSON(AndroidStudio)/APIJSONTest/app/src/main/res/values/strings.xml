@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">APIJSON</string>
+    <string name="app_name">APIJSONTest</string>
     <string name="app_version">2.0</string>
     <string name="request">请求</string>
     <string name="post">增</string>

@@ -16,7 +16,7 @@ limitations under the License.*/
  * model对应服务器数据库里table，用于封装请求和解析结果
  * 类名称 : model == table
  * 变量(名称, 类型) : variable == column
- * @warn 在model内不用对变量使用int,boolean,char等基本类型, 用Integer,Boolean,String等对应的对象类型替代
+ * @warn 在model内不要对变量使用int,boolean,char等基本类型, 用Integer,Boolean,String等对应的对象类型替代
  */
 /**
  * @author Lemon

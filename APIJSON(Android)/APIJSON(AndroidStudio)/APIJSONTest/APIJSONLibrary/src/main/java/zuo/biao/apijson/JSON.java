@@ -23,7 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
-/**阿里json封装类 防止解析时异常
+/**阿里FastJSON封装类 防止解析时异常
  * @author Lemon
  */
 public class JSON {
@@ -34,7 +34,7 @@ public class JSON {
 	 * @return
 	 */
 	public static boolean isJsonCorrect(String s) {
-		Log.i(TAG, "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
+//		Log.i(TAG, "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
 		if (s == null 
 				//				|| s.equals("[]") 
 				//				|| s.equals("{}") 
@@ -171,7 +171,7 @@ public class JSON {
 		try {
 			return com.alibaba.fastjson.JSON.toJSONString(obj);
 		} catch (Exception e) {
-			Log.i(TAG, "toJSONString  catch \n" + e.getMessage());
+			Log.e(TAG, "toJSONString  catch \n" + e.getMessage());
 		}
 		return null;
 	}
@@ -188,7 +188,7 @@ public class JSON {
 		try {
 			return com.alibaba.fastjson.JSON.toJSONString(obj, features);
 		} catch (Exception e) {
-			Log.i(TAG, "toJSONString  catch \n" + e.getMessage());
+			Log.e(TAG, "parseArray  catch \n" + e.getMessage());
 		}
 		return null;
 	}
@@ -221,9 +221,7 @@ public class JSON {
 				JSONObject json = parseObject((String) obj);
 				return json != null && json.isEmpty() == false;
 			} catch (Exception e) {
-				//太长 System.out.println(TAG + "select  while (rs.next()){  >> i = "
-				//  + i + "  try { json = JSON.parse((String) value);"
-				//	+ ">> } catch (Exception e) {\n" + e.getMessage());
+				Log.e(TAG, "isJSONObject  catch \n" + e.getMessage());
 			}
 		}
 		
@@ -242,14 +240,11 @@ public class JSON {
 				JSONArray json = parseArray((String) obj);
 				return json != null && json.isEmpty() == false;
 			} catch (Exception e) {
-				//太长 System.out.println(TAG + "select  while (rs.next()){  >> i = "
-				//  + i + "  try { json = JSON.parse((String) value);"
-				//	+ ">> } catch (Exception e) {\n" + e.getMessage());
+				Log.e(TAG, "isJSONArray  catch \n" + e.getMessage());
 			}
 		}
 		
 		return false;
 	}
-
 
 }

@@ -234,7 +234,7 @@ public final class SettingUtil {
 	/**
 	 * TODO 改为你的测试服务器地址,如果有的话
 	 */
-	public static final String URL_SERVER_ADDRESS_TEST = "http://192.168.1.103:8080/";//测试服务器
+	public static final String URL_SERVER_ADDRESS_TEST = "http://192.168.1.104:8080/";//测试服务器
 
 	/**获取当前服务器地址
 	 * isHttps = false
