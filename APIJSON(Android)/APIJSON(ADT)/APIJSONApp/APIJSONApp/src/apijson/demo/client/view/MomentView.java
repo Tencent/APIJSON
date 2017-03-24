@@ -3,6 +3,7 @@ package apijson.demo.client.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.model.Entry;
@@ -137,8 +138,8 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	public void bindView(MomentItem data_){
 		llMomentViewContainer.setVisibility(data_ == null ? View.GONE : View.VISIBLE);
 		if (data_ == null) {
-			Log.e(TAG, "bindView data_ == null >> return;");
-			return;
+			Log.w(TAG, "bindView data_ == null >> data_ = new MomentItem();");
+			data_ = new MomentItem();
 		}
 		this.data = data_;
 		this.user = data.getUser();
@@ -199,7 +200,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		}
 		tvMomentViewComment.setText(total <= 0 ? "评论" : "" + total);
 		tvMomentViewComment.setTextColor(getColor(joined ? R.color.blue : R.color.black));
-		
+
 		if (showComment == false) {
 			Log.i(TAG, "setComment  showComment == false >> return;");
 			return;
@@ -365,13 +366,13 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	/**赞
 	 * @param toPraise
 	 */
-	public void praiseWork(boolean toPraise) {
-		//		setPraise(toPraise, moment.getPraiseCount() + (toPraise ? 1 : -1));
-		//		if (toPraise == moment.getIsPraised()) {
-		//			Log.e(TAG, "praiseWork  toPraise == moment.getIsPraise() >> return;");
-		//			return;
-		//		}
-		HttpRequest.praiseMoment(momentId, toPraise, HTTP_PRAISE, this);
+	public void praise(boolean toPraise) {
+		if (toPraise == data.getIsPraised()) {
+			Log.e(TAG, "praiseWork  toPraise == moment.getIsPraise() >> return;");
+			return;
+		}
+		//		setPraise(toPraise, data.getPraiseCount() + (toPraise ? 1 : -1));
+		HttpRequest.praiseMoment(momentId, toPraise, toPraise ? HTTP_PRAISE : HTTP_CANCLE_PRAISE, this);
 	}
 
 	//Data数据区(存在数据获取或处理代码，但不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -397,30 +398,36 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 
 	public static final int HTTP_PRAISE = 1;
+	public static final int HTTP_CANCLE_PRAISE = 2;
 	public static final int HTTP_DELETE = 3;
 	@Override
 	public void onHttpResponse(int requestCode, String result, Exception e) {
-		//		switch (requestCode) {
-		//		case HTTP_PRAISE:
-		//			if(resultCode == HttpRequest.RESULT_PRAISE_WORK_SUCCEED) {
-		//				moment.setPraiseCount(moment.getPraiseCount() + 1);
-		//				moment.setIsPraise(true);
-		//			} else if (resultCode == HttpRequest.RESULT_CANCEL_PRAISE_WORK_SUCCEED) {
-		//				moment.setPraiseCount(moment.getPraiseCount() -1);
-		//				moment.setIsPraise(false);
-		//			}
-		//			setPraise(moment.getIsPraised(), moment.getPraiseCount());
-		//			break;
-		//		case HTTP_DELETE:
-		//			if(resultCode == HttpRequest.RESULT_DELETE_WORK_SUCCEED) {
-		//				context.sendBroadcast(new Intent(ActionUtil.REFRESH_WORK)
-		//				.putExtra(ActionUtil.TYPE, ActionUtil.TYPE_DELETE_WORK)
-		//				.putExtra(ActionUtil.RESULT_WORK, Json.toJSONString(moment)));
-		//			} else {
-		//				bindView(moment);
-		//			}
-		//			break;
-		//		}
+		if (data == null) {
+			Log.e(TAG, "onHttpResponse  data == null  >> return;");
+			return;
+		}
+		JSONResponse response = new JSONResponse(result);
+		switch (requestCode) {
+		case HTTP_PRAISE:
+		case HTTP_CANCLE_PRAISE:
+			response = response.getJSONResponse(Moment.class.getSimpleName());
+			if (JSONResponse.isSucceed(response)) {
+				data.setIsPraised(requestCode == HTTP_PRAISE);
+				bindView(data);
+			} else {
+				showShortToast((requestCode == HTTP_PRAISE ? "点赞" : "取消点赞") + "失败，请检查网络后重试");
+			}
+			break;
+			//		case HTTP_DELETE:
+			//			if(resultCode == HttpRequest.RESULT_DELETE_WORK_SUCCEED) {
+			//				context.sendBroadcast(new Intent(ActionUtil.REFRESH_WORK)
+			//				.putExtra(ActionUtil.TYPE, ActionUtil.TYPE_DELETE_WORK)
+			//				.putExtra(ActionUtil.RESULT_WORK, Json.toJSONString(moment)));
+			//			} else {
+			//				bindView(data);
+			//			}
+			//			break;
+		}
 	}
 
 
@@ -458,7 +465,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			}
 			switch (v.getId()) {
 			case R.id.llMomentViewPraise:
-				//				praiseWork(! moment.getIsPraised());
+				praise(! data.getIsPraised());
 				break;
 			case R.id.llMomentViewComment:
 				toCommentActivity(true);

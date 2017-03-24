@@ -140,6 +140,9 @@ public class MomentItem extends BaseModel {
 		}
 		return value(isPraised);
 	}
+	public MomentItem setIsPraised(boolean isPraised) {
+		return setIsPraised(isPraised, APIJSONApplication.getInstance().getCurrentUserId());
+	}
 	public MomentItem setIsPraised(boolean isPraised, long userId) {
 		this.isPraised = isPraised;
 
@@ -154,6 +157,7 @@ public class MomentItem extends BaseModel {
 				list.add(userId);
 			}
 		}
+		getMoment().setPraiseUserIdList(list);
 
 		return this;
 	}
@@ -196,12 +200,14 @@ public class MomentItem extends BaseModel {
 				list.add(userId);
 			}
 		}
+		getMoment().setCommentIdList(list);
+		
 		return this;
 	}
 
-//	public int getCommentCount() {
-//		return getMoment().getCommentCount();
-//	}
+	//	public int getCommentCount() {
+	//		return getMoment().getCommentCount();
+	//	}
 
 	private int commentCount;
 	public int getCommentCount() {

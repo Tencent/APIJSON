@@ -346,7 +346,7 @@ public class HttpRequest {
 		//		moment.put("praiseCount()", "count(Collection:praiseUserIdList)");//测试成功
 		//		moment.put("praised()", "isContain(Collection:praiseUserIdList, userId)");//测试成功
 		//		moment.put("plus()", "plus(long:id,long:userId)");//测试成功
-//		moment.put("@commentCount@", "Comment[]/total");
+		//		moment.put("@commentCount@", "Comment[]/total");
 		request.put(Moment.class.getSimpleName(), moment);
 
 		//		request.put(new Moment(id));
@@ -354,9 +354,9 @@ public class HttpRequest {
 
 		JSONRequest commentItem = new JSONRequest();
 		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "Moment/id"));
-//		commentItem.put("release", "total:Moment/commentCount");
+		//		commentItem.put("release", "total:Moment/commentCount");
 		request.add(commentItem.toArray(3, 0, Comment.class.getSimpleName()));
-//		request.put("commentCount@", "Comment[]/total");
+		//		request.put("commentCount@", "Comment[]/total");
 		get(request, requestCode, listener);
 	}
 
@@ -372,8 +372,8 @@ public class HttpRequest {
 	public static void getMomentList(int range, long id, com.alibaba.fastjson.JSONObject search
 			, int count, int page, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
-//		request.put("commentCount@", "[]/CommentItem[]/total");
-		
+		//		request.put("commentCount@", "[]/CommentItem[]/total");
+
 		JSONRequest moment = new JSONRequest();
 		switch (range) {
 		case RANGE_ALL:
@@ -404,7 +404,7 @@ public class HttpRequest {
 		default:
 			break;
 		}
-//		moment.put("@commentCount@", "[]/CommentItem[]/total");
+		//		moment.put("@commentCount@", "[]/CommentItem[]/total");
 		moment.add(search);
 		//测试远程函数调用成功
 		//		moment.put("praiseCount()", "count(Collection:praiseUserIdList)");
@@ -417,16 +417,16 @@ public class HttpRequest {
 		JSONRequest commentItem = new JSONRequest();
 		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "[]/Moment/id"));
 		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumns(COLUMNS_USER));
-		
+
 		JSONObject toUserObject = new JSONObject();
 		toUserObject.put(User.class.getSimpleName()
 				, new JSONRequest(ID_AT, "[]/CommentItem[]/Comment/toUserId").setColumns(COLUMNS_USER_SIMPLE));
 		commentItem.put("toUserObject", toUserObject);
-		
-//		commentItem.put("release", "total:[]/Moment/commentCount");
+
+		//		commentItem.put("release", "total:[]/Moment/commentCount");
 		request.add(commentItem.toArray(3, 0, CommentItem.class.getSimpleName()));
 		//comment >>>>>>>>>>>>>>>>>>
-		
+
 		get(request.toArray(count, page), requestCode, listener);
 	}
 
@@ -458,7 +458,12 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void praiseMoment(long id, boolean toPraise, int requestCode, OnHttpResponseListener listener) {
-		get(null, requestCode, listener);
+		JSONObject data = new JSONObject(new Moment(id));
+		List<Long> list = new ArrayList<Long>();
+		list.add(APIJSONApplication.getInstance().getCurrentUserId());
+		data.put("praiseUserIdList" + (toPraise ? "+" : "-"), list, true);
+		put(new JSONRequest(Moment.class.getSimpleName(), data).setTag(Moment.class.getSimpleName())
+				, requestCode, listener);
 	}
 
 	/**删除动态
@@ -467,7 +472,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void deleteMoment(Long id, int requestCode, OnHttpResponseListener listener) {
-		get(null, requestCode, listener);
+		delete(new JSONRequest(new Moment(id)).setTag(Moment.class.getSimpleName()), requestCode, listener);
 	}
 
 	/**获取钱包
