@@ -14,9 +14,16 @@ limitations under the License.*/
 
 package apijson.demo.client.server.model;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**评论类
  * @author Lemon
  */
+@APIJSONRequest(
+		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Comment extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;
 	

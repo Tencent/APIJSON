@@ -16,9 +16,16 @@ package apijson.demo.client.server.model;
 
 import java.util.List;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**作品类
  * @author Lemon
  */
+@APIJSONRequest(
+		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Moment extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;
 

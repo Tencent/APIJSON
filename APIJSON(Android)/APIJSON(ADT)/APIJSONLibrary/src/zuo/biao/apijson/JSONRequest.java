@@ -30,7 +30,7 @@ public class JSONRequest extends JSONObject {
 	}
 	/**
 	 * encode = true
-	 * @param object
+	 * @param object must be annotated by {@link APIJSONRequest}
 	 * @see	{@link #JSONRequest(String, Object)}
 	 */
 	public JSONRequest(Object object) {
@@ -46,7 +46,7 @@ public class JSONRequest extends JSONObject {
 		this(name, object, true);
 	}
 	/**
-	 * @param object
+	 * @param object must be annotated by {@link APIJSONRequest}
 	 * @param encode
 	 * @see {@link #JSONRequest(String, Object, boolean)}
 	 */
@@ -133,9 +133,10 @@ public class JSONRequest extends JSONObject {
 
 	/**
 	 * encode = true
-	 * @param value
+	 * @param value must be annotated by {@link APIJSONRequest}
 	 * @return {@link #put(String, boolean)}
 	 */
+	@Override
 	public Object put(Object value) {
 		return put(value, true);
 	}

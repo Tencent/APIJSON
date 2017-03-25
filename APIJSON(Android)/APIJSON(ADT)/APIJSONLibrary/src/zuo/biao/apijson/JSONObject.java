@@ -145,7 +145,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	/**
 	 * encode = false
-	 * @param value
+	 * @param value must be annotated by {@link APIJSONRequest}
 	 * @return {@link #put(String, boolean)}
 	 */
 	public Object put(Object value) {
@@ -153,7 +153,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 	/**
 	 * key = value.getClass().getSimpleName()
-	 * @param value
+	 * @param value must be annotated by {@link APIJSONRequest}
 	 * @param encode
 	 * @return {@link #put(String, Object, boolean)}
 	 */
@@ -170,7 +170,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public Object put(String key, Object value, boolean encode) {
 		if (StringUtil.isNotEmpty(key, true) == false) {
-			key = value == null ? null : value.getClass().getSimpleName();
+			Class<?> clazz = value == null ? null : value.getClass();
+			if (clazz == null || clazz.getAnnotation(APIJSONRequest.class) == null) {
+				throw new IllegalArgumentException("put  StringUtil.isNotEmpty(key, true) == false" +
+						" && clazz == null || clazz.getAnnotation(APIJSONRequest.class) == null" +
+						" \n key为空时仅支持 类型被@APIJSONRequest注解 的value !!!" +
+						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！");
+			}
+			key = value.getClass().getSimpleName();
 		}
 		if (encode) {
 			if (key.endsWith("+") || key.endsWith("-")) {

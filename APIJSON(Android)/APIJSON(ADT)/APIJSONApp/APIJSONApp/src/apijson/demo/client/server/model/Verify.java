@@ -14,12 +14,18 @@ limitations under the License.*/
 
 package apijson.demo.client.server.model;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
 /**登录类
  * @author Lemon
  */
 @SuppressWarnings("serial")
+@APIJSONRequest(
+		method = {RequestMethod.POST_HEAD, RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Verify extends BaseModel {
 
 	private String code;

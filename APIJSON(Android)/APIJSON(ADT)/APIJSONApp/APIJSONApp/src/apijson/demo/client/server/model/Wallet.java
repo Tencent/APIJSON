@@ -16,9 +16,17 @@ package apijson.demo.client.server.model;
 
 import java.math.BigDecimal;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**钱包类
  * @author Lemon
  */
+@APIJSONRequest(
+		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		POST_GET = "{Wallet:{disallowColumns:!, necessaryColumns:userId}, necessaryColumns:currentUserId,loginPassword}",
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Wallet extends BaseModel {
 	private static final long serialVersionUID = 4298571449155754300L;
 	

@@ -14,12 +14,18 @@ limitations under the License.*/
 
 package apijson.demo.client.server.model;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
 /**登录类
  * @author Lemon
  */
 @SuppressWarnings("serial")
+@APIJSONRequest(
+		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Password extends BaseModel {
 
 	private String model;//table是MySQL关键字不能用！
@@ -32,15 +38,20 @@ public class Password extends BaseModel {
 	public Password(String model, String phone) {
 		this();
 		setModel(model);
-		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
+		setPhone(phone);
 	}
-	public Password(String model, String phone, String value) {
+	public Password(String model, String phone, String password) {
 		this(model, phone);
-		setPassword(value);
+		setPassword(password);
 	}
 
+	public Password setPhone(String phone) {
+		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
+		return this;
+	}
+	
 	public String getModel() {
-		return model;
+		return StringUtil.isNotEmpty(model, true) ? model : "User";
 	}
 	public Password setModel(String model) {
 		this.model = model;
