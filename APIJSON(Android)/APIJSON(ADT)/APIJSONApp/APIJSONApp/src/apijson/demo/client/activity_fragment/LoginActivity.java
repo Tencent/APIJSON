@@ -148,7 +148,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 		password = StringUtil.getString(etLoginPassword);
 
 		//登录请求
-		HttpRequest.login(phone, password, type, 0, new OnHttpResponseListener() {
+		HttpRequest.login(phone, password, type, type, new OnHttpResponseListener() {
 			@Override
 			public void onHttpResponse(int requestCode, String resultJson, Exception e) {
 				dismissProgress();
@@ -174,7 +174,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 				} else {
 					APIJSONApplication.getInstance().saveCurrentUser(user);
 					if (APIJSONApplication.getInstance().isLoggedIn() == false) {
-						showShortToast("账号或密码错误");
+						showShortToast((requestCode == Login.TYPE_PASSWORD ? "密码" : "验证码") + "错误");
 						return;
 					}
 

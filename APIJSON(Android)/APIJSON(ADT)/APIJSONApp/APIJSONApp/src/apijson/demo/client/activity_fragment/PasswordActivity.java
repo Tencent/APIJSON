@@ -112,6 +112,13 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	}
 
 
+	/**
+	 * @param isGetting
+	 */
+	private void showVerifyGet(final boolean isGetting) {
+		pbPasswordGettingVerify.setVisibility(isGetting ? View.VISIBLE : View.GONE);
+		btnPasswordGetVerify.setText(isGetting ? "获取中..." : "重新获取");
+	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -163,36 +170,46 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			return;
 		}
 
-		if (StringUtil.isNotEmpty(etPasswordPassword0, true)) {
-			etPasswordPassword1.requestFocus();
+		if (type == TYPE_VERIFY) {
+			etPasswordVerify.requestFocus();
 		} else {
-			etPasswordPassword0.requestFocus();
+			if (StringUtil.isNotEmpty(etPasswordPassword0, true)) {
+				etPasswordPassword1.requestFocus();
+			} else {
+				etPasswordPassword0.requestFocus();
+			}
 		}
 
-		pbPasswordGettingVerify.setVisibility(View.VISIBLE);
-		btnPasswordGetVerify.setText("获取中...");
+		showVerifyGet(true);
 		time = new TimeCount(60000, 1000);
 
 		//判断手机号是否已经注册
 		HttpRequest.checkRegister(StringUtil.getTrimedString(etPasswordPhone), HTTP_CHECK_REGISTER, this);
 	}
 
+	/**从服务器获取验证码
+	 */
 	private void getVerifyFromServer() {
-		showProgress();
+		runUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				showVerifyGet(true);
+			}
+		});
+
 		HttpRequest.getAuthCode(StringUtil.getTrimedString(etPasswordPhone), HTTP_GET_VERIFY, this);
 	}
 
+	/**下一步
+	 */
 	private void toNextStep() {
-		if (EditTextManager.isInputedCorrect(context, etPasswordPhone, EditTextManager.TYPE_PHONE) == false 
-				|| EditTextManager.isInputedCorrect(context, etPasswordVerify, EditTextManager.TYPE_VERIFY) == false) {
-			return;
-		}
 		if (type != TYPE_VERIFY) {
 			if (EditTextManager.isInputedCorrect(context, etPasswordPassword0, EditTextManager.TYPE_PASSWORD) == false 
 					|| EditTextManager.isInputedCorrect(context, etPasswordPassword1, EditTextManager.TYPE_PASSWORD) == false) {
 				return;
 			}
-			
+
 			final String password0 = StringUtil.getTrimedString(etPasswordPassword0);
 			String password1 = StringUtil.getTrimedString(etPasswordPassword1);
 			if (! password0.equals(password1)) {
@@ -200,12 +217,20 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 				return;
 			}
 		}
-
-		verify();
+		
+		switch (type) {
+		case TYPE_REGISTER:
+			register();
+			break;
+		default:
+			checkVerify();
+			break;
+		}
 	}
 
-	//验证验证码
-	private void verify() {
+	/**验证验证码
+	 */
+	private void checkVerify() {
 		if (EditTextManager.isInputedCorrect(context, etPasswordPhone, EditTextManager.TYPE_PHONE) == false 
 				|| EditTextManager.isInputedCorrect(context, etPasswordVerify, EditTextManager.TYPE_VERIFY) == false) {
 			return;
@@ -233,27 +258,6 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 				HTTP_RESET_PASSWORD, this); // 注册接口
 	}
 
-
-	/**
-	 * @param response
-	 * @param user
-	 */
-	private void onPasswordResponse(JSONResponse response, User user) {
-		dismissProgress();
-
-		if (user == null || user.getId() <= 0 || JSONResponse.isSucceed(response) == false) {
-			showShortToast("注册失败，请检查网络后重试");
-			return;
-			//			} else if (result.getResultCode() == States.REGISTER_ACCOUNT_EXISTS) {
-			//				showShortToast("该账号已经注册过");
-			//				return;
-		} else {
-			showShortToast("注册成功");
-			APIJSONApplication.getInstance().saveCurrentUser(user);
-
-			saveAndExit(newResult().putExtra(INTENT_ID, user.getId()));
-		}
-	}
 
 	private Intent newResult() {
 		return new Intent()
@@ -305,22 +309,21 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	@Override
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
 		final JSONResponse response = new JSONResponse(resultJson);
+		final JSONResponse response2;
+
 		dismissProgress();
 		switch (requestCode) {
 		case HTTP_CHECK_REGISTER:
-			final JSONResponse response2 = response.getJSONResponse(User.class.getSimpleName());
+			response2 = response.getJSONResponse(User.class.getSimpleName());
 			Log.i(TAG, "checkPassword result = " + resultJson);
 			runUiThread(new Runnable() {
 				@Override
 				public void run() {
+					showVerifyGet(false);
 					if (JSONResponse.isSucceed(response2) == false) {
 						showShortToast(R.string.get_failed);
-						pbPasswordGettingVerify.setVisibility(View.GONE);
-						btnPasswordGetVerify.setText("重新获取");
 					} else if (JSONResponse.isExist(response2)) {
 						if (type == TYPE_REGISTER) {
-							pbPasswordGettingVerify.setVisibility(View.GONE);
-							btnPasswordGetVerify.setText("获取验证码");
 							showShortToast("手机号已经注册");
 						} else {
 							getVerifyFromServer();
@@ -336,10 +339,11 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			});
 			break;
 		case HTTP_CHECK_VERIFY:
+			response2 = response.getJSONResponse(Verify.class.getSimpleName());
 			runUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if (JSONResponse.isExist(response.getJSONResponse(Verify.class.getSimpleName()))) {	//验证验证码成功
+					if (JSONResponse.isExist(response2)) {	//验证验证码成功
 						switch (type) {
 						case TYPE_REGISTER:
 							register();
@@ -351,12 +355,9 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 							saveAndExit(newResult());
 							break;
 						}
-
-						//							etPasswordPhone.setEnabled(false);
-						//						} else if(result.getResultCode()==States.AUTHCODE_CHECK_EXPIRED) {	//主线程提示验证码过期
-						//							EditTextManager.showInputedError(context, etPasswordVerify, "验证码已过期");
-					} else {//输入验证码错误提醒
-						EditTextManager.showInputedError(context, etPasswordVerify, "验证码错误");
+					} else {//验证码错误
+						EditTextManager.showInputedError(context, etPasswordVerify
+								, response.getStatus() == 408 ? "验证码已过期" : "验证码错误");
 					}
 				}
 			});
@@ -366,10 +367,9 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			runUiThread(new Runnable() {
 				@Override
 				public void run() {
-					pbPasswordGettingVerify.setVisibility(View.GONE);
+					showVerifyGet(false);
 					if (verify == null || StringUtil.isNotEmpty(verify.getCode(), true) == false) {
 						showShortToast(R.string.get_failed);
-						btnPasswordGetVerify.setText("重新获取");
 					} else {
 						Log.i(TAG, "发送成功");
 						time.start();
@@ -379,7 +379,18 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			});
 			break;
 		case HTTP_REGISTER:
-			onPasswordResponse(response.getJSONResponse(User.class.getSimpleName()), response.getObject(User.class));
+			User user = response.getObject(User.class);
+			dismissProgress();
+			if (user == null || user.getId() <= 0 || JSONResponse.isSucceed(
+					response.getJSONResponse(User.class.getSimpleName())) == false) {
+				showShortToast("注册失败，请检查网络后重试");
+				return;
+			} else {
+				showShortToast("注册成功");
+				APIJSONApplication.getInstance().saveCurrentUser(user);
+
+				saveAndExit(newResult().putExtra(INTENT_ID, user.getId()));
+			}
 			break;
 		case HTTP_RESET_PASSWORD:
 			//TODO

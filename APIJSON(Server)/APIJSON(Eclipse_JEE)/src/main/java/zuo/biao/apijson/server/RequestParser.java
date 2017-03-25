@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONArray;
@@ -222,6 +223,8 @@ public class RequestParser {
 				status = 403;
 			} else if (e instanceof IllegalArgumentException) {
 				status = 406;
+			} else if (e instanceof TimeoutException) {
+				status = 408;
 			} else if (e instanceof ConflictException) {
 				status = 409;
 			} else if (e instanceof ConditionNotMatchException) {

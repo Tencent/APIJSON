@@ -172,8 +172,6 @@ public class HttpRequest {
 		.setTag(User.class.getSimpleName());
 		request.put(KEY_VERIFY, verify);
 		request.put(KEY_PASSWORD, password);
-		//		post(request, requestCode, listener);
-
 		HttpManager.getInstance().post(URL_POST + "register/user/", request, requestCode, listener);
 	}
 	/**重置密码
@@ -244,9 +242,8 @@ public class HttpRequest {
 		HttpManager.getInstance().get(URL_POST + "authCode/" + phone, null, requestCode, listener);
 	}
 	public static void checkAuthCode(String phone, String code, int requestCode, OnHttpResponseListener listener) {
-		//		HttpManager.getInstance().get(URL_BASE + "check/authCode/" + phone + "/" + code, null, requestCode, listener);
-		//		postGet(new JSONRequest(new Verify(phone, verify)).setTag(Verify.class.getSimpleName()), requestCode, listener);
-		postHead(new JSONRequest(new Verify(phone, code)).setTag(Verify.class.getSimpleName()), requestCode, listener);
+		//		postHead(new JSONRequest(new Verify(phone, code)).setTag(Verify.class.getSimpleName()), requestCode, listener);
+		HttpManager.getInstance().get(URL_BASE + "check/authCode/" + phone + "/" + code, null, requestCode, listener);
 	}
 
 	//account>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
