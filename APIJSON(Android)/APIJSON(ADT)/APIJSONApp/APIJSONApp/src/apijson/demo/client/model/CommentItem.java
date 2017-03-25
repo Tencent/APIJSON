@@ -5,7 +5,6 @@ import zuo.biao.apijson.JSONResponse;
 import android.support.annotation.NonNull;
 import apijson.demo.client.server.model.BaseModel;
 
-
 public class CommentItem extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;
 
@@ -29,8 +28,9 @@ public class CommentItem extends BaseModel {
 		}
 		return comment;
 	}
-	public void setComment(Comment comment) {
+	public CommentItem setComment(Comment comment) {
 		this.comment = comment;
+		return this;
 	}
 
 	@NonNull
@@ -75,5 +75,9 @@ public class CommentItem extends BaseModel {
 		return getComment().getDate();
 	}
 
+	public Long getUserId() {
+		return getUser().getId();
+	}
+	
 }
 

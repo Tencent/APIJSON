@@ -37,6 +37,10 @@ public class MomentItem extends BaseModel {
 		return setMomentId(id);
 	}
 
+	public Long getUserId() {
+		return getUser().getId();
+	}
+
 	public int getStatus() {
 		return status;
 	}
@@ -63,7 +67,7 @@ public class MomentItem extends BaseModel {
 	@NonNull
 	public User getUser() {
 		if (user == null) {
-			user = new User();
+			user = new User(getMoment().getUserId());
 		}
 		return user;
 	}
@@ -201,7 +205,7 @@ public class MomentItem extends BaseModel {
 			}
 		}
 		getMoment().setCommentIdList(list);
-		
+
 		return this;
 	}
 

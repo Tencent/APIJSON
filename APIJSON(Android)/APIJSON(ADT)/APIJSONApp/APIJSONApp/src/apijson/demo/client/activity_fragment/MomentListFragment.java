@@ -276,7 +276,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, Runnable, TopBarMe
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				toActivity(MomentActivity.createIntent(context, id));
+				toActivity(MomentActivity.createIntent(context, id, false));
 			}
 		});
 	}

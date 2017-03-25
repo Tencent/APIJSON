@@ -24,7 +24,13 @@ import zuo.biao.library.interfaces.CacheCallBack;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.CacheManager;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.AlertDialog;
+import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
+import zuo.biao.library.ui.EditTextManager;
 import zuo.biao.library.util.CommonUtil;
+import zuo.biao.library.util.Log;
+import zuo.biao.library.util.SettingUtil;
+import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -33,11 +39,16 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
 import apijson.demo.client.R;
 import apijson.demo.client.adapter.CommentAdapter;
 import apijson.demo.client.adapter.CommentAdapter.ItemView.OnCommentClickListener;
+import apijson.demo.client.application.APIJSONApplication;
+import apijson.demo.client.model.Comment;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.MomentItem;
+import apijson.demo.client.model.User;
 import apijson.demo.client.util.HttpRequest;
 import apijson.demo.client.view.MomentView;
 
@@ -48,46 +59,54 @@ import apijson.demo.client.view.MomentView;
  *       查看 .SettingUtil 中的@must和@warn
  */
 public class MomentActivity extends BaseHttpListActivity<CommentItem, CommentAdapter>
-implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickListener, OnBottomDragListener {
+implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickListener
+, OnBottomDragListener, OnClickListener, OnDialogButtonClickListener {
 	private static final String TAG = "MomentActivity";
 
 	//启动方法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	public static final String INTENT_MOMENT_ID = "INTENT_MOMENT_ID";
-	public static final String INTENT_COMMENT_ID = "INTENT_COMMENT_ID";
-	public static final String INTENT_IS_TO_COMMENT = "INTENT_IS_TO_COMMENT";
-
+	public static final String INTENT_SHOW_KEYBOARD = "INTENT_SHOW_KEYBOARD";
+	public static final String INTENT_TO_COMMENT_ID = "INTENT_TO_COMMENT_ID";
+	public static final String INTENT_TO_USER_ID = "INTENT_TO_USER_ID";
+	public static final String INTENT_TO_USER_NAME = "INTENT_TO_USER_NAME";
 
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param momentId
+	 * @param showKeyboard
 	 * @return
 	 */
-	public static Intent createIntent(Context context, long momentId) {
-		return createIntent(context, momentId, false);
+	public static Intent createIntent(Context context, long momentId, boolean showKeyboard) {
+		return createIntent(context, momentId, showKeyboard, 0, null);
 	}
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param momentId
-	 * @param isToComment
+	 * @param toCommentId
+	 * @param toUserName
 	 * @return
 	 */
-	public static Intent createIntent(Context context, long momentId, boolean isToComment) {
-		return createIntent(context, momentId, isToComment, 0);
+	public static Intent createIntent(Context context, long momentId, long toCommentId, String toUserName) {
+		return createIntent(context, momentId, toCommentId > 0, toCommentId, toUserName);
 	}
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param momentId
-	 * @param isToComment
-	 * @param commentId
+	 * @param showKeyboard
+	 * @param toCommentId
+	 * @param toUserName
 	 * @return
 	 */
-	public static Intent createIntent(Context context, long momentId, boolean isToComment, long commentId) {
+	public static Intent createIntent(Context context, long momentId, boolean showKeyboard
+			, long toCommentId, String toUserName) {
 		return new Intent(context, MomentActivity.class).
 				putExtra(INTENT_MOMENT_ID, momentId).
-				putExtra(INTENT_IS_TO_COMMENT, isToComment).
-				putExtra(INTENT_COMMENT_ID, commentId);
+				putExtra(INTENT_SHOW_KEYBOARD, showKeyboard).
+				putExtra(INTENT_TO_COMMENT_ID, toCommentId).
+				putExtra(INTENT_TO_USER_NAME, toUserName);
 	}
+
 
 
 	//启动方法>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -99,20 +118,24 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	}
 
 	private long momentId;
-	private boolean isToComment;
-	private long commentId;
+	private boolean showKeyboard;
+	private long toCommentId;//列表可能不包含toCommentId
+	private String toUserName;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.moment_activity, this);
 
+		intent = getIntent();
 		momentId = getIntent().getLongExtra(INTENT_MOMENT_ID, momentId);
-		isToComment = getIntent().getBooleanExtra(INTENT_IS_TO_COMMENT, isToComment);
-		commentId = getIntent().getLongExtra(INTENT_COMMENT_ID, commentId);
 		if (momentId <= 0) {
 			finishWithError("动态不存在！");
 			return;
 		}
+		showKeyboard = intent.getBooleanExtra(INTENT_SHOW_KEYBOARD, showKeyboard);
+		toCommentId = intent.getLongExtra(INTENT_TO_COMMENT_ID, toCommentId);
+		toUserName = intent.getStringExtra(INTENT_TO_USER_NAME);
+
 
 		initCache(this);
 
@@ -128,10 +151,14 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	private EditText etMomentInput;
+
 	private MomentView momentView;
 	@Override
 	public void initView() {//必须调用
 		super.initView();
+
+		etMomentInput = (EditText) findViewById(R.id.etMomentInput);
 
 		momentView = new MomentView(context, getResources());
 		lvBaseList.addHeaderView(momentView.createView(getLayoutInflater()));
@@ -149,6 +176,15 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			@Override
 			public void run() {
 				momentView.bindView(momentItem);
+				
+				if (showKeyboard) {//在etMomentInput被绑定前调用showInput崩溃 //{
+					showKeyboard = false;
+
+					Comment comment = new Comment(toCommentId);
+					User user = new User();
+					user.setName(toUserName);
+					showInput(new CommentItem().setComment(comment).setUser(user));
+				}
 			}
 		});
 	}
@@ -169,8 +205,37 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		});
 	}
 
-	private void showInput() {
 
+	/**显示输入评论
+	 * @param toCommentItem
+	 */
+	public void showInput(CommentItem toCommentItem_) {
+		this.toCommentItem = toCommentItem_;
+		final long toCommentId = toCommentItem == null ? 0 : toCommentItem.getComment().getId();
+		runUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (toCommentId <= 0 || toCommentItem == null) {
+					etMomentInput.setHint("评论");
+				} else {
+					etMomentInput.setHint("回复：" + StringUtil.getTrimedString(toCommentItem.getUser().getName()));
+				}
+				EditTextManager.showKeyboard(context, etMomentInput);//, toGetWindowTokenView);
+			}
+		});
+	}
+
+	private void hideKeyboard() {
+		toCommentItem = null;
+		runUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				etMomentInput.setHint("评论");
+				EditTextManager.hideKeyboard(context, etMomentInput);
+			}
+		});
 	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -195,7 +260,9 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			@Override
 			public void run() {
 
-				momentItem = CacheManager.getInstance().get(MomentItem.class, "" + momentId);
+				if (SettingUtil.cache) {
+					momentItem = CacheManager.getInstance().get(MomentItem.class, "" + momentId);
+				}
 				final List<CommentItem> list = CacheManager.getInstance().getList(
 						getCacheClass(), getCacheGroup(), 0, getCacheCount());
 				runUiThread(new Runnable() {
@@ -211,9 +278,56 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	}
 
+
+	private CommentItem toCommentItem;
+	/**发送评论(回复)
+	 */
+	public void sendComment() {
+		long toCommentId = toCommentItem == null ? -1 : toCommentItem.getId();
+		String content = StringUtil.getTrimedString(etMomentInput);
+		if (StringUtil.isNotEmpty(content, true) == false) {
+			showShortToast("请先输入评论");
+			return;
+		}
+
+		HttpRequest.addComment(momentId, toCommentId, content, toCommentId <= 0 ? HTTP_COMMENT : HTTP_REPLY, this);
+
+		hideKeyboard();
+	}
+
+
+	/**删除评论
+	 * @param comment
+	 */
+	private void deleteComment(CommentItem commentItem) {
+		long id = commentItem == null ? 0 : commentItem.getId();
+		if (id <= 0) {
+			Log.e(TAG, "deleteComment  id <= 0 >> return;");
+			return;
+		}
+		HttpRequest.deleteComment(id, HTTP_DELETE, this);
+	}
+
+
+	/**
+	 * @param actionType
+	 */
+	private void sendMomentBroadcast(int actionType) {
+		if (isAlive() == false) {
+			Log.e(TAG, "sendMomentBroadcast  isAlive() == false >> return;");
+			return;
+		}
+
+		//		sendBroadcast(new Intent(ActionUtil.REFRESH_WORK).
+		//				putExtra(ActionUtil.RESULT_WORK, Json.toJSONString(new Works(workId))).
+		//				putExtra(ActionUtil.TYPE, actionType));
+	}
+
+
+	private boolean loadHead = true;
 	@Override
 	public void getListAsync(final int page) {
-		if (page <= 0) {
+		if (loadHead && page <= 0) {
 			HttpRequest.getMoment(momentId, HTTP_GET_MOMENT, MomentActivity.this);
 		}
 		HttpRequest.getCommentList(momentId, 4, page, -page, this);
@@ -258,6 +372,9 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	public void initEvent() {//必须调用
 		super.initEvent();
 
+		findViewById(R.id.tvMomentSend).setOnClickListener(this);
+
+
 		momentView.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -269,7 +386,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 					}
 					break;
 				case R.id.llMomentViewComment:
-					showInput();
+					showInput(null);
 					break;
 				default:
 					momentView.onClick(v);
@@ -278,13 +395,50 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			}
 		});
 
+
+
+
 		lvBaseList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				toActivity(CommentActivity.createIntent(context, id));
+				onComemntItemClick(position, false);
 			}
 		});
+
+		lvBaseList.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				onComemntItemClick(position, true);
+				return true;
+			}
+		});
+	}
+
+	private void onComemntItemClick(int position,boolean isLong) {
+		if (adapter == null){
+			return;
+		}
+		position = position - lvBaseList.getHeaderViewsCount();
+		if (position < 0 || position >= adapter.getCount()) {
+			return;
+		}
+
+		CommentItem item = adapter.getItem(position);
+		if (isLong) {
+			if (item == null || momentItem == null) {
+				return;
+			}
+			if (APIJSONApplication.getInstance().isCurrentUser(momentItem.getUserId()) == false
+					&& APIJSONApplication.getInstance().isCurrentUser(item.getUserId()) == false) {
+				showShortToast("只能删除自己的或自己的动态下的评论");
+				return;
+			}
+			new AlertDialog(context, null, "删除这条评论?", true, DIALOG_DELETE_COMMENT, MomentActivity.this).show();
+		} else {
+			showInput(item);				
+		}
 	}
 
 	@Override
@@ -292,28 +446,63 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	}
 
+	private static final int DIALOG_DELETE_COMMENT = 1;
+
+	@Override
+	public void onDialogButtonClick(int requestCode, boolean isPositive) {
+		if (isPositive) {
+			deleteComment(toCommentItem);
+		}
+	}
+
 	public static final int HTTP_GET_MOMENT = 1;
+	private final int HTTP_COMMENT = 2;
+	private final int HTTP_REPLY = 3;
+	private final int HTTP_DELETE = 4;
 	@Override
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-		switch (requestCode) {
-		case HTTP_GET_MOMENT:
-			MomentItem data = JSONResponse.toObject(new JSONResponse(resultJson), MomentItem.class);
+		JSONResponse response = new JSONResponse(resultJson);
+		if (requestCode == HTTP_GET_MOMENT) {
+			MomentItem data = JSONResponse.toObject(response, MomentItem.class);
+			if (data == null || data.getId() <= 0) {
+				showShortToast("获取动态失败，请检查网络后重试");
+				return;
+			}
 			setHead(data);
+			return;
+		}
+		if (requestCode <= 0) {
+			super.onHttpResponse(requestCode, resultJson, e);
+			return;
+		}
 
-			//			// 测试成功
-			//			List<Comment> commentList = data.getCommentList();
-			//			if (commentList != null) {
-			//				List<CommentItem> itemList = new ArrayList<>();
-			//				for (Comment comment : commentList) {
-			//					itemList.add(new CommentItem(comment));
-			//				}
-			//				setList(itemList);
-			//			}
+		boolean succeed = JSONResponse.isSucceed(response.getJSONResponse(Comment.class.getSimpleName()));
+		String operation = "操作";
+		switch (requestCode) {
+		case HTTP_COMMENT: // 新增评论
+			operation = "评论";
+			//			sendMomentBroadcast(ActionUtil.TYPE_GET_WORK);
+			break;
+		case HTTP_REPLY:// 回复
+			operation = "回复";
+			//			sendMomentBroadcast(ActionUtil.TYPE_GET_WORK);
+			break;
+		case HTTP_DELETE:// 删除
+			operation = "删除";
+			//			sendMomentBroadcast(ActionUtil.TYPE_GET_WORK);
 			break;
 		default:
-			super.onHttpResponse(requestCode, resultJson, e);
-			break;
+			return;
 		}
+
+		showShortToast(operation + (succeed ? "成功" : "失败，请检查网络后重试"));
+		if (succeed) {
+			etMomentInput.setText("");
+
+			loadHead = false;
+			super.onRefresh();
+		}
+
 	}
 
 
@@ -327,9 +516,25 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		finish();
 	}
 
+
+	@Override
+	public void onRefresh() {
+		loadHead = true;
+		super.onRefresh();
+	}
+
 	//系统自带监听方法 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.tvMomentSend:
+			sendComment();
+			break;
+		default:
+			break;
+		}
+	}
 
 	//类相关监听<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

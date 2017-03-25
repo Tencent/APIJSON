@@ -90,13 +90,13 @@ public abstract class BaseView<T> {
 	 */
 	public void setOnClickListener(OnClickListener listener) {
 		onClickListener = listener;
-		if (onClickViewList != null) {
-			for (View v : onClickViewList) {
-				if (v != null) {
-					v.setOnClickListener(listener);
-				}
-			}
-		}
+//		if (onClickViewList != null) {
+//			for (View v : onClickViewList) {
+//				if (v != null) {
+//					v.setOnClickListener(listener);
+//				}
+//			}
+//		}
 	}
 
 	public OnLongClickListener onLongClickListener;//长按View回调监听回调的实例
@@ -114,7 +114,7 @@ public abstract class BaseView<T> {
 	 */
 	protected View convertView = null;
 
-	protected List<View> onClickViewList;
+//	protected List<View> onClickViewList;
 	/**通过id查找并获取控件，使用时不需要强转
 	 * @param id
 	 * @return 
@@ -131,10 +131,10 @@ public abstract class BaseView<T> {
 	public <V extends View> V findViewById(int id, OnClickListener listener) {
 		V v = findViewById(id);
 		v.setOnClickListener(listener);
-		if (onClickViewList == null) {
-			onClickViewList = new ArrayList<View>();
-		}
-		onClickViewList.add(v);
+//		if (onClickViewList == null) {
+//			onClickViewList = new ArrayList<View>();
+//		}
+//		onClickViewList.add(v);
 		return v;
 	}
 
@@ -345,7 +345,7 @@ public abstract class BaseView<T> {
 		onTouchListener = null;
 		onClickListener = null;
 		onLongClickListener = null;
-		onClickViewList = null;
+//		onClickViewList = null;
 
 		data = null;
 		position = 0;

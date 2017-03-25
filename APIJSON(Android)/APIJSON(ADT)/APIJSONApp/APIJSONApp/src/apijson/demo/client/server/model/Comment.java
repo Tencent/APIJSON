@@ -65,7 +65,7 @@ public class Comment extends BaseModel {
 		return userId;
 	}
 	public Comment setUserId(Long userId) {
-		this.momentId = userId;
+		this.userId = userId;
 		return this;
 	}
 	public Long getToUserId() {

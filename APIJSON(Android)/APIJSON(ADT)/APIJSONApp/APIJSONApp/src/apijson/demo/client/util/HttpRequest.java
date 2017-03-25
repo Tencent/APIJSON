@@ -29,7 +29,6 @@ import apijson.demo.client.server.model.Comment;
 import apijson.demo.client.server.model.Login;
 import apijson.demo.client.server.model.Moment;
 import apijson.demo.client.server.model.User;
-import apijson.demo.client.server.model.Verify;
 import apijson.demo.client.server.model.Wallet;
 
 /**HTTP请求工具类
@@ -41,9 +40,11 @@ import apijson.demo.client.server.model.Wallet;
 public class HttpRequest {
 	private static final String TAG = "HttpRequest";
 
+	private static APIJSONApplication application;
 	/**基础URL，这里服务器设置可切换*/
 	public static String URL_BASE;
 	static {
+		application = APIJSONApplication.getInstance();
 		URL_BASE = SettingUtil.getCurrentServerAddress();
 	}
 
@@ -486,6 +487,32 @@ public class HttpRequest {
 		request.put(KEY_LOGIN_PASSWORD, "apijson");
 		request.put(KEY_PAY_PASSWORD, "123456");
 		postGet(request.setTag(Wallet.class.getSimpleName()), requestCode, listener);
+	}
+
+
+	/**
+	 * @param momentId
+	 * @param toCommentId
+	 * @param content
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void addComment(long momentId, long toCommentId, String content
+			, int requestCode, OnHttpResponseListener listener) {
+		Comment comment = new Comment()
+		.setUserId(application.getCurrentUserId())
+		.setMomentId(momentId)
+		.setParentId(toCommentId)
+		.setContent(content);
+		post(new JSONRequest(comment).setTag(Comment.class.getSimpleName()), requestCode, listener);
+	}
+	/**
+	 * @param id
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void deleteComment(long id, int requestCode, OnHttpResponseListener listener) {
+		delete(new JSONRequest(new Comment(id)).setTag(Comment.class.getSimpleName()), requestCode, listener);
 	}
 
 

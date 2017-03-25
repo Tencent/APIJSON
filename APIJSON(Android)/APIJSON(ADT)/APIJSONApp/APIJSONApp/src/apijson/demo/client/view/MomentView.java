@@ -11,7 +11,6 @@ import zuo.biao.library.ui.AlertDialog;
 import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
 import zuo.biao.library.ui.GridAdapter;
 import zuo.biao.library.ui.WebViewActivity;
-import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.ImageLoaderUtil;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.ScreenUtil;
@@ -23,7 +22,6 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -305,7 +303,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 			@Override
 			public void onClick(View v) {
-				toCommentActivity(comment, ! isMore);
+				toComment(comment, ! isMore);
 			}
 		});
 
@@ -315,21 +313,19 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	/**跳转到所有评论界面
 	 * @param isToComment
 	 */
-	private void toCommentActivity(boolean isToComment) {
-		toCommentActivity(null, isToComment);
+	private void toComment(boolean isToComment) {
+		toComment(null, isToComment);
 	}
 	/**跳转到所有评论界面
 	 * @param comment
 	 * @param isToComment comment有效时为true
 	 */
-	private void toCommentActivity(CommentItem comment, boolean isToComment) {
-		long userId = comment == null ? 0 : comment.getUser().getId();
-		if (userId <= 0 || APIJSONApplication.getInstance().isCurrentUser(userId)) {
-			toActivity(MomentActivity.createIntent(context, momentId, isToComment, comment == null ? 0 : comment.getId()));
-			return;
+	private void toComment(CommentItem commentItem, boolean isToComment) {
+		if (commentItem == null) {
+			commentItem = new CommentItem();
 		}
-
-		toActivity(MomentActivity.createIntent(context, momentId, isToComment));
+		toActivity(MomentActivity.createIntent(context, momentId, isToComment
+				, commentItem.getId(), commentItem.getUser().getName()));
 	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -442,6 +438,10 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			showShortToast(R.string.publishing);
 			return;
 		}
+		if (onClickListener != null) {
+			onClickListener.onClick(v);
+			return;
+		}
 		switch (v.getId()) {
 		case R.id.ivMomentViewHead:
 		case R.id.tvMomentViewName:
@@ -459,7 +459,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			}
 			break;
 		case R.id.tvMomentViewContent:
-			toCommentActivity(false);
+			toComment(false);
 			break;
 		default:
 			if (isLoggedIn() == false) {
@@ -470,7 +470,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 				praise(! data.getIsPraised());
 				break;
 			case R.id.llMomentViewComment:
-				toCommentActivity(true);
+				toComment(true);
 				break;
 			default:
 				break;
