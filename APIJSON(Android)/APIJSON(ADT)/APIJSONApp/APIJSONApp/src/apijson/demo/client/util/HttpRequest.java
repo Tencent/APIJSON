@@ -17,6 +17,11 @@ package apijson.demo.client.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import zuo.biao.apijson.JSONObject;
+import zuo.biao.apijson.JSONRequest;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.util.Log;
+import zuo.biao.library.util.SettingUtil;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.manager.HttpManager;
 import apijson.demo.client.model.CommentItem;
@@ -26,13 +31,6 @@ import apijson.demo.client.server.model.Moment;
 import apijson.demo.client.server.model.User;
 import apijson.demo.client.server.model.Verify;
 import apijson.demo.client.server.model.Wallet;
-
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONObject;
-import zuo.biao.apijson.JSONRequest;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.util.Log;
-import zuo.biao.library.util.SettingUtil;
 
 /**HTTP请求工具类
  * @author Lemon
@@ -63,7 +61,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void head(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().get(URL_HEAD, JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().get(URL_HEAD, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -71,7 +69,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void get(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().get(URL_GET, JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().get(URL_GET, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -80,7 +78,7 @@ public class HttpRequest {
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
 	public static void post(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(URL_POST, JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().post(URL_POST, request, requestCode, listener);
 	}
 	/**用POST方法HEAD数据，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
 	 * @param request
@@ -89,7 +87,7 @@ public class HttpRequest {
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
 	public static void postHead(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(URL_POST_HEAD, JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().post(URL_POST_HEAD, request, requestCode, listener);
 	}
 	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
 	 * @param request
@@ -98,7 +96,7 @@ public class HttpRequest {
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
 	public static void postGet(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(URL_POST_GET, JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().post(URL_POST_GET, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -107,7 +105,7 @@ public class HttpRequest {
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
 	public static void put(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(URL_PUT, JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().post(URL_PUT, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -116,7 +114,7 @@ public class HttpRequest {
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
 	public static void delete(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(URL_DELETE, JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().post(URL_DELETE, request, requestCode, listener);
 	}
 
 
@@ -176,7 +174,7 @@ public class HttpRequest {
 		request.put(KEY_PASSWORD, password);
 		//		post(request, requestCode, listener);
 
-		HttpManager.getInstance().post(URL_POST + "register/user/", JSON.toJSONString(request), requestCode, listener);
+		HttpManager.getInstance().post(URL_POST + "register/user/", request, requestCode, listener);
 	}
 	/**重置密码
 	 * @param verify

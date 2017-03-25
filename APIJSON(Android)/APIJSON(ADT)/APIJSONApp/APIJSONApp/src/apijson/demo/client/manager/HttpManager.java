@@ -29,12 +29,14 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.util.Log;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.text.TextUtils;
-import android.util.Log;
 import apijson.demo.client.application.APIJSONApplication;
 
 import com.squareup.okhttp.MediaType;
@@ -78,25 +80,26 @@ public class HttpManager {
 
 
 	/**GET请求
-	 * @param requestCode 
-	 * @param paramList 请求参数列表，（可以一个键对应多个值）
 	 * @param url 接口url
+	 * @param request 请求
 	 * @param requestCode
 	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
 	 *            {@link OnHttpResponseListener#onHttpResponse(int, String, Exception)}<br/>
 	 *            在发起请求的类中可以用requestCode来区分各个请求
 	 * @param listener
 	 */
-	public void get(final String url_, final String request, final int requestCode, final OnHttpResponseListener listener) {
-		Log.d(TAG, "get  url_ = " + url_ + "; request = " + request + " >>>");
+	public void get(final String url_, final com.alibaba.fastjson.JSONObject request
+			, final int requestCode, final OnHttpResponseListener listener) {
 		new AsyncTask<Void, Void, Exception>() {
 
 			String result;
 			@Override
 			protected Exception doInBackground(Void... params) {
+				String body = request == null || request.isEmpty() ? null : JSON.toJSONString(request);
+				Log.d(TAG, "post  url_ = " + url_ + "\n request = \n" + body);
 				try {
 					String url = StringUtil.getNoBlankString(url_)
-							+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
+							+ (body == null ? "" : URLEncoder.encode(StringUtil.getNoBlankString(body), UTF_8));
 					StringBuffer sb = new StringBuffer();
 					sb.append(url);
 
@@ -127,19 +130,24 @@ public class HttpManager {
 
 	}
 
-	public static final MediaType TYPE_JSON =MediaType.parse("application/json; charset=utf-8");
-	
+	public static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
+
 	/**POST请求
-	 * @param paramList 请求参数列表，（可以一个键对应多个值）
 	 * @param url 接口url
+	 * @param request 请求
 	 * @param requestCode
 	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
 	 *            {@link OnHttpResponseListener#onHttpResponse(int, String, Exception)}<br/>
 	 *            在发起请求的类中可以用requestCode来区分各个请求
 	 * @param listener
 	 */
-	public void post(final String url_, final String request, final int requestCode, final OnHttpResponseListener listener) {
-		Log.d(TAG, "post  url_ = " + url_ + "; request = " + request + " >>>");
+	public void post(final String url_, final com.alibaba.fastjson.JSONObject request
+			, final int requestCode, final OnHttpResponseListener listener) {
+		if (request == null || request.containsKey(JSONRequest.KEY_TAG) == false) {
+			throw new IllegalArgumentException("post  " + url_ + " \n" +
+					"   request == null || request.containsKey(JSONRequest.KEY_TAG) == false !!!");
+		}
+
 		new AsyncTask<Void, Void, Exception>() {
 
 			String result;
@@ -153,9 +161,11 @@ public class HttpManager {
 					if (client == null) {
 						return new Exception(TAG + ".post  AsyncTask.doInBackground  client == null >> return;");
 					}
-					
-					RequestBody requestBody = RequestBody.create(TYPE_JSON, request);
-					
+					String body = JSON.toJSONString(request);
+					Log.d(TAG, "post  url_ = " + url_ + "\n request = \n" + body);					
+
+					RequestBody requestBody = RequestBody.create(TYPE_JSON, body);
+
 					result = getResponseJson(client, new Request.Builder()
 					.addHeader(KEY_TOKEN, getToken(url)).url(StringUtil.getNoBlankString(url))
 					.post(requestBody).build());
