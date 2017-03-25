@@ -11,6 +11,7 @@ import zuo.biao.library.ui.AlertDialog;
 import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
 import zuo.biao.library.ui.GridAdapter;
 import zuo.biao.library.ui.WebViewActivity;
+import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.ImageLoaderUtil;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.ScreenUtil;
@@ -22,6 +23,7 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -30,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import apijson.demo.client.R;
+import apijson.demo.client.activity_fragment.LoginActivity;
 import apijson.demo.client.activity_fragment.MomentActivity;
 import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.application.APIJSONApplication;
@@ -320,9 +323,6 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param isToComment comment有效时为true
 	 */
 	private void toCommentActivity(CommentItem comment, boolean isToComment) {
-		if (isLoggedIn() == false) {
-			return;
-		}
 		long userId = comment == null ? 0 : comment.getUser().getId();
 		if (userId <= 0 || APIJSONApplication.getInstance().isCurrentUser(userId)) {
 			toActivity(MomentActivity.createIntent(context, momentId, isToComment, comment == null ? 0 : comment.getId()));
@@ -359,7 +359,12 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @return
 	 */
 	private boolean isLoggedIn() {
-		return APIJSONApplication.getInstance().isLoggedIn();
+		boolean isLoggedIn = APIJSONApplication.getInstance().isLoggedIn();
+		if (isLoggedIn == false) {
+			context.startActivity(LoginActivity.createIntent(context));
+			context.overridePendingTransition(R.anim.bottom_push_in, R.anim.hold);
+		}
+		return isLoggedIn;
 	}
 
 
@@ -454,10 +459,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			}
 			break;
 		case R.id.tvMomentViewContent:
-			//			toActivity(TextActivity.createIntent(context, moment == null ? null : moment.getContent()));
-			break;
-		case R.id.tvMomentViewPraise:
-			//			toActivity(PraiseListActivity.createIntent(context, PraiseListActivity.TYPE_WORK, momentId));
+			toCommentActivity(false);
 			break;
 		default:
 			if (isLoggedIn() == false) {

@@ -24,6 +24,7 @@ import zuo.biao.library.interfaces.CacheCallBack;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.CacheManager;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.util.CommonUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -137,17 +138,17 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		momentView.setShowComment(false);
 	}
 
-	private MomentItem moment;
+	private MomentItem momentItem;
 	/**
-	 * @param moment
+	 * @param momentItem
 	 */
-	private void setHead(final MomentItem moment) {
-		this.moment = moment;
+	private void setHead(final MomentItem momentItem) {
+		this.momentItem = momentItem;
 		runUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				momentView.bindView(moment);
+				momentView.bindView(momentItem);
 			}
 		});
 	}
@@ -194,14 +195,14 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			@Override
 			public void run() {
 
-				moment = CacheManager.getInstance().get(MomentItem.class, "" + momentId);
+				momentItem = CacheManager.getInstance().get(MomentItem.class, "" + momentId);
 				final List<CommentItem> list = CacheManager.getInstance().getList(
 						getCacheClass(), getCacheGroup(), 0, getCacheCount());
 				runUiThread(new Runnable() {
 
 					@Override
 					public void run() {
-						setHead(moment);
+						setHead(momentItem);
 						setList(list);
 					}
 				});
@@ -262,6 +263,11 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			@Override
 			public void onClick(View v) {
 				switch (v.getId()) {
+				case R.id.tvMomentViewContent:
+					if (momentItem != null) {
+						CommonUtil.copyText(context, momentItem.getMoment().getContent());
+					}
+					break;
 				case R.id.llMomentViewComment:
 					showInput();
 					break;
