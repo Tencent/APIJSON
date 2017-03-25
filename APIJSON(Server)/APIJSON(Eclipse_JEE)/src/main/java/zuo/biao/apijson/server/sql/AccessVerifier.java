@@ -55,18 +55,18 @@ public class AccessVerifier {
 	static {
 		accessMap = new HashMap<String, RequestMethod[]>();
 		
-		//兼容JDK 1.8以上，见getDeclaredAnnotation的@since
-		accessMap.put(User.class.getSimpleName(), User.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Work.class.getSimpleName(), Work.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Moment.class.getSimpleName(), Moment.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Comment.class.getSimpleName(), Comment.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Wallet.class.getSimpleName(), Wallet.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Password.class.getSimpleName(), Password.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Verify.class.getSimpleName(), Verify.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Login.class.getSimpleName(), Login.class.getDeclaredAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Request.class.getSimpleName(), Request.class.getDeclaredAnnotation(APIJSONRequest.class).method());
+		//与客户端更好地统一
+		accessMap.put(User.class.getSimpleName(), User.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Work.class.getSimpleName(), Work.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Moment.class.getSimpleName(), Moment.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Comment.class.getSimpleName(), Comment.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Wallet.class.getSimpleName(), Wallet.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Password.class.getSimpleName(), Password.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Verify.class.getSimpleName(), Verify.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Login.class.getSimpleName(), Login.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Request.class.getSimpleName(), Request.class.getAnnotation(APIJSONRequest.class).method());
 
-		//兼容JDK 1.6以上
+		//原来的做法
 		//		accessMap.put("User", RequestMethod.values());
 		//		accessMap.put("Work", RequestMethod.values());
 		//		accessMap.put("Moment", RequestMethod.values());
