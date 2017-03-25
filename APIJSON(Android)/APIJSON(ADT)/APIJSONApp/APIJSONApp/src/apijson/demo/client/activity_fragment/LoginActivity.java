@@ -104,6 +104,11 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 				, StringUtil.getString(etLoginPassword)), requestCode);
 	}
 
+	private void showForget() {
+		toActivity(BottomMenuWindow.createIntent(context, new String[]{"重置密码", "验证码登录"})
+				.putExtra(INTENT_TITLE, "忘记密码")
+				, REQUEST_TO_BOTTOM_MUNU, false);		
+	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -166,6 +171,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 						break;
 					case 412:
 						showShortToast("账号或密码错误！");
+						showForget();
 						break;
 					default:
 						showShortToast(R.string.login_faild);
@@ -229,8 +235,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.tvLoginForget:
-			toActivity(BottomMenuWindow.createIntent(context, new String[]{"重置密码", "验证码登录"})
-					, REQUEST_TO_BOTTOM_MUNU, false);
+			showForget();
 			break;
 		case R.id.tvLoginLogin:
 			login(Login.TYPE_PASSWORD);
@@ -239,6 +244,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 			break;
 		}
 	}
+
 
 	private long touchDownTime = 0;
 	@SuppressLint("ClickableViewAccessibility")
