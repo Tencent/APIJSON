@@ -14,11 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.client.base;
 
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseBroadcastReceiver;
-import zuo.biao.library.interfaces.OnResultListener;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
 import android.content.BroadcastReceiver;
@@ -34,7 +30,6 @@ import apijson.demo.client.activity_fragment.LoginActivity;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.ActionUtil;
-import apijson.demo.client.util.HttpRequest;
 
 public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment implements Runnable {
 	private static final String TAG = "BaseFragment";
@@ -59,7 +54,7 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 	private void setCurrentUser() {
 		currentUser = APIJSONApplication.getInstance().getCurrentUser();
 		currentUserId = currentUser == null ? 0 : currentUser.getId();
-		isLoggedIn = isCurrentUserCorrect();		
+		isLoggedIn = isCurrentUserCorrect();
 	}
 
 	protected static boolean isCurrentUser(long userId) {
@@ -90,30 +85,38 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 	@Override
 	public abstract void run();
 	
+	private boolean isDataChanged = false;
 	/**
 	 */
-	protected void invalidate(User user) {
-		currentUser = user;
+	protected void invalidate() {
+		if (isRunning() == false) {
+			isDataChanged = true;
+			Log.w(TAG, "invalidate  isRunning() == false >> return;");
+			return;
+		}
+		isDataChanged = false;
+		
+		setCurrentUser();
 		loadAfterCorrect();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (isDataChanged) {
+			Log.d(TAG, "onResume  isDataChanged >> invalidate();");
+			invalidate();
+		}
 	}
 
 	/**
 	 * @param runnable
 	 */
 	protected void loadAfterCorrect() {
-		if (isCurrentUserCorrect() == false) {
-			loadCurrentUser(new OnResultListener<User>() {
-
-				@Override
-				public void onResult(User result) {
-					if (isCurrentUserCorrect()) {
-						run();
-					}
-				}
-			});
+		if (isCurrentUserCorrect() == false) {//请求currentUser都统一交给MainTabActivity，避免同时多次相同请求
+			Log.e(TAG, "loadAfterCorrect  isCurrentUserCorrect() == false >> return;");
 			return;
 		}
-
 		run();
 	}
 
@@ -130,47 +133,6 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 	 */
 	public boolean isUserCorrect(User user) {
 		return user != null && user.getId() > 0;
-	}
-
-	public static final int HTTP_GET_USER = -1;
-
-	/**
-	 * @param listener
-	 */
-	public void loadCurrentUser(final OnResultListener<User> listener) {
-		loadUser(APIJSONApplication.getInstance().getCurrentUserId(), listener);
-	}
-	/**
-	 * @param id
-	 * @param listener
-	 */
-	public void loadUser(long id, final OnResultListener<User> listener) {
-		HttpRequest.getUser(id, HTTP_GET_USER, new OnHttpResponseListener() {
-
-			@Override
-			public void onHttpResponse(final int requestCode, final String resultJson, final Exception e) {
-				final User user = new JSONResponse(resultJson).getObject(User.class);
-				if (isUserCorrect(user) == false) {
-					showShortToast(R.string.get_failed);
-					//					listener.onHttpResponse(requestCode, null, new NullPointerException("user == null"
-					//					+ (e == null ? "" : " because " + e.getMessage())));
-					listener.onResult(null);
-					return;
-				}
-				if (APIJSONApplication.getInstance().isCurrentUser(user.getId())) {
-					APIJSONApplication.getInstance().saveCurrentUser(user);
-					currentUser = APIJSONApplication.getInstance().getCurrentUser();
-				}
-
-				runUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						listener.onResult(user);
-					}
-				});
-			}
-		});
 	}
 
 
@@ -193,7 +155,7 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 
 			if (ActionUtil.ACTION_USER_CHANGED.equals(action)) {
 				if (isCurrentUser(intent.getLongExtra(INTENT_ID, 0))) {
-					invalidate(JSON.parseObject(intent.getStringExtra(ActionUtil.INTENT_USER), User.class));
+					invalidate();
 				}
 			}
 		}

@@ -57,7 +57,7 @@ extends zuo.biao.library.base.BaseListFragment<T, LV, BA> implements Runnable {
 	private void setCurrentUser() {
 		currentUser = APIJSONApplication.getInstance().getCurrentUser();
 		currentUserId = currentUser == null ? 0 : currentUser.getId();
-		isLoggedIn = isCurrentUserCorrect();		
+		isLoggedIn = isCurrentUserCorrect();
 	}
 
 	protected static boolean isCurrentUser(long userId) {
@@ -89,20 +89,39 @@ extends zuo.biao.library.base.BaseListFragment<T, LV, BA> implements Runnable {
 	@Override
 	public abstract void run();
 	
+	private boolean isDataChanged = false;
 	/**
 	 */
 	protected void invalidate() {
+		if (isRunning() == false) {
+			isDataChanged = true;
+			Log.w(TAG, "invalidate  isRunning() == false >> return;");
+			return;
+		}
+		isDataChanged = false;
+		
 		setCurrentUser();
 		loadAfterCorrect();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (isDataChanged) {
+			Log.d(TAG, "onResume  isDataChanged >> invalidate();");
+			invalidate();
+		}
 	}
 
 	/**
 	 * @param runnable
 	 */
 	protected void loadAfterCorrect() {
-		if (isCurrentUserCorrect()) {//请求currentUser都统一交给MainTabActivity，避免同时多次相同请求
-			run();
+		if (isCurrentUserCorrect() == false) {//请求currentUser都统一交给MainTabActivity，避免同时多次相同请求
+			Log.e(TAG, "loadAfterCorrect  isCurrentUserCorrect() == false >> return;");
+			return;
 		}
+		run();
 	}
 
 

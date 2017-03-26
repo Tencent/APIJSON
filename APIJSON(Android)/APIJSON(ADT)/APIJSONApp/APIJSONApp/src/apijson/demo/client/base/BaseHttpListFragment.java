@@ -35,8 +35,8 @@ import apijson.demo.client.util.ActionUtil;
 public abstract class BaseHttpListFragment<T, BA extends BaseAdapter>
 extends zuo.biao.library.base.BaseHttpListFragment<T, BA> implements Runnable {
 	private static final String TAG = "BaseHttpListFragment";
-	
-	
+
+
 	protected User currentUser;
 	protected long currentUserId;
 	protected boolean isLoggedIn;
@@ -45,18 +45,18 @@ extends zuo.biao.library.base.BaseHttpListFragment<T, BA> implements Runnable {
 	public View onCreateView(LayoutInflater inflater,
 			@Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
-		
+
 		setCurrentUser();
-		
+
 		BaseBroadcastReceiver.register(context, receiver, ActionUtil.ACTION_USER_CHANGED);
-		
+
 		return view;
 	}
 
 	private void setCurrentUser() {
 		currentUser = APIJSONApplication.getInstance().getCurrentUser();
 		currentUserId = currentUser == null ? 0 : currentUser.getId();
-		isLoggedIn = isCurrentUserCorrect();		
+		isLoggedIn = isCurrentUserCorrect();
 	}
 
 	protected static boolean isCurrentUser(long userId) {
@@ -82,26 +82,45 @@ extends zuo.biao.library.base.BaseHttpListFragment<T, BA> implements Runnable {
 		super.initData();
 		loadAfterCorrect();
 	}
-	
+
 	/*只有当isCurrentUserCorrect()时才会被调用，如果不符合则会获取currentUser并再次判断来决定是否调用
 	 */
 	@Override
 	public abstract void run();
-	
+
+	private boolean isDataChanged = false;
 	/**
 	 */
 	protected void invalidate() {
+		if (isRunning() == false) {
+			isDataChanged = true;
+			Log.w(TAG, "invalidate  isRunning() == false >> return;");
+			return;
+		}
+		isDataChanged = false;
+
 		setCurrentUser();
 		loadAfterCorrect();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (isDataChanged) {
+			Log.d(TAG, "onResume  isDataChanged >> invalidate();");
+			invalidate();
+		}
 	}
 
 	/**
 	 * @param runnable
 	 */
 	protected void loadAfterCorrect() {
-		if (isCurrentUserCorrect()) {//请求currentUser都统一交给MainTabActivity，避免同时多次相同请求
-			run();
+		if (isCurrentUserCorrect() == false) {//请求currentUser都统一交给MainTabActivity，避免同时多次相同请求
+			Log.e(TAG, "loadAfterCorrect  isCurrentUserCorrect() == false >> return;");
+			return;
 		}
+		run();
 	}
 
 
@@ -126,7 +145,7 @@ extends zuo.biao.library.base.BaseHttpListFragment<T, BA> implements Runnable {
 		super.onDestroy();
 	}
 
-	
+
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 
 		public void onReceive(Context context, Intent intent) {

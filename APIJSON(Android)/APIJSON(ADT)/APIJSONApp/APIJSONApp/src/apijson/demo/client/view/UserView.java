@@ -15,8 +15,6 @@ limitations under the License.*/
 package apijson.demo.client.view;
 
 import zuo.biao.library.base.BaseView;
-import zuo.biao.library.ui.WebViewActivity;
-import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.ImageLoaderUtil;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
@@ -29,6 +27,7 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import apijson.demo.client.R;
+import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.model.User;
 
 /**用户View
@@ -100,14 +99,6 @@ public class UserView extends BaseView<User> implements OnClickListener {
 		if (data == null) {
 			return;
 		}
-		switch (v.getId()) {
-		case R.id.ivUserViewHead:
-			toActivity(WebViewActivity.createIntent(context, data.getName(), data.getHead()));
-			break;
-		case R.id.tvUserViewName:
-		case R.id.tvUserViewPhone:
-			CommonUtil.copyText(context, StringUtil.getTrimedString((TextView) v));
-			break;
-		}		
+		toActivity(UserActivity.createIntent(context, data.getId()));
 	}
 }

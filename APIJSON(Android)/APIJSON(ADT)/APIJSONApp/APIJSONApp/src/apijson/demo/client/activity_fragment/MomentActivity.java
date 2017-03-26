@@ -511,6 +511,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 				showShortToast("只能删除自己的或自己的动态下的评论");
 				return;
 			}
+			toCommentItem = item;
 			new AlertDialog(context, null, "删除这条评论?", true, DIALOG_DELETE_COMMENT, MomentActivity.this).show();
 		} else {
 			showInput(item, position, index);

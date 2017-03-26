@@ -30,6 +30,7 @@ import zuo.biao.library.ui.EditTextInfoActivity;
 import zuo.biao.library.ui.EditTextInfoWindow;
 import zuo.biao.library.ui.SelectPictureActivity;
 import zuo.biao.library.ui.TextClearSuit;
+import zuo.biao.library.ui.WebViewActivity;
 import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.DataKeeper;
 import zuo.biao.library.util.JSON;
@@ -272,58 +273,66 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 		new TextClearSuit().addClearListener(etUserRemark, findViewById(R.id.ivUserRemarkClear));//清空备注按钮点击监听
 
-		userView.setOnDataChangedListener(new OnDataChangedListener() {
-
-			@Override
-			public void onDataChanged() {
-				user = userView.getData();
-			}
-		});
 
 		if (isOnEditMode) {
 			userView.setOnDataChangedListener(new OnDataChangedListener() {
 
 				@Override
 				public void onDataChanged() {
-					isDataChanged = true;
 					user = userView.getData();
-				}
-			});
-			
-			userView.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					if (user == null) {
-						return;
-					}
-					switch (v.getId()) {
-					case R.id.ivUserViewHead:
-						toActivity(SelectPictureActivity.createIntent(context), REQUEST_TO_SELECT_PICTURE, false);
-						break;
-					case R.id.tvUserViewName:
-						toActivity(EditTextInfoWindow.createIntent(context, "名字", user.getName())
-								, REQUEST_TO_EDIT_TEXT_INFO_NAME, false);
-						break;
-					default:
-						switch (v.getId()) {
-						case R.id.tvUserViewSex:
-							user.setSex(user.getSex() == User.SEX_FEMALE ? User.SEX_MAIL : User.SEX_FEMALE);
-							break;
-						case R.id.tvUserViewPhone:
-							toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_PHONE
-									, "手机", user.getPhone()), REQUEST_TO_EDIT_TEXT_INFO_PHONE, false);
-							break;
-						default:
-							return;
-						}
-						userView.bindView(user);
-						isDataChanged = true;
-						break;
-					}				
+					isDataChanged = true;
 				}
 			});
 		}
+		userView.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (user == null) {
+					return;
+				}
+				switch (v.getId()) {
+				case R.id.ivUserViewHead:
+					if (isOnEditMode) {
+						toActivity(SelectPictureActivity.createIntent(context), REQUEST_TO_SELECT_PICTURE, false);
+					} else {
+						toActivity(WebViewActivity.createIntent(context, user.getHead(), user.getHead()));
+					}
+					break;
+				case R.id.tvUserViewName:
+					if (isOnEditMode) {
+						toActivity(EditTextInfoWindow.createIntent(context, "名字", user.getName())
+								, REQUEST_TO_EDIT_TEXT_INFO_NAME, false);
+					} else {
+						CommonUtil.copyText(context, user.getName());
+					}
+					break;
+				default:
+					switch (v.getId()) {
+					case R.id.tvUserViewSex:
+						if (isOnEditMode) {
+							user.setSex(user.getSex() == User.SEX_FEMALE ? User.SEX_MAIL : User.SEX_FEMALE);
+						}
+						break;
+					case R.id.tvUserViewPhone:
+						if (isOnEditMode) {
+							toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_PHONE
+									, "手机", user.getPhone()), REQUEST_TO_EDIT_TEXT_INFO_PHONE, false);
+						} else {
+							CommonUtil.copyText(context, user.getPhone());
+						}
+						break;
+					default:
+						return;
+					}
+					if (isOnEditMode) {
+						userView.bindView(user);
+						isDataChanged = true;
+					}
+					break;
+				}				
+			}
+		});
 
 		if (bottomMenuView != null) {
 			bottomMenuView.setOnMenuItemClickListener(this);//底部菜单点击监听

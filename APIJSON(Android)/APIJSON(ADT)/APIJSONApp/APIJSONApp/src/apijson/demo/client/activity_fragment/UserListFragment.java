@@ -317,7 +317,7 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 	@Override
 	public void onRefresh() {
 		if (range == RANGE_ALL) {
-			super.onRefresh();
+			run();
 		} else {
 			loadAfterCorrect();
 		}

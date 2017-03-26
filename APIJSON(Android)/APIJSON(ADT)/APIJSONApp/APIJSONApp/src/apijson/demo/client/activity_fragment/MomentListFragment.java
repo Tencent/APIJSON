@@ -307,7 +307,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, Runnable, TopBarMe
 	@Override
 	public void onRefresh() {
 		if (range == RANGE_ALL) {
-			super.onRefresh();
+			run();
 		} else {
 			loadAfterCorrect();
 		}
