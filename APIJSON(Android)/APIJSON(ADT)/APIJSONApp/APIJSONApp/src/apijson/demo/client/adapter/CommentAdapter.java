@@ -1,6 +1,5 @@
 package apijson.demo.client.adapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import zuo.biao.library.base.BaseView;
@@ -130,9 +129,9 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 		 * @param data
 		 */
 		@SuppressLint("InflateParams")
-		public void setCommentDownComment(final CommentItem parentCb, boolean showAll) {
+		public void setCommentDownComment(final CommentItem parentItem, boolean showAll) {
 
-			List<CommentItem> downList = new ArrayList<>();// getItem(position).getChildList();
+			List<CommentItem> downList = parentItem.getChildList();
 			if (downList == null || downList.isEmpty()) {
 				llDownCommentContainer.removeAllViews();
 				findViewById(R.id.vCommentItemDivider).setVisibility(View.GONE);
@@ -147,7 +146,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 					tvWatchMore.setOnClickListener(new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							setCommentDownComment(parentCb, true);
+							setCommentDownComment(parentItem, true);
 						}
 					});
 
@@ -162,7 +161,9 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 					final CommentItem data = downList.get(i);
 					String name = StringUtil.getTrimedString(data.getUser().getName());
 					String content = StringUtil.getTrimedString(data.getComment().getContent());
-					tvContent.setText(Html.fromHtml("<font color=\"#25a281\">" + name + " :</font> " + content 
+					tvContent.setText(Html.fromHtml("<font color=\"#25a281\">" + name + " :</font> "
+							+ " 回复 "
+							+ "<font color=\"#25a281\">" + data.getToUser().getName() + " :</font> "+ content 
 							+ " <font color=\"#b5b5b5\">" + TimeUtil.getSmartDate(data.getDate()) + "</font>"));
 
 					commentItem.setOnClickListener(new OnClickListener() {

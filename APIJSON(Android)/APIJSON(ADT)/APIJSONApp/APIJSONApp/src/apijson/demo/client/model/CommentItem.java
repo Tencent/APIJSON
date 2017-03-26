@@ -1,5 +1,7 @@
 package apijson.demo.client.model;
 
+import java.util.List;
+
 import zuo.biao.apijson.JSONObject;
 import zuo.biao.apijson.JSONResponse;
 import android.support.annotation.NonNull;
@@ -12,6 +14,7 @@ public class CommentItem extends BaseModel {
 	private User user;
 	private User toUser;
 	private JSONObject toUserObject;
+	private List<CommentItem> childList;
 
 	public CommentItem() {
 		super();
@@ -65,6 +68,15 @@ public class CommentItem extends BaseModel {
 	public void setToUserObject(JSONObject toUserObject) {
 		this.toUserObject = toUserObject;
 	}
+	
+	public List<CommentItem> getChildList() {
+		return childList;
+	}
+	public CommentItem setChildList(List<CommentItem> childList) {
+		this.childList = childList;
+		return this;
+	}
+	
 
 	@Override
 	public Long getId() {

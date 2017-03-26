@@ -14,7 +14,10 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
@@ -35,6 +38,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -176,7 +180,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			@Override
 			public void run() {
 				momentView.bindView(momentItem);
-				
+
 				if (showKeyboard) {//在etMomentInput被绑定前调用showInput崩溃 //{
 					showKeyboard = false;
 
@@ -210,6 +214,13 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	 * @param toCommentItem
 	 */
 	public void showInput(CommentItem toCommentItem_) {
+		showInput(toCommentItem_, -1);
+	}
+	/**显示输入评论
+	 * @param toCommentItem
+	 * @param position 
+	 */
+	public void showInput(CommentItem toCommentItem_, final int position) {
 		this.toCommentItem = toCommentItem_;
 		final long toCommentId = toCommentItem == null ? 0 : toCommentItem.getComment().getId();
 		runUiThread(new Runnable() {
@@ -222,6 +233,18 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 					etMomentInput.setHint("回复：" + StringUtil.getTrimedString(toCommentItem.getUser().getName()));
 				}
 				EditTextManager.showKeyboard(context, etMomentInput);//, toGetWindowTokenView);
+
+				if (position >= 0) {
+					new Handler().postDelayed(new Runnable() {
+
+						@Override
+						public void run() {
+							if (isAlive()) {
+								lvBaseList.setSelection(position + lvBaseList.getHeaderViewsCount());
+							}
+						}
+					}, 500);
+				}
 			}
 		});
 	}
@@ -335,7 +358,52 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	@Override
 	public List<CommentItem> parseArray(String json) {
-		return JSON.parseArray(new JSONResponse(json).getArray(CommentItem.class.getSimpleName()), CommentItem.class);
+		List<CommentItem> list = JSON.parseArray(new JSONResponse(json).getArray(
+				CommentItem.class.getSimpleName()), CommentItem.class);
+		if (list != null && list.isEmpty() == false) {
+			//parent和child分类
+			Map<Long, CommentItem> parentMap = new HashMap<>();//added
+			List<CommentItem> allChildList = new ArrayList<>();
+			long id;
+			long toId;
+			for (CommentItem item : list) {
+				id = item == null ? 0 : item.getId();
+				if (id <= 0) {
+					continue;
+				}
+
+				toId = item.getComment().getParentId();
+				if (toId <= 0) {//parent
+					parentMap.put(id, item);
+				} else {//child
+					allChildList.add(item);
+				}
+			}
+
+			//child放到parent的childList中
+			CommentItem parent;
+			List<CommentItem> childList;
+			for (CommentItem child : allChildList) {
+				toId = child == null ? 0 : child.getComment().getParentId();
+				parent = toId <= 0 ? null : parentMap.get(toId);
+				if (parent != null) {
+					childList = parent.getChildList();
+					if (childList == null) {
+						childList = new ArrayList<>();
+					}
+					child.setToUser(parent.getUser());
+					childList.add(child);
+
+					parent.setChildList(childList);
+					parentMap.put(toId, parent);
+				}
+			}
+
+			//转为list
+			list = new ArrayList<>(parentMap.values());
+		}
+
+		return list;
 	}
 
 	@Override
@@ -437,7 +505,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			}
 			new AlertDialog(context, null, "删除这条评论?", true, DIALOG_DELETE_COMMENT, MomentActivity.this).show();
 		} else {
-			showInput(item);				
+			showInput(item, position);				
 		}
 	}
 
