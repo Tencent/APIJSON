@@ -493,16 +493,18 @@ public class HttpRequest {
 	/**
 	 * @param momentId
 	 * @param toCommentId
+	 * @param toUserId 不能省，可能同一toCommentId下回复不同的人
 	 * @param content
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void addComment(long momentId, long toCommentId, String content
+	public static void addComment(long momentId, long toCommentId, long toUserId, String content
 			, int requestCode, OnHttpResponseListener listener) {
 		Comment comment = new Comment()
 		.setUserId(application.getCurrentUserId())
 		.setMomentId(momentId)
 		.setParentId(toCommentId)
+		.setToUserId(toUserId)
 		.setContent(content);
 		post(new JSONRequest(comment).setTag(Comment.class.getSimpleName()), requestCode, listener);
 	}

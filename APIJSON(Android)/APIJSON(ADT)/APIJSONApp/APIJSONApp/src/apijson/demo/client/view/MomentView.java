@@ -325,7 +325,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			commentItem = new CommentItem();
 		}
 		toActivity(MomentActivity.createIntent(context, momentId, isToComment
-				, commentItem.getId(), commentItem.getUser().getName()));
+				, commentItem.getId(), commentItem.getUser().getId(), commentItem.getUser().getName()));
 	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

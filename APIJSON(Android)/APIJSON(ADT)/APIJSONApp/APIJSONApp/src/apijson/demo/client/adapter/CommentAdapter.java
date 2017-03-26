@@ -14,6 +14,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,13 +46,13 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 		return new ItemView(context, resources).setOnCommentClickListener(onCommentClickListener);
 	}
 
-	
+
 	public static class ItemView extends BaseView<CommentItem> implements OnClickListener {  
 
 		/**
 		 */
 		public interface OnCommentClickListener {
-			void onCommentClick(CommentItem data);
+			void onCommentClick(CommentItem item, int position, int index, boolean isLong);
 		}
 		
 		private OnCommentClickListener onCommentClickListener;
@@ -82,12 +83,12 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			this.inflater = inflater;
 			convertView = inflater.inflate(R.layout.comment_main_item, null);
 
-			ivHead = findViewById(R.id.ivCommentHead);
+			ivHead = findViewById(R.id.ivCommentHead, this);
 			llDownCommentContainer = findViewById(R.id.llCommentDownCommentContainer);
 			tvWatchMore = findViewById(R.id.tvCommentWatchMore);
 			rlCommentMainItem = findViewById(R.id.rlCommentMainItem);
 
-			tvName = (TextView) findViewById(R.id.tvCommentName);
+			tvName = (TextView) findViewById(R.id.tvCommentName, this);
 			tvContent = (TextView) findViewById(R.id.tvCommentContent);
 			tvTime = (TextView) findViewById(R.id.tvCommentTime);
 
@@ -113,7 +114,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			switch (v.getId()) {
 			case R.id.tvCommentContent:
 				if (onCommentClickListener != null) {
-					onCommentClickListener.onCommentClick(data);
+					onCommentClickListener.onCommentClick(data, position, -1, false);
 				}
 				break;
 			case R.id.ivCommentHead:
@@ -141,7 +142,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 				tvWatchMore.setVisibility(View.GONE);
 				if (showAll == false && downList.size() > 4) {
 
-					tvWatchMore.setText("查看更多" + (downList.size() - 4) + "条回复");// String.valueOf(downList.size() - 4) + "条回复");
+					tvWatchMore.setText("查看更多");
 					tvWatchMore.setVisibility(View.VISIBLE);
 					tvWatchMore.setOnClickListener(new View.OnClickListener() {
 						@Override
@@ -155,23 +156,31 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 
 				llDownCommentContainer.removeAllViews();
 				for (int i = 0; i < downList.size(); i++) {
+					final int index = i;
+					
 					View commentItem = inflater.inflate(R.layout.comment_down_item, null);
 					TextView tvContent = (TextView) commentItem.findViewById(R.id.tvCommentContent);
 
 					final CommentItem data = downList.get(i);
 					String name = StringUtil.getTrimedString(data.getUser().getName());
 					String content = StringUtil.getTrimedString(data.getComment().getContent());
-					tvContent.setText(Html.fromHtml("<font color=\"#25a281\">" + name + " :</font> "
-							+ " 回复 "
-							+ "<font color=\"#25a281\">" + data.getToUser().getName() + " :</font> "+ content 
-							+ " <font color=\"#b5b5b5\">" + TimeUtil.getSmartDate(data.getDate()) + "</font>"));
+					tvContent.setText(Html.fromHtml("<font color=\"#25a281\">" + StringUtil.getString(name) + "</font>"
+							+ " 回复 " + "<font color=\"#25a281\">" + StringUtil.getString(data.getToUser().getName())
+							+ "</font>" + " : " + content));
 
 					commentItem.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							if (onCommentClickListener != null) {
-								onCommentClickListener.onCommentClick(data);
-							}
+							onCommentClick(data, position, index, false);
+							
+						}
+					});
+					commentItem.setOnLongClickListener(new OnLongClickListener() {
+						
+						@Override
+						public boolean onLongClick(View v) {
+							onCommentClick(data, position, index, true);
+							return true;
 						}
 					});
 
@@ -179,8 +188,12 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 				}
 			}
 		}
-		
-	}
 
+		protected void onCommentClick(CommentItem item, int position, int index, boolean isLong) {
+			if (onCommentClickListener != null) {
+				onCommentClickListener.onCommentClick(item, position, index, isLong);
+			}
+		}
+	}
 
 }

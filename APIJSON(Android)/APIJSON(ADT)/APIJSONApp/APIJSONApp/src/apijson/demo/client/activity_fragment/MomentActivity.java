@@ -82,28 +82,30 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	 * @return
 	 */
 	public static Intent createIntent(Context context, long momentId, boolean showKeyboard) {
-		return createIntent(context, momentId, showKeyboard, 0, null);
+		return createIntent(context, momentId, showKeyboard, 0, 0, null);
 	}
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param momentId
 	 * @param toCommentId
+	 * @param toUserId
 	 * @param toUserName
 	 * @return
 	 */
-	public static Intent createIntent(Context context, long momentId, long toCommentId, String toUserName) {
-		return createIntent(context, momentId, toCommentId > 0, toCommentId, toUserName);
+	public static Intent createIntent(Context context, long momentId, long toCommentId, long toUserId, String toUserName) {
+		return createIntent(context, momentId, toCommentId > 0, toCommentId, toUserId, toUserName);
 	}
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param momentId
 	 * @param showKeyboard
 	 * @param toCommentId
+	 * @param toUserId
 	 * @param toUserName
 	 * @return
 	 */
 	public static Intent createIntent(Context context, long momentId, boolean showKeyboard
-			, long toCommentId, String toUserName) {
+			, long toCommentId, long toUserId, String toUserName) {
 		return new Intent(context, MomentActivity.class).
 				putExtra(INTENT_MOMENT_ID, momentId).
 				putExtra(INTENT_SHOW_KEYBOARD, showKeyboard).
@@ -214,13 +216,13 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	 * @param toCommentItem
 	 */
 	public void showInput(CommentItem toCommentItem_) {
-		showInput(toCommentItem_, -1);
+		showInput(toCommentItem_, -1, -1);
 	}
 	/**显示输入评论
 	 * @param toCommentItem
 	 * @param position 
 	 */
-	public void showInput(CommentItem toCommentItem_, final int position) {
+	public void showInput(CommentItem toCommentItem_, final int position, final int index) {
 		this.toCommentItem = toCommentItem_;
 		final long toCommentId = toCommentItem == null ? 0 : toCommentItem.getComment().getId();
 		runUiThread(new Runnable() {
@@ -306,14 +308,15 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	/**发送评论(回复)
 	 */
 	public void sendComment() {
-		long toCommentId = toCommentItem == null ? -1 : toCommentItem.getId();
 		String content = StringUtil.getTrimedString(etMomentInput);
 		if (StringUtil.isNotEmpty(content, true) == false) {
 			showShortToast("请先输入评论");
 			return;
 		}
+		long toCommentId = toCommentItem == null ? 0 : toCommentItem.getId();
+		long toUserId = toCommentId <= 0 ? 0 : toCommentItem.getUserId();
 
-		HttpRequest.addComment(momentId, toCommentId, content, toCommentId <= 0 ? HTTP_COMMENT : HTTP_REPLY, this);
+		HttpRequest.addComment(momentId, toCommentId, toUserId, content, toCommentId <= 0 ? HTTP_COMMENT : HTTP_REPLY, this);
 
 		hideKeyboard();
 	}
@@ -356,6 +359,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		HttpRequest.getCommentList(momentId, 4, page, -page, this);
 	}
 
+	//TODO 还是直接在Request中获取childList？
 	@Override
 	public List<CommentItem> parseArray(String json) {
 		List<CommentItem> list = JSON.parseArray(new JSONResponse(json).getArray(
@@ -391,7 +395,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 					if (childList == null) {
 						childList = new ArrayList<>();
 					}
-					child.setToUser(parent.getUser());
+					child.setToUser(parent.getUser());//TODO 不一定是parent的User
 					childList.add(child);
 
 					parent.setChildList(childList);
@@ -484,7 +488,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		});
 	}
 
-	private void onComemntItemClick(int position,boolean isLong) {
+	private void onComemntItemClick(int position, boolean isLong) {
 		if (adapter == null){
 			return;
 		}
@@ -493,7 +497,11 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			return;
 		}
 
-		CommentItem item = adapter.getItem(position);
+		onCommentClick(adapter.getItem(position), position, -1, isLong);
+	}
+
+	@Override
+	public void onCommentClick(CommentItem item, int position, int index, boolean isLong) {
 		if (isLong) {
 			if (item == null || momentItem == null) {
 				return;
@@ -505,13 +513,8 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			}
 			new AlertDialog(context, null, "删除这条评论?", true, DIALOG_DELETE_COMMENT, MomentActivity.this).show();
 		} else {
-			showInput(item, position);				
-		}
-	}
-
-	@Override
-	public void onCommentClick(CommentItem cb) {
-
+			showInput(item, position, index);
+		}	
 	}
 
 	private static final int DIALOG_DELETE_COMMENT = 1;
