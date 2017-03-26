@@ -1,4 +1,4 @@
-/*Copyright ©2015 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,15 +18,12 @@ import java.io.File;
 
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.ui.AlertDialog;
 import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
 import zuo.biao.library.util.DownloadUtil;
 import zuo.biao.library.util.ImageLoaderUtil;
 import zuo.biao.library.util.Log;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -38,7 +35,6 @@ import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseFragment;
-import apijson.demo.client.interfaces.TopBarMenuCallback;
 import apijson.demo.client.model.Login;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.HttpRequest;
@@ -48,7 +44,7 @@ import apijson.demo.client.util.HttpRequest;
  * @use new SettingFragment(),详细使用见.DemoFragmentActivity(initData方法内)
  */
 public class SettingFragment extends BaseFragment implements OnClickListener, OnDialogButtonClickListener
-, OnHttpResponseListener, TopBarMenuCallback, OnBottomDragListener {
+, OnHttpResponseListener {
 	private static final String TAG = "SettingFragment";
 
 	//与Activity通信<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -114,25 +110,6 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 		});
 	}
 
-
-	@Override
-	public View getLeftMenu(Activity activity) {
-		return null;
-	}
-	@SuppressLint("InflateParams")
-	@Override
-	public View getRightMenu(Activity activity) {
-		TextView tv = (TextView) LayoutInflater.from(activity).inflate(R.layout.top_right_tv, null);
-		tv.setText("编辑");
-		tv.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				onDragBottom(true);
-			}
-		});
-		return tv;
-	}
 
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -211,22 +188,6 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 		findViewById(R.id.llSettingLogout).setOnClickListener(this);
 	}
 
-
-	@Override
-	public void onDragBottom(boolean rightToLeft) {
-		if (isAlive() == false) {
-			return;
-		}
-
-		if (rightToLeft) {
-			if (verifyLogin() == false) {
-				return;
-			}
-			
-			toActivity(UserActivity.createIntent(context, APIJSONApplication.getInstance().getCurrentUserId())
-					.putExtra(UserActivity.INTENT_IS_ON_EDIT_MODE, true));
-		}
-	}
 
 	@Override
 	public void onDialogButtonClick(int requestCode, boolean isPositive) {

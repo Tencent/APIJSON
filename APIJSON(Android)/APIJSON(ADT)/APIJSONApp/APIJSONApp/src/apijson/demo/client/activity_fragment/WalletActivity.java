@@ -1,4 +1,4 @@
-/*Copyright ©2015 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import apijson.demo.client.R;
 import apijson.demo.client.model.Wallet;
 import apijson.demo.client.util.HttpRequest;
 
-/**时间刷新器使用activity示例
+/**钱包界面
  * @author Lemon
  * @use toActivity(WalletActivity.createIntent(...));
  */

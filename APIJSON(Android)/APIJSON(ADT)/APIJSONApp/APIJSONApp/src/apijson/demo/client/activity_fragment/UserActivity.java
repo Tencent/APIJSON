@@ -1,4 +1,4 @@
-/*Copyright ©2015 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import apijson.demo.client.R;
-import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseActivity;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.ActionUtil;
@@ -145,13 +144,15 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		tvUserTag = (TextView) findViewById(R.id.tvUserTag);
 
 
-		//添加底部菜单<<<<<<<<<<<<<<<<<<<<<<
-		llUserBottomMenuContainer = (ViewGroup) findViewById(R.id.llUserBottomMenuContainer);
-		llUserBottomMenuContainer.removeAllViews();
+		if (isOnEditMode == false) {
+			//添加底部菜单<<<<<<<<<<<<<<<<<<<<<<
+			llUserBottomMenuContainer = (ViewGroup) findViewById(R.id.llUserBottomMenuContainer);
+			llUserBottomMenuContainer.removeAllViews();
 
-		bottomMenuView = new BottomMenuView(context, getResources(), REQUEST_TO_BOTTOM_MENU);
-		llUserBottomMenuContainer.addView(bottomMenuView.createView(getLayoutInflater()));
-		//添加底部菜单>>>>>>>>>>>>>>>>>>>>>>>
+			bottomMenuView = new BottomMenuView(context, getResources(), REQUEST_TO_BOTTOM_MENU);
+			llUserBottomMenuContainer.addView(bottomMenuView.createView(getLayoutInflater()));
+			//添加底部菜单>>>>>>>>>>>>>>>>>>>>>>>
+		}
 
 	}
 
@@ -221,10 +222,11 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 	@Override
 	public void run() {
-		tvBaseTitle.setText(APIJSONApplication.getInstance().isCurrentUser(id) ? "我的资料" : "详细资料");
+		tvBaseTitle.setText(isOnEditMode ? "编辑资料" : (isCurrentUser(id) ? "我的资料" : "详细资料"));
 
-		bottomMenuView.bindView(MenuUtil.getMenuList(MenuUtil.USER, id, ! User.isFirend(currentUser, id)));
-
+		if (bottomMenuView != null) {
+			bottomMenuView.bindView(MenuUtil.getMenuList(MenuUtil.USER, id, ! User.isFirend(currentUser, id)));
+		}
 
 		setUser(CacheManager.getInstance().get(User.class, "" + id));//先加载缓存数据，比网络请求快很多
 		HttpRequest.getUser(id, HTTP_GET, UserActivity.this);
@@ -279,6 +281,15 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		});
 
 		if (isOnEditMode) {
+			userView.setOnDataChangedListener(new OnDataChangedListener() {
+
+				@Override
+				public void onDataChanged() {
+					isDataChanged = true;
+					user = userView.getData();
+				}
+			});
+			
 			userView.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -299,7 +310,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			});
 		}
 
-		bottomMenuView.setOnMenuItemClickListener(this);//底部菜单点击监听
+		if (bottomMenuView != null) {
+			bottomMenuView.setOnMenuItemClickListener(this);//底部菜单点击监听
+		}
 	}
 
 	@Override
@@ -312,6 +325,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			return;
 		}
 		switch (intentCode) {
+		case MenuUtil.INTENT_CODE_EDIT:
+			toActivity(UserActivity.createIntent(context, id).putExtra(UserActivity.INTENT_IS_ON_EDIT_MODE, true));
+			break;
 		case MenuUtil.INTENT_CODE_ADD:
 			HttpRequest.setIsFriend(id, true, HTTP_ADD, this);
 			break;

@@ -1,4 +1,4 @@
-/*Copyright ©2015 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -65,10 +65,9 @@ public class MenuUtil {
 		List<Menu> list = new ArrayList<Menu>();
 		switch (which) {
 		case USER:
-			//			list.add(FSB_SEND_MESSAGE);
-			//			list.add(FSB_CALL);
-			//			list.add(FSB_SEND_EMAIL);
-			if (APIJSONApplication.getInstance().isCurrentUser(id) == false) {
+			if (APIJSONApplication.getInstance().isCurrentUser(id)) {
+				list.add(FSB_EDIT);
+			} else {
 				if (isAdd) {
 					list.add(FSB_ADD);
 				} else {
