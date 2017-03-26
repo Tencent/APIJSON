@@ -17,32 +17,21 @@
 
         <LinearLayout style="@style/ll_horizontal_match_wrap" >
 
-            <LinearLayout
-                style="@style/ll_horizontal_match_wrap"
-                android:layout_weight="1" >
+            <TextView
+                android:id="@+id/tvUserViewName"
+                style="@style/text_middle_black"
+                android:layout_marginRight="6dp"
+                android:gravity="left"
+                android:text="Name" />
 
-                <TextView
-                    android:id="@+id/tvUserViewName"
-                    style="@style/text_middle_black"
-                    android:layout_marginRight="6dp"
-                    android:gravity="left"
-                    android:text="Name" />
-
-                <TextView
-                    android:id="@+id/tvUserViewSex"
-                    style="@style/text_micro"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:background="@drawable/circle_blue"
-                    android:text="男"
-                    android:textColor="@color/blue" />
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/ivUserViewStar"
-                android:layout_width="21dp"
-                android:layout_height="21dp"
-                android:src="@drawable/star_light" />
+            <TextView
+                android:id="@+id/tvUserViewSex"
+                style="@style/text_micro"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/circle_blue"
+                android:text="男"
+                android:textColor="@color/blue" />
         </LinearLayout>
 
         <TextView
@@ -51,7 +40,7 @@
             android:text="ID:" />
 
         <TextView
-            android:id="@+id/tvUserViewNumber"
+            android:id="@+id/tvUserViewPhone"
             style="@style/text_middle"
             android:text="Phone:" />
     </LinearLayout>

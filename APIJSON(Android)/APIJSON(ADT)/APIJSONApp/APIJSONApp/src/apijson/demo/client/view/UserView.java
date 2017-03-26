@@ -16,6 +16,7 @@ package apijson.demo.client.view;
 
 import zuo.biao.library.base.BaseView;
 import zuo.biao.library.ui.WebViewActivity;
+import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.ImageLoaderUtil;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
@@ -52,26 +53,24 @@ public class UserView extends BaseView<User> implements OnClickListener {
 	}
 
 	public ImageView ivUserViewHead;
-	public ImageView ivUserViewStar;
 
 	public TextView tvUserViewSex;
 
 	public TextView tvUserViewName;
 	public TextView tvUserViewId;
-	public TextView tvUserViewNumber;
+	public TextView tvUserViewPhone;
 	@SuppressLint("InflateParams")
 	@Override
 	public View createView(LayoutInflater inflater) {
 		convertView = inflater.inflate(R.layout.user_view, null);
 
 		ivUserViewHead = findViewById(R.id.ivUserViewHead, this);
-		ivUserViewStar = findViewById(R.id.ivUserViewStar, this);
 
 		tvUserViewSex = findViewById(R.id.tvUserViewSex, this);
 
 		tvUserViewName = findViewById(R.id.tvUserViewName, this);
 		tvUserViewId = findViewById(R.id.tvUserViewId);
-		tvUserViewNumber = findViewById(R.id.tvUserViewNumber);
+		tvUserViewPhone = findViewById(R.id.tvUserViewPhone, this);
 
 		return convertView;
 	}
@@ -85,7 +84,6 @@ public class UserView extends BaseView<User> implements OnClickListener {
 		this.data = data;
 
 		ImageLoaderUtil.loadImage(ivUserViewHead, data.getHead(), ImageLoaderUtil.TYPE_OVAL);
-		ivUserViewStar.setImageResource(data.getStarred() != 0 ? R.drawable.star_light : R.drawable.star);
 
 		tvUserViewSex.setBackgroundResource(data.getSex() == User.SEX_FEMALE
 				? R.drawable.circle_pink : R.drawable.circle_blue);
@@ -94,7 +92,7 @@ public class UserView extends BaseView<User> implements OnClickListener {
 
 		tvUserViewName.setText(StringUtil.getTrimedString(data.getName()));
 		tvUserViewId.setText("ID:" + data.getId());
-		tvUserViewNumber.setText("Phone:" + StringUtil.getNoBlankString(data.getPhone()));
+		tvUserViewPhone.setText("Phone:" + StringUtil.getNoBlankString(data.getPhone()));
 	}
 
 	@Override
@@ -106,19 +104,9 @@ public class UserView extends BaseView<User> implements OnClickListener {
 		case R.id.ivUserViewHead:
 			toActivity(WebViewActivity.createIntent(context, data.getName(), data.getHead()));
 			break;
-		default:
-			switch (v.getId()) {
-			case R.id.ivUserViewStar:
-				data.setStarred(data.getStarred() == 0 ? 1 : 0);
-				break;
-			case R.id.tvUserViewSex:
-				data.setSex(data.getSex() == User.SEX_FEMALE ? User.SEX_MAIL : User.SEX_FEMALE);
-				break;
-			}
-			bindView(data);
-			if (onDataChangedListener != null) {
-				onDataChangedListener.onDataChanged();
-			}
+		case R.id.tvUserViewName:
+		case R.id.tvUserViewPhone:
+			CommonUtil.copyText(context, StringUtil.getTrimedString((TextView) v));
 			break;
 		}		
 	}

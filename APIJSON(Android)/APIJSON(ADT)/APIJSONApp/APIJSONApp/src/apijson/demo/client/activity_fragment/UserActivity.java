@@ -294,16 +294,31 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 				@Override
 				public void onClick(View v) {
+					if (user == null) {
+						return;
+					}
 					switch (v.getId()) {
 					case R.id.ivUserViewHead:
 						toActivity(SelectPictureActivity.createIntent(context), REQUEST_TO_SELECT_PICTURE, false);
 						break;
 					case R.id.tvUserViewName:
-						toActivity(EditTextInfoWindow.createIntent(context, "名字", user == null ? null : user.getName())
+						toActivity(EditTextInfoWindow.createIntent(context, "名字", user.getName())
 								, REQUEST_TO_EDIT_TEXT_INFO_NAME, false);
 						break;
 					default:
-						userView.onClick(v);
+						switch (v.getId()) {
+						case R.id.tvUserViewSex:
+							user.setSex(user.getSex() == User.SEX_FEMALE ? User.SEX_MAIL : User.SEX_FEMALE);
+							break;
+						case R.id.tvUserViewPhone:
+							toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_PHONE
+									, "手机", user.getPhone()), REQUEST_TO_EDIT_TEXT_INFO_PHONE, false);
+							break;
+						default:
+							return;
+						}
+						userView.bindView(user);
+						isDataChanged = true;
 						break;
 					}				
 				}
@@ -436,10 +451,11 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	//类相关监听<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	private static final int REQUEST_TO_BOTTOM_MENU = 1;
-	private static final int REQUEST_TO_EDIT_TEXT_INFO = 2;
+	private static final int REQUEST_TO_SELECT_PICTURE = 2;
+	private static final int REQUEST_TO_CUT_PICTURE = 3;
+	private static final int REQUEST_TO_EDIT_TEXT_INFO = 4;
 	private static final int REQUEST_TO_EDIT_TEXT_INFO_NAME = 5;
-	private static final int REQUEST_TO_SELECT_PICTURE = 3;
-	private static final int REQUEST_TO_CUT_PICTURE = 4;
+	private static final int REQUEST_TO_EDIT_TEXT_INFO_PHONE = 6;
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -455,16 +471,23 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			break;
 		case REQUEST_TO_EDIT_TEXT_INFO:
 		case REQUEST_TO_EDIT_TEXT_INFO_NAME:
+		case REQUEST_TO_EDIT_TEXT_INFO_PHONE:
 			if (data == null) {
 				break;
 			}
 			isDataChanged = true;
 			user = getUser();
 			String value = data.getStringExtra(EditTextInfoActivity.RESULT_VALUE);
-			if (requestCode == REQUEST_TO_EDIT_TEXT_INFO) {
-				user.setTag(value);
-			} else {
+			switch (requestCode) {
+			case REQUEST_TO_EDIT_TEXT_INFO_NAME:
 				user.setName(value);
+				break;
+			case REQUEST_TO_EDIT_TEXT_INFO_PHONE:
+				user.setPhone(value);
+				break;
+			default:
+				user.setTag(value);
+				break;
 			}
 			setUser(user);
 			break;
