@@ -452,10 +452,6 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			showShortToast(R.string.publishing);
 			return;
 		}
-		if (onClickListener != null) {
-			onClickListener.onClick(v);
-			return;
-		}
 		switch (v.getId()) {
 		case R.id.ivMomentViewHead:
 		case R.id.tvMomentViewName:
