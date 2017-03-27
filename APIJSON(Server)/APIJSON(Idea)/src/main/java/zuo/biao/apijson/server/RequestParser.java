@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONArray;
@@ -222,6 +223,8 @@ public class RequestParser {
 				status = 403;
 			} else if (e instanceof IllegalArgumentException) {
 				status = 406;
+			} else if (e instanceof TimeoutException) {
+				status = 408;
 			} else if (e instanceof ConflictException) {
 				status = 409;
 			} else if (e instanceof ConditionNotMatchException) {
@@ -332,7 +335,7 @@ public class RequestParser {
 		Set<String> set = request.keySet();
 		if ("!".equals(disallows)) {//所有非necessaryColumns，改成 !necessary 更好
 			if (set != null) {
-				List<String> disallowList = new ArrayList<>();
+				List<String> disallowList = new ArrayList<String>();
 				for (String key : set) {
 					if (isContainKeyInArray(key, necessaryColumns) == false) {
 						disallowList.add(key);
@@ -440,8 +443,8 @@ public class RequestParser {
 
 		Set<String> set = request.keySet();
 		JSONObject transferredRequest = new JSONObject(true);
-		Map<String, String> functionMap = new LinkedHashMap<>();
-		Map<String, Object> selfDefineKeyMap = new LinkedHashMap<>();
+		Map<String, String> functionMap = new LinkedHashMap<String, String>();
+		Map<String, Object> selfDefineKeyMap = new LinkedHashMap<String, Object>();
 		if (set != null) {
 			Object value;
 			JSONObject result;
@@ -516,7 +519,7 @@ public class RequestParser {
 					}
 				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
-					if (key.startsWith("@") && QueryConfig.keyList.contains(key) == false) {
+					if (key.startsWith("@") && QueryConfig.tableKeyList.contains(key) == false) {
 						selfDefineKeyMap.put(key, value);
 					}//可@key@
 					if (key.endsWith("()")) {

@@ -1,11 +1,18 @@
-package zuo.biao.apijson.server.sql;
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
-import static zuo.biao.apijson.RequestMethod.GET;
-import static zuo.biao.apijson.RequestMethod.POST;
-import static zuo.biao.apijson.RequestMethod.POST_GET;
-import static zuo.biao.apijson.RequestMethod.POST_HEAD;
-import static zuo.biao.apijson.RequestMethod.PUT;
-import static zuo.biao.apijson.RequestMethod.DELETE;
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.*/
+
+package zuo.biao.apijson.server.sql;
 
 import java.rmi.AccessException;
 import java.util.HashMap;
@@ -13,9 +20,19 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.APIJSONRequest;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.QueryConfig;
+import zuo.biao.apijson.server.model.Comment;
+import zuo.biao.apijson.server.model.Login;
+import zuo.biao.apijson.server.model.Moment;
+import zuo.biao.apijson.server.model.Password;
+import zuo.biao.apijson.server.model.Request;
+import zuo.biao.apijson.server.model.User;
+import zuo.biao.apijson.server.model.Verify;
+import zuo.biao.apijson.server.model.Wallet;
+import zuo.biao.apijson.server.model.Work;
 
 /**权限验证类
  * @author Lemon
@@ -37,15 +54,28 @@ public class AccessVerifier {
 	private static Map<String, RequestMethod[]> accessMap;
 	static {
 		accessMap = new HashMap<String, RequestMethod[]>();
-		accessMap.put("User", RequestMethod.values());
-		accessMap.put("Work", RequestMethod.values());
-		accessMap.put("Moment", RequestMethod.values());
-		accessMap.put("Comment", RequestMethod.values());
-		accessMap.put("Wallet", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
-		accessMap.put("Password", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
-		accessMap.put("Login", new RequestMethod[]{POST_GET, POST, DELETE});
-		accessMap.put("Request", new RequestMethod[]{GET, POST_GET});
-		accessMap.put("Verify", new RequestMethod[]{POST_HEAD, POST_GET, POST, DELETE});
+		
+		//与客户端更好地统一
+		accessMap.put(User.class.getSimpleName(), User.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Work.class.getSimpleName(), Work.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Moment.class.getSimpleName(), Moment.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Comment.class.getSimpleName(), Comment.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Wallet.class.getSimpleName(), Wallet.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Password.class.getSimpleName(), Password.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Verify.class.getSimpleName(), Verify.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Login.class.getSimpleName(), Login.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap.put(Request.class.getSimpleName(), Request.class.getAnnotation(APIJSONRequest.class).method());
+
+		//原来的做法
+		//		accessMap.put("User", RequestMethod.values());
+		//		accessMap.put("Work", RequestMethod.values());
+		//		accessMap.put("Moment", RequestMethod.values());
+		//		accessMap.put("Comment", RequestMethod.values());
+		//		accessMap.put("Wallet", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
+		//		accessMap.put("Password", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
+		//		accessMap.put("Login", new RequestMethod[]{POST_GET, POST, DELETE});
+		//		accessMap.put("Request", new RequestMethod[]{GET, POST_GET});
+		//		accessMap.put("Verify", new RequestMethod[]{POST_HEAD, POST_GET, POST, DELETE});
 	}
 
 	/**验证权限是否通过
@@ -224,7 +254,7 @@ public class AccessVerifier {
 			throw new AccessException(table + "不允许访问！");
 		}
 		if (method == null) {
-			method = GET;
+			method = RequestMethod.GET;
 		}
 		for (int i = 0; i < methods.length; i++) {
 			if (method == methods[i]) {

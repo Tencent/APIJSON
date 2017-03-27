@@ -8,13 +8,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.Entry;
+import zuo.biao.apijson.FunctionList;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.TypeValueKeyEntry;
+import zuo.biao.apijson.server.model.BaseModel;
 
 /**
  * @author Lemon
  */
-public class Function {
+public class Function implements FunctionList {
 	private static final String TAG = "Function";
 
 
@@ -58,7 +60,7 @@ public class Function {
 
 		System.out.println("plus = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
 		System.out.println("count = " + invoke(jsonMap, "count(Collection:collection)"));
-		System.out.println("contains = " + invoke(jsonMap, "contains(Collection:collection,Object:id)"));
+		System.out.println("isContain = " + invoke(jsonMap, "isContain(Collection:collection,Object:id)"));
 		System.out.println("get(Map:map,key) = " + invoke(jsonMap, "get(Map:map,key)"));
 		System.out.println("get(Collection:collection,int:@position) = " + invoke(jsonMap, "get(Collection:collection,int:@position)"));
 		System.out.println("Integer:get(Map:map,key) = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
@@ -79,7 +81,7 @@ public class Function {
 					+ " >> return null;");
 			return null;
 		}
-		
+
 		String[] typeValues = StringUtil.split(function.substring(start + 1, end));
 
 		Class<?>[] types = null;
@@ -108,39 +110,80 @@ public class Function {
 	public static Object invoke(String methodName, Class<?>[] parameterTypes, Object[] args) throws Exception {
 		Function obj = new Function();
 		Class<?> clazz = obj.getClass();
-//		try {
-			return clazz.getDeclaredMethod(methodName, parameterTypes).invoke(obj, args);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return null;
+		//		try {
+		return clazz.getDeclaredMethod(methodName, parameterTypes).invoke(obj, args);
+		//		} catch (Exception e) {
+		//			e.printStackTrace();
+		//		}
+		//		return null;
 	}
-	
 
-	
-	
 
-	public static String search(String key) {
+
+
+	public String search(String key) {
 		return null;
 	}
 
-	public static long plus(long i0, long i1) {
+	public long plus(long i0, long i1) {
 		return i0 + i1;
 	}
-	
-	public static String newVerify(String phone) {
+
+	public String newVerify(String phone) {
 		return new Controller().postAuthCode(phone);
 	}
 
 
+	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**判断collection是否为空
+	 * @param collection
+	 * @return
+	 */
+	public <T> boolean isEmpty(Collection<T> collection) {
+		return BaseModel.isEmpty(collection);
+	}
+	/**判断map是否为空
+	 * @param <K>
+	 * @param <V>
+	 * @param map
+	 * @return
+	 */
+	public <K, V> boolean isEmpty(Map<K, V> map) {
+		return BaseModel.isEmpty(map); 
+	}
+	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	//判断是否为包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**判断collection是否包含object
 	 * @param collection
 	 * @param object
 	 * @return
 	 */
-	public static <T> boolean contains(Collection<T> collection, T object) {
-		return collection != null && collection.contains(object);
+	public <T> boolean isContain(Collection<T> collection, T object) {
+		return BaseModel.isContain(collection, object);
 	}
+	/**判断map是否包含key
+	 * @param <K>
+	 * @param <V>
+	 * @param map
+	 * @param key
+	 * @return
+	 */
+	public <K, V> boolean isContainKey(Map<K, V> map, K key) { 
+		return BaseModel.isContainKey(map, key); 
+	}
+	/**判断map是否包含value
+	 * @param <K>
+	 * @param <V>
+	 * @param map
+	 * @param value
+	 * @return
+	 */
+	public <K, V> boolean isContainValue(Map<K, V> map, V value) { 
+		return BaseModel.isContainValue(map, value);
+	}
+	//判断是否为包含 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 	//获取集合长度 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取数量
@@ -148,16 +191,16 @@ public class Function {
 	 * @param array
 	 * @return
 	 */
-	public static <T> int count(T[] array) {
-		return array == null ? 0 : array.length;
+	public <T> int count(T[] array) {  
+		return BaseModel.count(array); 
 	}
 	/**获取数量
 	 * @param <T>
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
-	public static <T> int count(Collection<T> collection) {
-		return collection == null ? 0 : collection.size();
+	public <T> int count(Collection<T> collection) { 
+		return BaseModel.count(collection); 
 	}
 	/**获取数量
 	 * @param <K>
@@ -165,41 +208,41 @@ public class Function {
 	 * @param map
 	 * @return
 	 */
-	public static <K, V> int count(Map<K, V> map) {
-		return map == null ? 0 : map.size();
+	public <K, V> int count(Map<K, V> map) {
+		return BaseModel.count(map); 
 	}
 	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-	//获取集合内的对象 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	/**获取集合内的对象
+	//获取集合长度 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**获取
 	 * @param <T>
 	 * @param array
 	 * @return
 	 */
-	public static <T> T get(T[] array, int position) {
-		return position < 0 || position >= count(array) ? null : array[position];
+	public <T> T get(T[] array, int position) { 
+		return BaseModel.get(array, position);
 	}
-	/**获取集合内的对象
+	/**获取
 	 * @param <T>
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T get(Collection<T> collection, int position) {
-		return (T) (collection == null ? null : get(collection.toArray(), position));
+	public <T> T get(Collection<T> collection, int position) { 
+		return BaseModel.get(collection, position); 
 	}
-	/**获取集合内的对象
+	/**获取
 	 * @param <K>
 	 * @param <V>
 	 * @param map null ? null
 	 * @param key null ? null : map.get(key);
 	 * @return
 	 */
-	public static <K, V> V get(Map<K, V> map, K key) {
-		return key == null || map == null ? null : map.get(key);
+	public <K, V> V get(Map<K, V> map, K key) { 
+		return BaseModel.get(map, key);
 	}
-	//获取集合内的对象 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 
 	//获取非基本类型对应基本类型的非空值 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -207,36 +250,37 @@ public class Function {
 	 * @param value
 	 * @return
 	 */
-	public static boolean value(Boolean value) {
-		return value == null ? false : value;
+	public boolean value(Boolean value) { 
+		return BaseModel.value(value); 
 	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static int value(Integer value) {
-		return value == null ? 0 : value;
+	public int value(Integer value) {  
+		return BaseModel.value(value); 
 	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static long value(Long value) {
-		return value == null ? 0 : value;
+	public long value(Long value) {   
+		return BaseModel.value(value); 
 	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static float value(Float value) {
-		return value == null ? 0 : value;
+	public float value(Float value) {  
+		return BaseModel.value(value); 
 	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static double value(Double value) {
-		return value == null ? 0 : value;
+	public double value(Double value) {    
+		return BaseModel.value(value);
 	}
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 }

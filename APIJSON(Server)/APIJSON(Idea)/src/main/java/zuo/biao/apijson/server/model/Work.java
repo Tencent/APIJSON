@@ -26,7 +26,7 @@ import zuo.biao.apijson.RequestMethod;
 		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
 		DELETE = "{necessaryColumns:id}"
 		)
-public class Moment extends BaseModel {
+public class Work extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;
 
 	private Long userId;
@@ -36,10 +36,10 @@ public class Moment extends BaseModel {
 	private List<Long> praiseUserIdList;
 	private List<Long> commentIdList;
 
-	public Moment() {
+	public Work() {
 		super();
 	}
-	public Moment(long id) {
+	public Work(long id) {
 		this();
 		setId(id);
 	}
@@ -47,42 +47,42 @@ public class Moment extends BaseModel {
 	public Long getUserId() {
 		return userId;
 	}
-	public Moment setUserId(Long userId) {
+	public Work setUserId(Long userId) {
 		this.userId = userId;
 		return this;
 	}
 	public String getContent() {
 		return content;
 	}
-	public Moment setContent(String content) {
+	public Work setContent(String content) {
 		this.content = content;
 		return this;
 	}
 	public String getPicture() {
 		return picture;
 	}
-	public Moment setPicture(String picture) {
+	public Work setPicture(String picture) {
 		this.picture = picture;
 		return this;
 	}
 	public List<String> getPictureList() {
 		return pictureList;
 	}
-	public Moment setPictureList(List<String> pictureList) {
+	public Work setPictureList(List<String> pictureList) {
 		this.pictureList = pictureList;
 		return this;
 	}
 	public List<Long> getPraiseUserIdList() {
 		return praiseUserIdList;
 	}
-	public Moment setPraiseUserIdList(List<Long> praiseUserIdList) {
+	public Work setPraiseUserIdList(List<Long> praiseUserIdList) {
 		this.praiseUserIdList = praiseUserIdList;
 		return this;
 	}
 	public List<Long> getCommentIdList() {
 		return commentIdList;
 	}
-	public Moment setCommentIdList(List<Long> commentIdList) {
+	public Work setCommentIdList(List<Long> commentIdList) {
 		this.commentIdList = commentIdList;
 		return this;
 	}

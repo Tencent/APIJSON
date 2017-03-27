@@ -16,9 +16,17 @@ package zuo.biao.apijson.server.model;
 
 import java.util.List;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**用户类
  * @author Lemon
  */
+@APIJSONRequest(
+		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
+		PUT = "{disallowColumns:phone, necessaryColumns:id}",
+		DELETE = "{necessaryColumns:id}"
+		)
 public class User extends BaseModel {
 	private static final long serialVersionUID = -1635551656020732611L;
 
@@ -31,7 +39,6 @@ public class User extends BaseModel {
 	private String head; //头像url
 	private String name; //姓名
 	private String phone; //手机
-	private String password; //手机
 	private String picture; //照片列表
 	private List<String> pictureList; //照片列表
 	private String tag; //标签
@@ -74,13 +81,6 @@ public class User extends BaseModel {
 	}
 	public User setPhone(String phone) {
 		this.phone = phone;
-		return this;
-	}
-	public String getPassword() {
-		return password;
-	}
-	public User setPassword(String password) {
-		this.password = password;
 		return this;
 	}
 	public String getPicture() {

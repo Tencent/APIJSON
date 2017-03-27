@@ -175,7 +175,7 @@ public class QueryHelper3 {
 		if (config == null) {
 			return null;
 		}
-		List<Column> list = new ArrayList<>();
+		List<Column> list = new ArrayList<Column>();
 
 		String columnsString = config.getColumns();
 		if (StringUtil.isNotEmpty(columnsString, true)) {

@@ -397,8 +397,12 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			dismissProgress();
 			if (user == null || user.getId() <= 0 || JSONResponse.isSucceed(
 					response.getJSONResponse(User.class.getSimpleName())) == false) {
-				showShortToast("注册失败，请检查网络后重试");
-				return;
+				if (response.getStatus() == 408 || response.getStatus() == 412) {
+					EditTextManager.showInputedError(context, etPasswordVerify
+							, response.getStatus() == 408 ? "验证码已过期" : "验证码错误");
+				} else {
+					showShortToast("注册失败，请检查网络后重试");
+				}
 			} else {
 				showShortToast("注册成功");
 				APIJSONApplication.getInstance().saveCurrentUser(user);

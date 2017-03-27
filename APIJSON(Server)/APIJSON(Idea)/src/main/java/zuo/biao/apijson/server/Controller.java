@@ -15,6 +15,7 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import java.util.Random;
+import java.util.concurrent.TimeoutException;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -127,12 +128,29 @@ public class Controller {
 
 	@RequestMapping("check/authCode/{phone}/{code}")
 	public String checkAuthCode(@PathVariable String phone, @PathVariable String code) {
-		if (StringUtil.isNumer(code) == false) {
-			code = "-1";
-		}
-		return new RequestParser(RequestMethod.POST_GET).parse(
-				newVerifyRequest(newVerify(phone, Integer.parseInt(0 + StringUtil.getNumber(code)))));
+		return JSON.toJSONString(checkVerify(phone, code));
 	}
+	
+	/**校验验证码
+	 * @param phone
+	 * @param code
+	 * @return
+	 */
+	public JSONObject checkVerify(String phone, String code) {
+		JSONResponse response = new JSONResponse(new RequestParser(RequestMethod.POST_GET).parseResponse(new JSONRequest(
+				new Verify(phone)).setTag(Verify.class.getSimpleName())));
+		Verify verify = response.getObject(Verify.class);
+		//验证码过期
+		if (verify != null && System.currentTimeMillis() - verify.getDate() > 60000) {
+			new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Verify(phone))
+					.setTag(Verify.class.getSimpleName()));
+			return RequestParser.newErrorResult(new TimeoutException("验证码已过期！"));
+		}
+		
+		return new JSONResponse(new RequestParser(RequestMethod.POST_HEAD).parseResponse(
+				new JSONRequest(new Verify(phone, code))));
+	}
+	
 
 	private JSONObject newVerify(String phone, int code) {
 		JSONObject verify = new JSONObject(true);
@@ -174,8 +192,7 @@ public class Controller {
 			response = new JSONResponse(new RequestParser(RequestMethod.HEAD).parseResponse(
 					new JSONRequest(new Password(User.class.getSimpleName(), phone, password))));
 		} else {//verify
-			response = new JSONResponse(new RequestParser(RequestMethod.HEAD).parseResponse(
-					new JSONRequest(new Verify(phone, password))));
+			response = new JSONResponse(checkVerify(phone, password));
 		}
 		if (JSONResponse.isSucceed(response) == false) {
 			return JSON.toJSONString(response);
@@ -232,18 +249,13 @@ public class Controller {
 		//					, new IllegalArgumentException("User.verify: " + verify + " 不合法！不能小于6个字符！")));
 		//		}
 
-		JSONResponse response = new JSONResponse(new RequestParser(RequestMethod.POST_GET).parseResponse(new JSONRequest(
-				new Verify(phone))));
-		Verify verify = response.getObject(Verify.class);
-		//验证码过期
-		if (verify != null && System.currentTimeMillis() - verify.getDate() > 60000) {
-			new JSONResponse(new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(
-					new Verify(phone))));
-			verify = null;
+		JSONResponse response = new JSONResponse(checkVerify(phone, requestObject.getString("verify")));
+		if (JSONResponse.isSucceed(response) == false) {
+			return JSON.toJSONString(response);
 		}
 		//手机号或验证码错误
-		if (verify == null || ("" + verify.getId()).equals(phone) == false) {
-			return JSON.toJSONString(RequestParser.extendErrorResult(requestObject
+		if (JSONResponse.isExist(response.getJSONResponse(Verify.class.getSimpleName())) == false) {
+			return JSON.toJSONString(RequestParser.extendErrorResult(response
 					, new ConditionNotMatchException("手机号或验证码错误！")));
 		}
 

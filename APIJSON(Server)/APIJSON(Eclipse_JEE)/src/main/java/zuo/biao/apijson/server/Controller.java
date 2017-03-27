@@ -249,13 +249,13 @@ public class Controller {
 		//					, new IllegalArgumentException("User.verify: " + verify + " 不合法！不能小于6个字符！")));
 		//		}
 
-		JSONResponse response = new JSONResponse(checkVerify(phone, user.getString("verify")));
+		JSONResponse response = new JSONResponse(checkVerify(phone, requestObject.getString("verify")));
 		if (JSONResponse.isSucceed(response) == false) {
 			return JSON.toJSONString(response);
 		}
 		//手机号或验证码错误
 		if (JSONResponse.isExist(response.getJSONResponse(Verify.class.getSimpleName())) == false) {
-			return JSON.toJSONString(RequestParser.extendErrorResult(requestObject
+			return JSON.toJSONString(RequestParser.extendErrorResult(response
 					, new ConditionNotMatchException("手机号或验证码错误！")));
 		}
 

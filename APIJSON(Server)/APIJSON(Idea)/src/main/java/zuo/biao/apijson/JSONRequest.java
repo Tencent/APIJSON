@@ -30,7 +30,7 @@ public class JSONRequest extends JSONObject {
 	}
 	/**
 	 * encode = true
-	 * @param object
+	 * @param object must be annotated by {@link APIJSONRequest}
 	 * @see	{@link #JSONRequest(String, Object)}
 	 */
 	public JSONRequest(Object object) {
@@ -46,7 +46,7 @@ public class JSONRequest extends JSONObject {
 		this(name, object, true);
 	}
 	/**
-	 * @param object
+	 * @param object must be annotated by {@link APIJSONRequest}
 	 * @param encode
 	 * @see {@link #JSONRequest(String, Object, boolean)}
 	 */
@@ -84,6 +84,7 @@ public class JSONRequest extends JSONObject {
 
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
+	public static final String KEY_TOTAL = "total";
 
 	public JSONRequest setCount(int count) {
 		put(KEY_COUNT, count);
@@ -99,6 +100,15 @@ public class JSONRequest extends JSONObject {
 	}
 	public int getPage() {
 		return getIntValue(KEY_PAGE);
+	}
+	//	private int total;
+	public JSONRequest setTotal(int total) {
+		//		this.total = total;
+		put(KEY_TOTAL, total);
+		return this;
+	}
+	public int getTotal() {
+		return getIntValue(KEY_TOTAL);//total;//
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -133,9 +143,10 @@ public class JSONRequest extends JSONObject {
 
 	/**
 	 * encode = true
-	 * @param value
+	 * @param value must be annotated by {@link APIJSONRequest}
 	 * @return {@link #put(String, boolean)}
 	 */
+	@Override
 	public Object put(Object value) {
 		return put(value, true);
 	}

@@ -16,47 +16,60 @@ package zuo.biao.apijson.server.model;
 
 import zuo.biao.apijson.APIJSONRequest;
 import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
 
-/**登录类
+/**请求类
  * @author Lemon
  */
 @SuppressWarnings("serial")
 @APIJSONRequest(
-		method = {RequestMethod.POST_HEAD, RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
+		method = {RequestMethod.GET}
 		)
-public class Verify extends BaseModel {
+public class Request extends BaseModel {
 
-	private String code;
+	public static final int TYPE_PASSWORD = 0;
+	public static final int TYPE_VERIFY = 1;
 
-	public Verify() {
+	private String tag;
+	private RequestMethod method;
+	private String structure;
+	private String desciption;
+
+	public Request() {
 		super();
 	}
-	public Verify(String phone) {
-		this();
-		setPhone(phone);
-	}
-	public Verify(Long phone) {
-		this();
-		setId(phone);
-	}
-	public Verify(String phone, String code) {
-		this(phone);
-		setCode(code);
-	}
-	
-	
-	public String getCode() {
-		return code;
-	}
-	public Verify setCode(String code) {
-		this.code = code;
-		return this;
+
+
+	public String getTag() {
+		return tag;
 	}
 
-	public Verify setPhone(String phone) {
-		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
-		return this;
+	public void setTag(String tag) {
+		this.tag = tag;
 	}
+
+	public RequestMethod getMethod() {
+		return method;
+	}
+
+	public void setMethod(RequestMethod method) {
+		this.method = method;
+	}
+
+	public String getStructure() {
+		return structure;
+	}
+
+	public void setStructure(String structure) {
+		this.structure = structure;
+	}
+
+	public String getDesciption() {
+		return desciption;
+	}
+
+	public void setDesciption(String desciption) {
+		this.desciption = desciption;
+	}
+
+
 }
