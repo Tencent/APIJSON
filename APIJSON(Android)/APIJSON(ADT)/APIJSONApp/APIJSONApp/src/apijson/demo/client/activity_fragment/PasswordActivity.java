@@ -231,32 +231,40 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 				return;
 			}
 		}
-		
+
 		switch (type) {
 		case TYPE_REGISTER:
 			register();
 			break;
 		default:
-			checkVerify();
+			checkVerify(true);
 			break;
 		}
 	}
 
 	/**验证验证码
+	 * @param fromServer 
 	 */
-	private void checkVerify() {
+	private boolean checkVerify(boolean fromServer) {
 		if (EditTextManager.isInputedCorrect(context, etPasswordPhone, EditTextManager.TYPE_PHONE) == false 
 				|| EditTextManager.isInputedCorrect(context, etPasswordVerify, EditTextManager.TYPE_VERIFY) == false) {
-			return;
+			return false;
+		}
+		
+		if (fromServer) {
+			showProgress();
+			HttpRequest.checkAuthCode(StringUtil.getTrimedString(etPasswordPhone),
+					StringUtil.getTrimedString(etPasswordVerify), HTTP_CHECK_VERIFY, this);
 		}
 
-		showProgress();
-		HttpRequest.checkAuthCode(StringUtil.getTrimedString(etPasswordPhone),
-				StringUtil.getTrimedString(etPasswordVerify), HTTP_CHECK_VERIFY, this);
+		return true;
 	}
 
 
 	private void register() {
+		if (checkVerify(false) == false) {
+			return;
+		}
 		showProgress();
 		HttpRequest.register(StringUtil.getTrimedString(etPasswordVerify)
 				, StringUtil.getTrimedString(etPasswordPhone)
