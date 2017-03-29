@@ -187,8 +187,8 @@ public class RequestParser {
 		if (object == null) {
 			object = new JSONObject(true);
 		}
-		object.put("status", status);
-		object.put("message", message);
+		object.put(JSONResponse.KEY_STATUS, status);
+		object.put(JSONResponse.KEY_MESSAGE, message);
 		return object;
 	}
 	/**添加请求成功的状态内容
@@ -204,7 +204,7 @@ public class RequestParser {
 	 */
 	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
 		JSONObject error = newErrorResult(e);
-		return extendResult(object, error.getIntValue("status"), error.getString("message"));
+		return extendResult(object, error.getIntValue(JSONResponse.KEY_STATUS), error.getString(JSONResponse.KEY_MESSAGE));
 	}
 	/**新建错误状态内容
 	 * @param e
@@ -472,7 +472,8 @@ public class RequestParser {
 						} else if (key.endsWith("-")) {//remove
 							putType = 2;
 						} else {//replace
-							throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + " 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
+							throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
+									" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
 						}
 						String realKey = getRealKey(requestMethod, key, false);
 
@@ -531,7 +532,7 @@ public class RequestParser {
 						if (value instanceof String == false) {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
-						System.out.println("getObject  StringUtil.isPath(value) >> parseRelation = " + parseRelation);
+						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = getRealKey(requestMethod, key, false);
 						if (parseRelation) {
 							transferredRequest.put(replaceKey, getValueByPath(relationMap.get(getPath(path, replaceKey))));
@@ -607,7 +608,7 @@ public class RequestParser {
 		}
 		String path = getPath(parentPath, name);
 
-		int page = 0, count = 0;
+		int page = 0, count = 0, total = 0;
 		try {
 			page = request.getIntValue(JSONRequest.KEY_PAGE);
 			count = request.getIntValue(JSONRequest.KEY_COUNT);
@@ -624,7 +625,6 @@ public class RequestParser {
 		if (count <= 0 || count > 10) {//10以下不优化长度
 			if(parseRelation == false && set != null) {
 				Object object;
-				int totalCount = 0;
 				for (String key : set) {
 					object = isTableKey(key) ? request.get(key) : null;
 					if (object != null && object instanceof JSONObject) {// && object.isEmpty() == false) {
@@ -632,15 +632,15 @@ public class RequestParser {
 						JSONObject response = new RequestParser(RequestMethod.HEAD)
 								.parseResponse(new JSONRequest(key, object));
 						JSONObject target = response == null ? null : response.getJSONObject(key);
-						totalCount = target == null ? 0 : target.getIntValue(JSONResponse.KEY_COUNT);
+						total = target == null ? 0 : target.getIntValue(JSONResponse.KEY_COUNT);
 						break;
 					}
 				}
-				if (totalCount <= 0) {//request内部没有JSONObject或者不存在适合条件的table内容
+				if (total <= 0) {//request内部没有JSONObject或者不存在适合条件的table内容
 					return null;
 				}
-				if (count > totalCount) {
-					count = totalCount;
+				if (count > total) {
+					count = total;
 					request.put(JSONRequest.KEY_COUNT, count);
 				}
 			}
@@ -723,6 +723,8 @@ public class RequestParser {
 		//更新关系path中对应改变字段
 		Set<String> relationSet = replacePath == null || relationMap == null ? null : relationMap.keySet();
 		if (relationSet != null) {
+			path = StringUtil.getString(path);
+
 			String relationValue;
 			for (String relationKey : relationSet) {
 				if (relationKey == null || relationKey.startsWith(replacePath) == false) {
@@ -731,7 +733,8 @@ public class RequestParser {
 				relationValue = relationMap.get(relationKey);
 				if (relationValue != null && relationValue.startsWith(path)
 						&& relationValue.startsWith(replacePath) == false) {
-					relationMap.put(relationKey, relationValue.replace(path, replacePath));
+					relationMap.put(relationKey, replacePath + relationValue.substring(path.length()));
+					//用replace会将所有符合字符替换！ []/Comment[] -> []/0/Comment[]/0, replaceFirst因[]特殊字符崩溃
 				}
 			}
 		}		
