@@ -309,9 +309,6 @@ public class RequestParser {
 			System.out.println(TAG + "filterTarget  target == null || request == null >> return null;");
 			return null;
 		}
-		//		if (method == null) {
-		//			method = RequestMethod.GET;
-		//		}
 
 		/**方法三：遍历request，transferredRequest只添加target所包含的object
 		 *  ，且移除target中DISALLOW_COLUMNS，期间判断NECESSARY_COLUMNS是否都有
@@ -535,7 +532,14 @@ public class RequestParser {
 						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = getRealKey(requestMethod, key, false);
 						if (parseRelation) {
-							transferredRequest.put(replaceKey, getValueByPath(relationMap.get(getPath(path, replaceKey))));
+							transferredRequest.remove(key);
+							selfDefineKeyMap.remove(key);
+							if (key.startsWith("@")) {
+								selfDefineKeyMap.put(replaceKey, getValueByPath(relationMap.get(getPath(path, replaceKey))));
+							} else {
+								transferredRequest.put(replaceKey, getValueByPath(relationMap.get(getPath(path, replaceKey))));
+							}
+
 							//							relationMap.remove(path + SEPARATOR + key);
 							updateRelation(path, getPath(path, replaceKey));//request结构已改变，需要更新依赖关系
 						} else {
