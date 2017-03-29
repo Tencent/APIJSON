@@ -262,7 +262,7 @@ public class TimeUtil {
 			if(nowDetails[1] == smartDetail[1]) {//this month
 				long day = nowDetails[2] - smartDetail[2];//between/(24*3600);
 				if (day >= 3) {//fomer day
-					smartDate = "本月" + String.valueOf(smartDetail[2]) + "日";
+					smartDate = String.valueOf(smartDetail[2]) + "日";
 				} else if (day >= 2) {//fomer day
 					smartDate = "前天";
 				} else if (day >= 1) {//fomer day
@@ -287,7 +287,7 @@ public class TimeUtil {
 				} else if(day >= -2) {//the day after tomorrow
 					smartDate = "后天";
 				} else {
-					smartDate = "本月" + String.valueOf(smartDetail[2]) + "日";
+					smartDate = String.valueOf(smartDetail[2]) + "日";
 				}
 			} else {//!!!
 				smartDate = String.valueOf(smartDetail[1]) + "月" + String.valueOf(smartDetail[2]) + "日";

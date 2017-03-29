@@ -15,7 +15,7 @@ limitations under the License.*/
 package apijson.demo.client.activity_fragment;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +49,7 @@ import apijson.demo.client.R;
 import apijson.demo.client.adapter.CommentAdapter;
 import apijson.demo.client.adapter.CommentAdapter.ItemView.OnCommentClickListener;
 import apijson.demo.client.application.APIJSONApplication;
+import apijson.demo.client.manager.HttpManager;
 import apijson.demo.client.model.Comment;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.MomentItem;
@@ -353,21 +354,30 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	private boolean loadHead = true;
 	@Override
 	public void getListAsync(final int page) {
-		if (loadHead && page <= 0) {
+		if (loadHead && page <= HttpManager.PAGE_NUM_0) {
 			HttpRequest.getMoment(momentId, HTTP_GET_MOMENT, MomentActivity.this);
 		}
-		HttpRequest.getCommentList(momentId, 4, page, -page, this);
+		HttpRequest.getCommentList(momentId, 0, page, -page, this);
 	}
 
-	//TODO 还是直接在Request中获取childList？
+	//	private int page;
 	@Override
 	public List<CommentItem> parseArray(String json) {
+
 		List<CommentItem> list = JSON.parseArray(new JSONResponse(json).getArray(
 				CommentItem.class.getSimpleName()), CommentItem.class);
+
+		//		if (page <= HttpManager.PAGE_NUM_0) {
+		//			List<CommentItem> oringinList = adapter == null ? null : adapter.getList();
+		//			if (oringinList != null) {
+		//				list.addAll(oringinList);
+		//			}
+		//		}
+
 		if (list != null && list.isEmpty() == false) {
 			//parent和child分类
-			Map<Long, CommentItem> parentMap = new HashMap<>();//added
-			Map<Long, CommentItem> allChildMap = new HashMap<>();
+			Map<Long, CommentItem> parentMap = new LinkedHashMap<>();//added
+			Map<Long, CommentItem> allChildMap = new LinkedHashMap<>();
 			long id;
 			long toId;
 			for (CommentItem item : list) {
@@ -376,7 +386,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 					continue;
 				}
 
-				toId = item.getComment().getToId();
+				toId = item.getToId();
 				if (toId <= 0) {//parent
 					parentMap.put(id, item);
 				} else {//child
@@ -385,28 +395,37 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			}
 
 			//child放到parent的childList中
+			boolean isFirst;
 			CommentItem parent;
 			List<CommentItem> childList;
 			for (final CommentItem child : allChildMap.values()) {
-				parent = child;
-				do {//根据父评论一步步找到一级父评论
-					toId = parent.getComment().getToId();//父评论的父评论的id
+				toId = child.getToId();
+				isFirst = true;
+				while (parentMap.containsKey(toId) == false) {//根据父评论一步步找到一级父评论
 					parent = toId <= 0 ? null : allChildMap.get(toId);
 					if (parent == null) {
 						break;
 					}
-				} while (parentMap.containsKey(toId) == false);//toId不是一级父评论id
-				
+					if (isFirst) {
+						isFirst = false;
+						child.setToUser(parent.getUser());
+					}
+
+					toId = parent.getToId();//父评论的父评论的id
+				}
+
 				parent = parentMap.get(toId);
 				if (parent == null) {
 					continue;
+				}
+				if (toId == child.getToId()) {
+					child.setToUser(parent.getUser());
 				}
 
 				childList = parent.getChildList();
 				if (childList == null) {
 					childList = new ArrayList<>();
 				}
-				child.setToUser(parent.getUser());
 				childList.add(child);
 
 				parent.setChildList(childList);
@@ -554,6 +573,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			return;
 		}
 		if (requestCode <= 0) {
+			//			this.page = -requestCode;
 			super.onHttpResponse(requestCode, resultJson, e);
 			return;
 		}

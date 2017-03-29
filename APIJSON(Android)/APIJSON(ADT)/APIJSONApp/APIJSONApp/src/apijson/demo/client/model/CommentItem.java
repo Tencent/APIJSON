@@ -16,8 +16,6 @@ package apijson.demo.client.model;
 
 import java.util.List;
 
-import zuo.biao.apijson.JSONObject;
-import zuo.biao.apijson.JSONResponse;
 import android.support.annotation.NonNull;
 import apijson.demo.client.server.model.BaseModel;
 
@@ -27,7 +25,7 @@ public class CommentItem extends BaseModel {
 	private Comment comment;
 	private User user;
 	private User toUser;
-	private JSONObject toUserObject;
+//	private JSONObject toUserObject;
 	private List<CommentItem> childList;
 
 	public CommentItem() {
@@ -64,21 +62,21 @@ public class CommentItem extends BaseModel {
 	@NonNull
 	public User getToUser() {
 		if (toUser == null) {
-			toUser = JSONResponse.toObject(new JSONResponse(toUserObject), User.class);
+			toUser = new User();//JSONResponse.toObject(new JSONResponse(toUserObject), User.class);
 		}
 		return toUser;
 	}
 	public CommentItem setToUser(User toUser) {
 		this.toUser = toUser;
-		setToUserObject(new JSONObject(toUser));
+//		setToUserObject(new JSONObject(toUser));
 		return this;
 	}
-	public JSONObject getToUserObject() {
-		return toUserObject;
-	}
-	public void setToUserObject(JSONObject toUserObject) {
-		this.toUserObject = toUserObject;
-	}
+//	public JSONObject getToUserObject() {
+//		return toUserObject;
+//	}
+//	public void setToUserObject(JSONObject toUserObject) {
+//		this.toUserObject = toUserObject;
+//	}
 	
 	public List<CommentItem> getChildList() {
 		return childList;
@@ -92,6 +90,9 @@ public class CommentItem extends BaseModel {
 	@Override
 	public Long getId() {
 		return getComment().getId();
+	}
+	public Long getToId() {
+		return getComment().getToId();
 	}
 	@Override
 	public Long getDate() {

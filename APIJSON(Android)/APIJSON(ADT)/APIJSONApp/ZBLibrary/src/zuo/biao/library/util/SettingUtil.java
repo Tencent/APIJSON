@@ -67,17 +67,20 @@ public final class SettingUtil {
 	public static boolean isOnTestMode = false;//测试模式
 	public static boolean isFirstStart = true;//第一次打开应用
 
-	public static final boolean[] defaultValues = new boolean[]{
-		cache,//开启缓存
-		preload,//开启预加载
+	public static final boolean[] defaultValues;
+	static {
+		defaultValues = new boolean[]{
+				cache,//开启缓存
+				preload,//开启预加载
 
-		voice,//开启通知声
-		vibrate,//开启震动
-		noDisturb,//夜间防打扰
+				voice,//开启通知声
+				vibrate,//开启震动
+				noDisturb,//夜间防打扰
 
-		isOnTestMode,//测试模式
-		isFirstStart,//第一次打开应用
-	};
+				isOnTestMode,//测试模式
+				isFirstStart,//第一次打开应用
+		};
+	}
 
 	private static Context context;
 	/**初始化

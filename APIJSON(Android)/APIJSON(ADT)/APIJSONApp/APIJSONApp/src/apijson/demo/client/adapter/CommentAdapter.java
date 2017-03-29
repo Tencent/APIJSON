@@ -55,9 +55,14 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 		return getItem(position).getId();
 	}
 
+	private boolean showAll = false;
+	public void setShowAll(boolean showAll) {
+		this.showAll = showAll;
+	}
+	
 	@Override
 	public ItemView createView(int position, ViewGroup parent) {
-		return new ItemView(context, resources).setOnCommentClickListener(onCommentClickListener);
+		return new ItemView(context, resources, showAll).setOnCommentClickListener(onCommentClickListener);
 	}
 
 
@@ -70,13 +75,17 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 		}
 		
 		private OnCommentClickListener onCommentClickListener;
+
 		public ItemView setOnCommentClickListener(OnCommentClickListener onCommentClickListener) {
 			this.onCommentClickListener = onCommentClickListener;
 			return this;
 		}
 		
-		public ItemView(Activity context, Resources resources) {
+		
+		private boolean showAll;
+		public ItemView(Activity context, Resources resources, boolean showAll) {
 			super(context, resources);
+			this.showAll = showAll;
 		}
 
 		private LayoutInflater inflater;
@@ -117,7 +126,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			tvCommentContent.setText("" + content);
 			tvCommentTime.setText("" + TimeUtil.getSmartDate(data.getDate()));
 			ImageLoaderUtil.loadImage(ivCommentHead, data.getUser().getHead(), ImageLoaderUtil.TYPE_OVAL);
-			setCommentDownComment(data, false);
+			setChildComment(data, showAll);
 		}
 
 		@Override
@@ -141,7 +150,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 		 * @param data
 		 */
 		@SuppressLint("InflateParams")
-		public void setCommentDownComment(final CommentItem parentItem, boolean showAll) {
+		public void setChildComment(final CommentItem parentItem, boolean showAll) {
 
 			List<CommentItem> downList = parentItem.getChildList();
 			if (downList == null || downList.isEmpty()) {
@@ -151,18 +160,17 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 				findViewById(R.id.vCommentItemDivider).setVisibility(View.VISIBLE);
 
 				tvCommentMore.setVisibility(View.GONE);
-				if (showAll == false && downList.size() > 4) {
-
+				if (showAll == false && downList.size() > 3) {
 					tvCommentMore.setText("查看更多");
 					tvCommentMore.setVisibility(View.VISIBLE);
 					tvCommentMore.setOnClickListener(new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							setCommentDownComment(parentItem, true);
+							setChildComment(parentItem, true);
 						}
 					});
 
-					downList = downList.subList(0, 4);
+					downList = downList.subList(0, 3);
 				}
 
 				llCommentContainer.removeAllViews();

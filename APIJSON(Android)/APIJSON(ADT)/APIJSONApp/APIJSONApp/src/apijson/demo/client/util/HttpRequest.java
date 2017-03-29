@@ -414,10 +414,10 @@ public class HttpRequest {
 		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "[]/Moment/id"));
 		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumns(COLUMNS_USER));
 
-		JSONObject toUserObject = new JSONObject();
-		toUserObject.put(User.class.getSimpleName()
-				, new JSONRequest(ID_AT, "[]/CommentItem[]/Comment/toUserId").setColumns(COLUMNS_USER_SIMPLE));
-		commentItem.put("toUserObject", toUserObject);
+//		JSONObject toUserObject = new JSONObject();
+//		toUserObject.put(User.class.getSimpleName()
+//				, new JSONRequest(ID_AT, "[]/CommentItem[]/Comment/toUserId").setColumns(COLUMNS_USER_SIMPLE));
+//		commentItem.put("toUserObject", toUserObject);
 
 		//		commentItem.put("release", "total:[]/Moment/commentCount");
 		request.add(commentItem.toArray(3, 0, CommentItem.class.getSimpleName()));

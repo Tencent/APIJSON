@@ -63,6 +63,9 @@ public abstract class BaseAdapter<T> extends android.widget.BaseAdapter {
 	 * 传进来的数据列表
 	 */
 	public List<T> list;
+	public List<T> getList() {
+		return list;
+	}
 	/**刷新列表
 	 */
 	public synchronized void refresh(List<T> list) {

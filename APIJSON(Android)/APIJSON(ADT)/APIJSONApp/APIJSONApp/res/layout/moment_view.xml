@@ -87,8 +87,10 @@
                 <LinearLayout
                     android:id="@+id/llMomentViewPraise"
                     style="@style/ll_horizontal_wrap_wrap"
+                    android:gravity="center"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:padding="5dp" >
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp" >
 
                     <ImageView
                         android:id="@+id/ivMomentViewPraise"
@@ -105,15 +107,16 @@
 
                 <View
                     style="@style/divider_vertical_1px"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp" />
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp" />
 
                 <LinearLayout
+                    android:gravity="center"
                     android:id="@+id/llMomentViewComment"
                     style="@style/ll_horizontal_wrap_wrap"
-                    android:layout_marginLeft="6dp"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:padding="5dp" >
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp" >
 
                     <ImageView
                         android:id="@+id/ivMomentViewComment"
@@ -132,7 +135,8 @@
                 android:id="@+id/llMomentViewCommentContainer"
                 style="@style/ll_vertical_match_wrap"
                 android:layout_marginTop="5dp"
-                android:background="@color/alpha_3" >
+                android:background="@color/alpha_3"
+                android:visibility="gone" >
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

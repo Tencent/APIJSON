@@ -3,22 +3,21 @@
     style="@style/ll_vertical_match_wrap"
     android:background="@color/white" >
 
-    <RelativeLayout style="@style/match_wrap" >
+    <RelativeLayout
+        style="@style/match_wrap"
+        android:paddingRight="10dp" >
 
         <ImageView
             android:id="@+id/ivCommentHead"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp" />
+            android:layout_margin="10dp" />
 
         <LinearLayout
             android:id="@+id/layout_comment_head"
             style="@style/ll_horizontal_match_wrap"
             android:layout_alignBottom="@id/ivCommentHead"
             android:layout_alignTop="@id/ivCommentHead"
-            android:layout_marginRight="10dp"
             android:layout_toRightOf="@+id/ivCommentHead" >
 
             <TextView
@@ -65,8 +64,7 @@
 
             <LinearLayout
                 android:id="@+id/llCommentContainer"
-                style="@style/ll_vertical_match_wrap"
-                android:paddingRight="10dp" >
+                style="@style/ll_vertical_match_wrap" >
             </LinearLayout>
 
             <TextView
@@ -74,9 +72,11 @@
                 style="@style/text_middle"
                 android:layout_width="match_parent"
                 android:layout_gravity="right|center_vertical"
-                android:gravity="right"
-                android:padding="12dp"
-                android:text="查看更多"
+                android:background="@drawable/bg_item_to_alpha"
+                android:gravity="left|center_vertical"
+                android:paddingBottom="4dp"
+                android:paddingTop="4dp"
+                android:text="查看所有"
                 android:textColor="@color/green_deep"
                 android:textSize="13dp"
                 android:visibility="gone" />
