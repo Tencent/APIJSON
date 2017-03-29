@@ -14,10 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
@@ -204,9 +201,9 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			@Override
 			public void run() {
 				final List<CommentItem> list_ = CommentUtil.toDoubleLevelList(list);
-				
+
 				runUiThread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						setList(new AdapterCallBack<CommentAdapter>() {
@@ -218,7 +215,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 							@Override
 							public void refreshAdapter() {
-//								adapter.setShowAll(true);
+								//								adapter.setShowAll(true);
 								adapter.refresh(list_);
 							}
 						});						
@@ -352,20 +349,6 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	}
 
 
-	/**
-	 * @param actionType
-	 */
-	private void sendMomentBroadcast(int actionType) {
-		if (isAlive() == false) {
-			Log.e(TAG, "sendMomentBroadcast  isAlive() == false >> return;");
-			return;
-		}
-
-		//		sendBroadcast(new Intent(ActionUtil.REFRESH_WORK).
-		//				putExtra(ActionUtil.RESULT_WORK, Json.toJSONString(new Works(workId))).
-		//				putExtra(ActionUtil.TYPE, actionType));
-	}
-
 
 	private boolean loadHead = true;
 	@Override
@@ -373,7 +356,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		if (loadHead && page <= HttpManager.PAGE_NUM_0) {
 			HttpRequest.getMoment(momentId, HTTP_GET_MOMENT, MomentActivity.this);
 		}
-		HttpRequest.getCommentList(momentId, getCacheCount(), page, -page, this);
+		HttpRequest.getCommentList(momentId, 0, page, -page, this);
 	}
 
 	@Override
@@ -439,8 +422,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		});
 
 
-
-
+		//setOnItemClickListener会让ItemView内所有View显示onTouch background
 		lvBaseList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -515,7 +497,6 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			return;
 		}
 		if (requestCode <= 0) {
-			//			this.page = -requestCode;
 			super.onHttpResponse(requestCode, resultJson, e);
 			return;
 		}
@@ -525,15 +506,12 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		switch (requestCode) {
 		case HTTP_COMMENT: // 新增评论
 			operation = "评论";
-			//			sendMomentBroadcast(ActionUtil.TYPE_GET_WORK);
 			break;
 		case HTTP_REPLY:// 回复
 			operation = "回复";
-			//			sendMomentBroadcast(ActionUtil.TYPE_GET_WORK);
 			break;
 		case HTTP_DELETE:// 删除
 			operation = "删除";
-			//			sendMomentBroadcast(ActionUtil.TYPE_GET_WORK);
 			break;
 		default:
 			return;
