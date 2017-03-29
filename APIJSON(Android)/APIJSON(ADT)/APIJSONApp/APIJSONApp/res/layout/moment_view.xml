@@ -87,8 +87,8 @@
                 <LinearLayout
                     android:id="@+id/llMomentViewPraise"
                     style="@style/ll_horizontal_wrap_wrap"
-                    android:gravity="center"
                     android:background="@drawable/bg_item_to_alpha"
+                    android:gravity="center"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp" >
 
@@ -111,10 +111,10 @@
                     android:layout_marginTop="5dp" />
 
                 <LinearLayout
-                    android:gravity="center"
                     android:id="@+id/llMomentViewComment"
                     style="@style/ll_horizontal_wrap_wrap"
                     android:background="@drawable/bg_item_to_alpha"
+                    android:gravity="center"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp" >
 
@@ -135,9 +135,22 @@
                 android:id="@+id/llMomentViewCommentContainer"
                 style="@style/ll_vertical_match_wrap"
                 android:layout_marginTop="5dp"
-                android:background="@color/alpha_3"
                 android:visibility="gone" >
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvMomentViewCommentMore"
+                style="@style/text_middle"
+                android:layout_width="match_parent"
+                android:layout_gravity="right|center_vertical"
+                android:gravity="left|center_vertical"
+                android:paddingBottom="4dp"
+                android:paddingTop="4dp"
+                android:text="查看所有"
+                android:background="@drawable/bg_item_to_alpha"
+                android:textColor="@color/green_deep"
+                android:textSize="13dp"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

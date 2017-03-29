@@ -110,6 +110,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	public TextView tvMomentViewComment;
 
 	public ViewGroup llMomentViewCommentContainer;
+	public View tvMomentViewCommentMore;
 
 	@SuppressLint("InflateParams")
 	@Override
@@ -137,6 +138,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		tvMomentViewComment = findViewById(R.id.tvMomentViewComment);
 
 		llMomentViewCommentContainer = findViewById(R.id.llMomentViewCommentContainer);
+		tvMomentViewCommentMore = findViewById(R.id.tvMomentViewCommentMore);
 
 		return convertView;
 	}
@@ -215,23 +217,25 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		}
 		tvMomentViewComment.setText(total <= 0 ? "评论" : "" + total);
 		tvMomentViewComment.setTextColor(getColor(joined ? R.color.blue : R.color.black));
+		tvMomentViewCommentMore.setVisibility(showComment && count > 9 ? View.VISIBLE : View.GONE);//total > count
+		
+		llMomentViewCommentContainer.removeAllViews();
+		llMomentViewCommentContainer.setVisibility(total <= 0 ? View.GONE : View.VISIBLE);
 
 		if (showComment == false) {
 			Log.i(TAG, "setComment  showComment == false >> return;");
 			return;
 		}
-
-		llMomentViewCommentContainer.setVisibility(total <= 0 ? View.GONE : View.VISIBLE);
-		llMomentViewCommentContainer.removeAllViews();
-
+		
 		if (count > 0) {
+			if (count > 9) {
+				list = list.subList(0, 9);
+			}
 			for (CommentItem comment : list) {
 				addCommentView(comment);
 			}
 		}
-		if (total > count) {
-			addCommentView(new CommentItem(new Comment("查看所有")), true);
-		}
+		
 	}
 
 	private GridAdapter adapter;
@@ -288,14 +292,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	/**
 	 * @param comment
 	 */
-	private void addCommentView(CommentItem comment) {
-		addCommentView(comment, false);
-	}
-	/**
-	 * @param comment
-	 * @param isMore
-	 */
-	private void addCommentView(final CommentItem comment, final boolean isMore) {
+	private void addCommentView(final CommentItem comment) {
 		if (comment == null) {
 			Log.e(TAG, "addCommentView comment == null >> return; ");
 			return;
@@ -306,18 +303,13 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			return;
 		}
 
-		TextView commentItem = (TextView) inflater.inflate(isMore
-				? R.layout.comment_view_comment_more_item : R.layout.moment_view_comment_item, null);
-		if (isMore) {
-			commentItem.setText(content);
-		} else {
-			((CommentTextView) commentItem).setView(comment, true);
-		}
+		CommentTextView commentItem = (CommentTextView) inflater.inflate(R.layout.moment_view_comment_item, null);
+		commentItem.setView(comment, true);
 		commentItem.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				toComment(comment, ! isMore);
+				toComment(comment, true);
 			}
 		});
 

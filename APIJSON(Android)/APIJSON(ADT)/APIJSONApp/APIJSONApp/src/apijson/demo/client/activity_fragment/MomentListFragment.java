@@ -43,7 +43,9 @@ import apijson.demo.client.adapter.MomentAdapter;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseHttpListFragment;
 import apijson.demo.client.interfaces.TopBarMenuCallback;
+import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.MomentItem;
+import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
 
 import com.alibaba.fastjson.JSONObject;
@@ -162,16 +164,37 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, Runnable, TopBarMe
 
 	@Override
 	public void setList(final List<MomentItem> list) {
-		setList(new AdapterCallBack<MomentAdapter>() {
+		runThread(TAG + "setList", new Runnable() {
 
 			@Override
-			public MomentAdapter createAdapter() {
-				return new MomentAdapter(context);
-			}
+			public void run() {
+				if (list != null) {
+					for (MomentItem item : list) {
+						if (item != null) {
+							item.setCommentItemList(CommentUtil.toSingleLevelList(item.getCommentItemList()));
+						}
+					}
+				}
 
-			@Override
-			public void refreshAdapter() {
-				adapter.refresh(list);
+				runUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+
+						setList(new AdapterCallBack<MomentAdapter>() {
+
+							@Override
+							public MomentAdapter createAdapter() {
+								return new MomentAdapter(context);
+							}
+
+							@Override
+							public void refreshAdapter() {
+								adapter.refresh(list);
+							}
+						});						
+					}
+				});
 			}
 		});
 	}

@@ -68,11 +68,11 @@ public class CommentTextView extends TextView {
 		String userName = StringUtil.getTrimedString(user.getName());
 		int userNameLength = showCommenter ? userName.length() : 0;
 
-		String targetUserName = StringUtil.getTrimedString(toUser.getName());
+		String toUserName = StringUtil.getTrimedString(toUser.getName());
 
 		SpannableString msp = null;
 		if (toUser.getId() <= 0) {
-			msp = new SpannableString(( showCommenter ? userName + ": " : "" ) + content);
+			msp = new SpannableString((showCommenter ? userName + ": " : "" ) + content);
 			msp.setSpan(new ClickableSpan() {
 				@Override
 				public void updateDrawState(TextPaint ds) {
@@ -87,7 +87,7 @@ public class CommentTextView extends TextView {
 				}
 			}, 0, userNameLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 		} else {
-			msp = new SpannableString((showCommenter ? userName : "") + "回复 " + targetUserName
+			msp = new SpannableString((showCommenter ? userName : "") + "回复 " + toUserName
 					+ ": " + content);
 			msp.setSpan(new ClickableSpan() {
 				@Override
@@ -117,7 +117,7 @@ public class CommentTextView extends TextView {
 						listener.onClick(widget);
 					}
 				}
-			}, userNameLength + 3, userNameLength + 3 + targetUserName.length(),
+			}, userNameLength + 3, userNameLength + 3 + toUserName.length(),
 			Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 
