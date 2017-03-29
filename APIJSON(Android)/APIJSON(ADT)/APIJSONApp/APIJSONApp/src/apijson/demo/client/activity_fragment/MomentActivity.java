@@ -54,6 +54,7 @@ import apijson.demo.client.model.Comment;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.model.User;
+import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
 import apijson.demo.client.view.MomentView;
 
@@ -198,16 +199,31 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	@Override
 	public void setList(final List<CommentItem> list) {
-		setList(new AdapterCallBack<CommentAdapter>() {
+		runThread(TAG + "setList", new Runnable() {
 
 			@Override
-			public CommentAdapter createAdapter() {
-				return new CommentAdapter(context, MomentActivity.this);
-			}
+			public void run() {
+				final List<CommentItem> list_ = CommentUtil.toDoubleLevelList(list);
+				
+				runUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						setList(new AdapterCallBack<CommentAdapter>() {
 
-			@Override
-			public void refreshAdapter() {
-				adapter.refresh(list);
+							@Override
+							public CommentAdapter createAdapter() {
+								return new CommentAdapter(context, MomentActivity.this);
+							}
+
+							@Override
+							public void refreshAdapter() {
+//								adapter.setShowAll(true);
+								adapter.refresh(list_);
+							}
+						});						
+					}
+				});
 			}
 		});
 	}
@@ -357,86 +373,12 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		if (loadHead && page <= HttpManager.PAGE_NUM_0) {
 			HttpRequest.getMoment(momentId, HTTP_GET_MOMENT, MomentActivity.this);
 		}
-		HttpRequest.getCommentList(momentId, 0, page, -page, this);
+		HttpRequest.getCommentList(momentId, getCacheCount(), page, -page, this);
 	}
 
-	//	private int page;
 	@Override
 	public List<CommentItem> parseArray(String json) {
-
-		List<CommentItem> list = JSON.parseArray(new JSONResponse(json).getArray(
-				CommentItem.class.getSimpleName()), CommentItem.class);
-
-		//		if (page <= HttpManager.PAGE_NUM_0) {
-		//			List<CommentItem> oringinList = adapter == null ? null : adapter.getList();
-		//			if (oringinList != null) {
-		//				list.addAll(oringinList);
-		//			}
-		//		}
-
-		if (list != null && list.isEmpty() == false) {
-			//parent和child分类
-			Map<Long, CommentItem> parentMap = new LinkedHashMap<>();//added
-			Map<Long, CommentItem> allChildMap = new LinkedHashMap<>();
-			long id;
-			long toId;
-			for (CommentItem item : list) {
-				id = item == null ? 0 : item.getId();
-				if (id <= 0) {
-					continue;
-				}
-
-				toId = item.getToId();
-				if (toId <= 0) {//parent
-					parentMap.put(id, item);
-				} else {//child
-					allChildMap.put(id, item);
-				}
-			}
-
-			//child放到parent的childList中
-			boolean isFirst;
-			CommentItem parent;
-			List<CommentItem> childList;
-			for (final CommentItem child : allChildMap.values()) {
-				toId = child.getToId();
-				isFirst = true;
-				while (parentMap.containsKey(toId) == false) {//根据父评论一步步找到一级父评论
-					parent = toId <= 0 ? null : allChildMap.get(toId);
-					if (parent == null) {
-						break;
-					}
-					if (isFirst) {
-						isFirst = false;
-						child.setToUser(parent.getUser());
-					}
-
-					toId = parent.getToId();//父评论的父评论的id
-				}
-
-				parent = parentMap.get(toId);
-				if (parent == null) {
-					continue;
-				}
-				if (toId == child.getToId()) {
-					child.setToUser(parent.getUser());
-				}
-
-				childList = parent.getChildList();
-				if (childList == null) {
-					childList = new ArrayList<>();
-				}
-				childList.add(child);
-
-				parent.setChildList(childList);
-				parentMap.put(toId, parent);
-			}
-
-			//转为list
-			list = new ArrayList<>(parentMap.values());
-		}
-
-		return list;
+		return JSON.parseArray(new JSONResponse(json).getArray(CommentItem.class.getSimpleName()), CommentItem.class);
 	}
 
 	@Override
