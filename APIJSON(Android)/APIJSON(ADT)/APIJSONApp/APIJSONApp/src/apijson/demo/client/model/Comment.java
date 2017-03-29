@@ -45,16 +45,12 @@ public class Comment extends apijson.demo.client.server.model.Comment {
 		return value(super.getMomentId());
 	}
 	@Override
-	public Long getParentId() {
-		return value(super.getParentId());
+	public Long getToId() {
+		return value(super.getToId());
 	}
 	@Override
 	public Long getUserId() {
 		return value(super.getUserId());
-	}
-	@Override
-	public Long getToUserId() {
-		return value(super.getToUserId());
 	}
 
 }

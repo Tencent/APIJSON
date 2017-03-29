@@ -81,15 +81,13 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 
 		private LayoutInflater inflater;
 		
-		public View rlCommentMainItem;
-		public TextView tvName;
-		public TextView tvContent;
-		public TextView tvTime;
+		public ImageView ivCommentHead;
+		public TextView tvCommentName;
+		public TextView tvCommentContent;
+		public TextView tvCommentTime;
 
-		public ImageView ivHead;
-		public TextView tvFloor;
-		public LinearLayout llDownCommentContainer;
-		public TextView tvWatchMore;
+		public LinearLayout llCommentContainer;
+		public TextView tvCommentMore;
 		
 		@SuppressLint("InflateParams")
 		@Override
@@ -97,14 +95,13 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			this.inflater = inflater;
 			convertView = inflater.inflate(R.layout.comment_main_item, null);
 
-			ivHead = findViewById(R.id.ivCommentHead, this);
-			llDownCommentContainer = findViewById(R.id.llCommentDownCommentContainer);
-			tvWatchMore = findViewById(R.id.tvCommentWatchMore);
-			rlCommentMainItem = findViewById(R.id.rlCommentMainItem);
+			ivCommentHead = findViewById(R.id.ivCommentHead, this);
+			llCommentContainer = findViewById(R.id.llCommentContainer);
+			tvCommentMore = findViewById(R.id.tvCommentMore);
 
-			tvName = (TextView) findViewById(R.id.tvCommentName, this);
-			tvContent = (TextView) findViewById(R.id.tvCommentContent);
-			tvTime = (TextView) findViewById(R.id.tvCommentTime);
+			tvCommentName = (TextView) findViewById(R.id.tvCommentName, this);
+			tvCommentContent = (TextView) findViewById(R.id.tvCommentContent);
+			tvCommentTime = (TextView) findViewById(R.id.tvCommentTime);
 
 			return convertView;
 		}
@@ -116,10 +113,10 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			String name = StringUtil.getTrimedString(data.getUser().getName());
 			String content = StringUtil.getTrimedString(data.getComment().getContent());
 
-			tvName.setText("" + name);
-			tvContent.setText("" + content);
-			tvTime.setText("" + TimeUtil.getSmartDate(data.getDate()));
-			ImageLoaderUtil.loadImage(ivHead, data.getUser().getHead(), ImageLoaderUtil.TYPE_OVAL);
+			tvCommentName.setText("" + name);
+			tvCommentContent.setText("" + content);
+			tvCommentTime.setText("" + TimeUtil.getSmartDate(data.getDate()));
+			ImageLoaderUtil.loadImage(ivCommentHead, data.getUser().getHead(), ImageLoaderUtil.TYPE_OVAL);
 			setCommentDownComment(data, false);
 		}
 
@@ -132,7 +129,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 				}
 				break;
 			case R.id.ivCommentHead:
-				showShortToast("ivHead.ivHead  userId = " + data.getUser().getId());
+			case R.id.tvCommentName:
 				toActivity(UserActivity.createIntent(context, data.getUser().getId()));
 				break;
 			default:
@@ -148,17 +145,17 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 
 			List<CommentItem> downList = parentItem.getChildList();
 			if (downList == null || downList.isEmpty()) {
-				llDownCommentContainer.removeAllViews();
+				llCommentContainer.removeAllViews();
 				findViewById(R.id.vCommentItemDivider).setVisibility(View.GONE);
 			} else {
 				findViewById(R.id.vCommentItemDivider).setVisibility(View.VISIBLE);
 
-				tvWatchMore.setVisibility(View.GONE);
+				tvCommentMore.setVisibility(View.GONE);
 				if (showAll == false && downList.size() > 4) {
 
-					tvWatchMore.setText("查看更多");
-					tvWatchMore.setVisibility(View.VISIBLE);
-					tvWatchMore.setOnClickListener(new View.OnClickListener() {
+					tvCommentMore.setText("查看更多");
+					tvCommentMore.setVisibility(View.VISIBLE);
+					tvCommentMore.setOnClickListener(new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
 							setCommentDownComment(parentItem, true);
@@ -168,28 +165,26 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 					downList = downList.subList(0, 4);
 				}
 
-				llDownCommentContainer.removeAllViews();
+				llCommentContainer.removeAllViews();
 				for (int i = 0; i < downList.size(); i++) {
 					final int index = i;
 					
-					View commentItem = inflater.inflate(R.layout.comment_down_item, null);
-					TextView tvContent = (TextView) commentItem.findViewById(R.id.tvCommentContent);
-
+					TextView childComment = (TextView) inflater.inflate(R.layout.comment_down_item, null);
+					
 					final CommentItem data = downList.get(i);
 					String name = StringUtil.getTrimedString(data.getUser().getName());
 					String content = StringUtil.getTrimedString(data.getComment().getContent());
-					tvContent.setText(Html.fromHtml("<font color=\"#25a281\">" + StringUtil.getString(name) + "</font>"
+					childComment.setText(Html.fromHtml("<font color=\"#25a281\">" + StringUtil.getString(name) + "</font>"
 							+ " 回复 " + "<font color=\"#25a281\">" + StringUtil.getString(data.getToUser().getName())
 							+ "</font>" + " : " + content));
 
-					commentItem.setOnClickListener(new OnClickListener() {
+					childComment.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
 							onCommentClick(data, position, index, false);
-							
 						}
 					});
-					commentItem.setOnLongClickListener(new OnLongClickListener() {
+					childComment.setOnLongClickListener(new OnLongClickListener() {
 						
 						@Override
 						public boolean onLongClick(View v) {
@@ -198,7 +193,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 						}
 					});
 
-					llDownCommentContainer.addView(commentItem);
+					llCommentContainer.addView(childComment);
 				}
 			}
 		}

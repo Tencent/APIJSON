@@ -66,9 +66,6 @@ public class CommentItem extends BaseModel {
 		if (toUser == null) {
 			toUser = JSONResponse.toObject(new JSONResponse(toUserObject), User.class);
 		}
-		if (toUser == null) {
-			toUser = new User(getComment().getToUserId());
-		}
 		return toUser;
 	}
 	public CommentItem setToUser(User toUser) {

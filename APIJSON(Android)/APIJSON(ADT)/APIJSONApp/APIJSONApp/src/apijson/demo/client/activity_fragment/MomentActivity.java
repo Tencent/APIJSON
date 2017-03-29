@@ -367,7 +367,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		if (list != null && list.isEmpty() == false) {
 			//parent和child分类
 			Map<Long, CommentItem> parentMap = new HashMap<>();//added
-			List<CommentItem> allChildList = new ArrayList<>();
+			Map<Long, CommentItem> allChildMap = new HashMap<>();
 			long id;
 			long toId;
 			for (CommentItem item : list) {
@@ -376,31 +376,41 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 					continue;
 				}
 
-				toId = item.getComment().getParentId();
+				toId = item.getComment().getToId();
 				if (toId <= 0) {//parent
 					parentMap.put(id, item);
 				} else {//child
-					allChildList.add(item);
+					allChildMap.put(id, item);
 				}
 			}
 
 			//child放到parent的childList中
 			CommentItem parent;
 			List<CommentItem> childList;
-			for (CommentItem child : allChildList) {
-				toId = child == null ? 0 : child.getComment().getParentId();
-				parent = toId <= 0 ? null : parentMap.get(toId);
-				if (parent != null) {
-					childList = parent.getChildList();
-					if (childList == null) {
-						childList = new ArrayList<>();
+			for (final CommentItem child : allChildMap.values()) {
+				parent = child;
+				do {//根据父评论一步步找到一级父评论
+					toId = parent.getComment().getToId();//父评论的父评论的id
+					parent = toId <= 0 ? null : allChildMap.get(toId);
+					if (parent == null) {
+						break;
 					}
-					child.setToUser(parent.getUser());//TODO 不一定是parent的User
-					childList.add(child);
-
-					parent.setChildList(childList);
-					parentMap.put(toId, parent);
+				} while (parentMap.containsKey(toId) == false);//toId不是一级父评论id
+				
+				parent = parentMap.get(toId);
+				if (parent == null) {
+					continue;
 				}
+
+				childList = parent.getChildList();
+				if (childList == null) {
+					childList = new ArrayList<>();
+				}
+				child.setToUser(parent.getUser());
+				childList.add(child);
+
+				parent.setChildList(childList);
+				parentMap.put(toId, parent);
 			}
 
 			//转为list

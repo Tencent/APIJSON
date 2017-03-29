@@ -351,8 +351,8 @@ public class HttpRequest {
 		JSONRequest commentItem = new JSONRequest();
 		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "Moment/id"));
 		//		commentItem.put("release", "total:Moment/commentCount");
-		request.add(commentItem.toArray(3, 0, Comment.class.getSimpleName()));
-		//		request.put("commentCount@", "Comment[]/total");
+//		request.add(commentItem.toArray(3, 0, Comment.class.getSimpleName()));
+//		request.put("commentCount@", "Comment[]/total");
 		get(request, requestCode, listener);
 	}
 
@@ -501,10 +501,9 @@ public class HttpRequest {
 	public static void addComment(long momentId, long toCommentId, long toUserId, String content
 			, int requestCode, OnHttpResponseListener listener) {
 		Comment comment = new Comment()
+		.setToId(toCommentId)
 		.setUserId(application.getCurrentUserId())
 		.setMomentId(momentId)
-		.setParentId(toCommentId)
-		.setToUserId(toUserId)
 		.setContent(content);
 		post(new JSONRequest(comment).setTag(Comment.class.getSimpleName()), requestCode, listener);
 	}

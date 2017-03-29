@@ -3,9 +3,7 @@
     style="@style/ll_vertical_match_wrap"
     android:background="@color/white" >
 
-    <RelativeLayout
-        android:id="@+id/rlCommentMainItem"
-        style="@style/match_wrap" >
+    <RelativeLayout style="@style/match_wrap" >
 
         <ImageView
             android:id="@+id/ivCommentHead"
@@ -26,7 +24,9 @@
             <TextView
                 android:id="@+id/tvCommentName"
                 style="@style/text_middle"
+                android:layout_width="match_parent"
                 android:layout_weight="1"
+                android:background="@drawable/bg_item_to_alpha"
                 android:ellipsize="marquee"
                 android:gravity="left"
                 android:singleLine="false"
@@ -64,19 +64,19 @@
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/llCommentDownCommentContainer"
+                android:id="@+id/llCommentContainer"
                 style="@style/ll_vertical_match_wrap"
                 android:paddingRight="10dp" >
             </LinearLayout>
 
             <TextView
-                android:id="@+id/tvCommentWatchMore"
+                android:id="@+id/tvCommentMore"
                 style="@style/text_middle"
                 android:layout_width="match_parent"
                 android:layout_gravity="right|center_vertical"
                 android:gravity="right"
                 android:padding="12dp"
-                android:text="查看更多n条回复"
+                android:text="查看更多"
                 android:textColor="@color/green_deep"
                 android:textSize="13dp"
                 android:visibility="gone" />

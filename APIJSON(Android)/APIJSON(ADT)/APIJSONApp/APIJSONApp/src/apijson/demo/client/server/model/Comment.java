@@ -27,11 +27,10 @@ import zuo.biao.apijson.RequestMethod;
 public class Comment extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;
 	
-	private Long momentId;
-	private Long parentId;
-	private String content;
+	private Long toId;
 	private Long userId;
-	private Long toUserId;
+	private Long momentId;
+	private String content;
 	public Comment() {
 		super();
 	}
@@ -40,25 +39,12 @@ public class Comment extends BaseModel {
 		setId(id);
 	}
 	
-	public Long getMomentId() {
-		return momentId;
+
+	public Long getToId() {
+		return toId;
 	}
-	public Comment setMomentId(Long momentId) {
-		this.momentId = momentId;
-		return this;
-	}
-	public Long getParentId() {
-		return parentId;
-	}
-	public Comment setParentId(Long parentId) {
-		this.parentId = parentId;
-		return this;
-	}
-	public String getContent() {
-		return content;
-	}
-	public Comment setContent(String content) {
-		this.content = content;
+	public Comment setToId(Long toId) {
+		this.toId = toId;
 		return this;
 	}
 	public Long getUserId() {
@@ -68,11 +54,19 @@ public class Comment extends BaseModel {
 		this.userId = userId;
 		return this;
 	}
-	public Long getToUserId() {
-		return toUserId;
+	public Long getMomentId() {
+		return momentId;
 	}
-	public Comment setToUserId(Long toUserId) {
-		this.toUserId = toUserId;
+	public Comment setMomentId(Long momentId) {
+		this.momentId = momentId;
 		return this;
 	}
+	public String getContent() {
+		return content;
+	}
+	public Comment setContent(String content) {
+		this.content = content;
+		return this;
+	}
+
 }
