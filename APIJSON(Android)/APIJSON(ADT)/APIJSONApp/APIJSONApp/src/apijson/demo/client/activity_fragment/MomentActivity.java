@@ -215,7 +215,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 							@Override
 							public void refreshAdapter() {
-								//								adapter.setShowAll(true);
+								//	adapter.setShowAll(true);
 								adapter.refresh(list_);
 							}
 						});						

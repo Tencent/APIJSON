@@ -120,10 +120,10 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 	 */
 	public static UserListFragment createInstance(List<Long> idList) {
 		UserListFragment fragment = new UserListFragment();
-		
+
 		Bundle bundle = new Bundle();
 		bundle.putSerializable(ARGUMENT_ID_LIST, (Serializable) idList);
-		
+
 		fragment.setArguments(bundle);
 		return fragment;
 	}
@@ -150,10 +150,12 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 
 		argument = getArguments();
 		if (argument != null) {
-			range = argument.getInt(ARGUMENT_RANGE, range);
-			id = argument.getLong(ARGUMENT_ID, id);
-			search = JSON.parseObject(argument.getString(ARGUMENT_SEARCH));//(JSONObject) argument.getSerializable(ARGUMENT_SEARCH);
 			idList = (List<Long>) argument.getSerializable(ARGUMENT_ID_LIST);
+			if (idList == null) {
+				range = argument.getInt(ARGUMENT_RANGE, range);
+				id = argument.getLong(ARGUMENT_ID, id);
+				search = JSON.parseObject(argument.getString(ARGUMENT_SEARCH));//JSONObject can't be serializabled
+			}
 		}
 
 		initCache(this);
@@ -322,7 +324,7 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 			if (range != RANGE_ALL && verifyLogin() == false) {
 				return;
 			}
-			
+
 			showShortToast("输入为空则查看全部");
 			if (searchType <= 0) {
 				searchType = EditTextInfoWindow.TYPE_PHONE;
