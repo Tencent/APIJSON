@@ -89,13 +89,13 @@
                     style="@style/img_btn"
                     android:layout_marginRight="18dp"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:src="@drawable/praised" />
+                    android:src="@drawable/praise" />
 
                 <ImageView
                     android:id="@+id/ivMomentViewComment"
                     style="@style/img_btn"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:src="@drawable/commented" />
+                    android:src="@drawable/comment" />
             </LinearLayout>
 
             <LinearLayout
@@ -106,18 +106,6 @@
                 android:visibility="gone" >
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvMomentViewCommentMore"
-                style="@style/text_small_blue"
-                android:layout_width="match_parent"
-                android:background="@drawable/bg_item_to_alpha"
-                android:gravity="left|center_vertical"
-                android:paddingBottom="4dp"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:paddingTop="4dp"
-                android:text="查看所有"
-                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

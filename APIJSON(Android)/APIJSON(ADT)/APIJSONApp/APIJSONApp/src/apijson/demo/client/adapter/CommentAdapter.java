@@ -41,6 +41,7 @@ import apijson.demo.client.adapter.CommentAdapter.ItemView;
 import apijson.demo.client.adapter.CommentAdapter.ItemView.OnCommentClickListener;
 import apijson.demo.client.adapter.CommentAdapter.ItemView.OnShowAllListener;
 import apijson.demo.client.model.CommentItem;
+import apijson.demo.client.view.CommentContainerView;
 
 /**评论列表
  * @author Lemon
@@ -134,7 +135,6 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 
 
 		public LinearLayout llCommentContainer;
-		public TextView tvCommentMore;
 
 		@SuppressLint("InflateParams")
 		@Override
@@ -149,7 +149,6 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			tvCommentTime = (TextView) findViewById(R.id.tvCommentTime);
 
 			llCommentContainer = findViewById(R.id.llCommentContainer);
-			tvCommentMore = findViewById(R.id.tvCommentMore, this);
 
 			return convertView;
 		}
@@ -183,7 +182,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			case R.id.tvCommentName:
 				toActivity(UserActivity.createIntent(context, data.getUser().getId()));
 				break;
-			case R.id.tvCommentMore:
+			case R.id.tvCommentContainerViewMore:
 				if (onShowAllListener != null) {
 					onShowAllListener.onShowAll(position, this, true);
 				}
@@ -193,63 +192,56 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			}
 		}
 
+		public CommentContainerView commentContainerView;
 		/**显示子评论
 		 * @param data
 		 */
 		@SuppressLint("InflateParams")
 		public void setChildComment() {
-			List<CommentItem> downList = data.getChildList();
-			boolean isEmpty = downList == null || downList.isEmpty();
+			if (commentContainerView == null) {
+				commentContainerView = new CommentContainerView(context, resources);
+				llCommentContainer.removeAllViews();
+				llCommentContainer.addView(commentContainerView.createView(inflater));
 
-			llCommentContainer.removeAllViews();
-			tvCommentMore.setVisibility(View.GONE);
-
-			if (isEmpty) {
-				return;
+				commentContainerView.setOnCommentClickListener(onCommentClickListener);
+				commentContainerView.tvCommentContainerViewMore.setOnClickListener(this);
 			}
+			
+			commentContainerView.setMaxShowCount(showAll ? 0 : 3);
+			commentContainerView.bindView(data.getChildList());
 
-			if (showAll == false && downList.size() > 3) {
-				tvCommentMore.setVisibility(View.VISIBLE);
-				downList = downList.subList(0, 3);
-			}
-
-			for (int i = 0; i < downList.size(); i++) {
-				final int index = i;
-
-				TextView childComment = (TextView) inflater.inflate(R.layout.comment_down_item, null);
-
-				final CommentItem data = downList.get(i);
-				String name = StringUtil.getTrimedString(data.getUser().getName());
-				String content = StringUtil.getTrimedString(data.getComment().getContent());
-				childComment.setText(Html.fromHtml("<font color=\"#009ed3\">" + StringUtil.getString(name) + "</font>"
-						+ " 回复 " + "<font color=\"#009ed3\">" + StringUtil.getString(data.getToUser().getName())
-						+ "</font>" + " : " + content));
-
-				childComment.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						onCommentClick(data, position, index, false);
-					}
-				});
-				childComment.setOnLongClickListener(new OnLongClickListener() {
-
-					@Override
-					public boolean onLongClick(View v) {
-						onCommentClick(data, position, index, true);
-						return true;
-					}
-				});
-
-				llCommentContainer.addView(childComment);
-			}
+//			for (int i = 0; i < downList.size(); i++) {
+//				final int index = i;
+//
+//				TextView childComment = (TextView) inflater.inflate(R.layout.comment_down_item, null);
+//
+//				final CommentItem data = downList.get(i);
+//				String name = StringUtil.getTrimedString(data.getUser().getName());
+//				String content = StringUtil.getTrimedString(data.getComment().getContent());
+//				childComment.setText(Html.fromHtml("<font color=\"#009ed3\">" + StringUtil.getString(name) + "</font>"
+//						+ " 回复 " + "<font color=\"#009ed3\">" + StringUtil.getString(data.getToUser().getName())
+//						+ "</font>" + " : " + content));
+//
+//				childComment.setOnClickListener(new OnClickListener() {
+//					@Override
+//					public void onClick(View v) {
+//						onCommentClick(data, position, index, false);
+//					}
+//				});
+//				childComment.setOnLongClickListener(new OnLongClickListener() {
+//
+//					@Override
+//					public boolean onLongClick(View v) {
+//						onCommentClick(data, position, index, true);
+//						return true;
+//					}
+//				});
+//
+//				llCommentContainer.addView(childComment);
+//			}
 
 		}
 
-		protected void onCommentClick(CommentItem item, int position, int index, boolean isLong) {
-			if (onCommentClickListener != null) {
-				onCommentClickListener.onCommentClick(item, position, index, isLong);
-			}
-		}
 	}
 
 }

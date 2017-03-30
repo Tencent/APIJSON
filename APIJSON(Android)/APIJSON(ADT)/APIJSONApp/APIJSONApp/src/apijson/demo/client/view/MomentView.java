@@ -47,8 +47,8 @@ import apijson.demo.client.R;
 import apijson.demo.client.activity_fragment.LoginActivity;
 import apijson.demo.client.activity_fragment.MomentActivity;
 import apijson.demo.client.activity_fragment.UserActivity;
+import apijson.demo.client.adapter.CommentAdapter.ItemView.OnCommentClickListener;
 import apijson.demo.client.application.APIJSONApplication;
-import apijson.demo.client.model.Comment;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.Moment;
 import apijson.demo.client.model.MomentItem;
@@ -106,8 +106,6 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	public ImageView ivMomentViewComment;
 
 	public ViewGroup llMomentViewCommentContainer;
-	public View tvMomentViewCommentMore;
-
 	@SuppressLint("InflateParams")
 	@Override
 	public View createView(LayoutInflater inflater) {
@@ -130,7 +128,6 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		ivMomentViewComment = findViewById(R.id.ivMomentViewComment, this);
 
 		llMomentViewCommentContainer = findViewById(R.id.llMomentViewCommentContainer);
-		tvMomentViewCommentMore = findViewById(R.id.tvMomentViewCommentMore);
 
 		return convertView;
 	}
@@ -173,7 +170,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		// 点赞
 		setPraise(data.getIsPraised(), data.getPraiseCount());
 		// 评论
-		setComment(data.getIsCommented(), data.getCommentCount(), data.getCommentItemList());
+		setComment(data.getIsCommented(), data.getCommentItemList());
 
 	}
 
@@ -195,37 +192,41 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	}
 
 
+	public CommentContainerView commentContainerView;
 	/**设置评论
 	 * @param joined
 	 * @param commentCount 
 	 * @param list
 	 */
-	public void setComment(boolean joined, int total, List<CommentItem> list) {
-		int count = list == null ? 0 : list.size();
-		if (total < count) {
-			Log.e(TAG, "setComment  total < count ! >> total = count;");
-			total = count;
-		}
-		ivMomentViewComment.setImageResource(total <= 0 ? R.drawable.comment : R.drawable.commented);
-		tvMomentViewCommentMore.setVisibility(showComment && count > 9 ? View.VISIBLE : View.GONE);//total > count
-		
-		llMomentViewCommentContainer.removeAllViews();
-		llMomentViewCommentContainer.setVisibility(total <= 0 ? View.GONE : View.VISIBLE);
+	public void setComment(boolean joined, List<CommentItem> list) {
+		boolean isEmpty = list == null || list.isEmpty();
+		ivMomentViewComment.setImageResource(isEmpty ? R.drawable.comment : R.drawable.commented);
+	
+		llMomentViewCommentContainer.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
 
 		if (showComment == false) {
 			Log.i(TAG, "setComment  showComment == false >> return;");
 			return;
 		}
-		
-		if (count > 0) {
-			if (count > 9) {
-				list = list.subList(0, 9);
-			}
-			for (CommentItem comment : list) {
-				addCommentView(comment);
-			}
+
+		if (commentContainerView == null) {
+			commentContainerView = new CommentContainerView(context, resources);
+			llMomentViewCommentContainer.removeAllViews();
+			llMomentViewCommentContainer.addView(commentContainerView.createView(inflater));
+
+			commentContainerView.setOnCommentClickListener(new OnCommentClickListener() {
+				
+				@Override
+				public void onCommentClick(CommentItem item, int position, int index, boolean isLong) {
+					toComment(item, true);
+				}
+			});
+			commentContainerView.tvCommentContainerViewMore.setOnClickListener(this);
+			
+			commentContainerView.setMaxShowCount(9);
 		}
 		
+		commentContainerView.bindView(list);
 	}
 
 	private GridAdapter adapter;
@@ -275,36 +276,6 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	}
 
 
-
-
-
-
-	/**
-	 * @param comment
-	 */
-	private void addCommentView(final CommentItem comment) {
-		if (comment == null) {
-			Log.e(TAG, "addCommentView comment == null >> return; ");
-			return;
-		}
-		String content = StringUtil.getTrimedString(comment.getComment().getContent());
-		if (StringUtil.isNotEmpty(content, true) == false) {
-			Log.e(TAG, "addCommentView StringUtil.isNotEmpty(content, true) == false >> return; ");
-			return;
-		}
-
-		CommentTextView commentItem = (CommentTextView) inflater.inflate(R.layout.moment_view_comment_item, null);
-		commentItem.setView(comment, true);
-		commentItem.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				toComment(comment, true);
-			}
-		});
-
-		llMomentViewCommentContainer.addView(commentItem);
-	}
 
 	/**跳转到所有评论界面
 	 * @param isToComment
@@ -451,6 +422,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			}
 			break;
 		case R.id.tvMomentViewContent:
+		case R.id.tvCommentContainerViewMore:
 			toComment(false);
 			break;
 		default:
