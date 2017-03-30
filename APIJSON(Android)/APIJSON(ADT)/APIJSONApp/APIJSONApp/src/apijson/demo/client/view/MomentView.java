@@ -183,7 +183,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param count
 	 */
 	private void setPraise(boolean joined, int count) {
-		ivMomentViewComment.setImageResource(count <= 0 ? R.drawable.praise : R.drawable.praise_light);
+		ivMomentViewComment.setImageResource(count <= 0 ? R.drawable.praise : R.drawable.praised);
 	}
 
 	private boolean showComment = true;
@@ -206,7 +206,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			Log.e(TAG, "setComment  total < count ! >> total = count;");
 			total = count;
 		}
-		ivMomentViewComment.setImageResource(total <= 0 ? R.drawable.comment : R.drawable.comment_light);
+		ivMomentViewComment.setImageResource(total <= 0 ? R.drawable.comment : R.drawable.commented);
 		tvMomentViewCommentMore.setVisibility(showComment && count > 9 ? View.VISIBLE : View.GONE);//total > count
 		
 		llMomentViewCommentContainer.removeAllViews();

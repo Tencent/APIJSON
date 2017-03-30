@@ -89,13 +89,13 @@
                     style="@style/img_btn"
                     android:layout_marginRight="18dp"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:src="@drawable/praise_light" />
+                    android:src="@drawable/praised" />
 
                 <ImageView
                     android:id="@+id/ivMomentViewComment"
                     style="@style/img_btn"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:src="@drawable/comment_light" />
+                    android:src="@drawable/commented" />
             </LinearLayout>
 
             <LinearLayout
