@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import java.io.Serializable;
 import java.util.List;
 
 import zuo.biao.apijson.JSON;
@@ -60,6 +61,7 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 
 	public static final String ARGUMENT_RANGE = "ARGUMENT_RANGE";
 	public static final String ARGUMENT_SEARCH = "ARGUMENT_SEARCH";
+	public static final String ARGUMENT_ID_LIST = "ARGUMENT_ID_LIST";
 
 	/**
 	 * <br> range = RANGE_USER_FRIEND
@@ -110,6 +112,21 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 		fragment.setArguments(bundle);
 		return fragment;
 	}
+	/**
+	 * @param range
+	 * @param id
+	 * @param search
+	 * @return
+	 */
+	public static UserListFragment createInstance(List<Long> idList) {
+		UserListFragment fragment = new UserListFragment();
+		
+		Bundle bundle = new Bundle();
+		bundle.putSerializable(ARGUMENT_ID_LIST, (Serializable) idList);
+		
+		fragment.setArguments(bundle);
+		return fragment;
+	}
 
 	//与Activity通信>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -118,11 +135,15 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 	public static final int RANGE_USER = HttpRequest.RANGE_USER;
 	public static final int RANGE_USER_FRIEND = HttpRequest.RANGE_USER_FRIEND;
 	public static final int RANGE_USER_CIRCLE = HttpRequest.RANGE_USER_CIRCLE;
+	public static final int RANGE_MOMENT = HttpRequest.RANGE_MOMENT;
+	public static final int RANGE_COMMENT = HttpRequest.RANGE_COMMENT;
 
 
 	private int range = RANGE_ALL;
 	private long id = 0;
 	private JSONObject search;
+	private List<Long> idList;
+	@SuppressWarnings("unchecked")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
@@ -132,6 +153,7 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 			range = argument.getInt(ARGUMENT_RANGE, range);
 			id = argument.getLong(ARGUMENT_ID, id);
 			search = JSON.parseObject(argument.getString(ARGUMENT_SEARCH));//(JSONObject) argument.getSerializable(ARGUMENT_SEARCH);
+			idList = (List<Long>) argument.getSerializable(ARGUMENT_ID_LIST);
 		}
 
 		initCache(this);
@@ -222,7 +244,7 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 
 	@Override
 	public void getListAsync(final int page) {
-		HttpRequest.getUserList(range, id, search, getCacheCount(), page, -page, this);
+		HttpRequest.getUserList(range, id, search, idList, getCacheCount(), page, -page, this);
 	}
 
 	@Override
@@ -236,10 +258,14 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 	}
 	@Override
 	public String getCacheGroup() {
-		if (range == RANGE_ALL) {
-			return search != null ? null : "range=" + range;
+		if (search != null || idList != null) {
+			return null;
 		}
-		return range == RANGE_USER || search != null ? null : "range=" + range + ";userId=" + id;
+		if (range == RANGE_ALL) {
+			return "range=" + range;
+		}
+		return range == RANGE_USER || range == RANGE_MOMENT || range == RANGE_COMMENT
+				? null : "range=" + range + ";userId=" + id;
 	}
 	@Override
 	public String getCacheId(User data) {

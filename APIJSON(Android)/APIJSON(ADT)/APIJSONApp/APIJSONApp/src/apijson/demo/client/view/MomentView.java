@@ -47,6 +47,8 @@ import apijson.demo.client.R;
 import apijson.demo.client.activity_fragment.LoginActivity;
 import apijson.demo.client.activity_fragment.MomentActivity;
 import apijson.demo.client.activity_fragment.UserActivity;
+import apijson.demo.client.activity_fragment.UserListActivity;
+import apijson.demo.client.activity_fragment.UserListFragment;
 import apijson.demo.client.adapter.CommentAdapter.ItemView.OnCommentClickListener;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.model.CommentItem;
@@ -105,6 +107,11 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	public ImageView ivMomentViewPraise;
 	public ImageView ivMomentViewComment;
 
+	public ViewGroup llMomentViewPraise;
+	public TextView tvMomentViewPraise;
+	
+	public View vMomentViewDivider;
+	
 	public ViewGroup llMomentViewCommentContainer;
 	@SuppressLint("InflateParams")
 	@Override
@@ -127,6 +134,11 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		ivMomentViewPraise = findViewById(R.id.ivMomentViewPraise, this);
 		ivMomentViewComment = findViewById(R.id.ivMomentViewComment, this);
 
+		llMomentViewPraise = findViewById(R.id.llMomentViewPraise, this);
+		tvMomentViewPraise = findViewById(R.id.tvMomentViewPraise);
+		
+		vMomentViewDivider = findViewById(R.id.vMomentViewDivider);
+		
 		llMomentViewCommentContainer = findViewById(R.id.llMomentViewCommentContainer);
 
 		return convertView;
@@ -168,19 +180,39 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		// 图片
 		setPicture(moment.getPictureList());
 		// 点赞
-		setPraise(data.getIsPraised(), data.getPraiseCount());
+		setPraise(data.getIsPraised(), data.getPraiseUserIdList());
 		// 评论
-		setComment(data.getIsCommented(), data.getCommentItemList());
+		setComment(data.getCommentItemList());
 
+		vMomentViewDivider.setVisibility(llMomentViewPraise.getVisibility() == View.VISIBLE
+				&& llMomentViewCommentContainer.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
+		
 	}
 
 
 	/**设置赞
 	 * @param joined
-	 * @param count
+	 * @param list
 	 */
-	private void setPraise(boolean joined, int count) {
-		ivMomentViewComment.setImageResource(count <= 0 ? R.drawable.praise : R.drawable.praised);
+	private void setPraise(boolean joined, List<Long> list) {
+		int count = list == null ? 0 : list.size();
+		String[] names = null;
+		if (count > 0) {
+			if (count > 9) {
+				list = list.subList(0, 9);
+			}
+			names = new String[list.size()];
+			for (int i = 0; i < list.size(); i++) {
+				names[i] = "" + list.get(i);
+			}
+		}
+
+		ivMomentViewPraise.setImageResource(joined ? R.drawable.praised : R.drawable.praise);
+
+		llMomentViewPraise.setVisibility(count <= 0 ? View.GONE : View.VISIBLE);
+		tvMomentViewPraise.setText(count <= 0 ? ""
+				: zuo.biao.apijson.StringUtil.getString(names, "、")
+				+ (count <= 9 ? "" : "等" + count + "人觉得很赞"));
 	}
 
 	private boolean showComment = true;
@@ -194,15 +226,11 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 	public CommentContainerView commentContainerView;
 	/**设置评论
-	 * @param joined
-	 * @param commentCount 
 	 * @param list
 	 */
-	public void setComment(boolean joined, List<CommentItem> list) {
-		boolean isEmpty = list == null || list.isEmpty();
-		ivMomentViewComment.setImageResource(isEmpty ? R.drawable.comment : R.drawable.commented);
-	
-		llMomentViewCommentContainer.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+	public void setComment(List<CommentItem> list) {
+		//		ivMomentViewComment.setImageResource(joined ? R.drawable.commented : R.drawable.comment);
+		llMomentViewCommentContainer.setVisibility(list == null || list.isEmpty() ? View.GONE : View.VISIBLE);
 
 		if (showComment == false) {
 			Log.i(TAG, "setComment  showComment == false >> return;");
@@ -215,17 +243,17 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			llMomentViewCommentContainer.addView(commentContainerView.createView(inflater));
 
 			commentContainerView.setOnCommentClickListener(new OnCommentClickListener() {
-				
+
 				@Override
 				public void onCommentClick(CommentItem item, int position, int index, boolean isLong) {
 					toComment(item, true);
 				}
 			});
 			commentContainerView.tvCommentContainerViewMore.setOnClickListener(this);
-			
+
 			commentContainerView.setMaxShowCount(9);
 		}
-		
+
 		commentContainerView.bindView(list);
 	}
 
@@ -424,6 +452,10 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		case R.id.tvMomentViewContent:
 		case R.id.tvCommentContainerViewMore:
 			toComment(false);
+			break;
+		case R.id.llMomentViewPraise:
+			toActivity(UserListActivity.createIntent(context, data.getPraiseUserIdList())
+					.putExtra(UserListActivity.INTENT_TITLE, data.getPraiseCount() + "人觉得很赞"));
 			break;
 		default:
 			if (isLoggedIn() == false) {

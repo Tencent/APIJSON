@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import java.io.Serializable;
+import java.util.List;
+
 import zuo.biao.apijson.JSON;
 import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
@@ -40,6 +43,7 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 	public static final String INTENT_RANGE = "INTENT_RANGE";
 	public static final String INTENT_SEARCH = "INTENT_SEARCH";
 	public static final String INTENT_SHOW_SEARCH = "INTENT_SHOW_SEARCH";
+	public static final String INTENT_ID_LIST = "INTENT_ID_LIST";
 
 	/**启动这个Activity的Intent
 	 * @param context
@@ -100,6 +104,15 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 		.putExtra(INTENT_SEARCH, JSON.toJSONString(search))
 		.putExtra(INTENT_SHOW_SEARCH, showSearch);
 	}
+	/**启动这个Activity的Intent
+	 * @param context
+	 * @param idList
+	 * @return
+	 */
+	public static Intent createIntent(Context context, List<Long> idList) {
+		return new Intent(context, UserListActivity.class)
+		.putExtra(INTENT_ID_LIST, (Serializable) idList);
+	}
 
 	//启动方法>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -113,6 +126,8 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 	private long id;
 	private String search;
 	private boolean showSearch;
+	private List<Long> idList;
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -122,7 +137,8 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 		id = getIntent().getLongExtra(INTENT_ID, id);
 		search = getIntent().getStringExtra(INTENT_SEARCH);
 		showSearch = getIntent().getBooleanExtra(INTENT_SHOW_SEARCH, showSearch);
-		
+		idList = (List<Long>) getIntent().getSerializableExtra(INTENT_ID_LIST);
+
 		//功能归类分区方法，必须调用<<<<<<<<<<
 		initView();
 		initData();
@@ -161,7 +177,8 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 		findViewById(R.id.ivUserListForward).setVisibility(showSearch ? View.VISIBLE : View.GONE);
 
 
-		fragment = UserListFragment.createInstance(range, id, JSON.parseObject(search));
+		fragment = idList != null ? UserListFragment.createInstance(idList)
+				: UserListFragment.createInstance(range, id, JSON.parseObject(search));
 
 		fragmentManager
 		.beginTransaction()

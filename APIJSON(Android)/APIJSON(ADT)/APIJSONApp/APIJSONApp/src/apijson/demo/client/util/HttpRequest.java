@@ -280,48 +280,67 @@ public class HttpRequest {
 	public static final int RANGE_USER = 2;
 	public static final int RANGE_USER_FRIEND = 3;
 	public static final int RANGE_USER_CIRCLE = 4;//RANGE_USER + RANGE_USER_FRIEND
+	public static final int RANGE_MOMENT = 5;
+	public static final int RANGE_COMMENT = 6;
 	/**获取用户列表
 	 * @param range
 	 * @param id 
 	 * @param search 
+	 * @param idList 
 	 * @param count
 	 * @param page
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void getUserList(int range, long id, com.alibaba.fastjson.JSONObject search
+	public static void getUserList(int range, long id, com.alibaba.fastjson.JSONObject search, List<Long> idList
 			, int count, int page, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
 
 		JSONRequest userItem = new JSONRequest();
-		switch (range) {
-		case RANGE_ALL:
-			//do nothing
-			break;
-		case RANGE_SINGLE:
-		case RANGE_USER:
-			userItem.put(KEY_ID, id);
-			break;
-		case RANGE_USER_FRIEND:
-		case RANGE_USER_CIRCLE:
-			if (APIJSONApplication.getInstance().isCurrentUser(id) == false) {
-				Log.e(TAG, "只允许查看当前用户的!");
-				return;
+		if (idList != null) {
+			userItem.put(ID_IN, idList);
+		} else {
+			switch (range) {
+			case RANGE_ALL:
+				//do nothing
+				break;
+			case RANGE_SINGLE:
+			case RANGE_USER:
+				userItem.put(KEY_ID, id);
+				break;
+			case RANGE_USER_FRIEND:
+			case RANGE_USER_CIRCLE:
+				if (APIJSONApplication.getInstance().isCurrentUser(id) == false) {
+					Log.e(TAG, "只允许查看当前用户的!");
+					return;
+				}
+				apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
+				List<Long> list = currentUser == null ? null : currentUser.getFriendIdList();
+				if (list == null) {//不能放在range == RANGE_USER_CIRCLE里面，为null不会当成查询条件！
+					list = new ArrayList<Long>();
+				}
+				if (range == RANGE_USER_CIRCLE) {
+					list.add(currentUser.getId());
+				}
+				userItem.put(ID_IN, list);
+				break;
+			case RANGE_MOMENT:
+				JSONObject moment = new JSONObject(new Moment(id));
+				moment.setColumns("praiseUserIdList");
+				request.put(Moment.class.getSimpleName(), moment);
+				userItem.put(ID_IN, "Moment/praiseUserIdList");
+				break;
+			case RANGE_COMMENT:
+				JSONObject comment = new JSONObject(new Comment(id));
+				comment.setColumns(KEY_USER_ID);
+				request.put(Comment.class.getSimpleName(), comment);
+				userItem.put(ID_AT, "Comment/userId");
+				break;
+			default:
+				break;
 			}
-			apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
-			List<Long> list = currentUser == null ? null : currentUser.getFriendIdList();
-			if (list == null) {//不能放在range == RANGE_USER_CIRCLE里面，为null不会当成查询条件！
-				list = new ArrayList<Long>();
-			}
-			if (range == RANGE_USER_CIRCLE) {
-				list.add(currentUser.getId());
-			}
-			userItem.put(ID_IN, list);
-			break;
-		default:
-			break;
+			userItem.add(search);
 		}
-		userItem.add(search);
 
 		JSONRequest listRequest = new JSONRequest(User.class.getSimpleName(), userItem);
 		listRequest = listRequest.toArray(count, page, User.class.getSimpleName());
@@ -351,8 +370,8 @@ public class HttpRequest {
 		JSONRequest commentItem = new JSONRequest();
 		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "Moment/id"));
 		//		commentItem.put("release", "total:Moment/commentCount");
-//		request.add(commentItem.toArray(3, 0, Comment.class.getSimpleName()));
-//		request.put("commentCount@", "Comment[]/total");
+		//		request.add(commentItem.toArray(3, 0, Comment.class.getSimpleName()));
+		//		request.put("commentCount@", "Comment[]/total");
 		get(request, requestCode, listener);
 	}
 
