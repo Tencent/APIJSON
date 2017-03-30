@@ -224,7 +224,7 @@ public class QueryConfig {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
 			if (RequestParser.isGetMethod(method) == false && method != RequestMethod.POST_GET
-					&& where.containsKey(Table.ID) == false) {
+					&& where.containsKey(Table.ID) == false) {//POST必须有id，否则不能INSERT后直接返回id 
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
 
@@ -249,10 +249,21 @@ public class QueryConfig {
 					keyType = 2;
 				}
 				value = where.get(key);
-				key = RequestParser.getRealKey(method, key, false);
+				key = RequestParser.getRealKey(method, key, false, true);
 
-				whereString += (isFirst ? "" : " AND ") + (key + (keyType == 1 ? " LIKE '" + value + "'" : (keyType == 2
-						? getRangeString(key, value) : "='" + value + "'") ));
+				String condition = "";
+				switch (keyType) {
+				case 1:
+					condition = getLikeString(key, value);
+					break;
+				case 2:
+					condition = getRangeString(key, value);
+					break;
+				default:
+					condition = (key + "='" + value + "'");
+					break;
+				}
+				whereString += (isFirst ? "" : " AND ") + condition;
 
 				isFirst = false;
 			}
@@ -263,18 +274,56 @@ public class QueryConfig {
 		}
 		return "";
 	}
-	
+
+	/**WHERE key LIKE 'value'
+	 * @param key endsWith("!") ? key = key.substring(0, key.length() - 1) + " NOT ";
+	 * @param value
+	 * @return key LIKE 'value'
+	 */
+	public static String getLikeString(String key, Object value) {
+		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
+		if ("!".equals(last)) {
+			key = key.substring(0, key.length() - 1) + " NOT ";
+		}
+		return key + " LIKE '" + value + "'";
+	}
 	/**WHERE key > 'key0' AND key <= 'key1' AND ...
 	 * @param key
 	 * @param range "condition0,condition1..."
 	 * @return key condition0 AND key condition1 AND ...
 	 */
 	public static String getRangeString(String key, Object range) {
-		if (range instanceof JSONArray) {
-			return getInString(((JSONArray) range).toArray());
+		Log.i(TAG, "getRangeString key = " + key);
+
+		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
+		int type = -1;
+		Log.i(TAG, "getRangeString last = " + last);
+		if ("|".equals(last)) {
+			type = 0;
 		}
-		if (range instanceof String) {
-			return ((String) range).replaceAll(",", " AND " + key);//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
+		if ("&".equals(last)) {
+			type = 1;
+		}
+		if ("!".equals(last)) {
+			type = 2;
+		}
+		if (type >= 0 && type <= 2) {
+			key = key.substring(0, key.length() - 1);
+		}
+		if (type < 0) {
+			type = 0;
+		}
+		Log.i(TAG, "getRangeString key = " + key);
+
+		if (range instanceof JSONArray) {
+			if (type != 0 && type != 2) {
+				throw new IllegalArgumentException("\"key{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
+			}
+			return key + getInString(type == 2, ((JSONArray) range).toArray());
+		}
+		if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
+			range = key + ((String) range).replaceAll(",", (type == 1 ? " AND " : " OR ") + key);
+			return type != 2 ? (String) range : " NOT (" + range + ")";
 		}
 
 		throw new IllegalArgumentException("\"key{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
@@ -283,14 +332,14 @@ public class QueryConfig {
 	 * @param in
 	 * @return IN ('key0', 'key1', ... )
 	 */
-	public static String getInString(Object[] in) {
+	public static String getInString(boolean not, Object[] in) {
 		String inString = "";
 		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
 			for (int i = 0; i < in.length; i++) {
 				inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
 			}
 		}
-		return " IN (" + inString + ") ";
+		return (not ? " NOT " : "") + " IN (" + inString + ") ";
 	}
 	//WHERE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -331,7 +380,7 @@ public class QueryConfig {
 					keyType = 2;
 				}
 				value = where.get(key);
-				key = RequestParser.getRealKey(method, key, false);
+				key = RequestParser.getRealKey(method, key, false, true);
 
 				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
 						? getRemoveString(key, value) : "'" + value + "'") ) );
@@ -377,7 +426,7 @@ public class QueryConfig {
 		throw new IllegalArgumentException(key + "- 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
 	}
 	//SET >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
+
 
 	/**获取查询配置
 	 * @param table

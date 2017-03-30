@@ -107,7 +107,7 @@ public class RequestUtil {
 		request.put(User.class.getSimpleName(), new JSONRequest("id@", "/Moment/userId", encode), encode);
 
 		request.add(new JSONRequest(Comment.class.getSimpleName()
-				, new JSONRequest("workId@", "[]/Moment/id", encode), encode).
+				, new JSONRequest("momentId@", "[]/Moment/id", encode), encode).
 				toArray(3, 0, Comment.class.getSimpleName()), encode);
 
 		return request.toArray(3, 0, encode);

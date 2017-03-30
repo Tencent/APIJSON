@@ -321,6 +321,8 @@ public class HttpRequest {
 				}
 				if (range == RANGE_USER_CIRCLE) {
 					list.add(currentUser.getId());
+				} else {//问题可能在于登录状态错误
+					list.remove(currentUser.getId());//避免误添加
 				}
 				userItem.put(ID_IN, list);
 				break;

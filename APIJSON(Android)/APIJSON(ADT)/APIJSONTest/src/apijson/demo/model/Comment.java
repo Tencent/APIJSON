@@ -14,70 +14,59 @@ limitations under the License.*/
 
 package apijson.demo.model;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**评论类
  * @author Lemon
  */
+@APIJSONRequest(
+		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Comment extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;
 	
-	public Long workId;
-	public Long parentId;
-	public Long userId;
-	public Long targetUserId;
-	public String userName;
-	public String targetUserName;
-	public String content;
+	private Long toId;
+	private Long userId;
+	private Long momentId;
+	private String content;
 	public Comment() {
 		super();
 	}
-	public Comment(Long id, String content) {
+	public Comment(long id) {
 		this();
-		this.id = id;
-		this.content = content;
+		setId(id);
 	}
 	
-	public Long getWorkId() {
-		return workId;
+
+	public Long getToId() {
+		return toId;
 	}
-	public void setWorkId(Long workId) {
-		this.workId = workId;
-	}
-	public Long getParentId() {
-		return parentId;
-	}
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
+	public Comment setToId(Long toId) {
+		this.toId = toId;
+		return this;
 	}
 	public Long getUserId() {
 		return userId;
 	}
-	public void setUserId(Long userId) {
+	public Comment setUserId(Long userId) {
 		this.userId = userId;
+		return this;
 	}
-	public Long getTargetUserId() {
-		return targetUserId;
+	public Long getMomentId() {
+		return momentId;
 	}
-	public void setTargetUserId(Long targetUserId) {
-		this.targetUserId = targetUserId;
-	}
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-	public String getTargetUserName() {
-		return targetUserName;
-	}
-	public void setTargetUserName(String targetUserName) {
-		this.targetUserName = targetUserName;
+	public Comment setMomentId(Long momentId) {
+		this.momentId = momentId;
+		return this;
 	}
 	public String getContent() {
 		return content;
 	}
-	public void setContent(String content) {
+	public Comment setContent(String content) {
 		this.content = content;
+		return this;
 	}
-	
-	
+
 }

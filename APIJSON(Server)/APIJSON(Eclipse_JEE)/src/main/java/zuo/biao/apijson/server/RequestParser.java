@@ -450,7 +450,7 @@ public class RequestParser {
 			transferredRequest = new JSONObject(true);
 			functionMap = new LinkedHashMap<String, String>();
 			selfDefineKeyMap = new LinkedHashMap<String, Object>();
-			
+
 			Object value;
 			JSONObject result;
 			boolean isFirst = true;
@@ -480,7 +480,7 @@ public class RequestParser {
 							throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
 									" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
 						}
-						String realKey = getRealKey(requestMethod, key, false);
+						String realKey = getRealKey(requestMethod, key, false, false);
 
 						//GET > add all 或 remove all > PUT > remove key
 
@@ -538,7 +538,7 @@ public class RequestParser {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
 						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
-						String replaceKey = getRealKey(requestMethod, key, false);
+						String replaceKey = getRealKey(requestMethod, key, false, false);
 						if (parseRelation) {
 							transferredRequest.remove(key);
 							selfDefineKeyMap.remove(key);
@@ -581,7 +581,7 @@ public class RequestParser {
 					Set<String> functionSet = functionMap == null ? null : functionMap.keySet();
 					if (functionSet != null && functionSet.isEmpty() == false) {
 						for (String key : functionSet) {
-							transferredRequest.put(getRealKey(requestMethod, key, false)
+							transferredRequest.put(getRealKey(requestMethod, key, false, false)
 									, Function.invoke(transferredRequest, functionMap.get(key)));
 						}
 					}
@@ -943,11 +943,15 @@ public class RequestParser {
 	 * <br> "content$":"%searchKey%"       //$搜索，右边紧跟key。value是搜索表达式。
 	 * <br> "@columns":"id,sex,name"       //关键字，左边紧跟key。暂时不用，因为目前关键字很少，几乎不会发生冲突。value是','分隔的字符串。
 	 * 
-	 * @param key
+	 * @param method
+	 * @param originKey
+	 * @param isTableKey
+	 * @param saveLogic 保留逻辑运算符 & | !
 	 * @return
 	 */
-	public static String getRealKey(RequestMethod method, String originKey, boolean isTableKey) throws Exception {
-		Log.i(TAG, "getRealKey  originKey = " + originKey);
+	public static String getRealKey(RequestMethod method, String originKey, boolean isTableKey, boolean saveLogic)
+			throws Exception {
+		Log.i(TAG, "getRealKey  saveLogic = " + saveLogic + "; originKey = " + originKey);
 		if (originKey == null || isArrayKey(originKey)) {
 			Log.w(TAG, "getRealKey  originKey == null || isArrayKey(originKey) >>  return originKey;");
 			return originKey;
@@ -972,6 +976,15 @@ public class RequestParser {
 			}
 		}
 
+		String last = null;
+		if (isGetMethod(method) || method == RequestMethod.HEAD) {//逻辑运算符仅供GET,HEAD方法使用
+			last = key.isEmpty() ? "" : key.substring(key.length() - 1);
+			if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
+				key = key.substring(0, key.length() - 1);
+			} else {
+				last = null;//避免key + StringUtil.getString(last)错误延长
+			}
+		}
 
 		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好？不，查询就得截取
 		if (isTableKey) {//不允许在column key中使用Type:key形式
@@ -982,6 +995,10 @@ public class RequestParser {
 			throw new IllegalArgumentException(TAG + "/" + method + "  getRealKey: 字符 " + originKey + " 不合法！");
 		}
 
+		if (saveLogic) {
+			key = key + StringUtil.getString(last);
+		}
+		Log.i(TAG, "getRealKey  return key = " + key);
 		return key;
 	}
 
