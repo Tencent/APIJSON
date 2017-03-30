@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/text_middle"
+    style="@style/text_small_black"
     android:layout_width="match_parent"
     android:background="@drawable/bg_item_to_alpha"
     android:gravity="left|center_vertical"
-    android:singleLine="false"
-    android:text="Content"
-    android:paddingTop="4dp"
     android:paddingBottom="4dp"
-    android:textColor="@color/black"
-    android:textSize="13dp" />
+    android:paddingTop="4dp"
+    android:singleLine="false"
+    android:text="Content" />

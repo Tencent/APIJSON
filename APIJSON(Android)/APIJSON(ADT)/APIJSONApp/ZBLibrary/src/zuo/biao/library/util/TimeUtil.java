@@ -260,13 +260,15 @@ public class TimeUtil {
 
 		if (nowDetails[0] == smartDetail[0]) {//this year
 			if(nowDetails[1] == smartDetail[1]) {//this month
+				String time = " " + StringUtil.getString(new SimpleDateFormat("HH:mm").format(date));
+				
 				long day = nowDetails[2] - smartDetail[2];//between/(24*3600);
 				if (day >= 3) {//fomer day
-					smartDate = String.valueOf(smartDetail[2]) + "日";
+					smartDate = String.valueOf(smartDetail[2]) + "日" + time;
 				} else if (day >= 2) {//fomer day
-					smartDate = "前天";
+					smartDate = "前天" + time;
 				} else if (day >= 1) {//fomer day
-					smartDate = "昨天";
+					smartDate = "昨天" + time;
 				} else if(day >= 0) {//today
 					if (0 == (nowDetails[HOUR_OF_DAY] - smartDetail[HOUR_OF_DAY])) {
 						long minute = nowDetails[MINUTE] - smartDetail[MINUTE];
@@ -275,19 +277,17 @@ public class TimeUtil {
 						} else if (minute < 31) {
 							smartDate = minute + "分钟前";
 						} else {
-							SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-							smartDate = sdf.format(date);
+							smartDate = time;
 						}
 					} else {
-						SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-						smartDate = sdf.format(date);
+						smartDate = time;
 					}
 				} else if(day >= -1) {//tomorrow
-					smartDate = "明天";
+					smartDate = "明天" + time;
 				} else if(day >= -2) {//the day after tomorrow
-					smartDate = "后天";
+					smartDate = "后天" + time;
 				} else {
-					smartDate = String.valueOf(smartDetail[2]) + "日";
+					smartDate = String.valueOf(smartDetail[2]) + "日" + time;
 				}
 			} else {//!!!
 				smartDate = String.valueOf(smartDetail[1]) + "月" + String.valueOf(smartDetail[2]) + "日";

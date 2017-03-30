@@ -411,7 +411,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 						CommonUtil.copyText(context, momentItem.getMoment().getContent());
 					}
 					break;
-				case R.id.llMomentViewComment:
+				case R.id.ivMomentViewComment:
 					showInput(null);
 					break;
 				default:

@@ -35,7 +35,7 @@
 
                 <TextView
                     android:id="@+id/tvMomentViewName"
-                    style="@style/text_middle_blue"
+                    style="@style/text_small_blue"
                     android:layout_width="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/bg_item_to_alpha"
@@ -84,72 +84,39 @@
                     android:gravity="left"
                     android:text="2015年12月" />
 
-                <LinearLayout
-                    android:id="@+id/llMomentViewPraise"
-                    style="@style/ll_horizontal_wrap_wrap"
+                <ImageView
+                    android:id="@+id/ivMomentViewPraise"
+                    style="@style/img_btn"
+                    android:layout_marginRight="18dp"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:gravity="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp" >
+                    android:src="@drawable/praise_light" />
 
-                    <ImageView
-                        android:id="@+id/ivMomentViewPraise"
-                        style="@style/img_btn"
-                        android:src="@drawable/praise_light" />
-
-                    <TextView
-                        android:id="@+id/tvMomentViewPraise"
-                        style="@style/text_small"
-                        android:paddingLeft="3dp"
-                        android:paddingRight="5dp"
-                        android:text="点赞" />
-                </LinearLayout>
-
-                <View
-                    style="@style/divider_vertical_1px"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginTop="5dp" />
-
-                <LinearLayout
-                    android:id="@+id/llMomentViewComment"
-                    style="@style/ll_horizontal_wrap_wrap"
+                <ImageView
+                    android:id="@+id/ivMomentViewComment"
+                    style="@style/img_btn"
                     android:background="@drawable/bg_item_to_alpha"
-                    android:gravity="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp" >
-
-                    <ImageView
-                        android:id="@+id/ivMomentViewComment"
-                        style="@style/img_btn"
-                        android:src="@drawable/comment_light" />
-
-                    <TextView
-                        android:id="@+id/tvMomentViewComment"
-                        style="@style/text_small"
-                        android:paddingLeft="3dp"
-                        android:text="评论" />
-                </LinearLayout>
+                    android:src="@drawable/comment_light" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llMomentViewCommentContainer"
                 style="@style/ll_vertical_match_wrap"
                 android:layout_marginTop="5dp"
+                android:background="@color/alpha_1"
                 android:visibility="gone" >
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tvMomentViewCommentMore"
-                style="@style/text_middle"
+                style="@style/text_small_blue"
                 android:layout_width="match_parent"
-                android:layout_gravity="right|center_vertical"
+                android:background="@drawable/bg_item_to_alpha"
                 android:gravity="left|center_vertical"
                 android:paddingBottom="4dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
                 android:paddingTop="4dp"
                 android:text="查看所有"
-                android:background="@drawable/bg_item_to_alpha"
-                android:textColor="@color/green_deep"
-                android:textSize="13dp"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

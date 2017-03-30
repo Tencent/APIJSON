@@ -132,7 +132,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 		public TextView tvCommentContent;
 		public TextView tvCommentTime;
 
-		public View vCommentItemDivider;
+
 		public LinearLayout llCommentContainer;
 		public TextView tvCommentMore;
 
@@ -148,7 +148,6 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			tvCommentContent = (TextView) findViewById(R.id.tvCommentContent);
 			tvCommentTime = (TextView) findViewById(R.id.tvCommentTime);
 
-			vCommentItemDivider = findViewById(R.id.vCommentItemDivider);
 			llCommentContainer = findViewById(R.id.llCommentContainer);
 			tvCommentMore = findViewById(R.id.tvCommentMore, this);
 
@@ -203,7 +202,6 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 			boolean isEmpty = downList == null || downList.isEmpty();
 
 			llCommentContainer.removeAllViews();
-			vCommentItemDivider.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
 			tvCommentMore.setVisibility(View.GONE);
 
 			if (isEmpty) {
@@ -223,8 +221,8 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, ItemView> {
 				final CommentItem data = downList.get(i);
 				String name = StringUtil.getTrimedString(data.getUser().getName());
 				String content = StringUtil.getTrimedString(data.getComment().getContent());
-				childComment.setText(Html.fromHtml("<font color=\"#25a281\">" + StringUtil.getString(name) + "</font>"
-						+ " 回复 " + "<font color=\"#25a281\">" + StringUtil.getString(data.getToUser().getName())
+				childComment.setText(Html.fromHtml("<font color=\"#009ed3\">" + StringUtil.getString(name) + "</font>"
+						+ " 回复 " + "<font color=\"#009ed3\">" + StringUtil.getString(data.getToUser().getName())
 						+ "</font>" + " : " + content));
 
 				childComment.setOnClickListener(new OnClickListener() {

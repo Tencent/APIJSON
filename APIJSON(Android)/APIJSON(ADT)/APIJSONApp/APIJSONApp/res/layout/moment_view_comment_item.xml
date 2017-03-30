@@ -5,4 +5,8 @@
     android:layout_width="match_parent"
     android:background="@drawable/bg_item_to_alpha"
     android:gravity="left|center_vertical"
+    android:paddingBottom="2dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="2dp"
     android:text="This is a comment..." />

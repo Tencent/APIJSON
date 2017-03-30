@@ -102,12 +102,8 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	public GridView gvMomentView;
 
 	public TextView tvMomentViewDate;
-
-	public View llMomentViewPraise;
-	public TextView tvMomentViewPraise;
-
-	public View llMomentViewComment;
-	public TextView tvMomentViewComment;
+	public ImageView ivMomentViewPraise;
+	public ImageView ivMomentViewComment;
 
 	public ViewGroup llMomentViewCommentContainer;
 	public View tvMomentViewCommentMore;
@@ -130,12 +126,8 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		gvMomentView = findViewById(R.id.gvMomentView);
 
 		tvMomentViewDate = findViewById(R.id.tvMomentViewDate);
-
-		llMomentViewPraise = findViewById(R.id.llMomentViewPraise, this);
-		tvMomentViewPraise = findViewById(R.id.tvMomentViewPraise);
-
-		llMomentViewComment = findViewById(R.id.llMomentViewComment, this);
-		tvMomentViewComment = findViewById(R.id.tvMomentViewComment);
+		ivMomentViewPraise = findViewById(R.id.ivMomentViewPraise, this);
+		ivMomentViewComment = findViewById(R.id.ivMomentViewComment, this);
 
 		llMomentViewCommentContainer = findViewById(R.id.llMomentViewCommentContainer);
 		tvMomentViewCommentMore = findViewById(R.id.tvMomentViewCommentMore);
@@ -191,8 +183,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param count
 	 */
 	private void setPraise(boolean joined, int count) {
-		tvMomentViewPraise.setText(count <= 0 ? "点赞" : "" + count);
-		tvMomentViewPraise.setTextColor(getColor(joined ? R.color.blue : R.color.black));
+		ivMomentViewComment.setImageResource(count <= 0 ? R.drawable.praise : R.drawable.praise_light);
 	}
 
 	private boolean showComment = true;
@@ -215,8 +206,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			Log.e(TAG, "setComment  total < count ! >> total = count;");
 			total = count;
 		}
-		tvMomentViewComment.setText(total <= 0 ? "评论" : "" + total);
-		tvMomentViewComment.setTextColor(getColor(joined ? R.color.blue : R.color.black));
+		ivMomentViewComment.setImageResource(total <= 0 ? R.drawable.comment : R.drawable.comment_light);
 		tvMomentViewCommentMore.setVisibility(showComment && count > 9 ? View.VISIBLE : View.GONE);//total > count
 		
 		llMomentViewCommentContainer.removeAllViews();
@@ -468,10 +458,10 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 				return;
 			}
 			switch (v.getId()) {
-			case R.id.llMomentViewPraise:
+			case R.id.ivMomentViewPraise:
 				praise(! data.getIsPraised());
 				break;
-			case R.id.llMomentViewComment:
+			case R.id.ivMomentViewComment:
 				toComment(true);
 				break;
 			default:
