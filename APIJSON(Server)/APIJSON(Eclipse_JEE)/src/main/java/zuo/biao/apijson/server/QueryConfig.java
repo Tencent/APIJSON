@@ -300,11 +300,9 @@ public class QueryConfig {
 		Log.i(TAG, "getRangeString last = " + last);
 		if ("|".equals(last)) {
 			type = 0;
-		}
-		if ("&".equals(last)) {
+		} else if ("&".equals(last)) {
 			type = 1;
-		}
-		if ("!".equals(last)) {
+		} else if ("!".equals(last)) {
 			type = 2;
 		}
 		if (type >= 0 && type <= 2) {
@@ -322,8 +320,19 @@ public class QueryConfig {
 			return key + getInString(type == 2, ((JSONArray) range).toArray());
 		}
 		if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
-			range = key + ((String) range).replaceAll(",", (type == 1 ? " AND " : " OR ") + key);
-			return type != 2 ? (String) range : " NOT (" + range + ")";
+			String[] conditions = StringUtil.split((String) range);
+			String condition = "(";
+			if (conditions != null) {
+				int index;
+				for (int i = 0; i < conditions.length; i++) {//对函数条件length(key)<=5这种不再在开头加key
+					index = conditions[i] == null ? -1 : conditions[i].indexOf("(");
+					condition += ((i <= 0 ? "" : (type == 1 ? " AND " : " OR "))//连接方式
+							+ (index >= 0 && conditions[i].substring(index).contains(")") ? "" : key + " ")//函数和非函数条件
+							+ conditions[i]);//单个条件
+				}
+			}
+			condition += ")";
+			return type != 2 ? condition : " NOT " + condition;
 		}
 
 		throw new IllegalArgumentException("\"key{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
@@ -333,13 +342,14 @@ public class QueryConfig {
 	 * @return IN ('key0', 'key1', ... )
 	 */
 	public static String getInString(boolean not, Object[] in) {
-		String inString = "";
+		String inString = "(";
 		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
 			for (int i = 0; i < in.length; i++) {
 				inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
 			}
 		}
-		return (not ? " NOT " : "") + " IN (" + inString + ") ";
+		inString += ") ";
+		return (not ? " NOT " : "") + " IN " + inString;
 	}
 	//WHERE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

@@ -24,7 +24,7 @@ public class SQL {
 	 * @return
 	 */
 	public static String isNull(boolean isNull) {
-		return " is " + (isNull ? "" : " not ") + " null ";
+		return "is" + (isNull ? "" : " not") + " null";
 	}
 	/**
 	 * trim = false
@@ -45,14 +45,14 @@ public class SQL {
 		if (trim) {
 			s = trim(s);
 		}
-		return lengthCompare(s, (isEmpty ? ">" : "<=") + "0 ");
+		return lengthCompare(s, (isEmpty ? ">" : "<=") + "0");
 	}
 	/**
 	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
 	 * @return
 	 */
 	public static String lengthCompare(String s, String compare) {
-		return length(s) + compare + " ";
+		return length(s) + compare;
 	}
 	
 	
@@ -61,14 +61,14 @@ public class SQL {
 	 * @return
 	 */
 	public static String length(String s) {
-		return " length(" + s + ") ";
+		return "length(" + s + ")";
 	}
 	/**
 	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
 	 * @return
 	 */
 	public static String charLength(String s) {
-		return " char_length(" + s + ") ";
+		return "char_length(" + s + ")";
 	}
 	
 	/**
@@ -76,21 +76,21 @@ public class SQL {
 	 * @return
 	 */
 	public static String trim(String s) {
-		return " trim(" + s + ") ";
+		return "trim(" + s + ")";
 	}
 	/**
 	 * @param s
 	 * @return
 	 */
 	public static String trimLeft(String s) {
-		return " ltrim(" + s + ") ";
+		return "ltrim(" + s + ")";
 	}
 	/**
 	 * @param s
 	 * @return
 	 */
 	public static String trimRight(String s) {
-		return " rtrim(" + s + ") ";
+		return "rtrim(" + s + ")";
 	}
 	
 	/**
@@ -99,7 +99,7 @@ public class SQL {
 	 * @return
 	 */
 	public static String left(String s, int n) {
-		return " left(" + s + "," + n + ") ";
+		return "left(" + s + "," + n + ")";
 	}
 	/**
 	 * @param s
@@ -107,7 +107,7 @@ public class SQL {
 	 * @return
 	 */
 	public static String right(String s, int n) {
-		return " right(" + s + "," + n + ") ";
+		return "right(" + s + "," + n + ")";
 	}
 	
 	/**
@@ -117,7 +117,7 @@ public class SQL {
 	 * @return
 	 */
 	public static String subString(String s, int start, int end) {
-		return " substring(" + s + "," + start + "," + (end-start) + ") ";
+		return "substring(" + s + "," + start + "," + (end-start) + ")";
 	}
 	
 	/**
@@ -126,7 +126,7 @@ public class SQL {
 	 * @return
 	 */
 	public static String indexOf(String s, String c) {
-		return " instr(" + s + "," + c + ") ";
+		return "instr(" + s + "," + c + ")";
 	}
 	
 	/**
@@ -136,7 +136,7 @@ public class SQL {
 	 * @return
 	 */
 	public static String replace(String s, String c1, String c2) {
-		return " replace(" + s + "," + c1 + "," + c2 + ") ";
+		return "replace(" + s + "," + c1 + "," + c2 + ")";
 	}
 	
 	/**
@@ -145,7 +145,7 @@ public class SQL {
 	 * @return
 	 */
 	public static String equals(String s1, String s2) {
-		return " strcmp(" + s1 + "," + s2 + ") ";
+		return "strcmp(" + s1 + "," + s2 + ")";
 	}
 	
 	/**
@@ -153,14 +153,14 @@ public class SQL {
 	 * @return
 	 */
 	public static String toUpperCase(String s) {
-		return " upper(" + s + ") ";
+		return "upper(" + s + ")";
 	}
 	/**
 	 * @param s
 	 * @return
 	 */
 	public static String toLowerCase(String s) {
-		return " lower(" + s + ") ";
+		return "lower(" + s + ")";
 	}
 	
 	
