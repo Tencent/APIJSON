@@ -243,4 +243,114 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 
+
+
+	//Request，默认encode <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	/**
+	 * encode = true
+	 * @param key
+	 * @param isNull
+	 * @return {@link #putNull(String, boolean, boolean)}
+	 */
+	public JSONObject putNull(String key, boolean isNull) {
+		return putNull(key, isNull, true);
+	}
+	/**
+	 * @param key
+	 * @param isNull
+	 * @param encode
+	 * @return
+	 */
+	public JSONObject putNull(String key, boolean isNull, boolean encode) {
+		put(key + "{}", SQL.isNull(isNull), encode);
+		return this;
+	}
+	/**
+	 * trim = false
+	 * @param key
+	 * @param isEmpty
+	 * @return {@link #putEmpty(String, boolean, boolean)}
+	 */
+	public JSONObject putEmpty(String key, boolean isEmpty) {
+		return putEmpty(key, isEmpty, false);
+	}
+	/**
+	 * encode = true
+	 * @param key
+	 * @param isEmpty
+	 * @return {@link #putEmpty(String, boolean, boolean, boolean)}
+	 */
+	public JSONObject putEmpty(String key, boolean isEmpty, boolean trim) {
+		return putEmpty(key, isEmpty, trim, true);
+	}
+	/**
+	 * @param key
+	 * @param isEmpty
+	 * @param encode
+	 * @return
+	 */
+	public JSONObject putEmpty(String key, boolean isEmpty, boolean trim, boolean encode) {
+		put(key + "{}", SQL.isEmpty(key, isEmpty, trim), encode);
+		return this;
+	}
+	/**
+	 * encode = true
+	 * @param key
+	 * @param compare <=0, >5 ...
+	 * @return {@link #putLength(String, String, boolean)}
+	 */
+	public JSONObject putLength(String key, String compare) {
+		return putLength(key, compare, true);
+	}
+	/**
+	 * @param key
+	 * @param compare <=0, >5 ...
+	 * @param encode
+	 * @return
+	 */
+	public JSONObject putLength(String key, String compare, boolean encode) {
+		put(key + "{}", SQL.length(key) + compare, encode);
+		return this;
+	}
+
+	/**设置搜索
+	 * type = SEARCH_TYPE_CONTAIN_FULL
+	 * @param key
+	 * @param value
+	 * @return {@link #putSearch(String, String, int)}
+	 */
+	public JSONObject putSearch(String key, String value) {
+		return putSearch(key, value, SQL.SEARCH_TYPE_CONTAIN_FULL);
+	}
+	/**设置搜索
+	 * encode = true
+	 * @param key
+	 * @param value
+	 * @param type
+	 * @return {@link #putSearch(String, String, int, boolean)}
+	 */
+	public JSONObject putSearch(String key, String value, int type) {
+		return putSearch(key, value, type, true);
+	}
+	/**设置搜索
+	 * @param key
+	 * @param value
+	 * @param type
+	 * @param encode
+	 * @return 
+	 */
+	public JSONObject putSearch(String key, String value, int type, boolean encode) {
+		if (key == null) {
+			key = "";
+		}
+		if (key.endsWith("$") == false) {
+			key += "$";
+		}
+		put(key, SQL.search(value, type), encode);
+		return this;
+	}
+
+	//Request，默认encode >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 }

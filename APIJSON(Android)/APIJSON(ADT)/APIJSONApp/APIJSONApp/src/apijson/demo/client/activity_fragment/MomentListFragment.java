@@ -19,6 +19,7 @@ import java.util.List;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
+import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.library.interfaces.AdapterCallBack;
 import zuo.biao.library.interfaces.CacheCallBack;
@@ -43,7 +44,6 @@ import apijson.demo.client.adapter.MomentAdapter;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseHttpListFragment;
 import apijson.demo.client.interfaces.TopBarMenuCallback;
-import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
@@ -362,7 +362,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, Runnable, TopBarMe
 				JSONRequest search = new JSONRequest();
 				if (StringUtil.isNotEmpty(value, true)) {
 					split = ":";
-					search.putSearch("content", value, JSONRequest.SEARCH_TYPE_CONTAIN_ORDER);
+					search.putSearch("content", value, SQL.SEARCH_TYPE_CONTAIN_ORDER);
 				}
 				toActivity(MomentListActivity.createIntent(context, range, id, search, false)
 						.putExtra(INTENT_TITLE, "搜索" + split + value));
