@@ -14,16 +14,19 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
+import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.StringUtil;
+import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
-import android.text.style.ClickableSpan;
+import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
+import apijson.demo.client.R;
+import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.model.Comment;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.User;
@@ -31,6 +34,14 @@ import apijson.demo.client.model.User;
 /**评论TextView
  */
 public class CommentTextView extends TextView {
+
+	public interface OnNameClickListener {
+		void onNameClick(int index, View widget);
+	}
+	private OnNameClickListener listener;
+	public void setOnNameClickListener(OnNameClickListener l) {
+		this.listener = l;
+	}
 
 
 	public CommentTextView(Context context) {
@@ -45,10 +56,7 @@ public class CommentTextView extends TextView {
 		super(context, attrs, defStyle);
 	}
 
-	private OnClickListener listener;
-	public void setOnNameClickListener(OnClickListener l) {
-		this.listener = l;
-	}
+
 
 	private Comment comment;
 	private User user;
@@ -56,7 +64,7 @@ public class CommentTextView extends TextView {
 	/**设置View
 	 * @param comment
 	 */
-	public void setView(CommentItem item, boolean showCommenter) {
+	public void setView(CommentItem item) {
 		if (item == null) {
 			item = new CommentItem();
 		}
@@ -66,62 +74,49 @@ public class CommentTextView extends TextView {
 		String content = StringUtil.getTrimedString(comment.getContent());
 
 		String userName = StringUtil.getTrimedString(user.getName());
-		int userNameLength = showCommenter ? userName.length() : 0;
+		int userNameLength = userName.length();
 
 		String toUserName = StringUtil.getTrimedString(toUser.getName());
 
+
 		SpannableString msp = null;
 		if (toUser.getId() <= 0) {
-			msp = new SpannableString((showCommenter ? userName + ": " : "" ) + content);
-			msp.setSpan(new ClickableSpan() {
-				@Override
-				public void updateDrawState(TextPaint ds) {
-					ds.setColor(Color.parseColor("#009ed3")); // 设置超链接颜色
-					ds.setUnderlineText(false); // 超链接去掉下划线
-				}
-				@Override
-				public void onClick(View widget) {
-					if (listener != null) {
-						listener.onClick(widget);
-					}
-				}
-			}, 0, userNameLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+			msp = new SpannableString(userName + " : " + content);
 		} else {
-			msp = new SpannableString((showCommenter ? userName : "") + "回复 " + toUserName
-					+ ": " + content);
-			msp.setSpan(new ClickableSpan() {
-				@Override
-				public void updateDrawState(TextPaint ds) {
-					ds.setColor(Color.parseColor("#009ed3")); // 设置超链接颜色
-					ds.setUnderlineText(false); // 超链接去掉下划线
-				}
-
-				@Override
-				public void onClick(View widget) {
-					if (listener != null) {
-						listener.onClick(widget);
-					}
-				}
-			}, 0, userNameLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-			msp.setSpan(new ClickableSpan() {
-				@Override
-				public void updateDrawState(TextPaint ds) {
-					ds.setColor(Color.parseColor("#009ed3")); // 设置超链接颜色
-					ds.setUnderlineText(false); // 超链接去掉下划线
-				}
-
-				@Override
-				public void onClick(View widget) {
-					if (listener != null) {
-						listener.onClick(widget);
-					}
-				}
-			}, userNameLength + 3, userNameLength + 3 + toUserName.length(),
-			Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+			msp = new SpannableString(userName + " 回复 " + toUserName + " : " + content);
+			setSpan(msp, 1, userNameLength + 4, userNameLength + 4 + toUserName.length());
 		}
+		setSpan(msp, 0, 0, userNameLength);
 
 		setText(msp);
-		// setMovementMethod(LinkMovementMethod.getInstance());
+		setMovementMethod(LinkMovementMethod.getInstance());
+	}
+
+	private void setSpan(SpannableString msp, final int index, int start, int end) {
+		msp.setSpan(new ClickableSpan() {
+
+			@Override
+			public void onClick(View widget) {
+				onNameClick(index, widget);
+			}
+		}, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);		
+	}
+
+
+	public void onNameClick(int index, View widget) {
+		if (listener != null) {
+			listener.onNameClick(index, widget);
+		} else {
+			CommonUtil.toActivity((Activity) getContext(), UserActivity.createIntent(getContext()
+					, index == 0 ? user.getId() : toUser.getId()));	
+		}
+	}
+
+	public abstract class ClickableSpan extends android.text.style.ClickableSpan {
+		@Override
+		public void updateDrawState(TextPaint ds) {
+			ds.setColor(getResources().getColor(R.color.blue)); // 设置超链接颜色
+			ds.setUnderlineText(false); // 超链接下划线
+		}
 	}
 }

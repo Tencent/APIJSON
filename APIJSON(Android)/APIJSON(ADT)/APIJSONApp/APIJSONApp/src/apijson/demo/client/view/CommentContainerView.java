@@ -92,13 +92,13 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 		setComment(list);
 	}
 
-	
+
 	private int maxShowCount = 3;
 	public void setMaxShowCount(int maxShowCount) {
 		this.maxShowCount = maxShowCount;
 	}
-	
-	
+
+
 	/**设置评论
 	 * @param joined
 	 * @param commentCount 
@@ -107,7 +107,7 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 	public void setComment(List<CommentItem> list) {
 		int count = list == null ? 0 : list.size();
 		boolean showMore = maxShowCount > 0 && count > maxShowCount;
-		
+
 		tvCommentContainerViewMore.setVisibility(showMore ? View.VISIBLE : View.GONE);
 
 		llCommentContainerViewContainer.removeAllViews();
@@ -142,8 +142,8 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 		}
 
 		CommentTextView commentView = (CommentTextView) inflater.inflate(R.layout.moment_view_comment_item, null);
-		commentView.setView(comment, true);
-		
+		commentView.setView(comment);
+
 		if (onCommentClickListener != null) {
 			commentView.setOnClickListener(new OnClickListener() {
 
@@ -192,14 +192,6 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 
 	//Event事件监听区(只要存在事件监听代码就是)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-//
-//	@Override
-//	public void onClick(View v) {
-//		switch (v.getId()) {
-//		case R.id.tvCommentContainerViewMore:
-//			break;
-//		}
-//	}
 
 	//Event事件监听区(只要存在事件监听代码就是)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

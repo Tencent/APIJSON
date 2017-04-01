@@ -25,7 +25,6 @@ public class CommentItem extends BaseModel {
 	private Comment comment;
 	private User user;
 	private User toUser;
-//	private JSONObject toUserObject;
 	private List<CommentItem> childList;
 
 	public CommentItem() {
@@ -68,15 +67,8 @@ public class CommentItem extends BaseModel {
 	}
 	public CommentItem setToUser(User toUser) {
 		this.toUser = toUser;
-//		setToUserObject(new JSONObject(toUser));
 		return this;
 	}
-//	public JSONObject getToUserObject() {
-//		return toUserObject;
-//	}
-//	public void setToUserObject(JSONObject toUserObject) {
-//		this.toUserObject = toUserObject;
-//	}
 	
 	public List<CommentItem> getChildList() {
 		return childList;
@@ -101,6 +93,9 @@ public class CommentItem extends BaseModel {
 
 	public Long getUserId() {
 		return getUser().getId();
+	}
+	public Long getToUserId() {
+		return getToUser().getId();
 	}
 	
 }
