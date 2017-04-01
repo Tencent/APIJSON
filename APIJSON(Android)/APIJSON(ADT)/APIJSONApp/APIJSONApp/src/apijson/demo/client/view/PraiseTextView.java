@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
@@ -27,66 +30,70 @@ import android.view.View;
 import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.activity_fragment.UserActivity;
-import apijson.demo.client.model.Comment;
-import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.User;
+import apijson.demo.client.view.CommentTextView.OnNameClickListener;
 
 /**评论TextView
  */
-public class CommentTextView extends TextView {
+public class PraiseTextView extends TextView {
 
-	public interface OnNameClickListener {
-		void onNameClick(int index, View widget, User user);
-	}
 	private OnNameClickListener listener;
 	public void setOnNameClickListener(OnNameClickListener l) {
 		this.listener = l;
 	}
 
 
-	public CommentTextView(Context context) {
+	public PraiseTextView(Context context) {
 		super(context);
 	}
 
-	public CommentTextView(Context context, AttributeSet attrs) {
+	public PraiseTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
-	public CommentTextView(Context context, AttributeSet attrs, int defStyle) {
+	public PraiseTextView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
 
-
-
-	private Comment comment;
-	private User user;
-	private User toUser;
+	public static final int DIVIDER_LENGTH = "、".length();
 	/**设置View
 	 * @param comment
 	 */
-	public void setView(CommentItem item) {
-		if (item == null) {
-			item = new CommentItem();
+	public void setView(List<User> list) {
+		if (list == null || list.isEmpty()) {
+			setText("");
+			return;
 		}
-		this.comment = item.getComment();
-		this.user = item.getUser();
-		this.toUser = item.getToUser();
-		String content = StringUtil.getTrimedString(comment.getContent());
-
-		String userName = StringUtil.getTrimedString(user.getName());
-		int userNameLength = userName.length();
-
-		String toUserName = StringUtil.getTrimedString(toUser.getName());
-
-
-		SpannableString msp = null;
-		if (toUser.getId() <= 0) {
-			msp = new SpannableString(userName + " : " + content);
-		} else {
-			msp = new SpannableString(userName + " 回复 " + toUserName + " : " + content);
-			setSpan(msp, 1, userNameLength + 4, userNameLength + 4 + toUserName.length(), toUser);
+		//去除无效User
+		User[] users = list.toArray(new User[]{});
+		for (int i = 0; i < users.length; i++) {
+			if (users[i] == null || StringUtil.isNotEmpty(users[i].getName(), true) == false) {
+				list.remove(i);
+			}
 		}
-		setSpan(msp, 0, 0, userNameLength, user);
+		int count = list == null ? 0 : list.size();
+		if (count > 9) {
+			list = list.subList(0, 9);
+		}
+
+
+		//拼接字符串
+		List<Integer> dividerIndexes = new ArrayList<Integer>();
+		String content = "";
+		User user;
+		for (int i = 0; i < list.size(); i++) {
+			user = list.get(i);
+			dividerIndexes.add(content.length());
+			content += (i <= 0 ? "" : "、") + user.getName();
+		}
+		dividerIndexes.add(content.length());//最后一个
+		
+		SpannableString msp = new SpannableString(content + (count <= 9 ? "" : " 等" + count + "人觉得很赞"));
+
+		//设置可点击名称
+		for (int i = 0; i < dividerIndexes.size() - 1; i++) {
+			setSpan(msp, i, dividerIndexes.get(i) + (i <= 0 ? 0 : DIVIDER_LENGTH), dividerIndexes.get(i + 1), list.get(i));
+		}
 
 		setText(msp);
 		setMovementMethod(LinkMovementMethod.getInstance());

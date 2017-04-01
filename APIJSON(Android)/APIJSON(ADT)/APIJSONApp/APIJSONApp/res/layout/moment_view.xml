@@ -109,8 +109,8 @@
                     android:id="@+id/llMomentViewPraise"
                     style="@style/ll_horizontal_match_wrap"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp"
                     android:background="@drawable/bg_item_to_alpha"
                     android:gravity="top" >
 
@@ -120,10 +120,12 @@
                         android:scaleType="fitXY"
                         android:src="@drawable/praise" />
 
-                    <TextView
+                    <apijson.demo.client.view.PraiseTextView
                         android:id="@+id/tvMomentViewPraise"
                         style="@style/text_small_blue"
+                        android:background="@drawable/bg_item_to_alpha"
                         android:gravity="left|top"
+                        android:lineSpacingExtra="4dp"
                         android:text="等17人觉得很赞" />
                 </LinearLayout>
 
