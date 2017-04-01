@@ -258,7 +258,22 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void getUser(long id, int requestCode, OnHttpResponseListener listener) {
-		get(new JSONRequest(new User(id)), requestCode, listener);
+		getUser(id, false, requestCode, listener);
+	}
+	/**获取用户
+	 * @param id
+	 * @param withMomentList
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void getUser(long id, boolean withMomentList, int requestCode, OnHttpResponseListener listener) {
+		JSONRequest request = new JSONRequest(new User(id));
+		if (withMomentList) {
+			request.add(new JSONRequest(Moment.class.getSimpleName()
+					, new JSONRequest(KEY_USER_ID, id)) //.setColumns("userId,pictureList"))
+			.toArray(3, 0, Moment.class.getSimpleName()));
+		}
+		get(request, requestCode, listener);
 	}
 	/**添加联系人
 	 * @param id

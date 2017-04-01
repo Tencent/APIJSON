@@ -31,7 +31,6 @@ public class Moment extends BaseModel {
 
 	private Long userId;
 	private String content;
-	private String picture;
 	private List<String> pictureList;
 	private List<Long> praiseUserIdList;
 	private List<Long> commentIdList;
@@ -58,12 +57,8 @@ public class Moment extends BaseModel {
 		this.content = content;
 		return this;
 	}
-	public String getPicture() {
-		return picture;
-	}
-	public Moment setPicture(String picture) {
-		this.picture = picture;
-		return this;
+	public String getFirstPicture() {
+		return get(pictureList, 0);
 	}
 	public List<String> getPictureList() {
 		return pictureList;

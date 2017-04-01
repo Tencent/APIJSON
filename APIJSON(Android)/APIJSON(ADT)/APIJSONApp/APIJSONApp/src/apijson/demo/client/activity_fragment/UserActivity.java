@@ -14,12 +14,16 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.CacheManager;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.model.Entry;
 import zuo.biao.library.ui.AlertDialog;
 import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
 import zuo.biao.library.ui.BottomMenuView;
@@ -28,6 +32,7 @@ import zuo.biao.library.ui.BottomMenuWindow;
 import zuo.biao.library.ui.CutPictureActivity;
 import zuo.biao.library.ui.EditTextInfoActivity;
 import zuo.biao.library.ui.EditTextInfoWindow;
+import zuo.biao.library.ui.GridAdapter;
 import zuo.biao.library.ui.SelectPictureActivity;
 import zuo.biao.library.ui.TextClearSuit;
 import zuo.biao.library.ui.WebViewActivity;
@@ -36,17 +41,22 @@ import zuo.biao.library.util.DataKeeper;
 import zuo.biao.library.util.JSON;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.base.BaseActivity;
+import apijson.demo.client.model.Moment;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.ActionUtil;
 import apijson.demo.client.util.HttpRequest;
@@ -116,6 +126,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	private ViewGroup llUserBusinessCardContainer;//方式三
 	private UserView userView;
 
+	private View llUserMoment;
+	private GridView gvUserMoment;
+
 	private EditText etUserRemark;
 	private TextView tvUserTag;
 
@@ -141,6 +154,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		//添加用户名片，这些方式都可>>>>>>>>>>>>>>>>>>>>>>>
 
 
+		llUserMoment = findViewById(R.id.llUserMoment);
+		gvUserMoment = (GridView) findViewById(R.id.gvUserMoment);
+
 		etUserRemark = (EditText) findViewById(R.id.etUserRemark);
 		tvUserTag = (TextView) findViewById(R.id.tvUserTag);
 
@@ -158,14 +174,31 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	}
 
 	private User user;
+	private List<Moment> momentList;
+	private GridAdapter adapter;
 	/**显示用户
 	 * @param user_
 	 */
 	private void setUser(User user_) {
+		setUser(user_, momentList);
+	}
+	/**显示用户
+	 * @param user_
+	 * @param momentList_ 
+	 */
+	private void setUser(User user_, List<Moment> momentList_) {
 		this.user = user_;
+		this.momentList = momentList_;
 		if (user == null) {
 			Log.w(TAG, "setUser  user == null >> user = new User();");
 			user = new User();
+		}
+		if (momentList == null) {
+			momentList = new ArrayList<>();
+		}
+		final List<Entry<String, String>> list = new ArrayList<>();
+		for (Moment moment : momentList) {
+			list.add(new Entry<String, String>(moment.getFirstPicture()));
 		}
 
 		runUiThread(new Runnable() {
@@ -178,6 +211,13 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 				etUserRemark.setText(StringUtil.getTrimedString(user.getHead()));
 				tvUserTag.setText(StringUtil.getTrimedString(user.getTag()));
+
+				if (adapter == null) {
+					adapter = new GridAdapter(context);
+					adapter.setHasName(false);
+					gvUserMoment.setAdapter(adapter);
+				}
+				adapter.refresh(list);
 			}
 		});
 	}
@@ -229,8 +269,25 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			bottomMenuView.bindView(MenuUtil.getMenuList(MenuUtil.USER, id, ! User.isFirend(currentUser, id)));
 		}
 
-		setUser(CacheManager.getInstance().get(User.class, "" + id));//先加载缓存数据，比网络请求快很多
-		HttpRequest.getUser(id, HTTP_GET, UserActivity.this);
+		runThread(TAG + "run", new Runnable() {
+
+			@Override
+			public void run() {
+				//先加载缓存数据，比网络请求快很多
+				user = CacheManager.getInstance().get(User.class, "" + id);
+				momentList = CacheManager.getInstance().getList(Moment.class, "userId=" + id, 0, 3);
+				runUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						setUser(user, momentList);
+					}
+				});
+
+				HttpRequest.getUser(id, true, HTTP_GET, UserActivity.this);						
+			}
+		});
+
 	}
 
 
@@ -271,6 +328,17 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 		findViewById(R.id.llUserTag).setOnClickListener(this);
 
+		llUserMoment.setOnClickListener(this);
+		gvUserMoment.setOnTouchListener(new OnTouchListener() {
+			
+			@SuppressLint("ClickableViewAccessibility")
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				llUserMoment.onTouchEvent(event);
+				return false;
+			}
+		});
+		
 		new TextClearSuit().addClearListener(etUserRemark, findViewById(R.id.ivUserRemarkClear));//清空备注按钮点击监听
 
 
@@ -378,13 +446,20 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 	@Override
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-		JSONResponse response = new JSONResponse(resultJson).getJSONResponse(User.class.getSimpleName());
-		boolean isSucceed = JSONResponse.isSucceed(response);
+		JSONResponse response = new JSONResponse(resultJson);
+		JSONResponse response2 = response.getJSONResponse(User.class.getSimpleName());
+		boolean isSucceed = JSONResponse.isSucceed(response2);
 
 		dismissProgress();
 		switch (requestCode) {
 		case HTTP_GET:
-			setUser(new JSONResponse(resultJson).getObject(User.class));
+			User user = response.getObject(User.class);
+			if (JSONResponse.isSucceed(response) && (user == null || user.getId() <= 0)) {
+				showShortToast("用户已注销");
+				super.finish();//需要动画，且不需要保存缓存
+				return;
+			}
+			setUser(user, response.getList(Moment.class.getSimpleName() + "[]", Moment.class));
 			break;
 		case HTTP_ADD:
 		case HTTP_DELETE:
@@ -427,6 +502,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
+		case R.id.llUserMoment:
+			toActivity(MomentListActivity.createIntent(context, id));
+			break;
 		case R.id.llUserTag:
 			toActivity(EditTextInfoActivity.createIntent(context, "标签"
 					, StringUtil.getTrimedString(tvUserTag)), REQUEST_TO_EDIT_TEXT_INFO);
