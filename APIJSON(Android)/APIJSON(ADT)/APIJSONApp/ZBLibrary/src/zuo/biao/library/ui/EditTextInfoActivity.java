@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -190,34 +191,47 @@ public class EditTextInfoActivity extends BaseActivity implements OnBottomDragLi
 	private ArrayList<String> list;
 	@Override
 	public void initData() {//必须调用
-		
 		intent = getIntent();
+
 		intentType = intent.getIntExtra(INTENT_TYPE, 0);
 		if (StringUtil.isNotEmpty(intent.getStringExtra(INTENT_KEY), true)) {
 			tvBaseTitle.setText(StringUtil.getCurrentString());
 		}
+		etEditTextInfo.setSingleLine(intentType != TYPE_NOTE);
 
-		if (intentType == TYPE_NICK) {
-			tvEditTextInfoRemind.setText("限10个字（或20个字符）");
+		switch (intentType) {
+		case TYPE_NICK:
 			maxEms = 20;
-			//etEditTextInfo.setFilters(new InputFilter[]{new InputFilter.LengthFilter(10)});
-		} else if (intentType == TYPE_PHONE) {
-			tvEditTextInfoRemind.setText("只能填电话号码哦");
+			break;
+		case TYPE_PHONE:
+			etEditTextInfo.setInputType(InputType.TYPE_CLASS_PHONE);
 			maxEms = 11;
-			//etEditTextInfo.setFilters(new InputFilter[]{new InputFilter.LengthFilter(30)});
-		} else if (intentType == TYPE_PROFESSION) {
-			hasList = true;
+			break;
+		case TYPE_EMAIL:
+			etEditTextInfo.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+			maxEms = 60;
+			break;
+		case TYPE_WEBSITE:
+			etEditTextInfo.setInputType(InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT);
+			maxEms = 200;
+			break;
+		case TYPE_MAILADDRESS:
+			maxEms = 60;
+			break;
+		case TYPE_PROFESSION:
 			tvEditTextInfoRemind.setText("所属行业");
-			//			etEditTextInfo.setFocusable(false);
-			//			etEditTextInfo.setFocusableInTouchMode(false);
-			//			etEditTextInfo.setEnabled(false);
-		} else {
-			tvEditTextInfoRemind.setText("限" + maxEms/2 + "个字（或" + maxEms + "个字符）");
+			maxEms = 15;
+		case TYPE_NOTE:
+			maxEms = 100;
+			break;
+		default:
+			break;
 		}
 		etEditTextInfo.setMaxEms(maxEms);
+		tvEditTextInfoRemind.setText("限" + maxEms/2 + "个字（或" + maxEms + "个字符）");
+
 
 		getList(intentType);
-
 	}
 
 	private int requestSize = 20;

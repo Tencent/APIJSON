@@ -25,11 +25,16 @@
 
         <EditText
             android:id="@+id/etEditTextInfo"
-            style="@style/edit_item_right_et"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/common_item_left_tv_padding"
             android:layout_weight="1"
+            android:background="@null"
             android:focusable="true"
-            android:focusableInTouchMode="true" >
+            android:focusableInTouchMode="true"
+            android:hint="请在这里输入"
+            android:textColor="@color/black"
+            android:textSize="17sp" >
 
             <requestFocus />
         </EditText>

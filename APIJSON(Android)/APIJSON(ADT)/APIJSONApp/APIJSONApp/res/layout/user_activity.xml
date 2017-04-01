@@ -40,30 +40,6 @@
                 android:layout_marginTop="@dimen/padding_huge" >
             </LinearLayout>
 
-            <View style="@style/divider_horizontal_1px" />
-
-            <LinearLayout style="@style/edit_item" >
-
-                <TextView
-                    style="@style/edit_item_left_tv"
-                    android:text="备注" />
-
-                <EditText
-                    android:id="@+id/etUserRemark"
-                    style="@style/edit_item_right_et"
-                    android:layout_weight="1"
-                    android:hint="点击这里来编辑"
-                    android:maxLength="90" />
-
-                <ImageView
-                    android:id="@+id/ivUserRemarkClear"
-                    style="@style/edit_item_right_clear" />
-            </LinearLayout>
-
-            <View
-                style="@style/divider_horizontal_1px"
-                android:layout_marginBottom="@dimen/padding_huge" />
-
             <LinearLayout
                 android:id="@+id/llUserMoment"
                 style="@style/content_item_white"
@@ -82,6 +58,25 @@
                     android:horizontalSpacing="6dp"
                     android:numColumns="3"
                     android:scrollbars="@null" />
+
+                <ImageView style="@style/content_item_rt_img" />
+            </LinearLayout>
+
+            <View style="@style/divider_horizontal_1px" />
+
+            <LinearLayout
+                android:id="@+id/llUserRemark"
+                style="@style/content_item_white" >
+
+                <TextView
+                    style="@style/content_item_lf_tv_black"
+                    android:text="备注" />
+
+                <TextView
+                    android:id="@+id/tvUserRemark"
+                    android:singleLine="true"
+                    style="@style/content_item_rt_tv"
+                    android:layout_weight="1" />
 
                 <ImageView style="@style/content_item_rt_img" />
             </LinearLayout>

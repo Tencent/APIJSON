@@ -34,7 +34,6 @@ import zuo.biao.library.ui.EditTextInfoActivity;
 import zuo.biao.library.ui.EditTextInfoWindow;
 import zuo.biao.library.ui.GridAdapter;
 import zuo.biao.library.ui.SelectPictureActivity;
-import zuo.biao.library.ui.TextClearSuit;
 import zuo.biao.library.ui.WebViewActivity;
 import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.DataKeeper;
@@ -51,7 +50,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 import apijson.demo.client.R;
@@ -129,7 +127,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	private View llUserMoment;
 	private GridView gvUserMoment;
 
-	private EditText etUserRemark;
+	private TextView tvUserRemark;
 	private TextView tvUserTag;
 
 	private ViewGroup llUserBottomMenuContainer;
@@ -157,10 +155,10 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		llUserMoment = findViewById(R.id.llUserMoment);
 		gvUserMoment = (GridView) findViewById(R.id.gvUserMoment);
 
-		etUserRemark = (EditText) findViewById(R.id.etUserRemark);
+		tvUserRemark = (TextView) findViewById(R.id.tvUserRemark);
 		tvUserTag = (TextView) findViewById(R.id.tvUserTag);
 
-
+		llUserMoment.setVisibility(isOnEditMode ? View.GONE : View.VISIBLE);
 		if (isOnEditMode == false) {
 			//添加底部菜单<<<<<<<<<<<<<<<<<<<<<<
 			llUserBottomMenuContainer = (ViewGroup) findViewById(R.id.llUserBottomMenuContainer);
@@ -209,7 +207,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 				//				uvlUser.bindView(user);//方式二
 				userView.bindView(user);//方式三
 
-				etUserRemark.setText(StringUtil.getTrimedString(user.getHead()));
+				tvUserRemark.setText(StringUtil.getTrimedString(user.getHead()));
 				tvUserTag.setText(StringUtil.getTrimedString(user.getTag()));
 
 				if (adapter == null) {
@@ -275,7 +273,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			public void run() {
 				//先加载缓存数据，比网络请求快很多
 				user = CacheManager.getInstance().get(User.class, "" + id);
-				momentList = CacheManager.getInstance().getList(Moment.class, "userId=" + id, 0, 3);
+				if (isOnEditMode == false) {
+					momentList = CacheManager.getInstance().getList(Moment.class, "userId=" + id, 0, 3);
+				}
 				runUiThread(new Runnable() {
 
 					@Override
@@ -284,7 +284,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 					}
 				});
 
-				HttpRequest.getUser(id, true, HTTP_GET, UserActivity.this);						
+				HttpRequest.getUser(id, ! isOnEditMode, HTTP_GET, UserActivity.this);						
 			}
 		});
 
@@ -326,8 +326,6 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	@Override
 	public void initEvent() {//必须调用
 
-		findViewById(R.id.llUserTag).setOnClickListener(this);
-
 		llUserMoment.setOnClickListener(this);
 		gvUserMoment.setOnTouchListener(new OnTouchListener() {
 
@@ -339,10 +337,11 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			}
 		});
 
-		new TextClearSuit().addClearListener(etUserRemark, findViewById(R.id.ivUserRemarkClear));//清空备注按钮点击监听
-
 
 		if (isOnEditMode) {
+			findViewById(R.id.llUserRemark).setOnClickListener(this);
+			findViewById(R.id.llUserTag).setOnClickListener(this);
+			
 			userView.setOnDataChangedListener(new OnDataChangedListener() {
 
 				@Override
@@ -508,9 +507,13 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		case R.id.llUserMoment:
 			toActivity(MomentListActivity.createIntent(context, id));
 			break;
+		case R.id.llUserRemark:
+			toActivity(EditTextInfoActivity.createIntent(context, EditTextInfoActivity.TYPE_WEBSITE, "备注"
+					, StringUtil.getTrimedString(tvUserRemark)), REQUEST_TO_EDIT_TEXT_INFO_REMARK);
+			break;
 		case R.id.llUserTag:
 			toActivity(EditTextInfoActivity.createIntent(context, "标签"
-					, StringUtil.getTrimedString(tvUserTag)), REQUEST_TO_EDIT_TEXT_INFO);
+					, StringUtil.getTrimedString(tvUserTag)), REQUEST_TO_EDIT_TEXT_INFO_TAG);
 			break;
 		default:
 			break;
@@ -543,9 +546,10 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	private static final int REQUEST_TO_BOTTOM_MENU = 1;
 	private static final int REQUEST_TO_SELECT_PICTURE = 2;
 	private static final int REQUEST_TO_CUT_PICTURE = 3;
-	private static final int REQUEST_TO_EDIT_TEXT_INFO = 4;
 	private static final int REQUEST_TO_EDIT_TEXT_INFO_NAME = 5;
 	private static final int REQUEST_TO_EDIT_TEXT_INFO_PHONE = 6;
+	private static final int REQUEST_TO_EDIT_TEXT_INFO_REMARK = 7;
+	private static final int REQUEST_TO_EDIT_TEXT_INFO_TAG = 8;
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -559,13 +563,13 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 				onBottomMenuItemClick(data.getIntExtra(BottomMenuWindow.RESULT_ITEM_ID, -1));
 			}
 			break;
-		case REQUEST_TO_EDIT_TEXT_INFO:
 		case REQUEST_TO_EDIT_TEXT_INFO_NAME:
 		case REQUEST_TO_EDIT_TEXT_INFO_PHONE:
+		case REQUEST_TO_EDIT_TEXT_INFO_REMARK:
+		case REQUEST_TO_EDIT_TEXT_INFO_TAG:
 			if (data == null) {
 				break;
 			}
-			isDataChanged = true;
 			user = getUser();
 			String value = data.getStringExtra(EditTextInfoActivity.RESULT_VALUE);
 			switch (requestCode) {
@@ -575,10 +579,16 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			case REQUEST_TO_EDIT_TEXT_INFO_PHONE:
 				user.setPhone(value);
 				break;
-			default:
+			case REQUEST_TO_EDIT_TEXT_INFO_REMARK:
+				user.setHead(value);
+				break;
+			case REQUEST_TO_EDIT_TEXT_INFO_TAG:
 				user.setTag(value);
 				break;
+			default:
+				return;
 			}
+			isDataChanged = true;
 			setUser(user);
 			break;
 		case REQUEST_TO_SELECT_PICTURE:
@@ -603,7 +613,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	@Override
 	public void finish() {
 		user = getUser();
-		user.setHead(StringUtil.getTrimedString(etUserRemark));
+		user.setHead(StringUtil.getTrimedString(tvUserRemark));
 		if (isOnEditMode && isDataChanged) {
 			new AlertDialog(context, "", "资料已改变，需要保存吗？", true, DIALOG_PUT_USER, this).show();
 			return;

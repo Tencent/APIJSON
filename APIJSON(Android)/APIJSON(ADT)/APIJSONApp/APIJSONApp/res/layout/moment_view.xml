@@ -17,6 +17,7 @@
             android:paddingRight="@dimen/moment_view_head_padding_right" >
 
             <ImageView
+                android:background="@color/alpha_3"
                 android:id="@+id/ivMomentViewHead"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
