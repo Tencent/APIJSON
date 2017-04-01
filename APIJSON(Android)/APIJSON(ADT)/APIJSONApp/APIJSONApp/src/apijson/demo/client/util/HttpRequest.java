@@ -270,7 +270,7 @@ public class HttpRequest {
 		JSONRequest request = new JSONRequest(new User(id));
 		if (withMomentList) {
 			request.add(new JSONRequest(Moment.class.getSimpleName()
-					, new JSONRequest(KEY_USER_ID, id)) //.setColumns("userId,pictureList"))
+					, new JSONRequest(KEY_USER_ID, id).setColumns("pictureList"))
 			.toArray(3, 0, Moment.class.getSimpleName()));
 		}
 		get(request, requestCode, listener);
