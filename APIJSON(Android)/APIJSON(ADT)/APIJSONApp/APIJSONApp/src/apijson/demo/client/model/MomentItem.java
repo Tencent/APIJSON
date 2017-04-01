@@ -27,6 +27,7 @@ public class MomentItem extends BaseModel {
 	public static final int STATUS_NORMAL = 0;
 	public static final int STATUS_PUBLISHING = 1;
 	public static final int STATUS_DELETING = 2;
+	public static final int STATUS_DELETED = 3;
 
 	private int status;
 	private User user;
@@ -55,14 +56,14 @@ public class MomentItem extends BaseModel {
 		return getUser().getId();
 	}
 
-	public int getStatus() {
+	public int getMyStatus() {
 		return status;
 	}
-	public void setStatus(int status) {
+	public void setMyStatus(int status) {//status莫名其妙变成状态码status 200
 		this.status = status;
 	}
 	public String getStatusString() {
-		return getStatusString(getStatus());
+		return getStatusString(getMyStatus());
 	}
 	public static String getStatusString(int status) {
 		switch (status) {
@@ -71,7 +72,7 @@ public class MomentItem extends BaseModel {
 		case STATUS_DELETING:
 			return "正在删除...";
 		default:
-			return null;
+			return "删除";
 		}
 	}
 

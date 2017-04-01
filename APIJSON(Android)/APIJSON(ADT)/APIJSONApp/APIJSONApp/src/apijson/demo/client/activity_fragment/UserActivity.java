@@ -330,7 +330,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 		llUserMoment.setOnClickListener(this);
 		gvUserMoment.setOnTouchListener(new OnTouchListener() {
-			
+
 			@SuppressLint("ClickableViewAccessibility")
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -338,7 +338,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 				return false;
 			}
 		});
-		
+
 		new TextClearSuit().addClearListener(etUserRemark, findViewById(R.id.ivUserRemarkClear));//清空备注按钮点击监听
 
 
@@ -454,10 +454,13 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		switch (requestCode) {
 		case HTTP_GET:
 			User user = response.getObject(User.class);
-			if (JSONResponse.isSucceed(response) && (user == null || user.getId() <= 0)) {
-				showShortToast("用户已注销");
-				super.finish();//需要动画，且不需要保存缓存
-				return;
+			if (user == null || user.getId() <= 0) {
+				if (JSONResponse.isSucceed(response)) {
+					showShortToast("用户已注销");
+					super.finish();//需要动画，且不需要保存缓存
+					return;
+				}
+				showShortToast(R.string.get_failed);
 			}
 			setUser(user, response.getList(Moment.class.getSimpleName() + "[]", Moment.class));
 			break;

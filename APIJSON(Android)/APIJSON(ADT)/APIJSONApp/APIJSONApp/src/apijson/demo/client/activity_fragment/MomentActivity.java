@@ -19,6 +19,7 @@ import java.util.List;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseHttpListActivity;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.interfaces.AdapterCallBack;
 import zuo.biao.library.interfaces.CacheCallBack;
 import zuo.biao.library.interfaces.OnBottomDragListener;
@@ -174,8 +175,11 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	/**
 	 * @param momentItem
 	 */
-	private void setHead(final MomentItem momentItem) {
-		this.momentItem = momentItem;
+	private void setHead(MomentItem momentItem_) {
+		this.momentItem = momentItem_;
+		if (momentItem == null) {
+			momentItem = new MomentItem(momentId);
+		}
 		runUiThread(new Runnable() {
 
 			@Override
@@ -420,6 +424,17 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 				}
 			}
 		});
+		momentView.setOnDataChangedListener(new OnDataChangedListener() {
+
+			@Override
+			public void onDataChanged() {
+				if (momentView.getStatus() == MomentItem.STATUS_DELETED) {
+					finish();
+				} else {
+					setHead(momentView.getData());
+				}
+			}
+		});
 
 
 		//setOnItemClickListener会让ItemView内所有View显示onTouch background
@@ -490,6 +505,11 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		if (requestCode == HTTP_GET_MOMENT) {
 			MomentItem data = JSONResponse.toObject(response, MomentItem.class);
 			if (data == null || data.getId() <= 0) {
+				if (JSONResponse.isSucceed(response)) {
+					showShortToast("动态不存在");
+					super.finish();//需要动画，且不需要保存缓存
+					return;
+				}
 				showShortToast("获取动态失败，请检查网络后重试");
 				return;
 			}
@@ -501,7 +521,8 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			return;
 		}
 
-		boolean succeed = JSONResponse.isSucceed(response.getJSONResponse(Comment.class.getSimpleName()));
+		JSONResponse comment = response.getJSONResponse(Comment.class.getSimpleName());
+		boolean succeed = JSONResponse.isSucceed(comment);
 		String operation = "操作";
 		switch (requestCode) {
 		case HTTP_COMMENT: // 新增评论
@@ -512,6 +533,9 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			break;
 		case HTTP_DELETE:// 删除
 			operation = "删除";
+			if (succeed) {//MomentItem中仍然存有Comment，可重写saveCache，单独存里面的Moment和Comment等
+				CacheManager.getInstance().remove(getCacheClass(), comment == null ? "0" : "" + comment.getId());
+			}
 			break;
 		default:
 			return;

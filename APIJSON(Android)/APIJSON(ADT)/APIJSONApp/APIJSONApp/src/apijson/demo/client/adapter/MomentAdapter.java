@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.client.adapter;
 
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.base.BaseViewAdapter;
 import android.app.Activity;
 import android.view.ViewGroup;
@@ -34,12 +35,29 @@ public class MomentAdapter extends BaseViewAdapter<MomentItem, MomentView> {
 
 	@Override
 	public MomentView createView(int position, ViewGroup parent) {
-		return new MomentView(context, resources);
+		final MomentView itemView = new MomentView(context, resources);
+		itemView.setOnDataChangedListener(new OnDataChangedListener() {
+
+			@Override
+			public void onDataChanged() {
+				if (list == null) {
+					return;
+				}
+				MomentItem data = itemView.getData();
+				if (data == null) {
+					list.remove(itemView.getPosition());
+				} else {
+					list.set(itemView.getPosition(), data);
+				}
+				refresh(list);
+			}
+		});
+		return itemView;
 	}
 
 	@Override
 	public long getItemId(int position) {
 		return getItem(position).getId();
 	}
-	
+
 }

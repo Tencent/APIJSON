@@ -19,6 +19,7 @@ import java.util.List;
 
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView;
+import zuo.biao.library.manager.CacheManager;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.model.Entry;
 import zuo.biao.library.ui.AlertDialog;
@@ -151,25 +152,29 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 	private boolean isCurrentUser;
 	private int status;
+	public int getStatus() {
+		return status;
+	}
 	@Override
 	public void bindView(MomentItem data_){
-		llMomentViewContainer.setVisibility(data_ == null ? View.GONE : View.VISIBLE);
-		if (data_ == null) {
-			Log.w(TAG, "bindView data_ == null >> data_ = new MomentItem();");
-			data_ = new MomentItem();
-		}
 		this.data = data_;
+		llMomentViewContainer.setVisibility(data == null ? View.GONE : View.VISIBLE);
+		if (data == null) {
+			Log.w(TAG, "bindView data == null >> return;");
+			return;
+		}
 		this.user = data.getUser();
 		this.moment = data.getMoment();
 		this.momentId = moment.getId();
 		this.userId = moment.getUserId();
 		this.isCurrentUser = APIJSONApplication.getInstance().isCurrentUser(moment.getUserId());
-		this.status = data.getStatus();
+		this.status = data.getMyStatus();
 
 		ImageLoaderUtil.loadImage(ivMomentViewHead, user.getHead());
 
 		tvMomentViewName.setText(StringUtil.getTrimedString(user.getName()));
 		tvMomentViewStatus.setText(StringUtil.getTrimedString(data.getStatusString()));
+		tvMomentViewStatus.setVisibility(isCurrentUser ? View.VISIBLE : View.GONE);
 
 		tvMomentViewContent.setVisibility(StringUtil.isNotEmpty(moment.getContent(), true) ? View.VISIBLE : View.GONE);
 		tvMomentViewContent.setText(StringUtil.getTrimedString(moment.getContent()));
@@ -336,9 +341,6 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		return llMomentViewContainer.getVisibility() == View.VISIBLE ? data : null;
 	}
 
-	public List<String> getPictureList() {
-		return moment == null ? null : moment.getPictureList();
-	}
 
 	/**判断是否已登录，如果未登录则弹出登录界面
 	 * @return
@@ -357,7 +359,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param toPraise
 	 */
 	public void praise(boolean toPraise) {
-		if (toPraise == data.getIsPraised()) {
+		if (data == null || toPraise == data.getIsPraised()) {
 			Log.e(TAG, "praiseWork  toPraise == moment.getIsPraise() >> return;");
 			return;
 		}
@@ -379,9 +381,10 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 	@Override
 	public void onDialogButtonClick(int requestCode, boolean isPositive) {
-		if (isPositive) {
+		if (isPositive && data != null) {
+			data.setMyStatus(MomentItem.STATUS_DELETING);
+			bindView(data);
 			HttpRequest.deleteMoment(moment.getId(), HTTP_DELETE, this);
-			bindView(null);
 		}
 	}
 
@@ -397,32 +400,42 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			return;
 		}
 		JSONResponse response = new JSONResponse(result);
+		JSONResponse response2 = response.getJSONResponse(Moment.class.getSimpleName());
+		boolean isSucceed = JSONResponse.isSucceed(response2);
 		switch (requestCode) {
 		case HTTP_PRAISE:
 		case HTTP_CANCLE_PRAISE:
-			response = response.getJSONResponse(Moment.class.getSimpleName());
-			if (JSONResponse.isSucceed(response)) {
+			if (isSucceed) {
 				data.setIsPraised(requestCode == HTTP_PRAISE);
 				bindView(data);
 			} else {
 				showShortToast((requestCode == HTTP_PRAISE ? "点赞" : "取消点赞") + "失败，请检查网络后重试");
 			}
 			break;
-			//		case HTTP_DELETE:
-			//			if(resultCode == HttpRequest.RESULT_DELETE_WORK_SUCCEED) {
-			//				context.sendBroadcast(new Intent(ActionUtil.REFRESH_WORK)
-			//				.putExtra(ActionUtil.TYPE, ActionUtil.TYPE_DELETE_WORK)
-			//				.putExtra(ActionUtil.RESULT_WORK, Json.toJSONString(moment)));
-			//			} else {
-			//				bindView(data);
-			//			}
-			//			break;
+		case HTTP_DELETE:
+			showShortToast(isSucceed ? R.string.delete_succeed : R.string.delete_failed);
+			//只对adapter.getCount()有影响。目前是隐藏的，不需要通知，也不需要刷新adapter，用户手动刷新后自然就更新了。
+			if(isSucceed) {
+				bindView(null);
+				status = MomentItem.STATUS_DELETED;
+				if (onDataChangedListener != null) {
+					onDataChangedListener.onDataChanged();
+				}
+				CacheManager.getInstance().remove(MomentItem.class, "" + momentId);
+			} else {
+				data.setMyStatus(MomentItem.STATUS_NORMAL);
+				bindView(data);
+			}
+			break;
 		}
 	}
 
 
 	@Override
 	public void onClick(View v) {
+		if (data == null) {
+			return;
+		}
 		if (status == MomentItem.STATUS_PUBLISHING) {
 			showShortToast(R.string.publishing);
 			return;
@@ -433,14 +446,8 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			toActivity(UserActivity.createIntent(context, userId));
 			break;
 		case R.id.tvMomentViewStatus:
-			switch (status) {
-			case MomentItem.STATUS_PUBLISHING:
-				break;
-			case MomentItem.STATUS_DELETING:
-				break;
-			default:
-				new AlertDialog(context, "", "", true, 0, this).show();
-				break;
+			if (status == MomentItem.STATUS_NORMAL) {
+				new AlertDialog(context, "", "删除动态", true, 0, this).show();
 			}
 			break;
 		case R.id.tvMomentViewContent:

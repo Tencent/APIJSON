@@ -45,6 +45,7 @@
                 <TextView
                     android:id="@+id/tvMomentViewStatus"
                     style="@style/text_small_blue"
+                    android:background="@drawable/bg_item_to_alpha"
                     android:text="发布中" />
             </LinearLayout>
 

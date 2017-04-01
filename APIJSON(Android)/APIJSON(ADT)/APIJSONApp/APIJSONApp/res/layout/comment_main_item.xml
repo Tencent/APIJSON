@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/ll_vertical_match_wrap"
-    android:background="@color/white" >
+    android:background="@color/white"
+    android:descendantFocusability="blocksDescendants" >
 
     <RelativeLayout
         style="@style/match_wrap"
