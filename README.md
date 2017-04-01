@@ -7,6 +7,16 @@
 [3.对应关系总览](#3)<br />
 [4.功能符](#4)<br />
 [5.使用方法](#5)<br />
+[5.1下载解压](#5.1)<br />
+[5.2导入table](#5.2)<br />
+[5.3运行服务端工程](#5.3)<br />
+[5.4运行客户端工程](#5.4)<br />
+[5.5操作客户端App](#5.5)<br />
+[6.其它](#6)<br />
+[6.1关于作者](#6.1)<br />
+[6.2下载试用](#6.2)<br />
+[6.3更新日志](#6.3)<br />
+[6.4Star&Fork](#6.4)<br />
 
 ## <h2 id="1">1.简介<h2/>
 
@@ -151,7 +161,7 @@ APIJSON是一种JSON传输结构协议。<br />
 
 
  
-<h2 id="2">2.对比传统RESTful方式<h2/>
+## <h2 id="2">2.对比传统RESTful方式<h2/>
  
  开发流程 | 传统方式 | APIJSON
 -------- | ------------ | ------------
@@ -198,7 +208,7 @@ APIJSON是一种JSON传输结构协议。<br />
 4.status和message总是在返回结果的同一层级成对出现。对所有请求的返回结果都会在最外层有一对总结式status和message。对非GET、HEAD请求，返回结果里面的每个JSONObject里都会有一对status和message说明这个JSONObject的状态。下同。<br >
 5.id等字段对应的值仅供说明，不一定是数据库里存在的，请求里用的是真实存在的值。下同。
 
-<h2 id="3">3.请求方法、URL、Request、Response对应关系总览<h2/>
+## <h2 id="3">3.请求方法、URL、Request、Response对应关系总览<h2/>
 
   方法及说明 | URL | Request | Response
 ------------ | ------------ | ------------ | ------------
@@ -217,7 +227,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 
 
 
-<h2 id="4">4.功能符<h2/>
+## <h2 id="4">4.功能符<h2/>
  
   键值对格式 | 功能与作用 | 使用示例
 ------------ | ------------ | ------------
@@ -232,22 +242,22 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
  &, \|, ! 逻辑运算符。<br />& 可用于"key&{}":"条件"等。<br />\| 可用于"key\|{}":"条件", "key\|{}":[]等。<br />! 可单独使用，如"key!":Object，也可像&,\|一样配合其他功能符使用等。 | 逻辑运算 | ["id&{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id&{}":">80000,<=90000"}})，即id满足id>80000 & id<=90000。<br />["id|{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id|{}":">80000,<=90000"}})，同"id{}":">80000,<=90000"，即id满足id>80000 \| id<=90000。<br />["id!{}":[82001,38710]](http://139.196.140.118:8080/head/{"User":{"id!{}":[82001,38710]}})，即id满足 ! (id=82001 \| id=38710)，可过滤黑名单的消息。
  "@key":key指定类型的Object | @key为JSONObject中的关键字，作用各不相同，但都不作为查询匹配条件 | ① 只查询id,sex,name这几列并且请求结果也按照这个顺序：<br />["@columns":"id,sex,name"](http://139.196.140.118:8080/get/{"User":{"@columns":"id,sex,name","id":38710}})<br />返回<br />{<br /> &nbsp; "id":1,<br /> &nbsp; "sex":0,<br /> &nbsp; "name":"Lemon"<br />}<br /> ② 从pictureList获取第0张图片：<br />[{<br /> &nbsp; "@position":0, //这里@position为自定义关键词<br /> &nbsp; "firstPicture()":"get(Collection:pictureList,int:@position)"<br />}](http://139.196.140.118:8080/get/{"User":{"id":38710,"@position":0,"firstPicture()":"get(Collection:pictureList,int:@position)"}})<br />返回<br />{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0,<br /> &nbsp; "firstPicture":"url0"<br />}<br /> ...
 
-<h2 id="5">5.使用方法<h2/>
+## <h2 id="5">5.使用方法<h2/>
 
-<h3 id="5.1">5.1 下载后解压APIJSON工程<h3/>
+### <h3 id="5.1">5.1 下载后解压APIJSON工程<h3/>
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
 #### 你可以跳过步骤2和步骤3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
 
-<h3 id="5.2">5.2 导入MySQL table文件<h3/>
+### <h3 id="5.2">5.2 导入MySQL table文件<h3/>
 
 服务端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
 我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。
 
 启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
-<h3 id="5.3">5.3 用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程<h3/>
+### <h3 id="5.3">5.3 用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程<h3/>
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.8.0_91 + Eclipse 4.6.1 + IntellIJ 2016.2.5
@@ -268,7 +278,7 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea
 2.运行<br />
 Run > Run APIJSONApplication
 
-<h3 id="5.4">5.4 用ADT Bundle或Android Studio运行客户端工程<h3/>
+### <h3 id="5.4">5.4 用ADT Bundle或Android Studio运行客户端工程<h3/>
 
 可以跳过这个步骤，直接下载下方提供的客户端App。
 
@@ -296,18 +306,20 @@ Run > Run app
 选择发送APIJSON请求并等待显示结果。<br />
 如果默认url不可用，修改为一个可用的，比如正在运行APIJSON服务端工程的电脑的IPV4地址，然后点击查询按钮重新请求。
 
-## 关于作者
+## <h2 id="6">6.其它<h2/>
+
+### <h3 id="6.1">6.1 关于作者<h3/>
 TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
 如果有什么问题或建议可以发我邮件，交流技术，分享经验 ^_^
 
-## 下载试用客户端App
+### <h3 id="6.2">6.2 下载试用客户端App<h3/>
 
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
 
-## 更新日志
+### <h3 id="6.3">6.3 更新日志<h3/>
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-## 欢迎Star，欢迎Fork
+### <h3 id="6.4">6.4 欢迎Star，欢迎Fork<h3/>
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
