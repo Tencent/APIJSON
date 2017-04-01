@@ -281,7 +281,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 		final int gridViewHeight = (int) (ScreenUtil.getScreenSize(context)[0]
 				- convertView.getPaddingLeft() - convertView.getPaddingRight()
-				- getDimension(R.dimen.work_view_head_width));
+				- getDimension(R.dimen.moment_view_head_width));
 		try {
 			if (pictureNum >= 7) {
 				gvMomentView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, gridViewHeight));

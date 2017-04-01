@@ -11,10 +11,10 @@
         android:padding="10dp" >
 
         <RelativeLayout
-            android:id="@+id/rlWorkShowItemHead"
-            android:layout_width="@dimen/work_view_head_width"
-            android:layout_height="@dimen/work_view_head_height"
-            android:paddingRight="@dimen/work_view_head_padding_right" >
+            android:id="@+id/rlMomentViewItemHead"
+            android:layout_width="@dimen/moment_view_head_width"
+            android:layout_height="@dimen/moment_view_head_height"
+            android:paddingRight="@dimen/moment_view_head_padding_right" >
 
             <ImageView
                 android:id="@+id/ivMomentViewHead"
@@ -25,8 +25,8 @@
 
         <LinearLayout
             style="@style/ll_vertical_match_wrap"
-            android:layout_below="@+id/rlWorkShowItemHead"
-            android:layout_toRightOf="@+id/rlWorkShowItemHead"
+            android:layout_below="@+id/rlMomentViewItemHead"
+            android:layout_toRightOf="@+id/rlMomentViewItemHead"
             android:gravity="left" >
 
             <LinearLayout

@@ -2,10 +2,8 @@
 <resources>
 
     <dimen name="qrcode_size">200dp</dimen>
-    <dimen name="show_view_head_size">60dp</dimen>
-    <dimen name="show_view_head_padding_right">15dp</dimen>
-    <dimen name="work_view_head_width">60dp</dimen>
-    <dimen name="work_view_head_height">50dp</dimen>
-    <dimen name="work_view_head_padding_right">10dp</dimen>
+    <dimen name="moment_view_head_width">60dp</dimen>
+    <dimen name="moment_view_head_height">50dp</dimen>
+    <dimen name="moment_view_head_padding_right">10dp</dimen>
 
 </resources>
