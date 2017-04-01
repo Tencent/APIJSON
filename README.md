@@ -4,6 +4,12 @@
 
 ### [1.简介](#1)
 ### [2.对比传统方式](#2)
+* [2.1 开发流程](#2.1)
+* [2.2 客户端请求](#2.2)
+* [2.3 服务端操作](#2.3)
+* [2.4 客户端解析](#2.4)
+* [2.5 客户端对应不同需求的请求](#2.5)
+* [2.6 服务端对应不同请求的返回结果](#2.6)
 ### [3.对应关系总览](#3)
 ### [4.功能符](#4)
 ### [5.使用方法](#5)
@@ -162,12 +168,14 @@ APIJSON是一种JSON传输结构协议。<br />
 
  
 ## <h2 id="2">2.对比传统RESTful方式<h2/>
- 
+
+### <h3 id="2.1">2.1 开发流程<h3/>
  开发流程 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  接口传输 | 等服务端编辑接口，然后更新文档，客户端再按照文档编辑请求和解析代码 | 客户端按照自己的需求编辑请求和解析代码。<br />没有接口，更不需要文档！客户端再也不用和服务端沟通接口或文档问题了！
  兼容旧版 | 服务端增加新接口，用v2表示第2版接口，然后更新文档 | 什么都不用做！
  
+### <h3 id="2.2">2.2 客户端请求<h3/>
  客户端请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
@@ -175,16 +183,19 @@ APIJSON是一种JSON传输结构协议。<br />
  URL | 不同的请求对应不同的url | 相同的请求方法(GET，POST等)都用同一个url
  键值对 | key=value | key:value
  
+### <h3 id="2.3">2.3 服务端操作<h3/>
  服务端操作 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  解析和返回 | 取出键值对，把键值对作为条件用预设的的方式去查询数据库，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端就行
  返回JSON结构的设定方式 | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
  
+### <h3 id="2.4">2.4 客户端解析<h3/>
  客户端解析 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  查看方式 | 查文档或等请求成功后看log | 看请求就行，所求即所得。也可以等请求成功后看log
  方法 | 解析JSONObject | 可以用JSONResponse解析JSONObject或传统方式
-
+ 
+### <h3 id="2.5">2.5 客户端对应不同需求的请求<h3/>
  客户端对应不同需求的请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  User | base_url/get/user?id=1 | [base_url/get/{"User":{"id":1}}](http://139.196.140.118:8080/get/{"User":{"id":38710}})
@@ -193,6 +204,7 @@ APIJSON是一种JSON传输结构协议。<br />
  Moment列表，每个Moment包括发布者User和前3条Comment | Moment里必须有User的Object和Comment的Array<br /> base_url/get/moment/list?page=0&count=3&commentCount=3 | [base_url/get/{"[]":{"page":0, "count":3, "Moment":{}, "User":{"momentId@":"/Moment/id"}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%7D%2C%22User%22%3A%7B%22id%40%22%3A%22%252FMoment%252FuserId%22%7D%2C%22Comment%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D)
  User发布的Moment列表，每个Moment包括发布者User和前3条Comment | base_url/get/moment/list?page=0&count=3&commentCount=3&userId=1 | 有以下几种方法:<br />①把以上请求里的"Moment":{}, "User":{"momentId@":"/Moment/id"}改为["Moment":{"userId":1}, "User":{"id":1}](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%22userId%22%3A38710%7D%2C%22User%22%3A%7B%22id%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D) <br /><br />②或这样省去4条重复User<br />[base_url/get/{"User":{"id":1}, "[]":{"page":0, "count":3, "Moment":{"userId":1}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://139.196.140.118:8080/get/%7B%22User%22%3A%7B%22id%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%22userId%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D)<br /><br />③如果User之前已经获取到了，还可以这样省去所有重复User<br />[base_url/get/{"[]":{"page":0, "count":3, "Moment":{"userId":1}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22Moment%22%3A%7B%22userId%22%3A38710%7D%2C%22%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D)
  
+### <h3 id="2.6">2.6 服务端对应不同请求的返回结果<h3/>
  服务端对应不同请求的返回结果 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  User | {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}}
