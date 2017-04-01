@@ -2,9 +2,13 @@
 
 [English Document](https://github.com/TommyLemon/APIJSON/blob/master/README(English).md)
 
-[1.简介](#1)  
+[1.简介](#1)<br />
+[2.对比传统方式](#2)<br />
+[3.对应关系总览](#3)<br />
+[4.功能符](#4)<br />
+[5.使用方法](#5)<br />
 
-
+<h2 id="1">1.简介<h2/>
 
 APIJSON是一种JSON传输结构协议。<br />
 
@@ -51,7 +55,7 @@ APIJSON是一种JSON传输结构协议。<br />
 &nbsp; &nbsp; &nbsp; &nbsp; }<br />
 &nbsp; &nbsp; }<br />
 }</p>
-<h2 id="1">1.简介<h2/>
+
 [点击这里测试](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22User%22%3A%7B%22sex%22%3A0%7D%2C%22Moment%22%3A%7B%22userId%40%22%3A%22%252FUser%252Fid%22%7D%2C%22Comment%5B%5D%22%3A%7B%22Comment%22%3A%7B%22momentId%40%22%3A%22%255B%255D%252FMoment%252Fid%22%7D%2C%22count%22%3A2%2C%22page%22%3A0%7D%2C%22count%22%3A2%2C%22page%22%3A0%7D%7D)
 
 ### 返回：
@@ -147,7 +151,7 @@ APIJSON是一种JSON传输结构协议。<br />
 
 
  
-## 对比传统HTTP传输方式
+<h2 id="2">2.对比传统RESTful方式<h2/>
  
  开发流程 | 传统方式 | APIJSON
 -------- | ------------ | ------------
@@ -194,7 +198,7 @@ APIJSON是一种JSON传输结构协议。<br />
 4.status和message总是在返回结果的同一层级成对出现。对所有请求的返回结果都会在最外层有一对总结式status和message。对非GET、HEAD请求，返回结果里面的每个JSONObject里都会有一对status和message说明这个JSONObject的状态。下同。<br >
 5.id等字段对应的值仅供说明，不一定是数据库里存在的，请求里用的是真实存在的值。下同。
 
-## 请求方法、URL、Request、Response对应关系总览
+<h2 id="3">3.请求方法、URL、Request、Response对应关系总览<h2/>
 
   方法及说明 | URL | Request | Response
 ------------ | ------------ | ------------ | ------------
@@ -213,7 +217,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 
 
 
-## 功能符
+<h2 id="4">4.功能符<h2/>
  
   键值对格式 | 功能与作用 | 使用示例
 ------------ | ------------ | ------------
@@ -228,7 +232,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
  &, \|, ! 逻辑运算符。<br />& 可用于"key&{}":"条件"等。<br />\| 可用于"key\|{}":"条件", "key\|{}":[]等。<br />! 可单独使用，如"key!":Object，也可像&,\|一样配合其他功能符使用等。 | 逻辑运算 | ["id&{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id&{}":">80000,<=90000"}})，即id满足id>80000 & id<=90000。<br />["id|{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id|{}":">80000,<=90000"}})，同"id{}":">80000,<=90000"，即id满足id>80000 \| id<=90000。<br />["id!{}":[82001,38710]](http://139.196.140.118:8080/head/{"User":{"id!{}":[82001,38710]}})，即id满足 ! (id=82001 \| id=38710)，可过滤黑名单的消息。
  "@key":key指定类型的Object | @key为JSONObject中的关键字，作用各不相同，但都不作为查询匹配条件 | ① 只查询id,sex,name这几列并且请求结果也按照这个顺序：<br />["@columns":"id,sex,name"](http://139.196.140.118:8080/get/{"User":{"@columns":"id,sex,name","id":38710}})<br />返回<br />{<br /> &nbsp; "id":1,<br /> &nbsp; "sex":0,<br /> &nbsp; "name":"Lemon"<br />}<br /> ② 从pictureList获取第0张图片：<br />[{<br /> &nbsp; "@position":0, //这里@position为自定义关键词<br /> &nbsp; "firstPicture()":"get(Collection:pictureList,int:@position)"<br />}](http://139.196.140.118:8080/get/{"User":{"id":38710,"@position":0,"firstPicture()":"get(Collection:pictureList,int:@position)"}})<br />返回<br />{<br /> &nbsp; "pictureList":["url0","url1"],<br /> &nbsp; "@position":0,<br /> &nbsp; "firstPicture":"url0"<br />}<br /> ...
 
-## 使用方法
+<h2 id="5">5.使用方法<h2/>
 
 ### 1.下载后解压APIJSON工程
 
