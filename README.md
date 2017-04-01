@@ -234,20 +234,20 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 
 <h2 id="5">5.使用方法<h2/>
 
-### 1.下载后解压APIJSON工程
+<h3 id="5.1">5.1 下载后解压APIJSON工程<h3/>
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
 #### 你可以跳过步骤2和步骤3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
 
-### 2.导入MySQL table文件
+<h3 id="5.2">5.2 导入MySQL table文件<h3/>
 
 服务端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
 我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。
 
 启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
-### 3.用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程
+<h3 id="5.3">5.3 用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行服务端工程<h3/>
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.8.0_91 + Eclipse 4.6.1 + IntellIJ 2016.2.5
@@ -268,7 +268,7 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea
 2.运行<br />
 Run > Run APIJSONApplication
 
-### 4.用ADT Bundle或Android Studio运行客户端工程
+<h3 id="5.4">5.4 用ADT Bundle或Android Studio运行客户端工程<h3/>
 
 可以跳过这个步骤，直接下载下方提供的客户端App。
 
@@ -291,7 +291,7 @@ Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-
 2.运行<br />
 Run > Run app
 
-### 5.操作客户端App
+<h3 id="5.5">5.5 操作客户端App<h3/>
 
 选择发送APIJSON请求并等待显示结果。<br />
 如果默认url不可用，修改为一个可用的，比如正在运行APIJSON服务端工程的电脑的IPV4地址，然后点击查询按钮重新请求。
