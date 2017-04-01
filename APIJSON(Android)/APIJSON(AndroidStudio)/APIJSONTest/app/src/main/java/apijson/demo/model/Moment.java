@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,9 +16,16 @@ package apijson.demo.model;
 
 import java.util.List;
 
+import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.RequestMethod;
+
 /**作品类
  * @author Lemon
  */
+@APIJSONRequest(
+		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		DELETE = "{necessaryColumns:id}"
+		)
 public class Moment extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;
 

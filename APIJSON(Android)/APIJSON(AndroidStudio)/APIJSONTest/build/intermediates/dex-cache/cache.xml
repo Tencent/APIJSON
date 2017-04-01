@@ -5,21 +5,21 @@
         jar="/Users/Tommy/Documents/JAVA/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONTest/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         revision="23.0.2"
-        sha1="f39cc1b3a07f9b58799ca2363ce77675e39feade">
+        sha1="2045ae25eb0bc48ea1b6817e1f052a08be73219a">
         <dex dex="/Users/Tommy/Documents/JAVA/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONTest/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_f4a14964328dd87e4d400fd1677f5b6028303a9f/classes.dex" />
     </item>
     <item
         jar="/Users/Tommy/Documents/JAVA/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONTest/app/build/intermediates/exploded-aar/APIJSONTest/APIJSONLibrary/unspecified/jars/libs/fastjson-1.2.24.jar"
         jumboMode="true"
         revision="23.0.2"
-        sha1="feed10697f0c3513d8c2ffe35cccb4401104d5d6">
+        sha1="95ba821eea9bb57e9bcc3a874933f23ee7085ba3">
         <dex dex="/Users/Tommy/Documents/JAVA/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONTest/app/build/intermediates/transforms/dex/debug/folders/1000/8/fastjson-1.2.24_71a06e79b33f0237b1a67c302cf4a45803112e6f/classes.dex" />
     </item>
     <item
         jar="/Users/Tommy/Documents/JAVA/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONTest/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         revision="23.0.2"
-        sha1="74f7fc46a471d1ad94163d980c340356f3c2a478">
+        sha1="f8c422eb678dcebce243b8ad7137295c60780506">
         <dex dex="/Users/Tommy/Documents/JAVA/APIJSON(GitHub)/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONTest/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_f172c9e0f4ee8d74a64515baf75c8f21dcc2bf81/classes.dex" />
     </item>
     <item
