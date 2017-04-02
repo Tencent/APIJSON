@@ -15,6 +15,12 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.StringUtil.UTF_8;
+import static zuo.biao.apijson.RequestMethod.GET;
+import static zuo.biao.apijson.RequestMethod.HEAD;
+import static zuo.biao.apijson.RequestMethod.POST_GET;
+import static zuo.biao.apijson.RequestMethod.POST_HEAD;
+import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.RequestMethod.PUT;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -61,7 +67,7 @@ public class RequestParser {
 	public RequestParser(RequestMethod requestMethod) {
 		super();
 		if (requestMethod == null) {
-			requestMethod = RequestMethod.GET;
+			requestMethod = GET;
 		}
 		this.requestMethod = requestMethod;
 	}
@@ -134,7 +140,7 @@ public class RequestParser {
 
 
 		requestObject = AccessVerifier.removeAccessInfo(requestObject);
-		//		if (isGetMethod(requestMethod) || requestMethod == RequestMethod.POST_GET) {//分情况把我都搞晕了@_@
+		//		if (isGetMethod(requestMethod) || requestMethod == POST_GET) {//分情况把我都搞晕了@_@
 		requestObject = error == null ? extendSuccessResult(requestObject)
 				: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		//		}
@@ -156,7 +162,7 @@ public class RequestParser {
 			return newErrorResult(e);
 		}
 		if (method == null) {
-			method = RequestMethod.GET;
+			method = GET;
 		}
 		System.out.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + TAG + method
 				+ "/parseResponse  request = \n" + request);
@@ -166,10 +172,28 @@ public class RequestParser {
 
 	/**是否为GET请求方法
 	 * @param method
+	 * @param containPrivate 包含私密(非明文)获取方法POST_GET
 	 * @return
 	 */
-	public static boolean isGetMethod(RequestMethod method) {
-		return method == null || method == RequestMethod.GET || method == RequestMethod.HEAD;
+	public static boolean isGetMethod(RequestMethod method, boolean containPrivate) {
+		boolean is = method == null || method == GET;
+		return containPrivate == false ? is : is || method == POST_GET;
+	}
+	/**是否为HEAD请求方法
+	 * @param method
+	 * @param containPrivate 包含私密(非明文)获取方法POST_HEAD
+	 * @return
+	 */
+	public static boolean isHeadMethod(RequestMethod method, boolean containPrivate) {
+		boolean is = method == HEAD;
+		return containPrivate == false ? is : is || method == POST_HEAD;
+	}
+	/**是否为公开(明文，浏览器能直接访问)的请求方法
+	 * @param method
+	 * @return
+	 */
+	public static boolean isPublicMethod(RequestMethod method) {
+		return method == null || method == GET || method == HEAD;
 	}
 
 	/**新建带状态内容的JSONObject
@@ -250,7 +274,7 @@ public class RequestParser {
 	 * @return
 	 */
 	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request) throws Exception {
-		if (isGetMethod(method)) {
+		if (isPublicMethod(method)) {
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
 
@@ -260,7 +284,7 @@ public class RequestParser {
 		}
 
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
-		QueryConfig config = new QueryConfig(RequestMethod.GET, "Request");
+		QueryConfig config = new QueryConfig(GET, "Request");
 		config.setColumn("structure");
 
 		Map<String, Object> where = new HashMap<String, Object>();
@@ -363,7 +387,7 @@ public class RequestParser {
 							throw new IllegalArgumentException(requestName
 									+ "不能缺少 " + key + " 等[" + necessarys + "]内的任何JSONObject！");
 						}
-						if (method == RequestMethod.POST && result.containsKey(Table.ID) == false) {//为注册用户返回id
+						if (method == POST && result.containsKey(Table.ID) == false) {//为注册用户返回id
 							result.put(Table.ID, System.currentTimeMillis());
 						}
 						transferredRequest.put(key, result);
@@ -468,7 +492,7 @@ public class RequestParser {
 					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
 						transferredRequest.put(key, result);
 					}
-				} else if (requestMethod == RequestMethod.PUT && JSON.isJSONArray(value)) {//PUT JSONArray
+				} else if (requestMethod == PUT && JSON.isJSONArray(value)) {//PUT JSONArray
 					JSONArray array = ((JSONArray) value);
 					if (array != null && array.isEmpty() == false && isTableKey(name)) {
 						int putType = 0;
@@ -610,6 +634,9 @@ public class RequestParser {
 			, final JSONObject request) throws Exception {
 		System.out.println(TAG + "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
+		if (isHeadMethod(requestMethod, true)) {
+			throw new UnsupportedOperationException("HEAD、POST_HEAD方法不允许重复查询！不应该传 " + name + " 等key[]:{}！");
+		}
 		if (request == null || request.isEmpty()) {//jsonKey-jsonValue条件
 			return null;
 		}
@@ -636,7 +663,7 @@ public class RequestParser {
 					object = isTableKey(key) ? request.get(key) : null;
 					if (object != null && object instanceof JSONObject) {// && object.isEmpty() == false) {
 						//							totalCount = QueryHelper.getInstance().getCount(key);
-						JSONObject response = new RequestParser(RequestMethod.HEAD)
+						JSONObject response = new RequestParser(HEAD)
 								.parseResponse(new JSONRequest(key, object));
 						JSONObject target = response == null ? null : response.getJSONObject(key);
 						total = target == null ? 0 : target.getIntValue(JSONResponse.KEY_COUNT);
@@ -967,17 +994,17 @@ public class RequestParser {
 		} else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
 			key = key.substring(0, key.lastIndexOf("@"));
 		} else if (key.endsWith("+")) {//延长，PUT查询时处理
-			if (method == RequestMethod.PUT) {//不为PUT就抛异常
+			if (method == PUT) {//不为PUT就抛异常
 				key = key.substring(0, key.lastIndexOf("+"));
 			}
 		} else if (key.endsWith("-")) {//缩减，PUT查询时处理
-			if (method == RequestMethod.PUT) {//不为PUT就抛异常
+			if (method == PUT) {//不为PUT就抛异常
 				key = key.substring(0, key.lastIndexOf("-"));
 			}
 		}
 
 		String last = null;
-		if (isGetMethod(method) || method == RequestMethod.HEAD) {//逻辑运算符仅供GET,HEAD方法使用
+		if (isGetMethod(method, true) || isHeadMethod(method, true)) {//逻辑运算符仅供GET,HEAD方法使用
 			last = key.isEmpty() ? "" : key.substring(key.length() - 1);
 			if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
 				key = key.substring(0, key.length() - 1);

@@ -284,7 +284,7 @@ public class QueryConfig {
 	public static String getWhereString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
-			if (RequestParser.isGetMethod(method) == false && method != POST_GET
+			if (RequestParser.isGetMethod(method, true) == false && RequestParser.isHeadMethod(method, true) == false
 					&& where.containsKey(Table.ID) == false) {//POST必须有id，否则不能INSERT后直接返回id 
 				throw new IllegalArgumentException("请设置" + Table.ID + "！");
 			}
