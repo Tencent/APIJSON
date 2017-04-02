@@ -225,12 +225,12 @@ APIJSON是一种JSON传输结构协议。<br />
   方法及说明 | URL | Request | Response
 ------------ | ------------ | ------------ | ------------
 GET：普通获取请求，明文，可用浏览器调试 | base_url/get/ | {TableName:{…}}，{…}内为限制条件。<br >例如获取一个id为1的Moment：<br >{"Moment":{"id":1}} | {TableName:{...}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"id":1, "userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "status":200, "message":"success"}
-HEAD：普通获取数量请求，明文，可用浏览器调试 | base_url/head/ | {TableName:{…}}，{…}内为限制条件。<br >例如<br >{"Moment":{"userId":1}}，获取一个id为1的User所发布的Moment总数 | {TableName:{"status":200, "message":"success", "count":10}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"status":200, "message":"success", "count":10}, "status":200, "message":"success"}
-POST_GET：安全/私密获取请求，非明文，用于获取密码、钱包等对安全性要求高的数据 | base_url/post_get/ | 最外层加一个"tag":tag，其它同GET | 同GET
+HEAD：普通获取数量请求，明文，可用浏览器调试 | base_url/head/ | {TableName:{…}}，{…}内为限制条件。<br >例如获取一个id为1的User所发布的Moment总数：<br >{"Moment":{"userId":1}} | {TableName:{"status":200, "message":"success", "count":10}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"status":200, "message":"success", "count":10}, "status":200, "message":"success"}
+POST_GET：安全/私密获取请求，非明文，用于获取钱包等对安全性要求高的数据 | base_url/post_get/ | 最外层加一个"tag":tag，其它同GET | 同GET
 POST_HEAD：安全/私密获取数量请求，非明文，用于获取银行卡数量等对安全性要求高的数据 | base_url/post_head/ | 最外层加一个"tag":tag，其它同HEAD | 同HEAD
-POST：新增数据，非明文 | base_url/post/ | {TableName:{…}, "tag":tag}，{…}中id由服务端生成，客户端不能传。<br >例如<br >{"Moment":{"userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"} | {TableName:{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}
-PUT：修改数据，非明文 | base_url/put/ | {TableName:{"id":id,…}, "tag":tag}，{…}中id必传。<br >例如<br >{"Moment":{"id":1,"content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"} | 同POST
-DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "tag":tag}，{…}中id必传，一般只传id。<br >例如<br >{"Moment":{"id":1}, "tag":"Moment"} | 同POST
+POST：新增数据，非明文 | base_url/post/ | {TableName:{…}, "tag":tag}，{…}中id由服务端生成，客户端不能传。<br >例如一个id为1的User发布一个新Moment：<br >{"Moment":{"userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"} | {TableName:{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}
+PUT：修改数据，非明文，只修改所传的字段 | base_url/put/ | {TableName:{"id":id,…}, "tag":tag}，{…}中id必传。<br >例如修改id为1的Moment的content：<br >{"Moment":{"id":1,"content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"} | 同POST
+DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "tag":tag}，{…}中id必传，一般只传id。<br >例如删除id为1的Moment：<br >{"Moment":{"id":1}, "tag":"Moment"} | 同POST
 
 
 1.TableName指要查询的table的名称字符串。第一个字符为大写字母，剩下的字符要符合英语字母、数字、下划线中的任何一种。对应的值为内部所传字段符合对应Table的JSONObject，结构是{...}<br >
