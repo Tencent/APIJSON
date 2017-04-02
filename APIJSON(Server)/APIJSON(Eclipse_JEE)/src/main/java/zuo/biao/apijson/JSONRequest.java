@@ -84,7 +84,6 @@ public class JSONRequest extends JSONObject {
 
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
-	public static final String KEY_TOTAL = "total";
 
 	public JSONRequest setCount(int count) {
 		put(KEY_COUNT, count);
@@ -100,15 +99,6 @@ public class JSONRequest extends JSONObject {
 	}
 	public int getPage() {
 		return getIntValue(KEY_PAGE);
-	}
-	//	private int total;
-	public JSONRequest setTotal(int total) {
-		//		this.total = total;
-		put(KEY_TOTAL, total);
-		return this;
-	}
-	public int getTotal() {
-		return getIntValue(KEY_TOTAL);//total;//
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -200,121 +190,5 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest toArray(int count, int page, String name, boolean encode) {
 		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page), encode);
 	}
-
-
-	/**设置搜索
-	 * @param key
-	 * @param value
-	 * @see {@link #putSearch(String, String, int)}
-	 */
-	public void putSearch(String key, String value) {
-		putSearch(key, value, SEARCH_TYPE_CONTAIN_FULL);
-	}
-	/**设置搜索
-	 * encode = true
-	 * @param key
-	 * @param value
-	 * @param type
-	 * @see {@link #putSearch(String, String, int, boolean)}
-	 */
-	public void putSearch(String key, String value, int type) {
-		putSearch(key, value, type, true);
-	}
-	/**设置搜索
-	 * @param key
-	 * @param value
-	 * @param type
-	 * @param encode
-	 */
-	public void putSearch(String key, String value, int type, boolean encode) {
-		if (key == null) {
-			key = "";
-		}
-		if (key.endsWith("$") == false) {
-			key += "$";
-		}
-		put(key, getSearch(value, type), encode);
-	}
-
-	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;
-	public static final int SEARCH_TYPE_CONTAIN_ORDER = 1;
-	public static final int SEARCH_TYPE_CONTAIN_SINGLE = 2;
-	public static final int SEARCH_TYPE_CONTAIN_ANY = 3;
-	public static final int SEARCH_TYPE_START = 4;
-	public static final int SEARCH_TYPE_END = 5;
-	public static final int SEARCH_TYPE_START_SINGLE = 6;
-	public static final int SEARCH_TYPE_END_SINGLE = 7;
-	public static final int SEARCH_TYPE_PART_MATCH = 8;
-	/**
-	 * SQL中NOT LIKE就行？？
-	 */
-	public static final int SEARCH_TYPE_NO_CONTAIN = 9;
-	/**
-	 * SQL中NOT LIKE就行？？
-	 */
-	public static final int SEARCH_TYPE_NO_PART_MATCH = 10;
-	/**获取搜索值
-	 * @param key
-	 * @return
-	 */
-	public static String getSearch(String key) {
-		return getSearch(key, SEARCH_TYPE_CONTAIN_FULL);
-	}
-	/**获取搜索值
-	 * @param key
-	 * @param type
-	 * @return
-	 */
-	public static String getSearch(String key, int type) {
-		return getSearch(key, type, true);
-	}
-	/**获取搜索值
-	 * @param key
-	 * @param type
-	 * @param ignoreCase
-	 * @return
-	 */
-	public static String getSearch(String key, int type, boolean ignoreCase) {
-		if (key == null) {
-			return null;
-		}
-		switch (type) {
-		case SEARCH_TYPE_CONTAIN_SINGLE:
-			return "_" + key + "_";
-		case SEARCH_TYPE_CONTAIN_ORDER:
-			char[] cs = key.toCharArray();
-			if (cs == null) {
-				return null;
-			}
-			String s = "%";
-			for (int i = 0; i < cs.length; i++) {
-				s += cs[i] + "%";
-			}
-			return s;
-		case SEARCH_TYPE_START:
-			return key + "%";
-		case SEARCH_TYPE_END:
-			return "%" + key;
-		case SEARCH_TYPE_START_SINGLE:
-			return key + "_";
-		case SEARCH_TYPE_END_SINGLE:
-			return "_" + key;
-		case SEARCH_TYPE_NO_CONTAIN:
-			return "[^" + key + "]";
-		case SEARCH_TYPE_NO_PART_MATCH:
-			cs = key.toCharArray();
-			if (cs == null) {
-				return null;
-			}
-			s = "";
-			for (int i = 0; i < cs.length; i++) {
-				s += getSearch("" + cs[i], SEARCH_TYPE_NO_CONTAIN, ignoreCase);
-			}
-			return s;
-		default:
-			return "%" + key + "%";
-		}
-	}
-
 
 }

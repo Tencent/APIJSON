@@ -15,6 +15,7 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
 
 /**JSONRequest for Server to replace zuo.biao.apijson.JSONRequest,
@@ -115,11 +116,12 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	/**设置搜索
 	 * @param key
 	 * @param value
+	 * @return 
 	 * @see {@link #putSearch(String, String, int)}
 	 */
 	@Override
-	public void putSearch(String key, String value) {
-		putSearch(key, value, SEARCH_TYPE_CONTAIN_FULL);
+	public JSONRequest putSearch(String key, String value) {
+		return putSearch(key, value, SQL.SEARCH_TYPE_CONTAIN_FULL);
 	}
 	/**设置搜索
 	 * @param key
@@ -128,8 +130,9 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	 * @see {@link #putSearch(String, String, int, boolean)}
 	 */
 	@Override
-	public void putSearch(String key, String value, int type) {
+	public JSONRequest putSearch(String key, String value, int type) {
 		putSearch(key, value, type, false);
+		return this;
 	}
 
 }
