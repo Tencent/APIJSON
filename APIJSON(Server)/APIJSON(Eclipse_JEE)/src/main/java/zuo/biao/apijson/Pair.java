@@ -21,7 +21,7 @@ import java.util.Map;
 /**type:value
  * @author Lemon
  */
-public class TypeValueKeyEntry extends Entry<String, String> {
+public class Pair extends Entry<String, String> {
 
 	private static Map<String, Class<?>> classMap;
 	static {
@@ -43,34 +43,34 @@ public class TypeValueKeyEntry extends Entry<String, String> {
 		classMap.put(Collection.class.getSimpleName(), Collection.class);//不允许指定<T>
 		classMap.put(Map.class.getSimpleName(), Map.class);//不允许指定<T>
 	}
-	
-	
-	public TypeValueKeyEntry() {
+
+
+	public Pair() {
 		super();
 	}
-	
-	
+
+
 	/**
 	 * @param <K>
-	 * @param typeValue
+	 * @param pair
 	 * @return
 	 */
-	public static <K, V> boolean isCorrect(Entry<K, V> typeValue) {
-		return typeValue != null && StringUtil.isNotEmpty(typeValue.getValue(), true);
+	public static <K, V> boolean isCorrect(Entry<K, V> pair) {
+		return pair != null && StringUtil.isNotEmpty(pair.getValue(), true);
 	}
 
 	/**
-	 * @param typeValue
+	 * @param pair
 	 * @return
 	 */
-	public String toEntryString() {
-		return toEntryString(getKey(), getValue());
+	public String toPairString() {
+		return toPairString(getKey(), getValue());
 	}
 	/**
-	 * @param typeValue
+	 * @param pair
 	 * @return
 	 */
-	public static String toEntryString(String typeKey, String valueKey) {
+	public static String toPairString(String typeKey, String valueKey) {
 		return (typeKey == null ? "" : typeKey + ":") + valueKey;
 	}
 	/**
@@ -78,42 +78,52 @@ public class TypeValueKeyEntry extends Entry<String, String> {
 	 * @param value
 	 * @return
 	 */
-	public static String toEntryString(Class<?> type, Object value) {
-		return toEntryString(type == null ? null : type.getSimpleName(), StringUtil.getString(value));
+	public static String toPairString(Class<?> type, Object value) {
+		return toPairString(type == null ? null : type.getSimpleName(), StringUtil.getString(value));
 	}
+
 	/**
-	 * @param typeValue
+	 * "key":null不应该出现？因为FastJSON内默认不存null
+	 * @param pair
+	 * @param defaultKey
 	 * @return
 	 */
-	public static Entry<String, String> parseKeyEntry(String typeValue) {
-		typeValue = StringUtil.getString(typeValue);//让客户端去掉所有空格 getNoBlankString(typeValue);
-		if (typeValue.isEmpty()) {
+	public static Entry<String, String> parseEntry(String pair, String defaultKey) {
+		pair = StringUtil.getString(pair);//让客户端去掉所有空格 getNoBlankString(pair);
+		if (pair.isEmpty()) {
 			return null;
 		}
-		int index = typeValue.contains(":") ? typeValue.indexOf(":") : -1;
+		int index = pair.indexOf(":");
 
 		Entry<String, String> entry = new Entry<String, String>();
-		entry.setKey(index < 0 ? Object.class.getSimpleName() : typeValue.substring(0, index));
-		entry.setValue(typeValue.substring(index + 1, typeValue.length()));
+		entry.setKey(index < 0 ? defaultKey : pair.substring(0, index));
+		entry.setValue(pair.substring(index + 1, pair.length()));
 
 		return entry;
 	}
 	/**
-	 * @param valueMap
-	 * @param typeValue
+	 * @param pair
 	 * @return
 	 */
-	public static Entry<Class<?>, Object> parseEntry(Map<String, Object> valueMap, String typeValue) {
-		typeValue = StringUtil.getString(typeValue);//让客户端去掉所有空格 getNoBlankString(typeValue);
-		if (typeValue.isEmpty()) {
+	public static Entry<String, String> parseVariableEntry(String pair) {
+		return parseEntry(pair, Object.class.getSimpleName());
+	}
+	/**
+	 * @param pair
+	 * @param valueMap
+	 * @return
+	 */
+	public static Entry<Class<?>, Object> parseVariableEntry(String pair, Map<String, Object> valueMap) {
+		pair = StringUtil.getString(pair);//让客户端去掉所有空格 getNoBlankString(pair);
+		if (pair.isEmpty()) {
 			return null;
 		}
-		int index = typeValue.contains(":") ? typeValue.indexOf(":") : -1;
-		
+		int index = pair.contains(":") ? pair.indexOf(":") : -1;
+
 		Entry<Class<?>, Object> entry = new Entry<Class<?>, Object>();
-		entry.setKey(classMap.get(index < 0 ? Object.class.getSimpleName() : typeValue.substring(0, index)));
-		entry.setValue(valueMap == null ? null : valueMap.get(typeValue.substring(index + 1, typeValue.length())));
-		
+		entry.setKey(classMap.get(index < 0 ? Object.class.getSimpleName() : pair.substring(0, index)));
+		entry.setValue(valueMap == null ? null : valueMap.get(pair.substring(index + 1, pair.length())));
+
 		return entry;
 	}
 }

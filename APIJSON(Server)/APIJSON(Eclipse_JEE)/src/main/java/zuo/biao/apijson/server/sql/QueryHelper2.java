@@ -55,6 +55,7 @@ public class QueryHelper2 {
 		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_SCHEMA, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
+	//TODO key应该改成SQL
 	private void saveCache(String key, List<JSONObject> list) {
 		if (key == null) {
 			System.out.println("saveList  key == null >> return;");

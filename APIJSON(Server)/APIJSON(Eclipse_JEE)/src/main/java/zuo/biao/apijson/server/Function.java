@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.Entry;
 import zuo.biao.apijson.FunctionList;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.TypeValueKeyEntry;
+import zuo.biao.apijson.Pair;
 import zuo.biao.apijson.server.model.BaseModel;
 
 /**
@@ -75,7 +75,7 @@ public class Function implements FunctionList {
 
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
-		Entry<String, String> method = TypeValueKeyEntry.parseKeyEntry(function.substring(0, start));
+		Entry<String, String> method = Pair.parseVariableEntry(function.substring(0, start));
 		if (method == null || StringUtil.isNotEmpty(method.getValue(), true) == false) {
 			System.out.println(TAG + "invoke  method == null || StringUtil.isNotEmpty(method.getValue(), true) == false"
 					+ " >> return null;");
@@ -92,7 +92,7 @@ public class Function implements FunctionList {
 
 			Entry<Class<?>, Object> entry;
 			for (int i = 0; i < typeValues.length; i++) {
-				entry = TypeValueKeyEntry.parseEntry(jsonMap, typeValues[i]);
+				entry = Pair.parseVariableEntry(typeValues[i], jsonMap);
 				if (entry != null) {
 					types[i] = entry.getKey();
 					values[i] = entry.getValue();

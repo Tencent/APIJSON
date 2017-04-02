@@ -42,7 +42,7 @@ import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
-import zuo.biao.apijson.TypeValueKeyEntry;
+import zuo.biao.apijson.Pair;
 import zuo.biao.apijson.server.sql.AccessVerifier;
 import zuo.biao.apijson.server.sql.QueryHelper;
 
@@ -654,6 +654,7 @@ public class RequestParser {
 			count = 100;
 		}
 
+		String firstTableKey = null;
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = new LinkedHashSet<>(request.keySet());
 		if (count <= 0 || count > 10) {//10以下不优化长度
@@ -663,6 +664,7 @@ public class RequestParser {
 					object = isTableKey(key) ? request.get(key) : null;
 					if (object != null && object instanceof JSONObject) {// && object.isEmpty() == false) {
 						//							totalCount = QueryHelper.getInstance().getCount(key);
+						firstTableKey = key;
 						JSONObject response = new RequestParser(HEAD)
 								.parseResponse(new JSONRequest(key, object));
 						JSONObject target = response == null ? null : response.getJSONObject(key);
@@ -719,7 +721,7 @@ public class RequestParser {
 				}
 			}
 		} else {
-			for (String key : set) {
+			for (String key : set) {//0:{},1:{}...
 				value = request.get(key);
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					config.setPosition(Integer.valueOf(0 + StringUtil.getNumber(key, true)));
@@ -729,7 +731,9 @@ public class RequestParser {
 						result = getObject(path, config, key, (JSONObject) value);
 					}
 					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
+						//先实现功能，后续再优化		if (result.containsKey(firstTableKey)) {//第一个Table都没有，后面的也无效
 						transferredRequest.put(key, result);
+						//				}
 					}
 				} else {//JSONArray或其它Object
 					//array里不允许关联，只能在object中关联
@@ -1015,7 +1019,7 @@ public class RequestParser {
 
 		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好？不，查询就得截取
 		if (isTableKey) {//不允许在column key中使用Type:key形式
-			key = TypeValueKeyEntry.parseKeyEntry(key).getKey();
+			key = Pair.parseEntry(key, null).getKey();
 		}
 
 		if (isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
