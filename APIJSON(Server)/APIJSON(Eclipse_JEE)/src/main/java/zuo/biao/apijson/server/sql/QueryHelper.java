@@ -86,7 +86,9 @@ public class QueryHelper {
 			return null;
 		}
 		final String sql = config.getSQL();
-		System.out.println(TAG + "select  sql = " + sql);
+		System.out.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
+				+ TAG + "select  sql = " + sql
+				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 
 		if (connection == null || connection.isClosed()) {
@@ -107,7 +109,7 @@ public class QueryHelper {
 			object = rs.next() ? RequestParser.newResult(200, "success")
 					: RequestParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
 			object.put(Table.COUNT, rs.getLong(1));
-			
+
 			rs.close();
 			return object;
 
@@ -189,9 +191,9 @@ public class QueryHelper {
 		if (config == null) {
 			return null;
 		}
-		String columns = config.getColumns();
-		if (StringUtil.isNotEmpty(columns, true)) {
-			return StringUtil.split(columns);//columns.contains(",") ? columns.split(",") : new String[]{columns};
+		String column = config.getColumn();
+		if (StringUtil.isNotEmpty(column, true)) {
+			return StringUtil.split(column);//column.contains(",") ? column.split(",") : new String[]{column};
 		}
 		List<String> list = new ArrayList<String>();
 		String table = config.getTable();

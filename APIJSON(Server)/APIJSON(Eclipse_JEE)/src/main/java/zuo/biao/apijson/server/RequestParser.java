@@ -261,7 +261,7 @@ public class RequestParser {
 
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
 		QueryConfig config = new QueryConfig(RequestMethod.GET, "Request");
-		config.setColumns("structure");
+		config.setColumn("structure");
 
 		Map<String, Object> where = new HashMap<String, Object>();
 		where.put("method", method.name());
@@ -487,8 +487,8 @@ public class RequestParser {
 						//GET <<<<<<<<<<<<<<<<<<<<<<<<<
 						JSONObject arrayRequest = new JSONObject();
 						arrayRequest.put(Table.ID, request.get(Table.ID));
-						//						arrayRequest.setColumns(realKey);//put请求会对id添加功能符？
-						arrayRequest.put(JSONRequest.KEY_COLUMNS, realKey);
+						//						arrayRequest.setColumn(realKey);//put请求会对id添加功能符？
+						arrayRequest.put(JSONRequest.KEY_COLUMN, realKey);
 						JSONRequest getRequest = new JSONRequest(name, arrayRequest);
 						JSONObject response = new RequestParser().parseResponse(getRequest);
 						//GET >>>>>>>>>>>>>>>>>>>>>>>>>
@@ -525,7 +525,7 @@ public class RequestParser {
 					}
 				} else {//JSONArray或其它Object，直接填充
 					transferredRequest.put(key, value);
-					if (key.startsWith("@") && QueryConfig.tableKeyList.contains(key) == false) {
+					if (key.startsWith("@") && QueryConfig.TABLE_KEY_LIST.contains(key) == false) {
 						selfDefineKeyMap.put(key, value);
 					}//可@key@
 					if (key.endsWith("()")) {

@@ -69,7 +69,7 @@ public class JSONRequest extends JSONObject {
 
 
 
-	public static final String KEY_TAG = "tag";
+	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
 
 	public JSONObject setTag(String tag) {
 		put(KEY_TAG, tag);
@@ -104,21 +104,6 @@ public class JSONRequest extends JSONObject {
 
 
 
-
-	/**
-	 * @param value
-	 * @param parts path = parts[0] + "/" + parts[1] + "/" + parts[2] + ...
-	 * @return
-	 */
-	public Object putPath(String key, String... parts) {
-		String path = "";
-		if (parts != null) {
-			for (int i = 0; i < parts.length; i++) {
-				path += (i > 0 ? "/" : "") + parts[i];
-			}
-		}
-		return put(key, path);
-	}
 
 	// 导致JSONObject add >> get = null
 	//	/**
@@ -180,12 +165,12 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest toArray(int count, int page, String name) {
 		return toArray(count, page, name, true);
 	}
-	/**create a parent JSONObject named name+KEY_ARRAY
+	/**create a parent JSONObject named name+KEY_ARRAY. 
 	 * @param count
 	 * @param page
 	 * @param name
 	 * @param encode
-	 * @return {name+KEY_ARRAY : this}
+	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #add(com.alibaba.fastjson.JSONObject)} instead
 	 */
 	public JSONRequest toArray(int count, int page, String name, boolean encode) {
 		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page), encode);

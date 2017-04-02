@@ -270,7 +270,7 @@ public class HttpRequest {
 		JSONRequest request = new JSONRequest(new User(id));
 		if (withMomentList) {
 			request.add(new JSONRequest(Moment.class.getSimpleName()
-					, new JSONRequest(KEY_USER_ID, id).setColumns("pictureList"))
+					, new JSONRequest(KEY_USER_ID, id).setColumn("pictureList"))
 			.toArray(3, 0, Moment.class.getSimpleName()));
 		}
 		get(request, requestCode, listener);
@@ -343,13 +343,13 @@ public class HttpRequest {
 				break;
 			case RANGE_MOMENT:
 				JSONObject moment = new JSONObject(new Moment(id));
-				moment.setColumns("praiseUserIdList");
+				moment.setColumn("praiseUserIdList");
 				request.put(Moment.class.getSimpleName(), moment);
 				userItem.put(ID_IN, "Moment/praiseUserIdList");
 				break;
 			case RANGE_COMMENT:
 				JSONObject comment = new JSONObject(new Comment(id));
-				comment.setColumns(KEY_USER_ID);
+				comment.setColumn(KEY_USER_ID);
 				request.put(Comment.class.getSimpleName(), comment);
 				userItem.put(ID_AT, "Comment/userId");
 				break;
@@ -443,12 +443,12 @@ public class HttpRequest {
 		//		moment.put("praised()", "isContain(Collection:praiseUserIdList,userId)");
 
 		request.put(Moment.class.getSimpleName(), moment);
-		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId").setColumns(COLUMNS_USER));
+		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 
 		//comment <<<<<<<<<<<<<<<<<<
 		JSONRequest commentItem = new JSONRequest();
 		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "[]/Moment/id"));
-		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumns(COLUMNS_USER));
+		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER_SIMPLE));
 
 		//		commentItem.put("release", "total:[]/Moment/commentCount");
 		request.add(commentItem.toArray(10, 0, CommentItem.class.getSimpleName()));
@@ -468,13 +468,7 @@ public class HttpRequest {
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
 		request.put(new Comment().setMomentId(momentId));
-		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumns(COLUMNS_USER));
-
-		JSONObject toUserObject = new JSONObject();
-		toUserObject.put(User.class.getSimpleName()
-				, new JSONRequest(ID_AT, "[]/Comment/toUserId").setColumns(COLUMNS_USER_SIMPLE));
-		request.put("toUserObject", toUserObject);
-
+		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 		get(request.toArray(count, page), requestCode, listener);
 	}
 

@@ -177,7 +177,7 @@ public class QueryHelper3 {
 		}
 		List<Column> list = new ArrayList<Column>();
 
-		String columnsString = config.getColumns();
+		String columnsString = config.getColumn();
 		if (StringUtil.isNotEmpty(columnsString, true)) {
 			String[] columns = StringUtil.split(columnsString);//columns.contains(",") ? columns.split(",") : new String[]{columns};
 			if (columns != null) {

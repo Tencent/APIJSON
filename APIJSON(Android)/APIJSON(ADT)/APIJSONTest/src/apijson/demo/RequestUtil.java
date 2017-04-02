@@ -57,8 +57,8 @@ public class RequestUtil {
 		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
 		//		data.setContent(context.getString(R.string.apijson_info));//一般可用这种方式，encode是为了展示方便
 		List<Long> list = new ArrayList<>();
-		list.add((long) 10000);
-		list.add((long) 10001);
+		list.add((long) 82001);
+		list.add((long) 82002);
 		JSONObject momentObject = new JSONObject(data, encode);
 		momentObject.put("praiseUserIdList+", list, encode);
 		momentObject.put("content", context.getString(R.string.apijson_info), encode);
@@ -78,7 +78,7 @@ public class RequestUtil {
 
 	public static JSONObject newColumnsRequest(long id, boolean encode) {
 		JSONObject object = new JSONObject(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id), encode);
-		object.setColumns("id,userId,content");
+		object.setColumn("id,userId,content");
 		return new JSONRequest(Moment.class.getSimpleName(), object, encode);
 	}
 
