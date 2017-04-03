@@ -48,8 +48,8 @@ public class MomentAdapter extends BaseViewAdapter<MomentItem, MomentView> {
 					list.remove(itemView.getPosition());
 				} else {
 					list.set(itemView.getPosition(), data);
+					itemView.bindView(data);
 				}
-				refresh(list);
 			}
 		});
 		return itemView;

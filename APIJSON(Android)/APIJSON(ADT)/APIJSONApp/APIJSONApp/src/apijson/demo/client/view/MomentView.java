@@ -17,6 +17,7 @@ package apijson.demo.client.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView;
 import zuo.biao.library.manager.CacheManager;
@@ -55,6 +56,7 @@ import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.Moment;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.model.User;
+import apijson.demo.client.server.model.BaseModel;
 import apijson.demo.client.util.HttpRequest;
 
 /**作品View
@@ -184,13 +186,21 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		// 图片
 		setPicture(moment.getPictureList());
 		// 点赞
-		setPraise(data.getIsPraised(), data.getPraiseUserIdList());
+		setPraise(data.getIsPraised(), data.getUserList(), data.getPraiseUserIdList());
 		// 评论
 		setComment(data.getCommentItemList());
 
 		vMomentViewDivider.setVisibility(llMomentViewPraise.getVisibility() == View.VISIBLE
 				&& llMomentViewCommentContainer.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
 
+		if (data.getUserList() == null && BaseModel.isEmpty(moment.getPraiseUserIdList()) == false) {
+			//			HttpRequest.getUserList(0, 0, null, moment.getPraiseUserIdList(), 0, 0, HTTP_GET_PRAISE, this);
+
+			JSONRequest userItem = new JSONRequest("id{}", moment.getPraiseUserIdList());
+			userItem.setColumn("id", "name");
+			JSONRequest listRequest = new JSONRequest(User.class.getSimpleName(), userItem);
+			HttpRequest.get(listRequest.toArray(0, 0, User.class.getSimpleName()), HTTP_GET_PRAISE, this);
+		}
 	}
 
 
@@ -198,20 +208,22 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param joined
 	 * @param list
 	 */
-	private void setPraise(boolean joined, List<Long> list) {
+	private void setPraise(boolean joined, List<User> userList, List<Long> list) {
 		ivMomentViewPraise.setImageResource(joined ? R.drawable.praised : R.drawable.praise);
 
-		llMomentViewPraise.setVisibility(list == null || list.isEmpty() ? View.GONE : View.VISIBLE);
-		if (list != null) {
-			List<User> userList = new ArrayList<User>();
-			User u;
-			for (Long id : list) {
-				u = new User(id);
-				u.setName("" + id);
-				userList.add(u);
+		if (userList == null || userList.isEmpty()) {
+			if (list != null) {
+				userList = new ArrayList<User>();
+				User u;
+				for (Long id : list) {
+					u = new User(id);
+					u.setName("" + id);
+					userList.add(u);
+				}
 			}
-			tvMomentViewPraise.setView(userList);
 		}
+		llMomentViewPraise.setVisibility(userList == null || userList.isEmpty() ? View.GONE : View.VISIBLE);
+		tvMomentViewPraise.setView(userList);
 	}
 
 	private boolean showComment = true;
@@ -393,6 +405,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	public static final int HTTP_PRAISE = 1;
 	public static final int HTTP_CANCLE_PRAISE = 2;
 	public static final int HTTP_DELETE = 3;
+	public static final int HTTP_GET_PRAISE = 10;
 	@Override
 	public void onHttpResponse(int requestCode, String result, Exception e) {
 		if (data == null) {
@@ -415,7 +428,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		case HTTP_DELETE:
 			showShortToast(isSucceed ? R.string.delete_succeed : R.string.delete_failed);
 			//只对adapter.getCount()有影响。目前是隐藏的，不需要通知，也不需要刷新adapter，用户手动刷新后自然就更新了。
-			if(isSucceed) {
+			if (isSucceed) {
 				bindView(null);
 				status = MomentItem.STATUS_DELETED;
 				if (onDataChangedListener != null) {
@@ -425,6 +438,20 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			} else {
 				data.setMyStatus(MomentItem.STATUS_NORMAL);
 				bindView(data);
+			}
+		case HTTP_GET_PRAISE:
+			if (response.isSucceed()) {
+				List<User> list = response.getList(User.class.getSimpleName() + "[]", User.class);
+				if (list == null) {
+					list = new ArrayList<>();//避免重复请求
+				}
+				data.setUserList(list);
+				if (onDataChangedListener != null) {
+					onDataChangedListener.onDataChanged();
+				} else {
+					bindView(data);
+				}
+				//滑动明显卡顿		CacheManager.getInstance().save(MomentItem.class, data, "" + data.getId());
 			}
 			break;
 		}

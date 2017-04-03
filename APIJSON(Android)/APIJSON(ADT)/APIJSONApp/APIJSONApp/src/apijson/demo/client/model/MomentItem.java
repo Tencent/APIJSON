@@ -115,11 +115,11 @@ public class MomentItem extends BaseModel {
 		return this;
 	}
 
-	@NonNull
+//	@NonNull
 	public List<User> getUserList() {
-		if (userList == null) {
-			userList = new ArrayList<>();
-		}
+//		if (userList == null) {
+//			userList = new ArrayList<>();
+//		}
 		return userList;
 	}
 	public MomentItem setUserList(List<User> userList) {
