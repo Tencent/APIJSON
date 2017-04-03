@@ -21,6 +21,7 @@ import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.interfaces.AdapterCallBack;
 import zuo.biao.library.interfaces.CacheCallBack;
 import zuo.biao.library.interfaces.OnBottomDragListener;
@@ -54,7 +55,8 @@ import com.alibaba.fastjson.JSONObject;
  *       查看 .SettingUtil 中的@must和@warn
  */
 public class UserListFragment extends BaseHttpListFragment<User, UserAdapter>
-implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragListener, TopBarMenuCallback {
+implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
+, TopBarMenuCallback, OnDataChangedListener {
 	//	private static final String TAG = "UserListFragment";
 
 	//与Activity通信<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -147,6 +149,8 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
+
+		registerObserver(this);
 
 		argument = getArguments();
 		if (argument != null) {
@@ -344,16 +348,18 @@ implements CacheCallBack<User>, OnHttpResponseListener, Runnable, OnBottomDragLi
 
 	@Override
 	public void onRefresh() {
-		if (range == RANGE_ALL) {
-			run();
-		} else {
+		if (range == RANGE_USER_FRIEND) {
 			loadAfterCorrect();
+		} else {
+			super.onRefresh();
 		}
 	}
 
 	@Override
-	public void run() {
-		super.onRefresh();
+	public void onDataChanged() {
+		if (range == RANGE_USER_FRIEND) {
+			super.onRefresh();
+		}
 	}
 
 	//系统自带监听方法 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

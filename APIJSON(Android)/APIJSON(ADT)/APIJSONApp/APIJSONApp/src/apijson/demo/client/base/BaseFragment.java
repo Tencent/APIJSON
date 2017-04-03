@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.demo.client.base;
 
 import zuo.biao.library.base.BaseBroadcastReceiver;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
 import android.content.BroadcastReceiver;
@@ -31,7 +32,7 @@ import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.ActionUtil;
 
-public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment implements Runnable {
+public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment {
 	private static final String TAG = "BaseFragment";
 
 	
@@ -45,8 +46,6 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 		super.onCreateView(inflater, container, savedInstanceState);
 		
 		setCurrentUser();
-		
-		BaseBroadcastReceiver.register(context, receiver, ActionUtil.ACTION_USER_CHANGED);
 		
 		return view;
 	}
@@ -79,33 +78,31 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 	public void initData() {
 		loadAfterCorrect();
 	}
-	
-	/*只有当isCurrentUserCorrect()时才会被调用，如果不符合则会获取currentUser并再次判断来决定是否调用
-	 */
-	@Override
-	public abstract void run();
-	
+
+
 	private boolean isDataChanged = false;
 	/**
 	 */
 	protected void invalidate() {
 		if (isRunning() == false) {
 			isDataChanged = true;
-			Log.w(TAG, "invalidate  isRunning() == false >> return;");
+			Log.w(TAG, "onDataChanged  isRunning() == false >> return;");
 			return;
 		}
 		isDataChanged = false;
-		
+
 		setCurrentUser();
 		loadAfterCorrect();
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
 		if (isDataChanged) {
-			Log.d(TAG, "onResume  isDataChanged >> invalidate();");
-			invalidate();
+			if (onDataChangedListener != null) {
+				Log.d(TAG, "onResume  isDataChanged >> onDataChangedListener.onDataChanged();");
+				onDataChangedListener.onDataChanged();
+			}
 		}
 	}
 
@@ -117,7 +114,9 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 			Log.e(TAG, "loadAfterCorrect  isCurrentUserCorrect() == false >> return;");
 			return;
 		}
-		run();
+		if (onDataChangedListener != null) {
+			onDataChangedListener.onDataChanged();
+		}
 	}
 
 
@@ -138,11 +137,20 @@ public abstract class BaseFragment extends zuo.biao.library.base.BaseFragment im
 
 	@Override
 	public void onDestroy() {
-		BaseBroadcastReceiver.unregister(context, receiver);
+		unregisterObserver();
 		super.onDestroy();
 	}
 
-	
+	private OnDataChangedListener onDataChangedListener;
+	protected void registerObserver(OnDataChangedListener onDataChangedListener) {
+		this.onDataChangedListener = onDataChangedListener;
+		BaseBroadcastReceiver.register(context, receiver, ActionUtil.ACTION_USER_CHANGED);
+	}
+	protected void unregisterObserver() {
+		onDataChangedListener = null;
+		BaseBroadcastReceiver.unregister(context, receiver);
+	}
+
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 
 		public void onReceive(Context context, Intent intent) {

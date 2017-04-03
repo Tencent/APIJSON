@@ -18,6 +18,7 @@ import java.io.File;
 
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.ui.AlertDialog;
 import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
@@ -44,7 +45,7 @@ import apijson.demo.client.util.HttpRequest;
  * @use new SettingFragment(),详细使用见.DemoFragmentActivity(initData方法内)
  */
 public class SettingFragment extends BaseFragment implements OnClickListener, OnDialogButtonClickListener
-, OnHttpResponseListener {
+, OnHttpResponseListener, OnDataChangedListener {
 	private static final String TAG = "SettingFragment";
 
 	//与Activity通信<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -67,12 +68,14 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 		setContentView(R.layout.setting_fragment);
 		//类相关初始化，必须使用>>>>>>>>>>>>>>>>
 
+		registerObserver(this);
+		
 		//功能归类分区方法，必须调用<<<<<<<<<<
 		initView();
 		initData();
 		initEvent();
 		//功能归类分区方法，必须调用>>>>>>>>>>
-
+		
 		return view;
 	}
 
@@ -132,8 +135,7 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 	}
 
 	@Override
-	public void run() {
-		//do nothing
+	public void onDataChanged() {
 		setUser(APIJSONApplication.getInstance().getCurrentUser());
 	}
 

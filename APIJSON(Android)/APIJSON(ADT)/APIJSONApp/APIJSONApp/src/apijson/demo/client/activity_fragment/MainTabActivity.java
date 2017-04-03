@@ -195,21 +195,20 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 	public void initData() {// 必须调用
 		super.initData();
 		
-		reloadAll();
+		if (isCurrentUserCorrect() == false) {
+			reloadAll();
+		}
 	}
 	
-	@Override
-	public void run() {
-		
-	}
-
 
 	@Override
 	protected void reloadAll() {
+		Log.d(TAG, "reloadAll >>> ");
 		HttpRequest.getUser(APIJSONApplication.getInstance().getCurrentUserId(), 0, new OnHttpResponseListener() {
 
 			@Override
 			public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+				Log.d(TAG, "reloadAll >>> HttpRequest.getUser.onHttpResponse >>  saveCurrentUser >>");
 				APIJSONApplication.getInstance().saveCurrentUser(new JSONResponse(resultJson).getObject(User.class));
 				runUiThread(new Runnable() {
 

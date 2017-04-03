@@ -21,6 +21,7 @@ import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.interfaces.AdapterCallBack;
 import zuo.biao.library.interfaces.CacheCallBack;
 import zuo.biao.library.interfaces.OnBottomDragListener;
@@ -57,7 +58,8 @@ import com.alibaba.fastjson.JSONObject;
  *       查看 .SettingUtil 中的@must和@warn
  */
 public class MomentListFragment extends BaseHttpListFragment<MomentItem, MomentAdapter>
-implements CacheCallBack<MomentItem>, OnHttpResponseListener, Runnable, TopBarMenuCallback, OnBottomDragListener {
+implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
+, OnBottomDragListener, OnDataChangedListener {
 	private static final String TAG = "MomentListFragment";
 
 	//与Activity通信<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -132,6 +134,8 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, Runnable, TopBarMe
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
+
+		registerObserver(this);
 
 		argument = getArguments();
 		if (argument != null) {
@@ -329,16 +333,18 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, Runnable, TopBarMe
 
 	@Override
 	public void onRefresh() {
-		if (range == RANGE_ALL) {
-			run();
-		} else {
+		if (range == RANGE_USER_CIRCLE) {
 			loadAfterCorrect();
+		} else {
+			super.onRefresh();
 		}
 	}
 
 	@Override
-	public void run() {
-		super.onRefresh();
+	public void onDataChanged() {
+		if (range == RANGE_USER_CIRCLE) {
+			super.onRefresh();
+		}
 	}
 
 	//系统自带监听方法 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

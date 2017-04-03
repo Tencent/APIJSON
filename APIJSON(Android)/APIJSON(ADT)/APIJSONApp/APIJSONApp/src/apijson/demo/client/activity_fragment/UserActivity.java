@@ -65,7 +65,7 @@ import apijson.demo.client.view.UserView;
  * @author Lemon
  */
 public class UserActivity extends BaseActivity implements OnClickListener, OnBottomDragListener
-, OnBottomMenuItemClickListener, OnHttpResponseListener, Runnable, OnDialogButtonClickListener {
+, OnBottomMenuItemClickListener, OnHttpResponseListener, OnDialogButtonClickListener, OnDataChangedListener {
 	public static final String TAG = "UserActivity";
 
 	public static final String INTENT_IS_ON_EDIT_MODE = "INTENT_IS_ON_EDIT_MODE";
@@ -92,6 +92,8 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.user_activity, this);
 
+		registerObserver(this);
+		
 		intent = getIntent();
 		id = intent.getLongExtra(INTENT_ID, id);
 		isOnEditMode = intent.getBooleanExtra(INTENT_IS_ON_EDIT_MODE, isOnEditMode);
@@ -255,12 +257,12 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		super.initData();
 
 		if (isCurrentUserCorrect() == false) {//解决不能在未登录情况下查看
-			run();
+			onDataChanged();
 		}
 	}
 
 	@Override
-	public void run() {
+	public void onDataChanged() {
 		tvBaseTitle.setText(isOnEditMode ? "编辑资料" : (isCurrentUser(id) ? "我的资料" : "详细资料"));
 
 		if (bottomMenuView != null) {
@@ -475,8 +477,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		case HTTP_PUT:
 			if (isSucceed) {
 				isDataChanged = false;
-				sendBroadcast(new Intent(ActionUtil.ACTION_USER_CHANGED)
-				.putExtra(INTENT_ID, id));
+				sendBroadcast(new Intent(ActionUtil.ACTION_RELOAD_CURRENT_USER));
 			}
 			showShortToast(isSucceed ? "提交成功" : "提交失败，请检查网络后重试");
 			break;
