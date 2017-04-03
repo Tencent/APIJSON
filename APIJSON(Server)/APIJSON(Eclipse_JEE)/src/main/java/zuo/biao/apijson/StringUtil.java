@@ -25,7 +25,8 @@ import java.util.regex.Pattern;
  * @use StringUtil.
  */
 public class StringUtil {
-
+	private static final String TAG = "StringUtil";
+	
 	public StringUtil() {
 	}
 
@@ -315,7 +316,7 @@ public class StringUtil {
 	 */
 	public static boolean isAlpha(String s) {
 		if (s == null) {
-			System.out.println("isNumberOrAlpha  inputed == null >> return false;");
+			Log.i(TAG, "isNumberOrAlpha  inputed == null >> return false;");
 			return false;
 		}
 		Pattern pAlpha = Pattern.compile("[a-zA-Z]");
@@ -348,7 +349,7 @@ public class StringUtil {
 		}
 		idCard = getString(idCard);
 		if (idCard.length() == 15) {
-			System.out.println("isIDCard idCard.length() == 15 old IDCard");
+			Log.i(TAG, "isIDCard idCard.length() == 15 old IDCard");
 			currentString = idCard;
 			return true;
 		}
@@ -518,7 +519,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String getCorrectUrl(String url) {
-		System.out.println("getCorrectUrl : \n" + url);
+		Log.i(TAG, "getCorrectUrl : \n" + url);
 		if (isNotEmpty(url, true) == false) {
 			return "";
 		}
@@ -606,7 +607,7 @@ public class StringUtil {
 		}
 		//单独写到getCorrectPrice? >>>>>>>>>>>>>>>>>>>>>>
 
-		System.out.println("getPrice  <<<<<<<<<<<<<<<<<< correctPrice =  " + correctPrice);
+		Log.i(TAG, "getPrice  <<<<<<<<<<<<<<<<<< correctPrice =  " + correctPrice);
 		if (correctPrice.contains(".")) {
 			//			if (correctPrice.startsWith(".")) {
 			//				correctPrice = 0 + correctPrice;
@@ -616,7 +617,7 @@ public class StringUtil {
 			}
 		}
 
-		System.out.println("getPrice correctPrice =  " + correctPrice + " >>>>>>>>>>>>>>>>");
+		Log.i(TAG, "getPrice correctPrice =  " + correctPrice + " >>>>>>>>>>>>>>>>");
 		return isNotEmpty(correctPrice, true) ? getPrice(new BigDecimal(0 + correctPrice), formatType) : getPrice(0, formatType);
 	}
 	/**获取价格，保留两位小数

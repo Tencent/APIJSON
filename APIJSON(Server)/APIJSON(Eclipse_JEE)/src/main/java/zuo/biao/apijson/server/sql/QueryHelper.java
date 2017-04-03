@@ -26,6 +26,7 @@ import java.util.List;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.QueryConfig;
@@ -35,7 +36,7 @@ import zuo.biao.apijson.server.RequestParser;
  * @author Lemon
  */
 public class QueryHelper {
-	private static final String TAG = "QueryHelper: ";
+	private static final String TAG = "QueryHelper";
 
 	private static final String YOUR_MYSQL_URL = "jdbc:mysql://localhost:3306/";//TODO edit to an available one
 	private static final String YOUR_MYSQL_SCHEMA = "sys";//TODO edit to an available one
@@ -57,7 +58,7 @@ public class QueryHelper {
 	public Connection getConnection() throws Exception {
 		//调用Class.forName()方法加载驱动程序
 		Class.forName("com.mysql.jdbc.Driver");
-		System.out.println(TAG + "成功加载MySQL驱动！");
+		Log.i(TAG, "成功加载MySQL驱动！");
 		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_SCHEMA, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
@@ -82,22 +83,22 @@ public class QueryHelper {
 
 	public JSONObject select(QueryConfig config) throws Exception {
 		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
-			System.out.println(TAG + "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
+			Log.e(TAG, "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
 			return null;
 		}
 		final String sql = config.getSQL();
-		System.out.println("\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
-				+ TAG + "select  sql = " + sql
+		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
+				+ "select  sql = " + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 
 		if (connection == null || connection.isClosed()) {
-			System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 			connection = getConnection();
 			statement = connection.createStatement(); //创建Statement对象
 			metaData = connection.getMetaData();
 		}
-		System.out.println(TAG + "成功连接到数据库！");
+		Log.i(TAG, "成功连接到数据库！");
 
 		JSONObject object = null;//new JSONObject(true);
 		ResultSet rs = null;
@@ -128,7 +129,7 @@ public class QueryHelper {
 			break;
 
 		default://OPTIONS, TRACE等
-			System.out.println(TAG + "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
+			Log.e(TAG, "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
 			return null;
 		}
 
@@ -154,7 +155,7 @@ public class QueryHelper {
 				try {
 					value = rs.getObject(rs.findColumn(columnArray[i]));
 				} catch (Exception e) {
-					System.out.println(TAG + "select while (rs.next()){ ..."
+					Log.i(TAG, "select while (rs.next()){ ..."
 							+ " >>  try { value = rs.getObject(rs.findColumn(columnArray[i])); ..."
 							+ " >> } catch (Exception e) {");
 					e.printStackTrace();
@@ -166,7 +167,7 @@ public class QueryHelper {
 							value = json;
 						}
 					} catch (Exception e) {
-						//太长 System.out.println(TAG + "select  while (rs.next()){  >> i = "
+						//太长 Log.i(TAG, "select  while (rs.next()){  >> i = "
 						//  + i + "  try { json = JSON.parse((String) value);"
 						//	+ ">> } catch (Exception e) {\n" + e.getMessage());
 					}
@@ -199,7 +200,7 @@ public class QueryHelper {
 		String table = config.getTable();
 		ResultSet rs = metaData.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
 		while (rs.next()) {
-			System.out.println(TAG + rs.getString(4));
+			Log.i(TAG, rs.getString(4));
 			list.add(rs.getString(4));
 		}
 		rs.close();
@@ -214,7 +215,7 @@ public class QueryHelper {
 	 */
 	public int getCount(String table) throws Exception {
 		if (connection == null || connection.isClosed()) {
-			System.out.println(TAG + "getCount  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+			Log.i(TAG, "getCount  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 			connection = getConnection();
 			statement = connection.createStatement(); //创建Statement对象
 			metaData = connection.getMetaData();
@@ -226,7 +227,7 @@ public class QueryHelper {
 		if (rs.next()) {
 			count = rs.getInt(1);
 		}
-		System.out.println(TAG + "getCount  count = " + count) ;
+		Log.i(TAG, "getCount  count = " + count) ;
 
 		rs.close();
 

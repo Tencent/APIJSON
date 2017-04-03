@@ -14,13 +14,20 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.sql;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
+
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.QueryConfig;
 
@@ -28,7 +35,7 @@ import zuo.biao.apijson.server.QueryConfig;
  * @author Lemon
  */
 public class QueryHelper2 {
-	private static final String TAG = "QueryHelper2: ";
+	private static final String TAG = "QueryHelper2";
 
 	private static final String YOUR_MYSQL_URL = "jdbc:mysql://localhost:3306/";//TODO edit to an available one
 	private static final String YOUR_MYSQL_SCHEMA = "sys";//TODO edit to an available one
@@ -51,21 +58,21 @@ public class QueryHelper2 {
 	public Connection getConnection() throws Exception {
 		//调用Class.forName()方法加载驱动程序
 		Class.forName("com.mysql.jdbc.Driver");
-		System.out.println(TAG + "成功加载MySQL驱动！");
+		Log.i(TAG, "成功加载MySQL驱动！");
 		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_SCHEMA, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
 	//TODO key应该改成SQL
 	private void saveCache(String key, List<JSONObject> list) {
 		if (key == null) {
-			System.out.println("saveList  key == null >> return;");
+			Log.i(TAG, "saveList  key == null >> return;");
 			return;
 		}
 		cacheMap.put(key, list);
 	}
 	private void removeCache(String key) {
 		if (key == null) {
-			System.out.println("removeList  key == null >> return;");
+			Log.i(TAG, "removeList  key == null >> return;");
 			return;
 		}
 		cacheMap.remove(key);
@@ -93,7 +100,7 @@ public class QueryHelper2 {
 
 	public JSONObject select(QueryConfig config) {
 		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
-			System.out.println(TAG + "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
+			Log.i(TAG, "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
 			return null;
 		}
 		String sql = null;
@@ -115,7 +122,7 @@ public class QueryHelper2 {
 
 		try{
 			if (connection == null || connection.isClosed()) {
-				System.out.println(TAG + "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+				Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 				connection = getConnection();
 				statement = connection.createStatement(); //创建Statement对象
 				metaData = connection.getMetaData();
@@ -126,7 +133,7 @@ public class QueryHelper2 {
 			}
 
 
-			System.out.println(TAG + "select  sql = " + sql);
+			Log.i(TAG, "select  sql = " + sql);
 
 			ResultSet rs = statement.executeQuery(sql);//创建数据对象
 
@@ -138,7 +145,7 @@ public class QueryHelper2 {
 						object.put(list.get(i), rs.getObject(rs.findColumn(list.get(i))));
 					}
 				} catch (Exception e) {
-					System.out.println(TAG + "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +
+					Log.i(TAG, "select while (rs.next()){ ... >>  try { object.put(list.get(i), ..." +
 							" >> } catch (Exception e) {\n" + e.getMessage());
 					e.printStackTrace();
 					object = null;
@@ -149,15 +156,15 @@ public class QueryHelper2 {
 
 			//从缓存存取，避免 too many connections崩溃
 			if (position < config.getCount() - 1) {
-				System.out.println("select  position < config.getLimit() - 1 >> saveCache(sql, resultList);");
+				Log.i(TAG, "select  position < config.getLimit() - 1 >> saveCache(sql, resultList);");
 				saveCache(sql, resultList);
 			} else {
-				System.out.println("select  position >= config.getLimit() - 1 >> removeCache(sql); return object;");
+				Log.i(TAG, "select  position >= config.getLimit() - 1 >> removeCache(sql); return object;");
 				removeCache(sql);
 				return object;
 			}
 
-			System.out.println("select  return position < 0 || position >= resultList.size() ? null : resultList.get(position); ");
+			Log.i(TAG, "select  return position < 0 || position >= resultList.size() ? null : resultList.get(position); ");
 			return position < 0 || position >= resultList.size() ? null : resultList.get(position);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -179,12 +186,12 @@ public class QueryHelper2 {
 		try {
 			rs = meta.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
 			while (rs.next()) {
-				System.out.println(TAG + rs.getString(4));
+				Log.i(TAG, rs.getString(4));
 				list.add(rs.getString(4));
 			}
 			rs.close();
 		} catch (Exception e) {
-			System.out.println(TAG + "getColumnList   try { DatabaseMetaData meta = conn.getMetaData(); ... >>  " +
+			Log.i(TAG, "getColumnList   try { DatabaseMetaData meta = conn.getMetaData(); ... >>  " +
 					"} catch (Exception e) {\n" + e.getMessage());
 			e.printStackTrace();
 		}

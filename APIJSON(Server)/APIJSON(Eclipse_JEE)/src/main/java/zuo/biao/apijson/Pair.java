@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-/**type:value
+/**key:value
  * @author Lemon
  */
 public class Pair extends Entry<String, String> {

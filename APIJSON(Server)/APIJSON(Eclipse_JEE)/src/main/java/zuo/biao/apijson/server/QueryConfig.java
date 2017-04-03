@@ -29,6 +29,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
@@ -571,7 +572,7 @@ public class QueryConfig {
 	 */
 	public static String getSQL(QueryConfig config) throws Exception {
 		if (config == null) {
-			System.out.println("QueryConfig: getSQL  config == null >> return null;");
+			Log.i(TAG, "QueryConfig: getSQL  config == null >> return null;");
 			return null;
 		}
 		RequestMethod method = config.getMethod();

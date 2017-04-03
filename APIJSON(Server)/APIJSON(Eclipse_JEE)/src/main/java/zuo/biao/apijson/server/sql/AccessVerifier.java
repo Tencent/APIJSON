@@ -21,6 +21,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.QueryConfig;
@@ -38,7 +39,7 @@ import zuo.biao.apijson.server.model.Work;
  * @author Lemon
  */
 public class AccessVerifier {
-	private static final String TAG = "AccessVerifier: ";
+	private static final String TAG = "AccessVerifier";
 
 	private static final int ACCESS_LOGIN = 1;
 	private static final int ACCESS_PAY = 2;
@@ -132,7 +133,7 @@ public class AccessVerifier {
 			return true;
 		}
 		if (currentUserId <= 0) {
-			System.out.println(TAG + "verify accessId = " + accessId
+			Log.e(TAG, "verify accessId = " + accessId
 					+ " >>  currentUserId <= 0, currentUserId = " + currentUserId);
 			throw new AccessException("请设置"+ KEY_CURRENT_USER_ID + "和对应的password！");
 		}
@@ -141,7 +142,7 @@ public class AccessVerifier {
 		case ACCESS_LOGIN:
 			password = StringUtil.getString(request.getString(KEY_LOGIN_PASSWORD));
 			if (password.equals(StringUtil.getString(getLoginPassword(currentUserId))) == false) {
-				System.out.println(TAG + "verify accessId = " + accessId
+				Log.e(TAG, "verify accessId = " + accessId
 						+ " >> currentUserId or loginPassword error"
 						+ "  currentUserId = " + currentUserId + ", loginPassword = " + password);
 				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_LOGIN_PASSWORD + "错误！");
@@ -150,7 +151,7 @@ public class AccessVerifier {
 		case ACCESS_PAY:
 			password = StringUtil.getString(request.getString(KEY_PAY_PASSWORD));
 			if (password.equals(StringUtil.getString(getPayPassword(currentUserId))) == false) {
-				System.out.println(TAG + "verify accessId = " + accessId
+				Log.e(TAG, "verify accessId = " + accessId
 						+ " >> currentUserId or payPassword error"
 						+ "  currentUserId = " + currentUserId + ", payPassword = " + password);
 				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_PAY_PASSWORD + "错误！");

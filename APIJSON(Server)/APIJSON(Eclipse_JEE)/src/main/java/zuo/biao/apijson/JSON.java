@@ -21,8 +21,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
-import zuo.biao.apijson.server.Log;
-
 /**阿里FastJSON封装类 防止解析时异常
  * @author Lemon
  */

@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package zuo.biao.apijson;
 
 /**测试用Log
  * @modifier Lemon
@@ -27,7 +27,7 @@ public class Log {
 	 */
 	public static void d(String TAG, String msg) {
 		if (DEBUG) {
-			System.out.println(TAG + ".DEBUG: " + msg);
+			System.err.println(TAG + ".DEBUG: " + msg);
 		}
 	}
 
@@ -57,7 +57,7 @@ public class Log {
 	 */
 	public static void e(String TAG, String msg) {
 		if (DEBUG) {
-			System.out.println(TAG + ".ERROR: " + msg);
+			System.err.println(TAG + ".ERROR: " + msg);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class Log {
 	 */
 	public static void w(String TAG, String msg) {
 		if (DEBUG) {
-			System.out.println(TAG + ".WARN: " + msg);
+			System.err.println(TAG + ".WARN: " + msg);
 		}
 	}
 

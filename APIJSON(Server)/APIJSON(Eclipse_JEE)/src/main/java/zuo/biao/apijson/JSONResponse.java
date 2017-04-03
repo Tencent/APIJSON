@@ -22,8 +22,6 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.server.Log;
-
 /**parser for response JSON String
  * @author Lemon
  * @see #getList
