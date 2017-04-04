@@ -336,6 +336,6 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 ### <h3 id="6.3">6.3 更新日志<h3/>
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-### <h3 id="6.4">6.4 点Star支持我 或 点Fork研究它<h3/>
+### <h3 id="6.4">6.4 点Star支持我，点Fork研究它<h3/>
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
