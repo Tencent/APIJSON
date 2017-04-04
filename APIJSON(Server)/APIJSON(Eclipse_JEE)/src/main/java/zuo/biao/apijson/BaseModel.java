@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package apijson.demo.client.server.model;
+package zuo.biao.apijson;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -105,7 +105,7 @@ public abstract class BaseModel implements Serializable {
 	}
 	/**获取数量
 	 * @param <T>
-	 * @param collection collection, Vector, Set等都是Collection的子类
+	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
 	public static <T> int count(Collection<T> collection) {

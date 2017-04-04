@@ -86,7 +86,6 @@
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name="apijson.demo.client.activity_fragment.UserActivity"
-            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity

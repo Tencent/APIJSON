@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
@@ -40,18 +41,19 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
-import zuo.biao.apijson.Pair;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.Table;
+import zuo.biao.apijson.server.exception.ConditionNotMatchException;
+import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.sql.AccessVerifier;
+import zuo.biao.apijson.server.sql.QueryConfig;
 import zuo.biao.apijson.server.sql.QueryHelper;
 
 /**parser for parsing request to JSONObject
  * @author Lemon
  */
-public class RequestParser {
-	private static final String TAG = "RequestParser";
+public class Parser {
+	private static final String TAG = "Parser";
 
 	public static final String SEPARATOR = StringUtil.SEPARATOR;
 
@@ -59,13 +61,13 @@ public class RequestParser {
 	/**
 	 * GET
 	 */
-	public RequestParser() {
+	public Parser() {
 		this(null);
 	}
 	/**
 	 * @param requestMethod null ? requestMethod = GET
 	 */
-	public RequestParser(RequestMethod requestMethod) {
+	public Parser(RequestMethod requestMethod) {
 		super();
 		if (requestMethod == null) {
 			requestMethod = GET;
@@ -426,8 +428,8 @@ public class RequestParser {
 							throw new IllegalArgumentException(requestName
 									+ "不能缺少 " + key + " 等[" + necessarys + "]内的任何JSONObject！");
 						}
-						if (method == POST && result.containsKey(Table.ID) == false) {//为注册用户返回id
-							result.put(Table.ID, System.currentTimeMillis());
+						if (method == POST && result.containsKey(QueryConfig.ID) == false) {//为注册用户返回id
+							result.put(QueryConfig.ID, System.currentTimeMillis());
 						}
 						transferredRequest.put(key, result);
 					}
@@ -552,11 +554,11 @@ public class RequestParser {
 
 						//GET <<<<<<<<<<<<<<<<<<<<<<<<<
 						JSONObject arrayRequest = new JSONObject();
-						arrayRequest.put(Table.ID, request.get(Table.ID));
+						arrayRequest.put(QueryConfig.ID, request.get(QueryConfig.ID));
 						//						arrayRequest.setColumn(realKey);//put请求会对id添加功能符？
 						arrayRequest.put(JSONRequest.KEY_COLUMN, realKey);
 						JSONRequest getRequest = new JSONRequest(table, arrayRequest);
-						JSONObject response = new RequestParser().parseResponse(getRequest);
+						JSONObject response = new Parser().parseResponse(getRequest);
 						//GET >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -717,21 +719,24 @@ public class RequestParser {
 		String firstTableKey = null;
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = new LinkedHashSet<>(request.keySet());
-		if (count <= 0 || count > 10) {//10以下不优化长度
+		if (count <= 0 || count > 5) {//5以下不优化长度
 			if(parseRelation == false && set != null) {
-				Object object;
+				Object value;
 				for (String key : set) {
-					object = isTableKey(key) ? request.get(key) : null;
-					if (object != null && object instanceof JSONObject) {// && object.isEmpty() == false) {
+					value = isTableKey(key) ? request.get(key) : null;
+					if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
 						//							totalCount = QueryHelper.getInstance().getCount(key);
 						firstTableKey = key;
-						JSONObject response = new RequestParser(HEAD)
-								.parseResponse(new JSONRequest(key, object));
-						JSONObject target = response == null ? null : response.getJSONObject(key);
-						total = target == null ? 0 : target.getIntValue(JSONResponse.KEY_COUNT);
+						//						JSONObject response = new Parser(HEAD)
+						//								.parseResponse(new JSONRequest(key, object));
+						//						JSONObject target = response == null ? null : response.getJSONObject(key);
+						//						total = target == null ? 0 : target.getIntValue(JSONResponse.KEY_COUNT);
+
+						total = estimateMaxCount(path, key, (JSONObject) value);
 						break;
 					}
 				}
+				Log.d(TAG, "total = " + total);
 				if (total <= 0) {//request内部没有JSONObject或者不存在适合条件的table内容
 					return null;
 				}
@@ -812,6 +817,66 @@ public class RequestParser {
 		return transferredRequest;
 	}
 
+	/**估计最大总数，去掉value中所有依赖引用.
+	 * TODO 返回一个{"total":10, name:value}更好，省去了之后的parseRelation
+	 * @param path
+	 * @param name
+	 * @param value
+	 * @return
+	 * @throws Exception 
+	 */
+	public int estimateMaxCount(String path, String name, JSONObject value) throws Exception {
+		if (StringUtil.isNotEmpty(name, true) == false) {
+			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(name, true) == false >> return 0;");
+			return 0;
+		}
+
+		JSONObject request = new JSONObject(true);
+		Set<Entry<String, Object>> entrySet = value == null ? null : new LinkedHashSet<>(value.entrySet());
+		if (entrySet != null && entrySet.isEmpty() == false) {
+			String k;
+			Object v;
+			Object target;
+			String valid;
+			for (Entry<String, Object> entry : entrySet) {
+				k = entry == null ? "" : StringUtil.getString(entry.getKey());
+				if (k.isEmpty() == false) {
+					v = entry.getValue();
+					if (k.endsWith("@")) {
+						if (v == null) {
+							continue;
+						}
+						target = getValueByPath(getAbsPath(
+								((String) v).startsWith(SEPARATOR) ? path : "", (String) v), true);
+						if (target != null && ((String) v).equals(target) == false) {
+							k = k.substring(0, k.length() - 1);
+							v = target;
+						}
+					}
+
+					valid = new String(k);
+					if (valid.endsWith("{}")) {
+						valid = valid.substring(0, valid.length() - 2);
+					} else if (valid.endsWith("$")) {
+						valid = valid.substring(0, valid.length() - 1);
+					}
+					if (valid.endsWith("&") || valid.endsWith("|") || valid.endsWith("!")) {
+						valid = valid.substring(0, valid.length() - 1);
+					}
+					if (isWord(valid)) {
+						request.put(k, v);
+					}
+				}
+			}
+		}
+		
+		name = Pair.parseEntry(name).getValue();
+		JSONObject response = new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(name, request));
+		if (response != null) {
+			response = response.getJSONObject(name);
+		}
+		return response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT);
+	}
 
 
 	/**获取绝对路径

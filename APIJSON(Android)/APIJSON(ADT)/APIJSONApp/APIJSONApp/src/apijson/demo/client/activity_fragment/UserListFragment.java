@@ -346,14 +346,6 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 		}
 	}
 
-	@Override
-	public void onRefresh() {
-		if (range == RANGE_USER_FRIEND) {
-			loadAfterCorrect();
-		} else {
-			super.onRefresh();
-		}
-	}
 
 	@Override
 	public void onDataChanged() {

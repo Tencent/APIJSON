@@ -28,12 +28,11 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
-import zuo.biao.apijson.Pair;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.Table;
-import zuo.biao.apijson.server.QueryConfig;
-import zuo.biao.apijson.server.RequestParser;
+import zuo.biao.apijson.server.Pair;
+import zuo.biao.apijson.server.Parser;
 
 /**helper for query MySQL database
  * @author Lemon
@@ -126,9 +125,9 @@ public class QueryHelper {
 		case POST_HEAD:
 			rs = statement.executeQuery(sql);
 
-			result = rs.next() ? RequestParser.newSuccessResult()
-					: RequestParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
-			result.put(Table.COUNT, rs.getLong(1));
+			result = rs.next() ? Parser.newSuccessResult()
+					: Parser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
+			result.put(JSONResponse.KEY_COUNT, rs.getLong(1));
 
 			rs.close();
 			return result;
@@ -138,9 +137,9 @@ public class QueryHelper {
 		case DELETE:
 			long updateCount = statement.executeUpdate(sql);
 
-			result = RequestParser.newResult(updateCount > 0 ? 200 : 404
+			result = Parser.newResult(updateCount > 0 ? 200 : 404
 					, updateCount > 0 ? "success" : "可能对象不存在！");
-			result.put(Table.ID, config.getId());
+			result.put(JSONResponse.KEY_ID, config.getId());
 			return result;
 
 		case GET:

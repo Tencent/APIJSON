@@ -17,6 +17,7 @@ package apijson.demo.client.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView;
@@ -56,7 +57,6 @@ import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.Moment;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.model.User;
-import apijson.demo.client.server.model.BaseModel;
 import apijson.demo.client.util.HttpRequest;
 
 /**作品View

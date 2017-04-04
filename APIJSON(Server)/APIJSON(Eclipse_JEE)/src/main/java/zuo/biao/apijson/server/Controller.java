@@ -24,11 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.model.BaseModel;
+import zuo.biao.apijson.server.exception.ConditionNotMatchException;
+import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.model.Login;
 import zuo.biao.apijson.server.model.Password;
 import zuo.biao.apijson.server.model.User;
@@ -43,18 +45,18 @@ public class Controller {
 
 	@RequestMapping("head/{request}")
 	public String head(@PathVariable String request) {
-		return new RequestParser(RequestMethod.HEAD).parse(request);
+		return new Parser(RequestMethod.HEAD).parse(request);
 	}
 
 	@RequestMapping("get/{request}")
 	public String get(@PathVariable String request) {
-		return new RequestParser(RequestMethod.GET).parse(request);
+		return new Parser(RequestMethod.GET).parse(request);
 	}
 
 
 	@RequestMapping(value="post", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public String post(@RequestBody String request) {
-		return new RequestParser(RequestMethod.POST).parse(request);
+		return new Parser(RequestMethod.POST).parse(request);
 	}
 
 	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
@@ -63,7 +65,7 @@ public class Controller {
 	 */
 	@RequestMapping(value="post_head", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public String post_head(@RequestBody String request) {
-		return new RequestParser(RequestMethod.POST_HEAD).parse(request);
+		return new Parser(RequestMethod.POST_HEAD).parse(request);
 	}
 	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
 	 * @param request
@@ -71,7 +73,7 @@ public class Controller {
 	 */
 	@RequestMapping(value="post_get", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public String post_get(@RequestBody String request) {
-		return new RequestParser(RequestMethod.POST_GET).parse(request);
+		return new Parser(RequestMethod.POST_GET).parse(request);
 	}
 
 	/**以下接口继续用POST接口是为了客户端方便，只需要做get，post请求。也可以改用实际对应的方法。
@@ -79,12 +81,12 @@ public class Controller {
 	 */
 	@RequestMapping(value="put", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public String put(@RequestBody String request) {
-		return new RequestParser(RequestMethod.PUT).parse(request);
+		return new Parser(RequestMethod.PUT).parse(request);
 	}
 
 	@RequestMapping(value="delete", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public String delete(@RequestBody String request) {
-		return new RequestParser(RequestMethod.DELETE).parse(request);
+		return new Parser(RequestMethod.DELETE).parse(request);
 	}
 
 
@@ -102,9 +104,9 @@ public class Controller {
 
 	@RequestMapping("post/authCode/{phone}")
 	public String postAuthCode(@PathVariable String phone) {
-		new RequestParser(RequestMethod.DELETE).parse(newVerifyRequest(newVerify(phone, 0)));
+		new Parser(RequestMethod.DELETE).parse(newVerifyRequest(newVerify(phone, 0)));
 
-		JSONObject response = new RequestParser(RequestMethod.POST).parseResponse(
+		JSONObject response = new Parser(RequestMethod.POST).parseResponse(
 				newVerifyRequest(newVerify(phone, new Random().nextInt(9999) + 1000)));
 
 		JSONObject verify = null;
@@ -114,8 +116,8 @@ public class Controller {
 			// TODO: handle exception
 		}
 		if (verify == null || verify.getIntValue("status") != 200) {
-			new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Verify(phone)));
-			return JSON.toJSONString(RequestParser.extendErrorResult(response, null));
+			new Parser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Verify(phone)));
+			return JSON.toJSONString(Parser.extendErrorResult(response, null));
 		}
 
 		return getAuthCode(phone);
@@ -123,7 +125,7 @@ public class Controller {
 
 	@RequestMapping(value="post_get/authCode/{phone}", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public String getAuthCode(@PathVariable String phone) {
-		return new RequestParser(RequestMethod.POST_GET).parse(newVerifyRequest(newVerify(phone, 0)));
+		return new Parser(RequestMethod.POST_GET).parse(newVerifyRequest(newVerify(phone, 0)));
 	}
 
 	@RequestMapping("check/authCode/{phone}/{code}")
@@ -137,17 +139,17 @@ public class Controller {
 	 * @return
 	 */
 	public JSONObject checkVerify(String phone, String code) {
-		JSONResponse response = new JSONResponse(new RequestParser(RequestMethod.POST_GET).parseResponse(new JSONRequest(
+		JSONResponse response = new JSONResponse(new Parser(RequestMethod.POST_GET).parseResponse(new JSONRequest(
 				new Verify(phone)).setTag(Verify.class.getSimpleName())));
 		Verify verify = response.getObject(Verify.class);
 		//验证码过期
 		if (verify != null && System.currentTimeMillis() - verify.getDate() > 60000) {
-			new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Verify(phone))
+			new Parser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Verify(phone))
 					.setTag(Verify.class.getSimpleName()));
-			return RequestParser.newErrorResult(new TimeoutException("验证码已过期！"));
+			return Parser.newErrorResult(new TimeoutException("验证码已过期！"));
 		}
 		
-		return new JSONResponse(new RequestParser(RequestMethod.POST_HEAD).parseResponse(
+		return new JSONResponse(new Parser(RequestMethod.POST_HEAD).parseResponse(
 				new JSONRequest(new Verify(phone, code))));
 	}
 	
@@ -169,27 +171,27 @@ public class Controller {
 	@RequestMapping("get/login/{typeString}/{phone}/{password}")
 	public String login(@PathVariable String typeString, @PathVariable String phone, @PathVariable String password) {
 		if (StringUtil.isPhone(phone) == false) {
-			return JSON.toJSONString(RequestParser.newErrorResult(new IllegalArgumentException("手机号不合法！")));
+			return JSON.toJSONString(Parser.newErrorResult(new IllegalArgumentException("手机号不合法！")));
 		}
 		if (StringUtil.isNotEmpty(password, true) == false) {
-			return JSON.toJSONString(RequestParser.newErrorResult(new IllegalArgumentException("密码/验证码不合法！")));
+			return JSON.toJSONString(Parser.newErrorResult(new IllegalArgumentException("密码/验证码不合法！")));
 		}
 
 		//手机号是否已注册
-		JSONObject requestObject = new RequestParser(RequestMethod.HEAD).parseResponse(
+		JSONObject requestObject = new Parser(RequestMethod.HEAD).parseResponse(
 				new JSONRequest(new User().setPhone(phone)));
 		JSONResponse response = new JSONResponse(requestObject).getJSONResponse(User.class.getSimpleName());
 		if (JSONResponse.isSucceed(response) == false) {
 			return JSON.toJSONString(response);
 		}
 		if(JSONResponse.isExist(response) == false) {
-			return JSON.toJSONString(RequestParser.newErrorResult(new NullPointerException("手机号未注册")));
+			return JSON.toJSONString(Parser.newErrorResult(new NullPointerException("手机号未注册")));
 		}
 
 		//校验凭证
 		int type = Integer.valueOf(0 + StringUtil.getNumber(typeString));
 		if (type == Login.TYPE_PASSWORD) {//password
-			response = new JSONResponse(new RequestParser(RequestMethod.HEAD).parseResponse(
+			response = new JSONResponse(new Parser(RequestMethod.HEAD).parseResponse(
 					new JSONRequest(new Password(User.class.getSimpleName(), phone, password))));
 		} else {//verify
 			response = new JSONResponse(checkVerify(phone, password));
@@ -199,22 +201,22 @@ public class Controller {
 		}
 		response = response.getJSONResponse(type == Login.TYPE_PASSWORD ? Password.class.getSimpleName() : Verify.class.getSimpleName());
 		if (JSONResponse.isExist(response) == false) {
-			return JSON.toJSONString(RequestParser.newErrorResult(new ConditionNotMatchException("账号或密码错误")));
+			return JSON.toJSONString(Parser.newErrorResult(new ConditionNotMatchException("账号或密码错误")));
 		}
 
 
 		//根据phone获取User
-		JSONObject result = new RequestParser().parseResponse(new JSONRequest(new User().setPhone(phone)));
+		JSONObject result = new Parser().parseResponse(new JSONRequest(new User().setPhone(phone)));
 		response = new JSONResponse(result);
 
 		User user = response == null ? null : response.getObject(User.class);
 		if (user == null || BaseModel.value(user.getId()) <= 0) {
-			return JSON.toJSONString(RequestParser.extendErrorResult(result, null));
+			return JSON.toJSONString(Parser.extendErrorResult(result, null));
 		}
 		//删除Login
-		new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Login().setUserId(user.getId())));
+		new Parser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Login().setUserId(user.getId())));
 		//写入Login
-		new RequestParser(RequestMethod.POST).parseResponse(new JSONRequest(
+		new Parser(RequestMethod.POST).parseResponse(new JSONRequest(
 				new Login().setType(type).setUserId(user.getId())));
 
 		return JSON.toJSONString(result);
@@ -226,26 +228,26 @@ public class Controller {
 	public String register(@RequestBody String request) {
 		JSONObject requestObject = null;
 		try {
-			requestObject = RequestParser.getCorrectRequest(RequestMethod.POST
-					, RequestParser.parseRequest(request, RequestMethod.POST));
+			requestObject = Parser.getCorrectRequest(RequestMethod.POST
+					, Parser.parseRequest(request, RequestMethod.POST));
 		} catch (Exception e) {
-			return JSON.toJSONString(RequestParser.newErrorResult(e));
+			return JSON.toJSONString(Parser.newErrorResult(e));
 		}
 
 		JSONObject user = requestObject == null ? null : requestObject.getJSONObject("User");
 		String phone = user == null ? null : user.getString("phone");
 		if (StringUtil.isPhone(phone) == false) {
-			return JSON.toJSONString(RequestParser.extendErrorResult(requestObject
+			return JSON.toJSONString(Parser.extendErrorResult(requestObject
 					, new IllegalArgumentException("User.phone: " + phone + " 不合法！")));
 		}
 		String password = StringUtil.getString(requestObject.getString("password"));
 		if (password.length() < 6) {
-			return JSON.toJSONString(RequestParser.extendErrorResult(requestObject
+			return JSON.toJSONString(Parser.extendErrorResult(requestObject
 					, new IllegalArgumentException("User.password: " + password + " 不合法！不能小于6个字符！")));
 		}
 		//		String verify = StringUtil.getString(user.getString("verify"));
 		//		if (verify.length() < 4) {
-		//			return JSON.toJSONString(RequestParser.extendErrorResult(requestObject
+		//			return JSON.toJSONString(Parser.extendErrorResult(requestObject
 		//					, new IllegalArgumentException("User.verify: " + verify + " 不合法！不能小于6个字符！")));
 		//		}
 
@@ -255,32 +257,32 @@ public class Controller {
 		}
 		//手机号或验证码错误
 		if (JSONResponse.isExist(response.getJSONResponse(Verify.class.getSimpleName())) == false) {
-			return JSON.toJSONString(RequestParser.extendErrorResult(response
+			return JSON.toJSONString(Parser.extendErrorResult(response
 					, new ConditionNotMatchException("手机号或验证码错误！")));
 		}
 
 
-		JSONObject check = new RequestParser(RequestMethod.HEAD)
+		JSONObject check = new Parser(RequestMethod.HEAD)
 				.parseResponse(newUserRequest(newUser(phone)));
 		JSONObject checkUser = check == null ? null : check.getJSONObject("User");
 		if (checkUser == null || checkUser.getIntValue("count") > 0) {
-			return JSON.toJSONString(RequestParser.newErrorResult(new ConflictException("手机号" + phone + "已经注册")));
+			return JSON.toJSONString(Parser.newErrorResult(new ConflictException("手机号" + phone + "已经注册")));
 		}
 
 		//生成User
-		JSONObject result = new RequestParser(RequestMethod.POST).parseResponse(requestObject);
+		JSONObject result = new Parser(RequestMethod.POST).parseResponse(requestObject);
 		response = new JSONResponse(result);
 		if (JSONResponse.isSucceed(response) == false) {
-			return JSON.toJSONString(RequestParser.extendErrorResult(result, null));
+			return JSON.toJSONString(Parser.extendErrorResult(result, null));
 		}
 		
 		//生成Password
-		response = new JSONResponse(new RequestParser(RequestMethod.POST).parseResponse(
+		response = new JSONResponse(new Parser(RequestMethod.POST).parseResponse(
 				new JSONRequest(new Password(User.class.getSimpleName(), phone, password))));
 		if (JSONResponse.isSucceed(response.getJSONResponse(Password.class.getSimpleName())) == false) {
-			new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new User().setPhone(phone)));
-			new RequestParser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Password().setPhone(phone)));
-			return JSON.toJSONString(RequestParser.extendErrorResult(result, null));
+			new Parser(RequestMethod.DELETE).parseResponse(new JSONRequest(new User().setPhone(phone)));
+			new Parser(RequestMethod.DELETE).parseResponse(new JSONRequest(new Password().setPhone(phone)));
+			return JSON.toJSONString(Parser.extendErrorResult(result, null));
 		}
 
 		return JSON.toJSONString(result);

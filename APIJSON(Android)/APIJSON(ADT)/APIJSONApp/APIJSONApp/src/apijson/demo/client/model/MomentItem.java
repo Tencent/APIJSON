@@ -17,9 +17,9 @@ package apijson.demo.client.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import zuo.biao.apijson.BaseModel;
 import android.support.annotation.NonNull;
 import apijson.demo.client.application.APIJSONApplication;
-import apijson.demo.client.server.model.BaseModel;
 
 public class MomentItem extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;

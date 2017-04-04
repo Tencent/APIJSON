@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package zuo.biao.apijson.server.sql;
 
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
@@ -29,10 +29,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.Table;
+import zuo.biao.apijson.server.Parser;
 
 /**config model for query
  * @author Lemon
@@ -40,6 +41,8 @@ import zuo.biao.apijson.Table;
 public class QueryConfig {
 	private static final String TAG = "QueryConfig";
 
+	public static final String ID = JSONResponse.KEY_ID;
+	
 	public static final List<String> ARRAY_KEY_LIST;
 	static {
 		ARRAY_KEY_LIST = new ArrayList<String>();
@@ -188,7 +191,7 @@ public class QueryConfig {
 			return "";
 		}
 		if (order.contains("+")) {//replace没有包含的replacement会崩溃
-			order = order.replaceAll("+", " ASC ");
+			order = order.replaceAll("\\+", " ASC ");
 		}
 		if (order.contains("-")) {
 			order = order.replaceAll("-", " DESC ");
@@ -289,9 +292,9 @@ public class QueryConfig {
 	public static String getWhereString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
-			if (RequestParser.isGetMethod(method, true) == false && RequestParser.isHeadMethod(method, true) == false
-					&& where.containsKey(Table.ID) == false) {//POST必须有id，否则不能INSERT后直接返回id 
-				throw new IllegalArgumentException("请设置" + Table.ID + "！");
+			if (Parser.isGetMethod(method, true) == false && Parser.isHeadMethod(method, true) == false
+					&& where.containsKey(ID) == false) {//POST必须有id，否则不能INSERT后直接返回id 
+				throw new IllegalArgumentException("请设置" + ID + "！");
 			}
 
 			String whereString = " WHERE ";
@@ -315,7 +318,7 @@ public class QueryConfig {
 					keyType = 2;
 				}
 				value = where.get(key);
-				key = RequestParser.getRealKey(method, key, false, true);
+				key = Parser.getRealKey(method, key, false, true);
 
 				String condition = "";
 				switch (keyType) {
@@ -437,8 +440,8 @@ public class QueryConfig {
 	public static String getSetString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
-			if (where.containsKey(Table.ID) == false) {
-				throw new IllegalArgumentException("请设置" + Table.ID + "！");
+			if (where.containsKey(ID) == false) {
+				throw new IllegalArgumentException("请设置" + ID + "！");
 			}
 			String setString = " SET ";
 			boolean isFirst = true;
@@ -446,7 +449,7 @@ public class QueryConfig {
 			Object value;
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
-				if (key == null || Table.ID.equals(key)) {
+				if (key == null || ID.equals(key)) {
 					continue;
 				}
 
@@ -456,7 +459,7 @@ public class QueryConfig {
 					keyType = 2;
 				}
 				value = where.get(key);
-				key = RequestParser.getRealKey(method, key, false, true);
+				key = Parser.getRealKey(method, key, false, true);
 
 				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
 						? getRemoveString(key, value) : "'" + value + "'") ) );
@@ -465,7 +468,7 @@ public class QueryConfig {
 			}
 
 			if (setString.trim().endsWith("SET") == false) {
-				return setString + " WHERE " + Table.ID + "='" + where.get(Table.ID) + "' ";
+				return setString + " WHERE " + ID + "='" + where.get(ID) + "' ";
 			}
 		}
 		return "";
@@ -555,7 +558,7 @@ public class QueryConfig {
 		}
 
 		try {
-			config.setId(request.getLongValue(Table.ID));
+			config.setId(request.getLongValue(ID));
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

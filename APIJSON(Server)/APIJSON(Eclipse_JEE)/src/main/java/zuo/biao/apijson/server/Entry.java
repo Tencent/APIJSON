@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package zuo.biao.apijson.server;
 
 /**自定义Entry
  * *java.util.Map.Entry是interface，new Entry(...)不好用，其它的Entry也不好用

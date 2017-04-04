@@ -17,6 +17,7 @@ package zuo.biao.apijson.server.model;
 import java.math.BigDecimal;
 
 import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 
 /**钱包类

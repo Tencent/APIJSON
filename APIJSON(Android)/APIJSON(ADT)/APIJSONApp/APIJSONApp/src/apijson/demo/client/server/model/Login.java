@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.demo.client.server.model;
 
 import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 
 /**登录类

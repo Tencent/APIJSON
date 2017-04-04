@@ -24,7 +24,6 @@ import zuo.biao.apijson.APIJSONRequest;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.QueryConfig;
 import zuo.biao.apijson.server.model.Comment;
 import zuo.biao.apijson.server.model.Login;
 import zuo.biao.apijson.server.model.Moment;
@@ -33,7 +32,6 @@ import zuo.biao.apijson.server.model.Request;
 import zuo.biao.apijson.server.model.User;
 import zuo.biao.apijson.server.model.Verify;
 import zuo.biao.apijson.server.model.Wallet;
-import zuo.biao.apijson.server.model.Work;
 
 /**权限验证类
  * @author Lemon
@@ -58,7 +56,6 @@ public class AccessVerifier {
 		
 		//与客户端更好地统一
 		accessMap.put(User.class.getSimpleName(), User.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Work.class.getSimpleName(), Work.class.getAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Moment.class.getSimpleName(), Moment.class.getAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Comment.class.getSimpleName(), Comment.class.getAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Wallet.class.getSimpleName(), Wallet.class.getAnnotation(APIJSONRequest.class).method());
@@ -69,7 +66,6 @@ public class AccessVerifier {
 
 		//原来的做法
 		//		accessMap.put("User", RequestMethod.values());
-		//		accessMap.put("Work", RequestMethod.values());
 		//		accessMap.put("Moment", RequestMethod.values());
 		//		accessMap.put("Comment", RequestMethod.values());
 		//		accessMap.put("Wallet", new RequestMethod[]{POST_GET, POST, PUT, DELETE});

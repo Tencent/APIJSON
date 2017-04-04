@@ -175,7 +175,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 				throw new IllegalArgumentException("put  StringUtil.isNotEmpty(key, true) == false" +
 						" && clazz == null || clazz.getAnnotation(APIJSONRequest.class) == null" +
 						" \n key为空时仅支持 类型被@APIJSONRequest注解 的value !!!" +
-						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！");
+						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！" +
+						" \n 如果是类似 key[]:{} 结构的请求，建议add(...)方法！");
 			}
 			key = value.getClass().getSimpleName();
 		}

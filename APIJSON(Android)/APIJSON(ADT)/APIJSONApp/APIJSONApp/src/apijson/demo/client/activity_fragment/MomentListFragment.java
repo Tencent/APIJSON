@@ -332,15 +332,6 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 
 
 	@Override
-	public void onRefresh() {
-		if (range == RANGE_USER_CIRCLE) {
-			loadAfterCorrect();
-		} else {
-			super.onRefresh();
-		}
-	}
-
-	@Override
 	public void onDataChanged() {
 		if (range == RANGE_USER_CIRCLE) {
 			super.onRefresh();
