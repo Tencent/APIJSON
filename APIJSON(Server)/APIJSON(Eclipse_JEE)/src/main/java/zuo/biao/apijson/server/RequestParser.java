@@ -75,11 +75,12 @@ public class RequestParser {
 
 
 	private JSONObject requestObject;
+	private QueryHelper queryHelper;
+	private Map<String, JSONObject> queryResultMap;//path-result
 
 	private boolean parseRelation;
 	//不用keyPath-valuePath-value是因为很可能很多valuePath对应同一个value
 	private Map<String, String> keyValuePathMap;//keyPath-valuePath
-	private Map<String, JSONObject> queryResultMap;//path-result
 
 
 	/**解析请求json并获取对应结果
@@ -128,6 +129,7 @@ public class RequestParser {
 		parseRelation = false;
 
 		Exception error = null;
+		queryHelper = new QueryHelper();
 		try {
 			requestObject = getObject(null, null, null, request);
 
@@ -144,8 +146,8 @@ public class RequestParser {
 			e.printStackTrace();
 			error = e;
 		}
-
-		QueryHelper.getInstance().close();
+		queryHelper.close();
+		queryHelper = null;
 		//		QueryHelper2.getInstance().close();
 
 
@@ -231,12 +233,20 @@ public class RequestParser {
 		object.put(JSONResponse.KEY_MESSAGE, message);
 		return object;
 	}
+
+
 	/**添加请求成功的状态内容
 	 * @param object
 	 * @return
 	 */
 	public static JSONObject extendSuccessResult(JSONObject object) {
 		return extendResult(object, 200, "success");
+	}
+	/**获取请求成功的状态内容
+	 * @return
+	 */
+	public static JSONObject newSuccessResult() {
+		return newResult(200, "success");
 	}
 	/**添加请求成功的状态内容
 	 * @param object
@@ -285,8 +295,19 @@ public class RequestParser {
 	 * @param method
 	 * @param request
 	 * @return
+	 * @throws Exception 
 	 */
 	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request) throws Exception {
+		return getCorrectRequest(method, request, null);
+	}
+	/**获取正确的请求，非GET请求必须是服务器指定的
+	 * @param method
+	 * @param request
+	 * @param queryHelper
+	 * @return
+	 */
+	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request, QueryHelper queryHelper)
+			throws Exception {
 		if (isPublicMethod(method)) {
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
@@ -307,12 +328,17 @@ public class RequestParser {
 
 		JSONObject object = null;
 		String error = "";
+		if (queryHelper == null) {
+			queryHelper = new QueryHelper();
+		}
 		try {
-			object = QueryHelper.getInstance().select(config);
+			object = queryHelper.select(config);
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e.getMessage();
 		}
+		queryHelper.close();
+
 		if (object == null || object.isEmpty()) {
 			throw new UnsupportedOperationException("非GET请求必须是服务端允许的操作！ \n " + error);
 		}
@@ -469,7 +495,7 @@ public class RequestParser {
 		boolean nameIsNumber = StringUtil.isNumer(name);
 		String table = Pair.parseEntry(name).getValue();
 		Log.d(TAG, "getObject  table = " + table);
-		
+
 		QueryConfig config = nameIsNumber ? parentConfig : null;
 		if (config == null) {
 			config = new QueryConfig(requestMethod, table).setCount(1);
@@ -495,7 +521,7 @@ public class RequestParser {
 			JSONObject result;
 			boolean isFirst = true;
 			for (String key : set) {
-				value = transferredRequest.containsKey(key) ? transferredRequest.get(key) : request.get(key);
+				value = request.get(key);
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					if (isArrayKey(key)) {//APIJSON Array
 						result = getArray(path, config, key, (JSONObject) value);
@@ -602,15 +628,15 @@ public class RequestParser {
 							if (((String) value).startsWith(SEPARATOR)) {
 								value = getAbsPath(parentPath, (String) value);
 							}
-//							Object target = getValueByPath((String) value);
-//							Log.d(TAG, "getObject value = " + value + "; target = " + target);
-//							if (target == null || ((String) value).equals(target)) {//标记并存放依赖关系
-								containRelation = true;
-								putRelation(getAbsPath(path, replaceKey), (String) value);
-//							} else {//直接替换原来的key@:path为key:target
-//								transferredRequest.remove(key);
-//								transferredRequest.put(replaceKey, target);
-//							}
+							//							Object target = getValueByPath((String) value);
+							//							Log.d(TAG, "getObject value = " + value + "; target = " + target);
+							//							if (target == null || ((String) value).equals(target)) {//标记并存放依赖关系
+							containRelation = true;
+							putRelation(getAbsPath(path, replaceKey), (String) value);
+							//							} else {//直接替换原来的key@:path为key:target
+							//								transferredRequest.remove(key);
+							//								transferredRequest.put(replaceKey, target);
+							//							}
 						}
 					}
 				}
@@ -925,7 +951,7 @@ public class RequestParser {
 				break;
 			}
 		}
-		
+
 		//逐层到达targetKey的直接容器JSONObject parent
 		if (keys != null && keys.length > 1) {
 			for (int i = 0; i < keys.length - 1; i++) {//一步一步到达指定位置parentPath
@@ -968,7 +994,7 @@ public class RequestParser {
 	private synchronized JSONObject getSQLObject(QueryConfig config) throws Exception {
 		Log.i(TAG, "getSQLObject  config = " + JSON.toJSONString(config));
 		AccessVerifier.verify(requestObject, config);
-		return QueryHelper.getInstance().select(config);//QueryHelper2.getInstance().select(config);//
+		return queryHelper.select(config);//QueryHelper2.getInstance().select(config);//
 	}
 
 	/**获取查询配置

@@ -575,8 +575,8 @@ public class QueryConfig {
 	 * @throws Exception 
 	 */
 	public static String getSQL(QueryConfig config) throws Exception {
-		if (config == null) {
-			Log.i(TAG, "QueryConfig: getSQL  config == null >> return null;");
+		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
+			Log.i(TAG, "getSQL  config == null || StringUtil.isNotEmpty(config.getTable(), true) == false >> return null;");
 			return null;
 		}
 		RequestMethod method = config.getMethod();
