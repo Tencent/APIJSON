@@ -235,7 +235,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 
 1.TableName指要查询的table的名称字符串。第一个字符为大写字母，剩下的字符要符合英语字母、数字、下划线中的任何一种。对应的值为内部所传字段符合对应Table的JSONObject，结构是{...}<br >
 2."tag":tag 后面的tag是非GET、HEAD请求中匹配请求的JSON结构的key，一般是要查询的table的名称，由服务端Request表中指定。<br >
-3.非GET、HEAD请求的方法、tag、结构必须和服务端Request表中指定的一一对应，否则请求将不被通过。<br >
+3.非GET、HEAD请求，其对应的 方法、tag、结构 必须和 服务端Request表中指定的 一一对应，否则请求将不被通过。<br >
 4.POST_GET与GET、POST_HEAD与HEAD分别为同类方法，请求方式不同但返回结果相同。下同。<br >
 5.在HTTP通信中，GET、HEAD方法一般用HTTP GET请求，其它一般用HTTP POST请求。下同。
 
