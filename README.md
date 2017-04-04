@@ -235,7 +235,10 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 
 1.TableName指要查询的table的名称字符串。第一个字符为大写字母，剩下的字符要符合英语字母、数字、下划线中的任何一种。对应的值为内部所传字段符合对应Table的JSONObject，结构是{...}<br >
 2."tag":tag 后面的tag是非GET、HEAD请求中匹配请求的JSON结构的key，一般是要查询的table的名称，由服务端Request表中指定。<br >
-3.非GET、HEAD请求的方法、tag、结构必须和服务端Request表中指定的一一对应，否则请求将不被通过。
+3.非GET、HEAD请求的方法、tag、结构必须和服务端Request表中指定的一一对应，否则请求将不被通过。<br >
+4.POST_GET与GET、POST_HEAD与HEAD分别为同类方法，请求方式不同但返回结果相同。下同。<br >
+5.在HTTP通信中，GET、HEAD方法一般用HTTP GET请求，其它一般用HTTP POST请求。下同。
+
 
 
 
@@ -249,7 +252,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
  "key()":"函数表达式"， 函数表达式为 function(Type0:value0,Type1:value1...) | 远程调用函数 |  ["isPraised()":"isContain(Collection:praiseUserIdList,userId)"](http://139.196.140.118:8080/get/{"Moment":{"id":301,"isPraised()":"isContain(Collection:praiseUserIdList,userId)"}})，请求完成后会调用 boolean isContain(Collection collection, Object object) 函数，然后变为 "isPraised":true 这种（假设点赞用户id列表包含了userId，即这个User点了赞）。函数参数类型为Object或泛型时可省略类型，即 Object:value 改写为 value
  "key@":"依赖路径"，依赖路径为用/分隔的字符串 | 依赖引用 | ["userId@":"/User/id"](http://139.196.140.118:8080/get/%7B%22User%22%3A%7B%22id%22%3A38710%7D%2C%22Moment%22%3A%7B%22userId%40%22%3A%22%252FUser%252Fid%22%7D%7D)，userId依赖引用同级User内的id值，假设id=1，则请求完成后会变成 "userId":1
  "key$":"SQL搜索表达式"，任意SQL搜索表达式字符串，如 %key%, %k%e%y% 等 | 模糊搜索 | "name$":"%m%"，搜索包含m的名字。一般用于查询一个数组。请求 [{"[]":{"User":{"name$":"%m%"}}}](http://139.196.140.118:8080/get/%7B%22%5B%5D%22%3A%7B%22User%22%3A%7B%22name%24%22%3A%22%2525m%2525%22%7D%2C%22count%22%3A3%2C%22page%22%3A0%7D%7D) 会返回name包含"m"的User数组
- "name:alias"，name映射为alias，用alias替代name。可用于 key,TableName,SQL函数 等 | 新建别名 | ["@column":"toId:parentId"](http://139.196.140.118:8080/get/{"Comment":{"@column":"id,toId:parentId","id":51}})，将查询的字段toId变为parentId返回
+ "name:alias"，name映射为alias，用alias替代name。可用于 key,TableName,SQL函数 等。只用于GET类方法、HEAD类方法的请求 | 新建别名 | ["@column":"toId:parentId"](http://139.196.140.118:8080/get/{"Comment":{"@column":"id,toId:parentId","id":51}})，将查询的字段toId变为parentId返回
  "key+":key指定类型的Object，且类型为Number,String,JSONArray中的一种。如 1,"apijson",["url0","url1"] 等。只用于PUT请求 | 增加 或 扩展 | "praiseUserIdList+":[1]，添加一个点赞用户id，即该用户点了赞
  "key-":key指定类型的Object，同"key+" | 减少 或 去除 | "balance-":100.00，余额减少100.00，即花费了100元
  &, \|, ! 逻辑运算符。<br />① & 可用于"key&{}":"条件"等<br />② \| 可用于"key\|{}":"条件", "key\|{}":[]等。一般可省略<br />③ ! 可单独使用，如"key!":Object，也可像&,\|一样配合其他功能符使用等 | 逻辑运算 |  ① ["id&{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id&{}":">80000,<=90000"}})，即id满足id>80000 & id<=90000<br /> ② ["id|{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id|{}":">80000,<=90000"}})，同"id{}":">80000,<=90000"，即id满足id>80000 \| id<=90000<br /> ③ ["id!{}":[82001,38710]](http://139.196.140.118:8080/head/{"User":{"id!{}":[82001,38710]}})，即id满足 ! (id=82001 \| id=38710)，可过滤黑名单的消息
