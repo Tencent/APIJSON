@@ -94,7 +94,7 @@ public class Function implements FunctionList {
 			Entry<Class<?>, Object> entry;
 			for (int i = 0; i < typeValues.length; i++) {
 				entry = Pair.parseVariableEntry(typeValues[i], jsonMap);
-				if (entry != null) {
+				if (entry != null && entry.isEmpty() == false) {
 					types[i] = entry.getKey();
 					values[i] = entry.getValue();
 				}

@@ -27,6 +27,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.Log;
+import zuo.biao.apijson.Pair;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.Table;
 import zuo.biao.apijson.server.QueryConfig;
@@ -152,6 +153,7 @@ public class QueryHelper {
 			Object value = null;
 			Object json;
 			for (int i = 0; i < columnArray.length; i++) {
+				columnArray[i] = Pair.parseEntry(columnArray[i]).getValue();
 				try {
 					value = rs.getObject(rs.findColumn(columnArray[i]));
 				} catch (Exception e) {

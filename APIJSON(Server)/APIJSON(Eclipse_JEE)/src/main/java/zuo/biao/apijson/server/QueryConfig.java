@@ -128,13 +128,17 @@ public class QueryConfig {
 	}
 	public String getColumnString() {
 		switch (getMethod()) {
-		case POST:
-			return StringUtil.isNotEmpty(column, true) ? "(" + column + ")" : "";
 		case HEAD:
 		case POST_HEAD:
-			return " COUNT(0) COUNT ";
+			return "count(0) AS count";
+		case POST:
+			return StringUtil.isNotEmpty(column, true) ? "(" + column + ")" : "";
 		default:
-			return StringUtil.isNotEmpty(column, true) ? column : "*";
+			column = StringUtil.getString(column);
+			if (column.isEmpty()) {
+				return "*";
+			}
+			return column.contains(":") == false ? column : column.replaceAll(":", " AS ");//不能在这里改，后续还要用到:
 		}
 	}
 

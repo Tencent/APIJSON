@@ -467,12 +467,15 @@ public class RequestParser {
 		}
 
 		boolean nameIsNumber = StringUtil.isNumer(name);
+		String table = Pair.parseEntry(name).getValue();
+		Log.d(TAG, "getObject  table = " + table);
+		
 		QueryConfig config = nameIsNumber ? parentConfig : null;
 		if (config == null) {
-			config = new QueryConfig(requestMethod, name).setCount(1);
+			config = new QueryConfig(requestMethod, table).setCount(1);
 		}
 		//避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
-		if (nameIsNumber && ("" + config.getPosition()).equals(name) == false) {
+		if (nameIsNumber && ("" + config.getPosition()).equals(table) == false) {
 			config.setPosition(0).setCount(1).setPage(0);
 		}
 
@@ -507,7 +510,7 @@ public class RequestParser {
 					}
 				} else if (requestMethod == PUT && JSON.isJSONArray(value)) {//PUT JSONArray
 					JSONArray array = ((JSONArray) value);
-					if (array != null && array.isEmpty() == false && isTableKey(name)) {
+					if (array != null && array.isEmpty() == false && isTableKey(table)) {
 						int putType = 0;
 						if (key.endsWith("+")) {//add
 							putType = 1;
@@ -526,13 +529,13 @@ public class RequestParser {
 						arrayRequest.put(Table.ID, request.get(Table.ID));
 						//						arrayRequest.setColumn(realKey);//put请求会对id添加功能符？
 						arrayRequest.put(JSONRequest.KEY_COLUMN, realKey);
-						JSONRequest getRequest = new JSONRequest(name, arrayRequest);
+						JSONRequest getRequest = new JSONRequest(table, arrayRequest);
 						JSONObject response = new RequestParser().parseResponse(getRequest);
 						//GET >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 						//add all 或 remove all <<<<<<<<<<<<<<<<<<<<<<<<<
-						response = response == null ? null : response.getJSONObject(name);
+						response = response == null ? null : response.getJSONObject(table);
 						JSONArray targetArray = response == null ? null : response.getJSONArray(realKey);
 						if (targetArray == null) {
 							targetArray = new JSONArray();
@@ -582,8 +585,8 @@ public class RequestParser {
 
 							Object target = getValueByPath(getRelationPath(getAbsPath(path, replaceKey)), true);
 							Log.d(TAG, "getObject  value = " + value + "; target = " + target);
-							if (((String) value).equals(target) && isTableKey(name)) {
-								Log.e(TAG, "getObject ((String) value).equals(target) && isTableKey(name) >>  return null;");
+							if (((String) value).equals(target) && isTableKey(table)) {
+								Log.e(TAG, "getObject ((String) value).equals(target) && isTableKey(table) >>  return null;");
 								return null;//parseRelation时还获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 							}
 							if (key.startsWith("@")) {
@@ -616,10 +619,10 @@ public class RequestParser {
 
 
 		//执行SQL操作数据库
-		if (containRelation == false && isTableKey(name)) {//提高性能
+		if (containRelation == false && isTableKey(table)) {//提高性能
 			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
 				//			keyValuePathMap.remove(path);
-				QueryConfig config2 = newQueryConfig(name, transferredRequest);
+				QueryConfig config2 = newQueryConfig(table, transferredRequest);
 
 				if (parentConfig != null) {
 					config2.setCount(parentConfig.getCount()).setPage(parentConfig.getPage())
@@ -1073,7 +1076,9 @@ public class RequestParser {
 
 		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好？不，查询就得截取
 		if (isTableKey) {//不允许在column key中使用Type:key形式
-			key = Pair.parseEntry(key, null).getKey();
+			key = Pair.parseEntry(key, false).getKey();//table以左边为准
+		} else {
+			key = Pair.parseEntry(key).getValue();//column以右边为准
 		}
 
 		if (isWord(key.startsWith("@") ? key.substring(1) : key) == false) {

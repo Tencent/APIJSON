@@ -23,10 +23,10 @@ package zuo.biao.apijson;
  * @warn K,V都需要基本类型时不建议使用，判空麻烦，不如新建一个Model
  */
 public class Entry<K, V> {
-	
+
 	public K key;
 	public V value;
-	
+
 	public Entry() {
 		//default
 	}
@@ -37,8 +37,8 @@ public class Entry<K, V> {
 		this.key = key;
 		this.value = value;
 	}
-	
-	
+
+
 	public K getKey() {
 		return key;
 	}
@@ -51,5 +51,9 @@ public class Entry<K, V> {
 	public void setValue(V value) {
 		this.value = value;
 	}
-	
+
+	public boolean isEmpty() {
+		return key == null && value == null;
+	}
+
 }
