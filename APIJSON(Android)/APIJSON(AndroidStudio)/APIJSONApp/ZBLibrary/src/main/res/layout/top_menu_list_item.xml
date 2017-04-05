@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvTopMenuListItem"
+    android:layout_width="@dimen/top_menu_item_width"
+    android:layout_height="@dimen/top_menu_item_height"
+    android:background="@drawable/bg_item_to_alpha"
+    android:gravity="center_vertical|left"
+    android:paddingLeft="@dimen/common_item_left_tv_padding"
+    android:paddingRight="0dp"
+    android:singleLine="true"
+    android:text="选项itemITEM"
+    android:textColor="@color/gray_3"
+    android:textSize="16sp" />

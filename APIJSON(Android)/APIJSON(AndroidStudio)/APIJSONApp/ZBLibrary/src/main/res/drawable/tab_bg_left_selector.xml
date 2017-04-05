@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/tab_bg_left_full_white" android:state_selected="true"></item>
+    <item android:drawable="@drawable/tab_bg_left_full_white" android:state_pressed="true"></item>
+    <item android:drawable="@color/alpha_complete"></item>
+
+</selector>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 使用方法：复制>粘贴>改名>改代码（id必须改，不要和其它类的id重复） -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/activity_page" >
+
+    <RelativeLayout style="@style/topbar_bg" >
+
+        <ImageView style="@style/topbar_return_img" />
+
+        <TextView
+            style="@style/topbar_title"
+            android:layout_centerHorizontal="true"
+            android:text="服务器设置" />
+
+        <TextView
+            style="@style/topbar_right_btn"
+            android:text="重置" />
+    </RelativeLayout>
+
+    <TextView
+        style="@style/content_item_remind_tv_black"
+        android:gravity="center"
+        android:text="只保存切换至的地址" />
+
+    <TextView
+        android:id="@+id/tvServerSettingNormalName"
+        style="@style/text_big"
+        android:layout_width="match_parent"
+        android:layout_marginTop="30dp"
+        android:background="@color/white"
+        android:text="正式服务器"
+        android:textColor="@color/green" />
+
+    <View style="@style/divider_horizontal_1px" />
+
+    <LinearLayout style="@style/edit_item" >
+
+        <TextView
+            style="@style/edit_item_left_tv"
+            android:text="地址" />
+
+        <EditText
+            android:id="@+id/etServerSettingNormal"
+            style="@style/edit_item_right_et"
+            android:layout_weight="1"
+            android:maxLength="100" />
+    </LinearLayout>
+
+    <View style="@style/divider_horizontal_1px" />
+
+    <LinearLayout
+        style="@style/ll_horizontal_match_wrap"
+        android:background="@color/white" >
+
+        <TextView
+            android:id="@+id/tvServerSettingNormalSet"
+            style="@style/bottom_menu_btn_return"
+            android:layout_weight="1"
+            android:text="切换至" />
+
+        <View style="@style/divider_vertical_1px_gray" />
+
+        <TextView
+            android:id="@+id/tvServerSettingNormalOpen"
+            style="@style/bottom_menu_btn_forward"
+            android:layout_weight="1"
+            android:text="打开网址" />
+    </LinearLayout>
+
+    <View
+        style="@style/divider_horizontal_1px"
+        android:layout_marginBottom="60dp" />
+
+    <TextView
+        android:id="@+id/tvServerSettingTestName"
+        style="@style/text_big"
+        android:layout_width="match_parent"
+        android:background="@color/white"
+        android:text="测试服务器"
+        android:textColor="@color/red" />
+
+    <View style="@style/divider_horizontal_1px" />
+
+    <LinearLayout style="@style/edit_item" >
+
+        <TextView
+            style="@style/edit_item_left_tv"
+            android:text="地址" />
+
+        <EditText
+            android:id="@+id/etServerSettingTest"
+            style="@style/edit_item_right_et"
+            android:layout_weight="1"
+            android:maxLength="100" />
+    </LinearLayout>
+
+    <View style="@style/divider_horizontal_1px" />
+
+    <LinearLayout
+        style="@style/ll_horizontal_match_wrap"
+        android:background="@color/white" >
+
+        <TextView
+            android:id="@+id/tvServerSettingTestSet"
+            style="@style/bottom_menu_btn_return"
+            android:layout_weight="1"
+            android:text="切换至" />
+
+        <View style="@style/divider_vertical_1px_gray" />
+
+        <TextView
+            android:id="@+id/tvServerSettingTestOpen"
+            style="@style/bottom_menu_btn_forward"
+            android:layout_weight="1"
+            android:text="打开网址" />
+    </LinearLayout>
+
+    <View
+        style="@style/divider_horizontal_1px"
+        android:layout_marginBottom="60dp" />
+
+</LinearLayout>

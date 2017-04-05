@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" >
+        <shape>
+            <solid android:color="#c8c8c8"/>
+            <stroke
+                android:width="0.5dp"
+                android:color="#d6d6d6" />
+            <corners
+                android:topRightRadius="0dp"
+                android:bottomLeftRadius="10dp"
+                android:topLeftRadius="0dp"
+                android:bottomRightRadius="0dp"
+            />
+            <padding
+                android:left="10dp"
+                android:top="10dp"
+                android:right="10dp"
+                android:bottom="10dp" />
+        </shape>
+    </item>
+
+   <!--  <item android:state_focused="true" >
+       <shape>
+            <solid android:color="#fefeff"/>
+            <stroke
+                android:width="1dp"
+                android:color="#fad3cf" />
+            <corners
+                android:topRightRadius="0dp"
+                android:bottomLeftRadius="0dp"
+                android:topLeftRadius="0dp"
+                android:bottomRightRadius="10dp"
+            />
+            <padding
+                android:left="10dp"
+                android:top="10dp"
+                android:right="10dp"
+                android:bottom="10dp" />
+        </shape>
+    </item> -->
+
+    <item >      
+        <shape>
+            <solid android:color="#f0f0f0"/>
+            <stroke
+                android:width="0.5dp"
+                android:color="#d6d6d6" />
+            <corners
+                android:topRightRadius="0dp"
+                android:bottomLeftRadius="10dp"
+                android:topLeftRadius="0dp"
+                android:bottomRightRadius="0dp"
+            />
+            <padding
+                android:left="10dp"
+                android:top="10dp"
+                android:right="10dp"
+                android:bottom="10dp" />
+        </shape>
+    </item>
+</selector>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zuo.biao.library.ui.SquareLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_pressed_common"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:id="@+id/ivSquareMenu"
+        style="@style/img_btn" />
+
+    <TextView
+        android:id="@+id/tvSquareMenu"
+        style="@style/text_middle"
+        android:textColor="@color/black" />
+
+</zuo.biao.library.ui.SquareLinearLayout>

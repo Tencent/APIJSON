@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llTopMenuWindowBg"
+    style="@style/ll_vertical_match_match"
+    android:background="@color/alpha_complete"
+    android:gravity="right" >
+
+    <ListView
+        android:id="@+id/lvTopMenuWindowMenu"
+        style="@style/wrap_wrap"
+        android:layout_width="@dimen/top_menu_width"
+        android:layout_marginBottom="90dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="@dimen/common_item_padding_right"
+        android:background="@drawable/edit_item_text_bg"
+        android:cacheColorHint="@null"
+        android:divider="@color/alpha_3"
+        android:dividerHeight="1px"
+        android:listSelector="@drawable/null_drawable"
+        android:minWidth="@dimen/top_menu_width"
+        android:padding="0dp" >
+    </ListView>
+
+</LinearLayout>

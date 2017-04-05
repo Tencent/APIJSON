@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rlCommonMultiSelect"
+    style="@style/topbar_bg" >
+
+    <TextView
+        android:id="@+id/tvMultiSelectTopbarCancel"
+        style="@style/topbar_return_tv"
+        android:text="完成" />
+
+    <TextView
+        android:id="@+id/tvMultiSelectTopbarTitle"
+        style="@style/topbar_title"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="批量操作" />
+
+</RelativeLayout>

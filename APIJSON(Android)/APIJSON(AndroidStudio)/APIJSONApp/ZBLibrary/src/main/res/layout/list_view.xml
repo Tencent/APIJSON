@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lvListView"
+    style="@style/lv_no_divider" >
+
+</ListView>

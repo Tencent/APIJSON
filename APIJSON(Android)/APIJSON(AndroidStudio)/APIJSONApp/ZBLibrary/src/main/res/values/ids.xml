@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="lvBaseList" type="id">false</item>
+    <item name="tvBaseTitle" type="id">false</item>
+    <item name="pbBaseTitle" type="id">false</item>
+    <item name="tvBaseTabTitle" type="id">false</item>
+    <item name="ivBaseTabReturn" type="id">false</item>
+    <item name="tvBaseTabReturn" type="id">false</item>
+    <item name="llBaseTabTopRightButtonContainer" type="id">false</item>
+    <item name="llBaseTabTabContainer" type="id">false</item>
+    <item name="flBaseTabFragmentContainer" type="id">false</item>
+    <item name="vBaseBottomWindowRoot" type="id">false</item>
+    <item name="llBaseViewBottomWindowContainer" type="id">false</item>
+    <item name="tvBaseViewBottomWindowReturn" type="id">false</item>
+    <item name="tvBaseViewBottomWindowForward" type="id">false</item>
+
+</resources>

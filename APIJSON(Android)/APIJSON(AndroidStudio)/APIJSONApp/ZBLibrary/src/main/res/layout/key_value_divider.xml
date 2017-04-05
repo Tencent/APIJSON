@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/edit_item"
+    android:layout_height="1px" >
+
+    <View style="@style/edit_item_left_tv_gravity_right" />
+
+    <View
+        style="@style/edit_item_right_ll"
+        android:layout_weight="1"
+        android:background="@color/divider" />
+
+</LinearLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvBottomMenuItem"
+    style="@style/text_middle"
+    android:gravity="center_vertical|left"
+    android:layout_width="match_parent"
+    android:background="@drawable/bg_item_to_alpha"
+    android:paddingTop="@dimen/common_item_padding_top"
+    android:paddingBottom="@dimen/common_item_padding_bottom"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:text="选项itemITEM"
+    android:textColor="@color/gray" />

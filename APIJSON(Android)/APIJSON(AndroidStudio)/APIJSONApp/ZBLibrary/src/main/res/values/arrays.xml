@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="sexs">
+        <item>不限</item>
+        <item>男</item>
+        <item>女</item>
+    </string-array>
+    <string-array name="ages">
+        <item>不限</item>
+        <item>20岁以下</item>
+        <item>20-25岁</item>
+        <item>25-30岁</item>
+        <item>30-35岁</item>
+        <item>35岁以上</item>
+    </string-array>
+    <string-array name="distances">
+        <item>不限</item>
+        <item>小于1千米</item>
+        <item>1千米-5千米</item>
+        <item>5千米-10千米</item>
+        <item>10千米-20千米</item>
+        <item>20千米以上</item>
+    </string-array>
+    <string-array name="constellations">
+        <item>不限</item>
+        <item>白羊座</item>
+        <item>金牛座</item>
+        <item>双子座</item>
+        <item>巨蟹座</item>
+        <item>狮子座</item>
+        <item>处女座</item>
+        <item>天秤座</item>
+        <item>天蝎座</item>
+        <item>射手座</item>
+        <item>摩羯座</item>
+        <item>水瓶座</item>
+        <item>双鱼座</item>
+    </string-array>
+    <string-array name="profesions">
+        <item>计算机/互联网/通信/电子</item>
+        <item>会计/金融/银行/保险</item>
+        <item>商业/服务业/个体经营</item>
+        <item>贸易/消费/运营</item>
+        <item>生产/工艺/制造</item>
+        <item>医疗/护理/制药</item>
+        <item>文化/广告/媒体</item>
+        <item>娱乐/艺术/表演</item>
+        <item>公务员/事业单位</item>
+        <item>房地厂/建筑</item>
+        <item>律师/法务</item>
+        <item>教育/培训</item>
+        <item>学生</item>
+        <item>其它</item>
+        <item>无</item>
+    </string-array>
+    
+
+</resources>

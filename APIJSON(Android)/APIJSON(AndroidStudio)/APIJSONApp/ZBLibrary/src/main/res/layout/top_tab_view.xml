@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/topbar_tab_bg" >
+
+    <TextView
+        android:id="@+id/tvTopTabViewTabFirst"
+        style="@style/topbar_tab_tv_left"
+        android:text="FIRST" />
+
+    <View style="@style/divider_vertical_1dp_white" />
+
+    <LinearLayout
+        android:id="@+id/llTopTabViewContainer"
+        style="@style/ll_horizontal_wrap_match" >
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTopTabViewTabLast"
+        style="@style/topbar_tab_tv_right"
+        android:text="LAST" />
+
+</LinearLayout>
