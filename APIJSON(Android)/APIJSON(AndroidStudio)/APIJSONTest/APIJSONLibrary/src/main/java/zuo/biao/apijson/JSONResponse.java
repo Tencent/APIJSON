@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@ import static zuo.biao.apijson.StringUtil.bigAlphaPattern;
 
 import java.util.List;
 import java.util.Set;
-
-import android.annotation.SuppressLint;
-import android.util.Log;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -424,7 +421,6 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 * @param key => StringUtil.getNoBlankString(key)
 	 * @return empty ? "list" : key + "List" 且首字母小写
 	 */
-	@SuppressLint("DefaultLocale")
 	public static String getArrayKey(String key) {
 		key = StringUtil.getNoBlankString(key);
 		if (key.isEmpty()) {

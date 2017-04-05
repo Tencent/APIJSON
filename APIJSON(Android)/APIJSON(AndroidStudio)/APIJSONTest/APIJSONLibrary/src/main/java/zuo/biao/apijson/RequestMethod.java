@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,14 +25,19 @@ public enum RequestMethod {
 	GET,
 	
 	/**
-	 * 通过POST来HEAD数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
+	 * 检查，默认是非空检查，返回数据总数
 	 */
-	POST_HEAD,
+	HEAD,
 	
 	/**
 	 * 通过POST来GET数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
 	 */
 	POST_GET,
+	
+	/**
+	 * 通过POST来HEAD数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
+	 */
+	POST_HEAD,
 	
 	/**
 	 * 新增(或者说插入)数据
@@ -47,10 +52,5 @@ public enum RequestMethod {
 	/**
 	 * 删除数据
 	 */
-	DELETE,
-	
-	/**
-	 * 检查，默认是非空检查，返回数据总数
-	 */
-	HEAD
+	DELETE
 }
