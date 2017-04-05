@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,7 +33,7 @@ import com.zxing.view.ViewfinderView;
  * @author Lemon
  * @use toActivity(ScanActivity.createIntent(...));
  */
-public class ScanActivity extends CaptureActivity implements Callback, ActivityPresenter, OnClickListener {
+public class ScanActivity extends CaptureActivity implements ActivityPresenter, OnClickListener {
 	public static final String TAG = "ScanActivity";
 
 	//启动方法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

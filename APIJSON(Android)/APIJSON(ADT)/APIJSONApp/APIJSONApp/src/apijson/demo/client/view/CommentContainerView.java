@@ -14,12 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import zuo.biao.library.base.BaseView;
-import zuo.biao.library.util.Log;
-import zuo.biao.library.util.StringUtil;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -28,9 +22,16 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import apijson.demo.client.R;
-import apijson.demo.client.adapter.CommentAdapter.ItemView.OnCommentClickListener;
 import apijson.demo.client.model.CommentItem;
+import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
+import zuo.biao.library.base.BaseView;
+import zuo.biao.library.util.Log;
+import zuo.biao.library.util.StringUtil;
 
 /**作品View
  * @author Lemon
@@ -100,8 +101,6 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 
 
 	/**设置评论
-	 * @param joined
-	 * @param commentCount 
 	 * @param list
 	 */
 	public void setComment(List<CommentItem> list) {

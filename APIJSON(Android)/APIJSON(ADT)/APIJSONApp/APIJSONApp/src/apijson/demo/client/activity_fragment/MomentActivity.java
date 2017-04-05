@@ -14,8 +14,32 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
+
 import java.util.List;
 
+import apijson.demo.client.R;
+import apijson.demo.client.adapter.CommentAdapter;
+import apijson.demo.client.application.APIJSONApplication;
+import apijson.demo.client.manager.HttpManager;
+import apijson.demo.client.model.Comment;
+import apijson.demo.client.model.CommentItem;
+import apijson.demo.client.model.MomentItem;
+import apijson.demo.client.model.User;
+import apijson.demo.client.util.CommentUtil;
+import apijson.demo.client.util.HttpRequest;
+import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
+import apijson.demo.client.view.MomentView;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseHttpListActivity;
@@ -32,29 +56,6 @@ import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.SettingUtil;
 import zuo.biao.library.util.StringUtil;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
-import apijson.demo.client.R;
-import apijson.demo.client.adapter.CommentAdapter;
-import apijson.demo.client.adapter.CommentAdapter.ItemView.OnCommentClickListener;
-import apijson.demo.client.application.APIJSONApplication;
-import apijson.demo.client.manager.HttpManager;
-import apijson.demo.client.model.Comment;
-import apijson.demo.client.model.CommentItem;
-import apijson.demo.client.model.MomentItem;
-import apijson.demo.client.model.User;
-import apijson.demo.client.util.CommentUtil;
-import apijson.demo.client.util.HttpRequest;
-import apijson.demo.client.view.MomentView;
 
 /**用户列表界面fragment
  * @author Lemon
@@ -173,7 +174,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	private MomentItem momentItem;
 	/**
-	 * @param momentItem
+	 * @param momentItem_
 	 */
 	private void setHead(MomentItem momentItem_) {
 		this.momentItem = momentItem_;
@@ -222,7 +223,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 								//	adapter.setShowAll(true);
 								adapter.refresh(list_);
 							}
-						});						
+						});
 					}
 				});
 			}
@@ -231,14 +232,14 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 
 	/**显示输入评论
-	 * @param toCommentItem
+	 * @param toCommentItem_
 	 */
 	public void showInput(CommentItem toCommentItem_) {
 		showInput(toCommentItem_, -1, -1);
 	}
 	/**显示输入评论
-	 * @param toCommentItem
-	 * @param position 
+	 * @param toCommentItem_
+	 * @param position
 	 */
 	public void showInput(CommentItem toCommentItem_, final int position, final int index) {
 		this.toCommentItem = toCommentItem_;
@@ -341,7 +342,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 
 	/**删除评论
-	 * @param comment
+	 * @param commentItem
 	 */
 	private void deleteComment(CommentItem commentItem) {
 		long id = commentItem == null ? 0 : commentItem.getId();
@@ -483,7 +484,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			new AlertDialog(context, null, "删除这条评论?", true, DIALOG_DELETE_COMMENT, MomentActivity.this).show();
 		} else {
 			showInput(item, position, index);
-		}	
+		}
 	}
 
 	private static final int DIALOG_DELETE_COMMENT = 1;
