@@ -142,6 +142,10 @@ public class HttpRequest {
 	public static final String KEY_TYPE = "type";
 
 
+	
+	public static final String DATE_UP = "date+";//同 "date ASC"
+	public static final String DATE_DOWN = "date-";//同 "date DESC"
+	
 	public static final String ID_AT = KEY_ID + "@";
 	public static final String USER_ID_AT = KEY_USER_ID + "@";
 	public static final String MOMENT_ID_AT = "momentId@";
@@ -315,9 +319,10 @@ public class HttpRequest {
 		if (idList != null) {
 			userItem.put(ID_IN, idList);
 		} else {
+			apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
 			switch (range) {
-			case RANGE_ALL:
-				//do nothing
+			case RANGE_ALL://1.首推注册时间长的（也可以是级别高的）；2.给男性用户首推女性用户
+				userItem.setOrder(DATE_UP + (currentUser.getSex() == 0 ? ",sex-" : ""));
 				break;
 			case RANGE_SINGLE:
 			case RANGE_USER:
@@ -329,7 +334,6 @@ public class HttpRequest {
 					Log.e(TAG, "只允许查看当前用户的!");
 					return;
 				}
-				apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
 				List<Long> list = currentUser == null ? null : currentUser.getFriendIdList();
 				if (list == null) {//不能放在range == RANGE_USER_CIRCLE里面，为null不会当成查询条件！
 					list = new ArrayList<Long>();
@@ -340,6 +344,7 @@ public class HttpRequest {
 					list.remove(currentUser.getId());//避免误添加
 				}
 				userItem.put(ID_IN, list);
+				userItem.setOrder("name+");
 				break;
 			case RANGE_MOMENT:
 				JSONObject moment = new JSONObject(new Moment(id));
@@ -383,12 +388,12 @@ public class HttpRequest {
 
 		JSONRequest request = new JSONRequest(new Moment(id));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId"));
-//		//praise <<<<<<<<<<<<<<<<<<
-//		JSONRequest userItem = new JSONRequest();
-//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
-//		.setColumn(COLUMNS_USER_SIMPLE));
-//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
-//		//praise >>>>>>>>>>>>>>>>>>
+		//		//praise <<<<<<<<<<<<<<<<<<
+		//		JSONRequest userItem = new JSONRequest();
+		//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
+		//		.setColumn(COLUMNS_USER_SIMPLE));
+		//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
+		//		//praise >>>>>>>>>>>>>>>>>>
 
 		get(request, requestCode, listener);
 	}
@@ -437,22 +442,23 @@ public class HttpRequest {
 		default:
 			break;
 		}
+		moment.setOrder(DATE_DOWN);
 		moment.add(search);
 
 		request.put(Moment.class.getSimpleName(), moment);
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 
-//		//praise <<<<<<<<<<<<<<<<<<
-//		JSONRequest userItem = new JSONRequest();
-//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
-//		.setColumn(COLUMNS_USER_SIMPLE));
-//
-//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
+		//		//praise <<<<<<<<<<<<<<<<<<
+		//		JSONRequest userItem = new JSONRequest();
+		//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
+		//		.setColumn(COLUMNS_USER_SIMPLE));
+		//
+		//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<
 		JSONRequest commentItem = new JSONRequest();
-		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "[]/Moment/id"));
+		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "[]/Moment/id").setOrder(DATE_UP));
 		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
@@ -472,7 +478,8 @@ public class HttpRequest {
 	public static void getCommentList(long momentId, int count, int page
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
-		request.put(new Comment().setMomentId(momentId));
+		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
+		request.put(Comment.class.getSimpleName(), comment.setOrder(DATE_UP));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 		get(request.toArray(count, page), requestCode, listener);
 	}

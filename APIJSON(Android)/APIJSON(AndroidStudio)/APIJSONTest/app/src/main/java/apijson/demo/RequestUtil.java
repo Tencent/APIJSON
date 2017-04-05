@@ -56,7 +56,7 @@ public class RequestUtil {
 	public static JSONObject newPutRequest(long id, boolean encode) {
 		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
 		//		data.setContent(context.getString(R.string.apijson_info));//一般可用这种方式，encode是为了展示方便
-		List<Long> list = new ArrayList<>();
+		List<Long> list = new ArrayList<Long>();
 		list.add((long) 82001);
 		list.add((long) 82002);
 		JSONObject momentObject = new JSONObject(data, encode);

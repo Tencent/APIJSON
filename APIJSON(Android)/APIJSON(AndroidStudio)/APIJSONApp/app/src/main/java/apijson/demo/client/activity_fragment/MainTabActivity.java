@@ -134,20 +134,6 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 		default:
 			return MomentListFragment.createInstance();
 		}
-//		switch (position) {
-//		case 1:
-//			UserListFragment fragment = UserListFragment.createInstance(isLoggedIn ? 
-//					MomentListFragment.RANGE_USER_CIRCLE : MomentListFragment.RANGE_ALL,
-//					currentUserId);
-//			fragment.setSearchType(EditTextInfoWindow.TYPE_NAME);
-//			return fragment;
-//		case 2:
-//			return SettingFragment.createInstance();
-//		default:
-//			return MomentListFragment.createInstance(isLoggedIn ? 
-//					MomentListFragment.RANGE_USER_CIRCLE : MomentListFragment.RANGE_ALL,
-//					currentUserId);
-//		}
 	}
 
 	private static final String[] TAB_NAMES = {"圈子", "朋友", "我的"};
@@ -315,8 +301,7 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 			}
 			
 			if (ActionUtil.ACTION_RELOAD_CURRENT_USER.equals(action)) {
-				// fragmentManager show remove等都会崩溃					
-				reloadAll();
+				reloadAll();// fragmentManager show remove等都会崩溃		
 			}
 		}
 	};

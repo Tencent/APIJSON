@@ -33,7 +33,7 @@ import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.model.User;
 import apijson.demo.client.view.CommentTextView.OnNameClickListener;
 
-/**评论TextView
+/**点赞用户列表TextView
  */
 public class PraiseTextView extends TextView {
 

@@ -441,6 +441,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 				data.setMyStatus(MomentItem.STATUS_NORMAL);
 				bindView(data);
 			}
+			break;
 		case HTTP_GET_PRAISE:
 			if (response.isSucceed()) {
 				List<User> list = response.getList(User.class.getSimpleName() + "[]", User.class);
