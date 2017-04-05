@@ -186,7 +186,7 @@ APIJSON是一种JSON传输结构协议。<br />
 ### <h3 id="2.3">2.3 服务端操作<h3/>
  服务端操作 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- 解析和返回 | 取出键值对，把键值对作为条件用预设的的方式去查询数据库，最后封装JSON并返回给客户端 | 把RequestParser#parse方法的返回值返回给客户端就行
+ 解析和返回 | 取出键值对，把键值对作为条件用预设的的方式去查询数据库，最后封装JSON并返回给客户端 | 把Parser#parse方法的返回值返回给客户端就行
  返回JSON结构的设定方式 | 由服务端设定，客户端不能修改 | 由客户端设定，服务端不能修改
  
 ### <h3 id="2.4">2.4 客户端解析<h3/>
@@ -255,7 +255,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
  "name:alias"，name映射为alias，用alias替代name。可用于 key,TableName,SQL函数 等。只用于GET类方法、HEAD类方法的请求 | 新建别名 | ["@column":"toId:parentId"](http://139.196.140.118:8080/get/{"Comment":{"@column":"id,toId:parentId","id":51}})，将查询的字段toId变为parentId返回
  "key+":key指定类型的Object，且类型为Number,String,JSONArray中的一种。如 1,"apijson",["url0","url1"] 等。只用于PUT请求 | 增加 或 扩展 | "praiseUserIdList+":[1]，添加一个点赞用户id，即该用户点了赞
  "key-":key指定类型的Object，同"key+" | 减少 或 去除 | "balance-":100.00，余额减少100.00，即花费了100元
- &, \|, ! 逻辑运算符。<br />① & 可用于"key&{}":"条件"等<br />② \| 可用于"key\|{}":"条件", "key\|{}":[]等。一般可省略<br />③ ! 可单独使用，如"key!":Object，也可像&,\|一样配合其他功能符使用 | 逻辑运算 |  ① ["id&{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id&{}":">80000,<=90000"}})，即id满足id>80000 & id<=90000<br /> ② ["id|{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id|{}":">80000,<=90000"}})，同"id{}":">80000,<=90000"，即id满足id>80000 \| id<=90000<br /> ③ ["id!{}":[82001,38710]](http://139.196.140.118:8080/head/{"User":{"id!{}":[82001,38710]}})，即id满足 ! (id=82001 \| id=38710)，可过滤黑名单的消息
+ &, \|, ! 逻辑运算符。<br />① & 可用于"key&{}":"条件"等<br />② \| 可用于"key\|{}":"条件", "key\|{}":[]等，一般可省略<br />③ ! 可单独使用，如"key!":Object，也可像&,\|一样配合其他功能符使用 | 逻辑运算 |  ① ["id&{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id&{}":">80000,<=90000"}})，即id满足id>80000 & id<=90000<br /> ② ["id|{}":">80000,<=90000"](http://139.196.140.118:8080/head/{"User":{"id|{}":">80000,<=90000"}})，同"id{}":">80000,<=90000"，即id满足id>80000 \| id<=90000<br /> ③ ["id!{}":[82001,38710]](http://139.196.140.118:8080/head/{"User":{"id!{}":[82001,38710]}})，即id满足 ! (id=82001 \| id=38710)，可过滤黑名单的消息
  "@key":key指定类型的Object，@key为JSONObject中的关键词<br />① "@column":"key0,key1...", 指定返回字段<br />② "@order":"key0,key1+,key2-..."，指定排序方式<br />③ "@group":"key0,key1,key2..."，指定分组方式。如果@column里声明了Table主键(一般是id)，则该主键也必须在@group中声明；其它情况下必须满足至少一个条件:1.分组的key在@column里声明;2.Table主键在@group中声明 <br />④ "@having":"function0(...)?valu0,function1(...)?valu1,function2(...)?value2..."，指定分组函数条件，必须和@group一起用，函数一般在@column里声明 | 关键词，可自定义 | ① 只查询id,sex,name这几列并且请求结果也按照这个顺序：<br />["@column":"id,sex,name"](http://139.196.140.118:8080/get/{"User":{"@column":"id,sex,name","id":38710}})<br /> ② 查询按 name降序、id默认顺序 排序的User数组：<br />["@order":"name-,id"](http://139.196.140.118:8080/get/{"[]":{"count":10,"User":%7B"@column":"name,id","@order":"name-,id"}}})<br /> ③ 查询按userId分组的Moment数组：<br />["@group"="userId,id"](http://139.196.140.118:8080/get/{"[]":{"count":10,"Moment":%7B"@column":"userId,id","@group":"userId,id"}}})<br /> ④ 查询 按userId分组、id最大值>=100 的Moment数组：<br />["@column":"userId,max(id)",<br />"@group":"userId",<br />"@having":"max(id)>=100"](http://139.196.140.118:8080/get/{"[]":{"count":10,"Moment":{"@column":"userId,max(id)","@group":"userId","@having":"max(id)>=100"}}})<br />还可以指定函数返回名：<br />["@column":"userId,max(id):maxId",<br />"@group":"userId",<br />"@having":"maxId>=100"](http://139.196.140.118:8080/get/{"[]":{"count":10,"Moment":{"@column":"userId,max(id):maxId","@group":"userId","@having":"maxId>=100"}}})<br /> ⑤ 从pictureList获取第0张图片：<br />[{<br /> &nbsp; "@position":0, //这里@position为自定义关键词<br /> &nbsp; "firstPicture()":"get(Collection:pictureList,int:@position)"<br />}](http://139.196.140.118:8080/get/{"User":{"id":38710,"@position":0,"firstPicture()":"get(Collection:pictureList,int:@position)"}})<br /> ...
 
 ## <h2 id="5">5.使用方法<h2/>
@@ -264,7 +264,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
-#### 你可以跳过步骤2和步骤3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
+#### 你可以跳过步骤5.2和步骤5.3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
 
 ### <h3 id="5.2">5.2 导入MySQL table文件<h3/>
 
