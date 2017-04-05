@@ -420,6 +420,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		case HTTP_CANCLE_PRAISE:
 			if (isSucceed) {
 				data.setIsPraised(requestCode == HTTP_PRAISE);
+				data.setUserList(null);
 				bindView(data);
 			} else {
 				showShortToast((requestCode == HTTP_PRAISE ? "点赞" : "取消点赞") + "失败，请检查网络后重试");

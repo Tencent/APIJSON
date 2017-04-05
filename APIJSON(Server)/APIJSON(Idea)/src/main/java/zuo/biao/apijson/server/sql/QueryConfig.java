@@ -12,7 +12,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package zuo.biao.apijson.server.sql;
+
+import static zuo.biao.apijson.RequestMethod.GET;
+import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.RequestMethod.POST_GET;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,9 +29,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.Table;
+import zuo.biao.apijson.server.Parser;
 
 /**config model for query
  * @author Lemon
@@ -35,16 +41,21 @@ import zuo.biao.apijson.Table;
 public class QueryConfig {
 	private static final String TAG = "QueryConfig";
 
-	public static final List<String> arrayKeyList;
+	public static final String ID = JSONResponse.KEY_ID;
+	
+	public static final List<String> ARRAY_KEY_LIST;
 	static {
-		arrayKeyList = new ArrayList<String>();
-		arrayKeyList.add(JSONRequest.KEY_COUNT);
-		arrayKeyList.add(JSONRequest.KEY_PAGE);
+		ARRAY_KEY_LIST = new ArrayList<String>();
+		ARRAY_KEY_LIST.add(JSONRequest.KEY_COUNT);
+		ARRAY_KEY_LIST.add(JSONRequest.KEY_PAGE);
 	}
-	public static final List<String> tableKeyList;
+	public static final List<String> TABLE_KEY_LIST;
 	static {
-		tableKeyList = new ArrayList<String>();
-		tableKeyList.add(JSONRequest.KEY_COLUMNS);
+		TABLE_KEY_LIST = new ArrayList<String>();
+		TABLE_KEY_LIST.add(JSONRequest.KEY_COLUMN);
+		TABLE_KEY_LIST.add(JSONRequest.KEY_GROUP);
+		TABLE_KEY_LIST.add(JSONRequest.KEY_HAVING);
+		TABLE_KEY_LIST.add(JSONRequest.KEY_ORDER);
 	}
 
 
@@ -52,12 +63,15 @@ public class QueryConfig {
 	private long id;
 	private RequestMethod method;
 	private String table;
-	private String columns;
 	private String values;
 	private Map<String, Object> where;
+	private String column;
+	private String group;
+	private String having;
+	private String order;
+
 	private int count;
 	private int page;
-	private String sort;
 	private int position;
 
 	public QueryConfig(RequestMethod method) {
@@ -71,14 +85,14 @@ public class QueryConfig {
 		this(method, table);
 		setWhere(where);
 	}
-	public QueryConfig(RequestMethod method, String table, String columns, String values) {
+	public QueryConfig(RequestMethod method, String table, String column, String values) {
 		this(method, table);
-		setColumns(columns);
+		setColumn(column);
 		setValues(values);
 	}
-	public QueryConfig(RequestMethod method, String table, String[] columns, String[][] values) {
+	public QueryConfig(RequestMethod method, String table, String[] column, String[][] values) {
 		this(method, table);
-		setColumns(columns);
+		setColumn(column);
 		setValues(values);
 	}
 	public QueryConfig(RequestMethod method, int count, int page) {
@@ -89,7 +103,7 @@ public class QueryConfig {
 
 	public RequestMethod getMethod() {
 		if (method == null) {
-			method = RequestMethod.GET;
+			method = GET;
 		}
 		return method;
 	}
@@ -104,27 +118,89 @@ public class QueryConfig {
 		this.table = table;
 		return this;
 	}
-	public String getColumns() {
-		return columns;
+
+	public String getColumn() {
+		return column;
 	}
-	public QueryConfig setColumns(String[] columns) {
-		return setColumns(StringUtil.getString(columns));
+	public QueryConfig setColumn(String... keys) {
+		return setColumn(StringUtil.getString(keys));
 	}
-	public QueryConfig setColumns(String columns) {
-		this.columns = columns;
+	public QueryConfig setColumn(String column) {
+		this.column = column;
 		return this;
 	}
-	private String getColumnsString() {
+	public String getColumnString() {
 		switch (getMethod()) {
-		case POST:
-			return StringUtil.isNotEmpty(columns, true) ? "(" + columns + ")" : "";
 		case HEAD:
 		case POST_HEAD:
-			return " COUNT(0) COUNT ";
+			return "count(0) AS count";
+		case POST:
+			return StringUtil.isNotEmpty(column, true) ? "(" + column + ")" : "";
 		default:
-			return StringUtil.isNotEmpty(columns, true) ? columns : "*";
+			column = StringUtil.getString(column);
+			if (column.isEmpty()) {
+				return "*";
+			}
+			return column.contains(":") == false ? column : column.replaceAll(":", " AS ");//不能在这里改，后续还要用到:
 		}
 	}
+
+	public String getGroup() {
+		return group;
+	}
+	public QueryConfig setGroup(String... keys) {
+		return setGroup(StringUtil.getString(keys));
+	}
+	public QueryConfig setGroup(String group) {
+		this.group = group;
+		return this;
+	}
+	public String getGroupString() {
+		group = StringUtil.getTrimedString(group);
+		return group.isEmpty() ? "" : " GROUP BY " + group;
+	}
+
+	public String getHaving() {
+		return having;
+	}
+	public QueryConfig setHaving(String... conditions) {
+		return setHaving(StringUtil.getString(conditions));
+	}
+	public QueryConfig setHaving(String having) {
+		this.having = having;
+		return this;
+	}
+	public String getHavingString() {
+		having = StringUtil.getTrimedString(having);
+		return having.isEmpty() ? "" : " HAVING " + having;
+	}
+
+	public String getOrder() {
+		return order;
+	}
+	public QueryConfig setOrder(String... conditions) {
+		return setOrder(StringUtil.getString(conditions));
+	}
+	public QueryConfig setOrder(String order) {
+		this.order = order;
+		return this;
+	}
+	public String getOrderString() {
+		order = StringUtil.getTrimedString(order);
+		if (order.isEmpty()) {
+			return "";
+		}
+		if (order.contains("+")) {//replace没有包含的replacement会崩溃
+			order = order.replaceAll("\\+", " ASC ");
+		}
+		if (order.contains("-")) {
+			order = order.replaceAll("-", " DESC ");
+		}
+		return " ORDER BY " + order;
+	}
+
+
+
 
 	public long getId() {
 		return id;
@@ -177,13 +253,6 @@ public class QueryConfig {
 		this.page = page;
 		return this;
 	}
-	public String getSort() {
-		return sort;
-	}
-	public QueryConfig setSort(String sort) {
-		this.sort = sort;
-		return this;
-	}
 	public int getPosition() {
 		return position;
 	}
@@ -223,9 +292,9 @@ public class QueryConfig {
 	public static String getWhereString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
-			if (RequestParser.isGetMethod(method) == false && method != RequestMethod.POST_GET
-					&& where.containsKey(Table.ID) == false) {//POST必须有id，否则不能INSERT后直接返回id 
-				throw new IllegalArgumentException("请设置" + Table.ID + "！");
+			if (Parser.isGetMethod(method, true) == false && Parser.isHeadMethod(method, true) == false
+					&& where.containsKey(ID) == false) {//POST必须有id，否则不能INSERT后直接返回id 
+				throw new IllegalArgumentException("请设置" + ID + "！");
 			}
 
 			String whereString = " WHERE ";
@@ -249,7 +318,7 @@ public class QueryConfig {
 					keyType = 2;
 				}
 				value = where.get(key);
-				key = RequestParser.getRealKey(method, key, false, true);
+				key = Parser.getRealKey(method, key, false, true);
 
 				String condition = "";
 				switch (keyType) {
@@ -371,8 +440,8 @@ public class QueryConfig {
 	public static String getSetString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
-			if (where.containsKey(Table.ID) == false) {
-				throw new IllegalArgumentException("请设置" + Table.ID + "！");
+			if (where.containsKey(ID) == false) {
+				throw new IllegalArgumentException("请设置" + ID + "！");
 			}
 			String setString = " SET ";
 			boolean isFirst = true;
@@ -380,7 +449,7 @@ public class QueryConfig {
 			Object value;
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : where.get(key);
-				if (key == null || Table.ID.equals(key)) {
+				if (key == null || ID.equals(key)) {
 					continue;
 				}
 
@@ -390,7 +459,7 @@ public class QueryConfig {
 					keyType = 2;
 				}
 				value = where.get(key);
-				key = RequestParser.getRealKey(method, key, false, true);
+				key = Parser.getRealKey(method, key, false, true);
 
 				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
 						? getRemoveString(key, value) : "'" + value + "'") ) );
@@ -399,7 +468,7 @@ public class QueryConfig {
 			}
 
 			if (setString.trim().endsWith("SET") == false) {
-				return setString + " WHERE " + Table.ID + "='" + where.get(Table.ID) + "' ";
+				return setString + " WHERE " + ID + "='" + where.get(ID) + "' ";
 			}
 		}
 		return "";
@@ -448,9 +517,18 @@ public class QueryConfig {
 
 		Set<String> set = request == null ? null : request.keySet();
 		if (set != null) {
-			String columns = request.getString(JSONRequest.KEY_COLUMNS);
-			if (method == RequestMethod.POST) {
-				config.setColumns(StringUtil.getString(set.toArray(new String[]{})));
+			String column = request.getString(JSONRequest.KEY_COLUMN);
+			String group = request.getString(JSONRequest.KEY_GROUP);
+			String having = request.getString(JSONRequest.KEY_HAVING);
+			String order = request.getString(JSONRequest.KEY_ORDER);
+			request.remove(JSONRequest.KEY_COLUMN);
+			request.remove(JSONRequest.KEY_GROUP);
+			request.remove(JSONRequest.KEY_HAVING);
+			request.remove(JSONRequest.KEY_ORDER);
+			
+			if (method == POST) {
+				config.setColumn(StringUtil.getString(set.toArray(new String[]{})));
+				
 				String valuesString = "";
 				Collection<Object> valueCollection = request.values();
 				Object[] values = valueCollection == null || valueCollection.isEmpty() ? null : valueCollection.toArray();
@@ -461,8 +539,8 @@ public class QueryConfig {
 				}
 				config.setValues("(" + valuesString + ")");
 			} else {
-				request.remove(JSONRequest.KEY_COLUMNS);
-
+				config.setColumn(column);
+				
 				Map<String, Object> transferredRequest = new HashMap<String, Object>();
 				Object value;
 				for (String key : set) {
@@ -474,14 +552,13 @@ public class QueryConfig {
 				config.setWhere(transferredRequest);
 			}
 
-
-			if (StringUtil.isNotEmpty(columns, true)) {
-				config.setColumns(columns);
-			}
+			config.setGroup(group);
+			config.setHaving(having);
+			config.setOrder(order);
 		}
 
 		try {
-			config.setId(request.getLongValue(Table.ID));
+			config.setId(request.getLongValue(ID));
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -501,23 +578,23 @@ public class QueryConfig {
 	 * @throws Exception 
 	 */
 	public static String getSQL(QueryConfig config) throws Exception {
-		if (config == null) {
-			System.out.println("QueryConfig: getSQL  config == null >> return null;");
+		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
+			Log.i(TAG, "getSQL  config == null || StringUtil.isNotEmpty(config.getTable(), true) == false >> return null;");
 			return null;
 		}
-		if (config.getMethod() == null) {
-			config.setMethod(RequestMethod.GET);
-		}
-		switch (config.getMethod()) {
+		RequestMethod method = config.getMethod();
+		switch (method) {
 		case POST:
-			return "INSERT INTO " + config.getTable() + config.getColumnsString() + " VALUES" + config.getValuesString();
+			return "INSERT INTO " + config.getTable() + config.getColumnString() + " VALUES" + config.getValuesString();
 		case PUT:
 			return "UPDATE " + config.getTable() + config.getSetString();
 		case DELETE:
 			return "DELETE FROM " + config.getTable() + config.getWhereString();
 		default:
-			return "SELECT "+ config.getColumnsString() + " FROM " + config.getTable()
-			+ config.getWhereString() + config.getLimitString();
+			return "SELECT "+ config.getColumnString() + " FROM " + config.getTable() + config.getWhereString()
+			+ (method != GET && method != POST_GET ?
+					"" : config.getGroupString() + config.getHavingString() + config.getOrderString() )
+			+ config.getLimitString();
 		}
 	}
 

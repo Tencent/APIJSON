@@ -1,4 +1,4 @@
-package zuo.biao.apijson.server;
+package zuo.biao.apijson.server.exception;
 
 
 public class ConflictException extends Exception {

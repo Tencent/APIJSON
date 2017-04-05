@@ -21,9 +21,9 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.QueryConfig;
 import zuo.biao.apijson.server.model.Comment;
 import zuo.biao.apijson.server.model.Login;
 import zuo.biao.apijson.server.model.Moment;
@@ -32,13 +32,12 @@ import zuo.biao.apijson.server.model.Request;
 import zuo.biao.apijson.server.model.User;
 import zuo.biao.apijson.server.model.Verify;
 import zuo.biao.apijson.server.model.Wallet;
-import zuo.biao.apijson.server.model.Work;
 
 /**权限验证类
  * @author Lemon
  */
 public class AccessVerifier {
-	private static final String TAG = "AccessVerifier: ";
+	private static final String TAG = "AccessVerifier";
 
 	private static final int ACCESS_LOGIN = 1;
 	private static final int ACCESS_PAY = 2;
@@ -57,7 +56,6 @@ public class AccessVerifier {
 		
 		//与客户端更好地统一
 		accessMap.put(User.class.getSimpleName(), User.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Work.class.getSimpleName(), Work.class.getAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Moment.class.getSimpleName(), Moment.class.getAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Comment.class.getSimpleName(), Comment.class.getAnnotation(APIJSONRequest.class).method());
 		accessMap.put(Wallet.class.getSimpleName(), Wallet.class.getAnnotation(APIJSONRequest.class).method());
@@ -68,7 +66,6 @@ public class AccessVerifier {
 
 		//原来的做法
 		//		accessMap.put("User", RequestMethod.values());
-		//		accessMap.put("Work", RequestMethod.values());
 		//		accessMap.put("Moment", RequestMethod.values());
 		//		accessMap.put("Comment", RequestMethod.values());
 		//		accessMap.put("Wallet", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
@@ -132,7 +129,7 @@ public class AccessVerifier {
 			return true;
 		}
 		if (currentUserId <= 0) {
-			System.out.println(TAG + "verify accessId = " + accessId
+			Log.e(TAG, "verify accessId = " + accessId
 					+ " >>  currentUserId <= 0, currentUserId = " + currentUserId);
 			throw new AccessException("请设置"+ KEY_CURRENT_USER_ID + "和对应的password！");
 		}
@@ -141,7 +138,7 @@ public class AccessVerifier {
 		case ACCESS_LOGIN:
 			password = StringUtil.getString(request.getString(KEY_LOGIN_PASSWORD));
 			if (password.equals(StringUtil.getString(getLoginPassword(currentUserId))) == false) {
-				System.out.println(TAG + "verify accessId = " + accessId
+				Log.e(TAG, "verify accessId = " + accessId
 						+ " >> currentUserId or loginPassword error"
 						+ "  currentUserId = " + currentUserId + ", loginPassword = " + password);
 				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_LOGIN_PASSWORD + "错误！");
@@ -150,7 +147,7 @@ public class AccessVerifier {
 		case ACCESS_PAY:
 			password = StringUtil.getString(request.getString(KEY_PAY_PASSWORD));
 			if (password.equals(StringUtil.getString(getPayPassword(currentUserId))) == false) {
-				System.out.println(TAG + "verify accessId = " + accessId
+				Log.e(TAG, "verify accessId = " + accessId
 						+ " >> currentUserId or payPassword error"
 						+ "  currentUserId = " + currentUserId + ", payPassword = " + password);
 				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_PAY_PASSWORD + "错误！");

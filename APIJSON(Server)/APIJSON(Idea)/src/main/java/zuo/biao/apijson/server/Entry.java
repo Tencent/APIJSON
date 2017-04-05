@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package zuo.biao.apijson.server;
 
 /**自定义Entry
  * *java.util.Map.Entry是interface，new Entry(...)不好用，其它的Entry也不好用
@@ -23,10 +23,10 @@ package zuo.biao.apijson;
  * @warn K,V都需要基本类型时不建议使用，判空麻烦，不如新建一个Model
  */
 public class Entry<K, V> {
-	
+
 	public K key;
 	public V value;
-	
+
 	public Entry() {
 		//default
 	}
@@ -37,8 +37,8 @@ public class Entry<K, V> {
 		this.key = key;
 		this.value = value;
 	}
-	
-	
+
+
 	public K getKey() {
 		return key;
 	}
@@ -51,5 +51,9 @@ public class Entry<K, V> {
 	public void setValue(V value) {
 		this.value = value;
 	}
-	
+
+	public boolean isEmpty() {
+		return key == null && value == null;
+	}
+
 }

@@ -7,11 +7,10 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.Entry;
+import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.FunctionList;
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.TypeValueKeyEntry;
-import zuo.biao.apijson.server.model.BaseModel;
 
 /**
  * @author Lemon
@@ -52,18 +51,18 @@ public class Function implements FunctionList {
 
 		} else if (key.endsWith("@function")) {//引用服务器方法
 			long time0 = System.currentTimeMillis();
-			System.out.println("" + time0);
+			Log.i(TAG, "" + time0);
 			Object result = invoke(jsonMap, function);
-			System.out.println("" + result);
-			System.out.println("duration=" + (System.currentTimeMillis()-time0));
+			Log.i(TAG, "" + result);
+			Log.i(TAG, "duration=" + (System.currentTimeMillis()-time0));
 		}
 
-		System.out.println("plus = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
-		System.out.println("count = " + invoke(jsonMap, "count(Collection:collection)"));
-		System.out.println("isContain = " + invoke(jsonMap, "isContain(Collection:collection,Object:id)"));
-		System.out.println("get(Map:map,key) = " + invoke(jsonMap, "get(Map:map,key)"));
-		System.out.println("get(Collection:collection,int:@position) = " + invoke(jsonMap, "get(Collection:collection,int:@position)"));
-		System.out.println("Integer:get(Map:map,key) = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
+		Log.i(TAG, "plus = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
+		Log.i(TAG, "count = " + invoke(jsonMap, "count(Collection:collection)"));
+		Log.i(TAG, "isContain = " + invoke(jsonMap, "isContain(Collection:collection,Object:id)"));
+		Log.i(TAG, "get(Map:map,key) = " + invoke(jsonMap, "get(Map:map,key)"));
+		Log.i(TAG, "get(Collection:collection,int:@position) = " + invoke(jsonMap, "get(Collection:collection,int:@position)"));
+		Log.i(TAG, "Integer:get(Map:map,key) = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
 	}
 
 	/**反射调用
@@ -75,9 +74,9 @@ public class Function implements FunctionList {
 
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
-		Entry<String, String> method = TypeValueKeyEntry.parseKeyEntry(function.substring(0, start));
+		Entry<String, String> method = Pair.parseVariableEntry(function.substring(0, start));
 		if (method == null || StringUtil.isNotEmpty(method.getValue(), true) == false) {
-			System.out.println(TAG + "invoke  method == null || StringUtil.isNotEmpty(method.getValue(), true) == false"
+			Log.i(TAG, "invoke  method == null || StringUtil.isNotEmpty(method.getValue(), true) == false"
 					+ " >> return null;");
 			return null;
 		}
@@ -92,8 +91,8 @@ public class Function implements FunctionList {
 
 			Entry<Class<?>, Object> entry;
 			for (int i = 0; i < typeValues.length; i++) {
-				entry = TypeValueKeyEntry.parseEntry(jsonMap, typeValues[i]);
-				if (entry != null) {
+				entry = Pair.parseVariableEntry(typeValues[i], jsonMap);
+				if (entry != null && entry.isEmpty() == false) {
 					types[i] = entry.getKey();
 					values[i] = entry.getValue();
 				}

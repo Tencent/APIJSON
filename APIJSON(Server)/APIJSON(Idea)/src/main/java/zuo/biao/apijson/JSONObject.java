@@ -175,7 +175,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 				throw new IllegalArgumentException("put  StringUtil.isNotEmpty(key, true) == false" +
 						" && clazz == null || clazz.getAnnotation(APIJSONRequest.class) == null" +
 						" \n key为空时仅支持 类型被@APIJSONRequest注解 的value !!!" +
-						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！");
+						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！" +
+						" \n 如果是类似 key[]:{} 结构的请求，建议add(...)方法！");
 			}
 			key = value.getClass().getSimpleName();
 		}
@@ -227,20 +228,205 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+	//JSONObject内关键词 key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final String KEY_COLUMNS = "@columns";//@key关键字都放这个类
+	public static final String KEY_COLUMN = "@column";//@key关键字都放这个类
+	public static final String KEY_GROUP = "@group";//@key关键字都放这个类
+	public static final String KEY_HAVING = "@having";//@key关键字都放这个类
+	public static final String KEY_ORDER = "@order";//@key关键字都放这个类
 
-	/**set columns need to be returned
-	 * @param columns  "column0,column1,column2..."
+	/**set keys need to be returned
+	 * @param keys  key0, key1, key2 ...
+	 * @return {@link #setColumn(String)}
+	 */
+	public JSONObject setColumn(String... keys) {
+		return setColumn(StringUtil.getString(keys));
+	}
+	/**set keys need to be returned
+	 * @param keys  "key0,key1,key2..."
 	 * @return
 	 */
-	public JSONObject setColumns(String columns) {
-		put(KEY_COLUMNS, columns);
+	public JSONObject setColumn(String keys) {
+		put(KEY_COLUMN, keys);
 		return this;
 	}
-	public String getColumns() {
-		return getString(KEY_COLUMNS);
+	public String getColumn() {
+		return getString(KEY_COLUMN);
+	}
+	
+	/**set keys for group by
+	 * @param keys key0, key1, key2 ...
+	 * @return {@link #setGroup(String)}
+	 */
+	public JSONObject setGroup(String... keys) {
+		return setGroup(StringUtil.getString(keys));
+	}
+	/**set keys for group by
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setGroup(String keys) {
+		put(KEY_GROUP, keys);
+		return this;
+	}
+	public String getGroup() {
+		return getString(KEY_GROUP);
+	}
+	
+	/**set keys for having
+	 * @param keys count(key0) > 1, sum(key1) <= 5, function2(key2) ? value2 ...
+	 * @return {@link #setHaving(String)}
+	 */
+	public JSONObject setHaving(String... keys) {
+		return setHaving(StringUtil.getString(keys));
+	}
+	/**set keys for having
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setHaving(String keys) {
+		put(KEY_HAVING, keys);
+		return this;
+	}
+	public String getHaving() {
+		return getString(KEY_HAVING);
+	}
+	
+	/**set keys for order by
+	 * @param keys  key0, key1+, key2- ...
+	 * @return {@link #setOrder(String)}
+	 */
+	public JSONObject setOrder(String... keys) {
+		return setOrder(StringUtil.getString(keys));
+	}
+	/**set keys for order by
+	 * @param keys  "key0,key1+,key2-..."
+	 * @return
+	 */
+	public JSONObject setOrder(String keys) {
+		put(KEY_ORDER, keys);
+		return this;
+	}
+	public String getOrder() {
+		return getString(KEY_ORDER);
+	}
+	
+	
+	//JSONObject内关键词 key >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+	//Request，默认encode <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+	/**
+	 * encode = true
+	 * @param value
+	 * @param parts path = keys[0] + "/" + keys[1] + "/" + keys[2] + ...
+	 * @return #put(key+"@", StringUtil.getString(keys, "/"), true)
+	 */
+	public Object putPath(String key, String... keys) {
+		return put(key+"@", StringUtil.getString(keys, "/"), true);
+	}
+	
+	/**
+	 * encode = true
+	 * @param key
+	 * @param isNull
+	 * @return {@link #putNull(String, boolean, boolean)}
+	 */
+	public JSONObject putNull(String key, boolean isNull) {
+		return putNull(key, isNull, true);
+	}
+	/**
+	 * @param key
+	 * @param isNull
+	 * @param encode
+	 * @return put(key+"{}", SQL.isNull(isNull), encode);
+	 */
+	public JSONObject putNull(String key, boolean isNull, boolean encode) {
+		put(key+"{}", SQL.isNull(isNull), encode);
+		return this;
+	}
+	/**
+	 * trim = false
+	 * @param key
+	 * @param isEmpty
+	 * @return {@link #putEmpty(String, boolean, boolean)}
+	 */
+	public JSONObject putEmpty(String key, boolean isEmpty) {
+		return putEmpty(key, isEmpty, false);
+	}
+	/**
+	 * encode = true
+	 * @param key
+	 * @param isEmpty
+	 * @return {@link #putEmpty(String, boolean, boolean, boolean)}
+	 */
+	public JSONObject putEmpty(String key, boolean isEmpty, boolean trim) {
+		return putEmpty(key, isEmpty, trim, true);
+	}
+	/**
+	 * @param key
+	 * @param isEmpty
+	 * @param encode
+	 * @return put(key+"{}", SQL.isEmpty(key, isEmpty, trim), encode);
+	 */
+	public JSONObject putEmpty(String key, boolean isEmpty, boolean trim, boolean encode) {
+		put(key+"{}", SQL.isEmpty(key, isEmpty, trim), encode);
+		return this;
+	}
+	/**
+	 * encode = true
+	 * @param key
+	 * @param compare <=0, >5 ...
+	 * @return {@link #putLength(String, String, boolean)}
+	 */
+	public JSONObject putLength(String key, String compare) {
+		return putLength(key, compare, true);
+	}
+	/**
+	 * @param key
+	 * @param compare <=0, >5 ...
+	 * @param encode
+	 * @return put(key+"{}", SQL.length(key) + compare, encode);
+	 */
+	public JSONObject putLength(String key, String compare, boolean encode) {
+		put(key+"{}", SQL.length(key) + compare, encode);
+		return this;
 	}
 
+	/**设置搜索
+	 * type = SEARCH_TYPE_CONTAIN_FULL
+	 * @param key
+	 * @param value
+	 * @return {@link #putSearch(String, String, int)}
+	 */
+	public JSONObject putSearch(String key, String value) {
+		return putSearch(key, value, SQL.SEARCH_TYPE_CONTAIN_FULL);
+	}
+	/**设置搜索
+	 * encode = true
+	 * @param key
+	 * @param value
+	 * @param type
+	 * @return {@link #putSearch(String, String, int, boolean)}
+	 */
+	public JSONObject putSearch(String key, String value, int type) {
+		return putSearch(key, value, type, true);
+	}
+	/**设置搜索
+	 * @param key
+	 * @param value
+	 * @param type
+	 * @param encode
+	 * @return put(key+"$", SQL.search(value, type), encode);
+	 */
+	public JSONObject putSearch(String key, String value, int type, boolean encode) {
+		put(key+"$", SQL.search(value, type), encode);
+		return this;
+	}
+
+	//Request，默认encode >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }
