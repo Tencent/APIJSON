@@ -312,7 +312,7 @@ Run > Run As > Android Application
 #### Android Studio
 
 1.导入<br />
-Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
+Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONApp （或APIJSONTest） > OK
 
 2.运行<br />
 Run > Run app
