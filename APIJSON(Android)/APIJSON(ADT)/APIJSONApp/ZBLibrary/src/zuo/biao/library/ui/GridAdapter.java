@@ -38,6 +38,13 @@ import android.widget.TextView;
 public class GridAdapter extends BaseAdapter<Entry<String, String>> {
 	private static final String TAG = "GridAdapter";
 
+	public GridAdapter(Activity context) {
+		this(context, R.layout.grid_item);
+	}
+	public GridAdapter(Activity context, int layoutRes) {
+		super(context);
+		setLayoutRes(layoutRes);
+	}
 
 	private int layoutRes;//item视图资源
 	public void setLayoutRes(int layoutRes) {
@@ -53,16 +60,9 @@ public class GridAdapter extends BaseAdapter<Entry<String, String>> {
 		this.hasCheck = hasCheck;
 		return this;
 	}
-	public GridAdapter(Activity context) {
-		this(context, R.layout.grid_item);
-	}
-	public GridAdapter(Activity context, int layoutRes) {
-		super(context);
-		setLayoutRes(layoutRes);
-	}
 
 	//item标记功能，不需要可以删除<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	private HashMap<Integer, Boolean> hashMap;//实现选中标记的列表，不需要可以删除
+	private HashMap<Integer, Boolean> hashMap;//实现选中标记的列表，不需要可以删除。这里可用List<Integer> checkedList代替
 	public boolean getItemChecked(int position) {
 		if (hasCheck == false) {
 			Log.e(TAG, "<<< !!! hasCheck == false  >>>>> ");
@@ -89,10 +89,12 @@ public class GridAdapter extends BaseAdapter<Entry<String, String>> {
 			convertView = inflater.inflate(layoutRes, parent, false);
 
 			holder = new ViewHolder();
-			holder.ivHead = (ImageView) convertView.findViewById(R.id.ivGridItemHead);
-			holder.tvName = (TextView) convertView.findViewById(R.id.tvGridItemName);
+			holder.ivGridItemHead = (ImageView) convertView.findViewById(R.id.ivGridItemHead);
+			if (hasName) {
+				holder.tvGridItemName = (TextView) convertView.findViewById(R.id.tvGridItemName);
+			}
 			if (hasCheck) {
-				holder.ivCheck = (ImageView) convertView.findViewById(R.id.ivGridItemCheck);
+				holder.ivGridItemCheck = (ImageView) convertView.findViewById(R.id.ivGridItemCheck);
 			}
 
 			convertView.setTag(holder);
@@ -101,15 +103,17 @@ public class GridAdapter extends BaseAdapter<Entry<String, String>> {
 		final Entry<String, String> kvb = getItem(position);
 		final String name = kvb.getValue();
 
-		ImageLoaderUtil.loadImage(holder.ivHead, kvb.getKey());
+		ImageLoaderUtil.loadImage(holder.ivGridItemHead, kvb.getKey());
 
-		holder.tvName.setVisibility(hasName ? View.VISIBLE : View.GONE);
-		holder.tvName.setText(StringUtil.getTrimedString(name));
+		if (hasName) {
+			holder.tvGridItemName.setVisibility(View.VISIBLE);
+			holder.tvGridItemName.setText(StringUtil.getTrimedString(name));
+		}
 
 		if (hasCheck) {
-			holder.ivCheck.setVisibility(View.VISIBLE);
+			holder.ivGridItemCheck.setVisibility(View.VISIBLE);
 
-			holder.ivCheck.setOnClickListener(new View.OnClickListener() {
+			holder.ivGridItemCheck.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					setItemChecked(position, !getItemChecked(position));
@@ -122,14 +126,17 @@ public class GridAdapter extends BaseAdapter<Entry<String, String>> {
 	}
 
 	static class ViewHolder {
-		public ImageView ivHead;
-		public TextView tvName;
-		public ImageView ivCheck;
+		public ImageView ivGridItemHead;
+		public TextView tvGridItemName;
+		public ImageView ivGridItemCheck;
 	}
 
 
+	/**刷新列表
+	 * @param list
+	 */
 	@Override
-	public void refresh(List<Entry<String, String>> list) {
+	public synchronized void refresh(List<Entry<String, String>> list) {
 		if (list != null && list.size() > 0) {
 			initList(list);
 		}

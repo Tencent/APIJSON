@@ -18,8 +18,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import zuo.biao.library.util.StringUtil;
-
 /**MD5加密工具类
  */
 public class MD5Util {

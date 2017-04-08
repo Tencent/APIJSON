@@ -22,12 +22,8 @@ import java.io.Serializable;
  * @author Lemon
  * @use extends BaseModel
  */
+@SuppressWarnings("serial")
 public abstract class BaseModel implements Serializable {
-
-	/**
-	 * default, 怎么设置子类都有warning
-	 */
-	private static final long serialVersionUID = 1L;
 	
 	public long id;
 	

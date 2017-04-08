@@ -223,24 +223,24 @@ public class CommonUtil {
 	/**展示加载进度条,无标题
 	 * @param stringResId
 	 */
-	public static void showProgress(Activity context, int stringResId){
+	public static void showProgressDialog(Activity context, int stringResId){
 		try {
-			showProgress(context, null, context.getResources().getString(stringResId));
+			showProgressDialog(context, null, context.getResources().getString(stringResId));
 		} catch (Exception e) {
-			Log.e(TAG, "showProgress  showProgress(Context context, null, context.getResources().getString(stringResId));");
+			Log.e(TAG, "showProgressDialog  showProgressDialog(Context context, null, context.getResources().getString(stringResId));");
 		}
 	}
 	/**展示加载进度条,无标题
 	 * @param dialogMessage
 	 */
-	public void showProgress(Activity context, String dialogMessage){
-		showProgress(context, null, dialogMessage);
+	public void showProgressDialog(Activity context, String dialogMessage){
+		showProgressDialog(context, null, dialogMessage);
 	}
 	/**展示加载进度条
 	 * @param dialog Title 标题
 	 * @param dialog Message 信息
 	 */
-	public static void showProgress(final Activity context, final String dialogTitle, final String dialogMessage){
+	public static void showProgressDialog(final Activity context, final String dialogTitle, final String dialogMessage){
 		if (context == null) {
 			return;
 		}
@@ -269,7 +269,7 @@ public class CommonUtil {
 
 	/** 隐藏加载进度
 	 */
-	public static void dismissProgress(Activity context) {
+	public static void dismissProgressDialog(Activity context) {
 		if(context == null || progressDialog == null || progressDialog.isShowing() == false){
 			return;
 		}
@@ -302,9 +302,9 @@ public class CommonUtil {
 	}
 	/**快捷显示short toast方法，需要long toast就用 Toast.makeText(string, Toast.LENGTH_LONG).show(); ---不常用所以这个类里不写
 	 * @param string
-	 * @param isForcedismissProgress
+	 * @param isForceDismissProgressDialog
 	 */
-	public static void showShortToast(final Context context, final String string, final boolean isForcedismissProgress) {
+	public static void showShortToast(final Context context, final String string, final boolean isForceDismissProgressDialog) {
 		if (context == null) {
 			return;
 		}
@@ -444,15 +444,15 @@ public class CommonUtil {
 	 * @param context
 	 * @return
 	 */
-	public static boolean isHasLocationPermission(Context context){
-		return isHasPermission(context, "android.permission.ACCESS_COARSE_LOCATION") || isHasPermission(context, "android.permission.ACCESS_FINE_LOCATION");
+	public static boolean isHaveLocationPermission(Context context){
+		return isHavePermission(context, "android.permission.ACCESS_COARSE_LOCATION") || isHavePermission(context, "android.permission.ACCESS_FINE_LOCATION");
 	}
 	/**检查是否有权限
 	 * @param context
 	 * @param name
 	 * @return
 	 */
-	public static boolean isHasPermission(Context context, String name){
+	public static boolean isHavePermission(Context context, String name){
 		try {
 			return PackageManager.PERMISSION_GRANTED == context.getPackageManager().checkPermission(name, context.getPackageName());
 		} catch (Exception e) {

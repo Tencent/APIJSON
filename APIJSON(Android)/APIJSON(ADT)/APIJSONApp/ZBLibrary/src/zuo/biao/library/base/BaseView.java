@@ -32,6 +32,7 @@ import android.view.View.OnTouchListener;
 /**基础自定义View
  * @author Lemon
  * @param <T> 数据模型(model/JavaBean)类
+ * @see OnViewClickListener
  * @see #onDestroy
  * @use extends BaseView<T>, 具体参考.DemoView
  */
@@ -345,7 +346,7 @@ public abstract class BaseView<T> {
 		onTouchListener = null;
 		onClickListener = null;
 		onLongClickListener = null;
-//		onClickViewList = null;
+		onClickViewList = null;
 
 		data = null;
 		position = 0;

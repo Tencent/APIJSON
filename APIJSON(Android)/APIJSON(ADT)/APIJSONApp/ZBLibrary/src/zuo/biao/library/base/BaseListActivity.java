@@ -225,7 +225,7 @@ public abstract class BaseListActivity<T, LV extends AbsListView, BA extends Bas
 	private synchronized void stopLoadData(int page, boolean isCache) {
 		Log.i(TAG, "stopLoadData  isCache = " + isCache);
 		isLoading = false;
-		dismissProgress();
+		dismissProgressDialog();
 
 		if (isCache) {
 			Log.d(TAG, "stopLoadData  isCache >> return;");

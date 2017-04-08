@@ -143,7 +143,7 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 	/**下载应用
 	 */
 	private void downloadApp() {
-		showProgress("正在下载...");
+		showProgressDialog("正在下载...");
 		runThread(TAG + "downloadApp", new Runnable() {
 			@Override
 			public void run() {
@@ -154,7 +154,7 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 
 					@Override
 					public void run() {
-						dismissProgress();
+						dismissProgressDialog();
 						DownloadUtil.openFile(context, file);
 					}
 				});

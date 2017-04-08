@@ -159,12 +159,12 @@ public class AboutActivity extends BaseActivity implements OnClickListener, OnLo
 	/**下载应用
 	 */
 	private void downloadApp() {
-		showProgress("正在下载...");
+		showProgressDialog("正在下载...");
 		runThread(TAG + "downloadApp", new Runnable() {
 			@Override
 			public void run() {
 				File file = DownloadUtil.downLoadFile(context, "APIJSONApp", ".apk", Constant.APP_DOWNLOAD_WEBSITE);
-				dismissProgress();
+				dismissProgressDialog();
 				DownloadUtil.openFile(context, file);
 			}
 		});

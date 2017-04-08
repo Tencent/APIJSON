@@ -21,6 +21,7 @@ import java.util.List;
 import zuo.biao.library.R;
 import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.util.EditTextUtil;
 import zuo.biao.library.util.StringUtil;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -257,7 +258,7 @@ public class EditTextInfoActivity extends BaseActivity implements OnBottomDragLi
 				runUiThread(new Runnable() {
 					@Override
 					public void run() {
-						dismissProgress();
+						dismissProgressDialog();
 						if (hasList) {
 							setList(list);
 						}
@@ -352,7 +353,7 @@ public class EditTextInfoActivity extends BaseActivity implements OnBottomDragLi
 		etEditTextInfo.setSelection(StringUtil.getLength(etEditTextInfo, true));
 
 		if (hasList == true) {
-			EditTextManager.hideKeyboard(context, etEditTextInfo);
+			EditTextUtil.hideKeyboard(context, etEditTextInfo);
 
 			if (hasUrl) {
 				lvEditTextInfo.setOnScrollListener(new OnScrollListener() {
@@ -395,7 +396,7 @@ public class EditTextInfoActivity extends BaseActivity implements OnBottomDragLi
 				@SuppressLint("ClickableViewAccessibility")
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
-					EditTextManager.hideKeyboard(context, etEditTextInfo);
+					EditTextUtil.hideKeyboard(context, etEditTextInfo);
 					return false;
 				}
 			});
@@ -429,7 +430,7 @@ public class EditTextInfoActivity extends BaseActivity implements OnBottomDragLi
 	@Override
 	public void finish() {
 		super.finish();
-		EditTextManager.showKeyboard(context, etEditTextInfo, false);
+		EditTextUtil.hideKeyboard(context, etEditTextInfo);
 	}
 
 	//类相关监听<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

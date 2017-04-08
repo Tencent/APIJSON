@@ -88,7 +88,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 
 			@Override
 			public void run() {
-				dismissProgress();
+				dismissProgressDialog();
 				tvBaseTitle.setText(getTitleName());
 				if (wallet == null) {
 					wallet = new Wallet();
@@ -114,7 +114,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	@Override
 	public void initData() {//必须调用
 
-		showProgress(getTitleName());
+		showProgressDialog(getTitleName());
 		HttpRequest.getWallet(0, this);
 	}
 

@@ -301,7 +301,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	}
 
 	private void putUser() {
-		showProgress("正在上传...");
+		showProgressDialog("正在上传...");
 		user = getUser();
 		apijson.demo.client.server.model.User userRequest = new apijson.demo.client.server.model.User(user.getId());
 		userRequest.setName(user.getName());
@@ -451,7 +451,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		JSONResponse response2 = response.getJSONResponse(User.class.getSimpleName());
 		boolean isSucceed = JSONResponse.isSucceed(response2);
 
-		dismissProgress();
+		dismissProgressDialog();
 		switch (requestCode) {
 		case HTTP_GET:
 			User user = response.getObject(User.class);

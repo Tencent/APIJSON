@@ -20,6 +20,7 @@ import zuo.biao.library.R;
 import zuo.biao.library.base.BaseBottomWindow;
 import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.ContactUtil;
+import zuo.biao.library.util.EditTextUtil;
 import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
@@ -223,7 +224,7 @@ public class EditTextInfoWindow extends BaseBottomWindow implements OnClickListe
 	protected void setResult() {
 		intent = new Intent();
 		intent.putExtra(RESULT_TYPE, getIntent().getIntExtra(INTENT_TYPE, -1));
-		intent.putExtra(RESULT_KEY, getIntent().getStringArrayExtra(INTENT_KEY));
+		intent.putExtra(RESULT_KEY, getIntent().getStringExtra(INTENT_KEY));
 		intent.putExtra(RESULT_VALUE, editedValue);
 		setResult(RESULT_OK, intent);
 	}
@@ -312,7 +313,7 @@ public class EditTextInfoWindow extends BaseBottomWindow implements OnClickListe
 	@Override
 	public void finish() {
 		super.finish();
-		EditTextManager.showKeyboard(context, etEditTextInfo, false);
+		EditTextUtil.hideKeyboard(context, etEditTextInfo);
 	}
 	
 	

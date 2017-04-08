@@ -47,7 +47,7 @@
     <string name="xlistview_header_hint_ready">松开刷新数据</string>
     <string name="xlistview_header_hint_loading">正在刷新</string>
     <string name="xlistview_header_last_time">上次更新时间：</string>
-    <string name="xlistview_footer_hint_normal">查看更多</string>
+    <string name="xlistview_footer_hint_normal">上拉加载更多</string>
     <string name="xlistview_footer_hint_ready">松开加载更多</string>
     <string name="xlistview_footer_hint_loading">正在加载更多...</string>
     <string name="xlistview_footer_hint_complete">已加载完全部</string>

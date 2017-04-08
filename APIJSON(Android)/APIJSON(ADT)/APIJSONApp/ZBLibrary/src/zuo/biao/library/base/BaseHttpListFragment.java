@@ -51,7 +51,7 @@ implements HttpManager.OnHttpResponseListener, IXListViewListener, OnStopLoadLis
 	}
 
 	/**设置列表适配器
-	 * @param adapter if (adapter != null && adapter instanceof BaseHttpAdapter) >> 预加载
+	 * @param callBack
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
