@@ -689,7 +689,7 @@ public class Parser {
 	 * @param parentConfig parentObject对子object的SQL查询配置
 	 * @param name parentObject的key
 	 * @param request parentObject的value
-	 * @return
+	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
 	 * @throws Exception 
 	 */
 	private JSONObject getArray(String parentPath, QueryConfig parentConfig, String name
@@ -721,9 +721,11 @@ public class Parser {
 		Set<String> set = new LinkedHashSet<>(request.keySet());
 		if (count <= 0 || count > 5) {//5以下不优化长度
 			if(parseRelation == false && set != null) {
+				String table;
 				Object value;
 				for (String key : set) {
-					value = isTableKey(key) ? request.get(key) : null;
+					table = Pair.parseEntry(key, true).getKey();
+					value = isTableKey(table) ? request.get(key) : null;
 					if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
 						//							totalCount = QueryHelper.getInstance().getCount(key);
 						firstTableKey = key;
@@ -732,7 +734,7 @@ public class Parser {
 						//						JSONObject target = response == null ? null : response.getJSONObject(key);
 						//						total = target == null ? 0 : target.getIntValue(JSONResponse.KEY_COUNT);
 
-						total = estimateMaxCount(path, key, (JSONObject) value);
+						total = estimateMaxCount(path, table, (JSONObject) value);
 						break;
 					}
 				}
@@ -825,9 +827,9 @@ public class Parser {
 	 * @return
 	 * @throws Exception 
 	 */
-	public int estimateMaxCount(String path, String name, JSONObject value) throws Exception {
-		if (StringUtil.isNotEmpty(name, true) == false) {
-			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(name, true) == false >> return 0;");
+	public int estimateMaxCount(String path, String table, JSONObject value) throws Exception {
+		if (StringUtil.isNotEmpty(table, true) == false) {
+			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(table, true) == false >> return 0;");
 			return 0;
 		}
 
@@ -870,10 +872,9 @@ public class Parser {
 			}
 		}
 		
-		name = Pair.parseEntry(name, true).getKey();
-		JSONObject response = new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(name, request));
+		JSONObject response = new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(table, request));
 		if (response != null) {
-			response = response.getJSONObject(name);
+			response = response.getJSONObject(table);
 		}
 		return response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT);
 	}
