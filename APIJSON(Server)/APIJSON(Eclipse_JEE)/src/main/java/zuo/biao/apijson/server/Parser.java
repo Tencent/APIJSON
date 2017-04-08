@@ -495,7 +495,7 @@ public class Parser {
 		}
 
 		boolean nameIsNumber = StringUtil.isNumer(name);
-		String table = Pair.parseEntry(name).getValue();
+		String table = Pair.parseEntry(name, true).getKey();
 		Log.d(TAG, "getObject  table = " + table);
 
 		QueryConfig config = nameIsNumber ? parentConfig : null;
@@ -623,7 +623,7 @@ public class Parser {
 								transferredRequest.put(replaceKey, target);
 							}
 
-							//							removeRelation(getPath(path, replaceKey));
+							//还要isInRelationMap(path)判断		removeRelation(getPath(path, replaceKey));
 							updateRelation(path, getAbsPath(path, replaceKey));//request结构已改变，需要更新依赖关系
 						} else {
 							//先尝试获取
@@ -870,7 +870,7 @@ public class Parser {
 			}
 		}
 		
-		name = Pair.parseEntry(name).getValue();
+		name = Pair.parseEntry(name, true).getKey();
 		JSONObject response = new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(name, request));
 		if (response != null) {
 			response = response.getJSONObject(name);
@@ -1167,7 +1167,7 @@ public class Parser {
 
 		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好？不，查询就得截取
 		if (isTableKey) {//不允许在column key中使用Type:key形式
-			key = Pair.parseEntry(key, false).getKey();//table以左边为准
+			key = Pair.parseEntry(key, true).getKey();//table以左边为准
 		} else {
 			key = Pair.parseEntry(key).getValue();//column以右边为准
 		}
