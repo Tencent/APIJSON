@@ -45,6 +45,7 @@ import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
+import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.sql.AccessVerifier;
 import zuo.biao.apijson.server.sql.QueryConfig;
 import zuo.biao.apijson.server.sql.QueryHelper;
@@ -526,7 +527,7 @@ public class Parser {
 				if (value == null) {
 					continue;
 				}
-				
+
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					if (isArrayKey(key)) {//APIJSON Array
 						result = getArray(path, config, key, (JSONObject) value);
@@ -603,7 +604,7 @@ public class Parser {
 						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey(requestMethod, key, false, false);
 						String keyPath = getAbsPath(path, replaceKey);
 						String valuePath = new String((String) value);
-						
+
 						if (parseRelation) {
 							Object target = getValueByPath(getRelationPath(keyPath), true);
 							Log.d(TAG, "getObject  valuePath = " + valuePath + "; target = " + target);
@@ -662,8 +663,22 @@ public class Parser {
 					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 
-				transferredRequest = getSQLObject(config2);
-				
+				try {
+					transferredRequest = getSQLObject(config2);
+				} catch (Exception e) {
+					Log.e(TAG, "getObject  try { transferredRequest = getSQLObject(config2); } catch (Exception e) {");
+					if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
+						e.printStackTrace();
+						transferredRequest = null;//内部吃掉异常，put到最外层
+						//						requestObject.put(JSONResponse.KEY_MESSAGE
+						//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MESSAGE)
+						//										+ "; query " + path + " cath NotExistException:"
+						//										+ newErrorResult(e).getString(JSONResponse.KEY_MESSAGE)));
+					} else {
+						throw e;
+					}
+				}
+
 				if (transferredRequest == null) {
 					transferredRequest = new JSONObject(true);
 				}
