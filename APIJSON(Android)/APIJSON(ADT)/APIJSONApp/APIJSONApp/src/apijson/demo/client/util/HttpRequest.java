@@ -142,10 +142,10 @@ public class HttpRequest {
 	public static final String KEY_TYPE = "type";
 
 
-	
+
 	public static final String DATE_UP = "date+";//同 "date ASC"
 	public static final String DATE_DOWN = "date-";//同 "date DESC"
-	
+
 	public static final String ID_AT = KEY_ID + "@";
 	public static final String USER_ID_AT = KEY_USER_ID + "@";
 	public static final String MOMENT_ID_AT = "momentId@";
@@ -388,12 +388,12 @@ public class HttpRequest {
 
 		JSONRequest request = new JSONRequest(new Moment(id));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId"));
-		//		//praise <<<<<<<<<<<<<<<<<<
-		//		JSONRequest userItem = new JSONRequest();
-		//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
-		//		.setColumn(COLUMNS_USER_SIMPLE));
-		//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
-		//		//praise >>>>>>>>>>>>>>>>>>
+		//praise <<<<<<<<<<<<<<<<<<
+		JSONRequest userItem = new JSONRequest();
+		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
+		.setColumn(COLUMNS_USER_SIMPLE));
+		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
+		//praise >>>>>>>>>>>>>>>>>>
 
 		get(request, requestCode, listener);
 	}
@@ -448,12 +448,12 @@ public class HttpRequest {
 		request.put(Moment.class.getSimpleName(), moment);
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 
-		//		//praise <<<<<<<<<<<<<<<<<<
-		//		JSONRequest userItem = new JSONRequest();
-		//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
-		//		.setColumn(COLUMNS_USER_SIMPLE));
-		//
-		//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
+		//praise <<<<<<<<<<<<<<<<<<
+		JSONRequest userItem = new JSONRequest();
+		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
+		.setColumn(COLUMNS_USER_SIMPLE));
+
+		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<

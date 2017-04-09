@@ -603,22 +603,25 @@ public class Parser {
 						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey(requestMethod, key, false, false);
 						String keyPath = getAbsPath(path, replaceKey);
-						String valuePath = new String((String) value);
+						String valuePath;// = new String((String) value);
 
 						if (parseRelation) {
-							Object target = getValueByPath(getRelationPath(keyPath), true);
+							//不是能直接获取到valuePath吗?因为更新？
+							valuePath = getRelationValuePath(keyPath);
+							Object target = getValueByPath(valuePath, true);
 							Log.d(TAG, "getObject  valuePath = " + valuePath + "; target = " + target);
 							if (valuePath.equals(target) && isTableKey(table)) {
 								Log.e(TAG, "getObject ((String) value).equals(target) && isTableKey(table) >>  return null;");
 								return null;//parseRelation时还获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 							}
 							//还要isInRelationMap(path)判断		removeRelation(keyPath);
-							updateRelation(getAbsPath(path, key), keyPath);//request结构已改变，需要更新依赖关系
+							//							updateRelation(getAbsPath(path, key), keyPath);//request结构已改变，需要更新依赖关系
 
 							key = replaceKey;
 							value = target;
 						} else {
 							//尽量保留缺省依赖路径，这样就不需要担心路径改变
+							valuePath = new String((String) value);
 							//先尝试获取
 							if (valuePath.startsWith(SEPARATOR)) {
 								valuePath = getAbsPath(parentPath, valuePath);
@@ -965,7 +968,7 @@ public class Parser {
 	 * @param keyPath
 	 * @return
 	 */
-	private String getRelationPath(String keyPath) {
+	private String getRelationValuePath(String keyPath) {
 		return keyValuePathMap.get(keyPath);
 	}
 	/**移除keyPath-valuePath关联
