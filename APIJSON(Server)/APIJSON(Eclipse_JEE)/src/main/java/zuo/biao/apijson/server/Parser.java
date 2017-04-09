@@ -494,20 +494,15 @@ public class Parser {
 				&& isInRelationMap(path) == false) {
 			return request;
 		}
+		//优化查询性能并避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
+		final boolean isArrayChild = parentConfig != null && StringUtil.isNumer(name) && ("" + parentConfig.getPosition()).equals(name);
 
-		boolean nameIsNumber = StringUtil.isNumer(name);
 		String table = Pair.parseEntry(name, true).getKey();
 		Log.d(TAG, "getObject  table = " + table);
 
-		QueryConfig config = nameIsNumber ? parentConfig : null;
-		if (config == null) {
-			config = new QueryConfig(requestMethod, table).setCount(1);
-		}
-		//避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
-		if (nameIsNumber && ("" + config.getPosition()).equals(table) == false) {
-			config.setPosition(0).setCount(1).setPage(0);
-		}
-
+		
+				
+				
 		boolean containRelation = false;
 
 		JSONObject transferredRequest = new JSONObject(true);//must init
@@ -530,11 +525,11 @@ public class Parser {
 
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					if (isArrayKey(key)) {//APIJSON Array
-						result = getArray(path, config, key, (JSONObject) value);
+						result = getArray(path, parentConfig, key, (JSONObject) value);
 					} else {//APIJSON Object
-						result = getObject(path, isFirst == false || nameIsNumber == false //[]里第一个不能为[]
-								? null : config, key, (JSONObject) value);
-						isFirst = false;
+						result = getObject(path, isArrayChild == false || isFirst == false //以第0个JSONObject为准
+								? null : parentConfig, key, (JSONObject) value);
+						isFirst = false;//[]里第一个不能为[]
 					}
 					Log.i(TAG, "getObject  key = " + key + "; result = " + result);
 					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
@@ -659,15 +654,17 @@ public class Parser {
 			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
 				query = true;
 				//			keyValuePathMap.remove(path);
-				QueryConfig config2 = newQueryConfig(table, transferredRequest);
+				QueryConfig config = newQueryConfig(table, transferredRequest);
 
-				if (parentConfig != null) {
-					config2.setCount(parentConfig.getCount()).setPage(parentConfig.getPage())
+				if (parentConfig == null) {//导致全部都是第0个 || isArrayChild == false) {
+					config.setCount(1);
+				} else {
+					config.setCount(parentConfig.getCount()).setPage(parentConfig.getPage())
 					.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
 				}
 
 				try {
-					transferredRequest = getSQLObject(config2);
+					transferredRequest = getSQLObject(config);
 				} catch (Exception e) {
 					Log.e(TAG, "getObject  try { transferredRequest = getSQLObject(config2); } catch (Exception e) {");
 					if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
@@ -717,7 +714,7 @@ public class Parser {
 
 	/**获取对象数组，该对象数组处于parentObject内
 	 * @param parentPath parentObject的路径
-	 * @param parentConfig parentObject对子object的SQL查询配置
+	 * @param parentConfig parentObject对子object的SQL查询配置，需要传两个层级
 	 * @param name parentObject的key
 	 * @param request parentObject的value
 	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
