@@ -322,7 +322,7 @@ public class HttpRequest {
 			apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
 			switch (range) {
 			case RANGE_ALL://1.首推注册时间长的（也可以是级别高的）；2.给男性用户首推女性用户
-				userItem.setOrder(DATE_UP + (currentUser.getSex() == 0 ? ",sex-" : ""));
+				userItem.setOrder(DATE_UP, (currentUser.getSex() == 0 ? "sex-" : ""));
 				break;
 			case RANGE_SINGLE:
 			case RANGE_USER:
