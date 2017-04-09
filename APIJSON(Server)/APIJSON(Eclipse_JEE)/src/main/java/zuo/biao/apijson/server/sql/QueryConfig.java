@@ -369,6 +369,10 @@ public class QueryConfig {
 	 */
 	public static String getRangeString(String key, Object range) throws NotExistException {
 		Log.i(TAG, "getRangeString key = " + key);
+		if (range == null) {//依赖的对象都没有给出有效值，这个存在无意义。如果是客户端传的，那就能在客户端确定了。
+			throw new NotExistException(TAG + "getRangeString(" + key + ", " + range
+					+ ") range == null");
+		}
 
 		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
 		int type = -1;
@@ -390,7 +394,7 @@ public class QueryConfig {
 
 		if (range instanceof JSONArray) {
 			if (type != 0 && type != 2) {
-				throw new IllegalArgumentException("\"key{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
+				throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
 			}
 			return key + getInString(key, ((JSONArray) range).toArray(), type == 2);
 		}
@@ -414,7 +418,7 @@ public class QueryConfig {
 			return type != 2 ? condition : " NOT " + condition;
 		}
 
-		throw new IllegalArgumentException("\"key{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
+		throw new IllegalArgumentException(key + "{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
 	}
 	/**WHERE key IN ('key0', 'key1', ... )
 	 * @param in
