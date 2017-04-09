@@ -509,13 +509,12 @@ public class Parser {
 
 		boolean containRelation = false;
 
-		JSONObject transferredRequest = null;
+		JSONObject transferredRequest = new JSONObject(true);//must init
 		Map<String, String> functionMap = null;
 		Map<String, Object> selfDefineKeyMap = null;
 
 		Set<String> set = new LinkedHashSet<>(request.keySet());
 		if (set != null && set.size() > 0) {//判断换取少几个变量的初始化是否值得？
-			transferredRequest = new JSONObject(true);
 			functionMap = new LinkedHashMap<String, String>();
 			selfDefineKeyMap = new LinkedHashMap<String, Object>();
 
@@ -524,6 +523,10 @@ public class Parser {
 			boolean isFirst = true;
 			for (String key : set) {
 				value = request.get(key);
+				if (value == null) {
+					continue;
+				}
+				
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					if (isArrayKey(key)) {//APIJSON Array
 						result = getArray(path, config, key, (JSONObject) value);
@@ -592,63 +595,65 @@ public class Parser {
 						//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
 					}
 				} else {//JSONArray或其它Object，直接填充
-					transferredRequest.put(key, value);
-					if (key.startsWith("@") && QueryConfig.TABLE_KEY_LIST.contains(key) == false) {
-						selfDefineKeyMap.put(key, value);
-					}//可@key@
-					if (key.endsWith("()")) {
-						if (value instanceof String == false) {
-							throw new IllegalArgumentException("\"key()\": 后面必须为函数String！");
-						}
-						functionMap.put(key, (String) value);
-					} else if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
+					if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
 						if (value instanceof String == false) {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
 						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey(requestMethod, key, false, false);
+						String keyPath = getAbsPath(path, replaceKey);
+						String valuePath = new String((String) value);
+						
 						if (parseRelation) {
-							transferredRequest.remove(key);
-							selfDefineKeyMap.remove(key);
-
-							Object target = getValueByPath(getRelationPath(getAbsPath(path, replaceKey)), true);
-							Log.d(TAG, "getObject  value = " + value + "; target = " + target);
-							if (((String) value).equals(target) && isTableKey(table)) {
+							Object target = getValueByPath(getRelationPath(keyPath), true);
+							Log.d(TAG, "getObject  valuePath = " + valuePath + "; target = " + target);
+							if (valuePath.equals(target) && isTableKey(table)) {
 								Log.e(TAG, "getObject ((String) value).equals(target) && isTableKey(table) >>  return null;");
 								return null;//parseRelation时还获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 							}
-							if (key.startsWith("@")) {
-								selfDefineKeyMap.put(replaceKey, target);
-							} else {
-								transferredRequest.put(replaceKey, target);
-							}
+							//还要isInRelationMap(path)判断		removeRelation(keyPath);
+							updateRelation(getAbsPath(path, key), keyPath);//request结构已改变，需要更新依赖关系
 
-							//还要isInRelationMap(path)判断		removeRelation(getPath(path, replaceKey));
-							updateRelation(path, getAbsPath(path, replaceKey));//request结构已改变，需要更新依赖关系
+							key = replaceKey;
+							value = target;
 						} else {
+							//尽量保留缺省依赖路径，这样就不需要担心路径改变
 							//先尝试获取
-							if (((String) value).startsWith(SEPARATOR)) {
-								value = getAbsPath(parentPath, (String) value);
+							if (valuePath.startsWith(SEPARATOR)) {
+								valuePath = getAbsPath(parentPath, valuePath);
 							}
 							//							Object target = getValueByPath((String) value);
 							//							Log.d(TAG, "getObject value = " + value + "; target = " + target);
 							//							if (target == null || ((String) value).equals(target)) {//标记并存放依赖关系
 							containRelation = true;
-							putRelation(getAbsPath(path, replaceKey), (String) value);
+							putRelation(keyPath, valuePath);
 							//							} else {//直接替换原来的key@:path为key:target
 							//								transferredRequest.remove(key);
 							//								transferredRequest.put(replaceKey, target);
 							//							}
 						}
 					}
+
+					if (key.endsWith("()")) {
+						if (value instanceof String == false) {
+							throw new IllegalArgumentException("\"key()\": 后面必须为函数String！");
+						}
+						functionMap.put(key, (String) value);
+					} else if (key.startsWith("@") && QueryConfig.TABLE_KEY_LIST.contains(key) == false) {
+						selfDefineKeyMap.put(key, value);
+					} else {
+						transferredRequest.put(key, value);
+					}
 				}
 			}
 		}
 
 
+		boolean query = false;
 		//执行SQL操作数据库
 		if (containRelation == false && isTableKey(table)) {//提高性能
 			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
+				query = true;
 				//			keyValuePathMap.remove(path);
 				QueryConfig config2 = newQueryConfig(table, transferredRequest);
 
@@ -658,25 +663,33 @@ public class Parser {
 				}
 
 				transferredRequest = getSQLObject(config2);
-
-				if (transferredRequest != null && transferredRequest.isEmpty() == false) {//避免返回空的
-					if (selfDefineKeyMap != null) {
-						transferredRequest.putAll(selfDefineKeyMap);
-					}
-					//解析函数function
-					Set<String> functionSet = functionMap == null ? null : functionMap.keySet();
-					if (functionSet != null && functionSet.isEmpty() == false) {
-						for (String key : functionSet) {
-							transferredRequest.put(getRealKey(requestMethod, key, false, false)
-									, Function.invoke(transferredRequest, functionMap.get(key)));
-						}
-					}
-
-					//可能客户端还有用，客户端自己解决，况且已知Android用fastjson解析不会崩溃 //移除自定义key
-					putQueryResult(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
+				
+				if (transferredRequest == null) {
+					transferredRequest = new JSONObject(true);
 				}
-
 			}
+		}
+
+		if (selfDefineKeyMap != null) {
+			transferredRequest.putAll(selfDefineKeyMap);
+		}
+		if (functionMap != null) {
+			if (query) {
+				//解析函数function
+				Set<String> functionSet = functionMap == null ? null : functionMap.keySet();
+				if (functionSet != null && functionSet.isEmpty() == false) {
+					for (String key : functionSet) {
+						transferredRequest.put(getRealKey(requestMethod, key, false, false)
+								, Function.invoke(transferredRequest, functionMap.get(key)));
+					}
+				}
+			} else {
+				transferredRequest.putAll(functionMap);
+			}
+		}
+
+		if (query) {
+			putQueryResult(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
 		}
 
 		return transferredRequest;
@@ -871,7 +884,7 @@ public class Parser {
 				}
 			}
 		}
-		
+
 		JSONObject response = new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(table, request));
 		if (response != null) {
 			response = response.getJSONObject(table);
