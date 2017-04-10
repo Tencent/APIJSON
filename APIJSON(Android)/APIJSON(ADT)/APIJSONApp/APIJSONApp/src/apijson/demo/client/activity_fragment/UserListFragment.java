@@ -14,19 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
-import java.io.Serializable;
-import java.util.List;
-
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONRequest;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.library.base.BaseView.OnDataChangedListener;
-import zuo.biao.library.interfaces.AdapterCallBack;
-import zuo.biao.library.interfaces.CacheCallBack;
-import zuo.biao.library.interfaces.OnBottomDragListener;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.EditTextInfoWindow;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -38,6 +25,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
+
+import com.alibaba.fastjson.JSONObject;
+
+import java.io.Serializable;
+import java.util.List;
+
 import apijson.demo.client.R;
 import apijson.demo.client.adapter.UserAdapter;
 import apijson.demo.client.application.APIJSONApplication;
@@ -45,8 +38,16 @@ import apijson.demo.client.base.BaseHttpListFragment;
 import apijson.demo.client.interfaces.TopBarMenuCallback;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.HttpRequest;
-
-import com.alibaba.fastjson.JSONObject;
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.apijson.StringUtil;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
+import zuo.biao.library.interfaces.AdapterCallBack;
+import zuo.biao.library.interfaces.CacheCallBack;
+import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.EditTextInfoWindow;
 
 /**用户列表界面fragment
  * @author Lemon
@@ -115,9 +116,7 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 		return fragment;
 	}
 	/**
-	 * @param range
-	 * @param id
-	 * @param search
+	 * @param idList
 	 * @return
 	 */
 	public static UserListFragment createInstance(List<Long> idList) {
@@ -320,7 +319,7 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 
 		if (rightToLeft == false) {
 			//			toActivity(EditTextInfoWindow.createIntent(context
-			//					, EditTextInfoWindow.TYPE_PHONE, "手机号", null), 
+			//					, EditTextInfoWindow.TYPE_PHONE, "手机号", null),
 			//					REQUEST_TO_EDIT_TEXT_INFO_ADD, false);
 			startActivity(UserListActivity.createIntent(context, RANGE_ALL, 0).putExtra(INTENT_TITLE, "添加"));
 			context.overridePendingTransition(R.anim.bottom_push_in, R.anim.hold);
@@ -335,11 +334,11 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 			}
 			if (searchType == EditTextInfoWindow.TYPE_NAME) {
 				toActivity(EditTextInfoWindow.createIntent(context
-						, EditTextInfoWindow.TYPE_NAME, "姓名", null), 
+						, EditTextInfoWindow.TYPE_NAME, "姓名", null),
 						REQUEST_TO_EDIT_TEXT_INFO_SEARCH, false);
 			} else {
 				toActivity(EditTextInfoWindow.createIntent(context
-						, EditTextInfoWindow.TYPE_PHONE, "手机号", null), 
+						, EditTextInfoWindow.TYPE_PHONE, "手机号", null),
 						REQUEST_TO_EDIT_TEXT_INFO_ADD, false);
 			}
 

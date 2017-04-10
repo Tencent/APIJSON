@@ -14,13 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.library.base.BaseActivity;
-import zuo.biao.library.interfaces.OnBottomDragListener;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.TextClearSuit;
-import zuo.biao.library.util.EditTextUtil;
-import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -32,11 +25,19 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import apijson.demo.client.R;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.model.User;
 import apijson.demo.client.model.Verify;
 import apijson.demo.client.util.HttpRequest;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.library.base.BaseActivity;
+import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.TextClearSuit;
+import zuo.biao.library.util.EditTextUtil;
+import zuo.biao.library.util.StringUtil;
 
 /**注册、验证码登录、重置密码等密码相关界面
  * @author Lemon
@@ -177,7 +178,6 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 	private TimeCount time;
 	/**获取验证码
-	 * @param et
 	 */
 	private void getVerify() {
 		if (EditTextUtil.isInputedCorrect(context, etPasswordPhone, EditTextUtil.TYPE_PHONE) == false) {
@@ -219,7 +219,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	 */
 	private void toNextStep() {
 		if (type != TYPE_VERIFY) {
-			if (EditTextUtil.isInputedCorrect(context, etPasswordPassword0, EditTextUtil.TYPE_PASSWORD) == false 
+			if (EditTextUtil.isInputedCorrect(context, etPasswordPassword0, EditTextUtil.TYPE_PASSWORD) == false
 					|| EditTextUtil.isInputedCorrect(context, etPasswordPassword1, EditTextUtil.TYPE_PASSWORD) == false) {
 				return;
 			}
@@ -243,14 +243,14 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	}
 
 	/**验证验证码
-	 * @param fromServer 
+	 * @param fromServer
 	 */
 	private boolean checkVerify(boolean fromServer) {
-		if (EditTextUtil.isInputedCorrect(context, etPasswordPhone, EditTextUtil.TYPE_PHONE) == false 
+		if (EditTextUtil.isInputedCorrect(context, etPasswordPhone, EditTextUtil.TYPE_PHONE) == false
 				|| EditTextUtil.isInputedCorrect(context, etPasswordVerify, EditTextUtil.TYPE_VERIFY) == false) {
 			return false;
 		}
-		
+
 		if (fromServer) {
 			showProgressDialog();
 			HttpRequest.checkAuthCode(StringUtil.getTrimedString(etPasswordPhone),
@@ -268,7 +268,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		showProgressDialog();
 		HttpRequest.register(StringUtil.getTrimedString(etPasswordVerify)
 				, StringUtil.getTrimedString(etPasswordPhone)
-				, StringUtil.getString(etPasswordPassword0), 
+				, StringUtil.getString(etPasswordPassword0),
 				"APIJSONUser", 0, HTTP_REGISTER, this); // 注册接口
 	}
 
@@ -276,7 +276,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		showProgressDialog();
 		HttpRequest.setPassword(StringUtil.getTrimedString(etPasswordVerify)
 				, StringUtil.getTrimedString(etPasswordPhone)
-				, StringUtil.getString(etPasswordPassword0), 
+				, StringUtil.getString(etPasswordPassword0),
 				HTTP_RESET_PASSWORD, this); // 注册接口
 	}
 
@@ -423,7 +423,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			break;
 		default:
 			break;
-		}		
+		}
 	}
 
 	//系统自带监听方法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

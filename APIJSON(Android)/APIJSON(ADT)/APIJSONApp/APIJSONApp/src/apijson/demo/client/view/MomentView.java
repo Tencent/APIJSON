@@ -14,9 +14,35 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.res.Resources;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import apijson.demo.client.R;
+import apijson.demo.client.activity_fragment.LoginActivity;
+import apijson.demo.client.activity_fragment.MomentActivity;
+import apijson.demo.client.activity_fragment.UserActivity;
+import apijson.demo.client.activity_fragment.UserListActivity;
+import apijson.demo.client.application.APIJSONApplication;
+import apijson.demo.client.model.CommentItem;
+import apijson.demo.client.model.Moment;
+import apijson.demo.client.model.MomentItem;
+import apijson.demo.client.model.User;
+import apijson.demo.client.util.HttpRequest;
+import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView;
 import zuo.biao.library.manager.CacheManager;
@@ -31,31 +57,6 @@ import zuo.biao.library.util.Log;
 import zuo.biao.library.util.ScreenUtil;
 import zuo.biao.library.util.StringUtil;
 import zuo.biao.library.util.TimeUtil;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.res.Resources;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.LinearLayout.LayoutParams;
-import android.widget.TextView;
-import apijson.demo.client.R;
-import apijson.demo.client.activity_fragment.LoginActivity;
-import apijson.demo.client.activity_fragment.MomentActivity;
-import apijson.demo.client.activity_fragment.UserActivity;
-import apijson.demo.client.activity_fragment.UserListActivity;
-import apijson.demo.client.application.APIJSONApplication;
-import apijson.demo.client.model.CommentItem;
-import apijson.demo.client.model.Moment;
-import apijson.demo.client.model.MomentItem;
-import apijson.demo.client.model.User;
-import apijson.demo.client.util.HttpRequest;
-import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
 
 /**作品View
  * @author Lemon
@@ -191,7 +192,9 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		vMomentViewDivider.setVisibility(llMomentViewPraise.getVisibility() == View.VISIBLE
 				&& llMomentViewCommentContainer.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
 
-		//		tvMomentViewDate.setText(StringUtil.getTrimedString(tvMomentViewDate) + "   total:" + data.getCommentCount());
+		//		tvMomentViewDate.setText(StringUtil.getTrimedString(tvMomentViewDate)
+		//				+ "  p:" + data.getPraiseCount()
+		//				+ "  c:" + data.getCommentCount());
 	}
 
 

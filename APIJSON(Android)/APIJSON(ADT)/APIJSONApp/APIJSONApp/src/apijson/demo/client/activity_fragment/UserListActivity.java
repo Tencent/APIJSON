@@ -14,21 +14,22 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
-import java.io.Serializable;
-import java.util.List;
-
-import zuo.biao.apijson.JSON;
-import zuo.biao.library.base.BaseActivity;
-import zuo.biao.library.interfaces.OnBottomDragListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import apijson.demo.client.R;
-import apijson.demo.client.application.APIJSONApplication;
 
 import com.alibaba.fastjson.JSONObject;
+
+import java.io.Serializable;
+import java.util.List;
+
+import apijson.demo.client.R;
+import apijson.demo.client.application.APIJSONApplication;
+import zuo.biao.apijson.JSON;
+import zuo.biao.library.base.BaseActivity;
+import zuo.biao.library.interfaces.OnBottomDragListener;
 
 /**使用方法：复制>粘贴>改名>改代码  */
 /**fragmentActivity示例
@@ -65,7 +66,7 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 	 * showSearch = true;
 	 * @param context
 	 * @param range
-	 * @param userId
+	 * @param id
 	 * @return
 	 */
 	public static Intent createIntent(Context context, int range, long id) {
@@ -92,7 +93,7 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param range
-	 * @param userId
+	 * @param id
 	 * @param search
 	 * @param showSearch
 	 * @return
@@ -230,7 +231,7 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 
 			fragment.onDragBottom(rightToLeft);
 			return;
-		}	
+		}
 
 		finish();
 	}

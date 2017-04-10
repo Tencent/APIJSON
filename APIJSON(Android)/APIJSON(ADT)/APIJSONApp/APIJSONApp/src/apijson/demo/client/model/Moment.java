@@ -39,12 +39,5 @@ public class Moment extends apijson.demo.client.server.model.Moment {
 	public Long getUserId() {
 		return value(super.getUserId());
 	}
-	
-//	private int commentCount;
-//	public int getCommentCount() {
-//		return commentCount;
-//	}
-//	public void setCommentCount(int commentCount) {
-//		this.commentCount = commentCount;
-//	}
+
 }

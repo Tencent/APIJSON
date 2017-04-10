@@ -14,12 +14,13 @@ limitations under the License.*/
 
 package apijson.demo.client.model;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import zuo.biao.apijson.BaseModel;
-import android.support.annotation.NonNull;
 import apijson.demo.client.application.APIJSONApplication;
+import zuo.biao.apijson.BaseModel;
 
 public class MomentItem extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;
@@ -194,8 +195,16 @@ public class MomentItem extends BaseModel {
 
 		return this;
 	}
+	private int praiseCount;
 	public int getPraiseCount() {
-		return count(getPraiseUserIdList());
+		return praiseCount;
+	}
+	public void setPraiseCount(int praiseCount) {
+		int idCount = count(getPraiseUserIdList());
+		if (praiseCount < idCount) {
+			praiseCount = idCount;
+		}
+		this.praiseCount = praiseCount;
 	}
 
 	private Boolean isCommented;
@@ -207,9 +216,9 @@ public class MomentItem extends BaseModel {
 			isCommented = false;
 		} else if (isCommented == null) {
 			isCommented = false;
-			List<CommentItem> commentItemlist = getCommentItemList();
-			if (commentItemlist != null) {
-				for (CommentItem comment : commentItemlist) {
+			List<CommentItem> commentItemList = getCommentItemList();
+			if (commentItemList != null) {
+				for (CommentItem comment : commentItemList) {
 					if (comment != null && comment.getComment().getUserId() == userId) {
 						isCommented = true;
 						break;
@@ -238,15 +247,15 @@ public class MomentItem extends BaseModel {
 		return this;
 	}
 
-	//	public int getCommentCount() {
-	//		return getMoment().getCommentCount();
-	//	}
-
 	private int commentCount;
 	public int getCommentCount() {
 		return commentCount;
 	}
 	public MomentItem setCommentCount(int commentCount) {
+		int idCount = count(getCommentIdList());
+		if (commentCount < idCount) {
+			commentCount = idCount;
+		}
 		this.commentCount = commentCount;
 		return this;
 	}
