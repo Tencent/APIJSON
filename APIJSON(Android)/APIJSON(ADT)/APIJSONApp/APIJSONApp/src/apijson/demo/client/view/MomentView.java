@@ -191,7 +191,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		vMomentViewDivider.setVisibility(llMomentViewPraise.getVisibility() == View.VISIBLE
 				&& llMomentViewCommentContainer.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
 
-//		tvMomentViewDate.setText(StringUtil.getTrimedString(tvMomentViewDate) + "   total:" + data.getCommentCount());
+		//		tvMomentViewDate.setText(StringUtil.getTrimedString(tvMomentViewDate) + "   total:" + data.getCommentCount());
 	}
 
 
@@ -461,7 +461,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		case R.id.tvMomentViewPraise:
 		case R.id.llMomentViewPraise:
 			toActivity(UserListActivity.createIntent(context, data.getPraiseUserIdList())
-					.putExtra(UserListActivity.INTENT_TITLE, data.getPraiseCount() + "人觉得很赞"));
+					.putExtra(UserListActivity.INTENT_TITLE, "点赞的人"));
 			break;
 		default:
 			if (isLoggedIn() == false) {

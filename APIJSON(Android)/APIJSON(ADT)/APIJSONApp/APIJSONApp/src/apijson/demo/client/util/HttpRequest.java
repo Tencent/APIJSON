@@ -449,7 +449,7 @@ public class HttpRequest {
 		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
-		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
+		request.add(userItem.toArray(10, 0, User.class.getSimpleName()));
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<
@@ -460,7 +460,7 @@ public class HttpRequest {
 
 		
 		request.add(commentItem.toArray(10, 0, CommentItem.class.getSimpleName()));
-//		request.put("commentCount@", "/CommentItem[]/total");
+		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 
 		get(request.toArray(count, page), requestCode, listener);
@@ -481,7 +481,7 @@ public class HttpRequest {
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 		
 		request = request.toArray(count, page);
-//		request.put("total@", "[]/total");
+		request.put("total@", "[]/total");
 		get(request, requestCode, listener);
 	}
 
