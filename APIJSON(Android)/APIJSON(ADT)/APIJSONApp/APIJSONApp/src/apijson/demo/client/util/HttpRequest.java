@@ -376,16 +376,6 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void getMoment(long id, int requestCode, OnHttpResponseListener listener) {
-
-		//		//测试远程函数调用成功
-		//		JSONRequest request = new JSONRequest();
-		//		JSONRequest moment = new JSONRequest(KEY_ID, id);
-		//		//		moment.put("praiseCount()", "count(Collection:praiseUserIdList)");//测试成功
-		//		//		moment.put("praised()", "isContain(Collection:praiseUserIdList, userId)");//测试成功
-		//		//		moment.put("plus()", "plus(long:id,long:userId)");//测试成功
-		//		//		moment.put("@commentCount@", "Comment[]/total");
-		//		request.put(Moment.class.getSimpleName(), moment);
-
 		JSONRequest request = new JSONRequest(new Moment(id));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId"));
 		//praise <<<<<<<<<<<<<<<<<<
@@ -462,7 +452,9 @@ public class HttpRequest {
 		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
+		
 		request.add(commentItem.toArray(10, 0, CommentItem.class.getSimpleName()));
+//		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 
 		get(request.toArray(count, page), requestCode, listener);
@@ -481,7 +473,10 @@ public class HttpRequest {
 		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
 		request.put(Comment.class.getSimpleName(), comment.setOrder(DATE_UP));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
-		get(request.toArray(count, page), requestCode, listener);
+		
+		request = request.toArray(count, page);
+//		request.put("total@", "[]/total");
+		get(request, requestCode, listener);
 	}
 
 	/**赞动态

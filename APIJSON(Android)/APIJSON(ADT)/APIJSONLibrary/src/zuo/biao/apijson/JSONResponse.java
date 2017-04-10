@@ -53,6 +53,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	public static final String KEY_ID = "id";
 	public static final String KEY_STATUS = "status";
 	public static final String KEY_COUNT = "count";
+	public static final String KEY_TOTAL = "total";
 	public static final String KEY_MESSAGE = "message";
 
 	/**获取id
@@ -72,6 +73,17 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 */
 	public int getCount() {
 		return getIntValue(KEY_COUNT);
+	}
+	/**获取数量
+	 * @return
+	 */
+	public int getTotal() {
+		try {
+			return getIntValue(KEY_TOTAL);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return 0;
 	}
 	/**获取信息
 	 * @return

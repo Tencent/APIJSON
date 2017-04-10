@@ -191,6 +191,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		vMomentViewDivider.setVisibility(llMomentViewPraise.getVisibility() == View.VISIBLE
 				&& llMomentViewCommentContainer.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
 
+//		tvMomentViewDate.setText(StringUtil.getTrimedString(tvMomentViewDate) + "   total:" + data.getCommentCount());
 	}
 
 

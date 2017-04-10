@@ -501,6 +501,12 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	private final int HTTP_DELETE = 4;
 	@Override
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+		if (requestCode <= 0) {
+			//			showShortToast("total=" + response.getTotal());
+			super.onHttpResponse(requestCode, resultJson, e);
+			return;
+		}
+
 		JSONResponse response = new JSONResponse(resultJson);
 		if (requestCode == HTTP_GET_MOMENT) {
 			MomentItem data = JSONResponse.toObject(response, MomentItem.class);
@@ -516,10 +522,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			setHead(data);
 			return;
 		}
-		if (requestCode <= 0) {
-			super.onHttpResponse(requestCode, resultJson, e);
-			return;
-		}
+
 
 		JSONResponse comment = response.getJSONResponse(Comment.class.getSimpleName());
 		boolean succeed = JSONResponse.isSucceed(comment);
