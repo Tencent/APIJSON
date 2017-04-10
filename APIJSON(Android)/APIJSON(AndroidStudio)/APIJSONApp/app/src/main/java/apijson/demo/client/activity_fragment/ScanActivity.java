@@ -26,7 +26,6 @@ import android.view.View.OnClickListener;
 import apijson.demo.client.R;
 
 import com.zxing.activity.CaptureActivity;
-import com.zxing.camera.CameraManager;
 import com.zxing.view.ViewfinderView;
 
 /**扫描二维码Activity
@@ -77,16 +76,6 @@ public class ScanActivity extends CaptureActivity implements ActivityPresenter, 
 	}
 
 
-	private boolean isOpen = false;
-	/**打开或关闭闪关灯
-	 * @param open
-	 */
-	private void switchLight(boolean open) {
-		if (open == isOpen) {
-			return;
-		}
-		isOpen = CameraManager.get().switchLight(open);
-	}
 
 
 
@@ -143,7 +132,7 @@ public class ScanActivity extends CaptureActivity implements ActivityPresenter, 
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.ivCameraScanLight:
-			switchLight(! isOpen);
+			switchLight(! isOn());
 			break;
 		default:
 			break;

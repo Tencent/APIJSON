@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class StringUtil {
 	private static final String TAG = "StringUtil";
-	
+
 	public StringUtil() {
 	}
 
@@ -95,24 +95,48 @@ public class StringUtil {
 		return s == null ? "" : s;
 	}
 	/**获取string,为null则返回""
+	 * ignoreEmptyItem = false;
+	 * split = ","
 	 * @param array
-	 * @return
+	 * @return {@link #getString(String[], boolean)}
 	 */
 	public static String getString(String[] array) {
-		return getString(array, null);
+		return getString(array, false);
+	}
+	/**获取string,为null则返回""
+	 * split = ","
+	 * @param array
+	 * @param ignoreEmptyItem
+	 * @return {@link #getString(String[], String, boolean)}
+	 */
+	public static String getString(String[] array, boolean ignoreEmptyItem) {
+		return getString(array, null, ignoreEmptyItem);
+	}
+	/**获取string,为null则返回""
+	 * ignoreEmptyItem = false;
+	 * @param array
+	 * @param split
+	 * @return {@link #getString(String[], String, boolean)}
+	 */
+	public static String getString(String[] array, String split) {
+		return getString(array, split, false);
 	}
 	/**获取string,为null则返回""
 	 * @param array
 	 * @param split
+	 * @param ignoreEmptyItem
 	 * @return
 	 */
-	public static String getString(String[] array, String split) {
+	public static String getString(String[] array, String split, boolean ignoreEmptyItem) {
 		String s = "";
 		if (array != null) {
 			if (split == null) {
 				split = ",";
 			}
 			for (int i = 0; i < array.length; i++) {
+				if (ignoreEmptyItem && isEmpty(array[i], true)) {
+					continue;
+				}
 				s += ((i > 0 ? split : "") + array[i]);
 			}
 		}
@@ -206,8 +230,50 @@ public class StringUtil {
 	//获取string的长度>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-	//判断字符是否非空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	//判断字符是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	/**判断字符是否为空
+	 * @param object
+	 * @param trim
+	 * @return
+	 */
+	public static boolean isEmpty(Object object, boolean trim) {
+		return isEmpty(getString(object), trim);
+	}
+	/**判断字符是否为空
+	 * @param cs
+	 * @param trim
+	 * @return
+	 */
+	public static boolean isEmpty(CharSequence cs, boolean trim) {
+		return isEmpty(getString(cs), trim);
+	}
+	/**判断字符是否为空
+	 * @param s
+	 * @param trim
+	 * @return
+	 */
+	public static boolean isEmpty(String s, boolean trim) {
+		//		Log.i(TAG, "getTrimedString   s = " + s);
+		if (s == null) {
+			return true;
+		}
+		if (trim) {
+			s = s.trim();
+		}
+		if (s.isEmpty()) {
+			return true;
+		}
+
+		currentString = s;
+
+		return false;
+	}
+
+	//判断字符是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	//判断字符是否非空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	
 	/**判断字符是否非空
 	 * @param object
 	 * @param trim
@@ -240,12 +306,12 @@ public class StringUtil {
 		if (s.length() <= 0) {
 			return false;
 		}
-
+		
 		currentString = s;
-
+		
 		return true;
 	}
-
+	
 	//判断字符是否非空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -261,7 +327,7 @@ public class StringUtil {
 		namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
 		smallAlphaPattern = Pattern.compile("[a-z]");
 	}
-	
+
 	//判断手机格式是否正确
 	public static boolean isPhone(String phone) {
 		if (isNotEmpty(phone, true) == false) {
@@ -576,7 +642,7 @@ public class StringUtil {
 	public static final int PRICE_FORMAT_PREFIX_WITH_BLANK = 3;
 	public static final int PRICE_FORMAT_SUFFIX_WITH_BLANK = 4;
 	public static final String[] PRICE_FORMATS = {
-			"", "￥", "元", "￥ ", " 元"
+		"", "￥", "元", "￥ ", " 元"
 	};
 
 	/**获取价格，保留两位小数

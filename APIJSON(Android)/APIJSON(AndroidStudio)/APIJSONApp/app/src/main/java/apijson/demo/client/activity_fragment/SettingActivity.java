@@ -122,7 +122,7 @@ public class SettingActivity extends BaseActivity implements OnBottomDragListene
 	@Override
 	public void initData() {//必须调用
 
-		showProgress(R.string.loading);
+		showProgressDialog(R.string.loading);
 
 		runThread(TAG + "initData", new Runnable() {
 
@@ -134,7 +134,7 @@ public class SettingActivity extends BaseActivity implements OnBottomDragListene
 
 					@Override
 					public void run() {
-						dismissProgress();
+						dismissProgressDialog();
 						if (settings == null || settings.length <= 0) {
 							finish();
 							return;
@@ -201,7 +201,7 @@ public class SettingActivity extends BaseActivity implements OnBottomDragListene
 	@Override
 	public void finish() {
 		if (isSettingChanged) {
-			showProgress("正在保存设置，请稍后...");
+			showProgressDialog("正在保存设置，请稍后...");
 			runThread(TAG, new Runnable() {
 
 				@Override

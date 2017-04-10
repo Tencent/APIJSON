@@ -14,6 +14,24 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import java.util.List;
+
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.library.base.BaseHttpListActivity;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
+import zuo.biao.library.interfaces.AdapterCallBack;
+import zuo.biao.library.interfaces.CacheCallBack;
+import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.manager.CacheManager;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.AlertDialog;
+import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
+import zuo.biao.library.util.CommonUtil;
+import zuo.biao.library.util.EditTextUtil;
+import zuo.biao.library.util.Log;
+import zuo.biao.library.util.SettingUtil;
+import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,9 +43,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
-
-import java.util.List;
-
 import apijson.demo.client.R;
 import apijson.demo.client.adapter.CommentAdapter;
 import apijson.demo.client.application.APIJSONApplication;
@@ -40,22 +55,6 @@ import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
 import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
 import apijson.demo.client.view.MomentView;
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.library.base.BaseHttpListActivity;
-import zuo.biao.library.base.BaseView.OnDataChangedListener;
-import zuo.biao.library.interfaces.AdapterCallBack;
-import zuo.biao.library.interfaces.CacheCallBack;
-import zuo.biao.library.interfaces.OnBottomDragListener;
-import zuo.biao.library.manager.CacheManager;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.AlertDialog;
-import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
-import zuo.biao.library.ui.EditTextManager;
-import zuo.biao.library.util.CommonUtil;
-import zuo.biao.library.util.Log;
-import zuo.biao.library.util.SettingUtil;
-import zuo.biao.library.util.StringUtil;
 
 /**用户列表界面fragment
  * @author Lemon
@@ -253,7 +252,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 				} else {
 					etMomentInput.setHint("回复：" + StringUtil.getTrimedString(toCommentItem.getUser().getName()));
 				}
-				EditTextManager.showKeyboard(context, etMomentInput);//, toGetWindowTokenView);
+				EditTextUtil.showKeyboard(context, etMomentInput);//, toGetWindowTokenView);
 
 				if (position >= 0) {
 					new Handler().postDelayed(new Runnable() {
@@ -277,7 +276,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			@Override
 			public void run() {
 				etMomentInput.setHint("评论");
-				EditTextManager.hideKeyboard(context, etMomentInput);
+				EditTextUtil.hideKeyboard(context, etMomentInput);
 			}
 		});
 	}
@@ -502,6 +501,12 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	private final int HTTP_DELETE = 4;
 	@Override
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+		if (requestCode <= 0) {
+			//			showShortToast("total=" + response.getTotal());
+			super.onHttpResponse(requestCode, resultJson, e);
+			return;
+		}
+
 		JSONResponse response = new JSONResponse(resultJson);
 		if (requestCode == HTTP_GET_MOMENT) {
 			MomentItem data = JSONResponse.toObject(response, MomentItem.class);
@@ -517,10 +522,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 			setHead(data);
 			return;
 		}
-		if (requestCode <= 0) {
-			super.onHttpResponse(requestCode, resultJson, e);
-			return;
-		}
+
 
 		JSONResponse comment = response.getJSONResponse(Comment.class.getSimpleName());
 		boolean succeed = JSONResponse.isSucceed(comment);

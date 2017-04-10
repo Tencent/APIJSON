@@ -12,10 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.library.ui;
+package zuo.biao.library.util;
 
 import zuo.biao.library.R;
-import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -27,15 +26,13 @@ import android.widget.Toast;
 
 /**通用密码、手机号、验证码输入框输入字符判断及错误提示 类
  * @author Lemon
- * @use EditTextManager.xxxMethod(...);
+ * @use EditTextUtil.xxxMethod(...);
  */
-public class EditTextManager {
-	private static final String TAG = "EditTextManager";
+public class EditTextUtil {
+	private static final String TAG = "EditTextUtil";
 
 
 	//显示/隐藏输入法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-	private static InputMethodManager imm;
 
 	/**隐藏输入法
 	 * @param context
@@ -79,7 +76,7 @@ public class EditTextManager {
 			return;
 		}
 
-		imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);//imm必须与context唯一对应
+		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);//imm必须与context唯一对应
 		if (toGetWindowTokenView == null) {
 			Log.w(TAG, "showKeyboard   toGetWindowTokenView == null");
 			toGetWindowTokenView = et;

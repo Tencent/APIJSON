@@ -266,30 +266,30 @@ public abstract class BaseActivity extends FragmentActivity implements ActivityP
 	/**展示加载进度条,无标题
 	 * stringResId = R.string.loading
 	 */
-	public void showProgress() {
-		showProgress(R.string.loading);
+	public void showProgressDialog() {
+		showProgressDialog(R.string.loading);
 	}
 	/**展示加载进度条,无标题
 	 * @param stringResId
 	 */
-	public void showProgress(int stringResId) {
+	public void showProgressDialog(int stringResId) {
 		try {
-			showProgress(null, context.getResources().getString(stringResId));
+			showProgressDialog(null, context.getResources().getString(stringResId));
 		} catch (Exception e) {
-			Log.e(TAG, "showProgress  showProgress(null, context.getResources().getString(stringResId));");
+			Log.e(TAG, "showProgressDialog  showProgressDialog(null, context.getResources().getString(stringResId));");
 		}
 	}
 	/**展示加载进度条,无标题
 	 * @param message
 	 */
-	public void showProgress(String message) {
-		showProgress(null, message);
+	public void showProgressDialog(String message) {
+		showProgressDialog(null, message);
 	}
 	/**展示加载进度条
 	 * @param title 标题
 	 * @param message 信息
 	 */
-	public void showProgress(final String title, final String message) {
+	public void showProgressDialog(final String title, final String message) {
 		runUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -323,7 +323,7 @@ public abstract class BaseActivity extends FragmentActivity implements ActivityP
 
 	/**隐藏加载进度
 	 */
-	public void dismissProgress() {
+	public void dismissProgressDialog() {
 		runUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -411,14 +411,14 @@ public abstract class BaseActivity extends FragmentActivity implements ActivityP
 	}
 	/**快捷显示short toast方法，需要long toast就用 Toast.makeText(string, Toast.LENGTH_LONG).show(); ---不常用所以这个类里不写
 	 * @param string
-	 * @param isForcedismissProgress
+	 * @param isForceDismissProgressDialog
 	 */
-	public void showShortToast(final String string, final boolean isForcedismissProgress) {
+	public void showShortToast(final String string, final boolean isForceDismissProgressDialog) {
 		runUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (isForcedismissProgress) {
-					dismissProgress();
+				if (isForceDismissProgressDialog) {
+					dismissProgressDialog();
 				}
 				Toast.makeText(context, "" + string, Toast.LENGTH_SHORT).show();
 			}
@@ -560,7 +560,7 @@ public abstract class BaseActivity extends FragmentActivity implements ActivityP
 	@Override
 	protected void onDestroy() {
 		Log.d(TAG, "\n onDestroy <<<<<<<<<<<<<<<<<<<<<<<");
-		dismissProgress();
+		dismissProgressDialog();
 		BaseBroadcastReceiver.unregister(context, receiver);
 		ThreadManager.getInstance().destroyThread(threadNameList);
 		if (view != null) {

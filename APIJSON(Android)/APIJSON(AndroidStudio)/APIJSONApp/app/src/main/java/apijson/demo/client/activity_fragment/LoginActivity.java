@@ -19,9 +19,9 @@ import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.ui.BottomMenuWindow;
-import zuo.biao.library.ui.EditTextManager;
 import zuo.biao.library.ui.ServerSettingActivity;
 import zuo.biao.library.ui.TextClearSuit;
+import zuo.biao.library.util.EditTextUtil;
 import zuo.biao.library.util.SettingUtil;
 import zuo.biao.library.util.StringUtil;
 import android.annotation.SuppressLint;
@@ -153,14 +153,14 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 
 
 	private void login(int type) {
-		if (EditTextManager.isInputedCorrect(context, etLoginPhone, EditTextManager.TYPE_PHONE) == false
-				|| EditTextManager.isInputedCorrect(context, etLoginPassword, type == Login.TYPE_VERIFY 
-				? EditTextManager.TYPE_VERIFY : EditTextManager.TYPE_PASSWORD) == false) {
+		if (EditTextUtil.isInputedCorrect(context, etLoginPhone, EditTextUtil.TYPE_PHONE) == false
+				|| EditTextUtil.isInputedCorrect(context, etLoginPassword, type == Login.TYPE_VERIFY 
+				? EditTextUtil.TYPE_VERIFY : EditTextUtil.TYPE_PASSWORD) == false) {
 			return;
 		}
-		EditTextManager.hideKeyboard(context, etLoginPassword);
+		EditTextUtil.hideKeyboard(context, etLoginPassword);
 
-		showProgress("正在登录，请稍后...");
+		showProgressDialog("正在登录，请稍后...");
 
 
 		phone = StringUtil.getTrimedString(etLoginPhone);
@@ -170,7 +170,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 		HttpRequest.login(phone, password, type, type, new OnHttpResponseListener() {
 			@Override
 			public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-				dismissProgress();
+				dismissProgressDialog();
 				JSONResponse response = new JSONResponse(resultJson);
 				User user = response.getObject(User.class);
 

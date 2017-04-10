@@ -16,6 +16,8 @@
 
 package zuo.biao.library.manager;
 
+import java.lang.reflect.Method;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -34,8 +36,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout.LayoutParams;
-
-import java.lang.reflect.Method;
 
 /**系统栏背景管理器
  * Class to manage status and navigation bar tint effects when using KitKat 

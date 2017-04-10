@@ -86,8 +86,8 @@ public abstract class BaseTabActivity extends BaseActivity implements ViewPresen
 	}
 	/**
 	 * @param savedInstanceState
-	 * @param layoutResID activity全局视图view的布局资源id，默认值为R.layout.base_tab_activity
-	 * @param listener this - 滑动返回 ; null - 没有滑动返回
+	 * @param layoutResID activity全局视图view的布局资源id。 <= 0 ? R.layout.base_tab_activity : layoutResID
+	 * @param listener == null ? 没有滑动返回 : 滑动返回
 	 * @return
 	 * @must 1.不要在子类重复这个类中onCreate中的代码;
 	 *       2.在子类onCreate中super.onCreate(savedInstanceState, layoutResID, listener);

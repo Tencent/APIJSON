@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**基础Adapter
+ * <br> 适用于ListView,GridView等AbsListView的子类
  * @author Lemon
  * @warn 出于性能考虑，里面很多方法对变量(比如list)都没有判断，应在adapter外判断
  * @param <T> 数据模型(model/JavaBean)类
@@ -39,7 +40,7 @@ import android.view.ViewGroup;
 public abstract class BaseAdapter<T> extends android.widget.BaseAdapter {
 	//	private static final String TAG = "BaseAdapter";
 
-	
+
 	/**
 	 * 管理整个界面的Activity实例
 	 */
@@ -102,12 +103,15 @@ public abstract class BaseAdapter<T> extends android.widget.BaseAdapter {
 	public void setOnReachViewBorderListener(OnReachViewBorderListener onReachViewBorderListener) {
 		this.onReachViewBorderListener = onReachViewBorderListener;
 	}
-	
+
 	/**
-	 * 预加载提前数
-	 * @use 可在子类getView前赋值;
+	 * 预加载提前数。
+	 * <br > = 0 - 列表滚到底部(最后一个Item View显示)时加载更多
+	 * <br > < 0 - 禁用加载更多
+	 * <br > > 0 - 列表滚到倒数第preloadCount个Item View显示时加载更多
+	 * @use 可在子类getView被调用前(可以是在构造器内)赋值
 	 */
-	protected int preloadCount = 1;
+	protected int preloadCount = 0;
 
 	/**获取item对应View的方法，带item滑到底部等监听
 	 * @param position
@@ -125,7 +129,7 @@ public abstract class BaseAdapter<T> extends android.widget.BaseAdapter {
 	}
 
 	//预加载，可不使用 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
+
 
 
 

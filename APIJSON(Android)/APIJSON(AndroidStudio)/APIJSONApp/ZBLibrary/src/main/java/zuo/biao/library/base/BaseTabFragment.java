@@ -75,7 +75,7 @@ public abstract class BaseTabFragment extends BaseFragment implements ViewPresen
 	 * @param inflater
 	 * @param container
 	 * @param savedInstanceState
-	 * @param layoutResID fragment全局视图view的布局资源id。 <= 0 ? R.layout.base_http_list_fragment : layoutResID
+	 * @param layoutResID fragment全局视图view的布局资源id。 <= 0 ? R.layout.base_tab_activity : layoutResID
 	 * @return
 	 * @must 1.不要在子类重复这个类中onCreateView中的代码;
 	 *       2.在子类onCreateView中super.onCreateView(inflater, container, savedInstanceState, layoutResID);

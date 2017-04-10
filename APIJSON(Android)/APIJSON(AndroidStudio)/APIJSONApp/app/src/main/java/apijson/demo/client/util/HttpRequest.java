@@ -142,10 +142,10 @@ public class HttpRequest {
 	public static final String KEY_TYPE = "type";
 
 
-	
+
 	public static final String DATE_UP = "date+";//同 "date ASC"
 	public static final String DATE_DOWN = "date-";//同 "date DESC"
-	
+
 	public static final String ID_AT = KEY_ID + "@";
 	public static final String USER_ID_AT = KEY_USER_ID + "@";
 	public static final String MOMENT_ID_AT = "momentId@";
@@ -322,7 +322,7 @@ public class HttpRequest {
 			apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
 			switch (range) {
 			case RANGE_ALL://1.首推注册时间长的（也可以是级别高的）；2.给男性用户首推女性用户
-				userItem.setOrder(DATE_UP + (currentUser.getSex() == 0 ? ",sex-" : ""));
+				userItem.setOrder(DATE_UP, (currentUser.getSex() == 0 ? "sex-" : ""));
 				break;
 			case RANGE_SINGLE:
 			case RANGE_USER:
@@ -376,24 +376,14 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void getMoment(long id, int requestCode, OnHttpResponseListener listener) {
-
-		//		//测试远程函数调用成功
-		//		JSONRequest request = new JSONRequest();
-		//		JSONRequest moment = new JSONRequest(KEY_ID, id);
-		//		//		moment.put("praiseCount()", "count(Collection:praiseUserIdList)");//测试成功
-		//		//		moment.put("praised()", "isContain(Collection:praiseUserIdList, userId)");//测试成功
-		//		//		moment.put("plus()", "plus(long:id,long:userId)");//测试成功
-		//		//		moment.put("@commentCount@", "Comment[]/total");
-		//		request.put(Moment.class.getSimpleName(), moment);
-
 		JSONRequest request = new JSONRequest(new Moment(id));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId"));
-		//		//praise <<<<<<<<<<<<<<<<<<
-		//		JSONRequest userItem = new JSONRequest();
-		//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
-		//		.setColumn(COLUMNS_USER_SIMPLE));
-		//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
-		//		//praise >>>>>>>>>>>>>>>>>>
+		//praise <<<<<<<<<<<<<<<<<<
+		JSONRequest userItem = new JSONRequest();
+		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
+		.setColumn(COLUMNS_USER_SIMPLE));
+		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
+		//praise >>>>>>>>>>>>>>>>>>
 
 		get(request, requestCode, listener);
 	}
@@ -448,12 +438,12 @@ public class HttpRequest {
 		request.put(Moment.class.getSimpleName(), moment);
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 
-		//		//praise <<<<<<<<<<<<<<<<<<
-		//		JSONRequest userItem = new JSONRequest();
-		//		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
-		//		.setColumn(COLUMNS_USER_SIMPLE));
-		//
-		//		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
+		//praise <<<<<<<<<<<<<<<<<<
+		JSONRequest userItem = new JSONRequest();
+		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
+		.setColumn(COLUMNS_USER_SIMPLE));
+
+		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<
@@ -462,7 +452,9 @@ public class HttpRequest {
 		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
+		
 		request.add(commentItem.toArray(10, 0, CommentItem.class.getSimpleName()));
+//		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 
 		get(request.toArray(count, page), requestCode, listener);
@@ -481,7 +473,10 @@ public class HttpRequest {
 		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
 		request.put(Comment.class.getSimpleName(), comment.setOrder(DATE_UP));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
-		get(request.toArray(count, page), requestCode, listener);
+		
+		request = request.toArray(count, page);
+//		request.put("total@", "[]/total");
+		get(request, requestCode, listener);
 	}
 
 	/**赞动态

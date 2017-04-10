@@ -22,6 +22,7 @@
 
     <TextView
         android:id="@+id/tvGridItemName"
-        style="@style/text_middle" />
+        style="@style/text_middle"
+        android:visibility="gone" />
 
 </LinearLayout>

@@ -54,6 +54,22 @@ public abstract class CaptureActivity extends Activity implements Callback, Deco
 		inactivityTimer = new InactivityTimer(this);
 	}
 	
+	private boolean isOn = false;
+	protected final boolean isOn() {
+		return isOn;
+	}
+	/**打开或关闭闪关灯
+	 * @param open
+	 */
+	protected void switchLight(boolean on) {
+		if (on == isOn()) {
+			return;
+		}
+		isOn = CameraManager.get().switchLight(on);
+	}
+	
+
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -101,8 +117,10 @@ public abstract class CaptureActivity extends Activity implements Callback, Deco
 			handler.quitSynchronously();
 			handler = null;
 		}
+		isOn = false;
 		CameraManager.get().closeDriver();
 	}
+	
 
 	@Override
 	protected void onDestroy() {

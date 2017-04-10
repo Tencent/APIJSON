@@ -191,43 +191,43 @@ public abstract class BaseFragment extends Fragment implements FragmentPresenter
 	/**展示加载进度条,无标题
 	 * @param stringResId
 	 */
-	public void showProgress(int stringResId){
+	public void showProgressDialog(int stringResId){
 		if (isAlive() == false) {
-			Log.w(TAG, "showProgress  isAlive() == false >> return;");
+			Log.w(TAG, "showProgressDialog  isAlive() == false >> return;");
 			return;
 		}
-		context.showProgress(context.getResources().getString(stringResId));
+		context.showProgressDialog(context.getResources().getString(stringResId));
 	}
 	/**展示加载进度条,无标题
 	 * @param dialogMessage
 	 */
-	public void showProgress(String dialogMessage){
+	public void showProgressDialog(String dialogMessage){
 		if (isAlive() == false) {
-			Log.w(TAG, "showProgress  isAlive() == false >> return;");
+			Log.w(TAG, "showProgressDialog  isAlive() == false >> return;");
 			return;
 		}
-		context.showProgress(dialogMessage);
+		context.showProgressDialog(dialogMessage);
 	}
 	/**展示加载进度条
 	 * @param dialogTitle 标题
 	 * @param dialogMessage 信息
 	 */
-	public void showProgress(String dialogTitle, String dialogMessage){
+	public void showProgressDialog(String dialogTitle, String dialogMessage){
 		if (isAlive() == false) {
-			Log.w(TAG, "showProgress  isAlive() == false >> return;");
+			Log.w(TAG, "showProgressDialog  isAlive() == false >> return;");
 			return;
 		}
-		context.showProgress(dialogTitle, dialogMessage);
+		context.showProgressDialog(dialogTitle, dialogMessage);
 	}
 
 	/** 隐藏加载进度
 	 */
-	public void dismissProgress(){
+	public void dismissProgressDialog(){
 		if (isAlive() == false) {
-			Log.w(TAG, "dismissProgress  isAlive() == false >> return;");
+			Log.w(TAG, "dismissProgressDialog  isAlive() == false >> return;");
 			return;
 		}
-		context.dismissProgress();
+		context.dismissProgressDialog();
 	}
 	//进度弹窗>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -289,7 +289,7 @@ public abstract class BaseFragment extends Fragment implements FragmentPresenter
 	 */
 	public void showShortToast(int stringResId) {
 		if (isAlive() == false) {
-			Log.w(TAG, "showProgress  isAlive() == false >> return;");
+			Log.w(TAG, "showProgressDialog  isAlive() == false >> return;");
 			return;
 		}
 		context.showShortToast(stringResId);
@@ -299,21 +299,21 @@ public abstract class BaseFragment extends Fragment implements FragmentPresenter
 	 */
 	public void showShortToast(String string) {
 		if (isAlive() == false) {
-			Log.w(TAG, "showProgress  isAlive() == false >> return;");
+			Log.w(TAG, "showProgressDialog  isAlive() == false >> return;");
 			return;
 		}
 		context.showShortToast(string);
 	}
 	/**快捷显示short toast方法，需要long toast就用 Toast.makeText(string, Toast.LENGTH_LONG).show(); ---不常用所以这个类里不写
 	 * @param string
-	 * @param isForcedismissProgress
+	 * @param isForceDismissProgressDialog
 	 */
-	public void showShortToast(String string, boolean isForcedismissProgress) {
+	public void showShortToast(String string, boolean isForceDismissProgressDialog) {
 		if (isAlive() == false) {
-			Log.w(TAG, "showProgress  isAlive() == false >> return;");
+			Log.w(TAG, "showProgressDialog  isAlive() == false >> return;");
 			return;
 		}
-		context.showShortToast(string, isForcedismissProgress);
+		context.showShortToast(string, isForceDismissProgressDialog);
 	}
 	//show short toast>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -349,7 +349,7 @@ public abstract class BaseFragment extends Fragment implements FragmentPresenter
 	@Override
 	public void onDestroy() {
 		Log.d(TAG, "\n onDestroy <<<<<<<<<<<<<<<<<<<<<<<");
-		dismissProgress();
+		dismissProgressDialog();
 		if (view != null) {
 			try {
 				view.destroyDrawingCache();

@@ -17,14 +17,4 @@
         <item name="android:textColor">@color/black_to_white_selector</item>
     </style>
 
-    
-    <style name="select_name" parent="match_wrap">
-        <item name="android:gravity">center</item>
-        <item name="android:paddingTop">15dp</item>
-    </style>
-
-    <style name="select_json" parent="match_wrap">
-        <item name="android:gravity">left|top</item>
-    </style>
-    
 </resources>

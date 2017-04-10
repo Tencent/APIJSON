@@ -59,16 +59,16 @@ public class PraiseTextView extends TextView {
 	/**设置View
 	 * @param comment
 	 */
-	public void setView(List<User> list) {
-		if (list == null || list.isEmpty()) {
+	public void setView(List<User> list_) {
+		if (list_ == null || list_.isEmpty()) {
 			setText("");
 			return;
 		}
 		//去除无效User
-		User[] users = list.toArray(new User[]{});
-		for (int i = 0; i < users.length; i++) {
-			if (users[i] == null || StringUtil.isNotEmpty(users[i].getName(), true) == false) {
-				list.remove(i);
+		List<User> list = new ArrayList<User>();
+		for (User user: list_) {
+			if (user != null && StringUtil.isNotEmpty(user.getName(), true)) {
+				list.add(user);
 			}
 		}
 		int count = list == null ? 0 : list.size();

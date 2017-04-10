@@ -18,8 +18,8 @@ import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.EditTextManager;
 import zuo.biao.library.ui.TextClearSuit;
+import zuo.biao.library.util.EditTextUtil;
 import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
@@ -180,7 +180,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	 * @param et
 	 */
 	private void getVerify() {
-		if (EditTextManager.isInputedCorrect(context, etPasswordPhone, EditTextManager.TYPE_PHONE) == false) {
+		if (EditTextUtil.isInputedCorrect(context, etPasswordPhone, EditTextUtil.TYPE_PHONE) == false) {
 			return;
 		}
 
@@ -219,8 +219,8 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	 */
 	private void toNextStep() {
 		if (type != TYPE_VERIFY) {
-			if (EditTextManager.isInputedCorrect(context, etPasswordPassword0, EditTextManager.TYPE_PASSWORD) == false 
-					|| EditTextManager.isInputedCorrect(context, etPasswordPassword1, EditTextManager.TYPE_PASSWORD) == false) {
+			if (EditTextUtil.isInputedCorrect(context, etPasswordPassword0, EditTextUtil.TYPE_PASSWORD) == false 
+					|| EditTextUtil.isInputedCorrect(context, etPasswordPassword1, EditTextUtil.TYPE_PASSWORD) == false) {
 				return;
 			}
 
@@ -246,13 +246,13 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	 * @param fromServer 
 	 */
 	private boolean checkVerify(boolean fromServer) {
-		if (EditTextManager.isInputedCorrect(context, etPasswordPhone, EditTextManager.TYPE_PHONE) == false 
-				|| EditTextManager.isInputedCorrect(context, etPasswordVerify, EditTextManager.TYPE_VERIFY) == false) {
+		if (EditTextUtil.isInputedCorrect(context, etPasswordPhone, EditTextUtil.TYPE_PHONE) == false 
+				|| EditTextUtil.isInputedCorrect(context, etPasswordVerify, EditTextUtil.TYPE_VERIFY) == false) {
 			return false;
 		}
 		
 		if (fromServer) {
-			showProgress();
+			showProgressDialog();
 			HttpRequest.checkAuthCode(StringUtil.getTrimedString(etPasswordPhone),
 					StringUtil.getTrimedString(etPasswordVerify), HTTP_CHECK_VERIFY, this);
 		}
@@ -265,7 +265,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		if (checkVerify(false) == false) {
 			return;
 		}
-		showProgress();
+		showProgressDialog();
 		HttpRequest.register(StringUtil.getTrimedString(etPasswordVerify)
 				, StringUtil.getTrimedString(etPasswordPhone)
 				, StringUtil.getString(etPasswordPassword0), 
@@ -273,7 +273,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 	}
 
 	private void setPassword() {
-		showProgress();
+		showProgressDialog();
 		HttpRequest.setPassword(StringUtil.getTrimedString(etPasswordVerify)
 				, StringUtil.getTrimedString(etPasswordPhone)
 				, StringUtil.getString(etPasswordPassword0), 
@@ -333,7 +333,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		final JSONResponse response = new JSONResponse(resultJson);
 		final JSONResponse response2;
 
-		dismissProgress();
+		dismissProgressDialog();
 		switch (requestCode) {
 		case HTTP_CHECK_REGISTER:
 			response2 = response.getJSONResponse(User.class.getSimpleName());
@@ -378,7 +378,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 							break;
 						}
 					} else {//验证码错误
-						EditTextManager.showInputedError(context, etPasswordVerify
+						EditTextUtil.showInputedError(context, etPasswordVerify
 								, response.getStatus() == 408 ? "验证码已过期" : "验证码错误");
 					}
 				}
@@ -402,11 +402,11 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			break;
 		case HTTP_REGISTER:
 			User user = response.getObject(User.class);
-			dismissProgress();
+			dismissProgressDialog();
 			if (user == null || user.getId() <= 0 || JSONResponse.isSucceed(
 					response.getJSONResponse(User.class.getSimpleName())) == false) {
 				if (response.getStatus() == 408 || response.getStatus() == 412) {
-					EditTextManager.showInputedError(context, etPasswordVerify
+					EditTextUtil.showInputedError(context, etPasswordVerify
 							, response.getStatus() == 408 ? "验证码已过期" : "验证码错误");
 				} else {
 					showShortToast("注册失败，请检查网络后重试");
