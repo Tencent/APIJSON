@@ -16,30 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Visit`
+-- Table structure for table `Reponse`
 --
 
-DROP TABLE IF EXISTS `Visit`;
+DROP TABLE IF EXISTS `Reponse`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Visit` (
-  `id` bigint(20) NOT NULL,
-  `table` varchar(20) NOT NULL,
-  `tableId` bigint(15) DEFAULT NULL,
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `lastDate` timestamp NULL DEFAULT NULL,
-  `count` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+CREATE TABLE `Reponse` (
+  `id` int(11) NOT NULL,
+  `method` varchar(10) DEFAULT 'GET',
+  `tag` varchar(20) NOT NULL,
+  `structure` json NOT NULL,
+  `description` varchar(10000) DEFAULT NULL,
+  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Visit`
+-- Dumping data for table `Reponse`
 --
 
-LOCK TABLES `Visit` WRITE;
-/*!40000 ALTER TABLE `Visit` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Visit` ENABLE KEYS */;
+LOCK TABLES `Reponse` WRITE;
+/*!40000 ALTER TABLE `Reponse` DISABLE KEYS */;
+INSERT INTO `Reponse` VALUES (1,NULL,'User','{\"add\": {\"extra\": \"Response is effective!\"}, \"put\": {\"certified\": 0}, \"remove\": \"phone\"}','remove-移除字段；add-如果没有对应字段就添加字段；replace-如果有就替换；put-添加或替换字段','2017-02-01 11:19:51');
+/*!40000 ALTER TABLE `Reponse` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
