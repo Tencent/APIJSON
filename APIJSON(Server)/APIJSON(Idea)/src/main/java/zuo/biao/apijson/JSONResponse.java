@@ -53,6 +53,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	public static final String KEY_ID = "id";
 	public static final String KEY_STATUS = "status";
 	public static final String KEY_COUNT = "count";
+	public static final String KEY_TOTAL = "total";
 	public static final String KEY_MESSAGE = "message";
 
 	/**获取id
@@ -72,6 +73,17 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 */
 	public int getCount() {
 		return getIntValue(KEY_COUNT);
+	}
+	/**获取数量
+	 * @return
+	 */
+	public int getTotal() {
+		try {
+			return getIntValue(KEY_TOTAL);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return 0;
 	}
 	/**获取信息
 	 * @return
@@ -285,8 +297,9 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 		return toArray(this, className);
 	}
 	/**
+	 * array.set(index, isContainer ? value : value.getJSONObject(className));
 	 * @param arrayObject
-	 * @param className
+	 * @param className className.isEmpty() == false && value.containsKey(className) >> isContainer = true;
 	 * @return
 	 */
 	public static JSONArray toArray(JSONObject arrayObject, String className) {
@@ -357,21 +370,24 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 		Set<String> set = response.keySet();
 		if (set != null) {
+			
 			Object value;
 			String arrayKey;
 			for (String key : set) {
 				value = response.get(key);
+				
 				if (value instanceof JSONArray) {//转化JSONArray内部的APIJSON Array
-					transferredObject.put(key, format((JSONArray) value));
+					transferredObject.put(getSimpleName(key), format((JSONArray) value));
 				} else if (value instanceof JSONObject) {//APIJSON Array转为常规JSONArray
 					if (isArrayKey(key)) {//APIJSON Array转为常规JSONArray
 						arrayKey = key.substring(0, key.indexOf(KEY_ARRAY));
-						transferredObject.put(getArrayKey(arrayKey), format(toArray((JSONObject) value, arrayKey)));
+						transferredObject.put(getArrayKey(getSimpleName(arrayKey))
+								, format(toArray((JSONObject) value, arrayKey)));//需要将name:alias传至toArray
 					} else {//常规JSONObject，往下一级提取
-						transferredObject.put(key, format((JSONObject) value));
+						transferredObject.put(getSimpleName(key), format((JSONObject) value));
 					}
 				} else {//其它Object，直接填充
-					transferredObject.put(key, value);
+					transferredObject.put(getSimpleName(key), value);
 				}
 			}
 		}
@@ -379,6 +395,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 		Log.i(TAG, "format  return transferredObject = " + JSON.toJSONString(transferredObject));
 		return transferredObject;
 	}
+	
 	/**
 	 * @param responseArray
 	 * @return
@@ -409,13 +426,13 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	/**替换key+KEY_ARRAY为keyList
 	 * @param key
-	 * @return isArrayKey(key) ? getArrayKey(...) : key
+	 * @return getSimpleName(isArrayKey(key) ? getArrayKey(...) : key) {@link #getSimpleName(String)}
 	 */
 	public static String replaceArray(String key) {
 		if (isArrayKey(key)) {
-			return getArrayKey(key.substring(0, key.indexOf(KEY_ARRAY)));
+			key = getArrayKey(key.substring(0, key.indexOf(KEY_ARRAY)));
 		}
-		return key;
+		return getSimpleName(key);
 	}
 	/**获取列表变量名
 	 * @param key => StringUtil.getNoBlankString(key)
@@ -433,5 +450,19 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 		}
 		return key + "List";
 	}
+	
+	/**获取简单名称
+	 * @param fullName name 或 name:alias
+	 * @return name > name; name:alias > alias
+	 */
+	public static String getSimpleName(String fullName) {
+		//key:alias  -> alias; key:alias[] -> alias[]
+		int index = fullName == null ? -1 : fullName.indexOf(":");
+		if (index >= 0) {
+			fullName = fullName.substring(index + 1);
+		}
+		return fullName;
+	}
+	
 
 }

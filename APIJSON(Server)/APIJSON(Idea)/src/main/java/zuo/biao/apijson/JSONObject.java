@@ -240,7 +240,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setColumn(String)}
 	 */
 	public JSONObject setColumn(String... keys) {
-		return setColumn(StringUtil.getString(keys));
+		return setColumn(StringUtil.getString(keys, true));
 	}
 	/**set keys need to be returned
 	 * @param keys  "key0,key1,key2..."
@@ -259,7 +259,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setGroup(String)}
 	 */
 	public JSONObject setGroup(String... keys) {
-		return setGroup(StringUtil.getString(keys));
+		return setGroup(StringUtil.getString(keys, true));
 	}
 	/**set keys for group by
 	 * @param keys  "key0,key1,key2..."
@@ -278,7 +278,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setHaving(String)}
 	 */
 	public JSONObject setHaving(String... keys) {
-		return setHaving(StringUtil.getString(keys));
+		return setHaving(StringUtil.getString(keys, true));
 	}
 	/**set keys for having
 	 * @param keys  "key0,key1,key2..."
@@ -297,7 +297,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setOrder(String)}
 	 */
 	public JSONObject setOrder(String... keys) {
-		return setOrder(StringUtil.getString(keys));
+		return setOrder(StringUtil.getString(keys, true));
 	}
 	/**set keys for order by
 	 * @param keys  "key0,key1+,key2-..."

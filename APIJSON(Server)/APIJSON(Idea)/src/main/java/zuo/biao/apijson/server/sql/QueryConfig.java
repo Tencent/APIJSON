@@ -34,6 +34,7 @@ import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.Parser;
+import zuo.biao.apijson.server.exception.NotExistException;
 
 /**config model for query
  * @author Lemon
@@ -129,13 +130,17 @@ public class QueryConfig {
 		this.column = column;
 		return this;
 	}
-	public String getColumnString() {
+	public String getColumnString() throws NotExistException {
 		switch (getMethod()) {
 		case HEAD:
 		case POST_HEAD:
 			return "count(0) AS count";
 		case POST:
-			return StringUtil.isNotEmpty(column, true) ? "(" + column + ")" : "";
+			if (StringUtil.isEmpty(column, true)) {
+				throw new NotExistException(TAG + "getColumnString  getMethod() = POST"
+						+ " >> StringUtil.isEmpty(column, true)");
+			}
+			return "(" + column + ")";
 		default:
 			column = StringUtil.getString(column);
 			if (column.isEmpty()) {
@@ -297,7 +302,7 @@ public class QueryConfig {
 				throw new IllegalArgumentException("请设置" + ID + "！");
 			}
 
-			String whereString = " WHERE ";
+			String whereString = "";
 			boolean isFirst = true;
 			int keyType = 0;// 0 - =; 1 - $, 2 - {} 
 			Object value;
@@ -337,8 +342,8 @@ public class QueryConfig {
 				isFirst = false;
 			}
 
-			if (whereString.trim().endsWith("WHERE") == false) {
-				return whereString;
+			if (whereString.isEmpty() == false) {
+				return " WHERE " + whereString;
 			}
 		}
 		return "";
@@ -360,9 +365,14 @@ public class QueryConfig {
 	 * @param key
 	 * @param range "condition0,condition1..."
 	 * @return key condition0 AND key condition1 AND ...
+	 * @throws NotExistException 
 	 */
-	public static String getRangeString(String key, Object range) {
+	public static String getRangeString(String key, Object range) throws NotExistException {
 		Log.i(TAG, "getRangeString key = " + key);
+		if (range == null) {//依赖的对象都没有给出有效值，这个存在无意义。如果是客户端传的，那就能在客户端确定了。
+			throw new NotExistException(TAG + "getRangeString(" + key + ", " + range
+					+ ") range == null");
+		}
 
 		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
 		int type = -1;
@@ -384,13 +394,13 @@ public class QueryConfig {
 
 		if (range instanceof JSONArray) {
 			if (type != 0 && type != 2) {
-				throw new IllegalArgumentException("\"key{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
+				throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
 			}
-			return key + getInString(type == 2, ((JSONArray) range).toArray());
+			return key + getInString(key, ((JSONArray) range).toArray(), type == 2);
 		}
 		if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
 			String[] conditions = StringUtil.split((String) range);
-			String condition = "(";
+			String condition = "";
 			if (conditions != null) {
 				int index;
 				for (int i = 0; i < conditions.length; i++) {//对函数条件length(key)<=5这种不再在开头加key
@@ -400,25 +410,33 @@ public class QueryConfig {
 							+ conditions[i]);//单个条件
 				}
 			}
-			condition += ")";
+			if (condition.isEmpty()) {//条件如果存在必须执行，不能忽略。条件为空会导致出错，又很难保证条件不为空(@:条件)，所以还是这样好
+				throw new NotExistException(TAG + "getRangeString(" + key + ", " + range
+						+ ") >> condition.isEmpty() >> IN()");
+			}
+			condition = "(" + condition + ")";
 			return type != 2 ? condition : " NOT " + condition;
 		}
 
-		throw new IllegalArgumentException("\"key{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
+		throw new IllegalArgumentException(key + "{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
 	}
 	/**WHERE key IN ('key0', 'key1', ... )
 	 * @param in
 	 * @return IN ('key0', 'key1', ... )
+	 * @throws NotExistException 
 	 */
-	public static String getInString(boolean not, Object[] in) {
-		String inString = "(";
+	public static String getInString(String key, Object[] in, boolean not) throws NotExistException {
+		String condition = "";
 		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
 			for (int i = 0; i < in.length; i++) {
-				inString += ((i > 0 ? "," : "") + "'" + in[i] + "'");
+				condition += ((i > 0 ? "," : "") + "'" + in[i] + "'");
 			}
 		}
-		inString += ") ";
-		return (not ? " NOT " : "") + " IN " + inString;
+		if (condition.isEmpty()) {
+			throw new NotExistException(TAG + "getInString(" + key + ", [], " + not
+					+ ") >> condition.isEmpty() >> IN()");
+		}
+		return (not ? " NOT " : "") + " IN " + "(" + condition + ")";
 	}
 	//WHERE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -443,7 +461,7 @@ public class QueryConfig {
 			if (where.containsKey(ID) == false) {
 				throw new IllegalArgumentException("请设置" + ID + "！");
 			}
-			String setString = " SET ";
+			String setString = "";
 			boolean isFirst = true;
 			int keyType = 0;// 0 - =; 1 - +, 2 - -
 			Object value;
@@ -466,10 +484,10 @@ public class QueryConfig {
 
 				isFirst = false;
 			}
-
-			if (setString.trim().endsWith("SET") == false) {
-				return setString + " WHERE " + ID + "='" + where.get(ID) + "' ";
+			if (setString.isEmpty()) {
+				throw new NotExistException(TAG + "getSetString  >> setString.isEmpty()");
 			}
+			return " SET " + setString + " WHERE " + ID + "='" + where.get(ID) + "' ";
 		}
 		return "";
 	}
