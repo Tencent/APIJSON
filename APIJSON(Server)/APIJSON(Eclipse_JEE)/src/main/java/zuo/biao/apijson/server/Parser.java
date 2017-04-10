@@ -79,7 +79,7 @@ public class Parser {
 
 	private JSONObject requestObject;
 	private QueryHelper queryHelper;
-	private Map<String, JSONObject> queryResultMap;//path-result
+	private Map<String, Object> queryResultMap;//path-result
 
 	private boolean parseRelation;
 	//不用keyPath-valuePath-value是因为很可能很多valuePath对应同一个value
@@ -128,7 +128,7 @@ public class Parser {
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
 
 		keyValuePathMap = new HashMap<String, String>();
-		queryResultMap = new HashMap<String, JSONObject>();
+		queryResultMap = new HashMap<String, Object>();
 		parseRelation = false;
 
 		Exception error = null;
@@ -616,8 +616,10 @@ public class Parser {
 							Log.i(TAG, "getObject  target != null && target instanceof String"
 									+ " && ((String) target).startsWith(valuePath)  >>  ");
 							if (parseRelation) {
-								if (isTableKey) {
-									Log.e(TAG, "getObject parseRelation >> isTableKey(table) >>  return null;");
+								//非查询关键词 @key 不影响查询，直接跳过
+								if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
+									Log.e(TAG, "getObject parseRelation >> isTableKey && (key.startsWith(@) == false"
+											+ " || QueryConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
 									return null;//parseRelation时还获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 								} else {
 									Log.d(TAG, "getObject parseRelation >> isTableKey(table) == false >> continue;");
@@ -737,7 +739,7 @@ public class Parser {
 		}
 		String path = getAbsPath(parentPath, name);
 
-		int page = 0, count = 0, total = 0;
+		int count = 0, page = 0, total = 0;
 
 		count = request.getIntValue(JSONRequest.KEY_COUNT);
 		page = request.getIntValue(JSONRequest.KEY_PAGE);
@@ -766,6 +768,7 @@ public class Parser {
 				if (total <= 0) {//request内部没有JSONObject或者不存在适合条件的table内容
 					return null;
 				}
+				putQueryResult(path + "/" + JSONResponse.KEY_TOTAL, total);
 				if (count > total) {
 					count = total;
 				}
@@ -987,7 +990,7 @@ public class Parser {
 	 * @param valuePath object的路径
 	 * @param value 需要被关联的object
 	 */
-	private synchronized void putQueryResult(String path, JSONObject result) {
+	private synchronized void putQueryResult(String path, Object result) {
 		Log.i(TAG, "\n putQueryResult  valuePath = " + path + "; result = " + result + "\n <<<<<<<<<<<<<<<<<<<<<<<");
 		//		if (queryResultMap.containsKey(valuePath)) {//只保存被关联的value
 		Log.d(TAG, "putQueryResult  queryResultMap.containsKey(valuePath) >> queryResultMap.put(path, result);");
@@ -1013,13 +1016,24 @@ public class Parser {
 			Log.e(TAG, "getValueByPath  StringUtil.isNotEmpty(valuePath, true) == false >> return null;");
 			return null;
 		}
+		Object target = queryResultMap.get(valuePath);
+		if (target != null) {
+			return target;
+		}
+
 		//取出key被valuePath包含的result，再从里面获取key对应的value
 		Set<String> set = queryResultMap.keySet();
 		JSONObject parent = null;
 		String[] keys = null;
 		for (String path : set) {
 			if (valuePath.startsWith(path)) {
-				parent = queryResultMap.get(path);
+				try {
+					parent = (JSONObject) queryResultMap.get(path);
+				} catch (Exception e) {
+					Log.e(TAG, "getValueByPath  try { parent = (JSONObject) queryResultMap.get(path); } catch { "
+							+ "\n parent not instanceof JSONObject!");
+					parent = null;
+				}
 				if (parent != null) {
 					keys = StringUtil.splitPath(valuePath.substring(path.length()));
 				}

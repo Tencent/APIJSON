@@ -14,8 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
-import zuo.biao.library.util.CommonUtil;
-import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.text.SpannableString;
@@ -25,11 +23,14 @@ import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
+
 import apijson.demo.client.R;
 import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.model.Comment;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.User;
+import zuo.biao.library.util.CommonUtil;
+import zuo.biao.library.util.StringUtil;
 
 /**评论TextView
  */
@@ -62,7 +63,7 @@ public class CommentTextView extends TextView {
 	private User user;
 	private User toUser;
 	/**设置View
-	 * @param comment
+	 * @param item
 	 */
 	public void setView(CommentItem item) {
 		if (item == null) {
@@ -99,7 +100,7 @@ public class CommentTextView extends TextView {
 			public void onClick(View widget) {
 				onNameClick(index, widget, user);
 			}
-		}, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);		
+		}, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 	}
 
 
@@ -107,7 +108,7 @@ public class CommentTextView extends TextView {
 		if (listener != null) {
 			listener.onNameClick(index, widget, user);
 		} else {
-			CommonUtil.toActivity((Activity) getContext(), UserActivity.createIntent(getContext(), user.getId()));	
+			CommonUtil.toActivity((Activity) getContext(), UserActivity.createIntent(getContext(), user.getId()));
 		}
 	}
 

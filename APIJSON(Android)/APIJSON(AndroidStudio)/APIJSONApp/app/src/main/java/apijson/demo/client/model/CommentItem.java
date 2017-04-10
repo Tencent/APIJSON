@@ -14,10 +14,11 @@ limitations under the License.*/
 
 package apijson.demo.client.model;
 
+import android.support.annotation.NonNull;
+
 import java.util.List;
 
 import zuo.biao.apijson.BaseModel;
-import android.support.annotation.NonNull;
 
 public class CommentItem extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;
@@ -61,7 +62,7 @@ public class CommentItem extends BaseModel {
 	@NonNull
 	public User getToUser() {
 		if (toUser == null) {
-			toUser = new User();//JSONResponse.toObject(new JSONResponse(toUserObject), User.class);
+			toUser = new User();
 		}
 		return toUser;
 	}
@@ -69,7 +70,7 @@ public class CommentItem extends BaseModel {
 		this.toUser = toUser;
 		return this;
 	}
-	
+
 	public List<CommentItem> getChildList() {
 		return childList;
 	}
@@ -77,7 +78,7 @@ public class CommentItem extends BaseModel {
 		this.childList = childList;
 		return this;
 	}
-	
+
 
 	@Override
 	public Long getId() {
@@ -94,9 +95,6 @@ public class CommentItem extends BaseModel {
 	public Long getUserId() {
 		return getUser().getId();
 	}
-	public Long getToUserId() {
-		return getToUser().getId();
-	}
-	
+
 }
 

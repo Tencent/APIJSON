@@ -88,7 +88,8 @@ public class PraiseTextView extends TextView {
 		}
 		dividerIndexes.add(content.length());//最后一个
 		
-		SpannableString msp = new SpannableString(content + (count <= 9 ? "" : " 等" + count + "人觉得很赞"));
+		//空格保证多行时不会点击空白处总是响应最后一个
+		SpannableString msp = new SpannableString(content + (count <= 9 ? " " : " 等觉得很赞"));//" + count + "人觉得很赞"));
 
 		//设置可点击名称
 		for (int i = 0; i < dividerIndexes.size() - 1; i++) {
