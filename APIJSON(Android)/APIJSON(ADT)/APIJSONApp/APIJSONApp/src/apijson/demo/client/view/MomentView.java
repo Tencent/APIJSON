@@ -232,10 +232,11 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 */
 	public void setComment(List<CommentItem> list) {
 		//		ivMomentViewComment.setImageResource(joined ? R.drawable.commented : R.drawable.comment);
-		llMomentViewCommentContainer.setVisibility(list == null || list.isEmpty() ? View.GONE : View.VISIBLE);
+		llMomentViewCommentContainer.setVisibility(showComment == false || list == null || list.isEmpty()
+				? View.GONE : View.VISIBLE);
 
-		if (showComment == false) {
-			Log.i(TAG, "setComment  showComment == false >> return;");
+		if (llMomentViewCommentContainer.getVisibility() != View.VISIBLE) {
+			Log.i(TAG, "setComment  llMomentViewCommentContainer.getVisibility() != View.VISIBLE >> return;");
 			return;
 		}
 

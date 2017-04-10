@@ -320,6 +320,9 @@ public class HttpRequest {
 			userItem.put(ID_IN, idList);
 		} else {
 			apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
+			if (currentUser == null) {
+				currentUser = new apijson.demo.client.model.User();
+			}
 			switch (range) {
 			case RANGE_ALL://1.首推注册时间长的（也可以是级别高的）；2.给男性用户首推女性用户
 				userItem.setOrder(DATE_UP, (currentUser.getSex() == 0 ? "sex-" : ""));
@@ -334,7 +337,7 @@ public class HttpRequest {
 					Log.e(TAG, "只允许查看当前用户的!");
 					return;
 				}
-				List<Long> list = currentUser == null ? null : currentUser.getFriendIdList();
+				List<Long> list = currentUser.getFriendIdList();
 				if (list == null) {//不能放在range == RANGE_USER_CIRCLE里面，为null不会当成查询条件！
 					list = new ArrayList<Long>();
 				}
@@ -420,7 +423,10 @@ public class HttpRequest {
 				return;
 			}
 			apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
-			List<Long> list = currentUser == null ? null : currentUser.getFriendIdList();
+			if (currentUser == null) {
+				currentUser = new apijson.demo.client.model.User();
+			}
+			List<Long> list = currentUser.getFriendIdList();
 			if (list == null) {
 				list = new ArrayList<Long>();
 			}
