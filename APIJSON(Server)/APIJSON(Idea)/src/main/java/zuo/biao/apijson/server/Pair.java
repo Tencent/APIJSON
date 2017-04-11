@@ -110,7 +110,7 @@ public class Pair extends Entry<String, String> {
 	 * "key":null不应该出现？因为FastJSON内默认不存null
 	 * @param pair leftKey:rightValue
 	 * @param isRightValueDefault 右边值缺省，当pair不包含 : 时默认整个pair为leftKey；false-相反
-	 * @param defaultKey 缺省值
+	 * @param defaultValue 缺省值
 	 * @return @NonNull
 	 */
 	public static Entry<String, String> parseEntry(String pair, boolean isRightValueDefault, String defaultValue) {

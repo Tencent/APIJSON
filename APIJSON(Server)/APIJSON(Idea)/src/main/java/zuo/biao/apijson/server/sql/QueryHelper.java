@@ -59,7 +59,6 @@ public class QueryHelper {
 		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_SCHEMA, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
-	//TODO key应该改成SQL
 	private synchronized void saveCache(String sql, Map<Integer, JSONObject> map) {
 		if (sql == null || map == null || map.isEmpty()) {
 			Log.i(TAG, "saveList  sql == null || map == null || map.isEmpty() >> return;");
@@ -180,6 +179,12 @@ public class QueryHelper {
 			Object value;
 			Object json;
 			for (int i = 0; i < columnArray.length; i++) {
+				if (columnArray[i] == null || columnArray[i].isEmpty() || columnArray[i].startsWith("_")) {
+					Log.i(TAG, "select while (rs.next()){ ..."
+							+ " >>  columnArray[i] == " + columnArray[i]
+							+ " >> continue;");
+					continue;
+				}//允许 key:_alias, 但不允许_key, _key:alias
 				columnArray[i] = Pair.parseEntry(columnArray[i]).getValue();
 				try {
 					value = rs.getObject(rs.findColumn(columnArray[i]));
