@@ -987,8 +987,8 @@ public class Parser {
 	}
 
 	/**将已获取完成的object的内容替换requestObject里对应的值
-	 * @param valuePath object的路径
-	 * @param value 需要被关联的object
+	 * @param path object的路径
+	 * @param result 需要被关联的object
 	 */
 	private synchronized void putQueryResult(String path, Object result) {
 		Log.i(TAG, "\n putQueryResult  valuePath = " + path + "; result = " + result + "\n <<<<<<<<<<<<<<<<<<<<<<<");
