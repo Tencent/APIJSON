@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zuo.biao.library.util.CommonUtil;
-import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.text.SpannableString;

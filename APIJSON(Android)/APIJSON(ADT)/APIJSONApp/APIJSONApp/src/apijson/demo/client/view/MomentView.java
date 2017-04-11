@@ -247,7 +247,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			});
 			commentContainerView.tvCommentContainerViewMore.setOnClickListener(this);
 
-			commentContainerView.setMaxShowCount(9);
+			commentContainerView.setMaxShowCount(5);
 		}
 
 		commentContainerView.bindView(list);
