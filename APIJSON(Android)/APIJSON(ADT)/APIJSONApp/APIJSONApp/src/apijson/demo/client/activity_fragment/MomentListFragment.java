@@ -279,7 +279,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 	}
 	@Override
 	public int getCacheCount() {
-		return 4;
+		return 3;
 	}
 
 
