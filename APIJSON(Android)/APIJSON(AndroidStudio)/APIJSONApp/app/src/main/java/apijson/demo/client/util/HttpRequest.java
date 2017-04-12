@@ -460,7 +460,7 @@ public class HttpRequest {
 				.setColumn(COLUMNS_USER_SIMPLE));
 
 
-		request.add(commentItem.toArray(10, 0, CommentItem.class.getSimpleName()));
+		request.add(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
 //		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 

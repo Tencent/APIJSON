@@ -185,7 +185,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		// 图片
 		setPicture(moment.getPictureList());
 		// 点赞
-		setPraise(data.getIsPraised(), data.getUserList(), data.getPraiseUserIdList());
+		setPraise(data.getIsPraised(), data.getUserList());
 		// 评论
 		setComment(data.getCommentItemList());
 
@@ -202,22 +202,12 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param joined
 	 * @param list
 	 */
-	private void setPraise(boolean joined, List<User> userList, List<Long> list) {
+	private void setPraise(boolean joined, List<User> userList) {
 		ivMomentViewPraise.setImageResource(joined ? R.drawable.praised : R.drawable.praise);
-
-		if (userList == null || userList.isEmpty()) {
-			if (list != null) {
-				userList = new ArrayList<User>();
-				User u;
-				for (Long id : list) {
-					u = new User(id);
-					u.setName("" + id);
-					userList.add(u);
-				}
-			}
-		}
 		llMomentViewPraise.setVisibility(userList == null || userList.isEmpty() ? View.GONE : View.VISIBLE);
-		tvMomentViewPraise.setView(userList);
+		if (llMomentViewPraise.getVisibility() == View.VISIBLE) {
+			tvMomentViewPraise.setView(userList);
+		}
 	}
 
 	private boolean showComment = true;
@@ -257,7 +247,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			});
 			commentContainerView.tvCommentContainerViewMore.setOnClickListener(this);
 
-			commentContainerView.setMaxShowCount(9);
+			commentContainerView.setMaxShowCount(5);
 		}
 
 		commentContainerView.bindView(list);

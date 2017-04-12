@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zuo.biao.library.util.CommonUtil;
-import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.text.SpannableString;
@@ -59,18 +58,18 @@ public class PraiseTextView extends TextView {
 	/**设置View
 	 * @param comment
 	 */
-	public void setView(List<User> list_) {
-		if (list_ == null || list_.isEmpty()) {
+	public void setView(List<User> list) {
+		if (list == null || list.isEmpty()) {
 			setText("");
 			return;
 		}
-		//去除无效User
-		List<User> list = new ArrayList<User>();
-		for (User user: list_) {
-			if (user != null && StringUtil.isNotEmpty(user.getName(), true)) {
-				list.add(user);
-			}
-		}
+		//		//影响列表滚动流畅度，去除无效User
+		//		List<User> list = new ArrayList<User>();
+		//		for (User user: list_) {
+		//			if (user != null && StringUtil.isNotEmpty(user.getName(), true)) {
+		//				list.add(user);
+		//			}
+		//		}
 		int count = list == null ? 0 : list.size();
 		if (count > 9) {
 			list = list.subList(0, 9);
@@ -84,10 +83,10 @@ public class PraiseTextView extends TextView {
 		for (int i = 0; i < list.size(); i++) {
 			user = list.get(i);
 			dividerIndexes.add(content.length());
-			content += (i <= 0 ? "" : "、") + user.getName();
+			content += (i <= 0 ? "" : "、") + (user == null ? " " : user.getName());
 		}
 		dividerIndexes.add(content.length());//最后一个
-		
+
 		//空格保证多行时不会点击空白处总是响应最后一个
 		SpannableString msp = new SpannableString(content + (count <= 9 ? " " : " 等觉得很赞"));//" + count + "人觉得很赞"));
 
@@ -115,7 +114,8 @@ public class PraiseTextView extends TextView {
 		if (listener != null) {
 			listener.onNameClick(index, widget, user);
 		} else {
-			CommonUtil.toActivity((Activity) getContext(), UserActivity.createIntent(getContext(), user.getId()));	
+			CommonUtil.toActivity((Activity) getContext(), UserActivity.createIntent(
+					getContext(), user == null ? 0 : user.getId()));	
 		}
 	}
 
