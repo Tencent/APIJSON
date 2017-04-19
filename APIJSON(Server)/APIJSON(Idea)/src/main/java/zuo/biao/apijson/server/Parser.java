@@ -523,18 +523,18 @@ public class Parser {
 
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					if (isArrayKey(key)) {//APIJSON Array
-						result = getArray(path, parentConfig, key, (JSONObject) value);
+						result = getArray(path, key, (JSONObject) value);
 					} else {//APIJSON Object
 						result = getObject(path, isFirst && isArrayChild //以第0个JSONObject为准
 								? parentConfig : null, key, (JSONObject) value);
-						
+
 						//如果第0个都为空，那后面的也都无意义了。
 						if (isFirst && isArrayChild && (result == null || result.isEmpty())) {
 							Log.d(TAG, "getObject  isFirst && isArrayChild"
 									+ " && (result == null || result.isEmpty()) >> return null;");
 							return null;
 						}
-						
+
 						isFirst = false;//[]里第一个不能为[]
 					}
 					Log.i(TAG, "getObject  key = " + key + "; result = " + result);
@@ -721,14 +721,12 @@ public class Parser {
 
 	/**获取对象数组，该对象数组处于parentObject内
 	 * @param parentPath parentObject的路径
-	 * @param parentConfig 对子object的SQL查询配置，需要传两个层级
 	 * @param name parentObject的key
 	 * @param request parentObject的value
 	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
 	 * @throws Exception 
 	 */
-	private JSONObject getArray(String parentPath, QueryConfig parentConfig, String name
-			, final JSONObject request) throws Exception {
+	private JSONObject getArray(String parentPath, String name, JSONObject request) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
 		if (isHeadMethod(requestMethod, true)) {
@@ -743,6 +741,7 @@ public class Parser {
 
 		count = request.getIntValue(JSONRequest.KEY_COUNT);
 		page = request.getIntValue(JSONRequest.KEY_PAGE);
+
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
 
@@ -752,8 +751,8 @@ public class Parser {
 
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = new LinkedHashSet<>(request.keySet());
-		if (count <= 0 || count > 5) {//5以下不优化长度
-			if(parseRelation == false && set != null) {
+		if(parseRelation == false && set != null) {
+			if (count <= 0 || count > 5) {//5以下不优化长度
 				String table;
 				Object value;
 				for (String key : set) {
@@ -778,7 +777,7 @@ public class Parser {
 
 		QueryConfig config = new QueryConfig(requestMethod, count, page);
 
-		
+
 		JSONObject transferredRequest = new JSONObject(true);
 
 		JSONObject parent = null;
@@ -808,7 +807,7 @@ public class Parser {
 					config.setPosition(Integer.valueOf(0 + StringUtil.getNumber(key, true)));
 					isArrayKey = isArrayKey(key);
 					if (isArrayKey) {//json array
-						result = getArray(path, config, key, (JSONObject) value);
+						result = getArray(path, key, (JSONObject) value);
 					} else {//json object
 						result = getObject(path, config, key, (JSONObject) value);
 					}
@@ -826,6 +825,10 @@ public class Parser {
 			}
 		}
 
+		//解决[]:{Comment[]:{...}}内层count,page丢失
+		request.put(JSONRequest.KEY_COUNT, count);
+		request.put(JSONRequest.KEY_PAGE, page);
+
 		Log.i(TAG, "getArray  return " + JSON.toJSONString(transferredRequest) + "\n>>>>>>>>>>>>>>>\n\n\n");
 
 		return transferredRequest;
@@ -834,7 +837,7 @@ public class Parser {
 	/**估计最大总数，去掉value中所有依赖引用.
 	 * TODO 返回一个{"total":10, name:value}更好，省去了之后的parseRelation
 	 * @param path
-	 * @param name
+	 * @param table
 	 * @param value
 	 * @return
 	 * @throws Exception 
