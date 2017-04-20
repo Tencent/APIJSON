@@ -603,13 +603,38 @@ public class Parser {
 						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
 						String keyPath = getAbsPath(path, replaceKey);
-						String valuePath = parseRelation ? getRelationValuePath(keyPath) : new String((String) value);
+						String valuePath = new String((String) value);//改用实时替换[] -> []/i
+								//parseRelation ? getRelationValuePath(keyPath) : new String((String) value);
 
 						if (valuePath.startsWith(SEPARATOR)) {
 							valuePath = getAbsPath(parentPath, valuePath);
+						} else {//处理[] -> []/i
+							String[] ps = StringUtil.split(parentPath, "]/");//"[]/");
+
+							if (ps != null && ps.length > 1) {
+								String[] vs = StringUtil.split(valuePath, "]/");
+
+								if (vs != null && vs.length > 0) {
+									String pos;
+									for (int i = 0; i < ps.length - 1; i++) {
+										if (ps[i] == null || ps[i].equals(vs[i]) == false) {//允许""？
+											break;
+										}
+
+										pos = ps[i+1].contains("/") == false ? ps[i+1]
+												: ps[i+1].substring(0, ps[i+1].indexOf("/"));
+										if (
+												//StringUtil.isNumer(pos) && 
+												vs[i+1].startsWith(pos + "/") == false) {
+											vs[i+1] = pos + "/" + vs[i+1];
+										}
+									}
+									valuePath = StringUtil.getString(vs, "]/");
+								}
+							}
 						}
 						//先尝试获取，尽量保留缺省依赖路径，这样就不需要担心路径改变
-						Object target = getValueByPath(valuePath, true);
+						Object target = getValueByPath(valuePath);
 						Log.i(TAG, "getObject valuePath = " + valuePath + "; target = " + target);
 
 						if (valuePath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
@@ -629,6 +654,7 @@ public class Parser {
 								Log.i(TAG, "getObject parseRelation == false"
 										+ " >>  containRelation = true; putRelation(keyPath, valuePath);");
 								containRelation = true;
+								//TODO					上面用实时替换[] -> []/i			
 								putRelation(keyPath, valuePath);
 							}
 						} else {//直接替换原来的key@:path为key:target
@@ -793,7 +819,7 @@ public class Parser {
 					break;//数据库返回数量不够count，后面没有了。有依赖不为空，无依赖直接查询数据库。
 				}
 				transferredRequest.put("" + i, parent);
-				updateRelation(path, getAbsPath(path, "" + i));//request结构已改变，需要更新依赖关系
+//				updateRelation(path, getAbsPath(path, "" + i));//request结构已改变，需要更新依赖关系
 			}
 
 			if (isInRelationMap(path)) {
@@ -864,8 +890,7 @@ public class Parser {
 						if (v == null) {
 							continue;
 						}
-						target = getValueByPath(getAbsPath(
-								((String) v).startsWith(SEPARATOR) ? path : "", (String) v), true);
+						target = getValueByPath(getAbsPath(((String) v).startsWith(SEPARATOR) ? path : "", (String) v));
 						if (target != null && ((String) v).equals(target) == false) {
 							k = k.substring(0, k.length() - 1);
 							v = target;
@@ -1003,20 +1028,11 @@ public class Parser {
 	}
 	/**根据路径获取值
 	 * @param valuePath
-	 * @return
+	 * @return parent == null ? valuePath : parent.get(keys[keys.length - 1])
 	 */
 	private Object getValueByPath(String valuePath) {
-		return getValueByPath(valuePath, false);
-	}
-	/**根据路径获取值
-	 * @param valuePath
-	 * @param containKey
-	 * @return containKey && parent.containsKey(targetKey) == false ? path : parent.get(targetKey);
-	 */
-	private Object getValueByPath(String valuePath, boolean containKey) {
-		Log.i(TAG, "<<<<<<<<<<<<<<< \n getValueByPath  valuePath = " + valuePath
-				+ ";  containKey = " + containKey + "\n <<<<<<<<<<<<<<<<<<");
-		if (StringUtil.isNotEmpty(valuePath, true) == false) {
+		Log.i(TAG, "<<<<<<<<<<<<<<< \n getValueByPath  valuePath = " + valuePath + "\n <<<<<<<<<<<<<<<<<<");
+		if (StringUtil.isEmpty(valuePath, true)) {
 			Log.e(TAG, "getValueByPath  StringUtil.isNotEmpty(valuePath, true) == false >> return null;");
 			return null;
 		}
@@ -1054,13 +1070,9 @@ public class Parser {
 				parent = getJSONObject(parent, keys[i]);
 			}
 		}
-		if (parent == null) {
-			return containKey ? valuePath : null;
-		}
 
-		System.out.println("getValueByPath  return parent.get(keys[keys.length - 1]); >> ");
-		String targetKey = keys[keys.length - 1];
-		return containKey && parent.containsKey(targetKey) == false ? valuePath : parent.get(targetKey);
+		System.out.println("getValueByPath  return parent == null ? valuePath : parent.get(keys[keys.length - 1]); >> ");
+		return parent == null ? valuePath : parent.get(keys[keys.length - 1]);
 	}
 
 	//依赖引用关系 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
