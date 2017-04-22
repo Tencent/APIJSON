@@ -19,6 +19,12 @@ package zuo.biao.apijson;
  */
 public class SQL {
 
+	public static final String OR = " OR ";
+	public static final String AND = " AND ";
+	public static final String NOT = " NOT ";
+	public static final String IS = " IS ";
+	public static final String NULL = " NULL ";
+	
 	/**
 	 * @param isNull
 	 * @return
