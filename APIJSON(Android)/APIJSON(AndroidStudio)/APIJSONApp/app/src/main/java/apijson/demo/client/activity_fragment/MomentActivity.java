@@ -496,10 +496,10 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 		}
 	}
 
-	public static final int HTTP_GET_MOMENT = 1;
-	private final int HTTP_COMMENT = 2;
-	private final int HTTP_REPLY = 3;
-	private final int HTTP_DELETE = 4;
+	private static final int HTTP_GET_MOMENT = 1;
+	private static final int HTTP_COMMENT = 2;
+	private static final int HTTP_REPLY = 3;
+	private static final int HTTP_DELETE = 4;
 	@Override
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
 		JSONResponse response = new JSONResponse(resultJson);

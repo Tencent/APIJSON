@@ -97,4 +97,3 @@ public class CommentItem extends BaseModel {
 	}
 
 }
-

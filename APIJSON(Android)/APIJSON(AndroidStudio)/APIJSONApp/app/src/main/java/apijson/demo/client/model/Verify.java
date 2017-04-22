@@ -17,7 +17,7 @@ package apijson.demo.client.model;
 import zuo.biao.library.util.StringUtil;
 
 
-/**钱包类
+/**验证码类
  * @author Lemon
  */
 public class Verify extends apijson.demo.client.server.model.Verify {
@@ -38,7 +38,7 @@ public class Verify extends apijson.demo.client.server.model.Verify {
 	public Long getId() {
 		return value(super.getId());
 	}
-	
+
 	/**服务器用id作为phone
 	 * @return
 	 */

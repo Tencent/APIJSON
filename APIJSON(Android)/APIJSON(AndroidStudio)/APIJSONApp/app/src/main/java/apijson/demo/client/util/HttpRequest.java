@@ -33,7 +33,7 @@ import apijson.demo.client.server.model.Wallet;
 
 /**HTTP请求工具类
  * @author Lemon
- * @use 添加请求方法xxxMethod >> HttpxxxMethod(...)
+ * @use 添加请求方法xxxMethod >> HttpRequest.xxxMethod(...)
  * @must 所有请求的url、请求方法(GET, POST等)、请求参数(key-value方式，必要key一定要加，没提供的key不要加，value要符合指定范围)
  *       都要符合后端给的接口文档
  */
@@ -125,40 +125,46 @@ public class HttpRequest {
 
 	//user<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final String KEY_RANGE = "range";
+	public static final String RANGE = "range";
 
-	public static final String KEY_ID = "id";
-	public static final String KEY_USER_ID = "userId";
-	public static final String KEY_CURRENT_USER_ID = "currentUserId";
+	public static final String ID = "id";
+	public static final String USER_ID = "userId";
+	public static final String CURRENT_USER_ID = "currentUserId";
 
-	public static final String KEY_NAME = "name";
-	public static final String KEY_PHONE = "phone";
-	public static final String KEY_PASSWORD = "password";
-	public static final String KEY_LOGIN_PASSWORD = "loginPassword";
-	public static final String KEY_PAY_PASSWORD = "payPassword";
-	public static final String KEY_VERIFY = "verify";
+	public static final String NAME = "name";
+	public static final String PHONE = "phone";
+	public static final String PASSWORD = "password";
+	public static final String LOGIN_PASSWORD = "loginPassword";
+	public static final String PAY_PASSWORD = "payPassword";
+	public static final String VERIFY = "verify";
 
-	public static final String KEY_SEX = "sex";
-	public static final String KEY_TYPE = "type";
+	public static final String SEX = "sex";
+	public static final String TYPE = "type";
+	public static final String CONTENT = "content";
 
 
 
 	public static final String DATE_UP = "date+";//同 "date ASC"
 	public static final String DATE_DOWN = "date-";//同 "date DESC"
 
-	public static final String ID_AT = KEY_ID + "@";
-	public static final String USER_ID_AT = KEY_USER_ID + "@";
+	public static final String ID_AT = ID + "@";
+	public static final String USER_ID_AT = USER_ID + "@";
 	public static final String MOMENT_ID_AT = "momentId@";
 	public static final String COMMENT_ID_AT = "commentId@";
 
-	public static final String ID_IN = KEY_ID + "{}";
-	public static final String USER_ID_IN = KEY_USER_ID + "{}";
+	public static final String ID_IN = ID + "{}";
+	public static final String USER_ID_IN = USER_ID + "{}";
 	public static final String MOMENT_ID_IN = "momentId{}";
 	public static final String COMMENT_ID_IN = "commentId{}";
 
-	public static final String NAME_SEARCH = KEY_NAME + "$";
-	public static final String PHONE_SEARCH = KEY_PHONE + "$";
-	public static final String CONTENT_SEARCH = "content$";
+	public static final String NAME_SEARCH = NAME + "$";
+	public static final String PHONE_SEARCH = PHONE + "$";
+	public static final String CONTENT_SEARCH = CONTENT + "$";
+
+
+
+	public static final String COLUMNS_USER_SIMPLE = "id,name";
+	public static final String COLUMNS_USER = "id,sex,name,head";
 
 
 	//account<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -175,8 +181,8 @@ public class HttpRequest {
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONObject request = new JSONRequest(new User().setPhone(phone).setName(name).setSex(sex))
 				.setTag(User.class.getSimpleName());
-		request.put(KEY_VERIFY, verify);
-		request.put(KEY_PASSWORD, password);
+		request.put(VERIFY, verify);
+		request.put(PASSWORD, password);
 		HttpManager.getInstance().post(URL_POST + "register/user/", request, requestCode, listener);
 	}
 	/**重置密码
@@ -207,24 +213,6 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void login(String phone, String password, int type, int requestCode, OnHttpResponseListener listener) {
-		//		JSONRequest request = new JSONRequest(new User().setPhone(phone).setPassword(password));
-		//		get(request, requestCode, listener);
-
-		//		JSONRequest request = new JSONRequest(new Password(User.class.getSimpleName(), phone, password));
-		//
-		//		JSONRequest user = new JSONRequest();
-		//		user.put(ID_AT, "Password/tableId");
-		//		request.put(User.class.getSimpleName(), user);
-
-		//post
-		////		Login login = new Login().setType(true);
-		//		JSONRequest loginObject = new JSONRequest();
-		//		loginObject.put(USER_ID_AT, "/Password/tableId");
-		//		loginObject.put(KEY_TYPE, true);
-		//		request.put(Login.class.getSimpleName(), loginObject);
-
-		//		postGet(request.setTag(Login.class.getSimpleName()), requestCode, listener);
-
 		HttpManager.getInstance().get(URL_GET + "login/" + type + "/" + phone + "/" + password
 				, null, requestCode, listener);
 	}
@@ -253,8 +241,9 @@ public class HttpRequest {
 
 	//account>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	public static final String COLUMNS_USER_SIMPLE = "id,name";
-	public static final String COLUMNS_USER = "id,sex,name,head";
+
+
+	//User<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**获取用户
 	 * @param id
@@ -274,7 +263,7 @@ public class HttpRequest {
 		JSONRequest request = new JSONRequest(new User(id));
 		if (withMomentList) {
 			request.add(new JSONRequest(Moment.class.getSimpleName()
-					, new JSONRequest(KEY_USER_ID, id).setColumn("pictureList").setOrder(DATE_DOWN))
+					, new JSONRequest(USER_ID, id).setColumn("pictureList").setOrder(DATE_DOWN))
 					.toArray(3, 0, Moment.class.getSimpleName()));
 		}
 		get(request, requestCode, listener);
@@ -329,7 +318,7 @@ public class HttpRequest {
 					break;
 				case RANGE_SINGLE:
 				case RANGE_USER:
-					userItem.put(KEY_ID, id);
+					userItem.put(ID, id);
 					break;
 				case RANGE_USER_FRIEND:
 				case RANGE_USER_CIRCLE:
@@ -357,7 +346,7 @@ public class HttpRequest {
 					break;
 				case RANGE_COMMENT:
 					JSONObject comment = new JSONObject(new Comment(id));
-					comment.setColumn(KEY_USER_ID);
+					comment.setColumn(USER_ID);
 					request.put(Comment.class.getSimpleName(), comment);
 					userItem.put(ID_AT, "Comment/userId");
 					break;
@@ -372,6 +361,13 @@ public class HttpRequest {
 		request.add(listRequest);
 		get(request, requestCode, listener);
 	}
+
+	//User>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+	//Moment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**获取作品
 	 * @param id
@@ -411,10 +407,10 @@ public class HttpRequest {
 				//do noting
 				break;
 			case RANGE_SINGLE:
-				moment.put(KEY_ID, id);
+				moment.put(ID, id);
 				break;
 			case RANGE_USER:
-				moment.put(KEY_USER_ID, id);
+				moment.put(USER_ID, id);
 				break;
 			case RANGE_USER_FRIEND:
 			case RANGE_USER_CIRCLE:
@@ -467,27 +463,6 @@ public class HttpRequest {
 		get(request.toArray(count, page), requestCode, listener);
 	}
 
-	/**获取评论列表
-	 * @param momentId
-	 * @param count
-	 * @param page
-	 * @param requestCode
-	 * @param listener
-	 */
-	public static void getCommentList(long momentId, int count, int page
-			, int requestCode, OnHttpResponseListener listener) {
-		JSONRequest request = new JSONRequest();
-		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
-		request.put(Comment.class.getSimpleName(), comment.setOrder(DATE_UP));
-		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
-
-		request = request.toArray(count, page);
-//		if (requestCode == 0) {
-//			request.put("total@", "[]/total");
-//		}
-		get(request, requestCode, listener);
-	}
-
 	/**赞动态
 	 * @param id
 	 * @param toPraise
@@ -512,24 +487,33 @@ public class HttpRequest {
 		delete(new JSONRequest(new Moment(id)).setTag(Moment.class.getSimpleName()), requestCode, listener);
 	}
 
-	/**获取钱包
+	//Moment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+	//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	/**获取评论列表
+	 * @param momentId
+	 * @param count
+	 * @param page
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void getWallet(int requestCode, OnHttpResponseListener listener) {
-		long userId = APIJSONApplication.getInstance().getCurrentUserId();
-		if (userId <= 0) {
-			userId = 38710;
-		}
-
+	public static void getCommentList(long momentId, int count, int page
+			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
-		request.put(new Wallet().setUserId(userId));
-		request.put(KEY_CURRENT_USER_ID, userId);
-		request.put(KEY_LOGIN_PASSWORD, "apijson");
-		request.put(KEY_PAY_PASSWORD, "123456");
-		postGet(request.setTag(Wallet.class.getSimpleName()), requestCode, listener);
-	}
+		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
+		request.put(Comment.class.getSimpleName(), comment.setOrder(DATE_UP));
+		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 
+		request = request.toArray(count, page);
+//		if (requestCode == 0) {
+//			request.put("total@", "[]/total");
+//		}
+		get(request, requestCode, listener);
+	}
 
 	/**
 	 * @param momentId
@@ -557,13 +541,32 @@ public class HttpRequest {
 		delete(new JSONRequest(new Comment(id)).setTag(Comment.class.getSimpleName()), requestCode, listener);
 	}
 
+	//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
 
 
+	/**获取钱包
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void getWallet(int requestCode, OnHttpResponseListener listener) {
+		long userId = APIJSONApplication.getInstance().getCurrentUserId();
+		if (userId <= 0) {
+			userId = 38710;
+		}
 
-	//user>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		JSONRequest request = new JSONRequest();
+		request.put(new Wallet().setUserId(userId));
+		request.put(CURRENT_USER_ID, userId);
+		request.put(LOGIN_PASSWORD, "apijson");
+		request.put(PAY_PASSWORD, "123456");
+		postGet(request.setTag(Wallet.class.getSimpleName()), requestCode, listener);
+	}
+
+
+
 
 
 

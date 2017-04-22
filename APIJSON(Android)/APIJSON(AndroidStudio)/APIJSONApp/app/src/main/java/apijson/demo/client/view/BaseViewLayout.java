@@ -14,19 +14,20 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
-import zuo.biao.library.base.BaseView;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
+
 import apijson.demo.client.activity_fragment.UserActivity;
+import zuo.biao.library.base.BaseView;
 
 /**BaseView布局类，可直接写在layout文件内
  * @author Lemon
  * @param <T>
  * @see UserActivity#initView()
- * @use 
+ * @use
  * <br>  BaseViewLayout<T> bvl = (BaseViewLayout<T>) findViewById(R.id.bvl);
  * <br>  bvl.createView(new ModelView(context, getResources()));
  * <br>  bvl.bindView(model);

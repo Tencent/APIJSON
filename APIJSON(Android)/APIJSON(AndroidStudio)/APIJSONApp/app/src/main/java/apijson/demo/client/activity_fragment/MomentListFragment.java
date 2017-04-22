@@ -14,19 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
-import java.util.List;
-
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONRequest;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.SQL;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.library.base.BaseView.OnDataChangedListener;
-import zuo.biao.library.interfaces.AdapterCallBack;
-import zuo.biao.library.interfaces.CacheCallBack;
-import zuo.biao.library.interfaces.OnBottomDragListener;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.EditTextInfoWindow;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -40,6 +27,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
+
 import apijson.demo.client.R;
 import apijson.demo.client.adapter.MomentAdapter;
 import apijson.demo.client.application.APIJSONApplication;
@@ -48,8 +40,17 @@ import apijson.demo.client.interfaces.TopBarMenuCallback;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
-
-import com.alibaba.fastjson.JSONObject;
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.apijson.SQL;
+import zuo.biao.apijson.StringUtil;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
+import zuo.biao.library.interfaces.AdapterCallBack;
+import zuo.biao.library.interfaces.CacheCallBack;
+import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.EditTextInfoWindow;
 
 /**用户列表界面fragment
  * @author Lemon
@@ -330,7 +331,6 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		}
 	}
 
-
 	@Override
 	public void onDataChanged() {
 		if (range == RANGE_USER_CIRCLE) {
@@ -359,7 +359,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 				JSONRequest search = new JSONRequest();
 				if (StringUtil.isNotEmpty(value, true)) {
 					split = ":";
-					search.putSearch("content", value, SQL.SEARCH_TYPE_CONTAIN_ORDER);
+					search.putSearch(HttpRequest.CONTENT, value, SQL.SEARCH_TYPE_CONTAIN_ORDER);
 				}
 				toActivity(MomentListActivity.createIntent(context, range, id, search, false)
 						.putExtra(INTENT_TITLE, "搜索" + split + value));

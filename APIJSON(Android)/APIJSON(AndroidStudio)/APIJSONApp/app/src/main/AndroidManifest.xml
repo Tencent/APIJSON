@@ -120,49 +120,6 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
-        <!-- Demo <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->
-
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoMainActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoListActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoFragmentActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoTabActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoSQLActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize|adjustUnspecified" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoTimeRefresherActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize|adjustUnspecified" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoBroadcastReceiverActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="apijson.demo.client.DEMO.DemoBottomWindow"
-            android:screenOrientation="portrait"
-            android:theme="@style/Window"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-
-        <!-- Demo >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
-
 
         <!-- ZBLibrary <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->
 
