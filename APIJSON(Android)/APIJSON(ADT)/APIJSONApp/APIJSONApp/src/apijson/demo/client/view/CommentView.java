@@ -34,7 +34,7 @@ import zuo.biao.library.util.TimeUtil;
 /**评论ItemView
  * @author Lemon
  */
-public class CommentItemView extends BaseView<CommentItem> implements View.OnClickListener {
+public class CommentView extends BaseView<CommentItem> implements View.OnClickListener {
 
     /**点击评论监听回调
      */
@@ -46,24 +46,24 @@ public class CommentItemView extends BaseView<CommentItem> implements View.OnCli
      * @author Lemon
      */
     public interface OnShowAllListener {
-        public void onShowAll(int position, CommentItemView bv, boolean show);
+        public void onShowAll(int position, CommentView bv, boolean show);
     }
 
     private OnCommentClickListener onCommentClickListener;
-    public CommentItemView setOnCommentClickListener(OnCommentClickListener onCommentClickListener) {
+    public CommentView setOnCommentClickListener(OnCommentClickListener onCommentClickListener) {
         this.onCommentClickListener = onCommentClickListener;
         return this;
     }
 
     private OnShowAllListener onShowAllListener;
-    public CommentItemView setOnShowAllListener(OnShowAllListener onShowAllListener) {
+    public CommentView setOnShowAllListener(OnShowAllListener onShowAllListener) {
         this.onShowAllListener = onShowAllListener;
         return this;
     }
 
 
 
-    public CommentItemView(Activity context, Resources resources) {
+    public CommentView(Activity context, Resources resources) {
         super(context, resources);
     }
 
@@ -81,7 +81,7 @@ public class CommentItemView extends BaseView<CommentItem> implements View.OnCli
     @Override
     public View createView(LayoutInflater inflater) {
         this.inflater = inflater;
-        convertView = inflater.inflate(R.layout.comment_main_item, null);
+        convertView = inflater.inflate(R.layout.comment_view, null);
 
         ivCommentHead = findViewById(R.id.ivCommentHead, this);
 
@@ -151,4 +151,3 @@ public class CommentItemView extends BaseView<CommentItem> implements View.OnCli
     }
 
 }
-

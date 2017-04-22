@@ -35,7 +35,7 @@ public class EmptyEventGridView extends GridView {
 
 	public EmptyEventGridView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-	} 
+	}
 
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
@@ -45,7 +45,7 @@ public class EmptyEventGridView extends GridView {
             // events, it just doesn't respond to them.
             return isClickable() || isLongClickable();
         }
-		
+
 		final int motionPosition = pointToPosition((int)event.getX(), (int)event.getY());//获取点击的位置
 		if(motionPosition == INVALID_POSITION) {//touch事件转交给后面的View处理
 			super.onTouchEvent(event);

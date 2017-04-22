@@ -38,7 +38,7 @@ import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
-import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
+import apijson.demo.client.view.CommentView.OnCommentClickListener;
 import apijson.demo.client.view.MomentView;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;

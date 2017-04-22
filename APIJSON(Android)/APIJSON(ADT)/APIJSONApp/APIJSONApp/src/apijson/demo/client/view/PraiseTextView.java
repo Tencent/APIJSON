@@ -106,7 +106,7 @@ public class PraiseTextView extends TextView {
 			public void onClick(View widget) {
 				onNameClick(index, widget, user);
 			}
-		}, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);		
+		}, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 	}
 
 
@@ -115,7 +115,7 @@ public class PraiseTextView extends TextView {
 			listener.onNameClick(index, widget, user);
 		} else {
 			CommonUtil.toActivity((Activity) getContext(), UserActivity.createIntent(
-					getContext(), user == null ? 0 : user.getId()));	
+					getContext(), user == null ? 0 : user.getId()));
 		}
 	}
 

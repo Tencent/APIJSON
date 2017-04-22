@@ -14,12 +14,13 @@ limitations under the License.*/
 
 package apijson.demo.client.adapter;
 
-import zuo.biao.library.base.BaseView.OnDataChangedListener;
-import zuo.biao.library.base.BaseViewAdapter;
 import android.app.Activity;
 import android.view.ViewGroup;
+
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.view.MomentView;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
+import zuo.biao.library.base.BaseViewAdapter;
 
 /**adapter模板
  * @author Lemon

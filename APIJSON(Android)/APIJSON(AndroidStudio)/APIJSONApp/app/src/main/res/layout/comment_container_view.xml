@@ -15,6 +15,6 @@
         android:gravity="left|center_vertical"
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
-        android:text="查看所有" />
+        android:text="查看全部" />
 
 </LinearLayout>

@@ -22,15 +22,15 @@ import java.util.List;
 import java.util.Map;
 
 import apijson.demo.client.model.CommentItem;
-import apijson.demo.client.view.CommentItemView;
-import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
-import apijson.demo.client.view.CommentItemView.OnShowAllListener;
+import apijson.demo.client.view.CommentView;
+import apijson.demo.client.view.CommentView.OnCommentClickListener;
+import apijson.demo.client.view.CommentView.OnShowAllListener;
 import zuo.biao.library.base.BaseViewAdapter;
 
 /**评论列表
  * @author Lemon
  */
-public class CommentAdapter extends BaseViewAdapter<CommentItem, CommentItemView> {
+public class CommentAdapter extends BaseViewAdapter<CommentItem, CommentView> {
 
 
 	private OnCommentClickListener onCommentClickListener;
@@ -58,12 +58,12 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, CommentItemView
 	}
 
 	@Override
-	public CommentItemView createView(int position, ViewGroup parent) {
-		return new CommentItemView(context, resources)
+	public CommentView createView(int position, ViewGroup parent) {
+		return new CommentView(context, resources)
 				.setOnCommentClickListener(onCommentClickListener)
 				.setOnShowAllListener(new OnShowAllListener() {
 					@Override
-					public void onShowAll(int position, CommentItemView bv, boolean show) {
+					public void onShowAll(int position, CommentView bv, boolean show) {
 						showAllMap.put(position, show);
 						bindView(position, bv);
 					}
@@ -73,7 +73,7 @@ public class CommentAdapter extends BaseViewAdapter<CommentItem, CommentItemView
 	private Map<Integer, Boolean> showAllMap = new HashMap<>();
 
 	@Override
-	public void bindView(int position, CommentItemView bv) {
+	public void bindView(int position, CommentView bv) {
 		//true : showAllMap.get(position)怎么搞都崩溃
 		bv.setShowAll(showAll ? Boolean.valueOf(true) : showAllMap.get(position));
 		super.bindView(position, bv);

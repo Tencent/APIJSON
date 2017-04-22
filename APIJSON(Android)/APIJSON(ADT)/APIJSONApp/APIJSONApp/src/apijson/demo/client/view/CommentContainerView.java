@@ -28,7 +28,7 @@ import java.util.List;
 
 import apijson.demo.client.R;
 import apijson.demo.client.model.CommentItem;
-import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
+import apijson.demo.client.view.CommentView.OnCommentClickListener;
 import zuo.biao.library.base.BaseView;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
@@ -37,11 +37,11 @@ import zuo.biao.library.util.StringUtil;
  * @author Lemon
  * @use
 CommentContainerView commentContainerView = new CommentContainerView(context, inflater);
-adapter中使用convertView = commentContainerView.getView();//[具体见.ModelAdapter] 或  其它类中使用
+adapter中使用convertView = commentContainerView.getView();//[具体见.DemoAdapter] 或  其它类中使用
 containerView.addView(commentContainerView.getConvertView());
-commentContainerView.bindView(object);
+commentContainerView.bindView(data);
 commentContainerView.setOnClickPictureListener(onClickPictureListener);
-commentContainerView.setOnDataChangedListener(onDataChangedListener);object = commentContainerView.getData();//非必需
+commentContainerView.setOnDataChangedListener(onDataChangedListener);data = commentContainerView.getData();//非必需
 commentContainerView.setOnClickListener(onClickListener);//非必需
 ...
  */
@@ -59,7 +59,6 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 	}
 
 
-	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	private LayoutInflater inflater;
 
@@ -124,7 +123,6 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 	}
 
 
-
 	/**
 	 * @param comment
 	 */
@@ -140,7 +138,7 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 			return;
 		}
 
-		CommentTextView commentView = (CommentTextView) inflater.inflate(R.layout.moment_view_comment_item, null);
+		CommentTextView commentView = (CommentTextView) inflater.inflate(R.layout.comment_item, null);
 		commentView.setView(comment);
 
 		if (onCommentClickListener != null) {
@@ -163,35 +161,5 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 
 		llCommentContainerViewContainer.addView(commentView);
 	}
-
-
-	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-
-
-
-
-
-
-
-	//Data数据区(存在数据获取或处理代码，但不存在事件监听代码)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-
-	//Data数据区(存在数据获取或处理代码，但不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-
-
-
-
-
-	//Event事件监听区(只要存在事件监听代码就是)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-	//Event事件监听区(只要存在事件监听代码就是)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

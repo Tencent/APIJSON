@@ -42,7 +42,7 @@ import apijson.demo.client.model.Moment;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.HttpRequest;
-import apijson.demo.client.view.CommentItemView.OnCommentClickListener;
+import apijson.demo.client.view.CommentView.OnCommentClickListener;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView;
 import zuo.biao.library.manager.CacheManager;
@@ -62,11 +62,11 @@ import zuo.biao.library.util.TimeUtil;
  * @author Lemon
  * @use
 MomentView momentView = new MomentView(context, inflater);
-adapter中使用convertView = momentView.getView();//[具体见.ModelAdapter] 或  其它类中使用
+adapter中使用convertView = momentView.getView();//[具体见.DemoAdapter] 或  其它类中使用
 containerView.addView(momentView.getConvertView());
-momentView.bindView(object);
+momentView.bindView(data);
 momentView.setOnClickPictureListener(onClickPictureListener);
-momentView.setOnDataChangedListener(onDataChangedListener);object = momentView.getData();//非必需
+momentView.setOnDataChangedListener(onDataChangedListener);data = momentView.getData();//非必需
 momentView.setOnClickListener(onClickListener);//非必需
 ...
  */
@@ -202,11 +202,11 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param joined
 	 * @param list
 	 */
-	private void setPraise(boolean joined, List<User> userList) {
+	private void setPraise(boolean joined, List<User> list) {
 		ivMomentViewPraise.setImageResource(joined ? R.drawable.praised : R.drawable.praise);
-		llMomentViewPraise.setVisibility(userList == null || userList.isEmpty() ? View.GONE : View.VISIBLE);
+		llMomentViewPraise.setVisibility(list == null || list.isEmpty() ? View.GONE : View.VISIBLE);
 		if (llMomentViewPraise.getVisibility() == View.VISIBLE) {
-			tvMomentViewPraise.setView(userList);
+			tvMomentViewPraise.setView(list);
 		}
 	}
 
@@ -224,7 +224,6 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	 * @param list
 	 */
 	public void setComment(List<CommentItem> list) {
-		//		ivMomentViewComment.setImageResource(joined ? R.drawable.commented : R.drawable.comment);
 		llMomentViewCommentContainer.setVisibility(showComment == false || list == null || list.isEmpty()
 				? View.GONE : View.VISIBLE);
 

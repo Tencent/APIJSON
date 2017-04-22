@@ -85,7 +85,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 	}
 	/**
 	 * @param range
-	 * @param userId
+	 * @param id
 	 * @return
 	 */
 	public static MomentListFragment createInstance(int range, long id) {
@@ -196,7 +196,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 							public void refreshAdapter() {
 								adapter.refresh(list);
 							}
-						});						
+						});
 					}
 				});
 			}
@@ -279,7 +279,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 	}
 	@Override
 	public int getCacheCount() {
-		return 3;
+		return 4;
 	}
 
 
@@ -325,7 +325,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 
 			showShortToast("输入为空则查看全部");
 			toActivity(EditTextInfoWindow.createIntent(context
-					, EditTextInfoWindow.TYPE_NAME, "关键词", null), 
+					, EditTextInfoWindow.TYPE_NAME, "关键词", null),
 					REQUEST_TO_EDIT_TEXT_INFO, false);
 		}
 	}
