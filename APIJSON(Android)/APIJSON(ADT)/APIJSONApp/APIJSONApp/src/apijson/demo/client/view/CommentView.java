@@ -31,7 +31,7 @@ import zuo.biao.library.util.ImageLoaderUtil;
 import zuo.biao.library.util.StringUtil;
 import zuo.biao.library.util.TimeUtil;
 
-/**评论ItemView
+/**评论
  * @author Lemon
  */
 public class CommentView extends BaseView<CommentItem> implements View.OnClickListener {

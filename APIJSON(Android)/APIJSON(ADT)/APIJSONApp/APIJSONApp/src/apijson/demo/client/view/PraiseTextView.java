@@ -14,10 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import zuo.biao.library.util.CommonUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.text.SpannableString;
@@ -27,12 +23,17 @@ import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import apijson.demo.client.R;
 import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.model.User;
 import apijson.demo.client.view.CommentTextView.OnNameClickListener;
+import zuo.biao.library.util.CommonUtil;
 
-/**点赞用户列表TextView
+/**点赞用户列表
  */
 public class PraiseTextView extends TextView {
 
@@ -56,7 +57,7 @@ public class PraiseTextView extends TextView {
 
 	public static final int DIVIDER_LENGTH = "、".length();
 	/**设置View
-	 * @param comment
+	 * @param list
 	 */
 	public void setView(List<User> list) {
 		if (list == null || list.isEmpty()) {

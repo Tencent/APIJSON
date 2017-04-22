@@ -33,22 +33,25 @@ import zuo.biao.library.base.BaseView;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
 
-/**作品View
+/**评论容器
  * @author Lemon
  * @use
 CommentContainerView commentContainerView = new CommentContainerView(context, inflater);
 adapter中使用convertView = commentContainerView.getView();//[具体见.DemoAdapter] 或  其它类中使用
 containerView.addView(commentContainerView.getConvertView());
 commentContainerView.bindView(data);
-commentContainerView.setOnClickPictureListener(onClickPictureListener);
+commentContainerView.setOnClickPictureListener(onClickPictureListener);//非必需
 commentContainerView.setOnDataChangedListener(onDataChangedListener);data = commentContainerView.getData();//非必需
 commentContainerView.setOnClickListener(onClickListener);//非必需
 ...
  */
-public class CommentContainerView extends BaseView<List<CommentItem>> {//implements OnClickListener {
+public class CommentContainerView extends BaseView<List<CommentItem>> {
 	private static final String TAG = "CommentContainerView";
 
 	private OnCommentClickListener onCommentClickListener;
+	/**设置点击评论监听
+	 * @param onCommentClickListener
+	 */
 	public void setOnCommentClickListener(OnCommentClickListener onCommentClickListener) {
 		this.onCommentClickListener = onCommentClickListener;
 	}
@@ -94,6 +97,9 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 
 
 	private int maxShowCount = 3;
+	/**设置最多显示数量，超过则折叠
+	 * @param maxShowCount <= 0 ? 显示全部 : 超过则折叠
+	 */
 	public void setMaxShowCount(int maxShowCount) {
 		this.maxShowCount = maxShowCount;
 	}
@@ -123,7 +129,8 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {//impleme
 	}
 
 
-	/**
+	/**添加评论
+	 * @param index
 	 * @param comment
 	 */
 	@SuppressLint("InflateParams")

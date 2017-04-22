@@ -15,7 +15,18 @@ limitations under the License.*/
 
 package apijson.demo.client.manager;
 
-import static zuo.biao.apijson.StringUtil.UTF_8;
+import android.content.Context;
+import android.os.AsyncTask;
+import android.text.TextUtils;
+
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.CookieHandler;
@@ -27,24 +38,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import apijson.demo.client.application.APIJSONApplication;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.util.Log;
-import android.content.Context;
-import android.os.AsyncTask;
-import android.text.TextUtils;
-import apijson.demo.client.application.APIJSONApplication;
 
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import static zuo.biao.apijson.StringUtil.UTF_8;
 
 /**HTTP请求管理类
  * @author Lemon
@@ -62,9 +63,13 @@ public class HttpManager {
 
 	}
 
-	public synchronized static HttpManager getInstance() {
+	public static HttpManager getInstance() {
 		if (instance == null) {
-			instance = new HttpManager(APIJSONApplication.getInstance());
+			synchronized (HttpManager.class) {
+				if (instance == null) {
+					instance = new HttpManager(APIJSONApplication.getInstance());
+				}
+			}
 		}
 		return instance;
 	}
@@ -81,7 +86,7 @@ public class HttpManager {
 
 
 	/**GET请求
-	 * @param url 接口url
+	 * @param url_ 接口url
 	 * @param request 请求
 	 * @param requestCode
 	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
@@ -110,8 +115,8 @@ public class HttpManager {
 					}
 
 					result = getResponseJson(client, new Request.Builder()
-					.addHeader(KEY_TOKEN, getToken(url))
-					.url(sb.toString()).build());
+							.addHeader(KEY_TOKEN, getToken(url))
+							.url(sb.toString()).build());
 				} catch (Exception e) {
 					Log.e(TAG, "get  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
 							"} catch (Exception e) {\n" + e.getMessage());
@@ -134,7 +139,7 @@ public class HttpManager {
 	public static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
 	/**POST请求
-	 * @param url 接口url
+	 * @param url_ 接口url
 	 * @param request 请求
 	 * @param requestCode
 	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
@@ -163,13 +168,13 @@ public class HttpManager {
 						return new Exception(TAG + ".post  AsyncTask.doInBackground  client == null >> return;");
 					}
 					String body = JSON.toJSONString(request);
-					Log.d(TAG, "post  url_ = " + url_ + "\n request = \n" + body);					
+					Log.d(TAG, "post  url_ = " + url_ + "\n request = \n" + body);
 
 					RequestBody requestBody = RequestBody.create(TYPE_JSON, body);
 
 					result = getResponseJson(client, new Request.Builder()
-					.addHeader(KEY_TOKEN, getToken(url)).url(StringUtil.getNoBlankString(url))
-					.post(requestBody).build());
+							.addHeader(KEY_TOKEN, getToken(url)).url(StringUtil.getNoBlankString(url))
+							.post(requestBody).build());
 				} catch (Exception e) {
 					Log.e(TAG, "post  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
 							"} catch (Exception e) {\n" + e.getMessage());
@@ -212,7 +217,7 @@ public class HttpManager {
 	}
 
 	/**
-	 * @param paramList
+	 * @param tag
 	 * @must demo_***改为服务器设定值
 	 * @return
 	 */
@@ -225,10 +230,10 @@ public class HttpManager {
 	 */
 	public void saveToken(String tag, String value) {
 		context.getSharedPreferences(KEY_TOKEN, Context.MODE_PRIVATE)
-		.edit()
-		.remove(KEY_TOKEN + tag)
-		.putString(KEY_TOKEN + tag, value)
-		.commit();
+				.edit()
+				.remove(KEY_TOKEN + tag)
+				.putString(KEY_TOKEN + tag, value)
+				.commit();
 	}
 
 
@@ -243,10 +248,10 @@ public class HttpManager {
 	 */
 	public void saveCookie(String value) {
 		context.getSharedPreferences(KEY_COOKIE, Context.MODE_PRIVATE)
-		.edit()
-		.remove(KEY_COOKIE)
-		.putString(KEY_COOKIE, value)
-		.commit();
+				.edit()
+				.remove(KEY_COOKIE)
+				.putString(KEY_COOKIE, value)
+				.commit();
 	}
 
 
@@ -270,7 +275,7 @@ public class HttpManager {
 	 * @param json
 	 * @param key
 	 * @return
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	public <T> T getValue(String json, String key) throws JSONException {
 		return getValue(new JSONObject(json), key);
@@ -280,7 +285,7 @@ public class HttpManager {
 	 * @param object
 	 * @param key
 	 * @return
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getValue(JSONObject object, String key) throws JSONException {
@@ -326,8 +331,6 @@ public class HttpManager {
 		}
 
 	}
-
-
 
 
 }

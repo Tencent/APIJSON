@@ -51,42 +51,42 @@ public class User extends apijson.demo.client.server.model.User {
 		return value(super.getSex());
 	}
 
-	
-	
+
+
 	/**判断是否为当前用户的朋友
 	 * @return
 	 */
-	public boolean isFirend() {
-		return isFirend(APIJSONApplication.getInstance().getCurrentUserId());
+	public boolean isFriend() {
+		return isFriend(APIJSONApplication.getInstance().getCurrentUserId());
 	}
 	/**判断是否为朋友，双方friendIdList都必须包含对方id
 	 * @param user
 	 * @return
 	 */
-	public boolean isFirend(User user) {
-		return isFirend(this, user);
+	public boolean isFriend(User user) {
+		return isFriend(this, user);
 	}
 	/**判断是否为朋友，双方friendIdList都必须包含对方id
 	 * @param user0
 	 * @param user1
 	 * @return
 	 */
-	public static boolean isFirend(User user0, User user1) {
-		return user0 != null && user1 != null && isFirend(user0, user1.getId()) && isFirend(user1, user0.getId());
+	public static boolean isFriend(User user0, User user1) {
+		return user0 != null && user1 != null && isFriend(user0, user1.getId()) && isFriend(user1, user0.getId());
 	}
 	/**判断是否为当前用户的朋友，仅从单方的friendIdList判断
 	 * @param id
 	 * @return
 	 */
-	public boolean isFirend(long id) {
-		return isFirend(this, id);
+	public boolean isFriend(long id) {
+		return isFriend(this, id);
 	}
 	/**判断是否为朋友，仅从单方的friendIdList判断
 	 * @param user0
 	 * @param id1
 	 * @return
 	 */
-	public static boolean isFirend(User user0, long id1) {
+	public static boolean isFriend(User user0, long id1) {
 		//id
 		if (id1 <= 0) {
 			return false;

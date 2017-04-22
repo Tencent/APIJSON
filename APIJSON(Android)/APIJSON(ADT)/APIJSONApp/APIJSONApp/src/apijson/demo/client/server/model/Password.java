@@ -19,7 +19,7 @@ import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
-/**登录类
+/**密码类
  * @author Lemon
  */
 @SuppressWarnings("serial")
@@ -50,7 +50,7 @@ public class Password extends BaseModel {
 		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
 		return this;
 	}
-	
+
 	public String getModel() {
 		return StringUtil.isNotEmpty(model, true) ? model : "User";
 	}

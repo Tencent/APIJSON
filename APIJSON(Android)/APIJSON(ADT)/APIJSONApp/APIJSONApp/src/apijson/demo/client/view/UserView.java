@@ -14,10 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
-import zuo.biao.library.base.BaseView;
-import zuo.biao.library.util.ImageLoaderUtil;
-import zuo.biao.library.util.Log;
-import zuo.biao.library.util.StringUtil;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -26,18 +22,23 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import apijson.demo.client.R;
 import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.model.User;
+import zuo.biao.library.base.BaseView;
+import zuo.biao.library.util.ImageLoaderUtil;
+import zuo.biao.library.util.Log;
+import zuo.biao.library.util.StringUtil;
 
-/**用户View
+/**用户
  * @author Lemon
  * @use
  * <br> UserView userView = new UserView(context, resources);
  * <br> adapter中使用:[具体参考.DemoAdapter2(getView使用自定义View的写法)]
  * <br> convertView = userView.createView(inflater);
  * <br> userView.bindView(position, data);
- * <br> 或  其它类中使用: 
+ * <br> 或  其它类中使用:
  * <br> containerView.addView(userView.createView(inflater));
  * <br> userView.bindView(data);
  * <br> 然后

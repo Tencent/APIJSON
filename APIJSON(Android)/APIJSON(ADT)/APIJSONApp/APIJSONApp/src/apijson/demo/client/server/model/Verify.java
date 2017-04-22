@@ -19,7 +19,7 @@ import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
-/**登录类
+/**验证码类
  * @author Lemon
  */
 @SuppressWarnings("serial")
@@ -46,8 +46,8 @@ public class Verify extends BaseModel {
 		this(phone);
 		setCode(code);
 	}
-	
-	
+
+
 	public String getCode() {
 		return code;
 	}

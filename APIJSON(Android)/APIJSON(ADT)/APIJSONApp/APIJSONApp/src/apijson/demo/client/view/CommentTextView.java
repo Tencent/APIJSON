@@ -32,7 +32,7 @@ import apijson.demo.client.model.User;
 import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.StringUtil;
 
-/**评论TextView
+/**评论
  */
 public class CommentTextView extends TextView {
 

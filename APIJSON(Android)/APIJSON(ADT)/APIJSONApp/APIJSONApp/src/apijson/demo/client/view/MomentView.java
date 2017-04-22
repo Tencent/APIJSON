@@ -58,14 +58,14 @@ import zuo.biao.library.util.ScreenUtil;
 import zuo.biao.library.util.StringUtil;
 import zuo.biao.library.util.TimeUtil;
 
-/**作品View
+/**动态
  * @author Lemon
  * @use
 MomentView momentView = new MomentView(context, inflater);
 adapter中使用convertView = momentView.getView();//[具体见.DemoAdapter] 或  其它类中使用
 containerView.addView(momentView.getConvertView());
 momentView.bindView(data);
-momentView.setOnClickPictureListener(onClickPictureListener);
+momentView.setOnPictureClickListener(onPictureClickListener);//非必需
 momentView.setOnDataChangedListener(onDataChangedListener);data = momentView.getData();//非必需
 momentView.setOnClickListener(onClickListener);//非必需
 ...
@@ -74,13 +74,16 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 , OnHttpResponseListener, OnDialogButtonClickListener, OnItemClickListener {
 	private static final String TAG = "MomentView";
 
-	public interface OnClickPictureListener {
+	public interface OnPictureClickListener {
 		void onClickPicture(int momentPosition, MomentView momentView, int pictureIndex);
 	}
 
-	private OnClickPictureListener onClickPictureListener;
-	public void setOnClickPictureListener(OnClickPictureListener onClickPictureListener) {
-		this.onClickPictureListener = onClickPictureListener;
+	private OnPictureClickListener onPictureClickListener;
+	/**设置点击图片监听
+	 * @param onPictureClickListener
+	 */
+	public void setOnPictureClickListener(OnPictureClickListener onPictureClickListener) {
+		this.onPictureClickListener = onPictureClickListener;
 	}
 
 	public MomentView(Activity context, Resources resources) {
@@ -192,13 +195,10 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		vMomentViewDivider.setVisibility(llMomentViewPraise.getVisibility() == View.VISIBLE
 				&& llMomentViewCommentContainer.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
 
-		//		tvMomentViewDate.setText(StringUtil.getTrimedString(tvMomentViewDate)
-		//				+ "  p:" + data.getPraiseCount()
-		//				+ "  c:" + data.getCommentCount());
 	}
 
 
-	/**设置赞
+	/**设置点赞
 	 * @param joined
 	 * @param list
 	 */
@@ -351,7 +351,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 	}
 
 
-	/**赞
+	/**点赞
 	 * @param toPraise
 	 */
 	public void praise(boolean toPraise) {
@@ -360,7 +360,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			return;
 		}
 		//		setPraise(toPraise, data.getPraiseCount() + (toPraise ? 1 : -1));
-		HttpRequest.praiseMoment(momentId, toPraise, toPraise ? HTTP_PRAISE : HTTP_CANCLE_PRAISE, this);
+		HttpRequest.praiseMoment(momentId, toPraise, toPraise ? HTTP_PRAISE : HTTP_CANCEL_PRAISE, this);
 	}
 
 	//Data数据区(存在数据获取或处理代码，但不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -387,7 +387,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 
 	public static final int HTTP_PRAISE = 1;
-	public static final int HTTP_CANCLE_PRAISE = 2;
+	public static final int HTTP_CANCEL_PRAISE = 2;
 	public static final int HTTP_DELETE = 3;
 	@Override
 	public void onHttpResponse(int requestCode, String result, Exception e) {
@@ -400,7 +400,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		boolean isSucceed = JSONResponse.isSucceed(response2);
 		switch (requestCode) {
 		case HTTP_PRAISE:
-		case HTTP_CANCLE_PRAISE:
+		case HTTP_CANCEL_PRAISE:
 			if (isSucceed) {
 				data.setIsPraised(requestCode == HTTP_PRAISE);
 				bindView(data);
@@ -479,8 +479,8 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			showShortToast(R.string.publishing);
 			return;
 		}
-		if (onClickPictureListener != null) {
-			onClickPictureListener.onClickPicture(this.position, this, position);
+		if (onPictureClickListener != null) {
+			onPictureClickListener.onClickPicture(this.position, this, position);
 		} else {
 			toActivity(WebViewActivity.createIntent(context, null
 					, adapter == null ? null : adapter.getItem(position).getKey()));

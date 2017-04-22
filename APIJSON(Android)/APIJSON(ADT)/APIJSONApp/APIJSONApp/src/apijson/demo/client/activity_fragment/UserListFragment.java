@@ -378,9 +378,9 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 				if (StringUtil.isNotEmpty(value, true)) {
 					split = ":";
 					if (isSearch) {
-						search.putSearch(HttpRequest.KEY_NAME, value);
+						search.putSearch(HttpRequest.NAME, value);
 					} else {
-						search.put(HttpRequest.KEY_PHONE, value);
+						search.put(HttpRequest.PHONE, value);
 					}
 				}
 				intent = isSearch

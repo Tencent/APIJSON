@@ -14,13 +14,14 @@ limitations under the License.*/
 
 package apijson.demo.client.manager;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import apijson.demo.client.application.APIJSONApplication;
+import apijson.demo.client.model.User;
 import zuo.biao.library.util.JSON;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.StringUtil;
-import android.content.Context;
-import android.content.SharedPreferences;
-import apijson.demo.client.application.APIJSONApplication;
-import apijson.demo.client.model.User;
 
 /**数据工具类
  * @author Lemon
@@ -33,14 +34,11 @@ public class DataManager {
 		this.context = context;
 	}
 
-	private static DataManager instance;
-	public static synchronized DataManager getInstance() {
-		if (instance == null) {
-			instance = new DataManager(APIJSONApplication.getInstance());
-		}
+	private static DataManager instance = new DataManager(APIJSONApplication.getInstance());
+	public static DataManager getInstance() {
 		return instance;
 	}
-	
+
     //用户 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     private String PATH_USER = "PATH_USER";
@@ -55,7 +53,6 @@ public class DataManager {
 
 
     /**判断是否为当前用户
-     * @param context
      * @param userId
      * @return
      */
@@ -64,7 +61,6 @@ public class DataManager {
     }
 
     /**获取当前用户id
-     * @param context
      * @return
      */
     public long getCurrentUserId() {
@@ -73,7 +69,6 @@ public class DataManager {
     }
 
     /**获取当前用户的手机号
-     * @param context
      * @return
      */
     public String getCurrentUserPhone() {
@@ -81,7 +76,6 @@ public class DataManager {
         return user == null ? "" : user.getPhone();
     }
     /**获取当前用户
-     * @param context
      * @return
      */
     public User getCurrentUser() {
@@ -91,7 +85,6 @@ public class DataManager {
 
 
     /**获取最后一次登录的用户的手机号
-     * @param context
      * @return
      */
     public String getLastUserPhone() {
@@ -100,7 +93,6 @@ public class DataManager {
     }
 
     /**获取最后一次登录的用户
-     * @param context
      * @return
      */
     public User getLastUser() {
@@ -109,7 +101,6 @@ public class DataManager {
     }
 
     /**获取用户
-     * @param context
      * @param userId
      * @return
      */
@@ -125,7 +116,6 @@ public class DataManager {
 
 
     /**保存当前用户,只在登录或注销时调用
-     * @param context
      * @param user  user == null >> user = new User();
      */
     public void saveCurrentUser(User user) {
@@ -147,14 +137,12 @@ public class DataManager {
     }
 
     /**保存用户
-     * @param context
      * @param user
      */
     public void saveUser(User user) {
         saveUser(context.getSharedPreferences(PATH_USER, Context.MODE_PRIVATE), user);
     }
     /**保存用户
-     * @param context
      * @param sdf
      * @param user
      */
@@ -169,8 +157,8 @@ public class DataManager {
     }
 
     /**删除用户
-     * @param context
      * @param sdf
+     * @param userId
      */
     public void removeUser(SharedPreferences sdf, long userId) {
         if (sdf == null) {
@@ -181,7 +169,6 @@ public class DataManager {
     }
 
     /**设置当前用户手机号
-     * @param context
      * @param phone
      */
     public void setCurrentUserPhone(String phone) {
@@ -194,7 +181,6 @@ public class DataManager {
     }
 
     /**设置当前用户姓名
-     * @param context
      * @param name
      */
     public void setCurrentUserName(String name) {

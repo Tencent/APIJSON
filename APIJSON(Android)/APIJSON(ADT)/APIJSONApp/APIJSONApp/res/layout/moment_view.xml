@@ -128,7 +128,7 @@
                         android:background="@drawable/bg_item_to_alpha"
                         android:gravity="left|top"
                         android:lineSpacingExtra="4dp"
-                        android:text="等17人觉得很赞" />
+                        android:text="等觉得很赞" />
                 </LinearLayout>
 
                 <View
