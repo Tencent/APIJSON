@@ -81,9 +81,9 @@ public class Parser {
 	private QueryHelper queryHelper;
 	private Map<String, Object> queryResultMap;//path-result
 
-	private boolean parseRelation;
+//	private boolean parseRelation;
 	//不用keyPath-valuePath-value是因为很可能很多valuePath对应同一个value
-	private Map<String, String> keyValuePathMap;//keyPath-valuePath
+//	private Map<String, String> keyValuePathMap;//keyPath-valuePath
 
 
 	/**解析请求json并获取对应结果
@@ -127,24 +127,24 @@ public class Parser {
 	public JSONObject parseResponse(JSONObject request) {
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
 
-		keyValuePathMap = new HashMap<String, String>();
+//		keyValuePathMap = new HashMap<String, String>();
 		queryResultMap = new HashMap<String, Object>();
-		parseRelation = false;
+//		parseRelation = false;
 
 		Exception error = null;
 		queryHelper = new QueryHelper();
 		try {
 			requestObject = getObject(null, null, null, request);
 
-			if (keyValuePathMap.isEmpty() == false) {//优化性能，没有依赖引用的就不用再遍历了
-				Log.d(TAG, "\n\n\n parseResponse  keyValuePathMap.isEmpty() == false"
-						+ "\n parseRelation = true; <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n");
-
-				parseRelation = true;
-				requestObject = getObject(null, null, null, requestObject);
-
-				Log.d(TAG, "\n\n parseRelation = true; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
-			}
+//			if (keyValuePathMap.isEmpty() == false) {//优化性能，没有依赖引用的就不用再遍历了
+//				Log.d(TAG, "\n\n\n parseResponse  keyValuePathMap.isEmpty() == false"
+//						+ "\n parseRelation = true; <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n");
+//
+//				parseRelation = true;
+//				requestObject = getObject(null, null, null, requestObject);
+//
+//				Log.d(TAG, "\n\n parseRelation = true; >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e;
@@ -160,7 +160,7 @@ public class Parser {
 				: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 		//		}
 
-		keyValuePathMap.clear();;
+//		keyValuePathMap.clear();;
 		queryResultMap.clear();
 
 		Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
@@ -489,11 +489,12 @@ public class Parser {
 			return null;
 		}
 		final String path = getAbsPath(parentPath, name);
-		if (parseRelation //优化性能：第二遍遍历时如果内部没有依赖引用其它就跳过
-				&& StringUtil.isNotEmpty(path, true)//避免最外层返回true而不能parseRelation
-				&& isInRelationMap(path) == false) {
-			return request;
-		}
+//		if (parseRelation //优化性能：第二遍遍历时如果内部没有依赖引用其它就跳过
+//				&& StringUtil.isNotEmpty(path, true)//避免最外层返回true而不能parseRelation
+////				&& isInRelationMap(path) == false
+//				) {
+//			return request;
+//		}
 		//为第二遍parseRelation = true服务，优化查询性能并避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
 		final boolean isArrayChild = parentConfig != null && StringUtil.isNumer(name) && ("" + parentConfig.getPosition()).equals(name);
 		final String table = isArrayChild ? null : Pair.parseEntry(name, true).getKey();
@@ -600,37 +601,42 @@ public class Parser {
 						if (value instanceof String == false) {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
-						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
+//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
-						String keyPath = getAbsPath(path, replaceKey);
-						String valuePath = parseRelation ? getRelationValuePath(keyPath) : new String((String) value);
+//						String keyPath = getAbsPath(path, replaceKey);
+						String valuePath = new String((String) value);//改用实时替换[] -> []/i
+								//parseRelation ? getRelationValuePath(keyPath) : new String((String) value);
 
 						if (valuePath.startsWith(SEPARATOR)) {
 							valuePath = getAbsPath(parentPath, valuePath);
+						} else {//处理[] -> []/i
+							valuePath = replaceArrayChildPath(parentPath, valuePath);
+							value = new String(valuePath);//避免后续重新转换
 						}
 						//先尝试获取，尽量保留缺省依赖路径，这样就不需要担心路径改变
-						Object target = getValueByPath(valuePath, true);
+						Object target = getValueByPath(valuePath);
 						Log.i(TAG, "getObject valuePath = " + valuePath + "; target = " + target);
 
 						if (valuePath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
 							Log.i(TAG, "getObject  target != null && target instanceof String"
 									+ " && ((String) target).startsWith(valuePath)  >>  ");
-							if (parseRelation) {
-								//非查询关键词 @key 不影响查询，直接跳过
-								if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
-									Log.e(TAG, "getObject parseRelation >> isTableKey && (key.startsWith(@) == false"
-											+ " || QueryConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
-									return null;//parseRelation时还获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
-								} else {
-									Log.d(TAG, "getObject parseRelation >> isTableKey(table) == false >> continue;");
-									continue;//舍去，对Table无影响
-								}
-							} else {//标记并存放依赖关系
+//							if (parseRelation) {
+//								//非查询关键词 @key 不影响查询，直接跳过
+//								if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
+//									Log.e(TAG, "getObject parseRelation >> isTableKey && (key.startsWith(@) == false"
+//											+ " || QueryConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
+//									return null;//parseRelation时还获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
+//								} else {
+//									Log.d(TAG, "getObject parseRelation >> isTableKey(table) == false >> continue;");
+//									continue;//舍去，对Table无影响
+//								}
+//							} else {//标记并存放依赖关系
 								Log.i(TAG, "getObject parseRelation == false"
 										+ " >>  containRelation = true; putRelation(keyPath, valuePath);");
 								containRelation = true;
-								putRelation(keyPath, valuePath);
-							}
+								//TODO					上面用实时替换[] -> []/i			
+//								putRelation(keyPath, valuePath);
+//							}
 						} else {//直接替换原来的key@:path为key:target
 							Log.i(TAG, "getObject    >>  key = replaceKey; value = target;");
 							key = replaceKey;
@@ -657,7 +663,9 @@ public class Parser {
 		boolean query = false;
 		//执行SQL操作数据库
 		if (containRelation == false && isTableKey) {//提高性能
-			if (parseRelation == false || isInRelationMap(path)) {//避免覆盖原来已经获取的
+//			if (parseRelation == false
+////					|| isInRelationMap(path)
+//					) {//避免覆盖原来已经获取的
 				query = true;
 				//			keyValuePathMap.remove(path);
 				//移除所有startswith path的keyPath？
@@ -675,7 +683,7 @@ public class Parser {
 				} catch (Exception e) {
 					Log.e(TAG, "getObject  try { transferredRequest = getSQLObject(config2); } catch (Exception e) {");
 					if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
-						e.printStackTrace();
+//						e.printStackTrace();
 						transferredRequest = null;//内部吃掉异常，put到最外层
 						//						requestObject.put(JSONResponse.KEY_MESSAGE
 						//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MESSAGE)
@@ -689,7 +697,7 @@ public class Parser {
 				if (transferredRequest == null) {
 					transferredRequest = new JSONObject(true);
 				}
-			}
+//			}
 		}
 
 		if (selfDefineKeyMap != null) {
@@ -721,6 +729,7 @@ public class Parser {
 
 	/**获取对象数组，该对象数组处于parentObject内
 	 * @param parentPath parentObject的路径
+	 * @param parentConfig 对子object的SQL查询配置，需要传两个层级
 	 * @param name parentObject的key
 	 * @param request parentObject的value
 	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
@@ -751,7 +760,9 @@ public class Parser {
 
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = new LinkedHashSet<>(request.keySet());
-		if(parseRelation == false && set != null) {
+		if(
+//				parseRelation == false &&
+				set != null) {
 			if (count <= 0 || count > 5) {//5以下不优化长度
 				String table;
 				Object value;
@@ -781,10 +792,10 @@ public class Parser {
 		JSONObject transferredRequest = new JSONObject(true);
 
 		JSONObject parent = null;
-		Object value;
-		JSONObject result;
-		Log.d(TAG, "getArray  parseRelation = " + parseRelation);
-		if (parseRelation == false) {
+//		Object value;
+//		JSONObject result;
+//		Log.d(TAG, "getArray  parseRelation = " + parseRelation);
+//		if (parseRelation == false) {
 			//生成count个
 			for (int i = 0; i < count; i++) {
 				parent = getObject(path, config.setPosition(i), "" + i, request);
@@ -792,38 +803,38 @@ public class Parser {
 					break;//数据库返回数量不够count，后面没有了。有依赖不为空，无依赖直接查询数据库。
 				}
 				transferredRequest.put("" + i, parent);
-				updateRelation(path, getAbsPath(path, "" + i));//request结构已改变，需要更新依赖关系
+//				updateRelation(path, getAbsPath(path, "" + i));//request结构已改变，需要更新依赖关系
 			}
 
-			if (isInRelationMap(path)) {
-				transferredRequest.put(JSONRequest.KEY_COUNT, count);
-				transferredRequest.put(JSONRequest.KEY_PAGE, page);
-			}
-		} else {
-			boolean isArrayKey;
-			for (String key : set) {//0:{},1:{}...
-				value = request.get(key);
-				if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					config.setPosition(Integer.valueOf(0 + StringUtil.getNumber(key, true)));
-					isArrayKey = isArrayKey(key);
-					if (isArrayKey) {//json array
-						result = getArray(path, key, (JSONObject) value);
-					} else {//json object
-						result = getObject(path, config, key, (JSONObject) value);
-					}
-					if (result == null || result.isEmpty()) {
-						if (isArrayKey) {
-							continue;
-						} else {
-							break;//数据库返回数量不够count，后面没有了。有依赖不为空，无依赖直接查询数据库。
-						}
-					}
-					transferredRequest.put(key, result);
-				} else {//JSONArray或其它Object
-					//array里不允许关联，只能在object中关联
-				}
-			}
-		}
+//			if (isInRelationMap(path)) {
+//				transferredRequest.put(JSONRequest.KEY_COUNT, count);
+//				transferredRequest.put(JSONRequest.KEY_PAGE, page);
+//			}
+//		} else {
+//			boolean isArrayKey;
+//			for (String key : set) {//0:{},1:{}...
+//				value = request.get(key);
+//				if (value instanceof JSONObject) {//JSONObject，往下一级提取
+//					config.setPosition(Integer.valueOf(0 + StringUtil.getNumber(key, true)));
+//					isArrayKey = isArrayKey(key);
+//					if (isArrayKey) {//json array
+//						result = getArray(path, key, (JSONObject) value);
+//					} else {//json object
+//						result = getObject(path, config, key, (JSONObject) value);
+//					}
+//					if (result == null || result.isEmpty()) {
+//						if (isArrayKey) {
+//							continue;
+//						} else {
+//							break;//数据库返回数量不够count，后面没有了。有依赖不为空，无依赖直接查询数据库。
+//						}
+//					}
+//					transferredRequest.put(key, result);
+//				} else {//JSONArray或其它Object
+//					//array里不允许关联，只能在object中关联
+//				}
+//			}
+//		}
 
 		//解决[]:{Comment[]:{...}}内层count,page丢失
 		request.put(JSONRequest.KEY_COUNT, count);
@@ -837,7 +848,7 @@ public class Parser {
 	/**估计最大总数，去掉value中所有依赖引用.
 	 * TODO 返回一个{"total":10, name:value}更好，省去了之后的parseRelation
 	 * @param path
-	 * @param table
+	 * @param name
 	 * @param value
 	 * @return
 	 * @throws Exception 
@@ -863,8 +874,7 @@ public class Parser {
 						if (v == null) {
 							continue;
 						}
-						target = getValueByPath(getAbsPath(
-								((String) v).startsWith(SEPARATOR) ? path : "", (String) v), true);
+						target = getValueByPath(getAbsPath(((String) v).startsWith(SEPARATOR) ? path : "", (String) v));
 						if (target != null && ((String) v).equals(target) == false) {
 							k = k.substring(0, k.length() - 1);
 							v = target;
@@ -917,77 +927,109 @@ public class Parser {
 		Log.i(TAG, "getPath  return " + path + " >>>>>>>>>>>>>>>>");
 		return path;
 	}
+	
+	/**替换[] -> []/i
+	 * 不能写在getAbsPath里，因为name不一定是依赖路径
+	 * @param parentPath
+	 * @param valuePath
+	 * @return
+	 */
+	private String replaceArrayChildPath(String parentPath, String valuePath) {
+		String[] ps = StringUtil.split(parentPath, "]/");//"[]/");
+		if (ps != null && ps.length > 1) {
+			String[] vs = StringUtil.split(valuePath, "]/");
+
+			if (vs != null && vs.length > 0) {
+				String pos;
+				for (int i = 0; i < ps.length - 1; i++) {
+					if (ps[i] == null || ps[i].equals(vs[i]) == false) {//允许""？
+						break;
+					}
+
+					pos = ps[i+1].contains("/") == false ? ps[i+1]
+							: ps[i+1].substring(0, ps[i+1].indexOf("/"));
+					if (
+							//StringUtil.isNumer(pos) && 
+							vs[i+1].startsWith(pos + "/") == false) {
+						vs[i+1] = pos + "/" + vs[i+1];
+					}
+				}
+				return StringUtil.getString(vs, "]/");
+			}
+		}
+		return valuePath;
+	}
 
 	//依赖引用关系 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	/**有关联代码的object的关联key在relationMap里
-	 * @param keyPath
-	 * @return
-	 */
-	private boolean isInRelationMap(String keyPath) {
-		if (keyPath == null) {
-			return false;
-		}
-		//		return keyValuePathMap == null ? false : keyValuePathMap.containsKey(path);
-		Set<String> set = keyValuePathMap == null ? null : keyValuePathMap.keySet();
-		if (set != null) {
-			for (String key : set) {
-				if (keyPath.equals(key) || key.startsWith(keyPath + "/")) {//解决相同字符导致的错误) {//key.contains(path)) {//
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-
-	/**新增keyPath-valuePath关联
-	 * @param keyPath
-	 * @param valuePath
-	 */
-	private void putRelation(String keyPath, String valuePath) {
-		keyValuePathMap.put(keyPath, valuePath);
-	}
-	/**根据keyPath获取valuePath
-	 * @param keyPath
-	 * @return
-	 */
-	private String getRelationValuePath(String keyPath) {
-		return keyValuePathMap.get(keyPath);
-	}
-	/**移除keyPath-valuePath关联
-	 * @param keyPath
-	 */
-	private void removeRelation(String keyPath) {
-		keyValuePathMap.remove(keyPath);
-	}
-
-
-	/**
-	 * @param path
-	 * @param replacePath
-	 */
-	private void updateRelation(String path, String replacePath) {
-		//更新关系path中对应改变字段
-		Set<String> relationSet = replacePath == null || keyValuePathMap == null ? null : keyValuePathMap.keySet();
-		if (relationSet != null) {
-			path = StringUtil.getString(path);
-
-			String relationValue;
-			for (String relationKey : relationSet) {
-				if (relationKey == null || relationKey.startsWith(replacePath) == false) {
-					continue;
-				}
-				relationValue = keyValuePathMap.get(relationKey);
-				if (relationValue != null && relationValue.startsWith(path)
-						&& relationValue.startsWith(replacePath) == false) {
-					//用replace会将所有符合字符替换！ []/Comment[] -> []/0/Comment[]/0, replaceFirst因[]特殊字符崩溃
-					relationValue = replacePath + relationValue.substring(path.length());
-					keyValuePathMap.put(relationKey, relationValue);
-				}
-			}
-		}
-	}
+//	/**有关联代码的object的关联key在relationMap里
+//	 * @param keyPath
+//	 * @return
+//	 */
+//	private boolean isInRelationMap(String keyPath) {
+//		if (keyPath == null) {
+//			return false;
+//		}
+//		//		return keyValuePathMap == null ? false : keyValuePathMap.containsKey(path);
+//		Set<String> set = keyValuePathMap == null ? null : keyValuePathMap.keySet();
+//		if (set != null) {
+//			for (String key : set) {
+//				if (keyPath.equals(key) || key.startsWith(keyPath + "/")) {//解决相同字符导致的错误) {//key.contains(path)) {//
+//					return true;
+//				}
+//			}
+//		}
+//		return false;
+//	}
+//
+//
+//	/**新增keyPath-valuePath关联
+//	 * @param keyPath
+//	 * @param valuePath
+//	 */
+//	private void putRelation(String keyPath, String valuePath) {
+//		keyValuePathMap.put(keyPath, valuePath);
+//	}
+//	/**根据keyPath获取valuePath
+//	 * @param keyPath
+//	 * @return
+//	 */
+//	private String getRelationValuePath(String keyPath) {
+//		return keyValuePathMap.get(keyPath);
+//	}
+//	/**移除keyPath-valuePath关联
+//	 * @param keyPath
+//	 */
+//	private void removeRelation(String keyPath) {
+//		keyValuePathMap.remove(keyPath);
+//	}
+//
+//
+//	/**
+//	 * @param path
+//	 * @param replacePath
+//	 */
+//	private void updateRelation(String path, String replacePath) {
+//		//更新关系path中对应改变字段
+//		Set<String> relationSet = replacePath == null || keyValuePathMap == null ? null : keyValuePathMap.keySet();
+//		if (relationSet != null) {
+//			path = StringUtil.getString(path);
+//
+//			String relationValue;
+//			for (String relationKey : relationSet) {
+//				if (relationKey == null || relationKey.startsWith(replacePath) == false) {
+//					continue;
+//				}
+//				relationValue = keyValuePathMap.get(relationKey);
+//				if (relationValue != null && relationValue.startsWith(path)
+//						&& relationValue.startsWith(replacePath) == false) {
+//					//用replace会将所有符合字符替换！ []/Comment[] -> []/0/Comment[]/0, replaceFirst因[]特殊字符崩溃
+//					relationValue = replacePath + relationValue.substring(path.length());
+//					keyValuePathMap.put(relationKey, relationValue);
+//				}
+//			}
+//		}
+//	}
 
 	/**将已获取完成的object的内容替换requestObject里对应的值
 	 * @param path object的路径
@@ -1002,20 +1044,11 @@ public class Parser {
 	}
 	/**根据路径获取值
 	 * @param valuePath
-	 * @return
+	 * @return parent == null ? valuePath : parent.get(keys[keys.length - 1])
 	 */
 	private Object getValueByPath(String valuePath) {
-		return getValueByPath(valuePath, false);
-	}
-	/**根据路径获取值
-	 * @param valuePath
-	 * @param containKey
-	 * @return containKey && parent.containsKey(targetKey) == false ? path : parent.get(targetKey);
-	 */
-	private Object getValueByPath(String valuePath, boolean containKey) {
-		Log.i(TAG, "<<<<<<<<<<<<<<< \n getValueByPath  valuePath = " + valuePath
-				+ ";  containKey = " + containKey + "\n <<<<<<<<<<<<<<<<<<");
-		if (StringUtil.isNotEmpty(valuePath, true) == false) {
+		Log.i(TAG, "<<<<<<<<<<<<<<< \n getValueByPath  valuePath = " + valuePath + "\n <<<<<<<<<<<<<<<<<<");
+		if (StringUtil.isEmpty(valuePath, true)) {
 			Log.e(TAG, "getValueByPath  StringUtil.isNotEmpty(valuePath, true) == false >> return null;");
 			return null;
 		}
@@ -1053,13 +1086,9 @@ public class Parser {
 				parent = getJSONObject(parent, keys[i]);
 			}
 		}
-		if (parent == null) {
-			return containKey ? valuePath : null;
-		}
 
-		System.out.println("getValueByPath  return parent.get(keys[keys.length - 1]); >> ");
-		String targetKey = keys[keys.length - 1];
-		return containKey && parent.containsKey(targetKey) == false ? valuePath : parent.get(targetKey);
+		System.out.println("getValueByPath  return parent == null ? valuePath : parent.get(keys[keys.length - 1]); >> ");
+		return parent == null ? valuePath : parent.get(keys[keys.length - 1]);
 	}
 
 	//依赖引用关系 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
