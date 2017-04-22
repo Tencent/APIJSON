@@ -31,10 +31,9 @@ import zuo.biao.apijson.JSON;
 import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 
-/**使用方法：复制>粘贴>改名>改代码  */
-/**fragmentActivity示例
+/**用户列表界面
  * @author Lemon
- * @use toActivity(DemoFragmentActivity.createIntent(...));
+ * @use toActivity(UserListActivity.createIntent(...));
  */
 public class UserListActivity extends BaseActivity implements OnBottomDragListener {
 	//	private static final String TAG = "DemoFragmentActivity";
@@ -159,9 +158,6 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 		case UserListFragment.RANGE_ALL:
 			title = "全部";
 			break;
-			//		case UserListFragment.RANGE_SINGLE:
-			//			title = "动态";
-			//			break;
 		case UserListFragment.RANGE_USER:
 			title = APIJSONApplication.getInstance().isCurrentUser(id) ? "我的动态" : "TA的动态";
 			break;
@@ -228,8 +224,10 @@ public class UserListActivity extends BaseActivity implements OnBottomDragListen
 	@Override
 	public void onDragBottom(boolean rightToLeft) {
 		if (rightToLeft) {
-
-			fragment.onDragBottom(rightToLeft);
+			if (showSearch) {
+				fragment.onDragBottom(rightToLeft);
+			}
+			
 			return;
 		}
 
