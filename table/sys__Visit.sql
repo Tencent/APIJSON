@@ -16,30 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Visit`
+-- Table structure for table `_Visit`
 --
 
-DROP TABLE IF EXISTS `Visit`;
+DROP TABLE IF EXISTS `_Visit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Visit` (
-  `id` bigint(20) NOT NULL,
-  `table` varchar(20) NOT NULL,
-  `tableId` bigint(15) DEFAULT NULL,
+CREATE TABLE `_Visit` (
+  `_index` int(11) NOT NULL,
+  `model` varchar(20) NOT NULL,
+  `id` bigint(15) NOT NULL,
+  `operate` tinyint(4) NOT NULL COMMENT '1-增\n2-删\n3-改\n4-查',
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `lastDate` timestamp NULL DEFAULT NULL,
-  `count` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Visit`
+-- Dumping data for table `_Visit`
 --
 
-LOCK TABLES `Visit` WRITE;
-/*!40000 ALTER TABLE `Visit` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Visit` ENABLE KEYS */;
+LOCK TABLES `_Visit` WRITE;
+/*!40000 ALTER TABLE `_Visit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `_Visit` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -51,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-04-10 23:24:27
+-- Dump completed on 2017-04-23 16:15:42

@@ -16,13 +16,13 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Reponse`
+-- Table structure for table `Response`
 --
 
-DROP TABLE IF EXISTS `Reponse`;
+DROP TABLE IF EXISTS `Response`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Reponse` (
+CREATE TABLE `Response` (
   `id` int(11) NOT NULL,
   `method` varchar(10) DEFAULT 'GET',
   `tag` varchar(20) NOT NULL,
@@ -31,17 +31,17 @@ CREATE TABLE `Reponse` (
   `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='每次启动服务器时加载整个表到内存。';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Reponse`
+-- Dumping data for table `Response`
 --
 
-LOCK TABLES `Reponse` WRITE;
-/*!40000 ALTER TABLE `Reponse` DISABLE KEYS */;
-INSERT INTO `Reponse` VALUES (1,NULL,'User','{\"add\": {\"extra\": \"Response is effective!\"}, \"put\": {\"certified\": 0}, \"remove\": \"phone\"}','remove-移除字段；add-如果没有对应字段就添加字段；replace-如果有就替换；put-添加或替换字段','2017-02-01 11:19:51');
-/*!40000 ALTER TABLE `Reponse` ENABLE KEYS */;
+LOCK TABLES `Response` WRITE;
+/*!40000 ALTER TABLE `Response` DISABLE KEYS */;
+INSERT INTO `Response` VALUES (1,NULL,'User','{\"add\": {\"extra\": \"Response is effective!\"}, \"put\": {\"certified\": 0}, \"remove\": \"phone\"}','remove-移除字段；add-如果没有对应字段就添加字段；replace-如果有就替换；put-添加或替换字段','2017-02-01 11:19:51');
+/*!40000 ALTER TABLE `Response` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-04-10 23:24:27
+-- Dump completed on 2017-04-23 16:15:47
