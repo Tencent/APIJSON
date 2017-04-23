@@ -94,7 +94,7 @@ APIJSON是一种JSON传输结构协议。<br />
         "userId":38710,
         "date":1486541171000,
         "pictureList":[
-          "http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg",
+          "http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg"
         ]
       },
       "Comment[]":{
@@ -133,7 +133,7 @@ APIJSON是一种JSON传输结构协议。<br />
         "content":1111534034,
         "pictureList":[
           "http://static.oschina.net/uploads/img/201604/22172508_eGDi.jpg",
-          "http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg",
+          "http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg"
         ]
       },
       "Comment[]":{
