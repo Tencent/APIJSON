@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -32,7 +33,9 @@ import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.Logic;
 import zuo.biao.apijson.server.Parser;
 import zuo.biao.apijson.server.exception.NotExistException;
 
@@ -43,7 +46,7 @@ public class QueryConfig {
 	private static final String TAG = "QueryConfig";
 
 	public static final String ID = JSONResponse.KEY_ID;
-	
+
 	public static final List<String> ARRAY_KEY_LIST;
 	static {
 		ARRAY_KEY_LIST = new ArrayList<String>();
@@ -58,6 +61,10 @@ public class QueryConfig {
 		TABLE_KEY_LIST.add(JSONRequest.KEY_HAVING);
 		TABLE_KEY_LIST.add(JSONRequest.KEY_ORDER);
 	}
+
+	public static final String OR = SQL.OR;
+	public static final String AND = SQL.AND;
+	public static final String NOT = SQL.NOT;
 
 
 
@@ -321,6 +328,8 @@ public class QueryConfig {
 					keyType = 1;
 				} else if (key.endsWith("{}")) {
 					keyType = 2;
+				} else if (key.endsWith("<>")) {
+					keyType = 3;
 				}
 				value = where.get(key);
 				key = Parser.getRealKey(method, key, false, true);
@@ -328,16 +337,23 @@ public class QueryConfig {
 				String condition = "";
 				switch (keyType) {
 				case 1:
-					condition = getLikeString(key, value);
+					condition = getSearchString(key, value);
 					break;
 				case 2:
 					condition = getRangeString(key, value);
+					break;
+				case 3:
+					condition = getContainString(key, value);
 					break;
 				default:
 					condition = (key + "='" + value + "'");
 					break;
 				}
-				whereString += (isFirst ? "" : " AND ") + condition;
+				if (StringUtil.isEmpty(condition, true)) {//避免SQL条件连接错误
+					continue;
+				}
+				
+				whereString += (isFirst ? "" : AND) + condition;
 
 				isFirst = false;
 			}
@@ -349,54 +365,86 @@ public class QueryConfig {
 		return "";
 	}
 
+	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**search key match value
+	 * @param in
+	 * @return {@link #getSearchString(String, Object[], int)}
+	 * @throws IllegalArgumentException 
+	 */
+	public static String getSearchString(String key, Object value) throws IllegalArgumentException {
+		if (value == null) {
+			return "";
+		}
+
+		Logic logic = new Logic(key);
+		key = logic.getKey();
+		Log.i(TAG, "getRangeString key = " + key);
+
+		if (value instanceof JSONArray == false) {//TODO 直接掉Like性能最好！
+			JSONArray array = new JSONArray();
+			array.add(value);
+			value = array;
+		}
+		if (((JSONArray) value).isEmpty()) {
+			return "";
+		}
+		return getSearchString(key, ((JSONArray) value).toArray(), logic.getType());
+	}
+	/**search key match values
+	 * @param in
+	 * @return LOGIC [  key LIKE 'values[i]' ]
+	 * @throws IllegalArgumentException 
+	 */
+	public static String getSearchString(String key, Object[] values, int type) throws IllegalArgumentException {
+		if (values == null || values.length <= 0) {
+			return "";
+		}
+
+		String condition = "";
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] instanceof String == false) {
+				throw new IllegalArgumentException(key + "$\":value 中value只能为String或JSONArray<String>！");
+			}
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, values[i]);
+		}
+
+		return (Logic.isNot(type) ? NOT : "") + "(" + condition + ")";
+	}
+
 	/**WHERE key LIKE 'value'
-	 * @param key endsWith("!") ? key = key.substring(0, key.length() - 1) + " NOT ";
+	 * @param key endsWith("!") ? key = key.substring(0, key.length() - 1) + NOT;
 	 * @param value
 	 * @return key LIKE 'value'
 	 */
 	public static String getLikeString(String key, Object value) {
-		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
-		if ("!".equals(last)) {
-			key = key.substring(0, key.length() - 1) + " NOT ";
-		}
 		return key + " LIKE '" + value + "'";
 	}
+	//$ search >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	//{} range <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**WHERE key > 'key0' AND key <= 'key1' AND ...
 	 * @param key
 	 * @param range "condition0,condition1..."
 	 * @return key condition0 AND key condition1 AND ...
-	 * @throws NotExistException 
+	 * @throws Exception 
 	 */
-	public static String getRangeString(String key, Object range) throws NotExistException {
+	public static String getRangeString(String key, Object range) throws Exception {
 		Log.i(TAG, "getRangeString key = " + key);
 		if (range == null) {//依赖的对象都没有给出有效值，这个存在无意义。如果是客户端传的，那就能在客户端确定了。
 			throw new NotExistException(TAG + "getRangeString(" + key + ", " + range
 					+ ") range == null");
 		}
 
-		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
-		int type = -1;
-		Log.i(TAG, "getRangeString last = " + last);
-		if ("|".equals(last)) {
-			type = 0;
-		} else if ("&".equals(last)) {
-			type = 1;
-		} else if ("!".equals(last)) {
-			type = 2;
-		}
-		if (type >= 0 && type <= 2) {
-			key = key.substring(0, key.length() - 1);
-		}
-		if (type < 0) {
-			type = 0;
-		}
+		Logic logic = new Logic(key);
+		key = logic.getKey();
 		Log.i(TAG, "getRangeString key = " + key);
 
 		if (range instanceof JSONArray) {
-			if (type != 0 && type != 2) {
-				throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
+			if (logic.isOr() || logic.isNot()) {
+				return key + getInString(key, ((JSONArray) range).toArray(), logic.isNot());
 			}
-			return key + getInString(key, ((JSONArray) range).toArray(), type == 2);
+			throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
 		}
 		if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
 			String[] conditions = StringUtil.split((String) range);
@@ -405,17 +453,16 @@ public class QueryConfig {
 				int index;
 				for (int i = 0; i < conditions.length; i++) {//对函数条件length(key)<=5这种不再在开头加key
 					index = conditions[i] == null ? -1 : conditions[i].indexOf("(");
-					condition += ((i <= 0 ? "" : (type == 1 ? " AND " : " OR "))//连接方式
+					condition += ((i <= 0 ? "" : (logic.isAnd() ? AND : OR))//连接方式
 							+ (index >= 0 && conditions[i].substring(index).contains(")") ? "" : key + " ")//函数和非函数条件
 							+ conditions[i]);//单个条件
 				}
 			}
-			if (condition.isEmpty()) {//条件如果存在必须执行，不能忽略。条件为空会导致出错，又很难保证条件不为空(@:条件)，所以还是这样好
-				throw new NotExistException(TAG + "getRangeString(" + key + ", " + range
-						+ ") >> condition.isEmpty() >> IN()");
+			if (condition.isEmpty()) {
+				return "";
 			}
 			condition = "(" + condition + ")";
-			return type != 2 ? condition : " NOT " + condition;
+			return logic.isNot() ? NOT + condition : condition;
 		}
 
 		throw new IllegalArgumentException(key + "{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
@@ -432,16 +479,88 @@ public class QueryConfig {
 				condition += ((i > 0 ? "," : "") + "'" + in[i] + "'");
 			}
 		}
-		if (condition.isEmpty()) {
-			throw new NotExistException(TAG + "getInString(" + key + ", [], " + not
+		if (condition.isEmpty()) {//条件如果存在必须执行，不能忽略。条件为空会导致出错，又很难保证条件不为空(@:条件)，所以还是这样好
+			throw new NotExistException(TAG + ".getInString(" + key + ", [], " + not
 					+ ") >> condition.isEmpty() >> IN()");
 		}
-		return (not ? " NOT " : "") + " IN " + "(" + condition + ")";
+		return (not ? NOT : "") + " IN " + "(" + condition + ")";
 	}
-	//WHERE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//{} range >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-	//SET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	//<> contain <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**WHERE key contains value
+	 * @param key
+	 * @param value
+	 * @return 	{@link #getContainString(String, Object[], int)}
+	 * @throws NotExistException
+	 */
+	public static String getContainString(String key, Object value) throws NotExistException {
+		if (value == null) {
+			return "";
+		}
+
+		Logic logic = new Logic(key);
+		key = logic.getKey();
+		Log.i(TAG, "getRangeString key = " + key);
+
+		if (value instanceof JSONArray == false) {//TODO 直接掉Like性能最好！
+			JSONArray array = new JSONArray();
+			array.add(value);
+			value = array;
+		}
+		return getContainString(key, ((JSONArray) value).toArray(), logic.getType());
+	}
+	/**WHERE key contains childs
+	 * @param key
+	 * @param childs null ? "" : (empty ? no child : contains childs)
+	 * @param type |, &, !
+	 * @return LOGIC [  ( key LIKE '[" + childs[i] + "]'  OR  key LIKE '[" + childs[i] + ", %'
+	 *   OR  key LIKE '%, " + childs[i] + ", %'  OR  key LIKE '%, " + childs[i] + "]' )  ]
+	 * @throws IllegalArgumentException 
+	 */
+	public static String getContainString(String key, Object[] childs, int type) throws IllegalArgumentException {
+		String condition = "";
+		if (childs != null) {
+			for (int i = 0; i < childs.length; i++) {
+				if (childs[i] != null) {
+					if (childs[i] instanceof JSON) {
+						throw new IllegalArgumentException(key + "<>\":value 中value类型不能为JSON！");
+					}
+					if (childs[i] instanceof String) {
+						childs[i] = "\"" + childs[i] + "\"";
+					}
+					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
+							+ getSearchString(
+									key
+									, new String[]{
+											"[" + childs[i] + "]", //全等
+											"[" + childs[i] + ", %", //开始
+											"%, " + childs[i] + ", %", //中间
+											"%, " + childs[i] + "]" //末尾
+									}
+									, Logic.TYPE_OR
+									);
+				}
+			}
+			if (condition.isEmpty()) {
+				condition = (SQL.isEmpty(key, true) + OR + getLikeString(key, "[]"));
+			}
+		}
+		if (condition.isEmpty()) {
+			return "";
+		}
+		return (Logic.isNot(type) ? NOT : "") + "(" + condition + ")";
+	}
+	//<> contain >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	//WHERE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+	//SET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取SET
 	 * @return
 	 * @throws Exception 
@@ -543,10 +662,10 @@ public class QueryConfig {
 			request.remove(JSONRequest.KEY_GROUP);
 			request.remove(JSONRequest.KEY_HAVING);
 			request.remove(JSONRequest.KEY_ORDER);
-			
+
 			if (method == POST) {
 				config.setColumn(StringUtil.getString(set.toArray(new String[]{})));
-				
+
 				String valuesString = "";
 				Collection<Object> valueCollection = request.values();
 				Object[] values = valueCollection == null || valueCollection.isEmpty() ? null : valueCollection.toArray();
@@ -558,7 +677,7 @@ public class QueryConfig {
 				config.setValues("(" + valuesString + ")");
 			} else {
 				config.setColumn(column);
-				
+
 				Map<String, Object> transferredRequest = new HashMap<String, Object>();
 				Object value;
 				for (String key : set) {

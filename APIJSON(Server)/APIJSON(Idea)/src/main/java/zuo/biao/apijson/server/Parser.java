@@ -845,6 +845,7 @@ public class Parser {
 		return transferredRequest;
 	}
 
+	//TODO 获取status和message，如果发生异常就throw new Exception(message!)，不行，不知道Exception类型，还是传boolean catchException到parse好
 	/**估计最大总数，去掉value中所有依赖引用.
 	 * TODO 返回一个{"total":10, name:value}更好，省去了之后的parseRelation
 	 * @param path
@@ -882,14 +883,18 @@ public class Parser {
 					}
 
 					valid = new String(k);
-					if (valid.endsWith("{}")) {
+					if (valid.endsWith("$")) {
+						valid = valid.substring(0, valid.length() - 1);
+					} else if (valid.endsWith("{}")) {
 						valid = valid.substring(0, valid.length() - 2);
-					} else if (valid.endsWith("$")) {
+					} else if (valid.endsWith("<>")) {
+						valid = valid.substring(0, valid.length() - 2);
+					}
+					
+					if (valid.endsWith("|") || valid.endsWith("&") || valid.endsWith("!")) {
 						valid = valid.substring(0, valid.length() - 1);
 					}
-					if (valid.endsWith("&") || valid.endsWith("|") || valid.endsWith("!")) {
-						valid = valid.substring(0, valid.length() - 1);
-					}
+					
 					if (isWord(valid)) {
 						request.put(k, v);
 					}
@@ -1195,20 +1200,22 @@ public class Parser {
 
 		String key = new String(originKey);
 		if (key.endsWith("$")) {//搜索，查询时处理
-			key = key.substring(0, key.lastIndexOf("$"));
-		} else if (key.endsWith("{}")) {//被包含，或者说处于value的范围内。查询时处理 "key[]":{} 和 "key{}":[]正好反过来
-			key = key.substring(0, key.lastIndexOf("{}"));
+			key = key.substring(0, key.length() - 1);
+		} else if (key.endsWith("{}")) {//被包含，或者说key对应值处于value的范围内。查询时处理
+			key = key.substring(0, key.length() - 2);
+		} else if (key.endsWith("<>")) {//包含，或者说value处于key对应值的范围内。查询时处理
+			key = key.substring(0, key.length() - 2);
 		} else if (key.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存？
-			key = key.substring(0, key.lastIndexOf("()"));
+			key = key.substring(0, key.length() - 2);
 		} else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
-			key = key.substring(0, key.lastIndexOf("@"));
+			key = key.substring(0, key.length() - 1);
 		} else if (key.endsWith("+")) {//延长，PUT查询时处理
 			if (method == PUT) {//不为PUT就抛异常
-				key = key.substring(0, key.lastIndexOf("+"));
+				key = key.substring(0, key.length() - 1);
 			}
 		} else if (key.endsWith("-")) {//缩减，PUT查询时处理
 			if (method == PUT) {//不为PUT就抛异常
-				key = key.substring(0, key.lastIndexOf("-"));
+				key = key.substring(0, key.length() - 1);
 			}
 		}
 
