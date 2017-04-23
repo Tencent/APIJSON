@@ -48,10 +48,10 @@ APIJSON是一种JSON传输结构协议。<br />
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_moment.jpg) 
 
 
-## 举几个栗子:
+### 举几个栗子:
 
-### 查询用户
-#### 请求：
+#### 查询用户
+请求：
 <pre><code class="language-json">
 {
   "User":{
@@ -61,7 +61,7 @@ APIJSON是一种JSON传输结构协议。<br />
 
 [点击这里测试](http://139.196.140.118:8080/get/{"User":{}})
 
-#### 返回：
+返回：
 <pre><code class="language-json">
 {
   "User":{
@@ -83,8 +83,8 @@ APIJSON是一种JSON传输结构协议。<br />
 }
 </code></pre>
 
-### 查询用户列表
-#### 请求：
+#### 查询用户列表
+请求：
 <pre><code class="language-json">
 {
   "[]":{
@@ -98,7 +98,7 @@ APIJSON是一种JSON传输结构协议。<br />
 
 [点击这里测试](http://139.196.140.118:8080/get/{"[]":{"count":3,"User":{"@column":"id,name"}}})
 
-#### 返回：
+返回：
 <pre><code class="language-json">
 {
   "[]":{
@@ -126,9 +126,8 @@ APIJSON是一种JSON传输结构协议。<br />
 }
 </code></pre>
 
-
-### 查询类似微信朋友圈的动态列表
-#### 请求：
+#### 查询类似微信朋友圈的动态列表
+请求：
 <pre><code class="language-json">
 {
   "[]":{                             //请求一个Array
@@ -152,11 +151,9 @@ APIJSON是一种JSON传输结构协议。<br />
 }
 </code></pre>
 
-
 [点击这里测试](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":2,"User":{"sex":0,"@column":"id,name,head"},"Moment":{"userId@":"%252FUser%252Fid"},"Comment[]":{"page":0,"count":2,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
 
-
-#### 返回：
+返回：
 <pre><code class="language-json">
 {
   "[]":{
