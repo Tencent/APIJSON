@@ -48,9 +48,87 @@ APIJSON是一种JSON传输结构协议。<br />
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_moment.jpg) 
 
 
-举个栗子（查询类似微信朋友圈动态列表）:
+## 举几个栗子:
 
-### 请求：
+### 查询用户
+#### 请求：
+<pre><code class="language-json">
+{
+  "User":{
+  }
+}
+</code></pre>
+
+[点击这里测试](http://139.196.140.118:8080/get/{"User":{}})
+
+#### 返回：
+<pre><code class="language-json">
+{
+  "User":{
+    "id":38710,
+    "sex":0,
+    "name":"TommyLemon",
+    "certified":true,
+    "tag":"Android&Java",
+    "phone":13000038710,
+    "head":"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
+    "date":1485948110000,
+    "pictureList":[
+      "http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
+      "http://common.cnblogs.com/images/icon_weibo_24.png"
+    ]
+  },
+  "status":200,
+  "message":"success"
+}
+</code></pre>
+
+### 查询用户列表
+#### 请求：
+<pre><code class="language-json">
+{
+  "[]":{
+    "count":3,
+    "User":{
+      "@column":"id,name"
+    }
+  }
+}
+</code></pre>
+
+[点击这里测试](http://139.196.140.118:8080/get/{"[]":{"count":3,"User":{"@column":"id,name"}}})
+
+#### 返回：
+<pre><code class="language-json">
+{
+  "[]":{
+    "0":{
+      "User":{
+        "id":38710,
+        "name":"TommyLemon"
+      }
+    },
+    "1":{
+      "User":{
+        "id":70793,
+        "name":"Strong"
+      }
+    },
+    "2":{
+      "User":{
+        "id":82001,
+        "name":"Android"
+      }
+    }
+  },
+  "status":200,
+  "message":"success"
+}
+</code></pre>
+
+
+### 查询类似微信朋友圈的动态列表
+#### 请求：
 <pre><code class="language-json">
 {
   "[]":{                             //请求一个Array
@@ -75,11 +153,10 @@ APIJSON是一种JSON传输结构协议。<br />
 </code></pre>
 
 
-
 [点击这里测试](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":2,"User":{"sex":0,"@column":"id,name,head"},"Moment":{"userId@":"%252FUser%252Fid"},"Comment[]":{"page":0,"count":2,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
 
-### 返回：
 
+#### 返回：
 <pre><code class="language-json">
 {
   "[]":{
