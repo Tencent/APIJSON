@@ -57,7 +57,7 @@ APIJSON是一种JSON传输结构协议。<br />
     "page":0,                        //Array条件
     "count":2,
     "User":{                         //请求一个名为User的Table
-      "sex":0                        //Object条件
+      "sex":0,                       //Object条件
       "@column":"id,name,head"       //指定返回字段
     },
     "Moment":{
