@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -348,6 +349,10 @@ public class QueryConfig {
 					condition = (key + "='" + value + "'");
 					break;
 				}
+				if (StringUtil.isEmpty(condition, true)) {//避免SQL条件连接错误
+					continue;
+				}
+				
 				whereString += (isFirst ? "" : AND) + condition;
 
 				isFirst = false;
@@ -494,9 +499,6 @@ public class QueryConfig {
 		if (value == null) {
 			return "";
 		}
-		if (value instanceof JSONObject) {
-			throw new IllegalArgumentException(key + "<>\":value 中value不能为JSONObject！");
-		}
 
 		Logic logic = new Logic(key);
 		key = logic.getKey();
@@ -510,7 +512,9 @@ public class QueryConfig {
 		return getContainString(key, ((JSONArray) value).toArray(), logic.getType());
 	}
 	/**WHERE key contains childs
-	 * @param in
+	 * @param key
+	 * @param childs null ? "" : (empty ? no child : contains childs)
+	 * @param type |, &, !
 	 * @return LOGIC [  ( key LIKE '[" + childs[i] + "]'  OR  key LIKE '[" + childs[i] + ", %'
 	 *   OR  key LIKE '%, " + childs[i] + ", %'  OR  key LIKE '%, " + childs[i] + "]' )  ]
 	 * @throws IllegalArgumentException 
@@ -520,6 +524,9 @@ public class QueryConfig {
 		if (childs != null) {
 			for (int i = 0; i < childs.length; i++) {
 				if (childs[i] != null) {
+					if (childs[i] instanceof JSON) {
+						throw new IllegalArgumentException(key + "<>\":value 中value类型不能为JSON！");
+					}
 					if (childs[i] instanceof String) {
 						childs[i] = "\"" + childs[i] + "\"";
 					}
@@ -535,6 +542,9 @@ public class QueryConfig {
 									, Logic.TYPE_OR
 									);
 				}
+			}
+			if (condition.isEmpty()) {
+				condition = (SQL.isEmpty(key, true) + OR + getLikeString(key, "[]"));
 			}
 		}
 		if (condition.isEmpty()) {
