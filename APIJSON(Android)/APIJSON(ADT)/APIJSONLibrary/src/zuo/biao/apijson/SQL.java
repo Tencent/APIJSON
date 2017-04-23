@@ -19,84 +19,133 @@ package zuo.biao.apijson;
  */
 public class SQL {
 
+	public static final String OR = " OR ";
+	public static final String AND = " AND ";
+	public static final String NOT = " NOT ";
+	public static final String IS = " is ";
+	public static final String NULL = " null ";
+
+	/**
+	 * isNull = true 
+	 * @return {@link #isNull(boolean)}
+	 */
+	public static String isNull() {
+		return isNull(true);
+	}
 	/**
 	 * @param isNull
-	 * @return
+	 * @return IS + (isNull ? "" : NOT) + NULL;
 	 */
 	public static String isNull(boolean isNull) {
-		return "is" + (isNull ? "" : " not") + " null";
+		return IS + (isNull ? "" : NOT) + NULL;
+	}
+	/**
+	 * isNull = true
+	 * @param s
+	 * @return {@link #isNull(String, boolean)}
+	 */
+	public static String isNull(String s) {
+		return isNull(s, true);
+	}
+	/**
+	 * @param s
+	 * @param isNull
+	 * @return s + {@link #isNull(boolean)}
+	 */
+	public static String isNull(String s, boolean isNull) {
+		return s + isNull(isNull);
+	}
+
+	/**
+	 * isEmpty = true
+	 * @param s
+	 * @return {@link #isEmpty(String, boolean)}
+	 */
+	public static String isEmpty(String s) {
+		return isEmpty(s, true);
 	}
 	/**
 	 * trim = false
 	 * @param s
 	 * @param isEmpty
-	 * @return
+	 * @return {@link #isEmpty(String, boolean, boolean)}
 	 */
 	public static String isEmpty(String s, boolean isEmpty) {
 		return isEmpty(s, isEmpty, false);
 	}
 	/**
+	 * nullable = true
 	 * @param s
-	 * @param isEmpty
-	 * @param trim
-	 * @return
+	 * @param isEmpty <=0
+	 * @param trim s = trim(s);
+	 * @return {@link #isEmpty(String, boolean, boolean, boolean)}
 	 */
 	public static String isEmpty(String s, boolean isEmpty, boolean trim) {
+		return isEmpty(s, isEmpty, trim, true);
+	}
+	/**
+	 * @param s
+	 * @param isEmpty <=0
+	 * @param trim s = trim(s);
+	 * @param nullable isNull(s, true) + OR +
+	 * @return {@link #lengthCompare(String, String)}
+	 */
+	public static String isEmpty(String s, boolean isEmpty, boolean trim, boolean nullable) {
 		if (trim) {
 			s = trim(s);
 		}
-		return lengthCompare(s, (isEmpty ? ">" : "<=") + "0");
+		return (nullable ? isNull(s, true) + OR : "") + lengthCompare(s, (isEmpty ? "<=" : ">") + "0");
 	}
 	/**
 	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
-	 * @return
+	 * @return {@link #length(String)} + compare
 	 */
 	public static String lengthCompare(String s, String compare) {
 		return length(s) + compare;
 	}
-	
-	
+
+
 	/**
 	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
-	 * @return
+	 * @return "length(" + s + ")"
 	 */
 	public static String length(String s) {
 		return "length(" + s + ")";
 	}
 	/**
 	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
-	 * @return
+	 * @return "char_length(" + s + ")"
 	 */
 	public static String charLength(String s) {
 		return "char_length(" + s + ")";
 	}
-	
+
 	/**
 	 * @param s
-	 * @return
+	 * @return "trim(" + s + ")"
 	 */
 	public static String trim(String s) {
 		return "trim(" + s + ")";
 	}
 	/**
 	 * @param s
-	 * @return
+	 * @return "ltrim(" + s + ")"
 	 */
 	public static String trimLeft(String s) {
 		return "ltrim(" + s + ")";
 	}
 	/**
 	 * @param s
-	 * @return
+	 * @return "rtrim(" + s + ")"
 	 */
 	public static String trimRight(String s) {
 		return "rtrim(" + s + ")";
 	}
-	
+
 	/**
 	 * @param s
 	 * @param n
-	 * @return
+	 * @return "left(" + s + "," + n + ")"
 	 */
 	public static String left(String s, int n) {
 		return "left(" + s + "," + n + ")";
@@ -104,31 +153,31 @@ public class SQL {
 	/**
 	 * @param s
 	 * @param n
-	 * @return
+	 * @return "right(" + s + "," + n + ")"
 	 */
 	public static String right(String s, int n) {
 		return "right(" + s + "," + n + ")";
 	}
-	
+
 	/**
 	 * @param s
 	 * @param start
 	 * @param end
-	 * @return
+	 * @return "substring(" + s + "," + start + "," + (end-start) + ")"
 	 */
 	public static String subString(String s, int start, int end) {
 		return "substring(" + s + "," + start + "," + (end-start) + ")";
 	}
-	
+
 	/**
 	 * @param s
 	 * @param c
-	 * @return
+	 * @return "instr(" + s + "," + c + ")"
 	 */
 	public static String indexOf(String s, String c) {
 		return "instr(" + s + "," + c + ")";
 	}
-	
+
 	/**
 	 * @param s
 	 * @param c1
@@ -138,35 +187,35 @@ public class SQL {
 	public static String replace(String s, String c1, String c2) {
 		return "replace(" + s + "," + c1 + "," + c2 + ")";
 	}
-	
+
 	/**
 	 * @param s1
 	 * @param s2
-	 * @return
+	 * @return "strcmp(" + s1 + "," + s2 + ")"
 	 */
 	public static String equals(String s1, String s2) {
 		return "strcmp(" + s1 + "," + s2 + ")";
 	}
-	
+
 	/**
 	 * @param s
-	 * @return
+	 * @return "upper(" + s + ")"
 	 */
 	public static String toUpperCase(String s) {
 		return "upper(" + s + ")";
 	}
 	/**
 	 * @param s
-	 * @return
+	 * @return "lower(" + s + ")"
 	 */
 	public static String toLowerCase(String s) {
 		return "lower(" + s + ")";
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;
 	public static final int SEARCH_TYPE_CONTAIN_ORDER = 1;
 	public static final int SEARCH_TYPE_CONTAIN_SINGLE = 2;
@@ -237,5 +286,5 @@ public class SQL {
 			return "%" + s + "%";
 		}
 	}
-	
+
 }
