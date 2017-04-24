@@ -61,14 +61,18 @@ import zuo.biao.library.util.TimeUtil;
 /**动态
  * @author Lemon
  * @use
-MomentView momentView = new MomentView(context, inflater);
-adapter中使用convertView = momentView.getView();//[具体见.DemoAdapter] 或  其它类中使用
-containerView.addView(momentView.getConvertView());
-momentView.bindView(data);
-momentView.setOnPictureClickListener(onPictureClickListener);//非必需
-momentView.setOnDataChangedListener(onDataChangedListener);data = momentView.getData();//非必需
-momentView.setOnClickListener(onClickListener);//非必需
-...
+ * <br> MomentView momentView = new MomentView(context, resources);
+ * <br> adapter中使用:[具体参考.DemoAdapter2(getView使用自定义View的写法)]
+ * <br> convertView = momentView.createView(inflater, position, viewType);
+ * <br> momentView.bindView(data, position, viewType);
+ * <br> 或  其它类中使用:
+ * <br> containerView.addView(momentView.createView(inflater));
+ * <br> momentView.bindView(data);
+ * <br> 然后
+ * <br> momentView.setOnPictureClickListener(onPictureClickListener);//非必需
+ * <br> momentView.setOnDataChangedListener(onDataChangedListener);data = momentView.getData();//非必需
+ * <br> momentView.setOnClickListener(onClickListener);//非必需
+ * <br> ...
  */
 public class MomentView extends BaseView<MomentItem> implements OnClickListener
 , OnHttpResponseListener, OnDialogButtonClickListener, OnItemClickListener {
@@ -266,9 +270,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		int pictureNum = keyValueList.size();
 		gvMomentView.setVisibility(pictureNum <= 0 ? View.GONE : View.VISIBLE);
 		if (pictureNum <= 0) {
-			Log.i(TAG, "setList pictureNum <= 0 >> lvModel.setAdapter(null); return;");
-			adapter = null;
-			gvMomentView.setAdapter(null);
+			Log.i(TAG, "setList pictureNum <= 0 >> return;");
 			return;
 		}
 
@@ -395,15 +397,16 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			Log.e(TAG, "onHttpResponse  data == null  >> return;");
 			return;
 		}
-		JSONResponse response = new JSONResponse(result);
-		JSONResponse response2 = response.getJSONResponse(Moment.class.getSimpleName());
-		boolean isSucceed = JSONResponse.isSucceed(response2);
+		JSONResponse response = new JSONResponse(result).getJSONResponse(Moment.class.getSimpleName());
+		boolean isSucceed = JSONResponse.isSucceed(response);
+
+		boolean refresh = false;
 		switch (requestCode) {
 		case HTTP_PRAISE:
 		case HTTP_CANCEL_PRAISE:
 			if (isSucceed) {
 				data.setIsPraised(requestCode == HTTP_PRAISE);
-				bindView(data);
+				refresh = true;
 			} else {
 				showShortToast((requestCode == HTTP_PRAISE ? "点赞" : "取消点赞") + "失败，请检查网络后重试");
 			}
@@ -414,15 +417,20 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			if (isSucceed) {
 				bindView(null);
 				status = MomentItem.STATUS_DELETED;
-				if (onDataChangedListener != null) {
-					onDataChangedListener.onDataChanged();
-				}
 				CacheManager.getInstance().remove(MomentItem.class, "" + momentId);
 			} else {
-				data.setMyStatus(MomentItem.STATUS_NORMAL);
-				bindView(data);
+				status = data.getMyStatus();
+				bindView(data);//不需要adapter内更新list    refresh = true;
 			}
 			break;
+		}
+
+		if (refresh) {
+			if (onDataChangedListener != null) {
+				onDataChangedListener.onDataChanged();
+			} else {
+				bindView(data);
+			}
 		}
 	}
 

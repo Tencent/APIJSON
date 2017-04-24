@@ -36,14 +36,15 @@ import zuo.biao.library.util.StringUtil;
  * @use
  * <br> UserView userView = new UserView(context, resources);
  * <br> adapter中使用:[具体参考.DemoAdapter2(getView使用自定义View的写法)]
- * <br> convertView = userView.createView(inflater);
- * <br> userView.bindView(position, data);
+ * <br> convertView = userView.createView(inflater, position, viewType);
+ * <br> userView.bindView(data, position, viewType);
  * <br> 或  其它类中使用:
  * <br> containerView.addView(userView.createView(inflater));
  * <br> userView.bindView(data);
  * <br> 然后
  * <br> userView.setOnDataChangedListener(onDataChangedListener);data = userView.getData();//非必需
  * <br> userView.setOnClickListener(onClickListener);//非必需
+ * <br> ...
  */
 public class UserView extends BaseView<User> implements OnClickListener {
 	private static final String TAG = "UserView";

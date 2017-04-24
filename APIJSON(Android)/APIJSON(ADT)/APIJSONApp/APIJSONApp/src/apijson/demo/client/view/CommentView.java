@@ -33,121 +33,135 @@ import zuo.biao.library.util.TimeUtil;
 
 /**评论
  * @author Lemon
+ * @use
+ * <br> CommentView commentView = new CommentView(context, resources);
+ * <br> adapter中使用:[具体参考.DemoAdapter2(getView使用自定义View的写法)]
+ * <br> convertView = commentView.createView(inflater, position, viewType);
+ * <br> commentView.bindView(data, position, viewType);
+ * <br> 或  其它类中使用:
+ * <br> containerView.addView(commentView.createView(inflater));
+ * <br> commentView.bindView(data);
+ * <br> 然后
+ * <br> commentView.OnCommentClickListener(onCommentClickListener);//非必需
+ * <br> commentView.OnShowAllListener(onShowAllListener);//非必需
+ * <br> commentView.setOnDataChangedListener(onDataChangedListener);data = commentView.getData();//非必需
+ * <br> commentView.setOnClickListener(onClickListener);//非必需
+ * <br> ...
  */
 public class CommentView extends BaseView<CommentItem> implements View.OnClickListener {
 
-    /**点击评论监听回调
-     */
-    public interface OnCommentClickListener {
-        void onCommentClick(CommentItem item, int position, int index, boolean isLong);
-    }
+	/**点击评论监听回调
+	 */
+	public interface OnCommentClickListener {
+		void onCommentClick(CommentItem item, int position, int index, boolean isLong);
+	}
 
-    /**显示更多监听回调
-     * @author Lemon
-     */
-    public interface OnShowAllListener {
-        public void onShowAll(int position, CommentView bv, boolean show);
-    }
+	/**显示更多监听回调
+	 * @author Lemon
+	 */
+	public interface OnShowAllListener {
+		void onShowAll(int position, CommentView bv, boolean show);
+	}
 
-    private OnCommentClickListener onCommentClickListener;
-    public CommentView setOnCommentClickListener(OnCommentClickListener onCommentClickListener) {
-        this.onCommentClickListener = onCommentClickListener;
-        return this;
-    }
+	private OnCommentClickListener onCommentClickListener;
+	public CommentView setOnCommentClickListener(OnCommentClickListener onCommentClickListener) {
+		this.onCommentClickListener = onCommentClickListener;
+		return this;
+	}
 
-    private OnShowAllListener onShowAllListener;
-    public CommentView setOnShowAllListener(OnShowAllListener onShowAllListener) {
-        this.onShowAllListener = onShowAllListener;
-        return this;
-    }
-
-
-
-    public CommentView(Activity context, Resources resources) {
-        super(context, resources);
-    }
-
-    private LayoutInflater inflater;
-
-    public ImageView ivCommentHead;
-    public TextView tvCommentName;
-    public TextView tvCommentContent;
-    public TextView tvCommentTime;
+	private OnShowAllListener onShowAllListener;
+	public CommentView setOnShowAllListener(OnShowAllListener onShowAllListener) {
+		this.onShowAllListener = onShowAllListener;
+		return this;
+	}
 
 
-    public LinearLayout llCommentContainer;
 
-    @SuppressLint("InflateParams")
-    @Override
-    public View createView(LayoutInflater inflater) {
-        this.inflater = inflater;
-        convertView = inflater.inflate(R.layout.comment_view, null);
+	public CommentView(Activity context, Resources resources) {
+		super(context, resources);
+	}
 
-        ivCommentHead = findViewById(R.id.ivCommentHead, this);
+	private LayoutInflater inflater;
 
-        tvCommentName = findViewById(R.id.tvCommentName, this);
-        tvCommentContent = findViewById(R.id.tvCommentContent);
-        tvCommentTime = findViewById(R.id.tvCommentTime);
-
-        llCommentContainer = findViewById(R.id.llCommentContainer);
-
-        return convertView;
-    }
+	public ImageView ivCommentHead;
+	public TextView tvCommentName;
+	public TextView tvCommentContent;
+	public TextView tvCommentTime;
 
 
-    private boolean showAll = false;
-    public void setShowAll(Boolean showAll) {
-        this.showAll = showAll == null ? false : showAll;
-    }
+	public LinearLayout llCommentContainer;
 
-    @Override
-    public void bindView(CommentItem data){
-        this.data = data;
+	@SuppressLint("InflateParams")
+	@Override
+	public View createView(LayoutInflater inflater) {
+		this.inflater = inflater;
+		convertView = inflater.inflate(R.layout.comment_view, null);
 
-        String name = StringUtil.getTrimedString(data.getUser().getName());
-        String content = StringUtil.getTrimedString(data.getComment().getContent());
+		ivCommentHead = findViewById(R.id.ivCommentHead, this);
 
-        tvCommentName.setText("" + name);
-        tvCommentContent.setText("" + content);
-        tvCommentTime.setText("" + TimeUtil.getSmartDate(data.getDate()));
-        ImageLoaderUtil.loadImage(ivCommentHead, data.getUser().getHead(), ImageLoaderUtil.TYPE_OVAL);
+		tvCommentName = findViewById(R.id.tvCommentName, this);
+		tvCommentContent = findViewById(R.id.tvCommentContent);
+		tvCommentTime = findViewById(R.id.tvCommentTime);
 
-        setChildComment();
-    }
+		llCommentContainer = findViewById(R.id.llCommentContainer);
+
+		return convertView;
+	}
 
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.ivCommentHead:
-            case R.id.tvCommentName:
-                toActivity(UserActivity.createIntent(context, data.getUser().getId()));
-                break;
-            case R.id.tvCommentContainerViewMore:
-                if (onShowAllListener != null) {
-                    onShowAllListener.onShowAll(position, this, true);
-                }
-                break;
-            default:
-                break;
-        }
-    }
+	private boolean showAll = false;
+	public void setShowAll(Boolean showAll) {
+		this.showAll = showAll == null ? false : showAll;
+	}
 
-    public CommentContainerView commentContainerView;
-    /**显示子评论
-     */
-    public void setChildComment() {
-        if (commentContainerView == null) {
-            commentContainerView = new CommentContainerView(context, resources);
-            llCommentContainer.removeAllViews();
-            llCommentContainer.addView(commentContainerView.createView(inflater));
+	@Override
+	public void bindView(CommentItem data){
+		this.data = data;
 
-            commentContainerView.setOnCommentClickListener(onCommentClickListener);
-            commentContainerView.tvCommentContainerViewMore.setOnClickListener(this);
-        }
+		String name = StringUtil.getTrimedString(data.getUser().getName());
+		String content = StringUtil.getTrimedString(data.getComment().getContent());
 
-        commentContainerView.setMaxShowCount(showAll ? 0 : 3);
-        commentContainerView.bindView(data.getChildList());
-    }
+		tvCommentName.setText("" + name);
+		tvCommentContent.setText("" + content);
+		tvCommentTime.setText("" + TimeUtil.getSmartDate(data.getDate()));
+		ImageLoaderUtil.loadImage(ivCommentHead, data.getUser().getHead(), ImageLoaderUtil.TYPE_OVAL);
+
+		setChildComment();
+	}
+
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.ivCommentHead:
+		case R.id.tvCommentName:
+			toActivity(UserActivity.createIntent(context, data.getUser().getId()));
+			break;
+		case R.id.tvCommentContainerViewMore:
+			if (onShowAllListener != null) {
+				onShowAllListener.onShowAll(position, this, true);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	public CommentContainerView commentContainerView;
+	/**显示子评论
+	 */
+	public void setChildComment() {
+		if (commentContainerView == null) {
+			commentContainerView = new CommentContainerView(context, resources);
+			llCommentContainer.removeAllViews();
+			llCommentContainer.addView(commentContainerView.createView(inflater));
+
+			commentContainerView.setOnCommentClickListener(onCommentClickListener);
+			commentContainerView.tvCommentContainerViewMore.setOnClickListener(this);
+		}
+
+		commentContainerView.setMaxShowCount(showAll ? 0 : 3);
+		commentContainerView.bindView(data.getChildList());
+	}
 
 }

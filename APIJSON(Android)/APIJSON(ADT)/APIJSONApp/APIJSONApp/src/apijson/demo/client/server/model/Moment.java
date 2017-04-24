@@ -34,7 +34,6 @@ public class Moment extends BaseModel {
 	private String content;
 	private List<String> pictureList;
 	private List<Long> praiseUserIdList;
-	private List<Long> commentIdList;
 
 	public Moment() {
 		super();
@@ -75,11 +74,5 @@ public class Moment extends BaseModel {
 		this.praiseUserIdList = praiseUserIdList;
 		return this;
 	}
-	public List<Long> getCommentIdList() {
-		return commentIdList;
-	}
-	public Moment setCommentIdList(List<Long> commentIdList) {
-		this.commentIdList = commentIdList;
-		return this;
-	}
+
 }
