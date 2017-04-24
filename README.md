@@ -141,7 +141,6 @@ APIJSON是一种JSON传输结构协议。<br />
       "userId@":"/User/id"           //缺省依赖路径，从同级Object的路径开始
     },
     "Comment[]":{                    //请求一个名为Comment的Array
-      "page":0,
       "count":2,
       "Comment":{
         "momentId@":"[]/Moment/id"   //完整依赖路径
@@ -151,7 +150,7 @@ APIJSON是一种JSON传输结构协议。<br />
 }
 </code></pre>
 
-[点击这里测试](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":2,"User":{"sex":0,"@column":"id,name,head"},"Moment":{"userId@":"%252FUser%252Fid"},"Comment[]":{"page":0,"count":2,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
+[点击这里测试](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":2,"User":{"sex":0,"@column":"id,name,head"},"Moment":{"userId@":"%252FUser%252Fid"},"Comment[]":{"count":2,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
 
 返回：
 <pre><code class="language-json">
