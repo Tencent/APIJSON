@@ -66,7 +66,7 @@ public class AutoActivity extends Activity {
 
 
 
-		String request = "{\"User\":{\"id\":38710},\"[]\":{\"count\":3,\"page\":1,\"Moment\":{\"userId@\":\"User/id\",\"@column\":\"id,userId,content\"}}}";
+		String request = "{\"Moment\":{\"id\":551},\"[]\":{\"count\":3,\"page\":1,\"Comment\":{\"momentId@\":\"Moment/id\",\"@column\":\"id,userId,content\"}}}";
 
 		tvAutoRequest.setText(StringUtil.getString(JSON.format(request)));
 

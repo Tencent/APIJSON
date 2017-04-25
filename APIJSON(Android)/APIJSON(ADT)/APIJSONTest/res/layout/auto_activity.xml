@@ -15,12 +15,11 @@
                 android:id="@+id/tvAutoRequest"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="6dp"
                 android:layout_weight="1"
                 android:background="@null"
                 android:gravity="top|left"
                 android:hint="request"
-                android:textSize="15sp" />
+                android:textSize="14sp" />
 
             <View
                 android:layout_width="1dp"
@@ -31,12 +30,13 @@
                 android:id="@+id/tvAutoResponse"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="6dp"
+                android:layout_margin="6dp"
                 android:layout_weight="2"
                 android:background="@null"
                 android:gravity="top|left"
                 android:hint="response"
-                android:onClick="copy" />
+                android:onClick="copy"
+                android:textSize="14sp" />
         </LinearLayout>
     </ScrollView>
 
