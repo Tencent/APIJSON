@@ -32,6 +32,7 @@ import android.widget.Toast;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**自动生成代码
@@ -65,7 +66,6 @@ public class AutoActivity extends Activity {
 		tvAutoResponse = (TextView) findViewById(R.id.tvAutoResponse);
 
 
-
 		String request = "{\"Moment\":{\"id\":551},\"[]\":{\"count\":3,\"page\":1,\"Comment\":{\"momentId@\":\"Moment/id\",\"@column\":\"id,userId,content\"}}}";
 
 		tvAutoRequest.setText(StringUtil.getString(JSON.format(request)));
@@ -80,7 +80,7 @@ public class AutoActivity extends Activity {
 	public void auto(View v) {
 		auto(StringUtil.getString(tvAutoRequest));		
 	}
-	
+
 	public void get(View v) {
 		request((TextView) v);
 	}
@@ -127,7 +127,7 @@ public class AutoActivity extends Activity {
 				, JSON.parseObject(StringUtil.getString(tvAutoRequest)), false), REQUEST_TO_REQUEST);
 	}
 
-	
+
 
 
 
@@ -157,10 +157,14 @@ public class AutoActivity extends Activity {
 			String pairKey;
 			for (String key : set) {
 				value = request.get(key);
+				if (value == null) {
+					continue;
+				}
+
 				pairKey = new String(key instanceof String ? "\"" + key + "\"" : key);
 				if (value instanceof JSONObject) {//APIJSON Array转为常规JSONArray
 					if (isArrayKey(key)) {//APIJSON Array转为常规JSONArray
-						response += NEWLINE + NEWLINE + "//" + key + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+						response += NEWLINE + NEWLINE + "//" + key + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
 
 						int count = ((JSONObject) value).getIntValue(JSONRequest.KEY_COUNT);
 						int page = ((JSONObject) value).getIntValue(JSONRequest.KEY_PAGE);
@@ -173,9 +177,9 @@ public class AutoActivity extends Activity {
 						String prefix = key.substring(0, key.length() - 2);
 						response += NEWLINE + NEWLINE
 								+ parentKey + ".add(" +  getItemKey(key) + ".toArray("
-								+ count  + ", " + page + (prefix.isEmpty() ? "" : ", " + prefix) + "));";
+								+ count  + ", " + page + (prefix.isEmpty() ? "" : ", \"" + prefix + "\"") + "));";
 
-						response += NEWLINE + "//" + key + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + NEWLINE;
+						response += NEWLINE + "//" + key + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + NEWLINE;
 					} else {//常规JSONObject，往下一级提取
 						response += NEWLINE + NEWLINE + "//" + key + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
 
@@ -185,7 +189,20 @@ public class AutoActivity extends Activity {
 						response += NEWLINE + "//" + key + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + NEWLINE;
 					}
 				} else {//其它Object，直接填充
-					value = value instanceof String ? new String("\"" + value + "\"") : value;
+					if (value instanceof String) {
+						value = "\"" + value + "\"";
+					} else if (value instanceof JSONArray) {
+						String s = StringUtil.getString(value);
+						if (s.startsWith("[")) {
+							s = s.substring(1);
+						}
+						if (s.endsWith("]")) {
+							s = s.substring(0, s.length() - 1);
+						}
+						//	String type = ((JSONArray) value).getClass().getSimpleName();
+						//	value = "new " + type.substring(0, type.length() - 2) + "[]{" + s + "}";
+						value = "new Object[]{" + s + "}";//反射获取泛型太麻烦，反正开发中还要改的
+					}
 
 					response += NEWLINE + parentKey + ".put(" + pairKey + ", " + value + ");";
 				}
