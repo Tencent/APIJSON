@@ -406,8 +406,11 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 
 ### <h3 id="6.2">6.2 下载试用客户端App<h3/>
 
+实战项目，仿QQ空间<br />
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
+测试及自动生成代码<br />
+[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
 ### <h3 id="6.3">6.3 更新日志<h3/>
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
