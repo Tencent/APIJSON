@@ -66,23 +66,48 @@ public class AutoActivity extends Activity {
 
 
 
-		String request = "{\"User\":{\"id\":38710,\"@column\":\"id,name\"},\"[]\":{\"count\":3,\"page\":1,\"Moment\":{\"userId@\":\"User/id\"}}}";
+		String request = "{\"User\":{\"id\":38710},\"[]\":{\"count\":3,\"page\":1,\"Moment\":{\"userId@\":\"User/id\",\"@column\":\"id,userId,content\"}}}";
 
 		tvAutoRequest.setText(StringUtil.getString(JSON.format(request)));
 
 	}
 
 
-	public void query(View v) {
-		startActivityForResult(RequestActivity.createIntent(context, 0, null, "get"
-				, JSON.parseObject(StringUtil.getString(tvAutoRequest)), false), REQUEST_TO_REQUEST);
+	public void copy(View v) {
+		StringUtil.copyText(context, StringUtil.getString(tvAutoResponse));	
 	}
-
-
 
 	public void auto(View v) {
 		auto(StringUtil.getString(tvAutoRequest));		
 	}
+	
+	public void get(View v) {
+		request((TextView) v);
+	}
+	public void head(View v) {
+		request((TextView) v);
+	}
+	public void post(View v) {
+		request((TextView) v);
+	}
+	public void put(View v) {
+		request((TextView) v);
+	}
+	public void delete(View v) {
+		request((TextView) v);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 	public void auto(String request) {
 		String response = parse("", JSON.parseObject(request)); //newObjectRequest(request);
 
@@ -92,10 +117,20 @@ public class AutoActivity extends Activity {
 		tvAutoResponse.setText(StringUtil.getString(response));
 	}
 
-	public void copy(View v) {
-		StringUtil.copyText(context, StringUtil.getString(tvAutoResponse));	
+
+	@SuppressLint("DefaultLocale")
+	public void request(TextView tv) {
+		request(StringUtil.getNoBlankString(tv).toLowerCase());
 	}
+	public void request(String method) {
+		startActivityForResult(RequestActivity.createIntent(context, 0, null, method
+				, JSON.parseObject(StringUtil.getString(tvAutoRequest)), false), REQUEST_TO_REQUEST);
+	}
+
 	
+
+
+
 
 	public static final String NEWLINE = "\n";
 
@@ -105,9 +140,9 @@ public class AutoActivity extends Activity {
 	 * @return
 	 */
 	public static String parse(final String name, final JSONObject request) {
-//		Log.i(TAG, "parse  request = \n" + JSON.toJSONString(request));
+		//		Log.i(TAG, "parse  request = \n" + JSON.toJSONString(request));
 		if (request == null || request.isEmpty()) {
-//			Log.i(TAG, "parse  request == null || request.isEmpty() >> return request;");
+			//			Log.i(TAG, "parse  request == null || request.isEmpty() >> return request;");
 			return null;
 		}
 		String parentKey = isArrayKey(name) ? getItemKey(name) : getTableKey(name);
@@ -126,7 +161,7 @@ public class AutoActivity extends Activity {
 				if (value instanceof JSONObject) {//APIJSON Array转为常规JSONArray
 					if (isArrayKey(key)) {//APIJSON Array转为常规JSONArray
 						response += NEWLINE + NEWLINE + "//" + key + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-						
+
 						int count = ((JSONObject) value).getIntValue(JSONRequest.KEY_COUNT);
 						int page = ((JSONObject) value).getIntValue(JSONRequest.KEY_PAGE);
 						((JSONObject) value).remove(JSONRequest.KEY_COUNT);
@@ -139,11 +174,11 @@ public class AutoActivity extends Activity {
 						response += NEWLINE + NEWLINE
 								+ parentKey + ".add(" +  getItemKey(key) + ".toArray("
 								+ count  + ", " + page + (prefix.isEmpty() ? "" : ", " + prefix) + "));";
-						
+
 						response += NEWLINE + "//" + key + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + NEWLINE;
 					} else {//常规JSONObject，往下一级提取
 						response += NEWLINE + NEWLINE + "//" + key + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-						
+
 						response += parse(key, (JSONObject) value);
 
 						response += NEWLINE + NEWLINE + parentKey + ".put(" + pairKey + ", " + getTableKey(key) + ");";
@@ -157,7 +192,7 @@ public class AutoActivity extends Activity {
 			}
 		}
 
-//		Log.i(TAG, "parse  return response = \n" + response);
+		//		Log.i(TAG, "parse  return response = \n" + response);
 		return response;
 	}
 
@@ -220,12 +255,12 @@ public class AutoActivity extends Activity {
 	private static boolean isArrayKey(String key) {
 		return JSONResponse.isArrayKey(key);
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	private static final int REQUEST_TO_REQUEST = 1;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

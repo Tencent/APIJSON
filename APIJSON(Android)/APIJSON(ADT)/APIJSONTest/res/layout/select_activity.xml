@@ -97,7 +97,7 @@
             style="@style/match_wrap"
             android:layout_marginTop="30dp"
             android:onClick="toAuto"
-            android:text="auto" />
+            android:text="@string/auto" />
         
         <Button
             android:onClick="toUpdateLog"

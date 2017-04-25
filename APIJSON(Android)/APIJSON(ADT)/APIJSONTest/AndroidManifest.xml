@@ -32,6 +32,7 @@
             android:label="@string/request" />
         <activity
             android:name="apijson.demo.ui.AutoActivity"
+            android:label="@string/auto"
             android:screenOrientation="landscape" />
     </application>
 

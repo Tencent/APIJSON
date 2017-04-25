@@ -15,7 +15,7 @@
                 android:id="@+id/tvRequestResult"
                 style="@style/select_json"
                 android:hint="result"
-                android:padding="@dimen/activity_horizontal_margin"
+                android:padding="16dp"
                 android:textIsSelectable="true" />
         </LinearLayout>
     </ScrollView>
