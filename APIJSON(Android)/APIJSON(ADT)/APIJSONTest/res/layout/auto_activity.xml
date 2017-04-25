@@ -42,6 +42,13 @@
             android:text="uri" />
 
         <Button
+            android:id="@+id/btnAutoCreate"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="create"
+            android:text="Create" />
+
+        <Button
             android:id="@+id/btnAutoAuto"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
