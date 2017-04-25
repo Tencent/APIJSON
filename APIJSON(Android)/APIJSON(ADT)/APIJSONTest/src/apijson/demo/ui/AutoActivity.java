@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -66,7 +67,14 @@ public class AutoActivity extends Activity {
 		tvAutoResponse = (TextView) findViewById(R.id.tvAutoResponse);
 
 
-		String request = "{\"Moment\":{\"id\":551},\"[]\":{\"count\":3,\"page\":1,\"Comment\":{\"momentId@\":\"Moment/id\",\"@column\":\"id,userId,content\"}}}";
+
+		//读取保存的配置
+		SharedPreferences sp = getSharedPreferences(getPackageName() + "_request", Context.MODE_PRIVATE);
+		String request = sp.getString("last", null);
+		if (StringUtil.isEmpty(request, true)) {
+			request = "{\"Moment\":{\"id\":551},\"[]\":{\"count\":3,\"page\":1,\"Comment\":{\"momentId@\":\"Moment/id\",\"@column\":\"id,userId,content\"}}}";
+		}
+
 
 		tvAutoRequest.setText(StringUtil.getString(JSON.format(request)));
 
@@ -299,5 +307,17 @@ public class AutoActivity extends Activity {
 		}
 	}
 
+
+	@Override
+	public void finish() {
+		//保存配置
+		getSharedPreferences(getPackageName() + "_request", Context.MODE_PRIVATE)
+		.edit()
+		.remove("last")
+		.putString("last", StringUtil.getTrimedString(tvAutoRequest))
+		.commit();
+
+		super.finish();
+	}
 
 }
