@@ -296,20 +296,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isNotEmpty(String s, boolean trim) {
-		//		Log.i(TAG, "getTrimedString   s = " + s);
-		if (s == null) {
-			return false;
-		}
-		if (trim) {
-			s = s.trim();
-		}
-		if (s.length() <= 0) {
-			return false;
-		}
-		
-		currentString = s;
-		
-		return true;
+		return ! isEmpty(s, trim);
 	}
 	
 	//判断字符是否非空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

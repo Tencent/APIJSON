@@ -94,7 +94,13 @@
             style="@style/select_json" />
 
         <Button
-            android:id="@+id/btnSelectUpdateLog"
+            style="@style/match_wrap"
+            android:layout_marginTop="30dp"
+            android:onClick="toAuto"
+            android:text="@string/auto" />
+        
+        <Button
+            android:onClick="toUpdateLog"
             style="@style/match_wrap"
             android:layout_marginTop="30dp"
             android:text="@string/update_log" />

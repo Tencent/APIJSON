@@ -15,7 +15,6 @@ limitations under the License.*/
 package apijson.demo.ui;
 
 import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -24,10 +23,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 import apijson.demo.R;
 import apijson.demo.RequestUtil;
+import apijson.demo.StringUtil;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -78,22 +79,31 @@ public class SelectActivity extends Activity implements OnClickListener {
 
 
 		for (int i = 0; i < buttons.length; i++) {
-			buttons[i].setOnClickListener(this);
+			final int which = i;
+			buttons[which].setOnClickListener(this);
+			buttons[which].setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+					StringUtil.copyText(context, StringUtil.getString(buttons[which]));
+					return true;
+				}
+			});
 		}
-
-		findViewById(R.id.btnSelectUpdateLog).setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
-						StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));
-			}
-		});
 
 	}
 
 
 
+	public void toAuto(View v) {
+		startActivity(AutoActivity.createIntent(context));
+	}
+	public void toUpdateLog(View v) {
+		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
+				StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));
+	}
+	
+	
 	/**
 	 */
 	public void setRequest() {
@@ -102,6 +112,8 @@ public class SelectActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	
+	
 	/**
 	 * @param v
 	 * @return
@@ -164,7 +176,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 
 
 	private void select(JSONObject request, String method) {
-		startActivityForResult(RequestActivity.createIntent(context, id, url, method, request), REQUEST_TO_REQUEST);
+		startActivityForResult(RequestActivity.createIntent(context, id, url, method, request, true), REQUEST_TO_REQUEST);
 	}
 
 

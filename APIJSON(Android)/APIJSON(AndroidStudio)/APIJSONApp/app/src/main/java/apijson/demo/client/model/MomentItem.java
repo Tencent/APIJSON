@@ -152,9 +152,6 @@ public class MomentItem extends BaseModel {
 	public List<Long> getPraiseUserIdList() {
 		return getMoment().getPraiseUserIdList();
 	}
-	public List<Long> getCommentIdList() {
-		return getMoment().getCommentIdList();
-	}
 
 
 	private Boolean isPraised;
@@ -237,34 +234,12 @@ public class MomentItem extends BaseModel {
 		}
 		return value(isCommented);
 	}
-	public MomentItem setIsCommented(boolean isCommented, long userId) {
-		this.isCommented = isCommented;
-
-		List<Long> list = getCommentIdList();
-		if (list == null) {
-			list = new ArrayList<>();
-		}
-		if (isCommented == false) {
-			list.remove(userId);
-		} else {
-			if (list.contains(userId) == false) {
-				list.add(userId);
-			}
-		}
-		getMoment().setCommentIdList(list);
-
-		return this;
-	}
 
 	private int commentCount;
 	public int getCommentCount() {
 		return commentCount;
 	}
 	public MomentItem setCommentCount(int commentCount) {
-		int idCount = count(getCommentIdList());
-		if (commentCount < idCount) {
-			commentCount = idCount;
-		}
 		this.commentCount = commentCount;
 		return this;
 	}

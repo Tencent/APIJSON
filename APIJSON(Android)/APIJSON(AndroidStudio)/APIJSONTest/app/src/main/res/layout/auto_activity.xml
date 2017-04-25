@@ -1,0 +1,92 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/activity_page"
+    android:padding="0dp" >
+
+    <ScrollView
+        style="@style/match_match"
+        android:layout_weight="1" >
+
+        <LinearLayout
+            style="@style/match_match"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/tvAutoRequest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:gravity="top|left"
+                android:hint="request"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/white" />
+
+            <TextView
+                android:id="@+id/tvAutoResponse"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_weight="2"
+                android:background="@null"
+                android:gravity="top|left"
+                android:hint="response"
+                android:onClick="copy"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/white" />
+
+    <LinearLayout
+        style="@style/match_wrap"
+        android:layout_height="45dp"
+        android:gravity="bottom"
+        android:orientation="horizontal" >
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="auto"
+            android:text="Auto" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="get"
+            android:text="GET" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="head"
+            android:text="HEAD" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="get"
+            android:text="POST" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="put"
+            android:text="PUT" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="delete"
+            android:text="DELETE" />
+    </LinearLayout>
+
+</LinearLayout>

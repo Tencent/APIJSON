@@ -15,6 +15,7 @@
     <string name="complex">复杂结构</string>
     <string name="access_error">没有访问权限</string>
     <string name="access_permitted">允许使用权限</string>
+    <string name="auto">自动生成代码</string>
     <string name="update_log">更新日志</string>
     <string name="received_result">已获得结果！</string>
     <string name="browser_can_only_receive_get_response">用浏览器只能获取GET结果</string>

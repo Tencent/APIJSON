@@ -147,8 +147,8 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 		runThread(TAG + "downloadApp", new Runnable() {
 			@Override
 			public void run() {
-				final File file = DownloadUtil.downLoadFile(context, "APIJSON", ".apk"
-						, "http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk");
+				final File file = DownloadUtil.downLoadFile(context, "APIJSONTest", ".apk"
+						, "http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk");
 
 				runUiThread(new Runnable() {
 

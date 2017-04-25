@@ -13,6 +13,7 @@
     <string name="complex">Complex</string>
     <string name="access_error">Access Error</string>
     <string name="access_permitted">Access Permitted</string>
+    <string name="auto">Auto Code</string>
     <string name="update_log">Update Log</string>
     <string name="received_result">received result!</string>
     <string name="browser_can_only_receive_get_response">Browsers can only receive GET responses</string>

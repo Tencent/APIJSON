@@ -14,6 +14,11 @@ limitations under the License.*/
 
 package apijson.demo.client.view;
 
+import java.util.List;
+
+import zuo.biao.library.base.BaseView;
+import zuo.biao.library.util.Log;
+import zuo.biao.library.util.StringUtil;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -22,28 +27,25 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import apijson.demo.client.R;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.view.CommentView.OnCommentClickListener;
-import zuo.biao.library.base.BaseView;
-import zuo.biao.library.util.Log;
-import zuo.biao.library.util.StringUtil;
 
 /**评论容器
  * @author Lemon
  * @use
-CommentContainerView commentContainerView = new CommentContainerView(context, inflater);
-adapter中使用convertView = commentContainerView.getView();//[具体见.DemoAdapter] 或  其它类中使用
-containerView.addView(commentContainerView.getConvertView());
-commentContainerView.bindView(data);
-commentContainerView.setOnClickPictureListener(onClickPictureListener);//非必需
-commentContainerView.setOnDataChangedListener(onDataChangedListener);data = commentContainerView.getData();//非必需
-commentContainerView.setOnClickListener(onClickListener);//非必需
-...
+ * <br> CommentContainerView commentContainerView = new CommentContainerView(context, resources);
+ * <br> adapter中使用:[具体参考.DemoAdapter2(getView使用自定义View的写法)]
+ * <br> convertView = commentContainerView.createView(inflater, position, viewType);
+ * <br> commentContainerView.bindView(data, position, viewType);
+ * <br> 或  其它类中使用:
+ * <br> containerView.addView(commentContainerView.createView(inflater));
+ * <br> commentContainerView.bindView(data);
+ * <br> 然后
+ * <br> commentContainerView.setOnCommentClickListener(onCommentClickListener);//非必需
+ * <br> commentContainerView.setOnDataChangedListener(onDataChangedListener);data = commentContainerView.getData();//非必需
+ * <br> commentContainerView.setOnClickListener(onClickListener);//非必需
+ * <br> ...
  */
 public class CommentContainerView extends BaseView<List<CommentItem>> {
 	private static final String TAG = "CommentContainerView";
@@ -84,38 +86,14 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {
 
 	@Override
 	public void bindView(List<CommentItem> list){
-		llCommentContainerViewContainer.setVisibility(list == null || list.isEmpty() ? View.GONE : View.VISIBLE);
-		if (list == null) {
-			Log.w(TAG, "bindView data_ == null >> data_ = new List<CommentItem>();");
-			list = new ArrayList<CommentItem>();
-		}
 		this.data = list;
 
-		// 评论
-		setComment(list);
-	}
-
-
-	private int maxShowCount = 3;
-	/**设置最多显示数量，超过则折叠
-	 * @param maxShowCount <= 0 ? 显示全部 : 超过则折叠
-	 */
-	public void setMaxShowCount(int maxShowCount) {
-		this.maxShowCount = maxShowCount;
-	}
-
-
-	/**设置评论
-	 * @param list
-	 */
-	public void setComment(List<CommentItem> list) {
 		int count = list == null ? 0 : list.size();
 		boolean showMore = maxShowCount > 0 && count > maxShowCount;
 
 		tvCommentContainerViewMore.setVisibility(showMore ? View.VISIBLE : View.GONE);
-
-		llCommentContainerViewContainer.removeAllViews();
 		llCommentContainerViewContainer.setVisibility(count <= 0 ? View.GONE : View.VISIBLE);
+		llCommentContainerViewContainer.removeAllViews();//TODO 貌似比 只在count > 0时执行 性能更好，有待具体测试
 
 		if (count > 0) {
 			if (showMore) {
@@ -125,8 +103,19 @@ public class CommentContainerView extends BaseView<List<CommentItem>> {
 				addCommentView(i, list.get(i));
 			}
 		}
-
+		
 	}
+
+
+	private int maxShowCount = 3;
+	/**设置最多显示数量，超过则折叠
+	 * @param maxShowCount <= 0 ? 显示全部 : 超过则折叠
+	 * @must 在bindView前调用
+	 */
+	public void setMaxShowCount(int maxShowCount) {
+		this.maxShowCount = maxShowCount;
+	}
+
 
 
 	/**添加评论

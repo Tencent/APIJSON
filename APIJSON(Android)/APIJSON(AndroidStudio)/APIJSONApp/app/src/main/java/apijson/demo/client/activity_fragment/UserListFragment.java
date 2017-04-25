@@ -199,33 +199,41 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 		});
 	}
 
+	
+	private ImageView leftMenu;
 	@SuppressLint("InflateParams")
 	@Override
 	public View getLeftMenu(Activity activity) {
-		ImageView iv = (ImageView) LayoutInflater.from(activity).inflate(R.layout.top_right_iv, null);
-		iv.setImageResource(R.drawable.add);
-		iv.setOnClickListener(new OnClickListener() {
+		if (leftMenu == null) {
+			leftMenu = (ImageView) LayoutInflater.from(activity).inflate(R.layout.top_right_iv, null);
+			leftMenu.setImageResource(R.drawable.add);
+			leftMenu.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				onDragBottom(false);
-			}
-		});
-		return iv;
+				@Override
+				public void onClick(View v) {
+					onDragBottom(false);
+				}
+			});
+		}
+		return leftMenu;
 	}
+
+	private ImageView rightMenu;
 	@SuppressLint("InflateParams")
 	@Override
 	public View getRightMenu(Activity activity) {
-		ImageView iv = (ImageView) LayoutInflater.from(activity).inflate(R.layout.top_right_iv, null);
-		iv.setImageResource(R.drawable.search);
-		iv.setOnClickListener(new OnClickListener() {
+		if (rightMenu == null) {
+			rightMenu = (ImageView) LayoutInflater.from(activity).inflate(R.layout.top_right_iv, null);
+			rightMenu.setImageResource(R.drawable.search);
+			rightMenu.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				onDragBottom(true);
-			}
-		});
-		return iv;
+				@Override
+				public void onClick(View v) {
+					onDragBottom(true);
+				}
+			});
+		}
+		return rightMenu;
 	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -318,9 +326,6 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 		}
 
 		if (rightToLeft == false) {
-			//			toActivity(EditTextInfoWindow.createIntent(context
-			//					, EditTextInfoWindow.TYPE_PHONE, "手机号", null),
-			//					REQUEST_TO_EDIT_TEXT_INFO_ADD, false);
 			startActivity(UserListActivity.createIntent(context, RANGE_ALL, 0).putExtra(INTENT_TITLE, "添加"));
 			context.overridePendingTransition(R.anim.bottom_push_in, R.anim.hold);
 		} else {
@@ -341,8 +346,8 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 						, EditTextInfoWindow.TYPE_PHONE, "手机号", null),
 						REQUEST_TO_EDIT_TEXT_INFO_ADD, false);
 			}
-
 		}
+		
 	}
 
 
@@ -392,6 +397,21 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 		default:
 			break;
 		}
+	}
+	
+	
+	@Override
+	public void onDestroy() {
+		if (leftMenu != null) {
+			leftMenu.destroyDrawingCache();
+			leftMenu = null;
+		}
+		if (rightMenu != null) {
+			rightMenu.destroyDrawingCache();
+			rightMenu = null;
+		}
+
+		super.onDestroy();
 	}
 
 	//类相关监听>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

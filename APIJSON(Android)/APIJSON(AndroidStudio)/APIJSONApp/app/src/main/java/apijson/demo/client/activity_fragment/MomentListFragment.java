@@ -204,34 +204,42 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		});
 	}
 
+	
+	private TextView leftMenu;
 	@SuppressLint("InflateParams")
 	@Override
 	public View getLeftMenu(Activity activity) {
-		TextView tv = (TextView) LayoutInflater.from(activity).inflate(R.layout.top_right_tv, null);
-		tv.setGravity(Gravity.CENTER);
-		tv.setText("全部");//"筛选");
-		tv.setOnClickListener(new OnClickListener() {
+		if (leftMenu == null) {
+			leftMenu = (TextView) LayoutInflater.from(activity).inflate(R.layout.top_right_tv, null);
+			leftMenu.setGravity(Gravity.CENTER);
+			leftMenu.setText("全部");//"筛选");
+			leftMenu.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				onDragBottom(false);
-			}
-		});
-		return tv;
+				@Override
+				public void onClick(View v) {
+					onDragBottom(false);
+				}
+			});
+		}
+		return leftMenu;
 	}
+
+	private ImageView rightMenu;
 	@SuppressLint("InflateParams")
 	@Override
 	public View getRightMenu(Activity activity) {
-		ImageView iv = (ImageView) LayoutInflater.from(activity).inflate(R.layout.top_right_iv, null);
-		iv.setImageResource(R.drawable.search);
-		iv.setOnClickListener(new OnClickListener() {
+		if (rightMenu == null) {
+			rightMenu = (ImageView) LayoutInflater.from(activity).inflate(R.layout.top_right_iv, null);
+			rightMenu.setImageResource(R.drawable.search);
+			rightMenu.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				onDragBottom(true);
-			}
-		});
-		return iv;
+				@Override
+				public void onClick(View v) {
+					onDragBottom(true);
+				}
+			});
+		}
+		return rightMenu;
 	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -368,6 +376,21 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		default:
 			break;
 		}
+	}
+
+
+	@Override
+	public void onDestroy() {
+		if (leftMenu != null) {
+			leftMenu.destroyDrawingCache();
+			leftMenu = null;
+		}
+		if (rightMenu != null) {
+			rightMenu.destroyDrawingCache();
+			rightMenu = null;
+		}
+
+		super.onDestroy();
 	}
 
 	//类相关监听>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

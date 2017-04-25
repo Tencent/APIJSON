@@ -28,10 +28,9 @@ import zuo.biao.apijson.JSON;
 import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 
-/**使用方法：复制>粘贴>改名>改代码  */
-/**fragmentActivity示例
+/**动态列表界面
  * @author Lemon
- * @use toActivity(DemoFragmentActivity.createIntent(...));
+ * @use toActivity(MomentListActivity.createIntent(...));
  */
 public class MomentListActivity extends BaseActivity implements OnBottomDragListener {
 	//	private static final String TAG = "DemoFragmentActivity";
@@ -212,8 +211,10 @@ public class MomentListActivity extends BaseActivity implements OnBottomDragList
 	@Override
 	public void onDragBottom(boolean rightToLeft) {
 		if (rightToLeft) {
+			if (showSearch) {
+				fragment.onDragBottom(rightToLeft);
+			}
 
-			fragment.onDragBottom(rightToLeft);
 			return;
 		}
 
