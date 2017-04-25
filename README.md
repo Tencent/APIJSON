@@ -406,7 +406,7 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 
 ### <h3 id="6.2">6.2 下载试用客户端App<h3/>
 
-实战项目，仿QQ空间<br />
+仿QQ空间实战项目<br />
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
 测试及自动生成代码<br />
