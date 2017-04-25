@@ -410,7 +410,7 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 [APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
 测试及自动生成代码<br />
-[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSON(ADT).apk)
+[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
 ### <h3 id="6.3">6.3 更新日志<h3/>
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
