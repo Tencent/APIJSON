@@ -9,15 +9,43 @@
 
         <LinearLayout
             style="@style/match_match"
-            android:orientation="vertical" >
+            android:orientation="horizontal" >
 
             <EditText
-                android:id="@+id/tvAutoResult"
-                style="@style/match_match"
-                android:hint="result"
+                android:id="@+id/tvAutoRequest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:gravity="top|left"
+                android:hint="request"
                 android:padding="@dimen/activity_horizontal_margin" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="6dp"
+                android:background="@android:color/white" />
+
+            <TextView
+                android:id="@+id/tvAutoResponse"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:gravity="top|left"
+                android:hint="response"
+                android:onClick="copy"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:selectAllOnFocus="true" />
         </LinearLayout>
     </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/white" />
 
     <LinearLayout
         style="@style/match_wrap"
@@ -42,14 +70,12 @@
             android:text="uri" />
 
         <Button
-            android:id="@+id/btnAutoCreate"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:onClick="create"
-            android:text="Create" />
+            android:onClick="query"
+            android:text="Query" />
 
         <Button
-            android:id="@+id/btnAutoAuto"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:onClick="auto"

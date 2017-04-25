@@ -29,8 +29,10 @@
         </activity>
         <activity
             android:name="apijson.demo.ui.RequestActivity"
-            android:label="@string/request" >
-        </activity>
+            android:label="@string/request" />
+        <activity
+            android:name="apijson.demo.ui.AutoActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>
