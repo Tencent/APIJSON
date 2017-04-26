@@ -76,8 +76,12 @@ public class QueryHelper {
 
 	private JSONObject getFromCache(String sql, int position) {
 		Map<Integer, JSONObject> map = cacheMap.get(sql);
-		return map == null ? null : map.get(position);
-		//TODO 只要map不为null，则如果 map.get(position) == null，则返回 {} ，避免再次SQL查询
+		//只要map不为null，则如果 map.get(position) == null，则返回 {} ，避免再次SQL查询
+		if (map == null) {
+			return null;
+		} 
+		JSONObject result = map.get(position);
+		return result != null ? result : new JSONObject();
 	}
 
 	private Connection connection;
