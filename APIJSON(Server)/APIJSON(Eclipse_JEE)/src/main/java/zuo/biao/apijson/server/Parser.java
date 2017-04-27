@@ -478,7 +478,6 @@ public class Parser {
 		Log.d(TAG, "getObject  table = " + table + "; isTableKey = " + isTableKey);
 
 
-		boolean containRelation = false;
 
 		JSONObject transferredRequest = new JSONObject(true);//must init
 		Map<String, String> functionMap = null;
@@ -578,10 +577,9 @@ public class Parser {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
 						//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
-						//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
 						String targetPath = getValuePath(parentPath, new String((String) value));
-						
+
 						//先尝试获取，尽量保留缺省依赖路径，这样就不需要担心路径改变
 						Object target = getValueByPath(targetPath);
 						Log.i(TAG, "getObject targetPath = " + targetPath + "; target = " + target);
@@ -592,7 +590,7 @@ public class Parser {
 						}
 						if (targetPath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
 							Log.d(TAG, "getObject  targetPath.equals(target)  >>");
-											
+
 							//非查询关键词 @key 不影响查询，直接跳过
 							if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
 								Log.e(TAG, "getObject  isTableKey && (key.startsWith(@) == false"
@@ -603,8 +601,8 @@ public class Parser {
 								continue;//舍去，对Table无影响
 							}
 						} 
-						
-						
+
+
 						//直接替换原来的key@:path为key:target
 						Log.i(TAG, "getObject    >>  key = replaceKey; value = target;");
 						key = replaceKey;
@@ -629,7 +627,7 @@ public class Parser {
 
 		boolean query = false;
 		//执行SQL操作数据库
-		if (containRelation == false && isTableKey) {//提高性能
+		if (isTableKey) {//提高性能
 			query = true;
 
 			QueryConfig config = newQueryConfig(table, transferredRequest);
@@ -697,7 +695,7 @@ public class Parser {
 	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
 	 * @throws Exception 
 	 */
-	private JSONObject getArray(String parentPath, String name, JSONObject request) throws Exception {
+	private JSONObject getArray(String parentPath, String name, final JSONObject request) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
 		if (isHeadMethod(requestMethod, true)) {
@@ -708,66 +706,89 @@ public class Parser {
 		}
 		String path = getAbsPath(parentPath, name);
 
-		int count = 0, page = 0, total = 0;
+		//不能改变，因为后面可能继续用到，导致1以上都改变 []:{0:{Comment[]:{0:{Comment:{}},1:{...},...}},1:{...},...}
+		final int query = request.getIntValue(JSONRequest.KEY_QUERY);
+		final int count = request.getIntValue(JSONRequest.KEY_COUNT);
+		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
+		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page);
 
-		count = request.getIntValue(JSONRequest.KEY_COUNT);
-		page = request.getIntValue(JSONRequest.KEY_PAGE);
-
+		//后面还要put回来，所以中间不要return；除非不需要保留page,count！
+		request.remove(JSONRequest.KEY_QUERY);
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
 
-		if (count <= 0 || count > 100) {//count最大为100
-			count = 100;
-		}
-
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = new LinkedHashSet<>(request.keySet());
-		if(set != null) {
-			if (count <= 0 || count > 5) {//5以下不优化长度
-				String table;
-				Object value;
-				for (String key : set) {
-					table = Pair.parseEntry(key, true).getKey();
-					value = isTableKey(table) ? request.get(key) : null;
-					if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
-						total = estimateMaxCount(path, table, (JSONObject) value);
-						break;
-					}
-				}
-				Log.d(TAG, "total = " + total);
-				if (total <= 0) {//request内部没有JSONObject或者不存在适合条件的table内容
-					return null;
-				}
-				putQueryResult(path + "/" + JSONResponse.KEY_TOTAL, total);
-				if (count > total) {
-					count = total;
-				}
-			}
-		}
-		Log.i(TAG, "getArray page = " + page + "; count = " + count);
-
-		QueryConfig config = new QueryConfig(requestMethod, count, page);
-
-
-		JSONObject transferredRequest = new JSONObject(true);
-
-		JSONObject parent = null;
-		//生成count个
-		for (int i = 0; i < count; i++) {
-			parent = getObject(path, config.setPosition(i), "" + i, request);
-			if (parent == null || parent.isEmpty()) {
-				break;//数据库返回数量不够count，后面没有了。有依赖不为空，无依赖直接查询数据库。
-			}
-			transferredRequest.put("" + i, parent);
+		if (set.isEmpty()) {//如果条件成立，说明所有的 parentPath/name:request 中request都无效！！！
+			Log.e(TAG, "getArray  set.isEmpty() >> return null;");
+			return null;
 		}
 
-		//解决[]:{Comment[]:{...}}内层count,page丢失
+		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
+		int size = 0;//在QUERY_TOTAL下不查询Table
+		if (query != JSONRequest.QUERY_TOTAL) {
+			size = count;//count为每页数量，size为第page页实际数量，max(size) = count
+			if (size <= 0 || size > 100) {//size最大为100
+				Log.d(TAG, "getArray  size <= 0 || size > 100 >> size = 100;");
+				size = 100;
+			}
+		}
+
+		
+		
+		//total<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		if (query != JSONRequest.QUERY_TABLE) {
+			int total = 0;//满足条件的总数，忽略page,count
+			Log.d(TAG, "getArray  query != JSONRequest.QUERY_TABLE >> ");
+			String table;
+			Object value;
+			for (String key : set) {
+				table = Pair.parseEntry(key, true).getKey();
+				value = isTableKey(table) ? request.get(key) : null;
+				if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
+					total = estimateMaxCount(path, table, (JSONObject) value);
+					break;
+				}
+			}
+			if (total <= size*page) {
+				Log.d(TAG, "getArray total <= size*page >> size = 0;");
+				size = 0;//不再查询，但不能return null;因为还需要put条件
+			}
+			if (total > 0) {
+				Log.d(TAG, "getArray  total = " + total + " >> putQueryResult(...)");
+				putQueryResult(path + "/" + JSONResponse.KEY_TOTAL, total);//GET下替代HEAD的方式
+			}
+		}
+		//total>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
+		
+		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		JSONObject response = new JSONObject(true);
+		if (size > 0) {//request内部没有JSONObject或者不存在适合条件的table内容
+			QueryConfig config = new QueryConfig(requestMethod, size, page);//count不能变，变了后start就不对了
+			JSONObject parent;
+			//生成size个
+			for (int i = 0; i < size; i++) {
+				parent = getObject(path, config.setPosition(i), "" + i, request);
+				if (parent == null || parent.isEmpty()) {
+					break;//数据库返回数量不够size，后面没有了。有依赖不为空，无依赖直接查询数据库。
+				}
+				response.put("" + i, parent);
+			}
+		}
+		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+		
+		
+		//解决[]:{Comment[]:{...}}内层0之后的count,page丢失，导致性能下降
+		request.put(JSONRequest.KEY_QUERY, query);
 		request.put(JSONRequest.KEY_COUNT, count);
 		request.put(JSONRequest.KEY_PAGE, page);
 
-		Log.i(TAG, "getArray  return " + JSON.toJSONString(transferredRequest) + "\n>>>>>>>>>>>>>>>\n\n\n");
+		Log.i(TAG, "getArray  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
 
-		return transferredRequest;
+		return response;
 	}
 
 	//TODO 获取status和message，如果发生异常就throw new Exception(message!)，不行，不知道Exception类型，还是传boolean catchException到parse好
@@ -800,11 +821,16 @@ public class Parser {
 						if (v == null) {
 							continue;
 						}
-						target = getValueByPath(getAbsPath(((String) v).startsWith(SEPARATOR) ? path : "", (String) v));
-						if (target != null && ((String) v).equals(target) == false) {
-							k = k.substring(0, k.length() - 1);
-							v = target;
+
+						String targetPath = getValuePath(path, new String((String) v));
+						target = getValueByPath(targetPath);
+						Log.i(TAG, "estimateMaxCount  k = "+ k + "; targetPath = " + targetPath + "; target = " + target);
+
+						if (target == null || targetPath.equals(target)) {
+							continue;
 						}
+						k = k.substring(0, k.length() - 1);
+						v = target;
 					}
 
 					valid = new String(k);
@@ -834,7 +860,9 @@ public class Parser {
 		return response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT);
 	}
 
-	
+
+
+
 	/**获取被依赖引用的key的路径, 实时替换[] -> []/i
 	 * @param parentPath
 	 * @param valuePath
