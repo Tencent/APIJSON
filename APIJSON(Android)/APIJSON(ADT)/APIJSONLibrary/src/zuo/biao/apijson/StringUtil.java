@@ -20,6 +20,8 @@ import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.annotation.SuppressLint;
+
 /**通用字符串(String)相关类,为null时返回""
  * @author Lemon
  * @use StringUtil.
@@ -453,46 +455,6 @@ public class StringUtil {
 				&& path.contains(SEPARATOR + SEPARATOR) == false && path.endsWith(SEPARATOR) == false;
 	}
 
-	/**分割路径
-	 * @param path
-	 * @return
-	 */
-	public static String[] splitPath(String path) {
-		if (StringUtil.isNotEmpty(path, true) == false) {
-			return null;
-		}
-		return isPath(path) ? split(path, SEPARATOR) : new String[] {path};
-	}
-	/**将s分割成String[]
-	 * @param s
-	 * @return
-	 */
-	public static String[] split(String s) {
-		return split(s, null);
-	}
-	/**将s用split分割成String[]
-	 * @param s
-	 * @param split
-	 * @return
-	 */
-	public static String[] split(String s, String split) {
-		s = getString(s);
-		if (s.isEmpty()) {
-			return null;
-		}
-		if (isNotEmpty(split, false) == false) {
-			split = ",";
-		}
-		while (s.startsWith(split)) {
-			s = s.substring(split.length());
-		}
-		while (s.endsWith(split)) {
-			s = s.substring(0, s.length() - split.length());
-		}
-		return s.contains(split) ? s.split(split) : new String[]{s};
-	}
-
-
 	/**判断字符类型是否是路径
 	 * @param path
 	 * @return
@@ -716,6 +678,84 @@ public class StringUtil {
 		}
 	}
 
+	
+	/**分割路径
+	 * @param path
+	 * @return
+	 */
+	public static String[] splitPath(String path) {
+		if (StringUtil.isNotEmpty(path, true) == false) {
+			return null;
+		}
+		return isPath(path) ? split(path, SEPARATOR) : new String[] {path};
+	}
+	/**将s分割成String[]
+	 * @param s
+	 * @return
+	 */
+	public static String[] split(String s) {
+		return split(s, null);
+	}
+	/**将s用split分割成String[]
+	 * @param s
+	 * @param split
+	 * @return
+	 */
+	public static String[] split(String s, String split) {
+		s = getString(s);
+		if (s.isEmpty()) {
+			return null;
+		}
+		if (isNotEmpty(split, false) == false) {
+			split = ",";
+		}
+		while (s.startsWith(split)) {
+			s = s.substring(split.length());
+		}
+		while (s.endsWith(split)) {
+			s = s.substring(0, s.length() - split.length());
+		}
+		return s.contains(split) ? s.split(split) : new String[]{s};
+	}
+
+	/**
+	 * @param key
+	 * @param suffix
+	 * @return key + suffix，第一个字母小写
+	 */
+	public static String addSuffix(String key, String suffix) {
+		key = StringUtil.getNoBlankString(key);
+		if (key.isEmpty()) {
+			return firstCase(suffix);
+		}
+
+		return firstCase(key) + firstCase(suffix, true);
+	}
+	/**
+	 * @param key
+	 */
+	public static String firstCase(String key) {
+		return firstCase(key, false);
+	}
+	/**
+	 * @param key
+	 * @param upper
+	 * @return
+	 */
+	@SuppressLint("DefaultLocale")
+	public static String firstCase(String key, boolean upper) {
+		key = StringUtil.getString(key);
+		if (key.isEmpty()) {
+			return "";
+		}
+
+		String first = key.substring(0, 1);
+		key = (upper ? first.toUpperCase() : first.toLowerCase()) + key.substring(1, key.length());
+
+		return key;
+	}
+
+	
 	//校正（自动补全等）字符串>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }
