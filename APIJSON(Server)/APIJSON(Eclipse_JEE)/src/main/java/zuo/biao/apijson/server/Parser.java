@@ -578,31 +578,37 @@ public class Parser {
 							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 						}
 						//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
+						//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
-
-						String valuePath = new String((String) value);//改用实时替换[] -> []/i
-
-						if (valuePath.startsWith(SEPARATOR)) {
-							valuePath = getAbsPath(parentPath, valuePath);
-						} else {//处理[] -> []/i
-							valuePath = replaceArrayChildPath(parentPath, valuePath);
-							value = new String(valuePath);//避免后续重新转换
-						}
+						String targetPath = getValuePath(parentPath, new String((String) value));
+						
 						//先尝试获取，尽量保留缺省依赖路径，这样就不需要担心路径改变
-						Object target = getValueByPath(valuePath);
-						Log.i(TAG, "getObject valuePath = " + valuePath + "; target = " + target);
+						Object target = getValueByPath(targetPath);
+						Log.i(TAG, "getObject targetPath = " + targetPath + "; target = " + target);
 
-						if (valuePath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
-							Log.i(TAG, "getObject  target != null && target instanceof String"
-									+ " && ((String) target).startsWith(valuePath)  >>  ");
-							Log.i(TAG, "getObject parseRelation == false"
-									+ " >>  containRelation = true; putRelation(keyPath, valuePath);");
-							containRelation = true;
-						} else {//直接替换原来的key@:path为key:target
-							Log.i(TAG, "getObject    >>  key = replaceKey; value = target;");
-							key = replaceKey;
-							value = target;
+						if (target == null) {//String#equals(null)会出错
+							Log.d(TAG, "getObject  target == null  >>  continue;");
+							continue;
 						}
+						if (targetPath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
+							Log.d(TAG, "getObject  targetPath.equals(target)  >>");
+											
+							//非查询关键词 @key 不影响查询，直接跳过
+							if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
+								Log.e(TAG, "getObject  isTableKey && (key.startsWith(@) == false"
+										+ " || QueryConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
+								return null;//获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
+							} else {
+								Log.d(TAG, "getObject  isTableKey(table) == false >> continue;");
+								continue;//舍去，对Table无影响
+							}
+						} 
+						
+						
+						//直接替换原来的key@:path为key:target
+						Log.i(TAG, "getObject    >>  key = replaceKey; value = target;");
+						key = replaceKey;
+						value = target;
 						Log.d(TAG, "getObject key = " + key + "; value = " + value);
 					}
 
@@ -828,6 +834,20 @@ public class Parser {
 		return response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT);
 	}
 
+	
+	/**获取被依赖引用的key的路径, 实时替换[] -> []/i
+	 * @param parentPath
+	 * @param valuePath
+	 * @return
+	 */
+	private String getValuePath(String parentPath, String valuePath) {
+		if (valuePath.startsWith(SEPARATOR)) {
+			valuePath = getAbsPath(parentPath, valuePath);
+		} else {//处理[] -> []/i
+			valuePath = replaceArrayChildPath(parentPath, valuePath);
+		}
+		return valuePath;
+	}
 
 	/**获取绝对路径
 	 * @param path

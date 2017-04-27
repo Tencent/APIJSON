@@ -257,31 +257,4 @@ public class QueryHelper {
 	}
 
 
-	//	/**
-	//	 * @param table
-	//	 * @param schema
-	//	 * @return
-	//	 * @throws Exception
-	//	 */
-	//	public int getCount(String table) throws Exception {
-	//		if (connection == null || connection.isClosed()) {
-	//			Log.i(TAG, "getCount  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
-	//			connection = getConnection();
-	//			statement = connection.createStatement(); //创建Statement对象
-	//			metaData = connection.getMetaData();
-	//		}
-	//
-	//		ResultSet rs = statement.executeQuery("SELECT Count(*) FROM " + table);//创建数据对象
-	//
-	//		int count = 0;
-	//		if (rs.next()) {
-	//			count = rs.getInt(1);
-	//		}
-	//		Log.i(TAG, "getCount  count = " + count) ;
-	//
-	//		rs.close();
-	//
-	//		return count;
-	//	}
-
 }
