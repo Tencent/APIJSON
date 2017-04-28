@@ -400,11 +400,18 @@ Run > Run app
 
 ## <h2 id="6">6.其它<h2/>
 
-### <h3 id="6.1">6.1 关于作者<h3/>
+### <h3 id="6.1">6.1 相关推荐<h3/>
+[APIJSON, 让接口和文档见鬼去吧！](https://my.oschina.net/tommylemon/blog/805459)
+
+[仿QQ空间和微信朋友圈，高解耦高复用高灵活](https://my.oschina.net/tommylemon/blog/885787)
+
+[3步创建APIJSON服务端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
+
+### <h3 id="6.2">6.2 关于作者<h3/>
 TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
 如果有什么问题或建议可以发我邮件，交流技术，分享经验 ^_^
 
-### <h3 id="6.2">6.2 下载试用客户端App<h3/>
+### <h3 id="6.3">6.3 下载试用客户端App<h3/>
 
 仿QQ空间实战项目<br />
 [APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
@@ -412,9 +419,9 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 测试及自动生成代码<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
-### <h3 id="6.3">6.3 更新日志<h3/>
+### <h3 id="6.4">6.4 更新日志<h3/>
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-### <h3 id="6.4">6.4 点Star支持我，点Fork研究它<h3/>
+### <h3 id="6.5">6.5 点Star支持我，点Fork研究它<h3/>
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
