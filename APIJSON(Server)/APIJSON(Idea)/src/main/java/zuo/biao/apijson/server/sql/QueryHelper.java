@@ -76,8 +76,12 @@ public class QueryHelper {
 
 	private JSONObject getFromCache(String sql, int position) {
 		Map<Integer, JSONObject> map = cacheMap.get(sql);
-		return map == null ? null : map.get(position);
-		//TODO 只要map不为null，则如果 map.get(position) == null，则返回 {} ，避免再次SQL查询
+		//只要map不为null，则如果 map.get(position) == null，则返回 {} ，避免再次SQL查询
+		if (map == null) {
+			return null;
+		} 
+		JSONObject result = map.get(position);
+		return result != null ? result : new JSONObject();
 	}
 
 	private Connection connection;
@@ -252,32 +256,5 @@ public class QueryHelper {
 		return list.toArray(new String[]{});
 	}
 
-
-	//	/**
-	//	 * @param table
-	//	 * @param schema
-	//	 * @return
-	//	 * @throws Exception
-	//	 */
-	//	public int getCount(String table) throws Exception {
-	//		if (connection == null || connection.isClosed()) {
-	//			Log.i(TAG, "getCount  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
-	//			connection = getConnection();
-	//			statement = connection.createStatement(); //创建Statement对象
-	//			metaData = connection.getMetaData();
-	//		}
-	//
-	//		ResultSet rs = statement.executeQuery("SELECT Count(*) FROM " + table);//创建数据对象
-	//
-	//		int count = 0;
-	//		if (rs.next()) {
-	//			count = rs.getInt(1);
-	//		}
-	//		Log.i(TAG, "getCount  count = " + count) ;
-	//
-	//		rs.close();
-	//
-	//		return count;
-	//	}
 
 }

@@ -50,6 +50,7 @@ public class QueryConfig {
 	public static final List<String> ARRAY_KEY_LIST;
 	static {
 		ARRAY_KEY_LIST = new ArrayList<String>();
+		ARRAY_KEY_LIST.add(JSONRequest.KEY_QUERY);
 		ARRAY_KEY_LIST.add(JSONRequest.KEY_COUNT);
 		ARRAY_KEY_LIST.add(JSONRequest.KEY_PAGE);
 	}
@@ -78,9 +79,11 @@ public class QueryConfig {
 	private String having;
 	private String order;
 
+
 	private int count;
 	private int page;
 	private int position;
+	private int total;
 
 	public QueryConfig(RequestMethod method) {
 		setMethod(method);
@@ -270,6 +273,13 @@ public class QueryConfig {
 	}
 	public QueryConfig setPosition(int position) {
 		this.position = position;
+		return this;
+	}
+	public int getTotal() {
+		return total;
+	}
+	public QueryConfig setTotal(int total) {
+		this.total = total;
 		return this;
 	}
 
