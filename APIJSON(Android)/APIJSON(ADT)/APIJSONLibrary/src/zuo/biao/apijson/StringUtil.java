@@ -20,8 +20,6 @@ import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.annotation.SuppressLint;
-
 /**通用字符串(String)相关类,为null时返回""
  * @author Lemon
  * @use StringUtil.
@@ -742,7 +740,6 @@ public class StringUtil {
 	 * @param upper
 	 * @return
 	 */
-	@SuppressLint("DefaultLocale")
 	public static String firstCase(String key, boolean upper) {
 		key = StringUtil.getString(key);
 		if (key.isEmpty()) {

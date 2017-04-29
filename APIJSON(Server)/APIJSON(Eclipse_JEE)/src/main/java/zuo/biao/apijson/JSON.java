@@ -32,7 +32,7 @@ public class JSON {
 	 * @return
 	 */
 	public static boolean isJsonCorrect(String s) {
-//		Log.i(TAG, "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
+		//太长		Log.i(TAG, "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
 		if (s == null 
 				//				|| s.equals("[]") 
 				//				|| s.equals("{}") 
@@ -222,7 +222,7 @@ public class JSON {
 				Log.e(TAG, "isJSONObject  catch \n" + e.getMessage());
 			}
 		}
-		
+
 		return false;
 	}
 	/**判断是否为JSONArray
@@ -241,7 +241,7 @@ public class JSON {
 				Log.e(TAG, "isJSONArray  catch \n" + e.getMessage());
 			}
 		}
-		
+
 		return false;
 	}
 
