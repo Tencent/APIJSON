@@ -414,10 +414,10 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 
 ### <h3 id="6.3">6.3 下载试用客户端App<h3/>
 
-仿QQ空间实战项目<br />
+仿微信朋友圈动态实战项目<br />
 [APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
-测试及自动生成代码<br />
+测试及自动生成代码工具<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
 ### <h3 id="6.4">6.4 更新日志<h3/>
