@@ -712,10 +712,10 @@ public class Parser {
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
 		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page);
 
-		//后面还要put回来，所以中间不要return；除非不需要保留page,count！
-		request.remove(JSONRequest.KEY_QUERY);
-		request.remove(JSONRequest.KEY_COUNT);
-		request.remove(JSONRequest.KEY_PAGE);
+//		//后面还要put回来，所以中间不要return；除非不需要保留page,count！
+//		request.remove(JSONRequest.KEY_QUERY);
+//		request.remove(JSONRequest.KEY_COUNT);
+//		request.remove(JSONRequest.KEY_PAGE);
 
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = new LinkedHashSet<>(request.keySet());
@@ -734,57 +734,102 @@ public class Parser {
 			}
 		}
 
-		
-		
+
+
 		//total<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		if (query != JSONRequest.QUERY_TABLE) {
-			int total = 0;//满足条件的总数，忽略page,count
-			Log.d(TAG, "getArray  query != JSONRequest.QUERY_TABLE >> ");
-			String table;
-			Object value;
-			for (String key : set) {
+		//		if (query != JSONRequest.QUERY_TABLE) {
+
+		JSONObject otherRequest = new JSONObject(true);
+
+		boolean queryTotal = true;
+		int total = 0;//满足条件的总数，忽略page,count
+		Log.d(TAG, "getArray  query != JSONRequest.QUERY_TABLE >> ");
+		String firstTableKey = null;
+//		JSONObject firstRequest = null;
+		String table;
+		Object value;
+		QueryConfig config = null;
+		for (String key : set) {
+			if (key == null) {
+				continue;
+			}
+			
+			if (queryTotal) {
 				table = Pair.parseEntry(key, true).getKey();
 				value = isTableKey(table) ? request.get(key) : null;
 				if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
-					total = estimateMaxCount(path, table, (JSONObject) value);
-					break;
+					queryTotal = false;
+					
+					firstTableKey = key;
+//					firstRequest = (JSONObject) value;
+
+					config = getConfigWithTotal(path, table, (JSONObject) value);
+					total = config.getTotal();
+
+//					request.remove(firstTableKey);
 				}
 			}
-			if (total <= size*page) {
-				Log.d(TAG, "getArray total <= size*page >> size = 0;");
-				size = 0;//不再查询，但不能return null;因为还需要put条件
-			}
-			if (total > 0) {
-				Log.d(TAG, "getArray  total = " + total + " >> putQueryResult(...)");
-				putQueryResult(path + "/" + JSONResponse.KEY_TOTAL, total);//GET下替代HEAD的方式
+			
+			if (key.equals(firstTableKey) == false && QueryConfig.ARRAY_KEY_LIST.contains(key) == false) {
+				otherRequest.put(key, request.get(key));
 			}
 		}
+		if (total <= size*page) {
+			Log.d(TAG, "getArray total <= size*page >> size = 0;");
+			size = 0;//不再查询，但不能return null;因为还需要put条件
+		}
+		if (total > 0) {
+			Log.d(TAG, "getArray  total = " + total + " >> putQueryResult(...)");
+			putQueryResult(path + "/" + JSONResponse.KEY_TOTAL, total);//GET下替代HEAD的方式
+		}
+		//		}
 		//total>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
-		
+
 		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONObject response = new JSONObject(true);
-		if (size > 0) {//request内部没有JSONObject或者不存在适合条件的table内容
-			QueryConfig config = new QueryConfig(requestMethod, size, page);//count不能变，变了后start就不对了
+		if (size > 0 && config != null) {//request内部没有JSONObject或者不存在适合条件的table内容
+			//			QueryConfig config = new QueryConfig(requestMethod, size, page);//count不能变，变了后start就不对了
+			config.setMethod(requestMethod).setCount(size).setPage(page);
 			JSONObject parent;
+			JSONObject first;
 			//生成size个
 			for (int i = 0; i < size; i++) {
-				parent = getObject(path, config.setPosition(i), "" + i, request);
-				if (parent == null || parent.isEmpty()) {
+				try {
+					first = getSQLObject(config.setPosition(i));
+				} catch (Exception e) {
+					Log.e(TAG, "getArray  try { transferredRequest = getSQLObject(config2); } catch (Exception e) {");
+					if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
+						first = null;//内部吃掉异常，put到最外层
+					} else {
+						throw e;
+					}
+				}
+
+				if (first == null || first.isEmpty()) {
 					break;//数据库返回数量不够size，后面没有了。有依赖不为空，无依赖直接查询数据库。
 				}
+				putQueryResult(path + "/" + i + "/" + firstTableKey, first);
+
+				parent = getObject(path, null, "" + i, otherRequest);//request);
+				if (parent == null) {
+					parent = new JSONObject(true);
+				}
+				parent.put(firstTableKey, first);//依赖的对象值在queryResultMap中取
 				response.put("" + i, parent);
 			}
 		}
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		
-		
-		//解决[]:{Comment[]:{...}}内层0之后的count,page丢失，导致性能下降
-		request.put(JSONRequest.KEY_QUERY, query);
-		request.put(JSONRequest.KEY_COUNT, count);
-		request.put(JSONRequest.KEY_PAGE, page);
+
+
+//		//解决[]:{Comment[]:{...}}内层0之后的count,page丢失，导致性能下降
+//		request.put(firstTableKey, firstRequest);//顺序错了！
+//
+//		request.put(JSONRequest.KEY_QUERY, query);
+//		request.put(JSONRequest.KEY_COUNT, count);
+//		request.put(JSONRequest.KEY_PAGE, page);
 
 		Log.i(TAG, "getArray  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
 
@@ -800,10 +845,10 @@ public class Parser {
 	 * @return
 	 * @throws Exception 
 	 */
-	public int estimateMaxCount(String path, String table, JSONObject value) throws Exception {
+	public QueryConfig getConfigWithTotal(String path, String table, final JSONObject value) throws Exception {
 		if (StringUtil.isNotEmpty(table, true) == false) {
 			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(table, true) == false >> return 0;");
-			return 0;
+			return null;
 		}
 
 		JSONObject request = new JSONObject(true);
@@ -812,7 +857,7 @@ public class Parser {
 			String k;
 			Object v;
 			Object target;
-			String valid;
+			//			String valid;
 			for (Entry<String, Object> entry : entrySet) {
 				k = entry == null ? "" : StringUtil.getString(entry.getKey());
 				if (k.isEmpty() == false) {
@@ -831,24 +876,27 @@ public class Parser {
 						}
 						k = k.substring(0, k.length() - 1);
 						v = target;
+
+						//						value.put(k.substring(0, k.length() - 1), target);//解析依赖，后面就不用再解析了
 					}
 
-					valid = new String(k);
-					if (valid.endsWith("$")) {
-						valid = valid.substring(0, valid.length() - 1);
-					} else if (valid.endsWith("{}")) {
-						valid = valid.substring(0, valid.length() - 2);
-					} else if (valid.endsWith("<>")) {
-						valid = valid.substring(0, valid.length() - 2);
-					}
-
-					if (valid.endsWith("|") || valid.endsWith("&") || valid.endsWith("!")) {
-						valid = valid.substring(0, valid.length() - 1);
-					}
-
-					if (isWord(valid)) {
-						request.put(k, v);
-					}
+					//如果这些通不过，getObject时也通不过
+					//					valid = new String(k);
+					//					if (valid.endsWith("$")) {
+					//						valid = valid.substring(0, valid.length() - 1);
+					//					} else if (valid.endsWith("{}")) {
+					//						valid = valid.substring(0, valid.length() - 2);
+					//					} else if (valid.endsWith("<>")) {
+					//						valid = valid.substring(0, valid.length() - 2);
+					//					}
+					//
+					//					if (valid.endsWith("|") || valid.endsWith("&") || valid.endsWith("!")) {
+					//						valid = valid.substring(0, valid.length() - 1);
+					//					}
+					//
+					//					if (isWord(valid)) {
+					request.put(k, v);//和value性质不同
+					//					}
 				}
 			}
 		}
@@ -857,7 +905,8 @@ public class Parser {
 		if (response != null) {
 			response = response.getJSONObject(table);
 		}
-		return response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT);
+
+		return newQueryConfig(table, request).setTotal(response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT));
 	}
 
 
