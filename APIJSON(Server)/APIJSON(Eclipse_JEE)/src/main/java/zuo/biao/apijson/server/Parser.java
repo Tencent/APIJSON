@@ -128,7 +128,7 @@ public class Parser {
 		Exception error = null;
 		queryHelper = new QueryHelper();
 		try {
-			requestObject = getObject(null, null, null, request);
+			requestObject = getObject(null, null, request);
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e;
@@ -462,7 +462,7 @@ public class Parser {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JSONObject getObject(String parentPath, final QueryConfig parentConfig, String name
+	private JSONObject getObject(String parentPath, String name
 			, final JSONObject request) throws Exception {
 		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
 				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
@@ -472,9 +472,8 @@ public class Parser {
 		final String path = getAbsPath(parentPath, name);
 
 		//为第二遍parseRelation = true服务，优化查询性能并避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
-		final boolean isArrayChild = parentConfig != null && StringUtil.isNumer(name) && ("" + parentConfig.getPosition()).equals(name);
-		final String table = isArrayChild ? null : Pair.parseEntry(name, true).getKey();
-		final boolean isTableKey = isArrayChild == false && isTableKey(table);
+		final String table = Pair.parseEntry(name, true).getKey();
+		final boolean isTableKey = isTableKey(table);
 		Log.d(TAG, "getObject  table = " + table + "; isTableKey = " + isTableKey);
 
 
@@ -490,7 +489,6 @@ public class Parser {
 
 			Object value;
 			JSONObject result;
-			boolean isFirst = true;
 			for (String key : set) {
 				value = request.get(key);
 				if (value == null) {
@@ -501,17 +499,7 @@ public class Parser {
 					if (isArrayKey(key)) {//APIJSON Array
 						result = getArray(path, key, (JSONObject) value);
 					} else {//APIJSON Object
-						result = getObject(path, isFirst && isArrayChild //以第0个JSONObject为准
-								? parentConfig : null, key, (JSONObject) value);
-
-						//如果第0个都为空，那后面的也都无意义了。
-						if (isFirst && isArrayChild && (result == null || result.isEmpty())) {
-							Log.d(TAG, "getObject  isFirst && isArrayChild"
-									+ " && (result == null || result.isEmpty()) >> return null;");
-							return null;
-						}
-
-						isFirst = false;//[]里第一个不能为[]
+						result = getObject(path, key, (JSONObject) value);
 					}
 					Log.i(TAG, "getObject  key = " + key + "; result = " + result);
 					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
@@ -630,14 +618,7 @@ public class Parser {
 		if (isTableKey) {//提高性能
 			query = true;
 
-			QueryConfig config = newQueryConfig(table, transferredRequest);
-
-			if (parentConfig == null) {//导致全部都是第0个 || isArrayChild == false) {
-				config.setCount(1);
-			} else {
-				config.setCount(parentConfig.getCount()).setPage(parentConfig.getPage())
-				.setPosition(parentConfig.getPosition());//避免position > 0的object获取不到
-			}
+			QueryConfig config = newQueryConfig(table, transferredRequest).setCount(1);
 
 			try {
 				transferredRequest = getSQLObject(config);
@@ -712,10 +693,6 @@ public class Parser {
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
 		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page);
 
-//		//后面还要put回来，所以中间不要return；除非不需要保留page,count！
-//		request.remove(JSONRequest.KEY_QUERY);
-//		request.remove(JSONRequest.KEY_COUNT);
-//		request.remove(JSONRequest.KEY_PAGE);
 
 		//最好先获取第一个table的所有项（where条件），填充一个列表？
 		Set<String> set = new LinkedHashSet<>(request.keySet());
@@ -745,7 +722,6 @@ public class Parser {
 		int total = 0;//满足条件的总数，忽略page,count
 		Log.d(TAG, "getArray  query != JSONRequest.QUERY_TABLE >> ");
 		String firstTableKey = null;
-//		JSONObject firstRequest = null;
 		String table;
 		Object value;
 		QueryConfig config = null;
@@ -761,12 +737,9 @@ public class Parser {
 					queryTotal = false;
 					
 					firstTableKey = key;
-//					firstRequest = (JSONObject) value;
 
 					config = getConfigWithTotal(path, table, (JSONObject) value);
 					total = config.getTotal();
-
-//					request.remove(firstTableKey);
 				}
 			}
 			
@@ -790,7 +763,6 @@ public class Parser {
 		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONObject response = new JSONObject(true);
 		if (size > 0 && config != null) {//request内部没有JSONObject或者不存在适合条件的table内容
-			//			QueryConfig config = new QueryConfig(requestMethod, size, page);//count不能变，变了后start就不对了
 			config.setMethod(requestMethod).setCount(size).setPage(page);
 			JSONObject parent;
 			JSONObject first;
@@ -799,7 +771,7 @@ public class Parser {
 				try {
 					first = getSQLObject(config.setPosition(i));
 				} catch (Exception e) {
-					Log.e(TAG, "getArray  try { transferredRequest = getSQLObject(config2); } catch (Exception e) {");
+					Log.e(TAG, "getArray  try { first = getSQLObject(config2); } catch (Exception e) {");
 					if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
 						first = null;//内部吃掉异常，put到最外层
 					} else {
@@ -812,7 +784,7 @@ public class Parser {
 				}
 				putQueryResult(path + "/" + i + "/" + firstTableKey, first);
 
-				parent = getObject(path, null, "" + i, otherRequest);//request);
+				parent = getObject(path, "" + i, otherRequest);//request);
 				if (parent == null) {
 					parent = new JSONObject(true);
 				}
@@ -823,13 +795,6 @@ public class Parser {
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-
-//		//解决[]:{Comment[]:{...}}内层0之后的count,page丢失，导致性能下降
-//		request.put(firstTableKey, firstRequest);//顺序错了！
-//
-//		request.put(JSONRequest.KEY_QUERY, query);
-//		request.put(JSONRequest.KEY_COUNT, count);
-//		request.put(JSONRequest.KEY_PAGE, page);
 
 		Log.i(TAG, "getArray  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
 
