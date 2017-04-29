@@ -488,7 +488,8 @@ public class Parser {
 			selfDefineKeyMap = new LinkedHashMap<String, Object>();
 
 			Object value;
-			JSONObject result;
+			com.alibaba.fastjson.JSON result;
+			boolean isEmpty = false;
 			for (String key : set) {
 				value = request.get(key);
 				if (value == null) {
@@ -498,11 +499,13 @@ public class Parser {
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
 					if (isArrayKey(key)) {//APIJSON Array
 						result = getArray(path, key, (JSONObject) value);
+						isEmpty = result == null || ((JSONArray) result).isEmpty();
 					} else {//APIJSON Object
 						result = getObject(path, key, (JSONObject) value);
+						isEmpty = result == null || ((JSONObject) result).isEmpty();
 					}
 					Log.i(TAG, "getObject  key = " + key + "; result = " + result);
-					if (result != null && result.isEmpty() == false) {//只添加!=null的值，可能数据库返回数据不够count
+					if (isEmpty == false) {//只添加!=null的值，可能数据库返回数据不够count
 						transferredRequest.put(key, result);
 					}
 				} else if (requestMethod == PUT && JSON.isJSONArray(value)) {//PUT JSONArray
@@ -667,7 +670,11 @@ public class Parser {
 	}
 
 
-
+	/**
+	 * TODO 一次获取QueryConfig的方式减少了count-1次JSONObject->QueryConfig的过程，大幅提升了性能。
+	 * 但导致第一个Table位置被重新put到最后，并且需要重复getObject内的代码，目前[]中第一个Table还缺少对key()和自定义@key的支持。
+	 * 评估下[]:{FirstTableKey:{Table}}第一个Table需要使用这两种功能符的场景、频率和替代方式(外层？)
+	 */
 	/**获取对象数组，该对象数组处于parentObject内
 	 * @param parentPath parentObject的路径
 	 * @param parentConfig 对子object的SQL查询配置，需要传两个层级
@@ -676,7 +683,7 @@ public class Parser {
 	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
 	 * @throws Exception 
 	 */
-	private JSONObject getArray(String parentPath, String name, final JSONObject request) throws Exception {
+	private JSONArray getArray(String parentPath, String name, final JSONObject request) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
 		if (isHeadMethod(requestMethod, true)) {
@@ -729,20 +736,20 @@ public class Parser {
 			if (key == null) {
 				continue;
 			}
-			
+
 			if (queryTotal) {
 				table = Pair.parseEntry(key, true).getKey();
 				value = isTableKey(table) ? request.get(key) : null;
 				if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
 					queryTotal = false;
-					
+
 					firstTableKey = key;
 
 					config = getConfigWithTotal(path, table, (JSONObject) value);
 					total = config.getTotal();
 				}
 			}
-			
+
 			if (key.equals(firstTableKey) == false && QueryConfig.ARRAY_KEY_LIST.contains(key) == false) {
 				otherRequest.put(key, request.get(key));
 			}
@@ -761,7 +768,7 @@ public class Parser {
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
 
 		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONObject response = new JSONObject(true);
+		JSONArray response = new JSONArray();
 		if (size > 0 && config != null) {//request内部没有JSONObject或者不存在适合条件的table内容
 			config.setMethod(requestMethod).setCount(size).setPage(page);
 			JSONObject parent;
@@ -789,7 +796,8 @@ public class Parser {
 					parent = new JSONObject(true);
 				}
 				parent.put(firstTableKey, first);//依赖的对象值在queryResultMap中取
-				response.put("" + i, parent);
+				//				response.put("" + i, parent);
+				response.add(parent);
 			}
 		}
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1070,25 +1078,7 @@ public class Parser {
 		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
 	}
 
-	/**这些符号会对@依赖引用造成影响。[]/Moment/User:toUser/id@ ? 解决方法：
-	 * 方法1(最佳)：在所有修改带操作符的地方更新依赖关系 #updateRelation
-	 * 优点：替换key后结构成为客户端所需的，不带转义；可能增加updateRelation次数后性能比方法2遍历keySet找到映射key后好点
-	 * 缺点：修改代码分散
-	 * 
-	 * 方法2：在所有用到key的地方用getRealKey(key)代替key
-	 * 优点：修改代码集中
-	 * 缺点：完成查询后key没有替换为客户端所需的，要么不解决，要么最后增加一次遍历来替换key；
-	 *      需要在getValueByPath和putValueByPath中遍历keySet找到映射key
-	 * 
-	 * 方法3：方法1，2结合。增加一个keyMap<origin, real>，
-	 * getValueByPath和putValueByPath中path中的realKey如果有映射就替换为originKey，
-	 * 每次替换key为realkey后keyMap.remove(realkey)
-	 * 
-	 * 优点：替换key后结构成为客户端所需的，不带转义
-	 * 缺点：逻辑复杂，而且不能单独origin-real映射，origin必须要完整路径，否则当不同Object种含有相同origin时就会出错！！！
-	 * 
-	 * 综上，方法1最好。
-	 */
+
 
 	/**获取客户端实际需要的key
 	 * <br> "userId@":"/User/id"      //@根据路径依赖，@始终在最后。value是'/'分隔的字符串。

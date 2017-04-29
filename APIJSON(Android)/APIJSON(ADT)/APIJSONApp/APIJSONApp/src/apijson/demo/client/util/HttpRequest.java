@@ -19,6 +19,7 @@ import java.util.List;
 
 import zuo.biao.apijson.JSONObject;
 import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.SettingUtil;
@@ -125,6 +126,8 @@ public class HttpRequest {
 
 	//user<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	public static final String TOTAL = JSONResponse.KEY_TOTAL;
+
 	public static final String RANGE = "range";
 
 	public static final String ID = "id";
@@ -141,6 +144,7 @@ public class HttpRequest {
 	public static final String SEX = "sex";
 	public static final String TYPE = "type";
 	public static final String CONTENT = "content";
+
 
 
 
@@ -180,7 +184,7 @@ public class HttpRequest {
 	public static void register(String verify, String phone, String password, String name, int sex
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONObject request = new JSONRequest(new User().setPhone(phone).setName(name).setSex(sex))
-				.setTag(User.class.getSimpleName());
+		.setTag(User.class.getSimpleName());
 		request.put(VERIFY, verify);
 		request.put(PASSWORD, password);
 		HttpManager.getInstance().post(URL_POST + "register/user/", request, requestCode, listener);
@@ -222,7 +226,7 @@ public class HttpRequest {
 	 */
 	public static void logout(int requestCode, OnHttpResponseListener listener) {
 		post(new JSONRequest(new Login(APIJSONApplication.getInstance().getCurrentUserId()).setType(0)
-		).setTag(Login.class.getSimpleName()), requestCode, listener);
+				).setTag(Login.class.getSimpleName()), requestCode, listener);
 	}
 
 	/**
@@ -264,7 +268,7 @@ public class HttpRequest {
 		if (withMomentList) {
 			request.add(new JSONRequest(Moment.class.getSimpleName()
 					, new JSONRequest(USER_ID, id).setColumn("pictureList").setOrder(DATE_DOWN))
-					.toArray(3, 0, Moment.class.getSimpleName()));
+			.toArray(3, 0, Moment.class.getSimpleName()));
 		}
 		get(request, requestCode, listener);
 	}
@@ -313,45 +317,45 @@ public class HttpRequest {
 				currentUser = new apijson.demo.client.model.User();
 			}
 			switch (range) {
-				case RANGE_ALL://1.首推注册时间长的（也可以是级别高的）；2.给男性用户首推女性用户
-					userItem.setOrder(DATE_UP, (currentUser.getSex() == 0 ? "sex-" : ""));
-					break;
-				case RANGE_SINGLE:
-				case RANGE_USER:
-					userItem.put(ID, id);
-					break;
-				case RANGE_USER_FRIEND:
-				case RANGE_USER_CIRCLE:
-					if (APIJSONApplication.getInstance().isCurrentUser(id) == false) {
-						Log.e(TAG, "只允许查看当前用户的!");
-						return;
-					}
-					List<Long> list = currentUser.getFriendIdList();
-					if (list == null) {//不能放在range == RANGE_USER_CIRCLE里面，为null不会当成查询条件！
-						list = new ArrayList<Long>();
-					}
-					if (range == RANGE_USER_CIRCLE) {
-						list.add(currentUser.getId());
-					} else {//问题可能在于登录状态错误
-						list.remove(currentUser.getId());//避免误添加
-					}
-					userItem.put(ID_IN, list);
-					userItem.setOrder("name+");
-					break;
-				case RANGE_MOMENT:
-					JSONObject moment = new JSONObject(new Moment(id));
-					moment.setColumn("praiseUserIdList");
-					request.put(Moment.class.getSimpleName(), moment);
-					userItem.put(ID_IN, "Moment/praiseUserIdList");
-					break;
-				case RANGE_COMMENT:
-					JSONObject comment = new JSONObject(new Comment(id));
-					comment.setColumn(USER_ID);
-					request.put(Comment.class.getSimpleName(), comment);
-					userItem.put(ID_AT, "Comment/userId");
-					break;
-				default:
-					break;
+			case RANGE_ALL://1.首推注册时间长的（也可以是级别高的）；2.给男性用户首推女性用户
+				userItem.setOrder(DATE_UP, (currentUser.getSex() == 0 ? "sex-" : ""));
+				break;
+			case RANGE_SINGLE:
+			case RANGE_USER:
+				userItem.put(ID, id);
+				break;
+			case RANGE_USER_FRIEND:
+			case RANGE_USER_CIRCLE:
+				if (APIJSONApplication.getInstance().isCurrentUser(id) == false) {
+					Log.e(TAG, "只允许查看当前用户的!");
+					return;
+				}
+				List<Long> list = currentUser.getFriendIdList();
+				if (list == null) {//不能放在range == RANGE_USER_CIRCLE里面，为null不会当成查询条件！
+					list = new ArrayList<Long>();
+				}
+				if (range == RANGE_USER_CIRCLE) {
+					list.add(currentUser.getId());
+				} else {//问题可能在于登录状态错误
+					list.remove(currentUser.getId());//避免误添加
+				}
+				userItem.put(ID_IN, list);
+				userItem.setOrder("name+");
+				break;
+			case RANGE_MOMENT:
+				JSONObject moment = new JSONObject(new Moment(id));
+				moment.setColumn("praiseUserIdList");
+				request.put(Moment.class.getSimpleName(), moment);
+				userItem.put(ID_IN+"@", "Moment/praiseUserIdList");
+				break;
+			case RANGE_COMMENT:
+				JSONObject comment = new JSONObject(new Comment(id));
+				comment.setColumn(USER_ID);
+				request.put(Comment.class.getSimpleName(), comment);
+				userItem.put(ID_AT, "Comment/userId");
+				break;
+			default:
+				break;
 			}
 			userItem.add(search);
 		}
@@ -380,9 +384,11 @@ public class HttpRequest {
 		//praise <<<<<<<<<<<<<<<<<<
 		JSONRequest userItem = new JSONRequest();
 		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
-				.setColumn(COLUMNS_USER_SIMPLE));
-		request.add(userItem.toArray(20, 0, User.class.getSimpleName()));
-//		request.put("praiseCount@", "/User[]/total");
+		.setColumn(COLUMNS_USER_SIMPLE));
+
+		//		userItem.setQuery(JSONRequest.QUERY_ALL);
+		request.add(userItem.toArray(10, 0, User.class.getSimpleName()));
+		//		request.putPath("praiseCount", "/User[]", TOTAL);
 		//praise >>>>>>>>>>>>>>>>>>
 
 		get(request, requestCode, listener);
@@ -403,36 +409,36 @@ public class HttpRequest {
 
 		JSONRequest moment = new JSONRequest();
 		switch (range) {
-			case RANGE_ALL:
-				//do noting
-				break;
-			case RANGE_SINGLE:
-				moment.put(ID, id);
-				break;
-			case RANGE_USER:
-				moment.put(USER_ID, id);
-				break;
-			case RANGE_USER_FRIEND:
-			case RANGE_USER_CIRCLE:
-				if (APIJSONApplication.getInstance().isCurrentUser(id) == false) {
-					Log.e(TAG, "只允许查看当前用户的!");
-					return;
-				}
-				apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
-				if (currentUser == null) {
-					currentUser = new apijson.demo.client.model.User();
-				}
-				List<Long> list = currentUser.getFriendIdList();
-				if (list == null) {
-					list = new ArrayList<Long>();
-				}
-				if (range == RANGE_USER_CIRCLE) {
-					list.add(currentUser.getId());
-				}
-				moment.put(USER_ID_IN, list);
-				break;
-			default:
-				break;
+		case RANGE_ALL:
+			//do noting
+			break;
+		case RANGE_SINGLE:
+			moment.put(ID, id);
+			break;
+		case RANGE_USER:
+			moment.put(USER_ID, id);
+			break;
+		case RANGE_USER_FRIEND:
+		case RANGE_USER_CIRCLE:
+			if (APIJSONApplication.getInstance().isCurrentUser(id) == false) {
+				Log.e(TAG, "只允许查看当前用户的!");
+				return;
+			}
+			apijson.demo.client.model.User currentUser = APIJSONApplication.getInstance().getCurrentUser();
+			if (currentUser == null) {
+				currentUser = new apijson.demo.client.model.User();
+			}
+			List<Long> list = currentUser.getFriendIdList();
+			if (list == null) {
+				list = new ArrayList<Long>();
+			}
+			if (range == RANGE_USER_CIRCLE) {
+				list.add(currentUser.getId());
+			}
+			moment.put(USER_ID_IN, list);
+			break;
+		default:
+			break;
 		}
 		moment.setOrder(DATE_DOWN);
 		moment.add(search);
@@ -443,21 +449,22 @@ public class HttpRequest {
 		//praise <<<<<<<<<<<<<<<<<<
 		JSONRequest userItem = new JSONRequest();
 		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
-				.setColumn(COLUMNS_USER_SIMPLE));
+		.setColumn(COLUMNS_USER_SIMPLE));
 
+		//		userItem.setQuery(JSONRequest.QUERY_TOTAL);
 		request.add(userItem.toArray(10, 0, User.class.getSimpleName()));
-//		request.put("praiseCount@", "/User[]/total");
+		//		request.putPath("praiseCount", "/User[]", TOTAL);
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<
 		JSONRequest commentItem = new JSONRequest();
 		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "[]/Moment/id").setOrder(DATE_UP));
 		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId")
-				.setColumn(COLUMNS_USER_SIMPLE));
+		.setColumn(COLUMNS_USER_SIMPLE));
 
-
+		//		commentItem.setQuery(JSONRequest.QUERY_ALL);
 		request.add(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
-//		request.put("commentCount@", "/CommentItem[]/total");
+		//		request.putPath("commentCount", "/CommentItem[]", TOTAL);
 		//comment >>>>>>>>>>>>>>>>>>
 
 		get(request.toArray(count, page), requestCode, listener);
@@ -508,10 +515,14 @@ public class HttpRequest {
 		request.put(Comment.class.getSimpleName(), comment.setOrder(DATE_UP));
 		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 
+		//		if (page == 0) {
+		//			request.setQuery(JSONRequest.QUERY_ALL);
+		//		}
 		request = request.toArray(count, page);
-//		if (requestCode == 0) {
-//			request.put("total@", "[]/total");
-//		}
+		//		if (page == 0) {
+		//			request.putPath(TOTAL, "[]", TOTAL);
+		//		}
+
 		get(request, requestCode, listener);
 	}
 
@@ -526,10 +537,10 @@ public class HttpRequest {
 	public static void addComment(long momentId, long toCommentId, long toUserId, String content
 			, int requestCode, OnHttpResponseListener listener) {
 		Comment comment = new Comment()
-				.setToId(toCommentId)
-				.setUserId(application.getCurrentUserId())
-				.setMomentId(momentId)
-				.setContent(content);
+		.setToId(toCommentId)
+		.setUserId(application.getCurrentUserId())
+		.setMomentId(momentId)
+		.setContent(content);
 		post(new JSONRequest(comment).setTag(Comment.class.getSimpleName()), requestCode, listener);
 	}
 	/**

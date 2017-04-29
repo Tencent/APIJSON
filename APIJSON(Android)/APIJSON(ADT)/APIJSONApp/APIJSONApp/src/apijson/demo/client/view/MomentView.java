@@ -36,6 +36,7 @@ import apijson.demo.client.activity_fragment.LoginActivity;
 import apijson.demo.client.activity_fragment.MomentActivity;
 import apijson.demo.client.activity_fragment.UserActivity;
 import apijson.demo.client.activity_fragment.UserListActivity;
+import apijson.demo.client.activity_fragment.UserListFragment;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.client.model.Moment;
@@ -198,7 +199,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 
 		vMomentViewDivider.setVisibility(llMomentViewPraise.getVisibility() == View.VISIBLE
 				&& llMomentViewCommentContainer.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
-
+		
 	}
 
 
@@ -460,7 +461,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			break;
 		case R.id.tvMomentViewPraise:
 		case R.id.llMomentViewPraise:
-			toActivity(UserListActivity.createIntent(context, data.getPraiseUserIdList())
+			toActivity(UserListActivity.createIntent(context, UserListFragment.RANGE_MOMENT, data.getId())
 					.putExtra(UserListActivity.INTENT_TITLE, "点赞的人"));
 			break;
 		default:
