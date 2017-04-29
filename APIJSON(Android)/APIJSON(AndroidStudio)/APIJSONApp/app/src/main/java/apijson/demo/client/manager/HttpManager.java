@@ -102,7 +102,7 @@ public class HttpManager {
 			@Override
 			protected Exception doInBackground(Void... params) {
 				String body = request == null || request.isEmpty() ? null : JSON.toJSONString(request);
-				Log.d(TAG, "post  url_ = " + url_ + "\n request = \n" + body);
+				Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n get  url_ = " + url_ + "\n request = \n" + body);
 				try {
 					String url = StringUtil.getNoBlankString(url_)
 							+ (body == null ? "" : URLEncoder.encode(StringUtil.getNoBlankString(body), UTF_8));
@@ -117,6 +117,7 @@ public class HttpManager {
 					result = getResponseJson(client, new Request.Builder()
 							.addHeader(KEY_TOKEN, getToken(url))
 							.url(sb.toString()).build());
+					Log.d(TAG, "\n get  result = \n" + result + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 				} catch (Exception e) {
 					Log.e(TAG, "get  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
 							"} catch (Exception e) {\n" + e.getMessage());
@@ -168,13 +169,14 @@ public class HttpManager {
 						return new Exception(TAG + ".post  AsyncTask.doInBackground  client == null >> return;");
 					}
 					String body = JSON.toJSONString(request);
-					Log.d(TAG, "post  url_ = " + url_ + "\n request = \n" + body);
-
+					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n get  post = " + url_ + "\n request = \n" + body);
+					
 					RequestBody requestBody = RequestBody.create(TYPE_JSON, body);
 
 					result = getResponseJson(client, new Request.Builder()
 							.addHeader(KEY_TOKEN, getToken(url)).url(StringUtil.getNoBlankString(url))
 							.post(requestBody).build());
+					Log.d(TAG, "\n post  result = \n" + result + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 				} catch (Exception e) {
 					Log.e(TAG, "post  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
 							"} catch (Exception e) {\n" + e.getMessage());

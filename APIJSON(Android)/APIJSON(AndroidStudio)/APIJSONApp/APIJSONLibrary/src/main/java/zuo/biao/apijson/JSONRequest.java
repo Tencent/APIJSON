@@ -82,9 +82,30 @@ public class JSONRequest extends JSONObject {
 
 	//array object <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	public static final int QUERY_TABLE = 0;
+	public static final int QUERY_TOTAL = 1;
+	public static final int QUERY_ALL = 2;
+	
+	public static final String KEY_QUERY = "query";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
 
+	/**
+	 * @param query what need to query, Table,total,ALL?
+	 * @return
+	 */
+	public JSONRequest setQuery(int query) {
+		put(KEY_QUERY, query);
+		return this;
+	}
+	public int getQuery() {
+		return getIntValue(KEY_QUERY);
+	}
+
+	/**
+	 * @param count
+	 * @return
+	 */
 	public JSONRequest setCount(int count) {
 		put(KEY_COUNT, count);
 		return this;
@@ -93,6 +114,10 @@ public class JSONRequest extends JSONObject {
 		return getIntValue(KEY_COUNT);
 	}
 
+	/**
+	 * @param page
+	 * @return
+	 */
 	public JSONRequest setPage(int page) {
 		put(KEY_PAGE, page);
 		return this;

@@ -120,15 +120,15 @@ public class MomentItem extends BaseModel {
 	public List<User> getUserList() {
 		if (userList == null) {
 			userList = new ArrayList<User>();
-			List<Long> list = getPraiseUserIdList();
-			if (list != null) {
-				User u;
-				for (Long id : list) {
-					u = new User(id);
-					u.setName("" + id);
-					userList.add(u);
-				}
-			}
+//			List<Long> list = getPraiseUserIdList();
+//			if (list != null) {
+//				User u;
+//				for (Long id : list) {
+//					u = new User(id);
+//					u.setName("" + id);
+//					userList.add(u);
+//				}
+//			}
 		}
 		return userList;
 	}
@@ -168,7 +168,7 @@ public class MomentItem extends BaseModel {
 	}
 	public MomentItem setIsPraised(boolean isPraised) {
 		this.isPraised = isPraised;
-
+		
 		User currentUser = APIJSONApplication.getInstance().getCurrentUser();
 		long userId = currentUser == null ? 0 : currentUser.getId();
 
@@ -198,6 +198,7 @@ public class MomentItem extends BaseModel {
 		}
 		getMoment().setPraiseUserIdList(list);
 
+		setPraiseCount(praiseCount + (isPraised ? 1 : -1));
 
 		return this;
 	}

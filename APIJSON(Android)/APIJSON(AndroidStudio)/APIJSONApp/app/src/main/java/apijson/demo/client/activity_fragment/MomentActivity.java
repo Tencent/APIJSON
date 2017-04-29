@@ -174,6 +174,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	private MomentItem momentItem;
 	/**
+	 * 内部转到UI线程
 	 * @param momentItem_
 	 */
 	private void setHead(MomentItem momentItem_) {
@@ -501,60 +502,72 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 	private static final int HTTP_REPLY = 3;
 	private static final int HTTP_DELETE = 4;
 	@Override
-	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-		JSONResponse response = new JSONResponse(resultJson);
-		if (requestCode <= 0) {
-			if (requestCode == 0 && momentItem != null) {
-				setHead(momentItem.setCommentCount(response.getTotal()));
-			}
-			super.onHttpResponse(requestCode, resultJson, e);
-			return;
-		}
+	public void onHttpResponse(final int requestCode, final String resultJson, final Exception e) {
+		runThread(TAG + "onHttpResponse", new Runnable() {
 
-		if (requestCode == HTTP_GET_MOMENT) {
-			MomentItem data = JSONResponse.toObject(response, MomentItem.class);
-			if (data == null || data.getId() <= 0) {
-				if (JSONResponse.isSucceed(response)) {
-					showShortToast("动态不存在");
-					super.finish();//需要动画，且不需要保存缓存
+			@Override
+			public void run() {
+
+				JSONResponse response = new JSONResponse(resultJson);
+				if (requestCode <= 0) {
+					if (requestCode == 0 && momentItem != null) {
+						setHead(momentItem.setCommentCount(response.getTotal()));
+					}
+					MomentActivity.super.onHttpResponse(requestCode, resultJson, e);
 					return;
 				}
-				showShortToast("获取动态失败，请检查网络后重试");
-				return;
+
+				if (requestCode == HTTP_GET_MOMENT) {
+					MomentItem data = JSONResponse.toObject(response, MomentItem.class);
+					if (data == null || data.getId() <= 0) {
+						if (JSONResponse.isSucceed(response)) {
+							showShortToast("动态不存在");
+							MomentActivity.super.finish();//需要动画，且不需要保存缓存
+							return;
+						}
+						showShortToast("获取动态失败，请检查网络后重试");
+						return;
+					}
+					setHead(data);
+					return;
+				}
+
+
+				JSONResponse comment = response.getJSONResponse(Comment.class.getSimpleName());
+				final boolean succeed = JSONResponse.isSucceed(comment);
+				String operation = "操作";
+				switch (requestCode) {
+				case HTTP_COMMENT: // 新增评论
+					operation = "评论";
+					break;
+				case HTTP_REPLY:// 回复
+					operation = "回复";
+					break;
+				case HTTP_DELETE:// 删除
+					operation = "删除";
+					if (succeed) {//MomentItem中仍然存有Comment，可重写saveCache，单独存里面的Moment和Comment等
+						CacheManager.getInstance().remove(getCacheClass(), comment == null ? "0" : "" + comment.getId());
+					}
+					break;
+				default:
+					return;
+				}
+				showShortToast(operation + (succeed ? "成功" : "失败，请检查网络后重试"));
+
+				runUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (succeed) {
+							etMomentInput.setText("");
+
+							loadHead = false;
+							MomentActivity.super.onRefresh();
+						}
+					}
+				});
 			}
-			setHead(data);
-			return;
-		}
-
-
-		JSONResponse comment = response.getJSONResponse(Comment.class.getSimpleName());
-		boolean succeed = JSONResponse.isSucceed(comment);
-		String operation = "操作";
-		switch (requestCode) {
-		case HTTP_COMMENT: // 新增评论
-			operation = "评论";
-			break;
-		case HTTP_REPLY:// 回复
-			operation = "回复";
-			break;
-		case HTTP_DELETE:// 删除
-			operation = "删除";
-			if (succeed) {//MomentItem中仍然存有Comment，可重写saveCache，单独存里面的Moment和Comment等
-				CacheManager.getInstance().remove(getCacheClass(), comment == null ? "0" : "" + comment.getId());
-			}
-			break;
-		default:
-			return;
-		}
-
-		showShortToast(operation + (succeed ? "成功" : "失败，请检查网络后重试"));
-		if (succeed) {
-			etMomentInput.setText("");
-
-			loadHead = false;
-			super.onRefresh();
-		}
-
+		});
 	}
 
 

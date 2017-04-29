@@ -118,12 +118,12 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 		method = StringUtil.getTrimedString(method);
 		url = StringUtil.getCorrectUrl(url);
 		if (encoded == false && request != null && request.contains("/")) {
-//			try {//导致JSON.format(request)返回null，然后tvRequestResult就显示为null了
-//				String s = URLEncoder.encode(new String(request), StringUtil.UTF_8);
-//				request = s;
-//			} catch (UnsupportedEncodingException e) {
-//				e.printStackTrace();
-//			}
+			//			try {//导致JSON.format(request)返回null，然后tvRequestResult就显示为null了
+			//				String s = URLEncoder.encode(new String(request), StringUtil.UTF_8);
+			//				request = s;
+			//			} catch (UnsupportedEncodingException e) {
+			//				e.printStackTrace();
+			//			}
 			request = request.replaceAll("/", "%2F");
 		}
 
@@ -274,8 +274,11 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 
 	@Override
 	public void finish() {
-		setResult(RESULT_OK, 
-				new Intent().putExtra(RESULT_ID, id).putExtra(RESULT_URL, url).putExtra(RESULT_RESPONSE, resultJson));
+		setResult(RESULT_OK, new Intent().
+				putExtra(RESULT_ID, id).
+				putExtra(RESULT_URL, url).
+				putExtra(RESULT_RESPONSE, resultJson));
+
 		super.finish();
 	}
 

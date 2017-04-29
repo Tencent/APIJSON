@@ -38,9 +38,10 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class SelectActivity extends Activity implements OnClickListener {
 
+	public static final String CONFIG_PATH = "CONFIG_PATH";
 	
-	private static final String KEY_ID = "id";
-	private static final String KEY_URL = "url";
+	public static final String KEY_ID = "KEY_ID";
+	public static final String KEY_URL = "KEY_URL";
 	
 
 	private Activity context;
@@ -57,7 +58,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 
 
 		//读取保存的配置
-		SharedPreferences sp = getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE);
+		SharedPreferences sp = getSharedPreferences(CONFIG_PATH, Context.MODE_PRIVATE);
 		id = sp.getLong(KEY_ID, id);
 		url = sp.getString(KEY_URL, null);
 
@@ -96,7 +97,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 
 
 	public void toAuto(View v) {
-		startActivity(AutoActivity.createIntent(context));
+		startActivityForResult(AutoActivity.createIntent(context), REQUEST_TO_AUTO);
 	}
 	public void toUpdateLog(View v) {
 		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
@@ -182,6 +183,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 
 
 	private static final int REQUEST_TO_REQUEST = 1;
+	private static final int REQUEST_TO_AUTO = 2;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -190,6 +192,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 		}
 		switch (requestCode) {
 		case REQUEST_TO_REQUEST:
+		case REQUEST_TO_AUTO:
 			if (data == null) {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
 			} else {
@@ -199,7 +202,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 				setRequest();
 
 				//保存配置
-				getSharedPreferences(getPackageName() + "_config", Context.MODE_PRIVATE)
+				getSharedPreferences(CONFIG_PATH, Context.MODE_PRIVATE)
 				.edit()
 				.remove(KEY_ID)
 				.putLong(KEY_ID, id)
@@ -212,8 +215,6 @@ public class SelectActivity extends Activity implements OnClickListener {
 			break;
 		}
 	}
-
-
 
 
 }
