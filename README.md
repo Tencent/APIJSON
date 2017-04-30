@@ -322,7 +322,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
  
   键值对格式 | 功能 与 作用 | 使用示例
 ------------ | ------------ | ------------
- "key[]":{}，后面是JSONObject，key可省略。当key和内部Table名相同时，JSONResponse#format会把Table提取出来，即将 {Table:{Content}} 转化为 {Content} | 查询数组 | [{"User[]":{"User":{}}}](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{}}})，查询一个User数组。这里key和Table名都是User，会提取User，即将 {User:{Content}} 转化为 {Content} 
+ "key[]":{}，后面是JSONObject，key可省略。当key和内部Table名相同时，JSONResponse#format会把Table提取出来，即将 {Table:{Content}} 转化为 {Content} | 查询数组 | [{"User[]":{"User":{}}}](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{}}})，查询一个User数组。这里key和Table名都是User，会提取User，即将 {"User":{"id", ...}} 转化为 {"id", ...} 
  "key{}":[]，后面是JSONArray，作为key可取的值的选项 | 匹配选项范围 | ["id{}":[38710,82001,70793]](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"id{}":[38710,82001,70793]}}})，查询id符合38710,82001,70793中任意一个的一个User数组
  "key{}":"条件0,条件1..."，条件为任意SQL比较表达式字符串，非Number类型必须用''包含条件的值，如'a' | 匹配条件范围 | ["id{}":"<=80000,\>90000"](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"id{}":"<=80000,\>90000"}}})，查询id符合id\<=80000 \| id>90000的一个User数组
  "key<\>":Object  =>  "key<\>":[Object]，key对应值的类型必须为JSONArray，Object类型不能为JSON | 包含选项范围 | ["friendIdList<\>":38710](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"friendIdList<\>":38710}}})，查询friendIdList包含38710的一个User数组
