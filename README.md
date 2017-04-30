@@ -102,26 +102,26 @@ APIJSON是一种JSON传输结构协议。<br />
 返回：
 <pre><code class="language-json">
 {
-  "[]":{
-    "0":{
+  "[]":[
+    {
       "User":{
         "id":38710,
         "name":"TommyLemon"
       }
     },
-    "1":{
+    {
       "User":{
         "id":70793,
         "name":"Strong"
       }
     },
-    "2":{
+    {
       "User":{
         "id":82001,
         "name":"Android"
       }
     }
-  },
+  ],
   "status":200,
   "message":"success"
 }
@@ -156,8 +156,8 @@ APIJSON是一种JSON传输结构协议。<br />
 返回：
 <pre><code class="language-json">
 {
-  "[]":{
-    "0":{
+  "[]":[
+    {
       "User":{
         "id":38710,
         "name":"TommyLemon",
@@ -171,8 +171,8 @@ APIJSON是一种JSON传输结构协议。<br />
           "http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg"
         ]
       },
-      "Comment[]":{
-        "0":{
+      "Comment[]":[
+        {
           "Comment":{
             "id":160,
             "toId":0,
@@ -182,7 +182,7 @@ APIJSON是一种JSON传输结构协议。<br />
             "content":"This is a Content...-160"
           }
         },
-        "1":{
+        {
           "Comment":{
             "id":163,
             "toId":0,
@@ -192,9 +192,9 @@ APIJSON是一种JSON传输结构协议。<br />
             "content":"This is a Content...-163"
           }
         }
-      }
+      ]
     },
-    "1":{
+    {
       "User":{
         "id":70793,
         "name":"Strong",
@@ -210,8 +210,8 @@ APIJSON是一种JSON传输结构协议。<br />
           "http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg"
         ]
       },
-      "Comment[]":{
-        "0":{
+      "Comment[]":[
+        {
           "Comment":{
             "id":162,
             "toId":0,
@@ -221,7 +221,7 @@ APIJSON是一种JSON传输结构协议。<br />
             "content":"This is a Content...-162"
           }
         },
-        "1":{
+        {
           "Comment":{
             "id":164,
             "toId":0,
@@ -231,9 +231,9 @@ APIJSON是一种JSON传输结构协议。<br />
             "content":"This is a Content...-164"
           }
         }
-      }
+      ]
     }
-  },
+  ],
   "status":200,
   "message":"success"
 }
