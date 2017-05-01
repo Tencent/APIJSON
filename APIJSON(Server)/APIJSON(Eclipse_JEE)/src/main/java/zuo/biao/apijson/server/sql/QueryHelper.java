@@ -60,8 +60,8 @@ public class QueryHelper {
 	}
 
 	private synchronized void saveCache(String sql, Map<Integer, JSONObject> map) {
-		if (sql == null || map == null || map.isEmpty()) {
-			Log.i(TAG, "saveList  sql == null || map == null || map.isEmpty() >> return;");
+		if (sql == null || map == null) { //空map有效，说明查询过sql了  || map.isEmpty()) {
+			Log.i(TAG, "saveList  sql == null || map == null >> return;");
 			return;
 		}
 		cacheMap.put(sql, map);

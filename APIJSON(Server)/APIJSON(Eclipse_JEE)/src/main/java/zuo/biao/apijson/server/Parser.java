@@ -456,14 +456,12 @@ public class Parser {
 
 	/**获取单个对象，该对象处于parentObject内
 	 * @param parentPath parentObject的路径
-	 * @param parentConfig 对子object的SQL查询配置，需要传两个层级
 	 * @param name parentObject的key
 	 * @param request parentObject的value
 	 * @return
 	 * @throws Exception 
 	 */
-	private JSONObject getObject(String parentPath, String name
-			, final JSONObject request) throws Exception {
+	private JSONObject getObject(String parentPath, String name, final JSONObject request) throws Exception {
 		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
 				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
 		if (request == null) {// Moment:{} || request.isEmpty()) {//key-value条件
@@ -677,7 +675,6 @@ public class Parser {
 	 */
 	/**获取对象数组，该对象数组处于parentObject内
 	 * @param parentPath parentObject的路径
-	 * @param parentConfig 对子object的SQL查询配置，需要传两个层级
 	 * @param name parentObject的key
 	 * @param request parentObject的value
 	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
@@ -721,31 +718,34 @@ public class Parser {
 
 
 		//total<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		//		if (query != JSONRequest.QUERY_TABLE) {
 
-		JSONObject otherRequest = new JSONObject(true);
 
-		boolean queryTotal = true;
-		int total = 0;//满足条件的总数，忽略page,count
-		Log.d(TAG, "getArray  query != JSONRequest.QUERY_TABLE >> ");
+		final boolean queryTotal = query != JSONRequest.QUERY_TABLE;
+		Log.d(TAG, "getArray  queryTotal = " + queryTotal);
+		
+		boolean setConfig = true;
 		String firstTableKey = null;
 		String table;
 		Object value;
 		QueryConfig config = null;
+		int total = 0;//满足条件的总数，忽略page,count
+		
+		JSONObject otherRequest = new JSONObject(true);
+		
 		for (String key : set) {
 			if (key == null) {
 				continue;
 			}
 
-			if (queryTotal) {
+			if (setConfig) {
 				table = Pair.parseEntry(key, true).getKey();
 				value = isTableKey(table) ? request.get(key) : null;
 				if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
-					queryTotal = false;
+					setConfig = false;
 
 					firstTableKey = key;
 
-					config = getConfigWithTotal(path, table, (JSONObject) value);
+					config = getArrayConfig(path, table, (JSONObject) value, queryTotal);
 					total = config.getTotal();
 				}
 			}
@@ -754,15 +754,14 @@ public class Parser {
 				otherRequest.put(key, request.get(key));
 			}
 		}
-		if (total <= size*page) {
-			Log.d(TAG, "getArray total <= size*page >> size = 0;");
+		if (queryTotal && total <= size*page) {
+			Log.d(TAG, "getArray  queryTotal && total <= size*page >> size = 0;");
 			size = 0;//不再查询，但不能return null;因为还需要put条件
 		}
 		if (total > 0) {
 			Log.d(TAG, "getArray  total = " + total + " >> putQueryResult(...)");
 			putQueryResult(path + "/" + JSONResponse.KEY_TOTAL, total);//GET下替代HEAD的方式
 		}
-		//		}
 		//total>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
@@ -796,7 +795,6 @@ public class Parser {
 					parent = new JSONObject(true);
 				}
 				parent.put(firstTableKey, first);//依赖的对象值在queryResultMap中取
-				//				response.put("" + i, parent);
 				response.add(parent);
 			}
 		}
@@ -815,10 +813,12 @@ public class Parser {
 	 * @param path
 	 * @param name
 	 * @param value
+	 * @param queryTotal 
 	 * @return
 	 * @throws Exception 
 	 */
-	public QueryConfig getConfigWithTotal(String path, String table, final JSONObject value) throws Exception {
+	public QueryConfig getArrayConfig(String path, String table, final JSONObject value
+			, boolean queryTotal) throws Exception {
 		if (StringUtil.isNotEmpty(table, true) == false) {
 			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(table, true) == false >> return 0;");
 			return null;
@@ -830,7 +830,6 @@ public class Parser {
 			String k;
 			Object v;
 			Object target;
-			//			String valid;
 			for (Entry<String, Object> entry : entrySet) {
 				k = entry == null ? "" : StringUtil.getString(entry.getKey());
 				if (k.isEmpty() == false) {
@@ -849,32 +848,15 @@ public class Parser {
 						}
 						k = k.substring(0, k.length() - 1);
 						v = target;
-
-						//						value.put(k.substring(0, k.length() - 1), target);//解析依赖，后面就不用再解析了
 					}
 
-					//如果这些通不过，getObject时也通不过
-					//					valid = new String(k);
-					//					if (valid.endsWith("$")) {
-					//						valid = valid.substring(0, valid.length() - 1);
-					//					} else if (valid.endsWith("{}")) {
-					//						valid = valid.substring(0, valid.length() - 2);
-					//					} else if (valid.endsWith("<>")) {
-					//						valid = valid.substring(0, valid.length() - 2);
-					//					}
-					//
-					//					if (valid.endsWith("|") || valid.endsWith("&") || valid.endsWith("!")) {
-					//						valid = valid.substring(0, valid.length() - 1);
-					//					}
-					//
-					//					if (isWord(valid)) {
 					request.put(k, v);//和value性质不同
-					//					}
 				}
 			}
 		}
 
-		JSONObject response = new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(table, request));
+		JSONObject response = queryTotal == false
+				? null : new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(table, request));
 		if (response != null) {
 			response = response.getJSONObject(table);
 		}

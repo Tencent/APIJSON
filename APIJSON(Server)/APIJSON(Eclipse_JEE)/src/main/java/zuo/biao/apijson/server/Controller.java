@@ -59,7 +59,7 @@ public class Controller {
 		return new Parser(RequestMethod.POST).parse(request);
 	}
 
-	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
+	/**用POST方法HEAD，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
 	 * @param request
 	 * @return
 	 */
@@ -67,7 +67,7 @@ public class Controller {
 	public String post_head(@RequestBody String request) {
 		return new Parser(RequestMethod.POST_HEAD).parse(request);
 	}
-	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
+	/**用POST方法GET，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
 	 * @param request
 	 * @return
 	 */

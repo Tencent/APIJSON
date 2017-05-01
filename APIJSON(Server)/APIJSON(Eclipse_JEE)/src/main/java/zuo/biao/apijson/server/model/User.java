@@ -44,7 +44,7 @@ public class User extends BaseModel {
 	private List<String> pictureList; //照片列表
 	private String tag; //标签
 	private Integer starred; //星标
-	private List<Long> friendIdList; //照片列表
+	private List<Long> friendIdList; //朋友列表
 
 	/**默认构造方法，JSON等解析时必须要有
 	 */
