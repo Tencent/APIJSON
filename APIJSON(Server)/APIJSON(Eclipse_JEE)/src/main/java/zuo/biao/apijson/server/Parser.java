@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -462,209 +461,66 @@ public class Parser {
 	 * @throws Exception 
 	 */
 	private JSONObject getObject(String parentPath, String name, final JSONObject request) throws Exception {
-		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
-				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
-		if (request == null) {// Moment:{} || request.isEmpty()) {//key-value条件
+		if (request == null) {// Moment:{}   || request.isEmpty()) {//key-value条件
 			return null;
 		}
-		final String path = getAbsPath(parentPath, name);
+		
+		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
+				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
 
-		//为第二遍parseRelation = true服务，优化查询性能并避免"[]":{"0":{"1":{}}}这种导致第3层当成[]的直接子Object
-		final String table = Pair.parseEntry(name, true).getKey();
-		final boolean isTableKey = isTableKey(table);
-		Log.d(TAG, "getObject  table = " + table + "; isTableKey = " + isTableKey);
+		ObjectParser op = new ObjectParser(requestMethod, parentPath, name, request) {
 
-
-
-		JSONObject transferredRequest = new JSONObject(true);//must init
-		Map<String, String> functionMap = null;
-		Map<String, Object> selfDefineKeyMap = null;
-
-		Set<String> set = new LinkedHashSet<>(request.keySet());
-		if (set != null && set.size() > 0) {//判断换取少几个变量的初始化是否值得？
-			functionMap = new LinkedHashMap<String, String>();
-			selfDefineKeyMap = new LinkedHashMap<String, Object>();
-
-			Object value;
-			com.alibaba.fastjson.JSON result;
-			boolean isEmpty = false;
-			for (String key : set) {
-				value = request.get(key);
-				if (value == null) {
-					continue;
+			com.alibaba.fastjson.JSON child;
+			boolean isEmpty;
+			@Override
+			protected void onChildParse(String key, JSONObject value) throws Exception {
+				if (isArrayKey(key)) {//APIJSON Array
+					child = getArray(path, key, value);
+					isEmpty = child == null || ((JSONArray) child).isEmpty();
+				} else {//APIJSON Object
+					child = getObject(path, key, value);
+					isEmpty = child == null || ((JSONObject) child).isEmpty();
 				}
-
-				if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					if (isArrayKey(key)) {//APIJSON Array
-						result = getArray(path, key, (JSONObject) value);
-						isEmpty = result == null || ((JSONArray) result).isEmpty();
-					} else {//APIJSON Object
-						result = getObject(path, key, (JSONObject) value);
-						isEmpty = result == null || ((JSONObject) result).isEmpty();
-					}
-					Log.i(TAG, "getObject  key = " + key + "; result = " + result);
-					if (isEmpty == false) {//只添加!=null的值，可能数据库返回数据不够count
-						transferredRequest.put(key, result);
-					}
-				} else if (requestMethod == PUT && JSON.isJSONArray(value)) {//PUT JSONArray
-					JSONArray array = ((JSONArray) value);
-					if (array != null && array.isEmpty() == false && isTableKey(table)) {
-						int putType = 0;
-						if (key.endsWith("+")) {//add
-							putType = 1;
-						} else if (key.endsWith("-")) {//remove
-							putType = 2;
-						} else {//replace
-							throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
-									" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
-						}
-						String realKey = getRealKey(requestMethod, key, false, false);
-
-						//GET > add all 或 remove all > PUT > remove key
-
-						//GET <<<<<<<<<<<<<<<<<<<<<<<<<
-						JSONObject arrayRequest = new JSONObject();
-						arrayRequest.put(QueryConfig.ID, request.get(QueryConfig.ID));
-						arrayRequest.put(JSONRequest.KEY_COLUMN, realKey);
-						JSONRequest getRequest = new JSONRequest(table, arrayRequest);
-						JSONObject response = new Parser().parseResponse(getRequest);
-						//GET >>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-						//add all 或 remove all <<<<<<<<<<<<<<<<<<<<<<<<<
-						response = response == null ? null : response.getJSONObject(table);
-						JSONArray targetArray = response == null ? null : response.getJSONArray(realKey);
-						if (targetArray == null) {
-							targetArray = new JSONArray();
-						}
-						for (Object obj : array) {
-							if (obj == null) {
-								continue;
-							}
-							if (putType == 1) {
-								if (targetArray.contains(obj)) {
-									throw new ConflictException("PUT " + path + ", " + realKey + ":" + obj + " 已存在！");
-								}
-								targetArray.add(obj);
-							} else if (putType == 2) {
-								if (targetArray.contains(obj) == false) {
-									throw new NullPointerException("PUT " + path + ", " + realKey + ":" + obj + " 不存在！");
-								}
-								targetArray.remove(obj);
-							}
-						}
-
-						//add all 或 remove all >>>>>>>>>>>>>>>>>>>>>>>>>
-
-						//PUT <<<<<<<<<<<<<<<<<<<<<<<<<
-						transferredRequest.put(realKey, targetArray);
-						//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
-					}
-				} else {//JSONArray或其它Object，直接填充
-					if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
-						if (value instanceof String == false) {
-							throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
-						}
-						//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
-						String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
-						String targetPath = getValuePath(parentPath, new String((String) value));
-
-						//先尝试获取，尽量保留缺省依赖路径，这样就不需要担心路径改变
-						Object target = getValueByPath(targetPath);
-						Log.i(TAG, "getObject targetPath = " + targetPath + "; target = " + target);
-
-						if (target == null) {//String#equals(null)会出错
-							Log.d(TAG, "getObject  target == null  >>  continue;");
-							continue;
-						}
-						if (targetPath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
-							Log.d(TAG, "getObject  targetPath.equals(target)  >>");
-
-							//非查询关键词 @key 不影响查询，直接跳过
-							if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
-								Log.e(TAG, "getObject  isTableKey && (key.startsWith(@) == false"
-										+ " || QueryConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
-								return null;//获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
-							} else {
-								Log.d(TAG, "getObject  isTableKey(table) == false >> continue;");
-								continue;//舍去，对Table无影响
-							}
-						} 
-
-
-						//直接替换原来的key@:path为key:target
-						Log.i(TAG, "getObject    >>  key = replaceKey; value = target;");
-						key = replaceKey;
-						value = target;
-						Log.d(TAG, "getObject key = " + key + "; value = " + value);
-					}
-
-					if (key.endsWith("()")) {
-						if (value instanceof String == false) {
-							throw new IllegalArgumentException(path + "/" + key + "():function() 后面必须为函数String！");
-						}
-						functionMap.put(key, (String) value);
-					} else if (key.startsWith("@") && QueryConfig.TABLE_KEY_LIST.contains(key) == false) {
-						selfDefineKeyMap.put(key, value);
-					} else {
-						transferredRequest.put(key, value);
-					}
-				}
-			}
-		}
-
-
-		boolean query = false;
-		//执行SQL操作数据库
-		if (isTableKey) {//提高性能
-			query = true;
-
-			QueryConfig config = newQueryConfig(table, transferredRequest).setCount(1);
-
-			try {
-				transferredRequest = getSQLObject(config);
-			} catch (Exception e) {
-				Log.e(TAG, "getObject  try { transferredRequest = getSQLObject(config2); } catch (Exception e) {");
-				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
-					//						e.printStackTrace();
-					transferredRequest = null;//内部吃掉异常，put到最外层
-					//						requestObject.put(JSONResponse.KEY_MESSAGE
-					//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MESSAGE)
-					//										+ "; query " + path + " cath NotExistException:"
-					//										+ newErrorResult(e).getString(JSONResponse.KEY_MESSAGE)));
-				} else {
-					throw e;
+				Log.i(TAG, "getObject  ObjectParser.onParse  key = " + key + "; child = " + child);
+				if (isEmpty == false) {//只添加!=null的值，可能数据库返回数据不够count
+					response.put(key, child);
 				}
 			}
 
-			if (transferredRequest == null) {
-				transferredRequest = new JSONObject(true);
-			}
-		}
-
-		if (selfDefineKeyMap != null) {
-			transferredRequest.putAll(selfDefineKeyMap);
-		}
-		if (functionMap != null) {
-			if (query) {
-				//解析函数function
-				Set<String> functionSet = functionMap == null ? null : functionMap.keySet();
-				if (functionSet != null && functionSet.isEmpty() == false) {
-					for (String key : functionSet) {
-						transferredRequest.put(getRealKey(requestMethod, key, false, false)
-								, Function.invoke(transferredRequest, functionMap.get(key)));
-					}
+			@Override
+			protected JSONObject onSQLExecute() throws Exception {
+				JSONObject result = getSQLObject(config);
+				if (result != null) {
+					putQueryResult(path, result);//解决获取关联数据时requestObject里不存在需要的关联数据
 				}
-			} else {
-				transferredRequest.putAll(functionMap);
+				return result;
 			}
+			
+			//导致最多评论的(Strong 30个)的那个动态详情界面Android(82001)无姓名和头像，即User=null
+//			@Override
+//			protected void onComplete() {
+//				if (response != null) {
+//					putQueryResult(path, response);//解决获取关联数据时requestObject里不存在需要的关联数据
+//				}
+//			}
+
+			@Override
+			protected Object getTarget(String path) {
+				return getValueByPath(path);
+			}
+			
+		}.parse();
+
+
+		JSONObject response = op == null ? null : op.getResponse();
+		if (response != null) {//TODO SQL查询结果为空时，functionMap和customMap还有没有意义？
+			response = op.executeSQL();
+			
+			op.recycle();
+			op = null;
 		}
 
-		if (query) {
-			putQueryResult(path, transferredRequest);//解决获取关联数据时requestObject里不存在需要的关联数据
-		}
-
-		return transferredRequest;
+		return response;
 	}
 
 
@@ -722,16 +578,16 @@ public class Parser {
 
 		final boolean queryTotal = query != JSONRequest.QUERY_TABLE;
 		Log.d(TAG, "getArray  queryTotal = " + queryTotal);
-		
+
 		boolean setConfig = true;
 		String firstTableKey = null;
 		String table;
 		Object value;
 		QueryConfig config = null;
 		int total = 0;//满足条件的总数，忽略page,count
-		
+
 		JSONObject otherRequest = new JSONObject(true);
-		
+
 		for (String key : set) {
 			if (key == null) {
 				continue;
@@ -872,7 +728,7 @@ public class Parser {
 	 * @param valuePath
 	 * @return
 	 */
-	private String getValuePath(String parentPath, String valuePath) {
+	public static String getValuePath(String parentPath, String valuePath) {
 		if (valuePath.startsWith(SEPARATOR)) {
 			valuePath = getAbsPath(parentPath, valuePath);
 		} else {//处理[] -> []/i
@@ -886,7 +742,7 @@ public class Parser {
 	 * @param name
 	 * @return
 	 */
-	private String getAbsPath(String path, String name) {
+	public static String getAbsPath(String path, String name) {
 		Log.i(TAG, "getPath  path = " + path + "; name = " + name + " <<<<<<<<<<<<<");
 		path = StringUtil.getString(path);
 		name = StringUtil.getString(name);
@@ -910,7 +766,7 @@ public class Parser {
 	 * @param valuePath
 	 * @return
 	 */
-	private String replaceArrayChildPath(String parentPath, String valuePath) {
+	public static String replaceArrayChildPath(String parentPath, String valuePath) {
 		String[] ps = StringUtil.split(parentPath, "]/");//"[]/");
 		if (ps != null && ps.length > 1) {
 			String[] vs = StringUtil.split(valuePath, "]/");
