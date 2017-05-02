@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -22,33 +23,53 @@ import zuo.biao.apijson.server.sql.QueryConfig;
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public abstract class ObjectParser {
+public class ObjectParser implements ParserAdapter {
 	private static final String TAG = "ObjectParser";
 
 
-	/**
-	 * @param path path of target
-	 * @return
-	 */
-	protected abstract Object getTarget(String path);
+
+	private ParserAdapter adapter;
+	public ObjectParser init(ParserAdapter adapter) {
+		this.adapter = adapter;
+		return this;
+	}
+	public ParserAdapter getAdapter() {
+		return adapter == null ? this : adapter;
+	}
+
 	
+	
+	public static final int TYPE_CHILD = 0;
+	public static final int TYPE_ITEM = 1;
+	public static final int TYPE_ITEM_CHILD_0 = 2;
 
 
+	/**for array item
+	 * name = null
+	 * @param parentPath
+	 * @param request
+	 */
+	public ObjectParser(@NotNull JSONObject request, String parentPath, int type) {
+		this(request, parentPath, type, null);
+	}
 
-
-	protected RequestMethod requestMethod;
 	protected String parentPath;
+	protected int type;
 	protected String path;
 	protected String table;
 	protected final boolean isTableKey;
 	protected JSONObject request;
-
-	public ObjectParser(RequestMethod requestMethod, String parentPath, String name, @NotNull JSONObject request) {
+	/**for single object
+	 * @param parentPath
+	 * @param request
+	 * @param name
+	 */
+	public ObjectParser(@NotNull JSONObject request, String parentPath, int type, String name) {
 		if (request == null) {
 			throw new IllegalArgumentException(TAG + ".ObjectParser  request == null!!!");
 		}
-		this.requestMethod = requestMethod;
 		this.parentPath = parentPath;
+		this.type = type;
 		this.path = Parser.getAbsPath(parentPath, name);
 		this.table = Pair.parseEntry(name, true).getKey();
 		this.isTableKey = Parser.isTableKey(table);
@@ -56,27 +77,62 @@ public abstract class ObjectParser {
 		Log.d(TAG, "ObjectParser  table = " + table + "; isTableKey = " + isTableKey);
 	}
 
+	
 
+	
+	private boolean invalidate = false;
+	public void invalidate() {
+		invalidate = true;
+	}
+	public boolean isInvalidate() {
+		return invalidate;
+	}
+	
+	private boolean breakParse = false;
+	public void breakParse() {
+		breakParse = true;
+	}
+	public boolean isBreakParse() {
+		return breakParse || isInvalidate();
+	}
+	
 
 	protected JSONObject response;
-	protected JSONObject childObject;
+	protected JSONObject sqlRequest;
+	protected JSONObject sqlResult;
 	protected Map<String, Object> customMap;
 	protected Map<String, String> functionMap;
+	protected Map<String, JSON> childMap;
 
+	//	private QueryConfig childConfig;
+	//	public ObjectParser setChildConfig(QueryConfig childConfig) {
+	//		this.childConfig = childConfig;
+	//		return this;
+	//	}
 	/**解析成员
-	 * @param request
+	 * response重新赋值
+	 * @param config 传递给第0个Table
 	 * @return null or this
 	 * @throws Exception
 	 */
 	public ObjectParser parse() throws Exception {
+		breakParse = false;
+
 		response = new JSONObject(true);//must init
 
-		Set<Entry<String, Object>> set = new LinkedHashSet<>(request.entrySet());
+		sqlRequest = new JSONObject(true);//must init
+		sqlResult = null;//must init
+		customMap = null;//must init
+		functionMap = null;//must init
+		childMap = null;//must init
+		
+		Set<Entry<String, Object>> set = new LinkedHashSet<Entry<String, Object>>(request.entrySet());
 		if (set != null && set.isEmpty() == false) {//判断换取少几个变量的初始化是否值得？
-			if (isTableKey) {
+			if (isTableKey) {//非Table下不必分离出去再添加进来
 				customMap = new LinkedHashMap<String, Object>();
-				functionMap = new LinkedHashMap<String, String>();
+				childMap = new LinkedHashMap<String, JSON>();
 			}
+			functionMap = new LinkedHashMap<String, String>();//必须执行
 
 			String key;
 			Object value;
@@ -88,13 +144,21 @@ public abstract class ObjectParser {
 				key = entry.getKey();
 
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					onChildParse(key, (JSONObject) value);
-				} else if (requestMethod == PUT && value instanceof JSONArray) {//PUT JSONArray
+					putChild(key, onChildParse(key, (JSON) value));
+				} else if (method == PUT && value instanceof JSONArray) {//PUT JSONArray
 					onPUTArrayParse(key, (JSONArray) value);
 				} else {//JSONArray或其它Object，直接填充
 					if (onParse(key, value) == false) {
-						return null;
+						invalidate();
 					}
+				}
+
+				if (isInvalidate()) {
+					recycle();
+					return null;
+				}
+				if (isBreakParse()) {
+					break;
 				}
 			}
 		}
@@ -102,38 +166,77 @@ public abstract class ObjectParser {
 		return this;
 	}
 
+	protected JSON onChildParse(String key, JSON value) throws Exception {
+		return getAdapter().parseChild(path, key, value);
+	}
+
+	protected JSONObject onSQLExecute() throws Exception {
+		return getAdapter().executeSQL(path, config);
+	}
+
 	/**
 	 * @param key
-	 * @param value
+	 * @param value 类型不用JSON是因为JSON不能强转为JSONObject
 	 * @throws Exception
 	 */
-	protected void onChildParse(String key, JSONObject value) throws Exception {
-		childObject.put(key, value);
+	protected void putChild(String key, JSON child) throws Exception {
+		if (child != null) {
+			if (childMap != null) {
+				childMap.put(key, child);
+			} else {
+				response.put(key, child);
+			}
+		}
 	}
+
 	/**
-	 * @return
+	 * @param key
+	 * @param value 类型不用JSON是因为JSON不能强转为JSONObject
 	 * @throws Exception
 	 */
-	protected JSONObject onSQLExecute() throws Exception {
-		return response;
+	@Override
+	public JSON parseChild(String path, String key, JSON value) throws Exception {
+		return value;
 	}
+	@Override
+	public JSONObject executeSQL(String path, QueryConfig config) throws Exception {
+		return sqlRequest;
+	}
+	@Override
+	public Object getTarget(String path) {
+		return path;
+	}
+
+	public ObjectParser parseOtherChilds() throws Exception {
+		if (childMap != null) {
+			Set<Entry<String, JSON>> set = childMap.entrySet();
+			for (Entry<String, JSON> entry : set) {
+				if (entry != null) {
+					putChild(entry.getKey(), onChildParse(entry.getKey(), entry.getValue()));
+				}
+			}
+		}
+		return this;
+	}
+
 
 	/**解析普通成员
 	 * @param key
 	 * @param value
 	 * @return whether parse succeed
 	 */
-	protected boolean onParse(String key, Object value) throws Exception {
+	protected boolean onParse(@NotNull String key, @NotNull Object value) throws Exception {
 		if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
 			if (value instanceof String == false) {
 				throw new IllegalArgumentException("\"key@\": 后面必须为依赖路径String！");
 			}
 			//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
 			String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
-			String targetPath = Parser.getValuePath(parentPath, new String((String) value));
+			String targetPath = Parser.getValuePath(getType() == TYPE_ITEM
+					? path : parentPath, new String((String) value));
 
 			//先尝试获取，尽量保留缺省依赖路径，这样就不需要担心路径改变
-			Object target = getTarget(targetPath);
+			Object target = getAdapter().getTarget(targetPath);
 			Log.i(TAG, "getObject targetPath = " + targetPath + "; target = " + target);
 
 			if (target == null) {//String#equals(null)会出错
@@ -147,7 +250,6 @@ public abstract class ObjectParser {
 				if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
 					Log.e(TAG, "getObject  isTableKey && (key.startsWith(@) == false"
 							+ " || QueryConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
-					recycle();
 					return false;//获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 				} else {
 					Log.d(TAG, "getObject  isTableKey(table) == false >> continue;");
@@ -163,19 +265,15 @@ public abstract class ObjectParser {
 			Log.d(TAG, "getObject key = " + key + "; value = " + value);
 		}
 
-		if (isTableKey == false) {//不查询，所以不必分开
-			response.put(key, value);
-		} else {
-			if (key.endsWith("()")) {
-				if (value instanceof String == false) {
-					throw new IllegalArgumentException(path + "/" + key + "():function() 后面必须为函数String！");
-				}
-				functionMap.put(key, (String) value);
-			} else if (key.startsWith("@") && QueryConfig.TABLE_KEY_LIST.contains(key) == false) {
-				customMap.put(key, value);
-			} else {
-				response.put(key, value);
+		if (key.endsWith("()")) {
+			if (value instanceof String == false) {
+				throw new IllegalArgumentException(path + "/" + key + "():function() 后面必须为函数String！");
 			}
+			functionMap.put(key, (String) value);
+		} else if (isTableKey && key.startsWith("@") && QueryConfig.TABLE_KEY_LIST.contains(key) == false) {
+			customMap.put(key, value);
+		} else {
+			sqlRequest.put(key, value);
 		}
 
 		return true;
@@ -187,8 +285,8 @@ public abstract class ObjectParser {
 	 * @param array
 	 * @throws Exception
 	 */
-	protected void onPUTArrayParse(String key, JSONArray array) throws Exception {
-		if (isTableKey == false || array == null || array.isEmpty()) {
+	protected void onPUTArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception {
+		if (isTableKey == false || array.isEmpty()) {
 			Log.e(TAG, "onPUTArray  isTableKey == false || array == null || array.isEmpty() >> return;");
 			return;
 		}
@@ -202,7 +300,7 @@ public abstract class ObjectParser {
 			throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
 					" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
 		}
-		String realKey = Parser.getRealKey(requestMethod, key, false, false);
+		String realKey = Parser.getRealKey(method, key, false, false);
 
 		//GET > add all 或 remove all > PUT > remove key
 
@@ -242,7 +340,7 @@ public abstract class ObjectParser {
 		//add all 或 remove all >>>>>>>>>>>>>>>>>>>>>>>>>
 
 		//PUT <<<<<<<<<<<<<<<<<<<<<<<<<
-		response.put(realKey, targetArray);
+		sqlRequest.put(realKey, targetArray);
 		//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
 
 	}
@@ -252,7 +350,7 @@ public abstract class ObjectParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public JSONObject executeSQL() throws Exception {
+	public ObjectParser executeSQL() throws Exception {
 		return executeSQL(1, 0, 0);
 	}
 
@@ -261,27 +359,26 @@ public abstract class ObjectParser {
 	 * @param count
 	 * @param page
 	 * @param position
-	 * @return
+	 * @return sqlResult
 	 * @throws Exception
 	 */
-	public JSONObject executeSQL(int count, int page, int position) throws Exception {
-		boolean query = false;
+	public ObjectParser executeSQL(int count, int page, int position) throws Exception {
 		//执行SQL操作数据库
-		if (isTableKey()) {//提高性能
-			query = true;
-
+		if (isTableKey == false) {//提高性能
+			sqlResult = new JSONObject(sqlRequest);
+		} else {
 			if (config == null) {
-				config = QueryConfig.newQueryConfig(requestMethod, table, response);
+				config = newQueryConfig();
 			}
 			config.setCount(count).setPage(page).setPosition(position);
 
 			try {
-				response = onSQLExecute();
+				sqlResult = onSQLExecute();
 			} catch (Exception e) {
 				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
 				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
 					//						e.printStackTrace();
-					response = null;//内部吃掉异常，put到最外层
+					sqlResult = null;//内部吃掉异常，put到最外层
 					//						requestObject.put(JSONResponse.KEY_MESSAGE
 					//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MESSAGE)
 					//										+ "; query " + path + " cath NotExistException:"
@@ -292,33 +389,43 @@ public abstract class ObjectParser {
 			}
 		}
 
-		if (response == null) {
-			response = new JSONObject(true);
+		return this;
+	}
+
+	/**
+	 * @return response
+	 * @throws Exception
+	 */
+	public JSONObject response() throws Exception {
+		if (sqlResult != null) {
+			response.putAll(sqlResult);
 		}
 
-		if (customMap != null) {
+		if (customMap != null) {//把isTableKey时取出去的custom重新添加回来
 			response.putAll(customMap);
 		}
-		if (functionMap != null) {
-			if (query) {
-				//解析函数function
-				Set<String> functionSet = functionMap == null ? null : functionMap.keySet();
-				if (functionSet != null && functionSet.isEmpty() == false) {
-					for (String key : functionSet) {
-						response.put(Parser.getRealKey(requestMethod, key, false, false)
-								, Function.invoke(response, functionMap.get(key)));
-					}
+		if (functionMap != null) {//解析函数function
+			Set<Entry<String, String>> functionSet = functionMap == null ? null : functionMap.entrySet();
+			if (functionSet != null && functionSet.isEmpty() == false) {
+				for (Entry<String, String> entry : functionSet) {
+					response.put(Parser.getRealKey(method, entry.getKey(), false, false)
+							, Function.invoke(response, entry.getValue()));
 				}
-			} else {
-				response.putAll(functionMap);
 			}
 		}
-		
+
+		if (childMap != null) {//把isTableKey时取出去的child重新添加回来
+			response.putAll(childMap);
+		}
+
 		onComplete();
 
 		return response;
 	}
 
+	protected QueryConfig newQueryConfig() {
+		return QueryConfig.newQueryConfig(method, table, sqlRequest);
+	}
 	/**
 	 * response has the final value after parse (and query if isTableKey)
 	 */
@@ -329,7 +436,7 @@ public abstract class ObjectParser {
 	/**回收内存
 	 */
 	public void recycle() {
-		requestMethod = null;
+		method = null;
 		parentPath = null;
 		path = null;
 		table = null;
@@ -340,18 +447,43 @@ public abstract class ObjectParser {
 		//		}
 
 		response = null;
-		childObject = null;
+		sqlRequest = null;
+		sqlResult = null;
+
 		functionMap = null;
 		customMap = null;
+		childMap = null;
 	}
 
 
 
 
 
+	
+	public ObjectParser setName(String name) {
+		this.path = Parser.getAbsPath(parentPath, name);
+		return this;
+	}
+
+
+	protected RequestMethod method;
+	public ObjectParser setMethod(RequestMethod method) {
+		if (this.method != method) {
+			this.method = method;
+			config = null;
+			//			sqlResult = new JSONObject(true);
+		}
+		return this;
+	}
+	public RequestMethod getMethod() {
+		return method;
+	}
 
 
 
+	public int getType() {
+		return type;
+	}
 	public String getPath() {
 		return path;
 	}
@@ -364,14 +496,25 @@ public abstract class ObjectParser {
 	public JSONObject getResponse() {
 		return response;
 	}
-	public JSONObject getChildObject() {
-		return childObject;
+	public QueryConfig getConfig() {
+		return config;
+	}
+	public JSONObject getSqlRequest() {
+		return sqlRequest;
+	}
+	public JSONObject getSqlResult() {
+		return sqlResult;
+	}
+
+	public Map<String, Object> getCustomMap() {
+		return customMap;
 	}
 	public Map<String, String> getFunctionMap() {
 		return functionMap;
 	}
-	public Map<String, Object> getCustomMap() {
-		return customMap;
+	public Map<String, JSON> getChildMap() {
+		return childMap;
 	}
+
 
 }

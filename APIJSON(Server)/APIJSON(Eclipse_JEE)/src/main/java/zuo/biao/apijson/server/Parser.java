@@ -29,10 +29,11 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
+
+import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -44,7 +45,6 @@ import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
-import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.sql.AccessVerifier;
 import zuo.biao.apijson.server.sql.QueryConfig;
 import zuo.biao.apijson.server.sql.QueryHelper;
@@ -460,62 +460,126 @@ public class Parser {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JSONObject getObject(String parentPath, String name, final JSONObject request) throws Exception {
+	private JSONObject getObject(String parentPath, String name, JSONObject request) throws Exception {
+		return getObject(parentPath, name, request, null);
+	}
+
+	//	private QueryConfig itemConfig;
+	/**获取单个对象，该对象处于parentObject内
+	 * @param parentPath parentObject的路径
+	 * @param name parentObject的key
+	 * @param request parentObject的value
+	 * @param config for array item
+	 * @return
+	 * @throws Exception 
+	 */
+	private JSONObject getObject(String parentPath, String name, final JSONObject request
+			, final QueryConfig arrayConfig) throws Exception {
+		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
+				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
 		if (request == null) {// Moment:{}   || request.isEmpty()) {//key-value条件
 			return null;
 		}
-		
-		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
-				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
 
-		ObjectParser op = new ObjectParser(requestMethod, parentPath, name, request) {
+		final int type = arrayConfig == null ? 0 : arrayConfig.getType();
+		final boolean isArrayItem = type == ObjectParser.TYPE_ITEM;
 
-			com.alibaba.fastjson.JSON child;
-			boolean isEmpty;
+		ObjectParser op = new ObjectParser(request, parentPath, type, name) {
+
 			@Override
-			protected void onChildParse(String key, JSONObject value) throws Exception {
-				if (isArrayKey(key)) {//APIJSON Array
-					child = getArray(path, key, value);
-					isEmpty = child == null || ((JSONArray) child).isEmpty();
-				} else {//APIJSON Object
-					child = getObject(path, key, value);
-					isEmpty = child == null || ((JSONObject) child).isEmpty();
-				}
-				Log.i(TAG, "getObject  ObjectParser.onParse  key = " + key + "; child = " + child);
-				if (isEmpty == false) {//只添加!=null的值，可能数据库返回数据不够count
-					response.put(key, child);
-				}
+			public Object getTarget(@NotNull String path) {
+				return getValueByPath(path);
 			}
 
 			@Override
-			protected JSONObject onSQLExecute() throws Exception {
+			public JSONObject executeSQL(@NotNull String path, @NotNull QueryConfig config) throws Exception {
 				JSONObject result = getSQLObject(config);
 				if (result != null) {
 					putQueryResult(path, result);//解决获取关联数据时requestObject里不存在需要的关联数据
 				}
 				return result;
 			}
-			
-			//导致最多评论的(Strong 30个)的那个动态详情界面Android(82001)无姓名和头像，即User=null
-//			@Override
-//			protected void onComplete() {
-//				if (response != null) {
-//					putQueryResult(path, response);//解决获取关联数据时requestObject里不存在需要的关联数据
-//				}
-//			}
 
+			com.alibaba.fastjson.JSON child;
+			boolean isFirst = true;
+			boolean isEmpty;
 			@Override
-			protected Object getTarget(String path) {
-				return getValueByPath(path);
+			public com.alibaba.fastjson.JSON parseChild(@NotNull String path, @NotNull String key
+					, @NotNull com.alibaba.fastjson.JSON value) throws Exception {
+				if (isArrayKey(key)) {//APIJSON Array
+					child = getArray(path, key, (JSONObject) value);
+					isEmpty = child == null || ((JSONArray) child).isEmpty();
+				} else {//APIJSON Object
+					child = getObject(path, key, (JSONObject) value
+							, isFirst && isArrayItem ? arrayConfig.setType(TYPE_ITEM_CHILD_0) : null);
+					isEmpty = child == null || ((JSONObject) child).isEmpty();
+					if (isFirst && isEmpty) {
+						invalidate();
+					}
+
+					isFirst = false;
+				}
+				Log.i(TAG, "getObject  ObjectParser.onParse  key = " + key + "; child = " + child);
+
+				return isEmpty ? null : child;//只添加! isEmpty的值，可能数据库返回数据不够count
 			}
-			
-		}.parse();
+
+			//			@Override
+			//			protected QueryConfig newQueryConfig() {
+			//				if (itemConfig != null) {
+			//					return itemConfig;
+			//				}
+			//				return super.newQueryConfig();
+			//			}
+
+			//导致最多评论的(Strong 30个)的那个动态详情界面Android(82001)无姓名和头像，即User=null
+			//			@Override
+			//			protected void onComplete() {
+			//				if (response != null) {
+			//					putQueryResult(path, response);//解决获取关联数据时requestObject里不存在需要的关联数据
+			//				}
+			//			}
+
+		}.setMethod(requestMethod).parse();
 
 
-		JSONObject response = op == null ? null : op.getResponse();
-		if (response != null) {//TODO SQL查询结果为空时，functionMap和customMap还有没有意义？
-			response = op.executeSQL();
-			
+
+		JSONObject response = null;
+		if (op != null) {//TODO SQL查询结果为空时，functionMap和customMap还有没有意义？
+			if (arrayConfig == null) {//Common
+				response = op.executeSQL().response();
+			} else {//Array Item Child
+				int query = arrayConfig.getQuery();
+
+				//total
+				if (type == ObjectParser.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE
+						&& arrayConfig.getPosition() == 0) {
+					JSONObject rp = op.setMethod(RequestMethod.HEAD).executeSQL().getSqlResult();
+					if (rp != null) {
+						int index = parentPath.lastIndexOf("]/");
+						if (index >= 0) {
+							int total = rp.getIntValue(JSONResponse.KEY_COUNT);
+							putQueryResult(parentPath.substring(0, index) + "]/" + JSONResponse.KEY_TOTAL, total);
+
+							if (total <= arrayConfig.getCount()*arrayConfig.getPage()) {
+								query = JSONRequest.QUERY_TOTAL;//数量不够了，不再往后查询
+							}
+						}
+					}
+
+					op.setMethod(requestMethod);
+				}
+
+				//Table
+				if (query == JSONRequest.QUERY_TOTAL) {
+					response = null;//不再往后查询
+				} else {
+					response = op.executeSQL(arrayConfig.getCount(), arrayConfig.getPage(), arrayConfig.getPosition())
+							.response();
+					//					itemConfig = op.getConfig();
+				}
+			}
+
 			op.recycle();
 			op = null;
 		}
@@ -551,6 +615,9 @@ public class Parser {
 		final int query = request.getIntValue(JSONRequest.KEY_QUERY);
 		final int count = request.getIntValue(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
+		request.remove(JSONRequest.KEY_QUERY);
+		request.remove(JSONRequest.KEY_COUNT);
+		request.remove(JSONRequest.KEY_PAGE);
 		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page);
 
 
@@ -562,16 +629,7 @@ public class Parser {
 		}
 
 		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
-		int size = 0;//在QUERY_TOTAL下不查询Table
-		if (query != JSONRequest.QUERY_TOTAL) {
-			size = count;//count为每页数量，size为第page页实际数量，max(size) = count
-			if (size <= 0 || size > 100) {//size最大为100
-				Log.d(TAG, "getArray  size <= 0 || size > 100 >> size = 100;");
-				size = 100;
-			}
-		}
-
-
+		int size = count <= 0 || count > 100 ? 100 : count;//count为每页数量，size为第page页实际数量，max(size) = count
 
 		//total<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -579,83 +637,32 @@ public class Parser {
 		final boolean queryTotal = query != JSONRequest.QUERY_TABLE;
 		Log.d(TAG, "getArray  queryTotal = " + queryTotal);
 
-		boolean setConfig = true;
-		String firstTableKey = null;
-		String table;
-		Object value;
-		QueryConfig config = null;
-		int total = 0;//满足条件的总数，忽略page,count
 
-		JSONObject otherRequest = new JSONObject(true);
-
-		for (String key : set) {
-			if (key == null) {
-				continue;
-			}
-
-			if (setConfig) {
-				table = Pair.parseEntry(key, true).getKey();
-				value = isTableKey(table) ? request.get(key) : null;
-				if (value != null && value instanceof JSONObject) {// && value.isEmpty() == false) {
-					setConfig = false;
-
-					firstTableKey = key;
-
-					config = getArrayConfig(path, table, (JSONObject) value, queryTotal);
-					total = config.getTotal();
-				}
-			}
-
-			if (key.equals(firstTableKey) == false && QueryConfig.ARRAY_KEY_LIST.contains(key) == false) {
-				otherRequest.put(key, request.get(key));
-			}
-		}
-		if (queryTotal && total <= size*page) {
-			Log.d(TAG, "getArray  queryTotal && total <= size*page >> size = 0;");
-			size = 0;//不再查询，但不能return null;因为还需要put条件
-		}
-		if (total > 0) {
-			Log.d(TAG, "getArray  total = " + total + " >> putQueryResult(...)");
-			putQueryResult(path + "/" + JSONResponse.KEY_TOTAL, total);//GET下替代HEAD的方式
-		}
 		//total>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
 
+
+
 		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONArray response = new JSONArray();
-		if (size > 0 && config != null) {//request内部没有JSONObject或者不存在适合条件的table内容
-			config.setMethod(requestMethod).setCount(size).setPage(page);
-			JSONObject parent;
-			JSONObject first;
-			//生成size个
-			for (int i = 0; i < size; i++) {
-				try {
-					first = getSQLObject(config.setPosition(i));
-				} catch (Exception e) {
-					Log.e(TAG, "getArray  try { first = getSQLObject(config2); } catch (Exception e) {");
-					if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
-						first = null;//内部吃掉异常，put到最外层
-					} else {
-						throw e;
-					}
-				}
-
-				if (first == null || first.isEmpty()) {
-					break;//数据库返回数量不够size，后面没有了。有依赖不为空，无依赖直接查询数据库。
-				}
-				putQueryResult(path + "/" + i + "/" + firstTableKey, first);
-
-				parent = getObject(path, "" + i, otherRequest);//request);
-				if (parent == null) {
-					parent = new JSONObject(true);
-				}
-				parent.put(firstTableKey, first);//依赖的对象值在queryResultMap中取
-				response.add(parent);
+		JSONObject parent;
+		QueryConfig config = new QueryConfig(requestMethod, size, page).setQuery(query);
+		//生成size个
+		for (int i = 0; i < size; i++) {
+			parent = getObject(path, "" + i, request, config.setType(ObjectParser.TYPE_ITEM).setPosition(i));
+			if (parent == null || parent.isEmpty()) {
+				break;
 			}
+			response.add(parent);
 		}
+
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
+		request.put(JSONRequest.KEY_QUERY, query);
+		request.put(JSONRequest.KEY_COUNT, count);
+		request.put(JSONRequest.KEY_PAGE, page);
 
 
 		Log.i(TAG, "getArray  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
@@ -663,62 +670,65 @@ public class Parser {
 		return response;
 	}
 
-	//TODO 获取status和message，如果发生异常就throw new Exception(message!)，不行，不知道Exception类型，还是传boolean catchException到parse好
-	/**估计最大总数，去掉value中所有依赖引用.
-	 * TODO 返回一个{"total":10, name:value}更好，省去了之后的parseRelation
-	 * @param path
-	 * @param name
-	 * @param value
-	 * @param queryTotal 
-	 * @return
-	 * @throws Exception 
-	 */
-	public QueryConfig getArrayConfig(String path, String table, final JSONObject value
-			, boolean queryTotal) throws Exception {
-		if (StringUtil.isNotEmpty(table, true) == false) {
-			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(table, true) == false >> return 0;");
-			return null;
-		}
 
-		JSONObject request = new JSONObject(true);
-		Set<Entry<String, Object>> entrySet = value == null ? null : new LinkedHashSet<>(value.entrySet());
-		if (entrySet != null && entrySet.isEmpty() == false) {
-			String k;
-			Object v;
-			Object target;
-			for (Entry<String, Object> entry : entrySet) {
-				k = entry == null ? "" : StringUtil.getString(entry.getKey());
-				if (k.isEmpty() == false) {
-					v = entry.getValue();
-					if (k.endsWith("@")) {
-						if (v == null) {
-							continue;
-						}
 
-						String targetPath = getValuePath(path, new String((String) v));
-						target = getValueByPath(targetPath);
-						Log.i(TAG, "estimateMaxCount  k = "+ k + "; targetPath = " + targetPath + "; target = " + target);
-
-						if (target == null || targetPath.equals(target)) {
-							continue;
-						}
-						k = k.substring(0, k.length() - 1);
-						v = target;
-					}
-
-					request.put(k, v);//和value性质不同
-				}
-			}
-		}
-
-		JSONObject response = queryTotal == false
-				? null : new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(table, request));
-		if (response != null) {
-			response = response.getJSONObject(table);
-		}
-
-		return newQueryConfig(table, request).setTotal(response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT));
-	}
+	//
+	//	//TODO 获取status和message，如果发生异常就throw new Exception(message!)，不行，不知道Exception类型，还是传boolean catchException到parse好
+	//	/**估计最大总数，去掉value中所有依赖引用.
+	//	 * TODO 返回一个{"total":10, name:value}更好，省去了之后的parseRelation
+	//	 * @param path
+	//	 * @param name
+	//	 * @param value
+	//	 * @param queryTotal 
+	//	 * @return
+	//	 * @throws Exception 
+	//	 */
+	//	public QueryConfig getArrayConfig(String path, String table, final JSONObject value
+	//			, boolean queryTotal) throws Exception {
+	//		if (StringUtil.isNotEmpty(table, true) == false) {
+	//			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(table, true) == false >> return 0;");
+	//			return null;
+	//		}
+	//
+	//		JSONObject request = new JSONObject(true);
+	//		Set<Entry<String, Object>> entrySet = value == null ? null : new LinkedHashSet<>(value.entrySet());
+	//		if (entrySet != null && entrySet.isEmpty() == false) {
+	//			String k;
+	//			Object v;
+	//			Object target;
+	//			for (Entry<String, Object> entry : entrySet) {
+	//				k = entry == null ? "" : StringUtil.getString(entry.getKey());
+	//				if (k.isEmpty() == false) {
+	//					v = entry.getValue();
+	//					if (k.endsWith("@")) {
+	//						if (v == null) {
+	//							continue;
+	//						}
+	//
+	//						String targetPath = getValuePath(path, new String((String) v));
+	//						target = getValueByPath(targetPath);
+	//						Log.i(TAG, "estimateMaxCount  k = "+ k + "; targetPath = " + targetPath + "; target = " + target);
+	//
+	//						if (target == null || targetPath.equals(target)) {
+	//							continue;
+	//						}
+	//						k = k.substring(0, k.length() - 1);
+	//						v = target;
+	//					}
+	//
+	//					request.put(k, v);//和value性质不同
+	//				}
+	//			}
+	//		}
+	//
+	//		JSONObject response = queryTotal == false
+	//				? null : new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(table, request));
+	//		if (response != null) {
+	//			response = response.getJSONObject(table);
+	//		}
+	//
+	//		return newQueryConfig(table, request).setTotal(response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT));
+	//	}
 
 
 

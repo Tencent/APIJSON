@@ -83,7 +83,9 @@ public class QueryConfig {
 	private int count;
 	private int page;
 	private int position;
+	private int query;
 	private int total;
+	private int type;// 0 - Common, 1 - Array Item, 2 - Array Item First Child
 
 	public QueryConfig(RequestMethod method) {
 		setMethod(method);
@@ -275,11 +277,26 @@ public class QueryConfig {
 		this.position = position;
 		return this;
 	}
+	
+	public int getQuery() {
+		return query;
+	}
+	public QueryConfig setQuery(int query) {
+		this.query = query;
+		return this;
+	}
 	public int getTotal() {
 		return total;
 	}
 	public QueryConfig setTotal(int total) {
 		this.total = total;
+		return this;
+	}
+	public int getType() {
+		return type;
+	}
+	public QueryConfig setType(int type) {
+		this.type = type;
 		return this;
 	}
 
@@ -702,6 +719,11 @@ public class QueryConfig {
 			config.setGroup(group);
 			config.setHaving(having);
 			config.setOrder(order);
+			
+			request.put(JSONRequest.KEY_COLUMN, column);
+			request.put(JSONRequest.KEY_GROUP, group);
+			request.put(JSONRequest.KEY_HAVING, having);
+			request.put(JSONRequest.KEY_ORDER, order);
 		}
 
 		try {
