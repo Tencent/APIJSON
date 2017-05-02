@@ -29,6 +29,7 @@ import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.StructureVerifier;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.model.Login;
@@ -228,7 +229,7 @@ public class Controller {
 	public String register(@RequestBody String request) {
 		JSONObject requestObject = null;
 		try {
-			requestObject = Parser.getCorrectRequest(RequestMethod.POST
+			requestObject = StructureVerifier.getCorrectRequest(RequestMethod.POST
 					, Parser.parseRequest(request, RequestMethod.POST));
 		} catch (Exception e) {
 			return JSON.toJSONString(Parser.newErrorResult(e));

@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package zuo.biao.apijson;
 
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
@@ -25,10 +25,8 @@ import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.Log;
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.JSONRequest;
+import zuo.biao.apijson.server.Parser;
 import zuo.biao.apijson.server.sql.QueryConfig;
 import zuo.biao.apijson.server.sql.QueryHelper;
 
@@ -42,7 +40,7 @@ public class StructureVerifier {
 	public static final int TYPE_REQUEST = 1;
 	public static final int TYPE_RESPONSE = 2;
 	
-	private int type;
+	private int type;//TODO request,response
 
 	public StructureVerifier(int type) {
 		this.type = type;
@@ -50,7 +48,7 @@ public class StructureVerifier {
 	
 	
 	
-
+	
 	/**获取正确的请求，非GET请求必须是服务器指定的
 	 * @param method
 	 * @param request
@@ -225,6 +223,8 @@ public class StructureVerifier {
 
 		return false;
 	}
+
+
 
 
 	
