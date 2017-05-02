@@ -1,3 +1,17 @@
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.*/
+
 package zuo.biao.apijson.server;
 
 import java.util.Collection;
@@ -109,12 +123,7 @@ public class Function implements FunctionList {
 	public static Object invoke(String methodName, Class<?>[] parameterTypes, Object[] args) throws Exception {
 		Function obj = new Function();
 		Class<?> clazz = obj.getClass();
-		//		try {
 		return clazz.getDeclaredMethod(methodName, parameterTypes).invoke(obj, args);
-		//		} catch (Exception e) {
-		//			e.printStackTrace();
-		//		}
-		//		return null;
 	}
 
 
@@ -138,6 +147,7 @@ public class Function implements FunctionList {
 	 * @param collection
 	 * @return
 	 */
+	@Override
 	public <T> boolean isEmpty(Collection<T> collection) {
 		return BaseModel.isEmpty(collection);
 	}
@@ -147,6 +157,7 @@ public class Function implements FunctionList {
 	 * @param map
 	 * @return
 	 */
+	@Override
 	public <K, V> boolean isEmpty(Map<K, V> map) {
 		return BaseModel.isEmpty(map); 
 	}
@@ -158,6 +169,7 @@ public class Function implements FunctionList {
 	 * @param object
 	 * @return
 	 */
+	@Override
 	public <T> boolean isContain(Collection<T> collection, T object) {
 		return BaseModel.isContain(collection, object);
 	}
@@ -168,6 +180,7 @@ public class Function implements FunctionList {
 	 * @param key
 	 * @return
 	 */
+	@Override
 	public <K, V> boolean isContainKey(Map<K, V> map, K key) { 
 		return BaseModel.isContainKey(map, key); 
 	}
@@ -178,6 +191,7 @@ public class Function implements FunctionList {
 	 * @param value
 	 * @return
 	 */
+	@Override
 	public <K, V> boolean isContainValue(Map<K, V> map, V value) { 
 		return BaseModel.isContainValue(map, value);
 	}
@@ -190,6 +204,7 @@ public class Function implements FunctionList {
 	 * @param array
 	 * @return
 	 */
+	@Override
 	public <T> int count(T[] array) {  
 		return BaseModel.count(array); 
 	}
@@ -198,6 +213,7 @@ public class Function implements FunctionList {
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
+	@Override
 	public <T> int count(Collection<T> collection) { 
 		return BaseModel.count(collection); 
 	}
@@ -207,6 +223,7 @@ public class Function implements FunctionList {
 	 * @param map
 	 * @return
 	 */
+	@Override
 	public <K, V> int count(Map<K, V> map) {
 		return BaseModel.count(map); 
 	}
@@ -219,6 +236,7 @@ public class Function implements FunctionList {
 	 * @param array
 	 * @return
 	 */
+	@Override
 	public <T> T get(T[] array, int position) { 
 		return BaseModel.get(array, position);
 	}
@@ -227,6 +245,7 @@ public class Function implements FunctionList {
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
+	@Override
 	public <T> T get(Collection<T> collection, int position) { 
 		return BaseModel.get(collection, position); 
 	}
@@ -237,6 +256,7 @@ public class Function implements FunctionList {
 	 * @param key null ? null : map.get(key);
 	 * @return
 	 */
+	@Override
 	public <K, V> V get(Map<K, V> map, K key) { 
 		return BaseModel.get(map, key);
 	}
@@ -249,6 +269,7 @@ public class Function implements FunctionList {
 	 * @param value
 	 * @return
 	 */
+	@Override
 	public boolean value(Boolean value) { 
 		return BaseModel.value(value); 
 	}
@@ -256,6 +277,7 @@ public class Function implements FunctionList {
 	 * @param value
 	 * @return
 	 */
+	@Override
 	public int value(Integer value) {  
 		return BaseModel.value(value); 
 	}
@@ -263,6 +285,7 @@ public class Function implements FunctionList {
 	 * @param value
 	 * @return
 	 */
+	@Override
 	public long value(Long value) {   
 		return BaseModel.value(value); 
 	}
@@ -270,6 +293,7 @@ public class Function implements FunctionList {
 	 * @param value
 	 * @return
 	 */
+	@Override
 	public float value(Float value) {  
 		return BaseModel.value(value); 
 	}
@@ -277,6 +301,7 @@ public class Function implements FunctionList {
 	 * @param value
 	 * @return
 	 */
+	@Override
 	public double value(Double value) {    
 		return BaseModel.value(value);
 	}

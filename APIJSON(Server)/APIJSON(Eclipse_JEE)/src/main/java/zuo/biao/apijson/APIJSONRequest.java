@@ -33,16 +33,16 @@ public @interface APIJSONRequest {
 	 */
 	RequestMethod[] method() default {};
 	
-	
-	/**@see {@link RequestMethod#POST_GET}
-	 * @return 该请求方法允许的结构
-	 */
-	String POST_GET() default "";
 
 	/**@see {@link RequestMethod#POST_HEAD}
 	 * @return 该请求方法允许的结构
 	 */
 	String POST_HEAD() default "";
+	
+	/**@see {@link RequestMethod#POST_GET}
+	 * @return 该请求方法允许的结构
+	 */
+	String POST_GET() default "";
 
 	/**@see {@link RequestMethod#POST}
 	 * @return 该请求方法允许的结构

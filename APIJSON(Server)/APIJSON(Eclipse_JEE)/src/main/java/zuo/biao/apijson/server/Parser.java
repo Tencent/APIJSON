@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +56,7 @@ public class Parser {
 
 	public static final String SEPARATOR = StringUtil.SEPARATOR;
 
-	private RequestMethod requestMethod;
+
 	/**
 	 * GET
 	 */
@@ -67,12 +66,20 @@ public class Parser {
 	/**
 	 * @param requestMethod null ? requestMethod = GET
 	 */
-	public Parser(RequestMethod requestMethod) {
+	public Parser(RequestMethod method) {
+		this(method, false);
+	}
+
+	private final RequestMethod requestMethod;
+	private final boolean noVerify;
+	/**
+	 * @param requestMethod null ? requestMethod = GET
+	 * @param noVerify 仅限于为服务端提供免验证特权，普通请求不要设置为true！ 如果对应Table有权限也建议用默认值false，保持和客户端权限一致
+	 */
+	public Parser(RequestMethod method, boolean noVerify) {
 		super();
-		if (requestMethod == null) {
-			requestMethod = GET;
-		}
-		this.requestMethod = requestMethod;
+		this.requestMethod = method == null ? GET : method;
+		this.noVerify = noVerify; 
 	}
 
 
@@ -108,10 +115,14 @@ public class Parser {
 	public JSONObject parseResponse(String request) {
 		Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
 				+ requestMethod + "/parseResponse  request = \n" + request + "\n\n");
-		try {
-			requestObject = getCorrectRequest(requestMethod, parseRequest(request, requestMethod));
-		} catch (Exception e) {
-			return newErrorResult(e);
+		
+		requestObject = parseRequest(request, requestMethod);
+		if (noVerify == false) {
+			try {
+				requestObject = getCorrectRequest(requestMethod, requestObject);
+			} catch (Exception e) {
+				return newErrorResult(e);
+			}
 		}
 		return parseResponse(requestObject);
 	}
@@ -136,7 +147,9 @@ public class Parser {
 		queryHelper = null;
 
 
-		requestObject = AccessVerifier.removeAccessInfo(requestObject);
+		if (noVerify == false) {
+			requestObject = AccessVerifier.removeAccessInfo(requestObject);
+		}
 		requestObject = error == null ? extendSuccessResult(requestObject)
 				: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
 
@@ -322,7 +335,7 @@ public class Parser {
 		}
 		queryHelper.close();
 
-		if (object == null || object.isEmpty()) {
+		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
 			throw new UnsupportedOperationException("非GET请求必须是服务端允许的操作！ \n " + error);
 		}
 		object = getJSONObject(object, "structure");//解决返回值套了一层 "structure":{}
@@ -554,7 +567,7 @@ public class Parser {
 				//total
 				if (type == ObjectParser.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE
 						&& arrayConfig.getPosition() == 0) {
-					JSONObject rp = op.setMethod(RequestMethod.HEAD).executeSQL().getSqlResult();
+					JSONObject rp = op.setMethod(RequestMethod.HEAD).executeSQL().getSqlReponse();
 					if (rp != null) {
 						int index = parentPath.lastIndexOf("]/");
 						if (index >= 0) {
@@ -620,28 +633,15 @@ public class Parser {
 		request.remove(JSONRequest.KEY_PAGE);
 		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page);
 
-
-		//最好先获取第一个table的所有项（where条件），填充一个列表？
-		Set<String> set = new LinkedHashSet<>(request.keySet());
-		if (set.isEmpty()) {//如果条件成立，说明所有的 parentPath/name:request 中request都无效！！！
-			Log.e(TAG, "getArray  set.isEmpty() >> return null;");
+		if (request.isEmpty()) {//如果条件成立，说明所有的 parentPath/name:request 中request都无效！！！
+			Log.e(TAG, "getArray  request.isEmpty() >> return null;");
 			return null;
 		}
 
+
 		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
 		int size = count <= 0 || count > 100 ? 100 : count;//count为每页数量，size为第page页实际数量，max(size) = count
-
-		//total<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-		final boolean queryTotal = query != JSONRequest.QUERY_TABLE;
-		Log.d(TAG, "getArray  queryTotal = " + queryTotal);
-
-
-		//total>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
-
 
 
 		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -656,80 +656,16 @@ public class Parser {
 			}
 			response.add(parent);
 		}
-
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
+		//后面还可能用到，要还原
 		request.put(JSONRequest.KEY_QUERY, query);
 		request.put(JSONRequest.KEY_COUNT, count);
 		request.put(JSONRequest.KEY_PAGE, page);
 
-
 		Log.i(TAG, "getArray  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
-
 		return response;
 	}
-
-
-
-	//
-	//	//TODO 获取status和message，如果发生异常就throw new Exception(message!)，不行，不知道Exception类型，还是传boolean catchException到parse好
-	//	/**估计最大总数，去掉value中所有依赖引用.
-	//	 * TODO 返回一个{"total":10, name:value}更好，省去了之后的parseRelation
-	//	 * @param path
-	//	 * @param name
-	//	 * @param value
-	//	 * @param queryTotal 
-	//	 * @return
-	//	 * @throws Exception 
-	//	 */
-	//	public QueryConfig getArrayConfig(String path, String table, final JSONObject value
-	//			, boolean queryTotal) throws Exception {
-	//		if (StringUtil.isNotEmpty(table, true) == false) {
-	//			Log.e(TAG, "estimateMaxCount  StringUtil.isNotEmpty(table, true) == false >> return 0;");
-	//			return null;
-	//		}
-	//
-	//		JSONObject request = new JSONObject(true);
-	//		Set<Entry<String, Object>> entrySet = value == null ? null : new LinkedHashSet<>(value.entrySet());
-	//		if (entrySet != null && entrySet.isEmpty() == false) {
-	//			String k;
-	//			Object v;
-	//			Object target;
-	//			for (Entry<String, Object> entry : entrySet) {
-	//				k = entry == null ? "" : StringUtil.getString(entry.getKey());
-	//				if (k.isEmpty() == false) {
-	//					v = entry.getValue();
-	//					if (k.endsWith("@")) {
-	//						if (v == null) {
-	//							continue;
-	//						}
-	//
-	//						String targetPath = getValuePath(path, new String((String) v));
-	//						target = getValueByPath(targetPath);
-	//						Log.i(TAG, "estimateMaxCount  k = "+ k + "; targetPath = " + targetPath + "; target = " + target);
-	//
-	//						if (target == null || targetPath.equals(target)) {
-	//							continue;
-	//						}
-	//						k = k.substring(0, k.length() - 1);
-	//						v = target;
-	//					}
-	//
-	//					request.put(k, v);//和value性质不同
-	//				}
-	//			}
-	//		}
-	//
-	//		JSONObject response = queryTotal == false
-	//				? null : new Parser(RequestMethod.HEAD).parseResponse(new JSONRequest(table, request));
-	//		if (response != null) {
-	//			response = response.getJSONObject(table);
-	//		}
-	//
-	//		return newQueryConfig(table, request).setTotal(response == null ? 0 : response.getIntValue(JSONResponse.KEY_COUNT));
-	//	}
-
 
 
 
@@ -887,18 +823,12 @@ public class Parser {
 	 */
 	private synchronized JSONObject getSQLObject(QueryConfig config) throws Exception {
 		Log.i(TAG, "getSQLObject  config = " + JSON.toJSONString(config));
-		AccessVerifier.verify(requestObject, config);
+		if (noVerify == false) {
+			AccessVerifier.verify(requestObject, config);
+		}
 		return queryHelper.select(config);//QueryHelper2.getInstance().select(config);//
 	}
 
-	/**获取查询配置
-	 * @param table
-	 * @param request
-	 * @return
-	 */
-	private QueryConfig newQueryConfig(String table, JSONObject request) {
-		return QueryConfig.newQueryConfig(requestMethod, table, request);
-	}
 
 
 	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");

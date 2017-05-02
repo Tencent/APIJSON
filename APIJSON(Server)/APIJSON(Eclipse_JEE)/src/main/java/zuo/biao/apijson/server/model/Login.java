@@ -20,11 +20,39 @@ import zuo.biao.apijson.RequestMethod;
 
 /**登录类
  * @author Lemon
+ * @see
+ * <br >POST_HEAD:<pre>
+{
+ "Login":{
+     "disallowColumns":"!",
+     "necessaryColumns":"userId,type"
+ }
+}
+ * </pre>
+* <br >POST:post_get/login<pre>
+{
+    "User":{
+        "necessaryColumns":"phone"
+    },
+    "Password":{
+        "disallowColumns":"!",
+        "necessaryColumns":"password"
+    }
+}
+ * </pre>
+* <br >POST(logout):post/logout<pre>
+{
+    "User":{
+        "necessaryColumns":"phone"
+    }
+}
+ * </pre>
  */
 @SuppressWarnings("serial")
 @APIJSONRequest(
-		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
+		method = {RequestMethod.POST_HEAD, RequestMethod.POST},
+		POST_HEAD = "{\"disallowColumns\": \"!\", \"necessaryColumns\": \"userId,type\"}",
+		POST = "{\"User\": {\"necessaryColumns\": \"phone\"}, \"Password\": {\"disallowColumns\": \"!\", \"necessaryColumns\": \"password\"}}"
 		)
 public class Login extends BaseModel {
 

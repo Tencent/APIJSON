@@ -80,13 +80,15 @@ public class QueryConfig {
 	private String order;
 
 
+	//array item <<<<<<<<<<
 	private int count;
 	private int page;
 	private int position;
-	private int query;
-	private int total;
-	private int type;// 0 - Common, 1 - Array Item, 2 - Array Item First Child
-
+	private int query; //JSONRequest.query
+	private int type; //ObjectParser.type
+	//array item >>>>>>>>>>
+	
+	
 	public QueryConfig(RequestMethod method) {
 		setMethod(method);
 	}
@@ -283,13 +285,6 @@ public class QueryConfig {
 	}
 	public QueryConfig setQuery(int query) {
 		this.query = query;
-		return this;
-	}
-	public int getTotal() {
-		return total;
-	}
-	public QueryConfig setTotal(int total) {
-		this.total = total;
 		return this;
 	}
 	public int getType() {
@@ -720,6 +715,7 @@ public class QueryConfig {
 			config.setHaving(having);
 			config.setOrder(order);
 			
+			//后面还可能用到，要还原
 			request.put(JSONRequest.KEY_COLUMN, column);
 			request.put(JSONRequest.KEY_GROUP, group);
 			request.put(JSONRequest.KEY_HAVING, having);

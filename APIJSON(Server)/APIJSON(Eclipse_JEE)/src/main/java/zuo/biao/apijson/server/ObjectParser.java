@@ -1,3 +1,17 @@
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.*/
+
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.RequestMethod.PUT;
@@ -37,8 +51,8 @@ public class ObjectParser implements ParserAdapter {
 		return adapter == null ? this : adapter;
 	}
 
-	
-	
+
+
 	public static final int TYPE_CHILD = 0;
 	public static final int TYPE_ITEM = 1;
 	public static final int TYPE_ITEM_CHILD_0 = 2;
@@ -53,12 +67,13 @@ public class ObjectParser implements ParserAdapter {
 		this(request, parentPath, type, null);
 	}
 
+	protected JSONObject request;
 	protected String parentPath;
-	protected int type;
+	
+	protected final int type;
 	protected String path;
 	protected String table;
 	protected final boolean isTableKey;
-	protected JSONObject request;
 	/**for single object
 	 * @param parentPath
 	 * @param request
@@ -68,18 +83,19 @@ public class ObjectParser implements ParserAdapter {
 		if (request == null) {
 			throw new IllegalArgumentException(TAG + ".ObjectParser  request == null!!!");
 		}
+		this.request = request;
 		this.parentPath = parentPath;
 		this.type = type;
+		
 		this.path = Parser.getAbsPath(parentPath, name);
 		this.table = Pair.parseEntry(name, true).getKey();
 		this.isTableKey = Parser.isTableKey(table);
-		this.request = request;
 		Log.d(TAG, "ObjectParser  table = " + table + "; isTableKey = " + isTableKey);
 	}
 
-	
 
-	
+
+
 	private boolean invalidate = false;
 	public void invalidate() {
 		invalidate = true;
@@ -87,7 +103,7 @@ public class ObjectParser implements ParserAdapter {
 	public boolean isInvalidate() {
 		return invalidate;
 	}
-	
+
 	private boolean breakParse = false;
 	public void breakParse() {
 		breakParse = true;
@@ -95,20 +111,15 @@ public class ObjectParser implements ParserAdapter {
 	public boolean isBreakParse() {
 		return breakParse || isInvalidate();
 	}
-	
+
 
 	protected JSONObject response;
 	protected JSONObject sqlRequest;
-	protected JSONObject sqlResult;
+	protected JSONObject sqlReponse;
 	protected Map<String, Object> customMap;
 	protected Map<String, String> functionMap;
 	protected Map<String, JSON> childMap;
 
-	//	private QueryConfig childConfig;
-	//	public ObjectParser setChildConfig(QueryConfig childConfig) {
-	//		this.childConfig = childConfig;
-	//		return this;
-	//	}
 	/**解析成员
 	 * response重新赋值
 	 * @param config 传递给第0个Table
@@ -121,11 +132,11 @@ public class ObjectParser implements ParserAdapter {
 		response = new JSONObject(true);//must init
 
 		sqlRequest = new JSONObject(true);//must init
-		sqlResult = null;//must init
+		sqlReponse = null;//must init
 		customMap = null;//must init
 		functionMap = null;//must init
 		childMap = null;//must init
-		
+
 		Set<Entry<String, Object>> set = new LinkedHashSet<Entry<String, Object>>(request.entrySet());
 		if (set != null && set.isEmpty() == false) {//判断换取少几个变量的初始化是否值得？
 			if (isTableKey) {//非Table下不必分离出去再添加进来
@@ -166,13 +177,7 @@ public class ObjectParser implements ParserAdapter {
 		return this;
 	}
 
-	protected JSON onChildParse(String key, JSON value) throws Exception {
-		return getAdapter().parseChild(path, key, value);
-	}
 
-	protected JSONObject onSQLExecute() throws Exception {
-		return getAdapter().executeSQL(path, config);
-	}
 
 	/**
 	 * @param key
@@ -207,18 +212,24 @@ public class ObjectParser implements ParserAdapter {
 		return path;
 	}
 
-	public ObjectParser parseOtherChilds() throws Exception {
-		if (childMap != null) {
-			Set<Entry<String, JSON>> set = childMap.entrySet();
-			for (Entry<String, JSON> entry : set) {
-				if (entry != null) {
-					putChild(entry.getKey(), onChildParse(entry.getKey(), entry.getValue()));
-				}
-			}
-		}
-		return this;
+
+	/**
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws Exception
+	 */
+	protected JSON onChildParse(String key, JSON value) throws Exception {
+		return getAdapter().parseChild(path, key, value);
 	}
 
+	/**
+	 * @return
+	 * @throws Exception
+	 */
+	protected JSONObject onSQLExecute() throws Exception {
+		return getAdapter().executeSQL(path, config);
+	}
 
 	/**解析普通成员
 	 * @param key
@@ -347,7 +358,7 @@ public class ObjectParser implements ParserAdapter {
 
 
 	/**SQL查询，for single object
-	 * @return
+	 * @return {@link #executeSQL(int, int, int)}
 	 * @throws Exception
 	 */
 	public ObjectParser executeSQL() throws Exception {
@@ -359,13 +370,13 @@ public class ObjectParser implements ParserAdapter {
 	 * @param count
 	 * @param page
 	 * @param position
-	 * @return sqlResult
+	 * @return this
 	 * @throws Exception
 	 */
 	public ObjectParser executeSQL(int count, int page, int position) throws Exception {
 		//执行SQL操作数据库
 		if (isTableKey == false) {//提高性能
-			sqlResult = new JSONObject(sqlRequest);
+			sqlReponse = new JSONObject(sqlRequest);
 		} else {
 			if (config == null) {
 				config = newQueryConfig();
@@ -373,12 +384,12 @@ public class ObjectParser implements ParserAdapter {
 			config.setCount(count).setPage(page).setPosition(position);
 
 			try {
-				sqlResult = onSQLExecute();
+				sqlReponse = onSQLExecute();
 			} catch (Exception e) {
 				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
 				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
 					//						e.printStackTrace();
-					sqlResult = null;//内部吃掉异常，put到最外层
+					sqlReponse = null;//内部吃掉异常，put到最外层
 					//						requestObject.put(JSONResponse.KEY_MESSAGE
 					//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MESSAGE)
 					//										+ "; query " + path + " cath NotExistException:"
@@ -397,8 +408,8 @@ public class ObjectParser implements ParserAdapter {
 	 * @throws Exception
 	 */
 	public JSONObject response() throws Exception {
-		if (sqlResult != null) {
-			response.putAll(sqlResult);
+		if (sqlReponse != null) {
+			response.putAll(sqlReponse);
 		}
 
 		if (customMap != null) {//把isTableKey时取出去的custom重新添加回来
@@ -446,9 +457,10 @@ public class ObjectParser implements ParserAdapter {
 		//			response = null;
 		//		}
 
+		request = null;
 		response = null;
 		sqlRequest = null;
-		sqlResult = null;
+		sqlReponse = null;
 
 		functionMap = null;
 		customMap = null;
@@ -459,19 +471,13 @@ public class ObjectParser implements ParserAdapter {
 
 
 
-	
-	public ObjectParser setName(String name) {
-		this.path = Parser.getAbsPath(parentPath, name);
-		return this;
-	}
-
 
 	protected RequestMethod method;
 	public ObjectParser setMethod(RequestMethod method) {
 		if (this.method != method) {
 			this.method = method;
 			config = null;
-			//			sqlResult = new JSONObject(true);
+			//TODO ?			sqlReponse = null;
 		}
 		return this;
 	}
@@ -493,18 +499,23 @@ public class ObjectParser implements ParserAdapter {
 	public boolean isTableKey() {
 		return isTableKey;
 	}
-	public JSONObject getResponse() {
-		return response;
-	}
+	
+	
+
 	public QueryConfig getConfig() {
 		return config;
+	}
+	
+	public JSONObject getResponse() {
+		return response;
 	}
 	public JSONObject getSqlRequest() {
 		return sqlRequest;
 	}
-	public JSONObject getSqlResult() {
-		return sqlResult;
+	public JSONObject getSqlReponse() {
+		return sqlReponse;
 	}
+
 
 	public Map<String, Object> getCustomMap() {
 		return customMap;

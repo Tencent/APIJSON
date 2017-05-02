@@ -19,13 +19,32 @@ import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
-/**登录类
+/**密码类
  * @author Lemon
+ * @see
+ * <br >POST_HEAD:<pre>
+{
+ "Password":{
+     "disallowColumns":"!",
+     "necessaryColumns":"id,model"
+ }
+}
+ * </pre>
+ * <br >PUT:put/loginPassword, put/payPassword<pre>
+{
+    "Password":{
+        "disallowColumns":"!",
+        "necessaryColumns":"id,password"
+    },
+    "necessaryColumns":"oldPassword"
+}
+ * </pre>
  */
 @SuppressWarnings("serial")
 @APIJSONRequest(
-		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
+		method = {RequestMethod.POST_HEAD, RequestMethod.PUT},
+		POST_HEAD = "{\"disallowColumns\": \"!\", \"necessaryColumns\": \"id,model\"}",
+		PUT = "{\"Password\": {\"disallowColumns\": \"!\", \"necessaryColumns\": \"id,password\"}, \"necessaryColumns\": \"oldPassword\"}"
 		)
 public class Password extends BaseModel {
 

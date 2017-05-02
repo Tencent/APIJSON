@@ -22,11 +22,38 @@ import zuo.biao.apijson.RequestMethod;
 
 /**用户类
  * @author Lemon
+ * @see
+ * <br >POST:post/register/user<pre>
+{
+    "User":{
+        "disallowColumns":"id",
+        "necessaryColumns":"name,phone"
+    },
+    "necessaryColumns":"loginPassword,verify"
+}
+ * </pre>
+ * <br >PUT:<pre>
+{
+    "User":{
+        "disallowColumns":"phone",
+        "necessaryColumns":"id"
+    }
+}
+ * </pre>
+ * <br >PUT(User.phone):put/user/phone<pre>
+{
+    "User":{
+        "disallowColumns":"!",
+        "necessaryColumns":"id,phone"
+    },
+    "necessaryColumns":"loginPassword,verify"
+}
+ * </pre>
  */
 @APIJSONRequest(
 		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
-		PUT = "{disallowColumns:phone, necessaryColumns:id}",
-		DELETE = "{necessaryColumns:id}"
+		POST = "{\"User\": {\"disallowColumns\": \"id\", \"necessaryColumns\": \"name,phone\"}, \"necessaryColumns\": \"loginPassword,verify\"}",
+		PUT = "{\"disallowColumns\": \"phone\", \"necessaryColumns\": \"id\"}"
 		)
 public class User extends BaseModel {
 	private static final long serialVersionUID = -1635551656020732611L;
