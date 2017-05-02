@@ -188,7 +188,8 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 		tvMomentViewContent.setVisibility(StringUtil.isNotEmpty(moment.getContent(), true) ? View.VISIBLE : View.GONE);
 		tvMomentViewContent.setText(StringUtil.getTrimedString(moment.getContent()));
 
-		tvMomentViewDate.setText(TimeUtil.getSmartDate(moment.getDate()));
+		tvMomentViewDate.setText(TimeUtil.getSmartDate(moment.getDate())
+				+ "    P:" + data.getPraiseCount() + "  C:" + data.getCommentCount());
 
 		// 图片
 		setPicture(moment.getPictureList());
