@@ -39,7 +39,7 @@ import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.StructureVerifier;
+import zuo.biao.apijson.Structure;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.sql.AccessVerifier;
@@ -115,7 +115,7 @@ public class Parser {
 				+ requestMethod + "/parseResponse  request = \n" + request + "\n\n");
 
 		try {
-			requestObject = StructureVerifier.getCorrectRequest(requestMethod, parseRequest(request, requestMethod));
+			requestObject = getCorrectRequest(requestMethod, parseRequest(request, requestMethod));
 		} catch (Exception e) {
 			return newErrorResult(e);
 		}
@@ -279,6 +279,74 @@ public class Parser {
 	}
 
 
+	
+	
+	
+	/**获取正确的请求，非GET请求必须是服务器指定的
+	 * @param method
+	 * @param request
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request) throws Exception {
+		return getCorrectRequest(method, request, null);
+	}
+	/**获取正确的请求，非GET请求必须是服务器指定的
+	 * @param method
+	 * @param request
+	 * @param queryHelper
+	 * @return
+	 */
+	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request, QueryHelper queryHelper)
+			throws Exception {
+		if (Parser.isPublicMethod(method)) {
+			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
+		}
+
+		String tag = request.getString(JSONRequest.KEY_TAG);
+		if (StringUtil.isNotEmpty(tag, true) == false) {
+			throw new IllegalArgumentException("请指定tag！一般是table名称");
+		}
+
+		//获取指定的JSON结构 <<<<<<<<<<<<<<
+		QueryConfig config = new QueryConfig(GET, "Request");
+		config.setColumn("structure");
+
+		Map<String, Object> where = new HashMap<String, Object>();
+		where.put("method", method.name());
+		where.put(JSONRequest.KEY_TAG, tag);
+		config.setWhere(where);
+
+		JSONObject object = null;
+		String error = "";
+		if (queryHelper == null) {
+			queryHelper = new QueryHelper();
+		}
+		try {
+			object = queryHelper.select(config);
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = e.getMessage();
+		}
+		queryHelper.close();
+
+		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
+			throw new UnsupportedOperationException("非GET请求必须是服务端允许的操作！ \n " + error);
+		}
+		object = Parser.getJSONObject(object, "structure");//解决返回值套了一层 "structure":{}
+
+		JSONObject target = null;
+		if (Parser.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
+			target = new JSONObject(true);
+			target.put(tag, object);
+		} else {
+			target = object;
+		}
+		//获取指定的JSON结构 >>>>>>>>>>>>>>
+
+		request.remove(JSONRequest.KEY_TAG);
+		return Structure.parseRequest(method, "", (JSONObject) target.clone(), request);
+	}
 
 
 

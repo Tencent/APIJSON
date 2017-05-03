@@ -24,26 +24,26 @@ import zuo.biao.apijson.RequestMethod;
  * <br >POST_HEAD:<pre>
 {
  "Login":{
-     "disallowColumns":"!",
-     "necessaryColumns":"userId,type"
+     "disallow":"!",
+     "necessary":"userId,type"
  }
 }
  * </pre>
 * <br >POST:post_get/login<pre>
 {
     "User":{
-        "necessaryColumns":"phone"
+        "necessary":"phone"
     },
     "Password":{
-        "disallowColumns":"!",
-        "necessaryColumns":"password"
+        "disallow":"!",
+        "necessary":"password"
     }
 }
  * </pre>
 * <br >POST(logout):post/logout<pre>
 {
     "User":{
-        "necessaryColumns":"phone"
+        "necessary":"phone"
     }
 }
  * </pre>
@@ -51,8 +51,8 @@ import zuo.biao.apijson.RequestMethod;
 @SuppressWarnings("serial")
 @APIJSONRequest(
 		method = {RequestMethod.POST_HEAD, RequestMethod.POST},
-		POST_HEAD = "{\"disallowColumns\": \"!\", \"necessaryColumns\": \"userId,type\"}",
-		POST = "{\"User\": {\"necessaryColumns\": \"phone\"}, \"Password\": {\"disallowColumns\": \"!\", \"necessaryColumns\": \"password\"}}"
+		POST_HEAD = "{\"disallow\": \"!\", \"necessary\": \"userId,type\"}",
+		POST = "{\"User\": {\"necessary\": \"phone\"}, \"Password\": {\"disallow\": \"!\", \"necessary\": \"password\"}}"
 		)
 public class Login extends BaseModel {
 

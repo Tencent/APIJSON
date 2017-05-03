@@ -25,15 +25,15 @@ import zuo.biao.apijson.StringUtil;
  * <br >POST_GET:post_get/authCode<pre>
 {
     "Verify":{
-        "disallowColumns":"id"
+        "disallow":"id"
     }
 }
  * </pre>
  * <br >POST:post/authCode<pre>
 {
     "Verify":{
-        "disallowColumns":"!",
-        "necessaryColumns":"id"
+        "disallow":"!",
+        "necessary":"id"
     }
 }
  * </pre>
@@ -41,8 +41,8 @@ import zuo.biao.apijson.StringUtil;
 @SuppressWarnings("serial")
 @APIJSONRequest(
 		method = {RequestMethod.POST_HEAD, RequestMethod.POST_GET, RequestMethod.POST},
-		POST_GET = "{\"necessaryColumns\": \"id\"}",
-		POST = "{\"disallowColumns\": \"!\", \"necessaryColumns\": \"id\"}"
+		POST_GET = "{\"necessary\": \"id\"}",
+		POST = "{\"disallow\": \"!\", \"necessary\": \"id\"}"
 		)
 public class Verify extends BaseModel {
 

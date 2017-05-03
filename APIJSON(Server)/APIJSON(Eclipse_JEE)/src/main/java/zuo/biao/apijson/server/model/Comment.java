@@ -24,16 +24,16 @@ import zuo.biao.apijson.RequestMethod;
 * <br >POST:<pre>
 {
  "Comment":{
-     "disallowColumns":"id",
-     "necessaryColumns":"userId,momentId,content"
+     "disallow":"id",
+     "necessary":"userId,momentId,content"
  }
 }
  * </pre>
  */
 @APIJSONRequest(
 		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.DELETE},
-		POST = "{\"disallowColumns\": \"id\", \"necessaryColumns\": \"userId,momentId,content\"}",
-		DELETE = "{\"necessaryColumns\": \"id\"}"
+		POST = "{\"disallow\": \"id\", \"necessary\": \"userId,momentId,content\"}",
+		DELETE = "{\"necessary\": \"id\"}"
 		)
 public class Comment extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;

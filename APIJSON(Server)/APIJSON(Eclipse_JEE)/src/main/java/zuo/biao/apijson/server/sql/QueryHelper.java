@@ -143,7 +143,7 @@ public class QueryHelper {
 
 			result = Parser.newResult(updateCount > 0 ? 200 : 404
 					, updateCount > 0 ? "success" : "可能对象不存在！");
-			result.put(JSONResponse.KEY_ID, config.getId());
+			result.put(JSONResponse.KEY_ID, config.getId());//id一定有，一定会返回，不用抛异常来阻止关联写时前面错误导致后面无条件执行！
 			return result;
 
 		case GET:

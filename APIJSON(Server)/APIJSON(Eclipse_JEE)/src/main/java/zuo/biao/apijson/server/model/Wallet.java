@@ -26,45 +26,45 @@ import zuo.biao.apijson.RequestMethod;
  * <br >POST_GET:<pre>
 {
     "Wallet":{
-        "disallowColumns":"!",
-        "necessaryColumns":"userId"
+        "disallow":"!",
+        "necessary":"userId"
     }
 }
  * </pre>
  * <br >POST:post/wallet<pre>
 {
     "Wallet":{
-        "disallowColumns":"!",
-        "necessaryColumns":"userId"
+        "disallow":"!",
+        "necessary":"userId"
     },
-    "necessaryColumns":"payPassword"
+    "necessary":"payPassword"
 }
  * </pre>
  * <br >PUT:put/wallet<pre>
 {
     "Wallet":{
-        "disallowColumns":"!",
-        "necessaryColumns":"userId,balance+"
+        "disallow":"!",
+        "necessary":"userId,balance+"
     },
-    "necessaryColumns":"payPassword,oldPassword"
+    "necessary":"payPassword,oldPassword"
 }
  * </pre>
  * <br >DELETE:delete/wallet<pre>
 {
     "Wallet":{
-        "disallowColumns":"!",
-        "necessaryColumns":"userId"
+        "disallow":"!",
+        "necessary":"userId"
     },
-    "necessaryColumns":"payPassword"
+    "necessary":"payPassword"
 }
  * </pre>
  */
 @APIJSONRequest(
 		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		POST_GET = "{\"disallowColumns\": \"!\", \"necessaryColumns\": \"userId\"}",
-		POST = "{\"Wallet\": {\"disallowColumns\": \"!\", \"necessaryColumns\": \"userId\"}, \"necessaryColumns\": \"payPassword\"}",
-		PUT = "{\"Wallet\": {\"disallowColumns\": \"!\", \"necessaryColumns\": \"userId,balance+\"}, \"necessaryColumns\": \"payPassword,oldPassword\"}",
-		DELETE = "{\"Wallet\": {\"disallowColumns\": \"!\", \"necessaryColumns\": \"userId\"}, \"necessaryColumns\": \"payPassword\"}"
+		POST_GET = "{\"disallow\": \"!\", \"necessary\": \"userId\"}",
+		POST = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"userId\"}, \"necessary\": \"payPassword\"}",
+		PUT = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"userId,balance+\"}, \"necessary\": \"payPassword,oldPassword\"}",
+		DELETE = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"userId\"}, \"necessary\": \"payPassword\"}"
 		)
 public class Wallet extends BaseModel {
 	private static final long serialVersionUID = 4298571449155754300L;

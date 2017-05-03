@@ -26,34 +26,34 @@ import zuo.biao.apijson.RequestMethod;
  * <br >POST:post/register/user<pre>
 {
     "User":{
-        "disallowColumns":"id",
-        "necessaryColumns":"name,phone"
+        "disallow":"id",
+        "necessary":"name,phone"
     },
-    "necessaryColumns":"loginPassword,verify"
+    "necessary":"loginPassword,verify"
 }
  * </pre>
  * <br >PUT:<pre>
 {
     "User":{
-        "disallowColumns":"phone",
-        "necessaryColumns":"id"
+        "disallow":"phone",
+        "necessary":"id"
     }
 }
  * </pre>
  * <br >PUT(User.phone):put/user/phone<pre>
 {
     "User":{
-        "disallowColumns":"!",
-        "necessaryColumns":"id,phone"
+        "disallow":"!",
+        "necessary":"id,phone"
     },
-    "necessaryColumns":"loginPassword,verify"
+    "necessary":"loginPassword,verify"
 }
  * </pre>
  */
 @APIJSONRequest(
 		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
-		POST = "{\"User\": {\"disallowColumns\": \"id\", \"necessaryColumns\": \"name,phone\"}, \"necessaryColumns\": \"loginPassword,verify\"}",
-		PUT = "{\"disallowColumns\": \"phone\", \"necessaryColumns\": \"id\"}"
+		POST = "{\"User\": {\"disallow\": \"id\", \"necessary\": \"name,phone\"}, \"necessary\": \"loginPassword,verify\"}",
+		PUT = "{\"disallow\": \"phone\", \"necessary\": \"id\"}"
 		)
 public class User extends BaseModel {
 	private static final long serialVersionUID = -1635551656020732611L;

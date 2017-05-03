@@ -26,25 +26,25 @@ import zuo.biao.apijson.RequestMethod;
  * <br >POST:<pre>
 {
  "Moment":{
-     "disallowColumns":"id",
-     "necessaryColumns":"userId,pictureList"
+     "disallow":"id",
+     "necessary":"userId,pictureList"
  }
 }
  * </pre>
  * <br >PUT:<pre>
 {
  "Moment":{
-     "disallowColumns":"userId,date",
-     "necessaryColumns":"id"
+     "disallow":"userId,date",
+     "necessary":"id"
  }
 }
  * </pre>
  */
 @APIJSONRequest(
 		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		POST = "{\"disallowColumns\": \"id\", \"necessaryColumns\": \"userId,pictureList\"}",
-		PUT = "{\"disallowColumns\": \"userId,date\", \"necessaryColumns\": \"id\"}",
-		DELETE = "{\"necessaryColumns\": \"id\"}"
+		POST = "{\"disallow\": \"id\", \"necessary\": \"userId,pictureList\"}",
+		PUT = "{\"disallow\": \"userId,date\", \"necessary\": \"id\"}",
+		DELETE = "{\"necessary\": \"id\"}"
 		)
 public class Moment extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;
