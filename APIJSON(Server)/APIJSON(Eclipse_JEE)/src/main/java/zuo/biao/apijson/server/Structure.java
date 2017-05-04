@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.RequestMethod.POST;
 
@@ -28,9 +28,10 @@ import javax.activation.UnsupportedDataTypeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.server.Logic;
-import zuo.biao.apijson.server.Pair;
-import zuo.biao.apijson.server.Parser;
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.Log;
+import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.sql.QueryConfig;
 
 /**结构类
@@ -47,7 +48,7 @@ public class Structure {
 
 
 	static final String requestString = "{\"Comment\":{\"disallow\": \"id\", \"necessary\": \"userId,momentId,content\"}, \"add\":{\"Comment:to\":{}}}";
-	static final String responseString = "{\"User\":{\"remove\": \"phone\", \"replace\":{\"sex\":2}, \"add\":{\"name\":\"api\"}}, \"add\":{\"Comment:to\":{}}}";
+	static final String responseString = "{\"User\":{\"remove\": \"phone\", \"replace\":{\"sex\":2}, \"add\":{\"name\":\"api\"}}, \"put\":{\"Comment:to\":{}}}";
 
 	public static void test() throws Exception {
 		JSONObject request;

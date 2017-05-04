@@ -39,7 +39,6 @@ import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.Structure;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.sql.AccessVerifier;

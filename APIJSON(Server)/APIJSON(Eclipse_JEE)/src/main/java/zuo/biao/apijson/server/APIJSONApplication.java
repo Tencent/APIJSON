@@ -17,8 +17,6 @@ package zuo.biao.apijson.server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import zuo.biao.apijson.Structure;
-
 /**application
  * @author Lemon
  */
