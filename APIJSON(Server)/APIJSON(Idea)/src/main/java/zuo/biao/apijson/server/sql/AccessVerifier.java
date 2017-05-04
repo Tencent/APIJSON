@@ -50,7 +50,7 @@ public class AccessVerifier {
 	public static final String[] PAY_ACCESS_TABLE_NAMES = {};
 
 
-	private static Map<String, RequestMethod[]> accessMap;
+	private static final Map<String, RequestMethod[]> accessMap;
 	static {
 		accessMap = new HashMap<String, RequestMethod[]>();
 		

@@ -22,11 +22,38 @@ import zuo.biao.apijson.RequestMethod;
 
 /**用户类
  * @author Lemon
+ * @see
+ * <br >POST:post/register/user<pre>
+{
+    "User":{
+        "disallow":"id",
+        "necessary":"name,phone"
+    },
+    "necessary":"loginPassword,verify"
+}
+ * </pre>
+ * <br >PUT:<pre>
+{
+    "User":{
+        "disallow":"phone",
+        "necessary":"id"
+    }
+}
+ * </pre>
+ * <br >PUT(User.phone):put/user/phone<pre>
+{
+    "User":{
+        "disallow":"!",
+        "necessary":"id,phone"
+    },
+    "necessary":"loginPassword,verify"
+}
+ * </pre>
  */
 @APIJSONRequest(
 		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
-		PUT = "{disallowColumns:phone, necessaryColumns:id}",
-		DELETE = "{necessaryColumns:id}"
+		POST = "{\"User\": {\"disallow\": \"id\", \"necessary\": \"name,phone\"}, \"necessary\": \"loginPassword,verify\"}",
+		PUT = "{\"disallow\": \"phone\", \"necessary\": \"id\"}"
 		)
 public class User extends BaseModel {
 	private static final long serialVersionUID = -1635551656020732611L;
@@ -44,7 +71,7 @@ public class User extends BaseModel {
 	private List<String> pictureList; //照片列表
 	private String tag; //标签
 	private Integer starred; //星标
-	private List<Long> friendIdList; //照片列表
+	private List<Long> friendIdList; //朋友列表
 
 	/**默认构造方法，JSON等解析时必须要有
 	 */

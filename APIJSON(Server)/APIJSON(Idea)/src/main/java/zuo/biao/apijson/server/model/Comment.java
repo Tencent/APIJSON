@@ -20,10 +20,20 @@ import zuo.biao.apijson.RequestMethod;
 
 /**评论类
  * @author Lemon
+ * @see
+* <br >POST:<pre>
+{
+ "Comment":{
+     "disallow":"id",
+     "necessary":"userId,momentId,content"
+ }
+}
+ * </pre>
  */
 @APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
+		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.DELETE},
+		POST = "{\"disallow\": \"id\", \"necessary\": \"userId,momentId,content\"}",
+		DELETE = "{\"necessary\": \"id\"}"
 		)
 public class Comment extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;

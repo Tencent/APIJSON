@@ -19,13 +19,30 @@ import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
-/**登录类
+/**验证码类
  * @author Lemon
+ * @see
+ * <br >POST_GET:post_get/authCode<pre>
+{
+    "Verify":{
+        "disallow":"id"
+    }
+}
+ * </pre>
+ * <br >POST:post/authCode<pre>
+{
+    "Verify":{
+        "disallow":"!",
+        "necessary":"id"
+    }
+}
+ * </pre>
  */
 @SuppressWarnings("serial")
 @APIJSONRequest(
-		method = {RequestMethod.POST_HEAD, RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
+		method = {RequestMethod.POST_HEAD, RequestMethod.POST_GET, RequestMethod.POST},
+		POST_GET = "{\"necessary\": \"id\"}",
+		POST = "{\"disallow\": \"!\", \"necessary\": \"id\"}"
 		)
 public class Verify extends BaseModel {
 
@@ -46,8 +63,8 @@ public class Verify extends BaseModel {
 		this(phone);
 		setCode(code);
 	}
-	
-	
+
+
 	public String getCode() {
 		return code;
 	}
@@ -56,6 +73,10 @@ public class Verify extends BaseModel {
 		return this;
 	}
 
+	//phone is not column
+	//	public String getPhone() {
+	//		return StringUtil.getString(getId());
+	//	}
 	public Verify setPhone(String phone) {
 		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
 		return this;

@@ -1,4 +1,4 @@
-/*Copyright ©2015 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import zuo.biao.apijson.StringUtil;
  */
 public class Pair extends Entry<String, String> {
 
-	private static Map<String, Class<?>> classMap;
+	private static final Map<String, Class<?>> classMap;
 	static {
 		classMap = new HashMap<String, Class<?>>();
 		classMap.put(boolean.class.getSimpleName(), boolean.class);
@@ -41,7 +41,6 @@ public class Pair extends Entry<String, String> {
 
 		classMap.put(Object.class.getSimpleName(), Object.class);
 		classMap.put(String.class.getSimpleName(), String.class);
-		//		classMap.put(JSONArray.class.getSimpleName(), JSONArray.class);//JSONArray implements Map
 		classMap.put(Collection.class.getSimpleName(), Collection.class);//不允许指定<T>
 		classMap.put(Map.class.getSimpleName(), Map.class);//不允许指定<T>
 	}

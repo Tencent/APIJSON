@@ -14,30 +14,39 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import javax.validation.constraints.NotNull;
 
-import zuo.biao.apijson.Structure;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
-/**application
+import zuo.biao.apijson.server.sql.QueryConfig;
+
+/**
  * @author Lemon
  */
-@SpringBootApplication
-public class APIJSONApplication {
+public interface ParserAdapter {
 
-	public static void main(String[] args) {
-		SpringApplication.run(APIJSONApplication.class, args);
+	/**
+	 * @param path
+	 * @return
+	 */
+	Object getTarget(@NotNull String path);
 
-		try {
-			Function.test();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		try {
-			Structure.test();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	/**
+	 * @param path
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws Exception
+	 */
+	JSON parseChild(@NotNull String path, @NotNull String key, @NotNull JSON value) throws Exception;
+	
+	/**
+	 * @param path
+	 * @param config
+	 * @return
+	 * @throws Exception
+	 */
+	JSONObject executeSQL(@NotNull String path, @NotNull QueryConfig config) throws Exception;
+	
 }

@@ -80,10 +80,14 @@ public class QueryConfig {
 	private String order;
 
 
+	//array item <<<<<<<<<<
 	private int count;
 	private int page;
 	private int position;
-	private int total;
+	private int query; //JSONRequest.query
+	private int type; //ObjectParser.type
+	//array item >>>>>>>>>>
+
 
 	public QueryConfig(RequestMethod method) {
 		setMethod(method);
@@ -275,11 +279,19 @@ public class QueryConfig {
 		this.position = position;
 		return this;
 	}
-	public int getTotal() {
-		return total;
+
+	public int getQuery() {
+		return query;
 	}
-	public QueryConfig setTotal(int total) {
-		this.total = total;
+	public QueryConfig setQuery(int query) {
+		this.query = query;
+		return this;
+	}
+	public int getType() {
+		return type;
+	}
+	public QueryConfig setType(int type) {
+		this.type = type;
 		return this;
 	}
 
@@ -314,10 +326,6 @@ public class QueryConfig {
 	public static String getWhereString(RequestMethod method, Map<String, Object> where) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
 		if (set != null && set.size() > 0) {
-			if (Parser.isGetMethod(method, true) == false && Parser.isHeadMethod(method, true) == false
-					&& where.containsKey(ID) == false) {//POST必须有id，否则不能INSERT后直接返回id 
-				throw new IllegalArgumentException("请设置" + ID + "！");
-			}
 
 			String whereString = "";
 			boolean isFirst = true;
@@ -362,7 +370,7 @@ public class QueryConfig {
 				if (StringUtil.isEmpty(condition, true)) {//避免SQL条件连接错误
 					continue;
 				}
-				
+
 				whereString += (isFirst ? "" : AND) + condition;
 
 				isFirst = false;
@@ -662,6 +670,9 @@ public class QueryConfig {
 	public static synchronized QueryConfig newQueryConfig(RequestMethod method, String table, JSONObject request) {
 		QueryConfig config = new QueryConfig(method, table);
 
+		if (method == POST && request != null && request.get(ID) == null) {
+			request.put(ID, System.currentTimeMillis());
+		}
 		Set<String> set = request == null ? null : request.keySet();
 		if (set != null) {
 			String column = request.getString(JSONRequest.KEY_COLUMN);
@@ -702,6 +713,12 @@ public class QueryConfig {
 			config.setGroup(group);
 			config.setHaving(having);
 			config.setOrder(order);
+
+			//后面还可能用到，要还原
+			request.put(JSONRequest.KEY_COLUMN, column);
+			request.put(JSONRequest.KEY_GROUP, group);
+			request.put(JSONRequest.KEY_HAVING, having);
+			request.put(JSONRequest.KEY_ORDER, order);
 		}
 
 		try {

@@ -20,12 +20,31 @@ import zuo.biao.apijson.APIJSONRequest;
 import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 
-/**作品类
+/**动态类
  * @author Lemon
+ * @see
+ * <br >POST:<pre>
+{
+ "Moment":{
+     "disallow":"id",
+     "necessary":"userId,pictureList"
+ }
+}
+ * </pre>
+ * <br >PUT:<pre>
+{
+ "Moment":{
+     "disallow":"userId,date",
+     "necessary":"id"
+ }
+}
+ * </pre>
  */
 @APIJSONRequest(
 		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
+		POST = "{\"disallow\": \"id\", \"necessary\": \"userId,pictureList\"}",
+		PUT = "{\"disallow\": \"userId,date\", \"necessary\": \"id\"}",
+		DELETE = "{\"necessary\": \"id\"}"
 		)
 public class Moment extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;
