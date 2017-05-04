@@ -18,7 +18,7 @@ package apijson.demo.client.model;
  * @author Lemon
  */
 @SuppressWarnings("serial")
-public class Login extends apijson.demo.client.server.model.Login {
+public class Login extends apijson.demo.server.model.Login {
 
 	public Login() {
 		super();

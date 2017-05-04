@@ -19,7 +19,7 @@ import apijson.demo.client.application.APIJSONApplication;
 /**用户类
  * @author Lemon
  */
-public class User extends apijson.demo.client.server.model.User {
+public class User extends apijson.demo.server.model.User {
 	/**
 	 */
 	private static final long serialVersionUID = -8778034378026642371L;
@@ -40,12 +40,6 @@ public class User extends apijson.demo.client.server.model.User {
 	public Long getDate() {
 		return value(super.getDate());
 	}
-
-	@Override
-	public Integer getStarred() {
-		return value(super.getStarred());
-	}
-
 	@Override
 	public Integer getSex() {
 		return value(super.getSex());

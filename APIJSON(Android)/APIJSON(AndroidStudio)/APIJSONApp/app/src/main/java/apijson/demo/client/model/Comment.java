@@ -17,7 +17,7 @@ package apijson.demo.client.model;
 /**评论类
  * @author Lemon
  */
-public class Comment extends apijson.demo.client.server.model.Comment {
+public class Comment extends apijson.demo.server.model.Comment {
 	private static final long serialVersionUID = -1011007127735372824L;
 
 	public Comment() {

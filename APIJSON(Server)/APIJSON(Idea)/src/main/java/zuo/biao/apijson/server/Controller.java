@@ -24,18 +24,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.demo.server.model.Login;
+import apijson.demo.server.model.Password;
+import apijson.demo.server.model.User;
+import apijson.demo.server.model.Verify;
 import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.Structure;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
-import zuo.biao.apijson.server.model.Login;
-import zuo.biao.apijson.server.model.Password;
-import zuo.biao.apijson.server.model.User;
-import zuo.biao.apijson.server.model.Verify;
 
 /**request receiver and controller
  * @author Lemon

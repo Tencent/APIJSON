@@ -20,7 +20,7 @@ import zuo.biao.library.util.StringUtil;
 /**验证码类
  * @author Lemon
  */
-public class Verify extends apijson.demo.client.server.model.Verify {
+public class Verify extends apijson.demo.server.model.Verify {
 	private static final long serialVersionUID = 4298571449155754300L;
 
 	public Verify() {

@@ -18,7 +18,7 @@ package apijson.demo.client.model;
 /**钱包类
  * @author Lemon
  */
-public class Wallet extends apijson.demo.client.server.model.Wallet {
+public class Wallet extends apijson.demo.server.model.Wallet {
 	private static final long serialVersionUID = 4298571449155754300L;
 	
 	

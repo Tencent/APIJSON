@@ -102,6 +102,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return this
 	 */
 	public JSONObject add(com.alibaba.fastjson.JSONObject object, boolean encode) {
+		//TODO  putAll(object);
+		
 		Set<String> set = object == null ? null : object.keySet();
 		if (set != null) {
 			for (String key : set) {

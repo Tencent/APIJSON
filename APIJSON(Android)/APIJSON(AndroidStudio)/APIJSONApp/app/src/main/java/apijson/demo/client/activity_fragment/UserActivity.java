@@ -304,7 +304,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	private void putUser() {
 		showProgressDialog("正在上传...");
 		user = getUser();
-		apijson.demo.client.server.model.User userRequest = new apijson.demo.client.server.model.User(user.getId());
+		apijson.demo.server.model.User userRequest = new apijson.demo.server.model.User(user.getId());
 		userRequest.setName(user.getName());
 		userRequest.setSex(user.getSex());
 		userRequest.setTag(user.getTag());

@@ -26,11 +26,11 @@ import zuo.biao.library.util.SettingUtil;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.manager.HttpManager;
 import apijson.demo.client.model.CommentItem;
-import apijson.demo.client.server.model.Comment;
-import apijson.demo.client.server.model.Login;
-import apijson.demo.client.server.model.Moment;
-import apijson.demo.client.server.model.User;
-import apijson.demo.client.server.model.Wallet;
+import apijson.demo.server.model.Comment;
+import apijson.demo.server.model.Login;
+import apijson.demo.server.model.Moment;
+import apijson.demo.server.model.User;
+import apijson.demo.server.model.Wallet;
 
 /**HTTP请求工具类
  * @author Lemon

@@ -39,8 +39,8 @@ import apijson.demo.client.R;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.manager.DataManager;
 import apijson.demo.client.model.User;
-import apijson.demo.client.server.model.Login;
 import apijson.demo.client.util.HttpRequest;
+import apijson.demo.server.model.Login;
 
 /**登录界面
  * @author Lemon

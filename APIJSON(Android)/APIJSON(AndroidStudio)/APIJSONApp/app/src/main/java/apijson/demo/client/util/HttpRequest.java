@@ -26,11 +26,11 @@ import zuo.biao.library.util.SettingUtil;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.manager.HttpManager;
 import apijson.demo.client.model.CommentItem;
-import apijson.demo.client.server.model.Comment;
-import apijson.demo.client.server.model.Login;
-import apijson.demo.client.server.model.Moment;
-import apijson.demo.client.server.model.User;
-import apijson.demo.client.server.model.Wallet;
+import apijson.demo.server.model.Comment;
+import apijson.demo.server.model.Login;
+import apijson.demo.server.model.Moment;
+import apijson.demo.server.model.User;
+import apijson.demo.server.model.Wallet;
 
 /**HTTP请求工具类
  * @author Lemon
@@ -121,7 +121,21 @@ public class HttpRequest {
 
 
 
-	//示例代码<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+
+	
+	
+
+	public static final String USER;
+	public static final String MOMENT;
+	public static final String COMMENT;
+	static {
+		USER = User.class.getSimpleName();
+		MOMENT = Moment.class.getSimpleName();
+		COMMENT = Comment.class.getSimpleName();
+	}
 
 
 	//user<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -184,7 +198,7 @@ public class HttpRequest {
 	public static void register(String verify, String phone, String password, String name, int sex
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONObject request = new JSONRequest(new User().setPhone(phone).setName(name).setSex(sex))
-		.setTag(User.class.getSimpleName());
+		.setTag(USER);
 		request.put(VERIFY, verify);
 		request.put(PASSWORD, password);
 		HttpManager.getInstance().post(URL_POST + "register/user/", request, requestCode, listener);
@@ -266,9 +280,9 @@ public class HttpRequest {
 	public static void getUser(long id, boolean withMomentList, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest(new User(id));
 		if (withMomentList) {
-			request.add(new JSONRequest(Moment.class.getSimpleName()
+			request.add(new JSONRequest(MOMENT
 					, new JSONRequest(USER_ID, id).setColumn("pictureList").setOrder(DATE_DOWN))
-			.toArray(3, 0, Moment.class.getSimpleName()));
+			.toArray(3, 0, MOMENT));
 		}
 		get(request, requestCode, listener);
 	}
@@ -283,8 +297,7 @@ public class HttpRequest {
 		list.add(id);
 		JSONObject userObject = new JSONObject(new User(user.getId()));
 		userObject.put("friendIdList" + (isFriend ? "+" : "-"), list, true);
-		put(new JSONRequest(User.class.getSimpleName(), userObject).setTag(User.class.getSimpleName())
-				, requestCode, listener);
+		put(new JSONRequest(USER, userObject).setTag(USER), requestCode, listener);
 	}
 
 	public static final int RANGE_ALL = 0;
@@ -345,13 +358,13 @@ public class HttpRequest {
 			case RANGE_MOMENT:
 				JSONObject moment = new JSONObject(new Moment(id));
 				moment.setColumn("praiseUserIdList");
-				request.put(Moment.class.getSimpleName(), moment);
+				request.put(MOMENT, moment);
 				userItem.put(ID_IN+"@", "Moment/praiseUserIdList");
 				break;
 			case RANGE_COMMENT:
 				JSONObject comment = new JSONObject(new Comment(id));
 				comment.setColumn(USER_ID);
-				request.put(Comment.class.getSimpleName(), comment);
+				request.put(COMMENT, comment);
 				userItem.put(ID_AT, "Comment/userId");
 				break;
 			default:
@@ -360,8 +373,8 @@ public class HttpRequest {
 			userItem.add(search);
 		}
 
-		JSONRequest listRequest = new JSONRequest(User.class.getSimpleName(), userItem);
-		listRequest = listRequest.toArray(count, page, User.class.getSimpleName());
+		JSONRequest listRequest = new JSONRequest(USER, userItem);
+		listRequest = listRequest.toArray(count, page, USER);
 		request.add(listRequest);
 		get(request, requestCode, listener);
 	}
@@ -380,15 +393,15 @@ public class HttpRequest {
 	 */
 	public static void getMoment(long id, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest(new Moment(id));
-		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId"));
+		request.put(USER, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 		//praise <<<<<<<<<<<<<<<<<<
 		JSONRequest userItem = new JSONRequest();
-		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
+		userItem.put(USER, new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
-		//		userItem.setQuery(JSONRequest.QUERY_ALL);
-		request.add(userItem.toArray(10, 0, User.class.getSimpleName()));
-		//		request.putPath("praiseCount", "/User[]", TOTAL);
+		userItem.setQuery(JSONRequest.QUERY_ALL);
+		request.add(userItem.toArray(10, 0, USER));
+		request.put("praiseCount@", "/User[]/total");
 		//praise >>>>>>>>>>>>>>>>>>
 
 		get(request, requestCode, listener);
@@ -443,28 +456,28 @@ public class HttpRequest {
 		moment.setOrder(DATE_DOWN);
 		moment.add(search);
 
-		request.put(Moment.class.getSimpleName(), moment);
-		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
+		request.put(MOMENT, moment);
+		request.put(USER, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 
 		//praise <<<<<<<<<<<<<<<<<<
 		JSONRequest userItem = new JSONRequest();
-		userItem.put(User.class.getSimpleName(), new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
+		userItem.put(USER, new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
-		//		userItem.setQuery(JSONRequest.QUERY_TOTAL);
-		request.add(userItem.toArray(10, 0, User.class.getSimpleName()));
-		//		request.putPath("praiseCount", "/User[]", TOTAL);
+		userItem.setQuery(JSONRequest.QUERY_ALL);
+		request.add(userItem.toArray(10, 0, USER));
+		request.put("praiseCount@", "/User[]/total");
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<
 		JSONRequest commentItem = new JSONRequest();
-		commentItem.put(Comment.class.getSimpleName(), new JSONRequest(MOMENT_ID_AT, "[]/Moment/id").setOrder(DATE_UP));
-		commentItem.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId")
+		commentItem.put(COMMENT, new JSONRequest(MOMENT_ID_AT, "[]/Moment/id").setOrder(DATE_UP));
+		commentItem.put(USER, new JSONRequest(ID_AT, "/Comment/userId")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
-		//		commentItem.setQuery(JSONRequest.QUERY_ALL);
+		commentItem.setQuery(JSONRequest.QUERY_ALL);
 		request.add(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
-		//		request.putPath("commentCount", "/CommentItem[]", TOTAL);
+		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 
 		get(request.toArray(count, page), requestCode, listener);
@@ -481,8 +494,7 @@ public class HttpRequest {
 		List<Long> list = new ArrayList<Long>();
 		list.add(APIJSONApplication.getInstance().getCurrentUserId());
 		data.put("praiseUserIdList" + (toPraise ? "+" : "-"), list, true);
-		put(new JSONRequest(Moment.class.getSimpleName(), data).setTag(Moment.class.getSimpleName())
-				, requestCode, listener);
+		put(new JSONRequest(MOMENT, data).setTag(MOMENT), requestCode, listener);
 	}
 
 	/**删除动态
@@ -491,7 +503,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void deleteMoment(Long id, int requestCode, OnHttpResponseListener listener) {
-		delete(new JSONRequest(new Moment(id)).setTag(Moment.class.getSimpleName()), requestCode, listener);
+		delete(new JSONRequest(new Moment(id)).setTag(MOMENT), requestCode, listener);
 	}
 
 	//Moment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -512,16 +524,16 @@ public class HttpRequest {
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
 		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
-		request.put(Comment.class.getSimpleName(), comment.setOrder(DATE_UP));
-		request.put(User.class.getSimpleName(), new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
+		request.put(COMMENT, comment.setOrder(DATE_UP));
+		request.put(USER, new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 
-		//		if (page == 0) {
-		//			request.setQuery(JSONRequest.QUERY_ALL);
-		//		}
+		if (page == 0) {
+			request.setQuery(JSONRequest.QUERY_ALL);
+		}
 		request = request.toArray(count, page);
-		//		if (page == 0) {
-		//			request.putPath(TOTAL, "[]", TOTAL);
-		//		}
+		if (page == 0) {
+			request.putPath(TOTAL, "[]", TOTAL);
+		}
 
 		get(request, requestCode, listener);
 	}
@@ -541,7 +553,7 @@ public class HttpRequest {
 		.setUserId(application.getCurrentUserId())
 		.setMomentId(momentId)
 		.setContent(content);
-		post(new JSONRequest(comment).setTag(Comment.class.getSimpleName()), requestCode, listener);
+		post(new JSONRequest(comment).setTag(COMMENT), requestCode, listener);
 	}
 	/**
 	 * @param id
@@ -549,7 +561,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void deleteComment(long id, int requestCode, OnHttpResponseListener listener) {
-		delete(new JSONRequest(new Comment(id)).setTag(Comment.class.getSimpleName()), requestCode, listener);
+		delete(new JSONRequest(new Comment(id)).setTag(COMMENT), requestCode, listener);
 	}
 
 	//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

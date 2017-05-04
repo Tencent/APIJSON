@@ -17,7 +17,7 @@ package apijson.demo.client.model;
 /**作品类
  * @author Lemon
  */
-public class Moment extends apijson.demo.client.server.model.Moment {
+public class Moment extends apijson.demo.server.model.Moment {
 	private static final long serialVersionUID = -7821648714756673170L;
 
 	public Moment() {
@@ -38,6 +38,10 @@ public class Moment extends apijson.demo.client.server.model.Moment {
 	@Override
 	public Long getUserId() {
 		return value(super.getUserId());
+	}
+	
+	public String getFirstPicture() {
+		return get(getPictureList(), 0);
 	}
 
 }
