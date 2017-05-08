@@ -16,29 +16,28 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Wallet`
+-- Table structure for table `Pair`
 --
 
-DROP TABLE IF EXISTS `Wallet`;
+DROP TABLE IF EXISTS `Pair`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Wallet` (
-  `id` bigint(15) NOT NULL,
-  `userId` int(11) NOT NULL,
-  `balance` decimal(10,2) DEFAULT NULL,
-  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE `Pair` (
+  `id` bigint(20) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `userId` bigint(20) NOT NULL,
+  `toUserId` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='对，一般用于朋友关系等。\n添加好友时创建一条row，但toUserId是空的，toUser同意后就修改toUserId';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Wallet`
+-- Dumping data for table `Pair`
 --
 
-LOCK TABLES `Wallet` WRITE;
-/*!40000 ALTER TABLE `Wallet` DISABLE KEYS */;
-INSERT INTO `Wallet` VALUES (1,38710,10000.50,'2017-02-01 11:15:44'),(2,70793,500.00,'2017-02-01 11:15:44'),(4,82001,2000.00,'2017-02-01 11:15:44'),(5,82002,2000.00,'2017-02-01 11:15:44'),(6,82003,700.00,'2017-02-01 11:15:44'),(7,82004,100.00,'2017-02-01 11:15:44'),(8,82005,700.00,'2017-02-01 11:15:44');
-/*!40000 ALTER TABLE `Wallet` ENABLE KEYS */;
+LOCK TABLES `Pair` WRITE;
+/*!40000 ALTER TABLE `Pair` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Pair` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
