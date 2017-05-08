@@ -125,8 +125,8 @@ public class HttpRequest {
 
 
 
-	
-	
+
+
 
 	public static final String USER;
 	public static final String MOMENT;
@@ -399,9 +399,9 @@ public class HttpRequest {
 		userItem.put(USER, new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
-		userItem.setQuery(JSONRequest.QUERY_ALL);
+		userItem.setQuery(JSONRequest.QUERY_ALL);//同时获取Table和total
 		request.add(userItem.toArray(10, 0, USER));
-		request.put("praiseCount@", "/User[]/total");
+		request.put("praiseCount@", "/User[]/total");//获取Table的总数total
 		//praise >>>>>>>>>>>>>>>>>>
 
 		get(request, requestCode, listener);
@@ -464,9 +464,9 @@ public class HttpRequest {
 		userItem.put(USER, new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
-		userItem.setQuery(JSONRequest.QUERY_ALL);
+		//		userItem.setQuery(JSONRequest.QUERY_ALL);
 		request.add(userItem.toArray(10, 0, USER));
-		request.put("praiseCount@", "/User[]/total");
+		//		request.put("praiseCount@", "/User[]/total");
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<
@@ -475,9 +475,9 @@ public class HttpRequest {
 		commentItem.put(USER, new JSONRequest(ID_AT, "/Comment/userId")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
-		commentItem.setQuery(JSONRequest.QUERY_ALL);
+		//		commentItem.setQuery(JSONRequest.QUERY_ALL);
 		request.add(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
-		request.put("commentCount@", "/CommentItem[]/total");
+		//		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 
 		get(request.toArray(count, page), requestCode, listener);
@@ -527,13 +527,13 @@ public class HttpRequest {
 		request.put(COMMENT, comment.setOrder(DATE_UP));
 		request.put(USER, new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 
-		if (page == 0) {
-			request.setQuery(JSONRequest.QUERY_ALL);
-		}
+		//		if (page == 0) {
+		//			request.setQuery(JSONRequest.QUERY_ALL);
+		//		}
 		request = request.toArray(count, page);
-		if (page == 0) {
-			request.putPath(TOTAL, "[]", TOTAL);
-		}
+		//		if (page == 0) {
+		//			request.putPath(TOTAL, "[]", TOTAL);
+		//		}
 
 		get(request, requestCode, listener);
 	}
