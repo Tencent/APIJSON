@@ -18,6 +18,7 @@ import static zuo.biao.apijson.RequestMethod.POST;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -120,15 +121,17 @@ public class Structure {
 		}
 
 
-
-
 		//解析
 		return parse(name, target, request, new OnParseCallback() {
 
 			@Override
 			public JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
 				//				Log.i(TAG, "parseRequest.parse.onParseJSONObject  key = " + key + "; robj = " + robj);
-				if (robj != null && Parser.isTableKey(key)) {
+				if (robj == null) {
+					if (tobj != null) {//不允许不传Target中指定的Table
+						throw new IllegalArgumentException("请设置 " + key + " ！");
+					}
+				} else if (Parser.isTableKey(key)) {
 					if (method == POST) {
 						if (robj.containsKey(QueryConfig.ID)) {
 							throw new IllegalArgumentException("POST " + key + " 请求不能设置" + QueryConfig.ID + "！");
@@ -217,12 +220,13 @@ public class Structure {
 		//获取配置>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+		Set<String> tableKeySet = new HashSet<String>();
 
 
-		real = operate(TYPE_VERIFY, verify, real);
-		real = operate(TYPE_ADD, add, real);
-		real = operate(TYPE_PUT, put, real);
-		real = operate(TYPE_REPLACE, replace, real);
+		real = operate(TYPE_VERIFY, verify, real, tableKeySet);
+		real = operate(TYPE_ADD, add, real, tableKeySet);
+		real = operate(TYPE_PUT, put, real, tableKeySet);
+		real = operate(TYPE_REPLACE, replace, real, tableKeySet);
 
 
 		//移除字段<<<<<<<<<<<<<<<<<<<
@@ -274,11 +278,10 @@ public class Structure {
 
 
 
-		List<String> tableKeyList = new ArrayList<String>();
 		Set<Entry<String, Object>> set = new LinkedHashSet<>(target.entrySet());
+		zuo.biao.apijson.server.Entry<String, String> pair;
 		if (set.isEmpty() == false) {
 
-			zuo.biao.apijson.server.Entry<String, String> pair;
 			String key;
 			Object tvalue;
 			Object rvalue;
@@ -298,7 +301,7 @@ public class Structure {
 
 					pair = Pair.parseEntry(key, true);
 					if (pair != null && Parser.isTableKey(pair.getKey())) {
-						tableKeyList.add(key);
+						tableKeySet.add(key);
 					}
 				} else if (tvalue instanceof JSONArray) {//JSONArray
 					tvalue = callback.onParseJSONArray(key, (JSONArray) tvalue, (JSONArray) rvalue);
@@ -317,7 +320,8 @@ public class Structure {
 
 		//不允许操作未指定Table<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
-			if (Parser.isTableKey(rk) && tableKeyList.contains(rk) == false) {
+			pair = Pair.parseEntry(rk, true);//非GET类操作不允许Table:alias别名
+			if (pair != null && Parser.isTableKey(pair.getKey()) && tableKeySet.contains(rk) == false) {
 				throw new UnsupportedOperationException("不允许操作 " + rk + " ！");
 			}
 		}
@@ -334,10 +338,12 @@ public class Structure {
 	 * @param operate
 	 * @param targetChild
 	 * @param real
+	 * @param tableKeySet 
 	 * @return
 	 * @throws Exception
 	 */
-	private static JSONObject operate(int type, JSONObject targetChild, JSONObject real) throws Exception {
+	private static JSONObject operate(int type, JSONObject targetChild, JSONObject real
+			, Set<String> tableKeySet) throws Exception {
 		if (targetChild == null) {
 			return real;
 		}
@@ -349,10 +355,6 @@ public class Structure {
 			return real;
 		}
 
-		if (type == TYPE_PUT) {
-			real.putAll(targetChild);
-			return real;
-		}
 
 		Set<Entry<String, Object>> set = new LinkedHashSet<>(targetChild.entrySet());
 		String tk;
@@ -432,14 +434,16 @@ public class Structure {
 
 				}
 
+			} else if (type == TYPE_PUT) {
+				putTargetChild(real, tk, tv, tableKeySet);
 			} else {
 				if (real.containsKey(tk)) {
 					if (type == TYPE_REPLACE) {
-						real.put(tk, tv);
+						putTargetChild(real, tk, tv, tableKeySet);
 					}
 				} else {
 					if (type == TYPE_ADD) {
-						real.put(tk, tv);
+						putTargetChild(real, tk, tv, tableKeySet);
 					}
 				}
 			}
@@ -449,6 +453,19 @@ public class Structure {
 	}
 
 
+	/**
+	 * @param real
+	 * @param tk
+	 * @param tv
+	 * @param tableKeySet
+	 */
+	private static void putTargetChild(JSONObject real, String tk, Object tv, Set<String> tableKeySet) {
+		real.put(tk, tv);
+		zuo.biao.apijson.server.Entry<String, String> pair = Pair.parseEntry(tk, true);
+		if (pair != null && Parser.isTableKey(pair.getKey())) {
+			tableKeySet.add(tk);
+		}
+	}
 
 
 	public static final int TYPE_DEFAULT = 0;
