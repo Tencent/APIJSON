@@ -485,12 +485,6 @@ public class Parser {
 		return response;
 	}
 
-
-	/**
-	 * TODO 一次获取QueryConfig的方式减少了count-1次JSONObject->QueryConfig的过程，大幅提升了性能。
-	 * 但导致第一个Table位置被重新put到最后，并且需要重复getObject内的代码，目前[]中第一个Table还缺少对key()和自定义@key的支持。
-	 * 评估下[]:{FirstTableKey:{Table}}第一个Table需要使用这两种功能符的场景、频率和替代方式(外层？)
-	 */
 	/**获取对象数组，该对象数组处于parentObject内
 	 * @param parentPath parentObject的路径
 	 * @param name parentObject的key
@@ -501,8 +495,8 @@ public class Parser {
 	private JSONArray getArray(String parentPath, String name, final JSONObject request) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
-		if (isHeadMethod(requestMethod, true)) {
-			throw new UnsupportedOperationException("HEAD、POST_HEAD方法不允许重复查询！不应该传 " + name + " 等key[]:{}！");
+		if (isGetMethod(requestMethod, true) == false) {
+			throw new UnsupportedOperationException("key[]:{}只支持GET类方法！不允许传 " + name + ":{} ！");
 		}
 		if (request == null || request.isEmpty()) {//jsonKey-jsonValue条件
 			return null;

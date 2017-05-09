@@ -155,7 +155,7 @@ public class ObjectParser implements ParserAdapter {
 				key = entry.getKey();
 
 				if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					putChild(key, onChildParse(key, (JSON) value));
+					putChild(key, (JSON) value);
 				} else if (method == PUT && value instanceof JSONArray) {//PUT JSONArray
 					onPUTArrayParse(key, (JSONArray) value);
 				} else {//JSONArray或其它Object，直接填充
@@ -186,10 +186,10 @@ public class ObjectParser implements ParserAdapter {
 	 */
 	protected void putChild(String key, JSON child) throws Exception {
 		if (child != null) {
-			if (childMap != null) {
+			if (childMap != null) {//添加到childMap，最后再解析
 				childMap.put(key, child);
-			} else {
-				response.put(key, child);
+			} else {//直接解析并替换原来的
+				response.put(key, onChildParse(key, child));
 			}
 		}
 	}
@@ -408,14 +408,21 @@ public class ObjectParser implements ParserAdapter {
 	 * @throws Exception
 	 */
 	public JSONObject response() throws Exception {
-		if (sqlReponse != null) {
+		if (sqlReponse == null || sqlReponse.isEmpty()) {
+			if (isTableKey) {//Table自身都获取不到值，则里面的Child都无意义，不需要再解析
+				return response;
+			}
+		} else {
 			response.putAll(sqlReponse);
 		}
 
-		if (customMap != null) {//把isTableKey时取出去的custom重新添加回来
+		//把isTableKey时取出去的custom重新添加回来
+		if (customMap != null) {
 			response.putAll(customMap);
 		}
-		if (functionMap != null) {//解析函数function
+		
+		//解析函数function
+		if (functionMap != null) {
 			Set<Entry<String, String>> functionSet = functionMap == null ? null : functionMap.entrySet();
 			if (functionSet != null && functionSet.isEmpty() == false) {
 				for (Entry<String, String> entry : functionSet) {
@@ -425,10 +432,16 @@ public class ObjectParser implements ParserAdapter {
 			}
 		}
 
-		if (childMap != null) {//把isTableKey时取出去的child重新添加回来
-			response.putAll(childMap);
+		//把isTableKey时取出去child解析后重新添加回来
+		Set<Entry<String, JSON>> set = childMap == null ? null : childMap.entrySet();
+		if (set != null) {
+			for (Entry<String, JSON> entry : set) {
+				if (entry != null) {
+					response.put(entry.getKey(), onChildParse(entry.getKey(), entry.getValue()));
+				}
+			}
 		}
-
+		
 		onComplete();
 
 		return response;
