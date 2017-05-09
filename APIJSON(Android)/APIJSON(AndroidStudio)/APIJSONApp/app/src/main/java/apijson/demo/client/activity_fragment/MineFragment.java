@@ -19,14 +19,20 @@ import java.io.File;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.library.base.BaseView.OnDataChangedListener;
+import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.ui.AlertDialog;
 import zuo.biao.library.ui.AlertDialog.OnDialogButtonClickListener;
+import zuo.biao.library.ui.WebViewActivity;
+import zuo.biao.library.util.CommonUtil;
 import zuo.biao.library.util.DownloadUtil;
 import zuo.biao.library.util.ImageLoaderUtil;
 import zuo.biao.library.util.Log;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,25 +42,26 @@ import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseFragment;
+import apijson.demo.client.interfaces.TopBarMenuCallback;
 import apijson.demo.client.model.Login;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.HttpRequest;
 
 /**设置fragment
  * @author Lemon
- * @use new SettingFragment(),详细使用见.DemoFragmentActivity(initData方法内)
+ * @use new MineFragment(),详细使用见.DemoFragmentActivity(initData方法内)
  */
-public class SettingFragment extends BaseFragment implements OnClickListener, OnDialogButtonClickListener
-, OnHttpResponseListener, OnDataChangedListener {
-	private static final String TAG = "SettingFragment";
+public class MineFragment extends BaseFragment implements OnClickListener, OnDialogButtonClickListener
+, OnHttpResponseListener, OnBottomDragListener, TopBarMenuCallback, OnDataChangedListener {
+	private static final String TAG = "MineFragment";
 
 	//与Activity通信<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**创建一个Fragment实例
 	 * @return
 	 */
-	public static SettingFragment createInstance() {
-		return new SettingFragment();
+	public static MineFragment createInstance() {
+		return new MineFragment();
 	}
 
 	//与Activity通信>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>	
@@ -65,17 +72,17 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		//类相关初始化，必须使用<<<<<<<<<<<<<<<<
 		super.onCreateView(inflater, container, savedInstanceState);
-		setContentView(R.layout.setting_fragment);
+		setContentView(R.layout.mine_fragment);
 		//类相关初始化，必须使用>>>>>>>>>>>>>>>>
 
 		registerObserver(this);
-		
+
 		//功能归类分区方法，必须调用<<<<<<<<<<
 		initView();
 		initData();
 		initEvent();
 		//功能归类分区方法，必须调用>>>>>>>>>>
-		
+
 		return view;
 	}
 
@@ -114,6 +121,43 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 	}
 
 
+	private TextView leftMenu;
+	@SuppressLint("InflateParams")
+	@Override
+	public View getLeftMenu(Activity activity) {
+		if (leftMenu == null) {
+			leftMenu = (TextView) LayoutInflater.from(activity).inflate(R.layout.top_right_tv, null);
+			leftMenu.setGravity(Gravity.CENTER);
+			leftMenu.setText("扫一扫");
+			leftMenu.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					onDragBottom(false);
+				}
+			});
+		}
+		return leftMenu;
+	}
+
+	private TextView rightMenu;
+	@SuppressLint("InflateParams")
+	@Override
+	public View getRightMenu(Activity activity) {
+		if (rightMenu == null) {
+			rightMenu = (TextView) LayoutInflater.from(activity).inflate(R.layout.top_right_tv, null);
+			rightMenu.setGravity(Gravity.CENTER);
+			rightMenu.setText("设置");
+			rightMenu.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					onDragBottom(true);
+				}
+			});
+		}
+		return rightMenu;
+	}
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -131,7 +175,7 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 	@Override
 	public void initData() {//必须调用
 		super.initData();
-		
+
 	}
 
 	@Override
@@ -139,7 +183,7 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 		setUser(APIJSONApplication.getInstance().getCurrentUser());
 	}
 
-	
+
 	/**下载应用
 	 */
 	private void downloadApp() {
@@ -184,11 +228,28 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 		findViewById(R.id.llSettingMoment).setOnClickListener(this);
 		findViewById(R.id.llSettingWallet).setOnClickListener(this);
 
-		findViewById(R.id.llSettingSetting).setOnClickListener(this);
 		findViewById(R.id.llSettingAbout).setOnClickListener(this);
 		findViewById(R.id.llSettingTest).setOnClickListener(this);
 		findViewById(R.id.llSettingLogout).setOnClickListener(this);
 	}
+
+
+	@Override
+	public void onDragBottom(boolean rightToLeft) {
+		if (isAlive() == false) {
+			return;
+		}
+
+		if (rightToLeft) {
+
+			toActivity(SettingActivity.createIntent(context));
+			return;
+		}
+
+		startActivityForResult(ScanActivity.createIntent(context), REQUEST_TO_SCAN);
+		context.overridePendingTransition(R.anim.bottom_push_in, R.anim.fade);
+	}
+
 
 
 	@Override
@@ -218,9 +279,6 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 	@Override
 	public void onClick(View v) {//直接调用不会显示v被点击效果
 		switch (v.getId()) {
-		case R.id.llSettingSetting:
-			toActivity(SettingActivity.createIntent(context));
-			break;
 		case R.id.llSettingAbout:
 			toActivity(AboutActivity.createIntent(context));
 			break;
@@ -276,6 +334,54 @@ public class SettingFragment extends BaseFragment implements OnClickListener, On
 
 	//类相关监听<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	private static final int REQUEST_TO_SCAN = 1;
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode != RESULT_OK) {
+			return;
+		}
+		switch (requestCode) {
+		case REQUEST_TO_SCAN:
+			String result = data == null ? null : data.getStringExtra(ScanActivity.RESULT_QRCODE_STRING);
+			if (StringUtil.isEmpty(result, true) == false) {
+				if (StringUtil.isUrl(result)) {
+					int index = result.indexOf("{\"User\":{");
+					if (index > 0) {
+						JSONResponse response = new JSONResponse(result.substring(index));
+						User user = response.getObject(User.class);
+						long id = user == null ? 0 : user.getId();
+						if (id > 0) {
+							toActivity(UserActivity.createIntent(context, id));
+							break;
+						}
+					}
+					toActivity(WebViewActivity.createIntent(context, "扫描结果", result));
+				} else {
+					CommonUtil.copyText(context, result);
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+
+
+	@Override
+	public void onDestroy() {
+		if (leftMenu != null) {
+			leftMenu.destroyDrawingCache();
+			leftMenu = null;
+		}
+		if (rightMenu != null) {
+			rightMenu.destroyDrawingCache();
+			rightMenu = null;
+		}
+
+		super.onDestroy();
+	}
 
 
 	//类相关监听>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

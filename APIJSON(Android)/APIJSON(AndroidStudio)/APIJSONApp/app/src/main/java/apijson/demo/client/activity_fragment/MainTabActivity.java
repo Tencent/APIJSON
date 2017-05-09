@@ -130,7 +130,7 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 			fragment.setSearchType(EditTextInfoWindow.TYPE_NAME);
 			return fragment;
 		case 2:
-			return SettingFragment.createInstance();
+			return MineFragment.createInstance();
 		default:
 			return MomentListFragment.createInstance();
 		}

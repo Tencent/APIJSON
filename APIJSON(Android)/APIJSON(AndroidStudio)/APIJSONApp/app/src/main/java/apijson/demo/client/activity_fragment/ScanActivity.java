@@ -24,6 +24,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import apijson.demo.client.R;
+import apijson.demo.client.application.APIJSONApplication;
 
 import com.zxing.activity.CaptureActivity;
 import com.zxing.view.ViewfinderView;
@@ -119,10 +120,11 @@ public class ScanActivity extends CaptureActivity implements ActivityPresenter, 
 	@Override
 	public void onReturnClick(View v) {
 		finish();
-	}	
+	}
 	@Override
 	public void onForwardClick(View v) {
-		CommonUtil.toActivity(context, QRCodeActivity.createIntent(context, 1));
+		CommonUtil.toActivity(context, QRCodeActivity.createIntent(context
+				, APIJSONApplication.getInstance().getCurrentUserId()));
 	}
 	
 	//系统自带监听方法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

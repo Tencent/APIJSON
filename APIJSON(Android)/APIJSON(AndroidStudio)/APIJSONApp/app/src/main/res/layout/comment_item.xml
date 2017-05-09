@@ -3,6 +3,7 @@
     android:id="@+id/tvmomentViewCommentItemContent"
     style="@style/text_small_black"
     android:layout_width="match_parent"
+    android:autoLink="all"
     android:background="@drawable/bg_item_to_alpha"
     android:gravity="left|center_vertical"
     android:paddingBottom="2dp"
