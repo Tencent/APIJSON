@@ -67,20 +67,6 @@
                 android:layout_marginBottom="30dp" />
 
             <LinearLayout
-                android:id="@+id/llSettingSetting"
-                style="@style/content_item_white" >
-
-                <TextView
-                    style="@style/content_item_lf_tv"
-                    android:layout_weight="1"
-                    android:text="个人设置" />
-
-                <ImageView style="@style/content_item_rt_img" />
-            </LinearLayout>
-
-            <View style="@style/divider_horizontal_1px" />
-
-            <LinearLayout
                 android:id="@+id/llSettingAbout"
                 style="@style/content_item_white" >
 

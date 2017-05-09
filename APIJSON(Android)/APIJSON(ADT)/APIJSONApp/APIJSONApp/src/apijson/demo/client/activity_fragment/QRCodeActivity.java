@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.CacheManager;
@@ -31,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.model.User;
+import apijson.demo.client.util.HttpRequest;
 
 import com.google.zxing.WriterException;
 import com.zxing.encoding.EncodingHandler;
@@ -145,14 +147,16 @@ public class QRCodeActivity extends BaseActivity implements OnBottomDragListener
 
 	private Bitmap qRCodeBitmap;
 	protected void setQRCode(User user) {
-		if (user == null) {
-			Log.e(TAG, "setQRCode  user == null" +
-					" || StringUtil.isNotEmpty(user.getPhone(), true) == false >> return;");
-			return;
-		}
+//		if (user == null) {
+//			Log.e(TAG, "setQRCode  user == null" +
+//					" || StringUtil.isNotEmpty(user.getPhone(), true) == false >> return;");
+//			return;
+//		}
 
 		try {
-			qRCodeBitmap = EncodingHandler.createQRCode(JSON.toJSONString(user)
+			//不能暴露用户隐私
+			qRCodeBitmap = EncodingHandler.createQRCode(HttpRequest.URL_GET
+					+ JSON.toJSONString(new JSONRequest(new apijson.demo.server.model.User(userId)))
 					, (int) (2 * getResources().getDimension(R.dimen.qrcode_size)));
 		} catch (WriterException e) {
 			e.printStackTrace();
