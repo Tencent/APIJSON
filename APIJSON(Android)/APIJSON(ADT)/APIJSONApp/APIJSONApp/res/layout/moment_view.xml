@@ -17,10 +17,10 @@
             android:paddingRight="@dimen/moment_view_head_padding_right" >
 
             <ImageView
-                android:background="@color/alpha_3"
                 android:id="@+id/ivMomentViewHead"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@color/alpha_3"
                 android:scaleType="centerCrop" />
         </RelativeLayout>
 
@@ -55,6 +55,7 @@
                 style="@style/text_small_black"
                 android:layout_width="match_parent"
                 android:layout_marginTop="5dp"
+                android:autoLink="all"
                 android:background="@drawable/bg_item_to_alpha"
                 android:gravity="left|top"
                 android:maxLines="8"

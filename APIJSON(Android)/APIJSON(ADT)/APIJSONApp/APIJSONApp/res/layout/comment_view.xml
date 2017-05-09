@@ -58,6 +58,7 @@
                 android:id="@+id/tvCommentContent"
                 style="@style/text_small_black"
                 android:layout_width="match_parent"
+                android:autoLink="all"
                 android:background="@drawable/bg_item_to_alpha"
                 android:gravity="top|left"
                 android:paddingBottom="4dp" />
