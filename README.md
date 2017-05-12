@@ -323,7 +323,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
 
 ## <h2 id="4">4.功能符<h2/>
  
-  功能 与 作用 | 键值对格式 | 使用示例
+  功能与作用 | 键值对格式 | 使用示例
 ------------ | ------------ | ------------
  查询数组 | "key[]":{}，后面是JSONObject，key可省略。当key和内部Table名相同时，JSONResponse#format会把Table提取出来，即将 {Table:{Content}} 转化为 {Content} | [{"User[]":{"User":{}}}](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{}}})，查询一个User数组。这里key和Table名都是User，会提取User，即将 {"User":{"id", ...}} 转化为 {"id", ...} 
  匹配选项范围 | "key{}":[]，后面是JSONArray，作为key可取的值的选项 | ["id{}":[38710,82001,70793]](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"id{}":[38710,82001,70793]}}})，查询id符合38710,82001,70793中任意一个的一个User数组
