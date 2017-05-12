@@ -144,22 +144,25 @@ public class EditTextInfoWindow extends BaseBottomWindow implements OnClickListe
 
 	public static final String INTENT_PACKAGE_NAME = "INTENT_PACKAGE_NAME";
 
-	public static final int TYPE_NICK = 200 + ContactUtil.TYPE_NICK;
-	public static final int TYPE_NAME = 200 + ContactUtil.TYPE_NAME;
+	public static final int TYPE_NICK = ContactUtil.TYPE_NICK;
+	public static final int TYPE_NAME = ContactUtil.TYPE_NAME;
 
-	public static final int TYPE_PHONE = 200 + ContactUtil.TYPE_PHONE;
-	public static final int TYPE_WEBSITE = 200 + ContactUtil.TYPE_WEBSITE;
-	public static final int TYPE_EMAIL = 200 + ContactUtil.TYPE_EMAIL;
-	public static final int TYPE_FAX = 200 + ContactUtil.TYPE_FAX;
+	public static final int TYPE_PHONE = ContactUtil.TYPE_PHONE;
+	public static final int TYPE_WEBSITE = ContactUtil.TYPE_WEBSITE;
+	public static final int TYPE_EMAIL = ContactUtil.TYPE_EMAIL;
+	public static final int TYPE_FAX = ContactUtil.TYPE_FAX;
 
-	public static final int TYPE_USUALADDRESS = 200 + ContactUtil.TYPE_USUALADDRESS;
-	public static final int TYPE_MAILADDRESS = 200 + ContactUtil.TYPE_MAILADDRESS;
-	public static final int TYPE_SCHOOL = 200 + ContactUtil.TYPE_SCHOOL;
-	public static final int TYPE_COMPANY = 200 + ContactUtil.TYPE_COMPANY;
+	public static final int TYPE_USUALADDRESS = ContactUtil.TYPE_USUALADDRESS;
+	public static final int TYPE_MAILADDRESS = ContactUtil.TYPE_MAILADDRESS;
+	public static final int TYPE_SCHOOL = ContactUtil.TYPE_SCHOOL;
+	public static final int TYPE_COMPANY = ContactUtil.TYPE_COMPANY;
 
-	public static final int TYPE_PROFESSION = 200 + ContactUtil.TYPE_PROFESSION;
-	public static final int TYPE_NOTE = 200 + ContactUtil.TYPE_NOTE;
-	//	public static final int TYPE_OTHER = 200 + ContactUtil.TYPE_OTHER;
+	public static final int TYPE_PROFESSION = ContactUtil.TYPE_PROFESSION;
+	public static final int TYPE_NOTE = ContactUtil.TYPE_NOTE;
+	//	public static final int TYPE_OTHER = ContactUtil.TYPE_OTHER;
+	
+	public static final int TYPE_NUMBER = 21;
+	public static final int TYPE_DECIMAL = 22;
 
 	public static final String INTENT_TYPE = "INTENT_TYPE";
 	public static final String INTENT_KEY = "INTENT_KEY";
@@ -186,16 +189,16 @@ public class EditTextInfoWindow extends BaseBottomWindow implements OnClickListe
 			maxEms = 20;
 			break;
 		case TYPE_PHONE:
-			etEditTextInfo.setInputType(InputType.TYPE_CLASS_PHONE);
 			maxEms = 11;
+			etEditTextInfo.setInputType(InputType.TYPE_CLASS_PHONE);
 			break;
 		case TYPE_EMAIL:
-			etEditTextInfo.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
 			maxEms = 60;
+			etEditTextInfo.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
 			break;
 		case TYPE_WEBSITE:
-			etEditTextInfo.setInputType(InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT);
 			maxEms = 200;
+			etEditTextInfo.setInputType(InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT);
 			break;
 		case TYPE_MAILADDRESS:
 			maxEms = 60;
@@ -205,6 +208,14 @@ public class EditTextInfoWindow extends BaseBottomWindow implements OnClickListe
 			maxEms = 15;
 		case TYPE_NOTE:
 			maxEms = 100;
+			break;
+		case TYPE_NUMBER:
+			maxEms = 10;
+			etEditTextInfo.setInputType(InputType.TYPE_NUMBER_VARIATION_NORMAL);
+			break;
+		case TYPE_DECIMAL:
+			maxEms = 20;
+			etEditTextInfo.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
 			break;
 		default:
 			break;

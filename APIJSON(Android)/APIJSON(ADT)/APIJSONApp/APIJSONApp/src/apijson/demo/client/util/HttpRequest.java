@@ -29,6 +29,7 @@ import apijson.demo.client.model.CommentItem;
 import apijson.demo.server.model.Comment;
 import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
+import apijson.demo.server.model.Password;
 import apijson.demo.server.model.User;
 import apijson.demo.server.model.Wallet;
 
@@ -128,13 +129,16 @@ public class HttpRequest {
 
 
 
-	public static final String USER;
-	public static final String MOMENT;
-	public static final String COMMENT;
+	//加 _ 表示class名，避免PASSWORD不知道是 Password 还是 password 这种冲突
+	public static final String USER_;
+	public static final String MOMENT_;
+	public static final String COMMENT_;
+	public static final String WALLET_;
 	static {
-		USER = User.class.getSimpleName();
-		MOMENT = Moment.class.getSimpleName();
-		COMMENT = Comment.class.getSimpleName();
+		USER_ = User.class.getSimpleName();
+		MOMENT_ = Moment.class.getSimpleName();
+		COMMENT_ = Comment.class.getSimpleName();
+		WALLET_ = Wallet.class.getSimpleName();
 	}
 
 
@@ -153,6 +157,7 @@ public class HttpRequest {
 	public static final String PASSWORD = "password";
 	public static final String LOGIN_PASSWORD = "loginPassword";
 	public static final String PAY_PASSWORD = "payPassword";
+	public static final String OLD_PASSWORD = "oldPassword";
 	public static final String VERIFY = "verify";
 
 	public static final String SEX = "sex";
@@ -198,7 +203,7 @@ public class HttpRequest {
 	public static void register(String verify, String phone, String password, String name, int sex
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONObject request = new JSONRequest(new User().setPhone(phone).setName(name).setSex(sex))
-		.setTag(USER);
+		.setTag(USER_);
 		request.put(VERIFY, verify);
 		request.put(PASSWORD, password);
 		HttpManager.getInstance().post(URL_POST + "register/user/", request, requestCode, listener);
@@ -257,6 +262,23 @@ public class HttpRequest {
 		HttpManager.getInstance().get(URL_BASE + "check/authCode/" + phone + "/" + code, null, requestCode, listener);
 	}
 
+
+	/**设置密码
+	 * @param type
+	 * @param password 只需要phone和verify，不需要old password
+	 * @param phone
+	 * @param verify
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void setPassword(int type, String password, String phone, String verify
+			, int requestCode, OnHttpResponseListener listener) {
+		Password pwd = new Password(phone, password).setType(type);
+		JSONRequest request = new JSONRequest(pwd);
+		request.put(VERIFY, verify);
+		put(request.setTag(Password.class.getSimpleName()), requestCode, listener);
+	}
+	
 	//account>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -280,9 +302,9 @@ public class HttpRequest {
 	public static void getUser(long id, boolean withMomentList, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest(new User(id));
 		if (withMomentList) {
-			request.add(new JSONRequest(MOMENT
+			request.add(new JSONRequest(MOMENT_
 					, new JSONRequest(USER_ID, id).setColumn("pictureList").setOrder(DATE_DOWN))
-			.toArray(3, 0, MOMENT));
+			.toArray(3, 0, MOMENT_));
 		}
 		get(request, requestCode, listener);
 	}
@@ -297,7 +319,7 @@ public class HttpRequest {
 		list.add(id);
 		JSONObject userObject = new JSONObject(new User(user.getId()));
 		userObject.put("friendIdList" + (isFriend ? "+" : "-"), list, true);
-		put(new JSONRequest(USER, userObject).setTag(USER), requestCode, listener);
+		put(new JSONRequest(USER_, userObject).setTag(USER_), requestCode, listener);
 	}
 
 	public static final int RANGE_ALL = 0;
@@ -307,6 +329,7 @@ public class HttpRequest {
 	public static final int RANGE_USER_CIRCLE = 4;//RANGE_USER + RANGE_USER_FRIEND
 	public static final int RANGE_MOMENT = 5;
 	public static final int RANGE_COMMENT = 6;
+
 	/**获取用户列表
 	 * @param range
 	 * @param id
@@ -358,13 +381,13 @@ public class HttpRequest {
 			case RANGE_MOMENT:
 				JSONObject moment = new JSONObject(new Moment(id));
 				moment.setColumn("praiseUserIdList");
-				request.put(MOMENT, moment);
+				request.put(MOMENT_, moment);
 				userItem.put(ID_IN+"@", "Moment/praiseUserIdList");
 				break;
 			case RANGE_COMMENT:
 				JSONObject comment = new JSONObject(new Comment(id));
 				comment.setColumn(USER_ID);
-				request.put(COMMENT, comment);
+				request.put(COMMENT_, comment);
 				userItem.put(ID_AT, "Comment/userId");
 				break;
 			default:
@@ -373,8 +396,8 @@ public class HttpRequest {
 			userItem.add(search);
 		}
 
-		JSONRequest listRequest = new JSONRequest(USER, userItem);
-		listRequest = listRequest.toArray(count, page, USER);
+		JSONRequest listRequest = new JSONRequest(USER_, userItem);
+		listRequest = listRequest.toArray(count, page, USER_);
 		request.add(listRequest);
 		get(request, requestCode, listener);
 	}
@@ -393,14 +416,14 @@ public class HttpRequest {
 	 */
 	public static void getMoment(long id, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest(new Moment(id));
-		request.put(USER, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
+		request.put(USER_, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 		//praise <<<<<<<<<<<<<<<<<<
 		JSONRequest userItem = new JSONRequest();
-		userItem.put(USER, new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
+		userItem.put(USER_, new JSONRequest(ID_IN+"@", "Moment/praiseUserIdList")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		userItem.setQuery(JSONRequest.QUERY_ALL);//同时获取Table和total
-		request.add(userItem.toArray(10, 0, USER));
+		request.add(userItem.toArray(10, 0, USER_));
 		request.put("praiseCount@", "/User[]/total");//获取Table的总数total
 		//praise >>>>>>>>>>>>>>>>>>
 
@@ -456,23 +479,23 @@ public class HttpRequest {
 		moment.setOrder(DATE_DOWN);
 		moment.add(search);
 
-		request.put(MOMENT, moment);
-		request.put(USER, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
+		request.put(MOMENT_, moment);
+		request.put(USER_, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
 
 		//praise <<<<<<<<<<<<<<<<<<
 		JSONRequest userItem = new JSONRequest();
-		userItem.put(USER, new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
+		userItem.put(USER_, new JSONRequest(ID_IN+"@", "[]/Moment/praiseUserIdList")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		//		userItem.setQuery(JSONRequest.QUERY_ALL);
-		request.add(userItem.toArray(10, 0, USER));
+		request.add(userItem.toArray(10, 0, USER_));
 		//		request.put("praiseCount@", "/User[]/total");
 		//praise >>>>>>>>>>>>>>>>>>
 
 		//comment <<<<<<<<<<<<<<<<<<
 		JSONRequest commentItem = new JSONRequest();
-		commentItem.put(COMMENT, new JSONRequest(MOMENT_ID_AT, "[]/Moment/id").setOrder(DATE_UP));
-		commentItem.put(USER, new JSONRequest(ID_AT, "/Comment/userId")
+		commentItem.put(COMMENT_, new JSONRequest(MOMENT_ID_AT, "[]/Moment/id").setOrder(DATE_UP));
+		commentItem.put(USER_, new JSONRequest(ID_AT, "/Comment/userId")
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		//		commentItem.setQuery(JSONRequest.QUERY_ALL);
@@ -494,7 +517,7 @@ public class HttpRequest {
 		List<Long> list = new ArrayList<Long>();
 		list.add(APIJSONApplication.getInstance().getCurrentUserId());
 		data.put("praiseUserIdList" + (toPraise ? "+" : "-"), list, true);
-		put(new JSONRequest(MOMENT, data).setTag(MOMENT), requestCode, listener);
+		put(new JSONRequest(MOMENT_, data).setTag(MOMENT_), requestCode, listener);
 	}
 
 	/**删除动态
@@ -503,7 +526,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void deleteMoment(Long id, int requestCode, OnHttpResponseListener listener) {
-		delete(new JSONRequest(new Moment(id)).setTag(MOMENT), requestCode, listener);
+		delete(new JSONRequest(new Moment(id)).setTag(MOMENT_), requestCode, listener);
 	}
 
 	//Moment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -524,8 +547,8 @@ public class HttpRequest {
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
 		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
-		request.put(COMMENT, comment.setOrder(DATE_UP));
-		request.put(USER, new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
+		request.put(COMMENT_, comment.setOrder(DATE_UP));
+		request.put(USER_, new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 
 		//		if (page == 0) {
 		//			request.setQuery(JSONRequest.QUERY_ALL);
@@ -553,7 +576,7 @@ public class HttpRequest {
 		.setUserId(application.getCurrentUserId())
 		.setMomentId(momentId)
 		.setContent(content);
-		post(new JSONRequest(comment).setTag(COMMENT), requestCode, listener);
+		post(new JSONRequest(comment).setTag(COMMENT_), requestCode, listener);
 	}
 	/**
 	 * @param id
@@ -561,14 +584,14 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void deleteComment(long id, int requestCode, OnHttpResponseListener listener) {
-		delete(new JSONRequest(new Comment(id)).setTag(COMMENT), requestCode, listener);
+		delete(new JSONRequest(new Comment(id)).setTag(COMMENT_), requestCode, listener);
 	}
 
 	//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
-
+	//Money<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**获取钱包
 	 * @param requestCode
@@ -576,23 +599,38 @@ public class HttpRequest {
 	 */
 	public static void getWallet(int requestCode, OnHttpResponseListener listener) {
 		long userId = APIJSONApplication.getInstance().getCurrentUserId();
-		if (userId <= 0) {
-			userId = 38710;
-		}
 
 		JSONRequest request = new JSONRequest();
 		request.put(new Wallet().setUserId(userId));
-		request.put(CURRENT_USER_ID, userId);
 		request.put(LOGIN_PASSWORD, "apijson");
 		request.put(PAY_PASSWORD, "123456");
-		postGet(request.setTag(Wallet.class.getSimpleName()), requestCode, listener);
+		request.put(CURRENT_USER_ID, userId);
+		
+		postGet(request.setTag(WALLET_), requestCode, listener);
+	}
+
+	/**修改余额
+	 * @param change
+	 * @param payPassword
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void changeBalance(double change, String payPassword, int requestCode, OnHttpResponseListener listener) {
+		apijson.demo.client.model.User user = APIJSONApplication.getInstance().getCurrentUser();
+		if (user == null) {
+			user = new apijson.demo.client.model.User();
+		}
+
+		JSONObject wallet = new JSONObject(new Wallet().setUserId(user.getId()));
+		wallet.put("balance+", change, true);
+		JSONRequest request = new JSONRequest(WALLET_, wallet);
+		
+		request.put(new Password(user.getPhone(), payPassword).setType(Password.TYPE_PAY));
+		
+		HttpManager.getInstance().post(URL_PUT + "wallet/", request.setTag(WALLET_), requestCode, listener);
 	}
 
 
-
-
-
-
-	//示例代码>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//Money>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

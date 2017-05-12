@@ -341,8 +341,9 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 		case REQUEST_TO_VERIFY:
 		case REQUEST_TO_REGISTER:
 			if (data != null) {
-				String phone = data.getStringExtra(INTENT_PHONE);
-				String password = data.getStringExtra(requestCode == REQUEST_TO_VERIFY ? INTENT_VERIFY : INTENT_PASSWORD);
+				String phone = data.getStringExtra(PasswordActivity.RESULT_PHONE);
+				String password = data.getStringExtra(requestCode == REQUEST_TO_VERIFY
+						? PasswordActivity.RESULT_VERIFY : PasswordActivity.RESULT_PASSWORD);
 				if (StringUtil.isPhone(phone)) {
 					etLoginPhone.setText(phone);
 				}

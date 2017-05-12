@@ -119,6 +119,10 @@
             android:name="apijson.demo.client.activity_fragment.QRCodeActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity
+            android:name="apijson.demo.client.activity_fragment.NumberPasswordActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible|adjustPan|adjustResize|adjustUnspecified" />
 
 
         <!-- ZBLibrary <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->

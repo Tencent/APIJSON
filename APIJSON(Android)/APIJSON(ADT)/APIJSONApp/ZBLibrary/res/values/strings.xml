@@ -13,6 +13,8 @@
     <string name="login_succeed">登录成功</string>
     <string name="exitting">正在退出，请稍侯……</string>
     <string name="loading">正在加载，请稍后...</string>
+    <string name="failed">失败，请检查网络后重试</string>
+    <string name="succeed">成功</string>
     <string name="get_failed">获取失败，请检查网络后重试</string>
     <string name="get_succeed">获取成功</string>
     <string name="adding">正在添加，请稍后...</string>

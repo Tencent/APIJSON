@@ -47,6 +47,14 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 	//启动方法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	
+	/**启动这个Activity的Intent
+	 * @param context
+	 * @return
+	 */
+	public static Intent createIntent(Context context, int type) {
+		return createIntent(context, type, null, null);
+	}
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param phone
@@ -283,9 +291,9 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 	private Intent newResult() {
 		return new Intent()
-		.putExtra(INTENT_PHONE, StringUtil.getTrimedString(etPasswordPhone))
-		.putExtra(INTENT_VERIFY, StringUtil.getTrimedString(etPasswordVerify))
-		.putExtra(INTENT_PASSWORD, StringUtil.getTrimedString(etPasswordPassword0));
+		.putExtra(RESULT_PHONE, StringUtil.getTrimedString(etPasswordPhone))
+		.putExtra(RESULT_VERIFY, StringUtil.getTrimedString(etPasswordVerify))
+		.putExtra(RESULT_PASSWORD, StringUtil.getTrimedString(etPasswordPassword0));
 	}
 
 	private void saveAndExit(Intent intent) {

@@ -26,7 +26,7 @@ import zuo.biao.apijson.StringUtil;
 {
  "Password":{
      "disallow":"!",
-     "necessary":"id,model"
+     "necessary":"id,type"
  }
 }
  * </pre>
@@ -34,7 +34,7 @@ import zuo.biao.apijson.StringUtil;
 {
     "Password":{
         "disallow":"!",
-        "necessary":"id,password"
+        "necessary":"id,type,password"
     },
     "necessary":"oldPassword"
 }
@@ -43,25 +43,26 @@ import zuo.biao.apijson.StringUtil;
 @SuppressWarnings("serial")
 @APIJSONRequest(
 		method = {RequestMethod.POST_HEAD, RequestMethod.PUT},
-		POST_HEAD = "{\"disallow\": \"!\", \"necessary\": \"id,model\"}",
-		PUT = "{\"Password\": {\"disallow\": \"!\", \"necessary\": \"id,password\"}, \"necessary\": \"oldPassword\"}"
+		POST_HEAD = "{\"disallow\": \"!\", \"necessary\": \"id,type\"}",
+		PUT = "{\"Password\": {\"disallow\": \"!\", \"necessary\": \"id,type,password\"}, \"necessary\": \"oldPassword\"}"
 		)
 public class Password extends BaseModel {
 
-	private String model;//table是MySQL关键字不能用！
+	public static final int TYPE_LOGIN = 0;
+	public static final int TYPE_PAY = 1;
+	
 	private Integer type;
 	private String password;
 
 	public Password() {
 		super();
 	}
-	public Password(String model, String phone) {
+	public Password(String phone) {
 		this();
-		setModel(model);
 		setPhone(phone);
 	}
-	public Password(String model, String phone, String password) {
-		this(model, phone);
+	public Password(String phone, String password) {
+		this(phone);
 		setPassword(password);
 	}
 
@@ -70,13 +71,6 @@ public class Password extends BaseModel {
 		return this;
 	}
 	
-	public String getModel() {
-		return StringUtil.isNotEmpty(model, true) ? model : "User";
-	}
-	public Password setModel(String model) {
-		this.model = model;
-		return this;
-	}
 	public Integer getType() {
 		return type;
 	}

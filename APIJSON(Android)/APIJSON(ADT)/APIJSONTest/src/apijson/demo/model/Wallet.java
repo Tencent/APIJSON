@@ -44,9 +44,6 @@ public class Wallet extends BaseModel {
 		setId(id);
 	}
 	
-	public Long getUserId() {
-		return userId;
-	}
 	public Wallet setUserId(Long userId) {
 		this.userId = userId;
 		return this;

@@ -6,5 +6,6 @@
     <string name="publish_succeed">发布成功</string>
     <string name="comment_failed">评论失败，再试一次吧^_^</string>
     <string name="comment_succeed">评论成功</string>
-
+    <string name="please_input_password">请输入密码</string>
+    <string name="password_not_equal">密码不一致</string>
 </resources>

@@ -34,10 +34,8 @@ public class Wallet extends apijson.demo.server.model.Wallet {
 		Long value = super.getId();
 		return value == null ? 0 : value;
 	}
-	@Override
 	public Long getUserId() {
-		Long value = super.getUserId();
-		return value == null ? 0 : value;
+		return getId();
 	}
 
 }
