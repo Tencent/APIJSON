@@ -41,6 +41,7 @@ import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
+import zuo.biao.apijson.server.exception.OutOfRangeException;
 import zuo.biao.apijson.server.sql.AccessVerifier;
 import zuo.biao.apijson.server.sql.QueryConfig;
 import zuo.biao.apijson.server.sql.QueryHelper;
@@ -118,7 +119,7 @@ public class Parser {
 		} catch (Exception e) {
 			return newErrorResult(e);
 		}
-		
+
 		return parseResponse(requestObject);
 	}
 	/**解析请求json并获取对应结果
@@ -160,13 +161,10 @@ public class Parser {
 	/**解析请求JSONObject
 	 * @param request => URLDecoder.decode(request, UTF_8);
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JSONObject parseRequest(String request, RequestMethod method) {
-		try {
-			request = URLDecoder.decode(request, UTF_8);
-		} catch (UnsupportedEncodingException e) {
-			return newErrorResult(e);
-		}
+	public static JSONObject parseRequest(String request, RequestMethod method) throws Exception {
+		request = URLDecoder.decode(request, UTF_8);
 		if (method == null) {
 			method = GET;
 		}
@@ -270,6 +268,8 @@ public class Parser {
 				status = 409;
 			} else if (e instanceof ConditionNotMatchException) {
 				status = 412;
+			} else if (e instanceof OutOfRangeException) {
+				status = 416;
 			}
 
 			return newResult(status, e.getMessage());
@@ -278,9 +278,9 @@ public class Parser {
 	}
 
 
-	
-	
-	
+
+
+
 	/**获取正确的请求，非GET请求必须是服务器指定的
 	 * @param method
 	 * @param request

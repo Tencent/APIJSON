@@ -14,23 +14,22 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.exception;
 
-/**
+/**超出范围
  * @author Lemon
  */
-public class ConditionNotMatchException extends Exception {
-	private static final long serialVersionUID = -7067141825558078593L;
+public class OutOfRangeException extends Exception {
+	private static final long serialVersionUID = 642233915506389465L;
 	
-	
-	public ConditionNotMatchException() {
+	public OutOfRangeException() {
 		super();
 	}
-	public ConditionNotMatchException(String msg) {
+	public OutOfRangeException(String msg) {
 		super(msg);
 	}
-	public ConditionNotMatchException(Throwable t) {
+	public OutOfRangeException(Throwable t) {
 		super(t);
 	}
-	public ConditionNotMatchException(String msg, Throwable t) {
+	public OutOfRangeException(String msg, Throwable t) {
 		super(msg, t);
 	}
 	

@@ -27,7 +27,7 @@ import zuo.biao.apijson.RequestMethod;
 {
     "Wallet":{
         "disallow":"!",
-        "necessary":"userId"
+        "necessary":"id"
     }
 }
  * </pre>
@@ -35,7 +35,7 @@ import zuo.biao.apijson.RequestMethod;
 {
     "Wallet":{
         "disallow":"!",
-        "necessary":"userId"
+        "necessary":"id"
     },
     "necessary":"payPassword"
 }
@@ -44,16 +44,16 @@ import zuo.biao.apijson.RequestMethod;
 {
     "Wallet":{
         "disallow":"!",
-        "necessary":"userId,balance+"
+        "necessary":"id,balance+"
     },
-    "necessary":"payPassword,oldPassword"
+    "necessary":"payPassword"
 }
  * </pre>
  * <br >DELETE:delete/wallet<pre>
 {
     "Wallet":{
         "disallow":"!",
-        "necessary":"userId"
+        "necessary":"id"
     },
     "necessary":"payPassword"
 }
@@ -61,17 +61,15 @@ import zuo.biao.apijson.RequestMethod;
  */
 @APIJSONRequest(
 		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		POST_GET = "{\"disallow\": \"!\", \"necessary\": \"userId\"}",
-		POST = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"userId\"}, \"necessary\": \"payPassword\"}",
-		PUT = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"userId,balance+\"}, \"necessary\": \"payPassword,oldPassword\"}",
-		DELETE = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"userId\"}, \"necessary\": \"payPassword\"}"
+		POST_GET = "{\"disallow\": \"!\", \"necessary\": \"id\"}",
+		POST = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"id\"}, \"necessary\": \"payPassword\"}",
+		PUT = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"id,balance+\"}, \"necessary\": \"payPassword\"}",
+		DELETE = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"id\"}, \"necessary\": \"payPassword\"}"
 		)
 public class Wallet extends BaseModel {
 	private static final long serialVersionUID = 4298571449155754300L;
 
 	public BigDecimal balance;
-
-	private Long userId;
 
 	/**默认构造方法，JSON等解析时必须要有
 	 */
@@ -83,11 +81,9 @@ public class Wallet extends BaseModel {
 		setId(id);
 	}
 
-	public Long getUserId() {
-		return userId;
-	}
-	public Wallet setUserId(Long userId) {
-		this.userId = userId;
+
+	public Wallet setUserId(long userId) {
+		setId(userId);
 		return this;
 	}
 
