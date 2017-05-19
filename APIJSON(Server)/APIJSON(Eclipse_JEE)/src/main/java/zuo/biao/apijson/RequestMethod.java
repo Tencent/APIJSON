@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-/**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出一个POST_GET方法
+/**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出POST_GET,POST_HEAD方法
  * @author Lemon
  */
 public enum RequestMethod {

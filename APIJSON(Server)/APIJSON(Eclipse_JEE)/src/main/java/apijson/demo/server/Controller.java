@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package apijson.demo.server;
 
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.HEAD;
@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.Comment;
 import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
@@ -39,10 +40,11 @@ import apijson.demo.server.model.Password;
 import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
 import apijson.demo.server.model.Wallet;
-import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.JSONRequest;
+import zuo.biao.apijson.server.Parser;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.OutOfRangeException;
@@ -54,6 +56,10 @@ import zuo.biao.apijson.server.exception.OutOfRangeException;
 @RequestMapping("")
 public class Controller {
 
+	/**如果用在金融等对安全要求很高的领域，get和head可以测试期间使用明文的HTTP GET，上线版改用非明文的HTTP POST，兼顾系统安全与开发效率
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping("head/{request}")
 	public String head(@PathVariable String request) {
 		return new Parser(HEAD).parse(request);

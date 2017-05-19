@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server.sql;
+package apijson.demo.server;
 
 import java.rmi.AccessException;
 import java.util.HashMap;
@@ -32,6 +32,7 @@ import zuo.biao.apijson.APIJSONRequest;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.sql.QueryConfig;
 
 /**权限验证类
  * @author Lemon

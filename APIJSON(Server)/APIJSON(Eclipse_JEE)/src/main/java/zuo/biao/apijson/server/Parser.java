@@ -27,13 +27,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.demo.server.AccessVerifier;
+import apijson.demo.server.model.Request;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
@@ -42,7 +43,6 @@ import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.OutOfRangeException;
-import zuo.biao.apijson.server.sql.AccessVerifier;
 import zuo.biao.apijson.server.sql.QueryConfig;
 import zuo.biao.apijson.server.sql.QueryHelper;
 
@@ -51,8 +51,6 @@ import zuo.biao.apijson.server.sql.QueryHelper;
  */
 public class Parser {
 	private static final String TAG = "Parser";
-
-	public static final String SEPARATOR = StringUtil.SEPARATOR;
 
 
 	/**
@@ -290,6 +288,7 @@ public class Parser {
 	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request) throws Exception {
 		return getCorrectRequest(method, request, null);
 	}
+	//TODO 启动时一次性加载Request所有内容，作为初始化。
 	/**获取正确的请求，非GET请求必须是服务器指定的
 	 * @param method
 	 * @param request
@@ -308,7 +307,7 @@ public class Parser {
 		}
 
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
-		QueryConfig config = new QueryConfig(GET, "Request");
+		QueryConfig config = new QueryConfig(GET, Request.class.getSimpleName());
 		config.setColumn("structure");
 
 		Map<String, Object> where = new HashMap<String, Object>();
@@ -322,7 +321,7 @@ public class Parser {
 			queryHelper = new QueryHelper();
 		}
 		try {
-			object = queryHelper.select(config);
+			object = queryHelper.execute(config);
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e.getMessage();
@@ -335,7 +334,7 @@ public class Parser {
 		object = Parser.getJSONObject(object, "structure");//解决返回值套了一层 "structure":{}
 
 		JSONObject target = null;
-		if (Parser.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
+		if (zuo.biao.apijson.JSONObject.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
 			target = new JSONObject(true);
 			target.put(tag, object);
 		} else {
@@ -404,7 +403,7 @@ public class Parser {
 			@Override
 			public com.alibaba.fastjson.JSON parseChild(@NotNull String path, @NotNull String key
 					, @NotNull com.alibaba.fastjson.JSON value) throws Exception {
-				if (isArrayKey(key)) {//APIJSON Array
+				if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
 					child = getArray(path, key, (JSONObject) value);
 					isEmpty = child == null || ((JSONArray) child).isEmpty();
 				} else {//APIJSON Object
@@ -489,8 +488,8 @@ public class Parser {
 	 * @param parentPath parentObject的路径
 	 * @param name parentObject的key
 	 * @param request parentObject的value
-	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
-	 * @throws Exception 
+	 * @return 
+	 * @throws Exception
 	 */
 	private JSONArray getArray(String parentPath, String name, final JSONObject request) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
@@ -554,7 +553,7 @@ public class Parser {
 	 * @return
 	 */
 	public static String getValuePath(String parentPath, String valuePath) {
-		if (valuePath.startsWith(SEPARATOR)) {
+		if (valuePath.startsWith("/")) {
 			valuePath = getAbsPath(parentPath, valuePath);
 		} else {//处理[] -> []/i
 			valuePath = replaceArrayChildPath(parentPath, valuePath);
@@ -573,12 +572,12 @@ public class Parser {
 		name = StringUtil.getString(name);
 		if (StringUtil.isNotEmpty(path, false)) {
 			if (StringUtil.isNotEmpty(name, false)) {
-				path += ((name.startsWith(SEPARATOR) ? "" : SEPARATOR) + name);
+				path += ((name.startsWith("/") ? "" : "/") + name);
 			}
 		} else {
 			path = name;
 		}
-		if (path.startsWith(SEPARATOR)) {
+		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
 		Log.i(TAG, "getPath  return " + path + " >>>>>>>>>>>>>>>>");
@@ -705,35 +704,9 @@ public class Parser {
 		if (noVerify == false) {
 			AccessVerifier.verify(requestObject, config);
 		}
-		return queryHelper.select(config);//QueryHelper2.getInstance().select(config);//
+		return queryHelper.execute(config);
 	}
 
-
-
-	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
-	private static final Pattern namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
-
-	/**判断是否为Array的key
-	 * @param key
-	 * @return
-	 */
-	public static boolean isArrayKey(String key) {
-		return key != null && key.endsWith("[]");
-	}
-	/**判断是否为对应Table的key
-	 * @param key
-	 * @return
-	 */
-	public static boolean isTableKey(String key) {
-		return isWord(key) && bigAlphaPattern.matcher(key.substring(0, 1)).matches();
-	}
-	/**判断是否为词，只能包含字母，数字或下划线
-	 * @param key
-	 * @return
-	 */
-	public static boolean isWord(String key) {
-		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
-	}
 
 
 
@@ -752,7 +725,7 @@ public class Parser {
 	public static String getRealKey(RequestMethod method, String originKey, boolean isTableKey, boolean saveLogic)
 			throws Exception {
 		Log.i(TAG, "getRealKey  saveLogic = " + saveLogic + "; originKey = " + originKey);
-		if (originKey == null || isArrayKey(originKey)) {
+		if (originKey == null || zuo.biao.apijson.JSONObject.isArrayKey(originKey)) {
 			Log.w(TAG, "getRealKey  originKey == null || isArrayKey(originKey) >>  return originKey;");
 			return originKey;
 		}
@@ -795,7 +768,7 @@ public class Parser {
 			key = Pair.parseEntry(key).getValue();//column以右边为准
 		}
 
-		if (isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
+		if (zuo.biao.apijson.JSONObject.isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
 			throw new IllegalArgumentException(TAG + "/" + method + "  getRealKey: 字符 " + originKey + " 不合法！");
 		}
 

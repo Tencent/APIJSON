@@ -131,7 +131,7 @@ public class Structure {
 					if (tobj != null) {//不允许不传Target中指定的Table
 						throw new IllegalArgumentException("请设置 " + key + " ！");
 					}
-				} else if (Parser.isTableKey(key)) {
+				} else if (zuo.biao.apijson.JSONObject.isTableKey(key)) {
 					if (method == POST) {
 						if (robj.containsKey(QueryConfig.ID)) {
 							throw new IllegalArgumentException("POST " + key + " 请求不能设置" + QueryConfig.ID + "！");
@@ -300,7 +300,7 @@ public class Structure {
 					tvalue = callback.onParseJSONObject(key, (JSONObject) tvalue, (JSONObject) rvalue);
 
 					pair = Pair.parseEntry(key, true);
-					if (pair != null && Parser.isTableKey(pair.getKey())) {
+					if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
 						tableKeySet.add(key);
 					}
 				} else if (tvalue instanceof JSONArray) {//JSONArray
@@ -321,7 +321,8 @@ public class Structure {
 		//不允许操作未指定Table<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
 			pair = Pair.parseEntry(rk, true);//非GET类操作不允许Table:alias别名
-			if (pair != null && Parser.isTableKey(pair.getKey()) && tableKeySet.contains(rk) == false) {
+			if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())
+					&& tableKeySet.contains(rk) == false) {
 				throw new UnsupportedOperationException("不允许操作 " + rk + " ！");
 			}
 		}
@@ -462,7 +463,7 @@ public class Structure {
 	private static void putTargetChild(JSONObject real, String tk, Object tv, Set<String> tableKeySet) {
 		real.put(tk, tv);
 		zuo.biao.apijson.server.Entry<String, String> pair = Pair.parseEntry(tk, true);
-		if (pair != null && Parser.isTableKey(pair.getKey())) {
+		if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
 			tableKeySet.add(tk);
 		}
 	}

@@ -17,7 +17,6 @@ package apijson.demo.server.model;
 import java.util.List;
 
 import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 
 /**用户类

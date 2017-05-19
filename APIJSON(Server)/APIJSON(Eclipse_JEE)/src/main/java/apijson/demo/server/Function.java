@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson.server;
+package apijson.demo.server;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,12 +21,13 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.BaseModel;
-import zuo.biao.apijson.FunctionList;
+import apijson.demo.server.model.BaseModel;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.Entry;
+import zuo.biao.apijson.server.Pair;
 
-/**
+/**可远程调用的函数类
  * @author Lemon
  */
 public class Function implements FunctionList {
@@ -58,18 +59,6 @@ public class Function implements FunctionList {
 		map.put("key", true);
 		jsonMap.put("map", map);
 
-		String function = "get(Collection:collection,int:position)";//只允许引用，不能直接传值//"plus(@i0,@i1)";
-
-		String key = "praiseCount@function";
-		if (key.endsWith("@")) {//内部引用
-
-		} else if (key.endsWith("@function")) {//引用服务器方法
-			long time0 = System.currentTimeMillis();
-			Log.i(TAG, "" + time0);
-			Object result = invoke(jsonMap, function);
-			Log.i(TAG, "" + result);
-			Log.i(TAG, "duration=" + (System.currentTimeMillis()-time0));
-		}
 
 		Log.i(TAG, "plus = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
 		Log.i(TAG, "count = " + invoke(jsonMap, "count(Collection:collection)"));

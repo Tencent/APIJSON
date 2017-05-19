@@ -28,6 +28,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.demo.server.Function;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.server.exception.ConflictException;
@@ -89,7 +90,7 @@ public class ObjectParser implements ParserAdapter {
 		
 		this.path = Parser.getAbsPath(parentPath, name);
 		this.table = Pair.parseEntry(name, true).getKey();
-		this.isTableKey = Parser.isTableKey(table);
+		this.isTableKey = zuo.biao.apijson.JSONObject.isTableKey(table);
 		Log.d(TAG, "ObjectParser  table = " + table + "; isTableKey = " + isTableKey);
 	}
 

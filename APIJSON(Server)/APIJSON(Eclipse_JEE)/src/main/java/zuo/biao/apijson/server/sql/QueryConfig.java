@@ -17,6 +17,9 @@ package zuo.biao.apijson.server.sql;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
 import static zuo.biao.apijson.RequestMethod.POST_GET;
+import static zuo.biao.apijson.SQL.AND;
+import static zuo.biao.apijson.SQL.NOT;
+import static zuo.biao.apijson.SQL.OR;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,10 +65,6 @@ public class QueryConfig {
 		TABLE_KEY_LIST.add(JSONRequest.KEY_HAVING);
 		TABLE_KEY_LIST.add(JSONRequest.KEY_ORDER);
 	}
-
-	public static final String OR = SQL.OR;
-	public static final String AND = SQL.AND;
-	public static final String NOT = SQL.NOT;
 
 
 

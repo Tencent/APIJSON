@@ -104,7 +104,7 @@ public class QueryHelper {
 		cacheMap = null;
 	}
 
-	public JSONObject select(QueryConfig config) throws Exception {
+	public JSONObject execute(QueryConfig config) throws Exception {
 		final String sql = QueryConfig.getSQL(config);
 		if (StringUtil.isNotEmpty(sql, true) == false) {
 			Log.e(TAG, "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
