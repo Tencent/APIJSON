@@ -12,65 +12,38 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package apijson.demo.server;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
-/**base model for reduce model codes
+/**可远程调用的函数列表
  * @author Lemon
- * @use extends BaseModel
  */
-@SuppressWarnings("serial")
-public abstract class BaseModel implements Serializable {
-
-	private Long id;
-	private Long date;
-
-	public Long getId() {
-		return id;
-	}
-	public BaseModel setId(Long id) {
-		this.id = id;
-		return this;
-	}
-	public Long getDate() {
-		return date;
-	}
-	public BaseModel setDate(Long date) {
-		this.date = date;
-		return this;
-	}
+public interface FunctionList {
 
 	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**判断collection是否为空
 	 * @param collection
 	 * @return
 	 */
-	public static <T> boolean isEmpty(Collection<T> collection) {
-		return collection == null || collection.isEmpty();
-	}
+	public <T> boolean isEmpty(Collection<T> collection);
 	/**判断map是否为空
 	 * @param <K>
 	 * @param <V>
 	 * @param map
 	 * @return
 	 */
-	public static <K, V> boolean isEmpty(Map<K, V> map) {
-		return map == null || map.isEmpty();
-	}
+	public <K, V> boolean isEmpty(Map<K, V> map);
 	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
-	//判断是否包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	//判断是否为包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**判断collection是否包含object
 	 * @param collection
 	 * @param object
 	 * @return
 	 */
-	public static <T> boolean isContain(Collection<T> collection, T object) {
-		return collection != null && collection.contains(object);
-	}
+	public <T> boolean isContain(Collection<T> collection, T object);
 	/**判断map是否包含key
 	 * @param <K>
 	 * @param <V>
@@ -78,9 +51,7 @@ public abstract class BaseModel implements Serializable {
 	 * @param key
 	 * @return
 	 */
-	public static <K, V> boolean isContainKey(Map<K, V> map, K key) {
-		return map != null && map.containsKey(key);
-	}
+	public <K, V> boolean isContainKey(Map<K, V> map, K key);
 	/**判断map是否包含value
 	 * @param <K>
 	 * @param <V>
@@ -88,9 +59,7 @@ public abstract class BaseModel implements Serializable {
 	 * @param value
 	 * @return
 	 */
-	public static <K, V> boolean isContainValue(Map<K, V> map, V value) {
-		return map != null && map.containsValue(value);
-	}
+	public <K, V> boolean isContainValue(Map<K, V> map, V value);
 	//判断是否为包含 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
@@ -100,26 +69,20 @@ public abstract class BaseModel implements Serializable {
 	 * @param array
 	 * @return
 	 */
-	public static <T> int count(T[] array) {
-		return array == null ? 0 : array.length;
-	}
+	public <T> int count(T[] array);
 	/**获取数量
 	 * @param <T>
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
-	public static <T> int count(Collection<T> collection) {
-		return collection == null ? 0 : collection.size();
-	}
+	public <T> int count(Collection<T> collection);
 	/**获取数量
 	 * @param <K>
 	 * @param <V>
 	 * @param map
 	 * @return
 	 */
-	public static <K, V> int count(Map<K, V> map) {
-		return map == null ? 0 : map.size();
-	}
+	public <K, V> int count(Map<K, V> map);
 	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
@@ -129,18 +92,13 @@ public abstract class BaseModel implements Serializable {
 	 * @param array
 	 * @return
 	 */
-	public static <T> T get(T[] array, int position) {
-		return position < 0 || position >= count(array) ? null : array[position];
-	}
+	public <T> T get(T[] array, int position);
 	/**获取
 	 * @param <T>
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T get(Collection<T> collection, int position) {
-		return (T) (collection == null ? null : get(collection.toArray(), position));
-	}
+	public <T> T get(Collection<T> collection, int position);
 	/**获取
 	 * @param <K>
 	 * @param <V>
@@ -148,9 +106,7 @@ public abstract class BaseModel implements Serializable {
 	 * @param key null ? null : map.get(key);
 	 * @return
 	 */
-	public static <K, V> V get(Map<K, V> map, K key) {
-		return key == null || map == null ? null : map.get(key);
-	}
+	public <K, V> V get(Map<K, V> map, K key);
 	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
@@ -160,37 +116,27 @@ public abstract class BaseModel implements Serializable {
 	 * @param value
 	 * @return
 	 */
-	public static boolean value(Boolean value) {
-		return value == null ? false : value;
-	}
+	public boolean value(Boolean value);
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static int value(Integer value) {
-		return value == null ? 0 : value;
-	}
+	public int value(Integer value);
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static long value(Long value) {
-		return value == null ? 0 : value;
-	}
+	public long value(Long value);
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static float value(Float value) {
-		return value == null ? 0 : value;
-	}
+	public float value(Float value);
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public static double value(Double value) {
-		return value == null ? 0 : value;
-	}
+	public double value(Double value);
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

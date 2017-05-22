@@ -14,8 +14,6 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import static zuo.biao.apijson.StringUtil.bigAlphaPattern;
-
 import java.util.List;
 import java.util.Set;
 
@@ -26,8 +24,8 @@ import com.alibaba.fastjson.JSONObject;
  * @author Lemon
  * @see #getList
  * @see #toArray
- * @use JSONResponse response = new JSONResponse(...);
- * <br> JSONArray array = JSONResponse.toArray(response.getJSONObject(KEY_ARRAY));//not a must
+ * @use JSONResponse response = new JSONResponse(json);
+ * <br> JSONArray array = JSONResponse.toArray(response.getJSONObject("[]"));//not a must
  * <br> User user = JSONResponse.getObject(response, User.class);//not a must
  * <br> List<Comment> list = JSONResponse.getList(response.getJSONObject("Comment[]"), Comment.class);//not a must
  */
@@ -451,16 +449,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 * @return empty ? "list" : key + "List" 且首字母小写
 	 */
 	public static String getArrayKey(String key) {
-		key = StringUtil.getNoBlankString(key);
-		if (key.isEmpty()) {
-			return "list";
-		}
-
-		String first = key.substring(0, 1);
-		if (bigAlphaPattern.matcher(first).matches()) {
-			key = first.toLowerCase() + key.substring(1, key.length());
-		}
-		return key + "List";
+		return StringUtil.addSuffix(key, "list");
 	}
 
 	/**获取简单名称

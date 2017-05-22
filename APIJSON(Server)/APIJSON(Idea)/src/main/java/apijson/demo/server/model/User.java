@@ -17,7 +17,6 @@ package apijson.demo.server.model;
 import java.util.List;
 
 import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 
 /**用户类
@@ -51,7 +50,7 @@ import zuo.biao.apijson.RequestMethod;
  * </pre>
  */
 @APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
+		method = {RequestMethod.GET, RequestMethod.POST_GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
 		POST = "{\"User\": {\"disallow\": \"id\", \"necessary\": \"name,phone\"}, \"necessary\": \"loginPassword,verify\"}",
 		PUT = "{\"disallow\": \"phone\", \"necessary\": \"id\"}"
 		)

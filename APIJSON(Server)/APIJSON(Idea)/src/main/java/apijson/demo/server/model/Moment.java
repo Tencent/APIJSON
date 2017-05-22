@@ -17,7 +17,6 @@ package apijson.demo.server.model;
 import java.util.List;
 
 import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
 import zuo.biao.apijson.RequestMethod;
 
 /**动态类
@@ -41,7 +40,7 @@ import zuo.biao.apijson.RequestMethod;
  * </pre>
  */
 @APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
+		method = {RequestMethod.GET, RequestMethod.POST_GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
 		POST = "{\"disallow\": \"id\", \"necessary\": \"userId,pictureList\"}",
 		PUT = "{\"disallow\": \"userId,date\", \"necessary\": \"id\"}",
 		DELETE = "{\"necessary\": \"id\"}"

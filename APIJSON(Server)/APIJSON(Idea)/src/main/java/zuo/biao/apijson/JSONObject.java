@@ -15,8 +15,6 @@ limitations under the License.*/
 package zuo.biao.apijson;
 
 import static zuo.biao.apijson.StringUtil.UTF_8;
-import static zuo.biao.apijson.StringUtil.bigAlphaPattern;
-import static zuo.biao.apijson.StringUtil.namePattern;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -218,14 +216,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return
 	 */
 	public static boolean isTableKey(String key) {
-		return isWord(key) && bigAlphaPattern.matcher(key.substring(0, 1)).matches();
-	}
-	/**判断是否为词，只能包含字母，数字或下划线
-	 * @param key
-	 * @return
-	 */
-	public static boolean isWord(String key) {
-		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
+		return StringUtil.isBigWord(key);
 	}
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -252,9 +243,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(KEY_COLUMN, keys);
 		return this;
 	}
-	public String getColumn() {
-		return getString(KEY_COLUMN);
-	}
 	
 	/**set keys for group by
 	 * @param keys key0, key1, key2 ...
@@ -270,9 +258,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setGroup(String keys) {
 		put(KEY_GROUP, keys);
 		return this;
-	}
-	public String getGroup() {
-		return getString(KEY_GROUP);
 	}
 	
 	/**set keys for having
@@ -290,9 +275,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(KEY_HAVING, keys);
 		return this;
 	}
-	public String getHaving() {
-		return getString(KEY_HAVING);
-	}
 	
 	/**set keys for order by
 	 * @param keys  key0, key1+, key2- ...
@@ -308,9 +290,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setOrder(String keys) {
 		put(KEY_ORDER, keys);
 		return this;
-	}
-	public String getOrder() {
-		return getString(KEY_ORDER);
 	}
 	
 	

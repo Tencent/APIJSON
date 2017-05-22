@@ -45,6 +45,11 @@ public class QueryHelper {
 	private static final String YOUR_MYSQL_ACCOUNT = "root";//TODO edit to an available one
 	private static final String YOUR_MYSQL_PASSWORD = "apijson";//TODO edit to an available one
 
+//	private static final Map<String, Map<Integer, JSONObject>> staticCacheMap;
+//	static {
+//		staticCacheMap = new HashMap<String, Map<Integer, JSONObject>>();
+//	}
+	
 	private Map<String, Map<Integer, JSONObject>> cacheMap = new HashMap<String, Map<Integer, JSONObject>>();
 	static {
 		try {//调用Class.forName()方法加载驱动程序
@@ -59,23 +64,31 @@ public class QueryHelper {
 		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_SCHEMA, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
 	}
 
-	private synchronized void saveCache(String sql, Map<Integer, JSONObject> map) {
+	private synchronized void saveCache(String sql, Map<Integer, JSONObject> map, boolean isStatic) {
 		if (sql == null || map == null) { //空map有效，说明查询过sql了  || map.isEmpty()) {
 			Log.i(TAG, "saveList  sql == null || map == null >> return;");
 			return;
 		}
-		cacheMap.put(sql, map);
+//		if (isStatic) {
+//			staticCacheMap.put(sql, map);
+//		} else {
+			cacheMap.put(sql, map);
+//		}
 	}
-	public synchronized void removeCache(String sql) {
+	public synchronized void removeCache(String sql, boolean isStatic) {
 		if (sql == null) {
 			Log.i(TAG, "removeList  sql == null >> return;");
 			return;
 		}
-		cacheMap.remove(sql);
+//		if (isStatic) {
+//			staticCacheMap.remove(sql);
+//		} else {
+			cacheMap.remove(sql);
+//		}
 	}
 
-	private JSONObject getFromCache(String sql, int position) {
-		Map<Integer, JSONObject> map = cacheMap.get(sql);
+	public JSONObject getFromCache(String sql, int position, boolean isStatic) {
+		Map<Integer, JSONObject> map = /** isStatic ? staticCacheMap.get(sql) : */ cacheMap.get(sql);
 		//只要map不为null，则如果 map.get(position) == null，则返回 {} ，避免再次SQL查询
 		if (map == null) {
 			return null;
@@ -104,7 +117,7 @@ public class QueryHelper {
 		cacheMap = null;
 	}
 
-	public JSONObject select(QueryConfig config) throws Exception {
+	public JSONObject execute(QueryConfig config) throws Exception {
 		final String sql = QueryConfig.getSQL(config);
 		if (StringUtil.isNotEmpty(sql, true) == false) {
 			Log.e(TAG, "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
@@ -157,7 +170,7 @@ public class QueryHelper {
 
 
 		final int position = config.getPosition();
-		result = getFromCache(sql, position);
+		result = getFromCache(sql, position, config.isCacheStatic());
 		Log.i(TAG, ">>> select  result = getFromCache('" + sql + "', " + position + ") = " + result);
 		if (result != null) {
 			Log.d(TAG, "\n\n select  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
@@ -224,7 +237,7 @@ public class QueryHelper {
 
 		rs.close();
 
-		saveCache(sql, resultMap);
+		saveCache(sql, resultMap, config.isCacheStatic());
 		Log.i(TAG, ">>> select  saveCache('" + sql + "', resultMap);  resultMap.size() = " + resultMap.size());
 
 		Log.d(TAG, "\n\n select  return resultMap.get(" + position + ");"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");

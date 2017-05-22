@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import static zuo.biao.apijson.JSONResponse.KEY_ID;
 import static zuo.biao.apijson.RequestMethod.POST;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -33,8 +35,8 @@ import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.sql.QueryConfig;
 
+//TODO 放到 zuo.biao.apijson 包内，供Android客户端校验请求结构
 /**结构类
  * 增删改查: operation(add,replace,put,remove)   operation:{key0:value0, key1:value1 ...}
  * 对值校验: verify:{key0:value0, key1:value1 ...}  (key{}:range,key$:"%m%"等)
@@ -47,6 +49,7 @@ public class Structure {
 
 	private Structure() {}
 
+	
 
 	static final String requestString = "{\"Comment\":{\"disallow\": \"id\", \"necessary\": \"userId,momentId,content\"}, \"add\":{\"Comment:to\":{}}}";
 	static final String responseString = "{\"User\":{\"remove\": \"phone\", \"replace\":{\"sex\":2}, \"add\":{\"name\":\"api\"}}, \"put\":{\"Comment:to\":{}}}";
@@ -76,25 +79,25 @@ public class Structure {
 		JSONObject response;
 		try {
 			response = JSON.parseObject("{\"User\":{\"userId\":0}}");
-			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response));
+			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		try {
 			response = JSON.parseObject("{\"User\":{\"userId\":0, \"phone\":\"12345678\"}}");
-			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response));
+			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		try {
 			response = JSON.parseObject("{\"User\":{\"userId\":0, \"phone\":\"12345678\", \"sex\":1}}");
-			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response));
+			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		try {
 			response = JSON.parseObject("{\"User\":{\"id\":0, \"name\":\"tommy\", \"phone\":\"12345678\", \"sex\":1}}");
-			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response));
+			Log.d(TAG, "test  parseResponse = " + parseResponse(RequestMethod.GET, "", JSON.parseObject(responseString), response, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -131,15 +134,14 @@ public class Structure {
 					if (tobj != null) {//不允许不传Target中指定的Table
 						throw new IllegalArgumentException("请设置 " + key + " ！");
 					}
-				} else if (Parser.isTableKey(key)) {
+				} else if (zuo.biao.apijson.JSONObject.isTableKey(key)) {
 					if (method == POST) {
-						if (robj.containsKey(QueryConfig.ID)) {
-							throw new IllegalArgumentException("POST " + key + " 请求不能设置" + QueryConfig.ID + "！");
+						if (robj.containsKey(KEY_ID)) {
+							throw new IllegalArgumentException("POST " + key + " 请求不能设置" + KEY_ID + "！");
 						}
 					} else {
-						if (Parser.isGetMethod(method, true) == false && Parser.isHeadMethod(method, true) == false
-								&& robj.containsKey(QueryConfig.ID) == false) {
-							throw new IllegalArgumentException("请设置 " + key + " 的 " + QueryConfig.ID + "！");
+						if (RequestMethod.isQueryMethod(method) == false && robj.containsKey(KEY_ID) == false) {
+							throw new IllegalArgumentException("请设置 " + key + " 的 " + KEY_ID + "！");
 						}
 					}
 				} 
@@ -155,31 +157,23 @@ public class Structure {
 	 * @param method
 	 * @param name
 	 * @param target
-	 * @param request
+	 * @param response
+	 * @param callback 
 	 * @return
 	 * @throws Exception
 	 */
 	public static JSONObject parseResponse(final RequestMethod method, final String name
-			, final JSONObject target, final JSONObject response) throws Exception {
+			, final JSONObject target, final JSONObject response, OnParseCallback callback) throws Exception {
 		Log.i(TAG, "parseResponse  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
 				+ "\n response = \n" + JSON.toJSONString(response));
-		if (target == null || response == null) {
-			Log.i(TAG, "parseRequest  target == null || response == null >> return null;");
-			return null;
+		if (target == null || response == null) {// || target.isEmpty() {
+			Log.i(TAG, "parseRequest  target == null || response == null >> return response;");
+			return response;
 		}
 
-		//获取配置
-
-
 		//解析
-		return parse(name, target, response, new OnParseCallback() {
-
-			@Override
-			protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
-				return parseResponse(method, key, tobj, robj);
-			}
-		});
+		return parse(name, target, response, callback != null ? callback : new OnParseCallback() {});
 	}
 
 
@@ -192,7 +186,7 @@ public class Structure {
 	 * @throws Exception 
 	 */
 	public static JSONObject parse(String name, JSONObject target, JSONObject real
-			, OnParseCallback callback) throws Exception {
+			, @NotNull OnParseCallback callback) throws Exception {
 		if (target == null) {
 			return null;
 		}
@@ -300,7 +294,7 @@ public class Structure {
 					tvalue = callback.onParseJSONObject(key, (JSONObject) tvalue, (JSONObject) rvalue);
 
 					pair = Pair.parseEntry(key, true);
-					if (pair != null && Parser.isTableKey(pair.getKey())) {
+					if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
 						tableKeySet.add(key);
 					}
 				} else if (tvalue instanceof JSONArray) {//JSONArray
@@ -321,7 +315,8 @@ public class Structure {
 		//不允许操作未指定Table<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
 			pair = Pair.parseEntry(rk, true);//非GET类操作不允许Table:alias别名
-			if (pair != null && Parser.isTableKey(pair.getKey()) && tableKeySet.contains(rk) == false) {
+			if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())
+					&& tableKeySet.contains(rk) == false) {
 				throw new UnsupportedOperationException("不允许操作 " + rk + " ！");
 			}
 		}
@@ -462,7 +457,7 @@ public class Structure {
 	private static void putTargetChild(JSONObject real, String tk, Object tv, Set<String> tableKeySet) {
 		real.put(tk, tv);
 		zuo.biao.apijson.server.Entry<String, String> pair = Pair.parseEntry(tk, true);
-		if (pair != null && Parser.isTableKey(pair.getKey())) {
+		if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
 			tableKeySet.add(tk);
 		}
 	}

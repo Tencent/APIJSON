@@ -98,10 +98,6 @@ public class JSONRequest extends JSONObject {
 		put(KEY_QUERY, query);
 		return this;
 	}
-	public int getQuery() {
-		return getIntValue(KEY_QUERY);
-	}
-
 	/**
 	 * @param count
 	 * @return
@@ -110,10 +106,6 @@ public class JSONRequest extends JSONObject {
 		put(KEY_COUNT, count);
 		return this;
 	}
-	public int getCount() {
-		return getIntValue(KEY_COUNT);
-	}
-
 	/**
 	 * @param page
 	 * @return
@@ -121,9 +113,6 @@ public class JSONRequest extends JSONObject {
 	public JSONRequest setPage(int page) {
 		put(KEY_PAGE, page);
 		return this;
-	}
-	public int getPage() {
-		return getIntValue(KEY_PAGE);
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

@@ -15,9 +15,6 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.RequestMethod.GET;
-import static zuo.biao.apijson.RequestMethod.HEAD;
-import static zuo.biao.apijson.RequestMethod.POST_GET;
-import static zuo.biao.apijson.RequestMethod.POST_HEAD;
 import static zuo.biao.apijson.RequestMethod.PUT;
 import static zuo.biao.apijson.StringUtil.UTF_8;
 
@@ -27,13 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.demo.server.AccessVerifier;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
@@ -41,7 +38,7 @@ import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConditionNotMatchException;
 import zuo.biao.apijson.server.exception.ConflictException;
-import zuo.biao.apijson.server.sql.AccessVerifier;
+import zuo.biao.apijson.server.exception.OutOfRangeException;
 import zuo.biao.apijson.server.sql.QueryConfig;
 import zuo.biao.apijson.server.sql.QueryHelper;
 
@@ -50,8 +47,6 @@ import zuo.biao.apijson.server.sql.QueryHelper;
  */
 public class Parser {
 	private static final String TAG = "Parser";
-
-	public static final String SEPARATOR = StringUtil.SEPARATOR;
 
 
 	/**
@@ -118,7 +113,7 @@ public class Parser {
 		} catch (Exception e) {
 			return newErrorResult(e);
 		}
-		
+
 		return parseResponse(requestObject);
 	}
 	/**解析请求json并获取对应结果
@@ -160,13 +155,10 @@ public class Parser {
 	/**解析请求JSONObject
 	 * @param request => URLDecoder.decode(request, UTF_8);
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JSONObject parseRequest(String request, RequestMethod method) {
-		try {
-			request = URLDecoder.decode(request, UTF_8);
-		} catch (UnsupportedEncodingException e) {
-			return newErrorResult(e);
-		}
+	public static JSONObject parseRequest(String request, RequestMethod method) throws Exception {
+		request = URLDecoder.decode(request, UTF_8);
 		if (method == null) {
 			method = GET;
 		}
@@ -176,31 +168,6 @@ public class Parser {
 	}
 
 
-	/**是否为GET请求方法
-	 * @param method
-	 * @param containPrivate 包含私密(非明文)获取方法POST_GET
-	 * @return
-	 */
-	public static boolean isGetMethod(RequestMethod method, boolean containPrivate) {
-		boolean is = method == null || method == GET;
-		return containPrivate == false ? is : is || method == POST_GET;
-	}
-	/**是否为HEAD请求方法
-	 * @param method
-	 * @param containPrivate 包含私密(非明文)获取方法POST_HEAD
-	 * @return
-	 */
-	public static boolean isHeadMethod(RequestMethod method, boolean containPrivate) {
-		boolean is = method == HEAD;
-		return containPrivate == false ? is : is || method == POST_HEAD;
-	}
-	/**是否为公开(明文，浏览器能直接访问)的请求方法
-	 * @param method
-	 * @return
-	 */
-	public static boolean isPublicMethod(RequestMethod method) {
-		return method == null || method == GET || method == HEAD;
-	}
 
 	/**新建带状态内容的JSONObject
 	 * @param status
@@ -270,6 +237,8 @@ public class Parser {
 				status = 409;
 			} else if (e instanceof ConditionNotMatchException) {
 				status = 412;
+			} else if (e instanceof OutOfRangeException) {
+				status = 416;
 			}
 
 			return newResult(status, e.getMessage());
@@ -278,9 +247,9 @@ public class Parser {
 	}
 
 
-	
-	
-	
+
+
+	//TODO 启动时一次性加载Request所有内容，作为初始化。
 	/**获取正确的请求，非GET请求必须是服务器指定的
 	 * @param method
 	 * @param request
@@ -288,17 +257,7 @@ public class Parser {
 	 * @throws Exception 
 	 */
 	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request) throws Exception {
-		return getCorrectRequest(method, request, null);
-	}
-	/**获取正确的请求，非GET请求必须是服务器指定的
-	 * @param method
-	 * @param request
-	 * @param queryHelper
-	 * @return
-	 */
-	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request, QueryHelper queryHelper)
-			throws Exception {
-		if (Parser.isPublicMethod(method)) {
+		if (RequestMethod.isPublicMethod(method)) {
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
 
@@ -307,35 +266,19 @@ public class Parser {
 			throw new IllegalArgumentException("请指定tag！一般是table名称");
 		}
 
-		//获取指定的JSON结构 <<<<<<<<<<<<<<
-		QueryConfig config = new QueryConfig(GET, "Request");
-		config.setColumn("structure");
-
-		Map<String, Object> where = new HashMap<String, Object>();
-		where.put("method", method.name());
-		where.put(JSONRequest.KEY_TAG, tag);
-		config.setWhere(where);
-
 		JSONObject object = null;
 		String error = "";
-		if (queryHelper == null) {
-			queryHelper = new QueryHelper();
-		}
 		try {
-			object = queryHelper.select(config);
+			object = getStructure(method, "Request", JSONRequest.KEY_TAG, tag);
 		} catch (Exception e) {
-			e.printStackTrace();
 			error = e.getMessage();
 		}
-		queryHelper.close();
-
 		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
-			throw new UnsupportedOperationException("非GET请求必须是服务端允许的操作！ \n " + error);
+			throw new UnsupportedOperationException("非开放请求必须是服务端允许的操作！ \n " + error);
 		}
-		object = Parser.getJSONObject(object, "structure");//解决返回值套了一层 "structure":{}
 
 		JSONObject target = null;
-		if (Parser.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
+		if (zuo.biao.apijson.JSONObject.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
 			target = new JSONObject(true);
 			target.put(tag, object);
 		} else {
@@ -347,8 +290,60 @@ public class Parser {
 		return Structure.parseRequest(method, "", (JSONObject) target.clone(), request);
 	}
 
+	/**获取正确的返回结果
+	 * @param method
+	 * @param response
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JSONObject getCorrectResponse(final RequestMethod method
+			, String table, JSONObject response) throws Exception {
+		Log.d(TAG, "getCorrectResponse  method = " + method + "; table = " + table);
+		if (response == null || response.isEmpty()) {//避免无效空result:{}添加内容后变有效
+			Log.e(TAG, "getCorrectResponse  response == null || response.isEmpty() >> return response;");
+			return response;
+		}
+		
+		JSONObject target = zuo.biao.apijson.JSONObject.isTableKey(table) == false
+				? new JSONObject() : getStructure(method, "Response", "model", table);
+				
+		return Structure.parseResponse(method, table, target, response, new OnParseCallback() {
 
+			@Override
+			protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
+				return getCorrectResponse(method, key, robj);
+			}
+		});
+	}
 
+	/**获取Request或Response内指定JSON结构
+	 * @param method
+	 * @param table
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject getStructure(RequestMethod method, String table, String key, String value) throws Exception  {
+		//获取指定的JSON结构 <<<<<<<<<<<<<<
+		QueryConfig config = new QueryConfig(GET, table);
+		config.setColumn("structure");
+
+		Map<String, Object> where = new HashMap<String, Object>();
+		where.put("method", method.name());
+		if (key != null) {
+			where.put(key, value);
+		}
+		config.setWhere(where);
+
+		QueryHelper qh = new QueryHelper();
+		try {
+			JSONObject result = qh.execute(config.setCacheStatic(true));
+			return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
+		} finally {
+			qh.close();
+		}
+	}
 
 
 	/**获取单个对象，该对象处于parentObject内
@@ -404,7 +399,7 @@ public class Parser {
 			@Override
 			public com.alibaba.fastjson.JSON parseChild(@NotNull String path, @NotNull String key
 					, @NotNull com.alibaba.fastjson.JSON value) throws Exception {
-				if (isArrayKey(key)) {//APIJSON Array
+				if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
 					child = getArray(path, key, (JSONObject) value);
 					isEmpty = child == null || ((JSONArray) child).isEmpty();
 				} else {//APIJSON Object
@@ -489,13 +484,13 @@ public class Parser {
 	 * @param parentPath parentObject的路径
 	 * @param name parentObject的key
 	 * @param request parentObject的value
-	 * @return 转为JSONArray不可行，因为会和被当成条件的key:JSONArray冲突。好像一般也就key{}:JSONArray用到??
-	 * @throws Exception 
+	 * @return 
+	 * @throws Exception
 	 */
 	private JSONArray getArray(String parentPath, String name, final JSONObject request) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
-		if (isGetMethod(requestMethod, true) == false) {
+		if (RequestMethod.isGetMethod(requestMethod, true) == false) {
 			throw new UnsupportedOperationException("key[]:{}只支持GET类方法！不允许传 " + name + ":{} ！");
 		}
 		if (request == null || request.isEmpty()) {//jsonKey-jsonValue条件
@@ -554,7 +549,7 @@ public class Parser {
 	 * @return
 	 */
 	public static String getValuePath(String parentPath, String valuePath) {
-		if (valuePath.startsWith(SEPARATOR)) {
+		if (valuePath.startsWith("/")) {
 			valuePath = getAbsPath(parentPath, valuePath);
 		} else {//处理[] -> []/i
 			valuePath = replaceArrayChildPath(parentPath, valuePath);
@@ -573,12 +568,12 @@ public class Parser {
 		name = StringUtil.getString(name);
 		if (StringUtil.isNotEmpty(path, false)) {
 			if (StringUtil.isNotEmpty(name, false)) {
-				path += ((name.startsWith(SEPARATOR) ? "" : SEPARATOR) + name);
+				path += ((name.startsWith("/") ? "" : "/") + name);
 			}
 		} else {
 			path = name;
 		}
-		if (path.startsWith(SEPARATOR)) {
+		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
 		Log.i(TAG, "getPath  return " + path + " >>>>>>>>>>>>>>>>");
@@ -705,34 +700,7 @@ public class Parser {
 		if (noVerify == false) {
 			AccessVerifier.verify(requestObject, config);
 		}
-		return queryHelper.select(config);//QueryHelper2.getInstance().select(config);//
-	}
-
-
-
-	private static final Pattern bigAlphaPattern = Pattern.compile("[A-Z]");
-	private static final Pattern namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
-
-	/**判断是否为Array的key
-	 * @param key
-	 * @return
-	 */
-	public static boolean isArrayKey(String key) {
-		return key != null && key.endsWith("[]");
-	}
-	/**判断是否为对应Table的key
-	 * @param key
-	 * @return
-	 */
-	public static boolean isTableKey(String key) {
-		return isWord(key) && bigAlphaPattern.matcher(key.substring(0, 1)).matches();
-	}
-	/**判断是否为词，只能包含字母，数字或下划线
-	 * @param key
-	 * @return
-	 */
-	public static boolean isWord(String key) {
-		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
+		return getCorrectResponse(requestMethod, config.getTable(), queryHelper.execute(config));
 	}
 
 
@@ -752,7 +720,7 @@ public class Parser {
 	public static String getRealKey(RequestMethod method, String originKey, boolean isTableKey, boolean saveLogic)
 			throws Exception {
 		Log.i(TAG, "getRealKey  saveLogic = " + saveLogic + "; originKey = " + originKey);
-		if (originKey == null || isArrayKey(originKey)) {
+		if (originKey == null || zuo.biao.apijson.JSONObject.isArrayKey(originKey)) {
 			Log.w(TAG, "getRealKey  originKey == null || isArrayKey(originKey) >>  return originKey;");
 			return originKey;
 		}
@@ -778,8 +746,8 @@ public class Parser {
 			}
 		}
 
-		String last = null;
-		if (isGetMethod(method, true) || isHeadMethod(method, true)) {//逻辑运算符仅供GET,HEAD方法使用
+		String last = null;//不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
+		if (RequestMethod.isQueryMethod(method)) {//逻辑运算符仅供GET,HEAD方法使用
 			last = key.isEmpty() ? "" : key.substring(key.length() - 1);
 			if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
 				key = key.substring(0, key.length() - 1);
@@ -795,12 +763,12 @@ public class Parser {
 			key = Pair.parseEntry(key).getValue();//column以右边为准
 		}
 
-		if (isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
+		if (StringUtil.isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
 			throw new IllegalArgumentException(TAG + "/" + method + "  getRealKey: 字符 " + originKey + " 不合法！");
 		}
 
-		if (saveLogic) {
-			key = key + StringUtil.getString(last);
+		if (saveLogic && last != null) {
+			key = key + last;
 		}
 		Log.i(TAG, "getRealKey  return key = " + key);
 		return key;

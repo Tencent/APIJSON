@@ -12,38 +12,65 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package apijson.demo.server.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
-/**可远程调用的函数列表
+/**base model for reduce model codes
  * @author Lemon
+ * @use extends BaseModel
  */
-public interface FunctionList {
+@SuppressWarnings("serial")
+public abstract class BaseModel implements Serializable {
+
+	private Long id;
+	private Long date;
+
+	public Long getId() {
+		return id;
+	}
+	public BaseModel setId(Long id) {
+		this.id = id;
+		return this;
+	}
+	public Long getDate() {
+		return date;
+	}
+	public BaseModel setDate(Long date) {
+		this.date = date;
+		return this;
+	}
 
 	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**判断collection是否为空
 	 * @param collection
 	 * @return
 	 */
-	public <T> boolean isEmpty(Collection<T> collection);
+	public static <T> boolean isEmpty(Collection<T> collection) {
+		return collection == null || collection.isEmpty();
+	}
 	/**判断map是否为空
 	 * @param <K>
 	 * @param <V>
 	 * @param map
 	 * @return
 	 */
-	public <K, V> boolean isEmpty(Map<K, V> map);
+	public static <K, V> boolean isEmpty(Map<K, V> map) {
+		return map == null || map.isEmpty();
+	}
 	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
-	//判断是否为包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	//判断是否包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**判断collection是否包含object
 	 * @param collection
 	 * @param object
 	 * @return
 	 */
-	public <T> boolean isContain(Collection<T> collection, T object);
+	public static <T> boolean isContain(Collection<T> collection, T object) {
+		return collection != null && collection.contains(object);
+	}
 	/**判断map是否包含key
 	 * @param <K>
 	 * @param <V>
@@ -51,7 +78,9 @@ public interface FunctionList {
 	 * @param key
 	 * @return
 	 */
-	public <K, V> boolean isContainKey(Map<K, V> map, K key);
+	public static <K, V> boolean isContainKey(Map<K, V> map, K key) {
+		return map != null && map.containsKey(key);
+	}
 	/**判断map是否包含value
 	 * @param <K>
 	 * @param <V>
@@ -59,7 +88,9 @@ public interface FunctionList {
 	 * @param value
 	 * @return
 	 */
-	public <K, V> boolean isContainValue(Map<K, V> map, V value);
+	public static <K, V> boolean isContainValue(Map<K, V> map, V value) {
+		return map != null && map.containsValue(value);
+	}
 	//判断是否为包含 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
@@ -69,20 +100,26 @@ public interface FunctionList {
 	 * @param array
 	 * @return
 	 */
-	public <T> int count(T[] array);
+	public static <T> int count(T[] array) {
+		return array == null ? 0 : array.length;
+	}
 	/**获取数量
 	 * @param <T>
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
-	public <T> int count(Collection<T> collection);
+	public static <T> int count(Collection<T> collection) {
+		return collection == null ? 0 : collection.size();
+	}
 	/**获取数量
 	 * @param <K>
 	 * @param <V>
 	 * @param map
 	 * @return
 	 */
-	public <K, V> int count(Map<K, V> map);
+	public static <K, V> int count(Map<K, V> map) {
+		return map == null ? 0 : map.size();
+	}
 	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
@@ -92,13 +129,18 @@ public interface FunctionList {
 	 * @param array
 	 * @return
 	 */
-	public <T> T get(T[] array, int position);
+	public static <T> T get(T[] array, int position) {
+		return position < 0 || position >= count(array) ? null : array[position];
+	}
 	/**获取
 	 * @param <T>
 	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
-	public <T> T get(Collection<T> collection, int position);
+	@SuppressWarnings("unchecked")
+	public static <T> T get(Collection<T> collection, int position) {
+		return (T) (collection == null ? null : get(collection.toArray(), position));
+	}
 	/**获取
 	 * @param <K>
 	 * @param <V>
@@ -106,7 +148,9 @@ public interface FunctionList {
 	 * @param key null ? null : map.get(key);
 	 * @return
 	 */
-	public <K, V> V get(Map<K, V> map, K key);
+	public static <K, V> V get(Map<K, V> map, K key) {
+		return key == null || map == null ? null : map.get(key);
+	}
 	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
@@ -116,27 +160,37 @@ public interface FunctionList {
 	 * @param value
 	 * @return
 	 */
-	public boolean value(Boolean value);
+	public static boolean value(Boolean value) {
+		return value == null ? false : value;
+	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public int value(Integer value);
+	public static int value(Integer value) {
+		return value == null ? 0 : value;
+	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public long value(Long value);
+	public static long value(Long value) {
+		return value == null ? 0 : value;
+	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public float value(Float value);
+	public static float value(Float value) {
+		return value == null ? 0 : value;
+	}
 	/**获取非空值
 	 * @param value
 	 * @return
 	 */
-	public double value(Double value);
+	public static double value(Double value) {
+		return value == null ? 0 : value;
+	}
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }
