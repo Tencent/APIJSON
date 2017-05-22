@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `Response`;
 CREATE TABLE `Response` (
   `id` int(11) NOT NULL,
   `method` varchar(10) DEFAULT 'GET',
-  `tag` varchar(20) NOT NULL,
+  `model` varchar(20) NOT NULL,
   `structure` json NOT NULL,
   `description` varchar(10000) DEFAULT NULL,
   `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -40,7 +40,7 @@ CREATE TABLE `Response` (
 
 LOCK TABLES `Response` WRITE;
 /*!40000 ALTER TABLE `Response` DISABLE KEYS */;
-INSERT INTO `Response` VALUES (1,'GET','User','{\"add\": {\"extra\": \"Response is effective!\"}, \"remove\": \"phone\"}','remove-移除字段；add-如果没有对应字段就添加字段；replace-如果有就替换；put-添加或替换字段','2017-02-01 11:19:51'),(2,'DELETE','Comment','{\"remove\": \"Comment:child\"}',NULL,'2017-05-03 17:51:26');
+INSERT INTO `Response` VALUES (1,'GET','User','{\"put\": {\"extra\": \"Response works! Test:He(She) is lazy and wrote nothing here\"}, \"remove\": \"phone\"}',NULL,'2017-05-22 12:36:47'),(2,'DELETE','Comment','{\"remove\": \"Comment:child\"}',NULL,'2017-05-03 17:51:26'),(3,'DELETE','Moment','{\"remove\": \"Comment\"}',NULL,'2017-05-03 17:51:26');
 /*!40000 ALTER TABLE `Response` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-13  0:12:27
+-- Dump completed on 2017-05-22 21:06:42
