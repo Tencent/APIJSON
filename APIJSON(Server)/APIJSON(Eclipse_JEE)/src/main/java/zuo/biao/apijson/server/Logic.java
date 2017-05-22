@@ -100,14 +100,23 @@ public class Logic {
 	public static boolean isNot(int type) {
 		return type == TYPE_NOT;
 	}
-
+	
+	public boolean isCorrect() {
+		return isContain(getType());
+	}
+	public static boolean isContain(String s) {
+		return isContain(getType(s));
+	}
+	public static boolean isContain(int type) {
+		return type >= TYPE_OR && type <= TYPE_NOT;
+	}
 
 	public static int getType(char logicChar) {
 		return getType(String.valueOf(logicChar));
 	}
 	public static int getType(String logicChar) {
 		int type = -1;
-		if (logicChar != null && logicChar.isEmpty() == false) {
+		if (logicChar != null && logicChar.length() == 1) {
 			if ("|".equals(logicChar)) {
 				type = 0;
 			} else if ("&".equals(logicChar)) {

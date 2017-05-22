@@ -50,7 +50,7 @@ import zuo.biao.apijson.RequestMethod;
  * </pre>
  */
 @APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
+		method = {RequestMethod.GET, RequestMethod.POST_GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
 		POST = "{\"User\": {\"disallow\": \"id\", \"necessary\": \"name,phone\"}, \"necessary\": \"loginPassword,verify\"}",
 		PUT = "{\"disallow\": \"phone\", \"necessary\": \"id\"}"
 		)

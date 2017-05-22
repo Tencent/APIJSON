@@ -29,7 +29,7 @@ import zuo.biao.apijson.server.Structure;
 @SpringBootApplication
 public class APIJSONApplication {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		SpringApplication.run(APIJSONApplication.class, args);
 
 		try {
@@ -38,6 +38,8 @@ public class APIJSONApplication {
 			e.printStackTrace();
 		}
 
+//		Structure.init();
+		
 		try {
 			Structure.test();
 		} catch (Exception e) {

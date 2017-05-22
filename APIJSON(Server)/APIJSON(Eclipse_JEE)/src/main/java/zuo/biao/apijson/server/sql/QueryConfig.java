@@ -16,7 +16,6 @@ package zuo.biao.apijson.server.sql;
 
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
-import static zuo.biao.apijson.RequestMethod.POST_GET;
 import static zuo.biao.apijson.SQL.AND;
 import static zuo.biao.apijson.SQL.NOT;
 import static zuo.biao.apijson.SQL.OR;
@@ -86,7 +85,7 @@ public class QueryConfig {
 	private int query; //JSONRequest.query
 	private int type; //ObjectParser.type
 	//array item >>>>>>>>>>
-
+	private boolean cacheStatic;
 
 	public QueryConfig(RequestMethod method) {
 		setMethod(method);
@@ -293,6 +292,13 @@ public class QueryConfig {
 		this.type = type;
 		return this;
 	}
+	public QueryConfig setCacheStatic(boolean cacheStatic) {
+		this.cacheStatic = cacheStatic;
+		return this;
+	}
+	public boolean isCacheStatic() {
+		return cacheStatic;
+	}
 
 	/**获取限制数量
 	 * @return
@@ -471,7 +477,7 @@ public class QueryConfig {
 				for (int i = 0; i < conditions.length; i++) {//对函数条件length(key)<=5这种不再在开头加key
 					index = conditions[i] == null ? -1 : conditions[i].indexOf("(");
 					condition += ((i <= 0 ? "" : (logic.isAnd() ? AND : OR))//连接方式
-							+ (index >= 0 && conditions[i].substring(index).contains(")") ? "" : key + " ")//函数和非函数条件
+							+ (index >= 0 && index < conditions[i].indexOf(")") ? "" : key + " ")//函数和非函数条件
 							+ conditions[i]);//单个条件
 				}
 			}
@@ -521,7 +527,7 @@ public class QueryConfig {
 		key = logic.getKey();
 		Log.i(TAG, "getRangeString key = " + key);
 
-		if (value instanceof JSONArray == false) {//TODO 直接掉Like性能最好！
+		if (value instanceof JSONArray == false) {//TODO 直接调Like性能最好！
 			JSONArray array = new JSONArray();
 			array.add(value);
 			value = array;
@@ -755,7 +761,7 @@ public class QueryConfig {
 			return "DELETE FROM " + config.getTable() + config.getWhereString();
 		default:
 			return "SELECT "+ config.getColumnString() + " FROM " + config.getTable() + config.getWhereString()
-			+ (method != GET && method != POST_GET ?
+			+ (RequestMethod.isGetMethod(method, true) == false ?
 					"" : config.getGroupString() + config.getHavingString() + config.getOrderString() )
 			+ config.getLimitString();
 		}

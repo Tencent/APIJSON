@@ -304,15 +304,15 @@ public class StringUtil {
 
 	//判断字符类型 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final Pattern alphaPattern;
-	public static final Pattern bigAlphaPattern;
-	public static final Pattern namePattern;
-	public static final Pattern smallAlphaPattern;
+	public static final Pattern ALPHA_PATTERN;
+	public static final Pattern NAME_PATTERN;
+	public static final Pattern BIG_ALPHA_PATTERN;
+	public static final Pattern SMALL_ALPHA_PATTERN;
 	static {
-		alphaPattern = Pattern.compile("[a-zA-Z]");
-		bigAlphaPattern = Pattern.compile("[A-Z]");
-		namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
-		smallAlphaPattern = Pattern.compile("[a-z]");
+		ALPHA_PATTERN = Pattern.compile("[a-zA-Z]");
+		NAME_PATTERN = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
+		BIG_ALPHA_PATTERN = Pattern.compile("[A-Z]");
+		SMALL_ALPHA_PATTERN = Pattern.compile("[a-z]");
 	}
 
 	//判断手机格式是否正确
@@ -392,6 +392,29 @@ public class StringUtil {
 		return isNumer(s) || isAlpha(s);
 	}
 
+	/**判断是否为单词，只能包含字母，数字或下划线
+	 * @param s
+	 * @return
+	 */
+	public static boolean isWord(String s) {
+		return s != null && NAME_PATTERN.matcher(s).matches();
+	}
+	/**判断是否为首字母大写的单词
+	 * @param key
+	 * @return
+	 */
+	public static boolean isBigWord(String s) {
+		return s != null && BIG_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() && isWord(s.substring(1));
+	}
+	/**判断是否为首字母小写的单词
+	 * @param key
+	 * @return
+	 */
+	public static boolean isSmallWord(String s) {
+		return s != null && SMALL_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() && isWord(s.substring(1));
+	}
+	
+	
 	/**判断字符类型是否是身份证号
 	 * @param idCard
 	 * @return
@@ -722,11 +745,10 @@ public class StringUtil {
 	 * @return key + suffix，第一个字母小写
 	 */
 	public static String addSuffix(String key, String suffix) {
-		key = StringUtil.getNoBlankString(key);
+		key = getNoBlankString(key);
 		if (key.isEmpty()) {
 			return firstCase(suffix);
 		}
-
 		return firstCase(key) + firstCase(suffix, true);
 	}
 	/**
@@ -741,7 +763,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String firstCase(String key, boolean upper) {
-		key = StringUtil.getString(key);
+		key = getString(key);
 		if (key.isEmpty()) {
 			return "";
 		}
@@ -752,7 +774,6 @@ public class StringUtil {
 		return key;
 	}
 
-	
 	//校正（自动补全等）字符串>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }
