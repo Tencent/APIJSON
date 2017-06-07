@@ -134,17 +134,17 @@ APIJSON是一种JSON传输结构协议。<br />
 请求：
 <pre><code class="language-json">
 {
-  "[]":{                             //请求一个Array
-    "page":0,                        //Array条件
+  "[]":{                             //请求一个数组
+    "page":0,                        //数组条件
     "count":2,
-    "User":{                         //请求一个名为User的Object
-      "sex":0,                       //Object条件
+    "User":{                         //请求一个名为User的对象
+      "sex":0,                       //对象条件
       "@column":"id,name,head"       //指定返回字段
     },
     "Moment":{
       "userId@":"/User/id"           //缺省依赖路径，从所处容器的父容器路径开始
     },
-    "Comment[]":{                    //请求一个名为Comment的Array
+    "Comment[]":{                    //请求一个名为Comment的数组
       "count":2,
       "Comment":{
         "momentId@":"[]/Moment/id"   //完整依赖路径
