@@ -14,12 +14,15 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
-import zuo.biao.apijson.RequestMethod;
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.LOGIN;
+import static zuo.biao.apijson.RequestRole.OWNER;
+import static zuo.biao.apijson.RequestRole.UNKNOWN;
+
+import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.StringUtil;
 
-/**密码类
+/**密码类，已用UserPrivacy替代
  * @author Lemon
  * @see
  * <br >POST_HEAD:<pre>
@@ -40,14 +43,16 @@ import zuo.biao.apijson.StringUtil;
 }
  * </pre>
  */
-@SuppressWarnings("serial")
-@APIJSONRequest(
-		method = {RequestMethod.POST_HEAD, RequestMethod.PUT},
-		POST_HEAD = "{\"disallow\": \"!\", \"necessary\": \"id,type\"}",
-		PUT = "{\"Password\": {\"disallow\": \"!\", \"necessary\": \"id,type,password\"}, \"necessary\": \"oldPassword\"}"
+@Deprecated
+@MethodAccess(
+		GET = {},
+		HEAD = {},
+		POST_HEAD = {OWNER, ADMIN},
+		POST = {UNKNOWN, LOGIN, OWNER, ADMIN}
 		)
 public class Password extends BaseModel {
-
+	private static final long serialVersionUID = 1L;
+	
 	public static final int TYPE_LOGIN = 0;
 	public static final int TYPE_PAY = 1;
 	

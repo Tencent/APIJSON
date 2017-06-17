@@ -29,9 +29,9 @@ public class Verify extends apijson.demo.server.model.Verify {
 	public Verify(long phone) {
 		super(phone);
 	}
-	public Verify(String code) {
+	public Verify(String verify) {
 		this();
-		setCode(code);
+		setVerify(verify);
 	}
 
 	@Override

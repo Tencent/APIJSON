@@ -34,6 +34,7 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
 
 //TODO 放到 zuo.biao.apijson 包内，供Android客户端校验请求结构
@@ -46,10 +47,9 @@ public class Structure {
 	private static final String TAG = "Structure";
 
 
-
 	private Structure() {}
 
-	
+
 
 	static final String requestString = "{\"Comment\":{\"disallow\": \"id\", \"necessary\": \"userId,momentId,content\"}, \"add\":{\"Comment:to\":{}}}";
 	static final String responseString = "{\"User\":{\"remove\": \"phone\", \"replace\":{\"sex\":2}, \"add\":{\"name\":\"api\"}}, \"put\":{\"Comment:to\":{}}}";
@@ -104,6 +104,26 @@ public class Structure {
 
 	}
 
+	
+	//TODO 放在一个 enum StructureOperate 
+	public static final int TYPE_DEFAULT = 0;
+	public static final int TYPE_VERIFY = 1;
+	public static final int TYPE_ADD = 2;
+	public static final int TYPE_PUT = 3;
+	public static final int TYPE_REPLACE = 4;
+	public static final int TYPE_REMOVE = 5;
+
+	public static final String NAME_VERIFY = "verify";
+
+	public static final String NAME_ADD = "add";
+	public static final String NAME_PUT = "put";
+	public static final String NAME_REPLACE = "replace";
+	public static final String NAME_REMOVE = "remove";
+
+	public static final String NAME_DISALLOW = "disallow";
+	public static final String NAME_NECESSARY = "necessary";
+	
+	
 
 	/**从request提取target指定的内容
 	 * @param method
@@ -123,6 +143,11 @@ public class Structure {
 			return null;
 		}
 
+		//TODO globleRole要不要改成@role?  只允许服务端Request表中加上可控的ADMIN角色
+		if (RequestRole.get(request.getString(JSONRequest.KEY_ROLE)) == RequestRole.ADMIN) {
+			throw new IllegalArgumentException("角色设置错误！不允许在写操作Request中传 " + name + 
+					":{ " + JSONRequest.KEY_ROLE + ":admin } ！");
+		}
 
 		//解析
 		return parse(name, target, request, new OnParseCallback() {
@@ -153,12 +178,12 @@ public class Structure {
 	}
 
 
-	/**TODO
+	/**校验并将response转换为指定的内容和结构
 	 * @param method
 	 * @param name
 	 * @param target
 	 * @param response
-	 * @param callback 
+	 * @param callback
 	 * @return
 	 * @throws Exception
 	 */
@@ -177,8 +202,7 @@ public class Structure {
 	}
 
 
-	/**TODO
-	 * 对request和response不同的解析用callback返回
+	/**对request和response不同的解析用callback返回
 	 * @param target
 	 * @param request
 	 * @param callback
@@ -217,12 +241,6 @@ public class Structure {
 		Set<String> tableKeySet = new HashSet<String>();
 
 
-		real = operate(TYPE_VERIFY, verify, real, tableKeySet);
-		real = operate(TYPE_ADD, add, real, tableKeySet);
-		real = operate(TYPE_PUT, put, real, tableKeySet);
-		real = operate(TYPE_REPLACE, replace, real, tableKeySet);
-
-
 		//移除字段<<<<<<<<<<<<<<<<<<<
 		String[] removes = StringUtil.split(StringUtil.getNoBlankString(remove));
 		if (removes != null && removes.length > 0) {
@@ -250,8 +268,8 @@ public class Structure {
 		List<String> disallowList = new ArrayList<String>();
 		if ("!".equals(disallow)) {//所有非necessary，改成 !necessary 更好
 			if (rkset != null) {
-				for (String key : rkset) {
-					if (necessaryList.contains(key) == false) {
+				for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
+					if (key != null && key.startsWith("@") == false && necessaryList.contains(key) == false) {
 						disallowList.add(key);
 					}
 				}
@@ -323,22 +341,28 @@ public class Structure {
 		//不允许操作未指定Table>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+		//校验与修改Request<<<<<<<<<<<<<<<<<
+		//在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
+		real = operate(TYPE_VERIFY, verify, real);
+		real = operate(TYPE_ADD, add, real);
+		real = operate(TYPE_PUT, put, real);
+		real = operate(TYPE_REPLACE, replace, real);
+		//校验与修改Request>>>>>>>>>>>>>>>>>
+
 		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
 		return real;
 	}
 
 
 
-	/**
-	 * @param operate
+	/**执行操作
+	 * @param type
 	 * @param targetChild
 	 * @param real
-	 * @param tableKeySet 
 	 * @return
 	 * @throws Exception
 	 */
-	private static JSONObject operate(int type, JSONObject targetChild, JSONObject real
-			, Set<String> tableKeySet) throws Exception {
+	private static JSONObject operate(int type, JSONObject targetChild, JSONObject real) throws Exception {
 		if (targetChild == null) {
 			return real;
 		}
@@ -430,80 +454,21 @@ public class Structure {
 				}
 
 			} else if (type == TYPE_PUT) {
-				putTargetChild(real, tk, tv, tableKeySet);
+				real.put(tk, tv);
 			} else {
 				if (real.containsKey(tk)) {
 					if (type == TYPE_REPLACE) {
-						putTargetChild(real, tk, tv, tableKeySet);
+						real.put(tk, tv);
 					}
 				} else {
 					if (type == TYPE_ADD) {
-						putTargetChild(real, tk, tv, tableKeySet);
+						real.put(tk, tv);
 					}
 				}
 			}
 		}
 
 		return real;
-	}
-
-
-	/**
-	 * @param real
-	 * @param tk
-	 * @param tv
-	 * @param tableKeySet
-	 */
-	private static void putTargetChild(JSONObject real, String tk, Object tv, Set<String> tableKeySet) {
-		real.put(tk, tv);
-		zuo.biao.apijson.server.Entry<String, String> pair = Pair.parseEntry(tk, true);
-		if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
-			tableKeySet.add(tk);
-		}
-	}
-
-
-	public static final int TYPE_DEFAULT = 0;
-	public static final int TYPE_VERIFY = 1;
-	public static final int TYPE_ADD = 2;
-	public static final int TYPE_PUT = 3;
-	public static final int TYPE_REPLACE = 4;
-	public static final int TYPE_REMOVE = 5;
-
-	public static final String NAME_VERIFY = "verify";
-
-	public static final String NAME_ADD = "add";
-	public static final String NAME_PUT = "put";
-	public static final String NAME_REPLACE = "replace";
-	public static final String NAME_REMOVE = "remove";
-
-	public static final String NAME_DISALLOW = "disallow";
-	public static final String NAME_NECESSARY = "necessary";
-
-	/**
-	 * @param key
-	 * @return
-	 */
-	public static int getOperate(String key) {
-		if (key != null) {
-			if (NAME_VERIFY.equals(key)) {
-				return TYPE_VERIFY;
-			}
-			if (NAME_ADD.equals(key)) {
-				return TYPE_ADD;
-			}
-			if (NAME_PUT.equals(key)) {
-				return TYPE_PUT;
-			}
-			if (NAME_REPLACE.equals(key)) {
-				return TYPE_REPLACE;
-			} 
-			if (NAME_REMOVE.equals(key)) {
-				return TYPE_REMOVE;
-			}
-		}
-
-		return TYPE_DEFAULT;
 	}
 
 

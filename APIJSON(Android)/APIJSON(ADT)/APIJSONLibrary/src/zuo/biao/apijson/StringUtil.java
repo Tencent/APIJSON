@@ -271,9 +271,9 @@ public class StringUtil {
 	}
 
 	//判断字符是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
+
 	//判断字符是否非空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	
+
 	/**判断字符是否非空
 	 * @param object
 	 * @param trim
@@ -298,21 +298,21 @@ public class StringUtil {
 	public static boolean isNotEmpty(String s, boolean trim) {
 		return ! isEmpty(s, trim);
 	}
-	
+
 	//判断字符是否非空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 	//判断字符类型 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final Pattern alphaPattern;
-	public static final Pattern bigAlphaPattern;
-	public static final Pattern namePattern;
-	public static final Pattern smallAlphaPattern;
+	public static final Pattern ALPHA_PATTERN;
+	public static final Pattern NAME_PATTERN;
+	public static final Pattern BIG_ALPHA_PATTERN;
+	public static final Pattern SMALL_ALPHA_PATTERN;
 	static {
-		alphaPattern = Pattern.compile("[a-zA-Z]");
-		bigAlphaPattern = Pattern.compile("[A-Z]");
-		namePattern = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
-		smallAlphaPattern = Pattern.compile("[a-z]");
+		ALPHA_PATTERN = Pattern.compile("[a-zA-Z]");
+		NAME_PATTERN = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
+		BIG_ALPHA_PATTERN = Pattern.compile("[A-Z]");
+		SMALL_ALPHA_PATTERN = Pattern.compile("[a-z]");
 	}
 
 	//判断手机格式是否正确
@@ -391,6 +391,37 @@ public class StringUtil {
 	public static boolean isNumberOrAlpha(String s) {
 		return isNumer(s) || isAlpha(s);
 	}
+
+	/**判断是否为单词，只能包含字母，数字或下划线
+	 * @param s
+	 * @return
+	 */
+	public static boolean isWord(String s) {
+		return s != null && NAME_PATTERN.matcher(s).matches();
+	}
+	/**判断是否为首字母大写的单词
+	 * @param key
+	 * @return
+	 */
+	public static boolean isBigWord(String s) {
+		s = getString(s);
+		if (s.isEmpty() || BIG_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+			return false;
+		}
+		return s.length() <= 1 ? true : isWord(s.substring(1));
+	}
+	/**判断是否为首字母小写的单词
+	 * @param key
+	 * @return
+	 */
+	public static boolean isSmallWord(String s) {
+		s = getString(s);
+		if (s.isEmpty() || SMALL_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+			return false;
+		}
+		return s.length() <= 1 ? true : isWord(s.substring(1));
+	}
+
 
 	/**判断字符类型是否是身份证号
 	 * @param idCard
@@ -589,7 +620,7 @@ public class StringUtil {
 	public static final int PRICE_FORMAT_PREFIX_WITH_BLANK = 3;
 	public static final int PRICE_FORMAT_SUFFIX_WITH_BLANK = 4;
 	public static final String[] PRICE_FORMATS = {
-		"", "￥", "元", "￥ ", " 元"
+			"", "￥", "元", "￥ ", " 元"
 	};
 
 	/**获取价格，保留两位小数
@@ -676,7 +707,7 @@ public class StringUtil {
 		}
 	}
 
-	
+
 	/**分割路径
 	 * @param path
 	 * @return
@@ -722,11 +753,10 @@ public class StringUtil {
 	 * @return key + suffix，第一个字母小写
 	 */
 	public static String addSuffix(String key, String suffix) {
-		key = StringUtil.getNoBlankString(key);
+		key = getNoBlankString(key);
 		if (key.isEmpty()) {
 			return firstCase(suffix);
 		}
-
 		return firstCase(key) + firstCase(suffix, true);
 	}
 	/**
@@ -741,7 +771,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String firstCase(String key, boolean upper) {
-		key = StringUtil.getString(key);
+		key = getString(key);
 		if (key.isEmpty()) {
 			return "";
 		}
@@ -752,7 +782,38 @@ public class StringUtil {
 		return key;
 	}
 
-	
+	/**全部大写
+	 * @param s
+	 * @return
+	 */
+	public static String toUpperCase(String s) {
+		return toUpperCase(s, false);
+	}
+	/**全部大写
+	 * @param s
+	 * @param trim
+	 * @return
+	 */
+	public static String toUpperCase(String s, boolean trim) {
+		s = trim ? getTrimedString(s) : getString(s);
+		return s.toUpperCase();
+	}
+	/**全部小写
+	 * @param s
+	 * @return
+	 */
+	public static String toLowerCase(String s) {
+		return toLowerCase(s, false);
+	}
+	/**全部小写
+	 * @param s
+	 * @return
+	 */
+	public static String toLowerCase(String s, boolean trim) {
+		s = trim ? getTrimedString(s) : getString(s);
+		return s.toLowerCase();
+	}
+
 	//校正（自动补全等）字符串>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

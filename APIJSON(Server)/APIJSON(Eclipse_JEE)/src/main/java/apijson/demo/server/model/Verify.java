@@ -14,8 +14,14 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.RequestMethod;
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.CIRCLE;
+import static zuo.biao.apijson.RequestRole.CONTACT;
+import static zuo.biao.apijson.RequestRole.LOGIN;
+import static zuo.biao.apijson.RequestRole.OWNER;
+import static zuo.biao.apijson.RequestRole.UNKNOWN;
+
+import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.StringUtil;
 
 /**验证码类
@@ -37,15 +43,19 @@ import zuo.biao.apijson.StringUtil;
 }
  * </pre>
  */
-@SuppressWarnings("serial")
-@APIJSONRequest(
-		method = {RequestMethod.POST_HEAD, RequestMethod.POST_GET, RequestMethod.POST},
-		POST_GET = "{\"necessary\": \"id\"}",
-		POST = "{\"disallow\": \"!\", \"necessary\": \"id\"}"
+@MethodAccess(
+		GET = {},
+		HEAD = {},
+		POST_GET = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
+		POST_HEAD = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
+		POST = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
+		PUT = {ADMIN},
+		DELETE = {ADMIN}
 		)
 public class Verify extends BaseModel {
-
-	private String code;
+	private static final long serialVersionUID = 1L;
+	
+	private String verify;
 
 	public Verify() {
 		super();
@@ -58,18 +68,21 @@ public class Verify extends BaseModel {
 		this();
 		setId(phone);
 	}
-	public Verify(String phone, String code) {
+	public Verify(Long phone, Integer verify) {
 		this(phone);
-		setCode(code);
+		setVerify(verify == null ? null : ("" + verify));
+	}
+	public Verify(String phone, String verify) {
+		this(phone);
+		setVerify(verify);
 	}
 
 
-	public String getCode() {
-		return code;
+	public String getVerify() {
+		return verify;
 	}
-	public Verify setCode(String code) {
-		this.code = code;
-		return this;
+	public void setVerify(String verify) {
+		this.verify = verify;
 	}
 
 	//phone is not column

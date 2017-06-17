@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,24 +14,44 @@ limitations under the License.*/
 
 package apijson.demo.model;
 
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.CIRCLE;
+import static zuo.biao.apijson.RequestRole.CONTACT;
+import static zuo.biao.apijson.RequestRole.LOGIN;
+import static zuo.biao.apijson.RequestRole.OWNER;
+
 import java.util.List;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.MethodAccess;
 
-/**作品类
+/**动态类
  * @author Lemon
+ * @see
+ * <br >POST:<pre>
+{
+ "Moment":{
+     "disallow":"id",
+     "necessary":"userId,pictureList"
+ }
+}
+ * </pre>
+ * <br >PUT:<pre>
+{
+ "Moment":{
+     "disallow":"userId,date",
+     "necessary":"id"
+ }
+}
+ * </pre>
  */
-@APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
+@MethodAccess(
+		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}//TODO 还要细分，LOGIN,CONTACT只允许修改praiseUserIdList。数据库加role没用，应该将praiseUserIdList移到Praise表
 		)
 public class Moment extends BaseModel {
-	private static final long serialVersionUID = -7437225320551780084L;
+	private static final long serialVersionUID = 1L;
 
 	private Long userId;
 	private String content;
-	private String picture;
 	private List<String> pictureList;
 	private List<Long> praiseUserIdList;
 	private List<Long> commentIdList;
@@ -56,13 +76,6 @@ public class Moment extends BaseModel {
 	}
 	public Moment setContent(String content) {
 		this.content = content;
-		return this;
-	}
-	public String getPicture() {
-		return picture;
-	}
-	public Moment setPicture(String picture) {
-		this.picture = picture;
 		return this;
 	}
 	public List<String> getPictureList() {

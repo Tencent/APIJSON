@@ -14,11 +14,15 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
-import zuo.biao.apijson.RequestMethod;
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.CONTACT;
+import static zuo.biao.apijson.RequestRole.LOGIN;
+import static zuo.biao.apijson.RequestRole.OWNER;
+import static zuo.biao.apijson.RequestRole.UNKNOWN;
 
-/**登录类
+import zuo.biao.apijson.MethodAccess;
+
+/**登录类，已用session替代
  * @author Lemon
  * @see
  * <br >POST_HEAD:<pre>
@@ -29,9 +33,9 @@ import zuo.biao.apijson.RequestMethod;
  }
 }
  * </pre>
-* <br >POST:post_get/login<pre>
+* <br >POST:login<pre>
 {
-    "User":{
+    "Login":{
         "necessary":"phone"
     },
     "Password":{
@@ -40,24 +44,28 @@ import zuo.biao.apijson.RequestMethod;
     }
 }
  * </pre>
-* <br >POST(logout):post/logout<pre>
+* <br >POST:login<pre>
 {
-    "User":{
-        "necessary":"phone"
+    "Login":{
+        "disallow":"!",
+        "necessary":"userId"
     }
 }
  * </pre>
  */
+@Deprecated
 @SuppressWarnings("serial")
-@APIJSONRequest(
-		method = {RequestMethod.POST_HEAD, RequestMethod.POST},
-		POST_HEAD = "{\"disallow\": \"!\", \"necessary\": \"userId,type\"}",
-		POST = "{\"User\": {\"necessary\": \"phone\"}, \"Password\": {\"disallow\": \"!\", \"necessary\": \"password\"}}"
+@MethodAccess(
+		POST_GET = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
+		POST_HEAD = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
+		POST = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
+		PUT = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
+		DELETE = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN}
 		)
 public class Login extends BaseModel {
 
-	public static final int TYPE_PASSWORD = 0;
-	public static final int TYPE_VERIFY = 1;
+	public static final int TYPE_PASSWORD = 0;//密码登录
+	public static final int TYPE_VERIFY = 1;//验证码登录
 	
 	private Long userId;
 	private Integer type;

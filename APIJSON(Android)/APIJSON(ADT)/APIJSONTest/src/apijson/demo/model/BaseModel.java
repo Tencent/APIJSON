@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,16 +15,19 @@ limitations under the License.*/
 package apijson.demo.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+
+import com.alibaba.fastjson.JSON;
 
 /**base model for reduce model codes
  * @author Lemon
  * @use extends BaseModel
  */
-@SuppressWarnings("serial")
 public abstract class BaseModel implements Serializable {
-
+	private static final long serialVersionUID = 1L;
+	
 	private Long id;
 	private Long date;
 
@@ -42,8 +45,22 @@ public abstract class BaseModel implements Serializable {
 		this.date = date;
 		return this;
 	}
+	
+	
+	@Override
+	public String toString() {
+		return JSON.toJSONString(this);
+	}
+	
 
 	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**判断array是否为空
+	 * @param array
+	 * @return
+	 */
+	public static <T> boolean isEmpty(T[] array) {
+		return array == null || array.length <= 0;
+	}
 	/**判断collection是否为空
 	 * @param collection
 	 * @return
@@ -63,6 +80,14 @@ public abstract class BaseModel implements Serializable {
 	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	//判断是否包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**判断array是否包含a
+	 * @param array
+	 * @param a
+	 * @return
+	 */
+	public static <T> boolean isContain(T[] array, T a) {
+		return array == null ? false : Arrays.asList(array).contains(a);
+	}
 	/**判断collection是否包含object
 	 * @param collection
 	 * @param object
@@ -105,7 +130,7 @@ public abstract class BaseModel implements Serializable {
 	}
 	/**获取数量
 	 * @param <T>
-	 * @param collection collection, Vector, Set等都是Collection的子类
+	 * @param collection List, Vector, Set等都是Collection的子类
 	 * @return
 	 */
 	public static <T> int count(Collection<T> collection) {
@@ -139,7 +164,7 @@ public abstract class BaseModel implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T get(Collection<T> collection, int position) {
-		return (T) (collection == null ? null : get(collection.toArray(), position));
+		return collection == null ? null : (T) get(collection.toArray(), position);
 	}
 	/**获取
 	 * @param <K>

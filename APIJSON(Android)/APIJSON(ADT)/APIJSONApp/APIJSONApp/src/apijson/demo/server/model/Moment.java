@@ -14,11 +14,15 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.CIRCLE;
+import static zuo.biao.apijson.RequestRole.CONTACT;
+import static zuo.biao.apijson.RequestRole.LOGIN;
+import static zuo.biao.apijson.RequestRole.OWNER;
+
 import java.util.List;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
-import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.MethodAccess;
 
 /**动态类
  * @author Lemon
@@ -40,14 +44,11 @@ import zuo.biao.apijson.RequestMethod;
 }
  * </pre>
  */
-@APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		POST = "{\"disallow\": \"id\", \"necessary\": \"userId,pictureList\"}",
-		PUT = "{\"disallow\": \"userId,date\", \"necessary\": \"id\"}",
-		DELETE = "{\"necessary\": \"id\"}"
+@MethodAccess(
+		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}//TODO 还要细分，LOGIN,CONTACT只允许修改praiseUserIdList。数据库加role没用，应该将praiseUserIdList移到Praise表
 		)
 public class Moment extends BaseModel {
-	private static final long serialVersionUID = -7437225320551780084L;
+	private static final long serialVersionUID = 1L;
 
 	private Long userId;
 	private String content;

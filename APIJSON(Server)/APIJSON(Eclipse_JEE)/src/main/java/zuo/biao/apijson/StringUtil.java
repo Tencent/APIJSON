@@ -271,9 +271,9 @@ public class StringUtil {
 	}
 
 	//判断字符是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
+
 	//判断字符是否非空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	
+
 	/**判断字符是否非空
 	 * @param object
 	 * @param trim
@@ -298,24 +298,29 @@ public class StringUtil {
 	public static boolean isNotEmpty(String s, boolean trim) {
 		return ! isEmpty(s, trim);
 	}
-	
+
 	//判断字符是否非空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 	//判断字符类型 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	public static final Pattern ALPHA_PATTERN;
+	public static final Pattern PASSWORD_PATTERN;
 	public static final Pattern NAME_PATTERN;
 	public static final Pattern BIG_ALPHA_PATTERN;
 	public static final Pattern SMALL_ALPHA_PATTERN;
 	static {
 		ALPHA_PATTERN = Pattern.compile("[a-zA-Z]");
+		PASSWORD_PATTERN = Pattern.compile("^[0-9a-zA-Z_]+$");
 		NAME_PATTERN = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
 		BIG_ALPHA_PATTERN = Pattern.compile("[A-Z]");
 		SMALL_ALPHA_PATTERN = Pattern.compile("[a-z]");
 	}
 
-	//判断手机格式是否正确
+	/**判断手机格式是否正确
+	 * @param phone
+	 * @return
+	 */
 	public static boolean isPhone(String phone) {
 		if (isNotEmpty(phone, true) == false) {
 			return false;
@@ -327,7 +332,24 @@ public class StringUtil {
 
 		return p.matcher(phone).matches();
 	}
-	//判断email格式是否正确
+	/**判断手机格式是否正确
+	 * @param s
+	 * @return
+	 */
+	public static boolean isPassword(String s) {
+		return getLength(s, false) >= 6 && PASSWORD_PATTERN.matcher(s).matches();
+	}
+	/**判断是否全是数字密码
+	 * @param s
+	 * @return
+	 */
+	public static boolean isNumberPassword(String s) {
+		return getLength(s, false) == 6 && isNumer(s);
+	}
+	/**判断email格式是否正确
+	 * @param email
+	 * @return
+	 */
 	public static boolean isEmail(String email) {
 		if (isNotEmpty(email, true) == false) {
 			return false;
@@ -341,6 +363,14 @@ public class StringUtil {
 		return p.matcher(email).matches();
 	}
 
+
+	/**判断是否全是验证码
+	 * @param s
+	 * @return
+	 */
+	public static boolean isVerify(String s) {
+		return getLength(s, false) >= 4 && isNumer(s);
+	}
 	/**判断是否全是数字
 	 * @param s
 	 * @return
@@ -404,17 +434,25 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isBigWord(String s) {
-		return s != null && BIG_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() && isWord(s.substring(1));
+		s = getString(s);
+		if (s.isEmpty() || BIG_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+			return false;
+		}
+		return s.length() <= 1 ? true : isWord(s.substring(1));
 	}
 	/**判断是否为首字母小写的单词
 	 * @param key
 	 * @return
 	 */
 	public static boolean isSmallWord(String s) {
-		return s != null && SMALL_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() && isWord(s.substring(1));
+		s = getString(s);
+		if (s.isEmpty() || SMALL_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+			return false;
+		}
+		return s.length() <= 1 ? true : isWord(s.substring(1));
 	}
-	
-	
+
+
 	/**判断字符类型是否是身份证号
 	 * @param idCard
 	 * @return
@@ -612,7 +650,7 @@ public class StringUtil {
 	public static final int PRICE_FORMAT_PREFIX_WITH_BLANK = 3;
 	public static final int PRICE_FORMAT_SUFFIX_WITH_BLANK = 4;
 	public static final String[] PRICE_FORMATS = {
-		"", "￥", "元", "￥ ", " 元"
+			"", "￥", "元", "￥ ", " 元"
 	};
 
 	/**获取价格，保留两位小数
@@ -699,7 +737,7 @@ public class StringUtil {
 		}
 	}
 
-	
+
 	/**分割路径
 	 * @param path
 	 * @return
@@ -772,6 +810,38 @@ public class StringUtil {
 		key = (upper ? first.toUpperCase() : first.toLowerCase()) + key.substring(1, key.length());
 
 		return key;
+	}
+
+	/**全部大写
+	 * @param s
+	 * @return
+	 */
+	public static String toUpperCase(String s) {
+		return toUpperCase(s, false);
+	}
+	/**全部大写
+	 * @param s
+	 * @param trim
+	 * @return
+	 */
+	public static String toUpperCase(String s, boolean trim) {
+		s = trim ? getTrimedString(s) : getString(s);
+		return s.toUpperCase();
+	}
+	/**全部小写
+	 * @param s
+	 * @return
+	 */
+	public static String toLowerCase(String s) {
+		return toLowerCase(s, false);
+	}
+	/**全部小写
+	 * @param s
+	 * @return
+	 */
+	public static String toLowerCase(String s, boolean trim) {
+		s = trim ? getTrimedString(s) : getString(s);
+		return s.toLowerCase();
 	}
 
 	//校正（自动补全等）字符串>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

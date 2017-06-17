@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon/APIJSON)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,19 +14,24 @@ limitations under the License.*/
 
 package apijson.demo.model;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.MethodAccess;
 
 /**评论类
  * @author Lemon
+ * @see
+ * <br >POST:<pre>
+{
+ "Comment":{
+     "disallow":"id",
+     "necessary":"userId,momentId,content"
+ }
+}
+ * </pre>
  */
-@APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		DELETE = "{necessaryColumns:id}"
-		)
+@MethodAccess
 public class Comment extends BaseModel {
-	private static final long serialVersionUID = -1011007127735372824L;
-	
+	private static final long  serialVersionUID = 1L;
+
 	private Long toId;
 	private Long userId;
 	private Long momentId;
@@ -38,7 +43,7 @@ public class Comment extends BaseModel {
 		this();
 		setId(id);
 	}
-	
+
 
 	public Long getToId() {
 		return toId;

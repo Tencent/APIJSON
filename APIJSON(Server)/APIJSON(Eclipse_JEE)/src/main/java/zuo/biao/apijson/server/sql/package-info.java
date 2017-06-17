@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 /**
- * query files package
+ * package of files for sql
  */
 /**
  * @author Lemon

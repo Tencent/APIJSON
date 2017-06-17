@@ -33,12 +33,12 @@ import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotExistException;
-import zuo.biao.apijson.server.sql.QueryConfig;
+import zuo.biao.apijson.server.sql.SQLConfig;
 
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public class ObjectParser implements ParserAdapter {
+public abstract class ObjectParser implements ParserAdapter {
 	private static final String TAG = "ObjectParser";
 
 
@@ -68,12 +68,12 @@ public class ObjectParser implements ParserAdapter {
 		this(request, parentPath, type, null);
 	}
 
-	protected JSONObject request;
-	protected String parentPath;
-	
+	protected JSONObject request;//不用final是为了recycle
+	protected String parentPath;//不用final是为了recycle
+
 	protected final int type;
-	protected String path;
-	protected String table;
+	protected String path;//不用final是为了recycle
+	protected String table;//不用final是为了recycle
 	protected final boolean isTableKey;
 	/**for single object
 	 * @param parentPath
@@ -87,13 +87,12 @@ public class ObjectParser implements ParserAdapter {
 		this.request = request;
 		this.parentPath = parentPath;
 		this.type = type;
-		
+
 		this.path = Parser.getAbsPath(parentPath, name);
 		this.table = Pair.parseEntry(name, true).getKey();
 		this.isTableKey = zuo.biao.apijson.JSONObject.isTableKey(table);
 		Log.d(TAG, "ObjectParser  table = " + table + "; isTableKey = " + isTableKey);
 	}
-
 
 
 
@@ -195,24 +194,6 @@ public class ObjectParser implements ParserAdapter {
 		}
 	}
 
-	/**
-	 * @param key
-	 * @param value 类型不用JSON是因为JSON不能强转为JSONObject
-	 * @throws Exception
-	 */
-	@Override
-	public JSON parseChild(String path, String key, JSON value) throws Exception {
-		return value;
-	}
-	@Override
-	public JSONObject executeSQL(String path, QueryConfig config) throws Exception {
-		return sqlRequest;
-	}
-	@Override
-	public Object getTarget(String path) {
-		return path;
-	}
-
 
 	/**
 	 * @param key
@@ -259,9 +240,9 @@ public class ObjectParser implements ParserAdapter {
 				Log.d(TAG, "getObject  targetPath.equals(target)  >>");
 
 				//非查询关键词 @key 不影响查询，直接跳过
-				if (isTableKey && (key.startsWith("@") == false || QueryConfig.TABLE_KEY_LIST.contains(key))) {
+				if (isTableKey && (key.startsWith("@") == false || SQLConfig.TABLE_KEY_LIST.contains(key))) {
 					Log.e(TAG, "getObject  isTableKey && (key.startsWith(@) == false"
-							+ " || QueryConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
+							+ " || SQLConfig.TABLE_KEY_LIST.contains(key)) >>  return null;");
 					return false;//获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 				} else {
 					Log.d(TAG, "getObject  isTableKey(table) == false >> continue;");
@@ -282,7 +263,7 @@ public class ObjectParser implements ParserAdapter {
 				throw new IllegalArgumentException(path + "/" + key + "():function() 后面必须为函数String！");
 			}
 			functionMap.put(key, (String) value);
-		} else if (isTableKey && key.startsWith("@") && QueryConfig.TABLE_KEY_LIST.contains(key) == false) {
+		} else if (isTableKey && key.startsWith("@") && SQLConfig.TABLE_KEY_LIST.contains(key) == false) {
 			customMap.put(key, value);
 		} else {
 			sqlRequest.put(key, value);
@@ -318,9 +299,9 @@ public class ObjectParser implements ParserAdapter {
 
 		//GET <<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONObject rq = new JSONObject();
-		rq.put(QueryConfig.ID, request.get(QueryConfig.ID));
+		rq.put(SQLConfig.ID, request.get(SQLConfig.ID));
 		rq.put(JSONRequest.KEY_COLUMN, realKey);
-		JSONObject rp = new Parser().parseResponse(new JSONRequest(table, rq));
+		JSONObject rp = parseResponse(new JSONRequest(table, rq));
 		//GET >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -366,7 +347,7 @@ public class ObjectParser implements ParserAdapter {
 		return executeSQL(1, 0, 0);
 	}
 
-	protected QueryConfig config = null;//array item复用
+	protected SQLConfig config = null;//array item复用
 	/**SQL查询，for array item
 	 * @param count
 	 * @param page
@@ -391,10 +372,10 @@ public class ObjectParser implements ParserAdapter {
 				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
 					//						e.printStackTrace();
 					sqlReponse = null;//内部吃掉异常，put到最外层
-					//						requestObject.put(JSONResponse.KEY_MESSAGE
-					//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MESSAGE)
+					//						requestObject.put(JSONResponse.KEY_MSG
+					//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MSG)
 					//										+ "; query " + path + " cath NotExistException:"
-					//										+ newErrorResult(e).getString(JSONResponse.KEY_MESSAGE)));
+					//										+ newErrorResult(e).getString(JSONResponse.KEY_MSG)));
 				} else {
 					throw e;
 				}
@@ -421,7 +402,7 @@ public class ObjectParser implements ParserAdapter {
 		if (customMap != null) {
 			response.putAll(customMap);
 		}
-		
+
 		//解析函数function
 		if (functionMap != null) {
 			Set<Entry<String, String>> functionSet = functionMap == null ? null : functionMap.entrySet();
@@ -442,14 +423,14 @@ public class ObjectParser implements ParserAdapter {
 				}
 			}
 		}
-		
+
 		onComplete();
 
 		return response;
 	}
 
-	protected QueryConfig newQueryConfig() {
-		return QueryConfig.newQueryConfig(method, table, sqlRequest);
+	protected SQLConfig newQueryConfig() {
+		return SQLConfig.newQueryConfig(method, table, sqlRequest);
 	}
 	/**
 	 * response has the final value after parse (and query if isTableKey)
@@ -513,13 +494,13 @@ public class ObjectParser implements ParserAdapter {
 	public boolean isTableKey() {
 		return isTableKey;
 	}
-	
-	
 
-	public QueryConfig getConfig() {
+
+
+	public SQLConfig getConfig() {
 		return config;
 	}
-	
+
 	public JSONObject getResponse() {
 		return response;
 	}

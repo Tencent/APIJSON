@@ -14,15 +14,12 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.exception;
 
-/**
+/**冲突
  * @author Lemon
  */
 public class ConflictException extends Exception {
-	private static final long serialVersionUID = -2237022658440709153L;
+	private static final long serialVersionUID = 1L;
 	
-	public ConflictException() {
-		super();
-	}
 	public ConflictException(String msg) {
 		super(msg);
 	}

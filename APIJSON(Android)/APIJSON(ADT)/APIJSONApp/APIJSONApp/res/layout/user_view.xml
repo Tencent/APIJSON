@@ -40,9 +40,9 @@
             android:text="ID:" />
 
         <TextView
-            android:id="@+id/tvUserViewPhone"
+            android:id="@+id/tvUserViewTag"
             style="@style/text_middle"
-            android:text="Phone:" />
+            android:text="Tag:" />
     </LinearLayout>
 
 </LinearLayout>

@@ -84,18 +84,18 @@
             <View style="@style/divider_horizontal_1px" />
 
             <LinearLayout
-                android:id="@+id/llUserTag"
+                android:id="@+id/llUserPhone"
                 style="@style/content_item_white" >
 
                 <TextView
                     style="@style/content_item_lf_tv_black"
-                    android:text="标签" />
+                    android:text="手机" />
 
                 <TextView
-                    android:id="@+id/tvUserTag"
+                    android:id="@+id/tvUserPhone"
                     style="@style/content_item_rt_tv"
                     android:layout_weight="1"
-                    android:text="Android" />
+                    android:text="12345678900" />
 
                 <ImageView style="@style/content_item_rt_img" />
             </LinearLayout>

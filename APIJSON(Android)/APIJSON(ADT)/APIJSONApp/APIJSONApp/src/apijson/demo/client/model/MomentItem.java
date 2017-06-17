@@ -14,13 +14,12 @@ limitations under the License.*/
 
 package apijson.demo.client.model;
 
-import android.support.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import android.support.annotation.NonNull;
 import apijson.demo.client.application.APIJSONApplication;
-import zuo.biao.apijson.BaseModel;
+import apijson.demo.server.model.BaseModel;
 
 public class MomentItem extends BaseModel {
 	private static final long serialVersionUID = -7437225320551780084L;

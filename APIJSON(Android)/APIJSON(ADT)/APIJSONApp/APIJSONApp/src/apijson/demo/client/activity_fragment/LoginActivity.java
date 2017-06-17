@@ -22,6 +22,7 @@ import zuo.biao.library.ui.BottomMenuWindow;
 import zuo.biao.library.ui.ServerSettingActivity;
 import zuo.biao.library.ui.TextClearSuit;
 import zuo.biao.library.util.EditTextUtil;
+import zuo.biao.library.util.Log;
 import zuo.biao.library.util.SettingUtil;
 import zuo.biao.library.util.StringUtil;
 import android.annotation.SuppressLint;
@@ -29,7 +30,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -175,15 +175,15 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 				User user = response.getObject(User.class);
 
 				if (response.isSucceed() == false) {
-					switch (response.getStatus()) {
-					case 404:
+					switch (response.getCode()) {
+					case JSONResponse.CODE_NOT_FOUND:
 						showShortToast("账号不存在，请先注册");
 						onDragBottom(true);
 						break;
-					case 406:
+					case JSONResponse.CODE_ILLEGAL_ARGUMENT:
 						showShortToast("账号或密码不合法！");
 						break;
-					case 412:
+					case JSONResponse.CODE_CONDITION_ERROR:
 						showShortToast("账号或密码错误！");
 						showForget();
 						break;

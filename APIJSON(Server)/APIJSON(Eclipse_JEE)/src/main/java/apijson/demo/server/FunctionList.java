@@ -17,6 +17,7 @@ package apijson.demo.server;
 import java.util.Collection;
 import java.util.Map;
 
+//TODO  新增 @FunctionList ，被它注解过的List可以传到 FuntionUtil.invoke(FunctionList list, ...)
 /**可远程调用的函数列表
  * @author Lemon
  */

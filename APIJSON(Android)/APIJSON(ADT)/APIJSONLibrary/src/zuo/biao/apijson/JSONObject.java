@@ -15,20 +15,17 @@ limitations under the License.*/
 package zuo.biao.apijson;
 
 import static zuo.biao.apijson.StringUtil.UTF_8;
-import static zuo.biao.apijson.StringUtil.bigAlphaPattern;
-import static zuo.biao.apijson.StringUtil.namePattern;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Set;
 
-
 /**use this class instead of com.alibaba.fastjson.JSONObject, not encode in default cases
  * @author Lemon
  */
 public class JSONObject extends com.alibaba.fastjson.JSONObject {
-	private static final long serialVersionUID = 8907029699680768212L;
+	private static final long  serialVersionUID = 1L;
 
 	/**ordered
 	 */
@@ -103,7 +100,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject add(com.alibaba.fastjson.JSONObject object, boolean encode) {
 		//TODO  putAll(object);
-		
+
 		Set<String> set = object == null ? null : object.keySet();
 		if (set != null) {
 			for (String key : set) {
@@ -173,10 +170,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public Object put(String key, Object value, boolean encode) {
 		if (StringUtil.isNotEmpty(key, true) == false) {
 			Class<?> clazz = value == null ? null : value.getClass();
-			if (clazz == null || clazz.getAnnotation(APIJSONRequest.class) == null) {
+			if (clazz == null || clazz.getAnnotation(MethodAccess.class) == null) {
 				throw new IllegalArgumentException("put  StringUtil.isNotEmpty(key, true) == false" +
-						" && clazz == null || clazz.getAnnotation(APIJSONRequest.class) == null" +
-						" \n key为空时仅支持 类型被@APIJSONRequest注解 的value !!!" +
+						" && clazz == null || clazz.getAnnotation(MethodAccess.class) == null" +
+						" \n key为空时仅支持 类型被@MethodAccess注解 的value !!!" +
 						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！" +
 						" \n 如果是类似 key[]:{} 结构的请求，建议add(...)方法！");
 			}
@@ -218,24 +215,58 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return
 	 */
 	public static boolean isTableKey(String key) {
-		return isWord(key) && bigAlphaPattern.matcher(key.substring(0, 1)).matches();
-	}
-	/**判断是否为词，只能包含字母，数字或下划线
-	 * @param key
-	 * @return
-	 */
-	public static boolean isWord(String key) {
-		return StringUtil.isNotEmpty(key, false) && namePattern.matcher(key).matches();
+		return StringUtil.isBigWord(key);
 	}
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 	//JSONObject内关键词 key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final String KEY_COLUMN = "@column";//@key关键字都放这个类
-	public static final String KEY_GROUP = "@group";//@key关键字都放这个类
-	public static final String KEY_HAVING = "@having";//@key关键字都放这个类
-	public static final String KEY_ORDER = "@order";//@key关键字都放这个类
+	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
+	/**
+	 * 角色，拥有对某些数据的某些操作的权限
+	 */
+	public static final String KEY_ROLE = "@role";
+	/**
+	 * 数据库，Table在非默认schema内时需要声明 
+	 */
+	public static final String KEY_SCHEMA = "@schema";
+	/**
+	 * 查询的Table字段或SQL函数
+	 */
+	public static final String KEY_COLUMN = "@column";
+	/**
+	 * 分组方式
+	 */
+	public static final String KEY_GROUP = "@group";
+	/**
+	 * 聚合函数条件，一般和@group一起用
+	 */
+	public static final String KEY_HAVING = "@having";
+	/**
+	 * 排序方式
+	 */
+	public static final String KEY_ORDER = "@order";
+	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>
+
+
+	/**set role of request sender
+	 * @param role
+	 * @return this
+	 */
+	public JSONObject setRole(String role) {
+		put(KEY_ROLE, role);
+		return this;
+	}
+
+	/**set schema where table was put
+	 * @param schema
+	 * @return this
+	 */
+	public JSONObject setSchema(String schema) {
+		put(KEY_SCHEMA, schema);
+		return this;
+	}
 
 	/**set keys need to be returned
 	 * @param keys  key0, key1, key2 ...
@@ -252,10 +283,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(KEY_COLUMN, keys);
 		return this;
 	}
-	public String getColumn() {
-		return getString(KEY_COLUMN);
-	}
-	
+
 	/**set keys for group by
 	 * @param keys key0, key1, key2 ...
 	 * @return {@link #setGroup(String)}
@@ -271,10 +299,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(KEY_GROUP, keys);
 		return this;
 	}
-	public String getGroup() {
-		return getString(KEY_GROUP);
-	}
-	
+
 	/**set keys for having
 	 * @param keys count(key0) > 1, sum(key1) <= 5, function2(key2) ? value2 ...
 	 * @return {@link #setHaving(String)}
@@ -290,10 +315,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(KEY_HAVING, keys);
 		return this;
 	}
-	public String getHaving() {
-		return getString(KEY_HAVING);
-	}
-	
+
 	/**set keys for order by
 	 * @param keys  key0, key1+, key2- ...
 	 * @return {@link #setOrder(String)}
@@ -309,11 +331,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(KEY_ORDER, keys);
 		return this;
 	}
-	public String getOrder() {
-		return getString(KEY_ORDER);
-	}
-	
-	
+
+
 	//JSONObject内关键词 key >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -330,7 +349,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public Object putPath(String key, String... keys) {
 		return put(key+"@", StringUtil.getString(keys, "/"), true);
 	}
-	
+
 	/**
 	 * encode = true
 	 * @param key

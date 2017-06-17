@@ -131,7 +131,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	private GridView gvUserMoment;
 
 	private TextView tvUserRemark;
-	private TextView tvUserTag;
+	private TextView tvUserPhone;
 
 	private ViewGroup llUserBottomMenuContainer;
 	private BottomMenuView bottomMenuView;
@@ -159,7 +159,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 		gvUserMoment = (GridView) findViewById(R.id.gvUserMoment);
 
 		tvUserRemark = (TextView) findViewById(R.id.tvUserRemark);
-		tvUserTag = (TextView) findViewById(R.id.tvUserTag);
+		tvUserPhone = (TextView) findViewById(R.id.tvUserPhone);
 
 		llUserMoment.setVisibility(isOnEditMode ? View.GONE : View.VISIBLE);
 		if (isOnEditMode == false) {
@@ -211,7 +211,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 				userView.bindView(user);//方式三
 
 				tvUserRemark.setText(StringUtil.getTrimedString(user.getHead()));
-				tvUserTag.setText(StringUtil.getTrimedString(user.getTag()));
+				tvUserPhone.setText(StringUtil.getTrimedString(user.getPhone()));
 
 				if (adapter == null) {
 					adapter = new GridAdapter(context);
@@ -343,7 +343,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 		if (isOnEditMode) {
 			findViewById(R.id.llUserRemark).setOnClickListener(this);
-			findViewById(R.id.llUserTag).setOnClickListener(this);
+			findViewById(R.id.llUserPhone).setOnClickListener(this);
 
 			userView.setOnDataChangedListener(new OnDataChangedListener() {
 
@@ -384,12 +384,12 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 							user.setSex(user.getSex() == User.SEX_FEMALE ? User.SEX_MAIL : User.SEX_FEMALE);
 						}
 						break;
-					case R.id.tvUserViewPhone:
+					case R.id.tvUserViewTag:
 						if (isOnEditMode) {
-							toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_PHONE
-									, "手机", user.getPhone()), REQUEST_TO_EDIT_TEXT_INFO_PHONE, false);
+							toActivity(EditTextInfoActivity.createIntent(context, "标签"
+									, StringUtil.getTrimedString(tvUserPhone)), REQUEST_TO_EDIT_TEXT_INFO_TAG);
 						} else {
-							CommonUtil.copyText(context, user.getPhone());
+							CommonUtil.copyText(context, user.getTag());
 						}
 						break;
 					default:
@@ -513,9 +513,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			toActivity(EditTextInfoActivity.createIntent(context, EditTextInfoActivity.TYPE_WEBSITE, "备注"
 					, StringUtil.getTrimedString(tvUserRemark)), REQUEST_TO_EDIT_TEXT_INFO_REMARK);
 			break;
-		case R.id.llUserTag:
-			toActivity(EditTextInfoActivity.createIntent(context, "标签"
-					, StringUtil.getTrimedString(tvUserTag)), REQUEST_TO_EDIT_TEXT_INFO_TAG);
+		case R.id.llUserPhone:
+			toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_PHONE
+					, "手机", user.getPhone()), REQUEST_TO_EDIT_TEXT_INFO_PHONE, false);
 			break;
 		default:
 			break;

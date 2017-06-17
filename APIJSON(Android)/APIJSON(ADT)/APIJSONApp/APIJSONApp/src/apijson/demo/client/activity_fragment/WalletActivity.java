@@ -31,6 +31,7 @@ import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.model.Wallet;
 import apijson.demo.client.util.HttpRequest;
+import apijson.demo.server.model.UserPrivacy;
 
 /**钱包界面
  * @author Lemon
@@ -83,19 +84,19 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	}
 
 
-	private Wallet wallet;
-	public void setWallet(Wallet wallet_) {
-		this.wallet = wallet_;
+	private UserPrivacy privacy;
+	public void setWallet(UserPrivacy privacy_) {
+		this.privacy = privacy_;
 		runUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				dismissProgressDialog();
 				tvBaseTitle.setText(getTitleName());
-				if (wallet == null) {
-					wallet = new Wallet();
+				if (privacy == null) {
+					privacy = new UserPrivacy();
 				}
-				tvWalletCount.setText(StringUtil.getPrice(wallet.getBalance(), StringUtil.PRICE_FORMAT_PREFIX));
+				tvWalletCount.setText(StringUtil.getPrice(privacy.getBalance(), StringUtil.PRICE_FORMAT_PREFIX));
 			}
 		});
 	}
@@ -117,7 +118,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	public void initData() {//必须调用
 
 		showProgressDialog(getTitleName());
-		HttpRequest.getWallet(HTTP_GET, this);
+		HttpRequest.getUserPrivacy(HTTP_GET, this);
 	}
 
 	public String getTitleName() {
@@ -172,9 +173,9 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 				switch (requestCode) {
 				case HTTP_RECHARGE:
 				case HTTP_WITHDRAW:
-					if (response.getStatus() == 412) {
+					if (response.getCode() == JSONResponse.CODE_CONDITION_ERROR) {
 						showShortToast("密码错误！");
-					} else if (requestCode == HTTP_WITHDRAW && response.getStatus() == 416) {
+					} else if (requestCode == HTTP_WITHDRAW && response.getCode() == JSONResponse.CODE_OUT_OF_RANGE) {
 						showShortToast("余额不足！");
 					} else {
 						showShortToast((requestCode == HTTP_RECHARGE ? "充值" : "提现")
@@ -186,7 +187,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 					break;
 				case HTTP_GET:
 					if (isSucceed) {
-						setWallet(response.getObject(Wallet.class));
+						setWallet(response.getObject(UserPrivacy.class));
 					} else {
 						showShortToast(R.string.get_failed);
 					}
