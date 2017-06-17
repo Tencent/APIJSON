@@ -26,7 +26,7 @@ CREATE TABLE `Wallet` (
   `id` bigint(15) NOT NULL,
   `balance` decimal(10,2) DEFAULT NULL,
   `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='@deprecated，合并至UserPrivacy';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -48,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-13  0:12:27
+-- Dump completed on 2017-06-17 23:02:18

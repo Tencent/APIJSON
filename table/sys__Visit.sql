@@ -23,12 +23,10 @@ DROP TABLE IF EXISTS `_Visit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `_Visit` (
-  `_index` int(11) NOT NULL,
   `model` varchar(20) NOT NULL,
   `id` bigint(15) NOT NULL,
   `operate` tinyint(4) NOT NULL COMMENT '1-增\n2-删\n3-改\n4-查',
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`_index`)
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -50,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-08 15:54:34
+-- Dump completed on 2017-06-17 23:02:17

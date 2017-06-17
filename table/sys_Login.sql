@@ -28,7 +28,7 @@ CREATE TABLE `Login` (
   `type` tinyint(1) NOT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1493891806373 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1493891806373 DEFAULT CHARSET=utf8 COMMENT='@deprecated，登录信息存session';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-08 15:54:34
+-- Dump completed on 2017-06-17 23:02:18

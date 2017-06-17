@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `_Statistics`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `_Statistics` (
-  `_index` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `model` varchar(20) NOT NULL,
   `min` int(11) NOT NULL,
   `max` int(11) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE `_Statistics` (
   `update` int(11) DEFAULT NULL,
   `select` int(11) DEFAULT NULL,
   `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`_index`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='table的统计。\n貌似可以直接遍历每个表. min = min(_index); max = max(_index)\n增删改查统计可以遍历_Visit: SELECT count(0) WHERE operate = {operate}  AND model = {model} \n\n每次启动服务器时加载整个表到内存。每次对其它表有操作都写入这里\n\n_index最大值max、最小值min。\n增删改查次数\n最后修改时间\n\n做分页优化能用到min,max,delete\n';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-08 15:54:34
+-- Dump completed on 2017-06-17 23:02:17
