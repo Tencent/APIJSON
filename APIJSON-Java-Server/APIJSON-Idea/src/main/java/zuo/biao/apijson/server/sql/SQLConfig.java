@@ -63,7 +63,7 @@ public class SQLConfig {
 	public static final String MYSQL_URI = "jdbc:mysql://localhost:3306";//TODO 改成你自己的
 	public static final String MYSQL_SCHEMA = "sys";//TODO 改成你自己的
 	public static final String MYSQL_ACCOUNT = "root";//TODO 改成你自己的
-	public static final String MYSQL_PASSWORD = "root";//TODO 改成你自己的
+	public static final String MYSQL_PASSWORD = "apijson";//TODO 改成你自己的
 
 
 	public static final String ID = JSONResponse.KEY_ID;
