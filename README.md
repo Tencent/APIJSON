@@ -82,8 +82,8 @@ APIJSON是一种JSON传输结构协议。<br />
       "http://common.cnblogs.com/images/icon_weibo_24.png"
     ]
   },
-  "status":200,
-  "message":"success"
+  "code":200,
+  "msg":"success"
 }
 </code></pre>
 
@@ -125,8 +125,8 @@ APIJSON是一种JSON传输结构协议。<br />
       }
     }
   ],
-  "status":200,
-  "message":"success"
+  "code":200,
+  "msg":"success"
 }
 </code></pre>
 
@@ -237,8 +237,8 @@ APIJSON是一种JSON传输结构协议。<br />
       ]
     }
   ],
-  "status":200,
-  "message":"success"
+  "code":200,
+  "msg":"success"
 }
 </code></pre>
 
@@ -285,29 +285,29 @@ APIJSON是一种JSON传输结构协议。<br />
 ### <h3 id="2.6">2.6 服务端对应不同请求的返回结果<h3/>
  服务端对应不同请求的返回结果 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- User | {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "User":{"id":1, "name":"xxx"...}}
- Moment和对应的User | 分别返回两次请求的结果<br />Moment: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}}<br />User: {"status":200, "message":"success", "data":{"id":1, "name":"xxx"...}} | {"status":200, "message":"success", "Moment":{"id":1, "content":"xxx"...}, "User":{"id":1, "name":"xxx"...}}
- User列表 | {"status":200, "message":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"status":200, "message":"success", "[]":[{"User":{"id":1, "name":"xxx"...}}, {"User":{"id":2...}}...]}
- Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"status":200, "message":"success", "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "User":{...}, "[]":[{"Comment":{...}}, ...]}, ...]}
- User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"status":200, "message":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...} ...]} | 以上不同请求方法的结果:<br /> ① {"status":200, "message":"success", "[]":[{"User":{"id":1, "name":"xxx", ...}, "Moment":{...}, "[]":[{"Comment":{...}}, ...]}, ...]}<br /><br /> ② {"status":200, "message":"success", "User":{...}, "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{...}, ...}, ...]}, ...]}<br /><br /> ③ {"status":200, "message":"success", "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{}}, ...]}, ...]}
+ User | {"code":200, "msg":"success", "data":{"id":1, "name":"xxx"...}} | {"code":200, "msg":"success", "User":{"id":1, "name":"xxx"...}}
+ Moment和对应的User | 分别返回两次请求的结果<br />Moment: {"code":200, "msg":"success", "data":{"id":1, "name":"xxx"...}}<br />User: {"code":200, "msg":"success", "data":{"id":1, "name":"xxx"...}} | {"code":200, "msg":"success", "Moment":{"id":1, "content":"xxx"...}, "User":{"id":1, "name":"xxx"...}}
+ User列表 | {"code":200, "msg":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"code":200, "msg":"success", "[]":[{"User":{"id":1, "name":"xxx"...}}, {"User":{"id":2...}}...]}
+ Moment列表，每个Moment包括发布者User和前3条Comment | {"code":200, "msg":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"code":200, "msg":"success", "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "User":{...}, "[]":[{"Comment":{...}}, ...]}, ...]}
+ User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"code":200, "msg":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...} ...]} | 以上不同请求方法的结果:<br /> ① {"code":200, "msg":"success", "[]":[{"User":{"id":1, "name":"xxx", ...}, "Moment":{...}, "[]":[{"Comment":{...}}, ...]}, ...]}<br /><br /> ② {"code":200, "msg":"success", "User":{...}, "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{...}, ...}, ...]}, ...]}<br /><br /> ③ {"code":200, "msg":"success", "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{}}, ...]}, ...]}
 
 
 1.base_url指基地址，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.google.com/ ，对应的GET分支url:http://www.google.com/get/ ，下同。<br >
 2.请求中的 / 需要转义。JSONRequest.java已经用URLEncoder.encode转义，不需要再写；但如果是浏览器或Postman等直接输入url/request，需要把request中的所有 / 都改成 %252F ，下同。<br >
-3.status，指返回结果中的状态码，200表示成功，其它都是错误码，值全部都是HTTP标准状态码。下同。<br >
-4.message，指返回结果中的状态信息，对成功结果或错误原因的详细说明。下同。<br >
-5.status和message总是在返回结果的同一层级成对出现。对所有请求的返回结果都会在最外层有一对总结式status和message。对非GET类请求，返回结果里面的每个JSONObject里都会有一对status和message说明这个JSONObject的状态。下同。<br >
+3.code，指返回结果中的状态码，200表示成功，其它都是错误码，值全部都是HTTP标准状态码。下同。<br >
+4.msg，指返回结果中的状态信息，对成功结果或错误原因的详细说明。下同。<br >
+5.code和msg总是在返回结果的同一层级成对出现。对所有请求的返回结果都会在最外层有一对总结式code和msg。对非GET类请求，返回结果里面的每个JSONObject里都会有一对code和msg说明这个JSONObject的状态。下同。<br >
 6.id等字段对应的值仅供说明，不一定是数据库里存在的，请求里用的是真实存在的值。下同。
 
 ## <h2 id="3">3.请求方法、URL、Request、Response对应关系总览<h2/>
 
   方法及说明 | URL | Request | Response
 ------------ | ------------ | ------------ | ------------
-GET：普通获取请求，明文，可用浏览器调试 | base_url/get/ | {TableName:{…}}，{…}内为限制条件。<br >例如获取一个id为1的Moment：<br >{"Moment":{"id":1}} | {TableName:{...}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"id":1, "userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "status":200, "message":"success"}
-HEAD：普通获取数量请求，明文，可用浏览器调试 | base_url/head/ | {TableName:{…}}，{…}内为限制条件。<br >例如获取一个id为1的User所发布的Moment总数：<br >{"Moment":{"userId":1}} | {TableName:{"status":200, "message":"success", "count":10}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"status":200, "message":"success", "count":10}, "status":200, "message":"success"}
+GET：普通获取请求，明文，可用浏览器调试 | base_url/get/ | {TableName:{…}}，{…}内为限制条件。<br >例如获取一个id为1的Moment：<br >{"Moment":{"id":1}} | {TableName:{...}, "code":200, "msg":"success"}<br >例如<br >{"Moment":{"id":1, "userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "code":200, "msg":"success"}
+HEAD：普通获取数量请求，明文，可用浏览器调试 | base_url/head/ | {TableName:{…}}，{…}内为限制条件。<br >例如获取一个id为1的User所发布的Moment总数：<br >{"Moment":{"userId":1}} | {TableName:{"code":200, "msg":"success", "count":10}, "code":200, "msg":"success"}<br >例如<br >{"Moment":{"code":200, "msg":"success", "count":10}, "code":200, "msg":"success"}
 POST_GET：安全/私密获取请求，非明文，用于获取钱包等对安全性要求高的数据 | base_url/post_get/ | 最外层加一个"tag":tag，其它同GET | 同GET
 POST_HEAD：安全/私密获取数量请求，非明文，用于获取银行卡数量等对安全性要求高的数据 | base_url/post_head/ | 最外层加一个"tag":tag，其它同HEAD | 同HEAD
-POST：新增数据，非明文 | base_url/post/ | {TableName:{…}, "tag":tag}，{…}中id由服务端生成，客户端不能传。<br >例如一个id为1的User发布一个新Moment：<br >{"Moment":{"userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"} | {TableName:{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}<br >例如<br >{"Moment":{"status":200, "message":"success", "id":1}, "status":200, "message":"success"}
+POST：新增数据，非明文 | base_url/post/ | {TableName:{…}, "tag":tag}，{…}中id由服务端生成，客户端不能传。<br >例如一个id为1的User发布一个新Moment：<br >{"Moment":{"userId":1, "content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"} | {TableName:{"code":200, "msg":"success", "id":1}, "code":200, "msg":"success"}<br >例如<br >{"Moment":{"code":200, "msg":"success", "id":1}, "code":200, "msg":"success"}
 PUT：修改数据，非明文，只修改所传的字段 | base_url/put/ | {TableName:{"id":id,…}, "tag":tag}，{…}中id必传。<br >例如修改id为1的Moment的content：<br >{"Moment":{"id":1,"content":"APIJSON,let interfaces and documents go to hell !"}, "tag":"Moment"} | 同POST
 DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "tag":tag}，{…}中id必传，一般只传id。<br >例如删除id为1的Moment：<br >{"Moment":{"id":1}, "tag":"Moment"} | 同POST
 
@@ -328,7 +328,7 @@ DELETE：删除数据，非明文 | base_url/delete/ | {TableName:{"id":id}, "ta
  查询数组 | "key[]":{}，后面是JSONObject，key可省略。当key和内部Table名相同时，JSONResponse#format会把Table提取出来，即将 {Table:{Content}} 转化为 {Content} | [{"User[]":{"User":{}}}](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{}}})，查询一个User数组。这里key和Table名都是User，会提取User，即将 {"User":{"id", ...}} 转化为 {"id", ...} 
  匹配选项范围 | "key{}":[]，后面是JSONArray，作为key可取的值的选项 | ["id{}":[38710,82001,70793]](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"id{}":[38710,82001,70793]}}})，查询id符合38710,82001,70793中任意一个的一个User数组
  匹配条件范围 | "key{}":"条件0,条件1..."，条件为任意SQL比较表达式字符串，非Number类型必须用''包含条件的值，如'a' | ["id{}":"<=80000,\>90000"](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"id{}":"<=80000,\>90000"}}})，查询id符合id\<=80000 \| id>90000的一个User数组
- 包含选项范围 | "key<\>":Object  =>  "key<\>":[Object]，key对应值的类型必须为JSONArray，Object类型不能为JSON |  ["friendIdList<\>":38710](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"friendIdList<\>":38710}}})，查询friendIdList包含38710的一个User数组
+ 包含选项范围 | "key<\>":Object  =>  "key<\>":[Object]，key对应值的类型必须为JSONArray，Object类型不能为JSON |  ["contactIdList<\>":38710](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"contactIdList<\>":38710}}})，查询contactIdList包含38710的一个User数组
  远程调用函数 | "key()":"函数表达式"，函数表达式为 function(Type0:value0,Type1:value1...)。函数参数类型为Object或泛型时可省略类型，即 Object:value 改写为 value | ["isPraised()":"isContain(Collection:praiseUserIdList,userId)"](http://139.196.140.118:8080/get/{"Moment":{"id":301,"isPraised()":"isContain(Collection:praiseUserIdList,userId)"}})，请求完成后会调用 boolean isContain(Collection collection, Object object) 函数，然后变为 "isPraised":true 这种（假设点赞用户id列表包含了userId，即这个User点了赞）
  依赖引用 | "key@":"依赖路径"，依赖路径为用/分隔的字符串。以/开头的是缺省依赖路径，从声明key所处容器的父容器路径开始；其它是完整依赖路径，从最外层开始。被依赖的对象必须在声明key的上面 | ["userId@":"/User/id"](http://139.196.140.118:8080/get/{"User":{"id":38710},"Moment":{"userId@":"%252FUser%252Fid"}})，userId依赖引用与所处容器同级的User内的id值，假设id=1，则请求完成后会变成 "userId":1
  模糊搜索 | "key$":"SQL搜索表达式"  =>  "key$":["SQL搜索表达式"]，任意SQL搜索表达式字符串，如 %key%, %k%e%y% 等 | ["name$":"%m%"](http://139.196.140.118:8080/get/{"User[]":{"count":3,"User":{"name$":"%2525m%2525"}}})，查询name包含"m"的一个User数组
