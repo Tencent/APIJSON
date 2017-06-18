@@ -16,27 +16,27 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Wallet`
+-- Table structure for table `Praise`
 --
 
-DROP TABLE IF EXISTS `Wallet`;
+DROP TABLE IF EXISTS `Praise`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Wallet` (
+CREATE TABLE `Praise` (
   `id` bigint(15) NOT NULL,
-  `balance` decimal(10,2) DEFAULT NULL,
-  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='@deprecated，合并至UserPrivacy';
+  `userIdList` json NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='如果对Moment写安全要求高，可以将Moment内praiserUserIdList分离到Praise表中，作为userIdList。\n权限注解也改下：\n@MethodAccess(\n		PUT = {OWNER, ADMIN}\n		)\nclass Moment {\n       …\n}\n\n@MethodAccess(\n		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}\n		)\n class Praise {\n       …\n }\n';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `Wallet`
+-- Dumping data for table `Praise`
 --
 
-LOCK TABLES `Wallet` WRITE;
-/*!40000 ALTER TABLE `Wallet` DISABLE KEYS */;
-INSERT INTO `Wallet` VALUES (38710,14912.50,'2017-02-01 11:15:44'),(70793,500.00,'2017-02-01 11:15:44'),(82001,8682.30,'2017-02-01 11:15:44'),(82002,3500.00,'2017-02-01 11:15:44'),(82003,700.00,'2017-02-01 11:15:44'),(82004,100.00,'2017-02-01 11:15:44'),(82005,700.00,'2017-02-01 11:15:44');
-/*!40000 ALTER TABLE `Wallet` ENABLE KEYS */;
+LOCK TABLES `Praise` WRITE;
+/*!40000 ALTER TABLE `Praise` DISABLE KEYS */;
+INSERT INTO `Praise` VALUES (12,'[38710, 82003, 70793, 93793, 82006, 82044, 82040, 82055, 82002, 90814, 82001]'),(15,'[82055, 82001, 82002]'),(32,'[38710, 82001, 82002]'),(58,'[38710, 82003, 82005, 93793, 82006, 82044, 82001]'),(170,'[82044, 82002, 82001]'),(235,'[]'),(301,'[38710, 93793, 82003, 82005, 82040, 82055, 82002, 82001]'),(371,'[90814, 82002, 93793, 82003, 82005, 82006, 82040, 82001]'),(470,'[]'),(511,'[70793, 93793, 82001]'),(543,'[]'),(551,'[]'),(594,'[38710, 82002]'),(595,'[70793, 82002, 82001]'),(704,'[82003, 82002, 82001]'),(1491200468898,'[]'),(1491277116776,'[38710, 82001]'),(1493835799335,'[82001, 82002]');
+/*!40000 ALTER TABLE `Praise` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
