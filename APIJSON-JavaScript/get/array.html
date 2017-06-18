@@ -8,7 +8,7 @@
 <body>
 <script >
     var json = {
-        "User[]":{ //数组命名和内部对象同名时会将对象去包装
+        "User[]":{ //数组命名和内部对象同名时会将对象去包装 "User[]":[{"User":{Content}}, ...] => "User[]":[{Content}, ...]
             "count":5,
             "page":1,
             "User":{
@@ -17,7 +17,7 @@
         }
     };
 
-    rq = request(url_get, json, false, function () {
+    var rq = request(url_get, json, false, function () {
         if (rq.readyState !== 4) {
             return;
         }
