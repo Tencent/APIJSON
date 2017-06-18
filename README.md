@@ -138,7 +138,7 @@ APIJSON是一种JSON传输结构协议。<br />
     "page":0,                        //数组条件
     "count":2,
     "Moment":{                       //请求一个名为Moment的对象
-      "content$":"%a%"               //对象条件，搜索content中包含 "a" 的动态
+      "content$":"%a%"               //对象条件，搜索content中包含a的动态
     },
     "User":{
       "id@":"/Moment/userId",        //缺省依赖路径，从所处容器的父容器路径开始
