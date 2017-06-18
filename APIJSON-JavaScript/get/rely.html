@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GET:Rely</title>
+  <script type="text/javascript" src="../apijson.js">
+  </script>
+</head>
+<body>
+<script >
+    var json = {
+        "Moment":{
+            "id":15
+        },
+        "User":{
+            "id@":"Moment/userId" //已通过encode函数自动转义 encodeURIComponent("Moment/userId")
+        }
+    };
+
+    request(url_get, json);
+</script>
+</body>
+</html>

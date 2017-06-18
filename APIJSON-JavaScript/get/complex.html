@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GET:Complex</title>
+  <script type="text/javascript" src="../apijson.js">
+  </script>
+</head>
+<body>
+<script >
+    var json = {
+        "[]":{
+            "count":3,
+            "page":0,
+            "Moment":{
+                "@column":"id,userId,content,praiseUserIdList",
+                "userId{}":[
+                    38710,
+                    70793
+                ]
+            },
+            "User":{
+                "@column":"id,name,head",
+                "id@":"/Moment/userId" //已通过encode函数自动转义 encodeURIComponent("/Moment/userId")
+            },
+            "[]":{
+                "count":3,
+                "Comment":{
+                    "momentId@":"[]/Moment/id" //已通过encode函数自动转义 encodeURIComponent("[]/Moment/id")
+                },
+            }
+        }
+    };
+
+    request(url_get, json);
+</script>
+</body>
+</html>

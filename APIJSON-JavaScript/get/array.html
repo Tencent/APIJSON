@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GET:Array</title>
+  <script type="text/javascript" src="../apijson.js">
+  </script>
+</head>
+<body>
+<script >
+    var json = {
+        "User[]":{ //数组命名和内部对象同名时会将对象去包装
+            "count":5,
+            "page":1,
+            "User":{
+                "name$":"%o%" //已通过encode函数自动转义 encodeURIComponent("%o%")
+            }
+        }
+    };
+
+    rq = request(url_get, json, false, function () {
+        if (rq.readyState !== 4) {
+            return;
+        }
+
+        if (rq.status === 200) {
+            alert("Response(GET):\n" + format(rq.responseText));
+
+            var rp = JSON.parse(rq.responseText);
+            var arr = rp == null ? null : rp["User[]"]; //取出数组User[]
+            if (arr != null) {
+                alert("User[] length = \n" + arr.length);
+
+                var user0 = arr == null || arr.length <= 0 ? null : arr[0]; //取出User[]第0项
+                if (user0 != null) {
+                    alert("User[]/0 = \n" + format(JSON.stringify(user0)));
+                    alert("User[]/0/id = \n" + user0.id); //取出并显示User[]第0项User的id
+                }
+            }
+        } else {
+            alert("Response(GET):\nstatus" + rq.status + "\nerror:" + rq.error);
+        }
+    });
+</script>
+</body>
+</html>
