@@ -22,8 +22,7 @@ package zuo.biao.apijson;
  * <br> request.toArray(...);//not a must
  */
 public class JSONRequest extends JSONObject {
-
-	private static final long serialVersionUID = -2223023180338466812L;
+	private static final long  serialVersionUID = 1L;
 
 	public JSONRequest() {
 		super();
@@ -75,9 +74,6 @@ public class JSONRequest extends JSONObject {
 		put(KEY_TAG, tag);
 		return this;
 	}
-	public String getTag() {
-		return getString(KEY_TAG);
-	}
 
 
 	//array object <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -85,7 +81,7 @@ public class JSONRequest extends JSONObject {
 	public static final int QUERY_TABLE = 0;
 	public static final int QUERY_TOTAL = 1;
 	public static final int QUERY_ALL = 2;
-	
+
 	public static final String KEY_QUERY = "query";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";

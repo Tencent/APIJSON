@@ -90,4 +90,5 @@ public enum RequestMethod {
 	public static boolean isPublicMethod(RequestMethod method) {
 		return method == null || method == GET || method == HEAD;
 	}
+	
 }

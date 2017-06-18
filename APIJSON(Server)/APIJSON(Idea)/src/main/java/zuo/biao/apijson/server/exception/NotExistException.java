@@ -14,15 +14,12 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.exception;
 
-/**不存在异常，可接受，内部吃掉
+/**不存在，可接受，内部吃掉
  * @author Lemon
  */
 public class NotExistException extends Exception {
-	private static final long serialVersionUID = -5597379135111907206L;
+	private static final long serialVersionUID = 1L;
 	
-	public NotExistException() {
-		super();
-	}
 	public NotExistException(String msg) {
 		super(msg);
 	}

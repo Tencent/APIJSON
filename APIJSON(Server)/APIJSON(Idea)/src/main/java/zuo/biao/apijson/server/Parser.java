@@ -25,22 +25,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import javax.activation.UnsupportedDataTypeException;
+import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.AccessVerifier;
+import apijson.demo.server.model.User;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.exception.ConditionNotMatchException;
+import zuo.biao.apijson.server.exception.ConditionErrorException;
 import zuo.biao.apijson.server.exception.ConflictException;
+import zuo.biao.apijson.server.exception.NotLoggedInException;
 import zuo.biao.apijson.server.exception.OutOfRangeException;
-import zuo.biao.apijson.server.sql.QueryConfig;
-import zuo.biao.apijson.server.sql.QueryHelper;
+import zuo.biao.apijson.server.sql.SQLConfig;
+import zuo.biao.apijson.server.sql.SQLExecutor;
 
 /**parser for parsing request to JSONObject
  * @author Lemon
@@ -74,9 +79,24 @@ public class Parser {
 		this.noVerify = noVerify; 
 	}
 
+	private HttpSession session;//可能比较大，占内存。而且不是所有地方都用
+	private User visitor;//来访用户
+	private long visitorId;//来访用户id
+	public Parser setSession(@NotNull HttpSession session) {
+		this.session = session;
+		this.visitor = AccessVerifier.getUser(session);
+		this.visitorId = AccessVerifier.getUserId(session);
+		return this;
+	}
+	private RequestRole globleRole;//全局角色，对未指明角色的Table自动加上这个角色
+	public Parser setGlobleRole(RequestRole globleRole) {
+		this.globleRole = globleRole;
+		return this;
+	}
+
 
 	private JSONObject requestObject;
-	private QueryHelper queryHelper;
+	private SQLExecutor sQLExecutor;
 	private Map<String, Object> queryResultMap;//path-result
 
 
@@ -85,12 +105,7 @@ public class Parser {
 	 * @return
 	 */
 	public String parse(String request) {
-		String response = JSON.toJSONString(parseResponse(request));
-
-		Log.d(TAG, "parse  return response = \n" + response
-				+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n");
-
-		return response;
+		return JSON.toJSONString(parseResponse(request));
 	}
 	/**解析请求json并获取对应结果
 	 * @param request
@@ -116,38 +131,69 @@ public class Parser {
 
 		return parseResponse(requestObject);
 	}
+
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return requestObject
 	 */
 	public JSONObject parseResponse(JSONObject request) {
+		long startTime = System.currentTimeMillis();
+		Log.d(TAG, "parseResponse  startTime = " + startTime
+				+ "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n ");
+
+		if (noVerify == false) {
+			//TODO 暂时去掉，方便测试
+			if (RequestMethod.isPublicMethod(requestMethod) == false) {
+				try {
+					AccessVerifier.verifyLogin(session);
+				} catch (Exception e) {
+					return Parser.newErrorResult(e);
+				}
+			}
+
+			if (globleRole == null) {
+				setGlobleRole(RequestRole.get(request.getString(JSONRequest.KEY_ROLE)));
+			}
+		}
+
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
+
 
 		queryResultMap = new HashMap<String, Object>();
 
 		Exception error = null;
-		queryHelper = new QueryHelper();
+		sQLExecutor = new SQLExecutor();
 		try {
 			requestObject = getObject(null, null, request);
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e;
 		}
-		queryHelper.close();
-		queryHelper = null;
+		sQLExecutor.close();
+		sQLExecutor = null;
 
 
 		if (noVerify == false) {
 			requestObject = AccessVerifier.removeAccessInfo(requestObject);
 		}
 		requestObject = error == null ? extendSuccessResult(requestObject)
-				: extendResult(requestObject, 206, "未完成全部请求：\n" + error.getMessage());
+				: extendResult(requestObject, JSONResponse.CODE_PARTIAL_SUCCEED, "未完成全部请求：\n " + error.getMessage());
 
 
 		queryResultMap.clear();
 
+		//会不会导致原来的session = null？		session = null;
+
+
 		Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
 				+ requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
+
+		Log.d(TAG, "parse  return response = \n" + JSON.toJSONString(requestObject)
+		+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n");
+
+		long endTime = System.currentTimeMillis();
+		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + (endTime - startTime)
+				+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
 
 		return requestObject;
 	}
@@ -169,26 +215,28 @@ public class Parser {
 
 
 
+
+
 	/**新建带状态内容的JSONObject
-	 * @param status
-	 * @param message
+	 * @param code
+	 * @param msg
 	 * @return
 	 */
-	public static JSONObject newResult(int status, String message) {
-		return extendResult(null, status, message);
+	public static JSONObject newResult(int code, String msg) {
+		return extendResult(null, code, msg);
 	}
 	/**添加JSONObject的状态内容，一般用于错误提示结果
 	 * @param object
-	 * @param status
-	 * @param message
+	 * @param code
+	 * @param msg
 	 * @return
 	 */
-	public static JSONObject extendResult(JSONObject object, int status, String message) {
+	public static JSONObject extendResult(JSONObject object, int code, String msg) {
 		if (object == null) {
 			object = new JSONObject(true);
 		}
-		object.put(JSONResponse.KEY_STATUS, status);
-		object.put(JSONResponse.KEY_MESSAGE, message);
+		object.put(JSONResponse.KEY_CODE, code);
+		object.put(JSONResponse.KEY_MSG, msg);
 		return object;
 	}
 
@@ -212,7 +260,7 @@ public class Parser {
 	 */
 	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
 		JSONObject error = newErrorResult(e);
-		return extendResult(object, error.getIntValue(JSONResponse.KEY_STATUS), error.getString(JSONResponse.KEY_MESSAGE));
+		return extendResult(object, error.getIntValue(JSONResponse.KEY_CODE), error.getString(JSONResponse.KEY_MSG));
 	}
 	/**新建错误状态内容
 	 * @param e
@@ -222,27 +270,44 @@ public class Parser {
 		if (e != null) {
 			e.printStackTrace();
 
-			int status = 404;
+			int code = JSONResponse.CODE_NOT_FOUND;
 			if (e instanceof UnsupportedEncodingException) {
-				status = 400;
-			} else if (e instanceof IllegalAccessException) {
-				status = 401;
-			} else if (e instanceof UnsupportedOperationException) {
-				status = 403;
-			} else if (e instanceof IllegalArgumentException) {
-				status = 406;
-			} else if (e instanceof TimeoutException) {
-				status = 408;
-			} else if (e instanceof ConflictException) {
-				status = 409;
-			} else if (e instanceof ConditionNotMatchException) {
-				status = 412;
-			} else if (e instanceof OutOfRangeException) {
-				status = 416;
+				code = JSONResponse.CODE_UNSUPPORTED_ENCODING;
+			} 
+			else if (e instanceof IllegalAccessException) {
+				code = JSONResponse.CODE_ILLEGAL_ACCESS;
+			}
+			else if (e instanceof UnsupportedOperationException) {
+				code = JSONResponse.CODE_UNSUPPORTED_OPERATION;
+			}
+			else if (e instanceof IllegalArgumentException) {
+				code = JSONResponse.CODE_ILLEGAL_ARGUMENT;
+			}
+			else if (e instanceof NotLoggedInException) {
+				code = JSONResponse.CODE_NOT_LOGGED_IN;
+			}
+			else if (e instanceof TimeoutException) {
+				code = JSONResponse.CODE_TIME_OUT;
+			} 
+			else if (e instanceof ConflictException) {
+				code = JSONResponse.CODE_CONFLICT;
+			}
+			else if (e instanceof ConditionErrorException) {
+				code = JSONResponse.CODE_CONDITION_ERROR;
+			}
+			else if (e instanceof UnsupportedDataTypeException) {
+				code = JSONResponse.CODE_UNSUPPORTED_TYPE;
+			}
+			else if (e instanceof OutOfRangeException) {
+				code = JSONResponse.CODE_OUT_OF_RANGE;
+			}
+			else if (e instanceof NullPointerException) {
+				code = JSONResponse.CODE_NULL_POINTER;
 			}
 
-			return newResult(status, e.getMessage());
+			return newResult(code, e.getMessage());
 		}
+
 		return newResult(500, "服务器内部错误");
 	}
 
@@ -290,6 +355,7 @@ public class Parser {
 		return Structure.parseRequest(method, "", (JSONObject) target.clone(), request);
 	}
 
+	//TODO 优化性能！
 	/**获取正确的返回结果
 	 * @param method
 	 * @param response
@@ -298,22 +364,22 @@ public class Parser {
 	 */
 	public static JSONObject getCorrectResponse(final RequestMethod method
 			, String table, JSONObject response) throws Exception {
-		Log.d(TAG, "getCorrectResponse  method = " + method + "; table = " + table);
-		if (response == null || response.isEmpty()) {//避免无效空result:{}添加内容后变有效
-			Log.e(TAG, "getCorrectResponse  response == null || response.isEmpty() >> return response;");
-			return response;
-		}
-		
-		JSONObject target = zuo.biao.apijson.JSONObject.isTableKey(table) == false
-				? new JSONObject() : getStructure(method, "Response", "model", table);
-				
-		return Structure.parseResponse(method, table, target, response, new OnParseCallback() {
-
-			@Override
-			protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
-				return getCorrectResponse(method, key, robj);
-			}
-		});
+		//		Log.d(TAG, "getCorrectResponse  method = " + method + "; table = " + table);
+		//		if (response == null || response.isEmpty()) {//避免无效空result:{}添加内容后变有效
+		//			Log.e(TAG, "getCorrectResponse  response == null || response.isEmpty() >> return response;");
+		return response;
+		//		}
+		//
+		//		JSONObject target = zuo.biao.apijson.JSONObject.isTableKey(table) == false
+		//				? new JSONObject() : getStructure(method, "Response", "model", table);
+		//
+		//				return MethodStructure.parseResponse(method, table, target, response, new OnParseCallback() {
+		//
+		//					@Override
+		//					protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
+		//						return getCorrectResponse(method, key, robj);
+		//					}
+		//				});
 	}
 
 	/**获取Request或Response内指定JSON结构
@@ -326,7 +392,7 @@ public class Parser {
 	 */
 	public static JSONObject getStructure(RequestMethod method, String table, String key, String value) throws Exception  {
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
-		QueryConfig config = new QueryConfig(GET, table);
+		SQLConfig config = new SQLConfig(GET, table);
 		config.setColumn("structure");
 
 		Map<String, Object> where = new HashMap<String, Object>();
@@ -336,7 +402,9 @@ public class Parser {
 		}
 		config.setWhere(where);
 
-		QueryHelper qh = new QueryHelper();
+		SQLExecutor qh = new SQLExecutor();
+
+		//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
 		try {
 			JSONObject result = qh.execute(config.setCacheStatic(true));
 			return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
@@ -357,7 +425,7 @@ public class Parser {
 		return getObject(parentPath, name, request, null);
 	}
 
-	//	private QueryConfig itemConfig;
+	//	private SQLConfig itemConfig;
 	/**获取单个对象，该对象处于parentObject内
 	 * @param parentPath parentObject的路径
 	 * @param name parentObject的key
@@ -367,7 +435,7 @@ public class Parser {
 	 * @throws Exception 
 	 */
 	private JSONObject getObject(String parentPath, String name, final JSONObject request
-			, final QueryConfig arrayConfig) throws Exception {
+			, final SQLConfig arrayConfig) throws Exception {
 		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
 				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
 		if (request == null) {// Moment:{}   || request.isEmpty()) {//key-value条件
@@ -385,7 +453,7 @@ public class Parser {
 			}
 
 			@Override
-			public JSONObject executeSQL(@NotNull String path, @NotNull QueryConfig config) throws Exception {
+			public JSONObject executeSQL(@NotNull String path, @NotNull SQLConfig config) throws Exception {
 				JSONObject result = getSQLObject(config);
 				if (result != null) {
 					putQueryResult(path, result);//解决获取关联数据时requestObject里不存在需要的关联数据
@@ -417,8 +485,13 @@ public class Parser {
 				return isEmpty ? null : child;//只添加! isEmpty的值，可能数据库返回数据不够count
 			}
 
+			@Override
+			public JSONObject parseResponse(JSONRequest request) throws Exception {
+				return new Parser(GET, noVerify).setSession(session).parseResponse(request);
+			}
+
 			//			@Override
-			//			protected QueryConfig newQueryConfig() {
+			//			protected SQLConfig newQueryConfig() {
 			//				if (itemConfig != null) {
 			//					return itemConfig;
 			//				}
@@ -467,8 +540,9 @@ public class Parser {
 				if (query == JSONRequest.QUERY_TOTAL) {
 					response = null;//不再往后查询
 				} else {
-					response = op.executeSQL(arrayConfig.getCount(), arrayConfig.getPage(), arrayConfig.getPosition())
-							.response();
+					response = op.executeSQL(
+							arrayConfig.getCount(), arrayConfig.getPage(), arrayConfig.getPosition()
+							).response();
 					//					itemConfig = op.getConfig();
 				}
 			}
@@ -518,17 +592,27 @@ public class Parser {
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
 
 
+		//key[]:{Table:{}}中key equals Table时 提取Table
+		boolean isContainer = true;
+		int index = name == null ? -1 : name.lastIndexOf("[]");
+		String table = index <= 0 ? null : Pair.parseEntry(name.substring(0, index), true).getKey();
+		if (JSONRequest.isTableKey(table) && request.containsKey(table)) {
+			isContainer = false;
+		}
+
+
 		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONArray response = new JSONArray();
 		JSONObject parent;
-		QueryConfig config = new QueryConfig(requestMethod, size, page).setQuery(query);
+		SQLConfig config = new SQLConfig(requestMethod, size, page).setQuery(query);
 		//生成size个
 		for (int i = 0; i < size; i++) {
 			parent = getObject(path, "" + i, request, config.setType(ObjectParser.TYPE_ITEM).setPosition(i));
 			if (parent == null || parent.isEmpty()) {
 				break;
 			}
-			response.add(parent);
+			//key[]:{Table:{}}中key equals Table时 提取Table
+			response.add(isContainer ? parent : parent.getJSONObject(table) );
 		}
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -670,7 +754,7 @@ public class Parser {
 			}
 		}
 
-		System.out.println("getValueByPath  return parent == null ? valuePath : parent.get(keys[keys.length - 1]); >> ");
+		Log.i(TAG, "getValueByPath  return parent == null ? valuePath : parent.get(keys[keys.length - 1]); >> ");
 		return parent == null ? valuePath : parent.get(keys[keys.length - 1]);
 	}
 
@@ -695,22 +779,24 @@ public class Parser {
 	 * @return
 	 * @throws Exception
 	 */
-	private synchronized JSONObject getSQLObject(QueryConfig config) throws Exception {
+	private synchronized JSONObject getSQLObject(SQLConfig config) throws Exception {
 		Log.i(TAG, "getSQLObject  config = " + JSON.toJSONString(config));
 		if (noVerify == false) {
-			AccessVerifier.verify(requestObject, config);
+			if (config.getRole() == null) {
+				if (globleRole != null) {
+					config.setRole(globleRole);
+				} else {
+					config.setRole(visitorId <= 0 ? RequestRole.UNKNOWN : RequestRole.LOGIN);
+				}
+			}
+			AccessVerifier.verify(config, visitor);
 		}
-		return getCorrectResponse(requestMethod, config.getTable(), queryHelper.execute(config));
+		return getCorrectResponse(requestMethod, config.getTable(), sQLExecutor.execute(config));
 	}
 
 
 
 	/**获取客户端实际需要的key
-	 * <br> "userId@":"/User/id"      //@根据路径依赖，@始终在最后。value是'/'分隔的字符串。
-	 * <br> "isPraised()":"isContain(Collection:idList,long:id)"  //()使用方法，value是方法表达式。不能与@并用。
-	 * <br> "content$":"%searchKey%"  //$搜索，右边紧跟key。value是搜索表达式。
-	 * <br> "@columns":"id,sex,name"  //关键字，左边紧跟key。暂时不用，因为目前关键字很少，几乎不会发生冲突。value是','分隔的字符串。
-	 * 
 	 * @param method
 	 * @param originKey
 	 * @param isTableKey
@@ -773,5 +859,6 @@ public class Parser {
 		Log.i(TAG, "getRealKey  return key = " + key);
 		return key;
 	}
+
 
 }

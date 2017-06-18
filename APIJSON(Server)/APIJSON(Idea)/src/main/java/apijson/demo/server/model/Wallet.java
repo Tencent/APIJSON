@@ -14,12 +14,14 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.OWNER;
+
 import java.math.BigDecimal;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.MethodAccess;
 
-/**钱包类
+/**钱包类，已用UserPrivacy替代
  * @author Lemon
  * @see
  * <br >POST_GET:<pre>
@@ -58,15 +60,17 @@ import zuo.biao.apijson.RequestMethod;
 }
  * </pre>
  */
-@APIJSONRequest(
-		method = {RequestMethod.POST_GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
-		POST_GET = "{\"disallow\": \"!\", \"necessary\": \"id\"}",
-		POST = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"id\"}, \"necessary\": \"payPassword\"}",
-		PUT = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"id,balance+\"}, \"necessary\": \"payPassword\"}",
-		DELETE = "{\"Wallet\": {\"disallow\": \"!\", \"necessary\": \"id\"}, \"necessary\": \"payPassword\"}"
+@Deprecated
+@MethodAccess(
+		GET = {},
+		HEAD = {},
+		POST_GET = {OWNER, ADMIN},
+		POST_HEAD = {OWNER, ADMIN},
+		POST = {ADMIN},
+		DELETE = {ADMIN}
 		)
 public class Wallet extends BaseModel {
-	private static final long serialVersionUID = 4298571449155754300L;
+	private static final long serialVersionUID = 1L;
 
 	public BigDecimal balance;
 

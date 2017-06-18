@@ -24,9 +24,8 @@ import zuo.biao.apijson.StringUtil;
  * @see #put(String, Object, boolean)
  */
 public class JSONRequest extends zuo.biao.apijson.JSONRequest {
-
-	private static final long serialVersionUID = -2223023180338466812L;
-
+	private static final long serialVersionUID = 1L;
+	
 	public JSONRequest() {
 		super();
 	}
@@ -109,8 +108,16 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	 */
 	@Override
 	public Object put(String key, Object value, boolean encode) {
+		if (value == null) {//  || key == null
+			return null;
+		}
+		
+		com.alibaba.fastjson.JSONObject target = JSON.parseObject(value);
+		if (target == null) {
+			return null;
+		}
 		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName() //must handle key here
-				, JSON.parseObject(value), encode);
+				, target, encode);
 	}
 
 	/**设置搜索

@@ -14,8 +14,18 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.sql;
 
+import static zuo.biao.apijson.JSONObject.KEY_COLUMN;
+import static zuo.biao.apijson.JSONObject.KEY_GROUP;
+import static zuo.biao.apijson.JSONObject.KEY_HAVING;
+import static zuo.biao.apijson.JSONObject.KEY_ORDER;
+import static zuo.biao.apijson.JSONObject.KEY_ROLE;
+import static zuo.biao.apijson.JSONObject.KEY_SCHEMA;
+import static zuo.biao.apijson.JSONRequest.KEY_COUNT;
+import static zuo.biao.apijson.JSONRequest.KEY_PAGE;
+import static zuo.biao.apijson.JSONRequest.KEY_QUERY;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.RequestMethod.PUT;
 import static zuo.biao.apijson.SQL.AND;
 import static zuo.biao.apijson.SQL.NOT;
 import static zuo.biao.apijson.SQL.OR;
@@ -30,85 +40,95 @@ import java.util.Set;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 
-import zuo.biao.apijson.JSONRequest;
+import apijson.demo.server.model.User;
+import apijson.demo.server.model.UserPrivacy;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.Logic;
 import zuo.biao.apijson.server.Parser;
 import zuo.biao.apijson.server.exception.NotExistException;
 
-/**config model for query
+/**config sql for JSON Request
  * @author Lemon
  */
-public class QueryConfig {
-	private static final String TAG = "QueryConfig";
+public class SQLConfig {
+	private static final String TAG = "SQLConfig";
+
+	public static final String MYSQL_URI = "jdbc:mysql://localhost:3306";//TODO 改成你自己的
+	public static final String MYSQL_SCHEMA = "sys";//TODO 改成你自己的
+	public static final String MYSQL_ACCOUNT = "root";//TODO 改成你自己的
+	public static final String MYSQL_PASSWORD = "root";//TODO 改成你自己的
+
 
 	public static final String ID = JSONResponse.KEY_ID;
 
 	public static final List<String> ARRAY_KEY_LIST;
 	static {
 		ARRAY_KEY_LIST = new ArrayList<String>();
-		ARRAY_KEY_LIST.add(JSONRequest.KEY_QUERY);
-		ARRAY_KEY_LIST.add(JSONRequest.KEY_COUNT);
-		ARRAY_KEY_LIST.add(JSONRequest.KEY_PAGE);
+		ARRAY_KEY_LIST.add(KEY_QUERY);
+		ARRAY_KEY_LIST.add(KEY_COUNT);
+		ARRAY_KEY_LIST.add(KEY_PAGE);
 	}
 	public static final List<String> TABLE_KEY_LIST;
 	static {
 		TABLE_KEY_LIST = new ArrayList<String>();
-		TABLE_KEY_LIST.add(JSONRequest.KEY_COLUMN);
-		TABLE_KEY_LIST.add(JSONRequest.KEY_GROUP);
-		TABLE_KEY_LIST.add(JSONRequest.KEY_HAVING);
-		TABLE_KEY_LIST.add(JSONRequest.KEY_ORDER);
+		TABLE_KEY_LIST.add(KEY_ROLE);
+		TABLE_KEY_LIST.add(KEY_SCHEMA);
+		TABLE_KEY_LIST.add(KEY_COLUMN);
+		TABLE_KEY_LIST.add(KEY_GROUP);
+		TABLE_KEY_LIST.add(KEY_HAVING);
+		TABLE_KEY_LIST.add(KEY_ORDER);
 	}
 
 
 
-	private long id;
-	private RequestMethod method;
-	private String table;
-	private String values;
-	private Map<String, Object> where;
-	private String column;
-	private String group;
-	private String having;
-	private String order;
+	//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
+	public static final Map<String, String> TABLE_KEY_MAP;
+	static {
+		TABLE_KEY_MAP = new HashMap<String, String>();
+		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
+		TABLE_KEY_MAP.put(UserPrivacy.class.getSimpleName(), "apijson_user_privacy");
+	}
+
+
+
+	private long id; //Table的id
+	private RequestMethod method; //操作方法
+	private RequestRole role; //发送请求的用户的角色
+	private String schema; //Table所在的数据库
+	private String table; //Table名
+	private String group; //分组方式的字符串数组，','分隔
+	private String having; //聚合函数的字符串数组，','分隔
+	private String order; //排序方式的字符串数组，','分隔
+	private String column; //Table内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
+	private String values; //对应Table内字段的值的字符串数组，','分隔
+	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
+	private Map<String, Object> where; //筛选条件，key:value形式
 
 
 	//array item <<<<<<<<<<
-	private int count;
-	private int page;
-	private int position;
+	private int count; //Table数量
+	private int page; //Table所在页码
+	private int position; //Table在[]中的位置
 	private int query; //JSONRequest.query
 	private int type; //ObjectParser.type
 	//array item >>>>>>>>>>
-	private boolean cacheStatic;
+	private boolean cacheStatic; //静态缓存
 
-	public QueryConfig(RequestMethod method) {
+	public SQLConfig(RequestMethod method) {
 		setMethod(method);
 	}
-	public QueryConfig(RequestMethod method, String table) {
+	public SQLConfig(RequestMethod method, String table) {
 		this(method);
 		setTable(table);
 	}
-	public QueryConfig(RequestMethod method, String table, Map<String, Object> where) {
-		this(method, table);
-		setWhere(where);
-	}
-	public QueryConfig(RequestMethod method, String table, String column, String values) {
-		this(method, table);
-		setColumn(column);
-		setValues(values);
-	}
-	public QueryConfig(RequestMethod method, String table, String[] column, String[][] values) {
-		this(method, table);
-		setColumn(column);
-		setValues(values);
-	}
-	public QueryConfig(RequestMethod method, int count, int page) {
+	public SQLConfig(RequestMethod method, int count, int page) {
 		this(method);
 		setCount(count);
 		setPage(page);
@@ -120,28 +140,136 @@ public class QueryConfig {
 		}
 		return method;
 	}
-	public QueryConfig setMethod(RequestMethod method) {
+	public SQLConfig setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}
+
+
+
+	public long getId() {
+		return id;
+	}
+	public SQLConfig setId(long id) {
+		this.id = id;
+		return this;
+	}
+
+	public RequestRole getRole() {
+		return role;
+	}
+	public SQLConfig setRole(String roleName) {
+		return setRole(RequestRole.get(roleName));
+	}
+	public SQLConfig setRole(RequestRole role) {
+		this.role = role;
+		return this;
+	}
+
+	public String getSchema() {
+		if (StringUtil.isEmpty(schema, true)) {
+			schema = MYSQL_SCHEMA; //非默认Schema必须要有
+		}
+		return schema;
+	}
+	public SQLConfig setSchema(String schema) {
+		this.schema = schema;
+		return this;
+	}
+	/**请求传进来的Table名
+	 * @return
+	 * @see {@link #getSQLTable()}
+	 */
 	public String getTable() {
 		return table;
 	}
-	public QueryConfig setTable(String table) {
+	/**数据库里的真实Table名
+	 * 通过 {@link #TABLE_KEY_MAP} 映射
+	 * @return
+	 */
+	@JSONField(serialize = false)
+	public String getSQLTable() {
+		return TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
+	}
+	@JSONField(serialize = false)
+	public String getTablePath() {
+		return getSchema() + "." + getSQLTable();
+	}
+	public SQLConfig setTable(String table) {
 		this.table = table;
 		return this;
 	}
 
+	public String getGroup() {
+		return group;
+	}
+	public SQLConfig setGroup(String... keys) {
+		return setGroup(StringUtil.getString(keys));
+	}
+	public SQLConfig setGroup(String group) {
+		this.group = group;
+		return this;
+	}
+	@JSONField(serialize = false)
+	public String getGroupString() {
+		group = StringUtil.getTrimedString(group);
+		return group.isEmpty() ? "" : " GROUP BY " + group;
+	}
+
+	public String getHaving() {
+		return having;
+	}
+	public SQLConfig setHaving(String... conditions) {
+		return setHaving(StringUtil.getString(conditions));
+	}
+	public SQLConfig setHaving(String having) {
+		this.having = having;
+		return this;
+	}
+	@JSONField(serialize = false)
+	public String getHavingString() {
+		having = StringUtil.getTrimedString(having);
+		return having.isEmpty() ? "" : " HAVING " + having;
+	}
+
+	public String getOrder() {
+		return order;
+	}
+	public SQLConfig setOrder(String... conditions) {
+		return setOrder(StringUtil.getString(conditions));
+	}
+	public SQLConfig setOrder(String order) {
+		this.order = order;
+		return this;
+	}
+	@JSONField(serialize = false)
+	public String getOrderString() {
+		order = StringUtil.getTrimedString(order);
+		if (order.isEmpty()) {
+			return "";
+		}
+		if (order.contains("+")) {//replace没有包含的replacement会崩溃
+			order = order.replaceAll("\\+", " ASC ");
+		}
+		if (order.contains("-")) {
+			order = order.replaceAll("-", " DESC ");
+		}
+		return " ORDER BY " + order;
+	}
+
+
+
 	public String getColumn() {
 		return column;
 	}
-	public QueryConfig setColumn(String... keys) {
+	public SQLConfig setColumn(String... keys) {
 		return setColumn(StringUtil.getString(keys));
 	}
-	public QueryConfig setColumn(String column) {
+	public SQLConfig setColumn(String column) {
 		this.column = column;
 		return this;
 	}
+	@JSONField(serialize = false)
 	public String getColumnString() throws NotExistException {
 		switch (getMethod()) {
 		case HEAD:
@@ -162,78 +290,15 @@ public class QueryConfig {
 		}
 	}
 
-	public String getGroup() {
-		return group;
-	}
-	public QueryConfig setGroup(String... keys) {
-		return setGroup(StringUtil.getString(keys));
-	}
-	public QueryConfig setGroup(String group) {
-		this.group = group;
-		return this;
-	}
-	public String getGroupString() {
-		group = StringUtil.getTrimedString(group);
-		return group.isEmpty() ? "" : " GROUP BY " + group;
-	}
-
-	public String getHaving() {
-		return having;
-	}
-	public QueryConfig setHaving(String... conditions) {
-		return setHaving(StringUtil.getString(conditions));
-	}
-	public QueryConfig setHaving(String having) {
-		this.having = having;
-		return this;
-	}
-	public String getHavingString() {
-		having = StringUtil.getTrimedString(having);
-		return having.isEmpty() ? "" : " HAVING " + having;
-	}
-
-	public String getOrder() {
-		return order;
-	}
-	public QueryConfig setOrder(String... conditions) {
-		return setOrder(StringUtil.getString(conditions));
-	}
-	public QueryConfig setOrder(String order) {
-		this.order = order;
-		return this;
-	}
-	public String getOrderString() {
-		order = StringUtil.getTrimedString(order);
-		if (order.isEmpty()) {
-			return "";
-		}
-		if (order.contains("+")) {//replace没有包含的replacement会崩溃
-			order = order.replaceAll("\\+", " ASC ");
-		}
-		if (order.contains("-")) {
-			order = order.replaceAll("-", " DESC ");
-		}
-		return " ORDER BY " + order;
-	}
-
-
-
-
-	public long getId() {
-		return id;
-	}
-	public QueryConfig setId(long id) {
-		this.id = id;
-		return this;
-	}
 
 	public String getValues() {
 		return values;
 	}
+	@JSONField(serialize = false)
 	public String getValuesString() {
 		return values;
 	}
-	public QueryConfig setValues(String[][] values) {
+	public SQLConfig setValues(String[][] values) {
 		String s = "";
 		if (values != null && values.length > 0) {
 			String[] items = new String[values.length];
@@ -244,36 +309,37 @@ public class QueryConfig {
 		}
 		return setValues(s);
 	}
-	public QueryConfig setValues(String values) {
+	public SQLConfig setValues(String values) {
 		this.values = values;
 		return this;
 	}
-	public Map<String, Object> getWhere() {
-		return where;
+
+	public Map<String, Object> getContent() {
+		return content;
 	}
-	public QueryConfig setWhere(Map<String, Object> where) {
-		this.where = where;
+	public SQLConfig setContent(Map<String, Object> content) {
+		this.content = content;
 		return this;
 	}
 
 	public int getCount() {
 		return count;
 	}
-	public QueryConfig setCount(int count) {
+	public SQLConfig setCount(int count) {
 		this.count = count;
 		return this;
 	}
 	public int getPage() {
 		return page;
 	}
-	public QueryConfig setPage(int page) {
+	public SQLConfig setPage(int page) {
 		this.page = page;
 		return this;
 	}
 	public int getPosition() {
 		return position;
 	}
-	public QueryConfig setPosition(int position) {
+	public SQLConfig setPosition(int position) {
 		this.position = position;
 		return this;
 	}
@@ -281,28 +347,46 @@ public class QueryConfig {
 	public int getQuery() {
 		return query;
 	}
-	public QueryConfig setQuery(int query) {
+	public SQLConfig setQuery(int query) {
 		this.query = query;
 		return this;
 	}
 	public int getType() {
 		return type;
 	}
-	public QueryConfig setType(int type) {
+	public SQLConfig setType(int type) {
 		this.type = type;
 		return this;
 	}
-	public QueryConfig setCacheStatic(boolean cacheStatic) {
-		this.cacheStatic = cacheStatic;
-		return this;
-	}
+
 	public boolean isCacheStatic() {
 		return cacheStatic;
 	}
+	public SQLConfig setCacheStatic(boolean cacheStatic) {
+		this.cacheStatic = cacheStatic;
+		return this;
+	}
 
+
+	/**获取初始位置offset
+	 * @return
+	 */
+	@JSONField(serialize = false)
+	public int getOffset() {
+		return getOffset(getPage(), getCount());
+	}
+	/**获取初始位置offset
+	 * @param page
+	 * @param count
+	 * @return
+	 */
+	public static int getOffset(int page, int count) {
+		return page*count;
+	}
 	/**获取限制数量
 	 * @return
 	 */
+	@JSONField(serialize = false)
 	public String getLimitString() {
 		return getLimitString(getPage(), getCount());// + 1);
 	}
@@ -311,14 +395,66 @@ public class QueryConfig {
 	 * @return
 	 */
 	public static String getLimitString(int page, int count) {
-		return count <= 0 ? "" : " LIMIT " + page*count + ", " + count;
+		return count <= 0 ? "" : " LIMIT " + getOffset(page, count) + ", " + count;
 	}
 
 	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	public Map<String, Object> getWhere() {
+		return where;
+	}
+	public SQLConfig setWhere(Map<String, Object> where) {
+		this.where = where;
+		return this;
+	}
+	/**
+	 * noFunctionChar = false
+	 * @param key
+	 * @return
+	 */
+	@JSONField(serialize = false)
+	public Object getWhere(String key) {
+		return getWhere(key, false);
+	}
+	/**
+	 * @param key
+	 * @param exactMatch
+	 * @return
+	 */
+	@JSONField(serialize = false)
+	public Object getWhere(String key, boolean exactMatch) {
+		if (exactMatch) {
+			return where == null ? null : where.get(key);
+		}
+
+		Set<String> set = key == null || where == null ? null : where.keySet();
+		if (set != null) {
+			synchronized (where) {
+				int index;
+				for (String k : set) {
+					index = k.indexOf(key);
+					if (index > 0 && StringUtil.isWord(k.substring(index)) == false) {
+						return where.get(k);
+					}
+				}
+			}
+		}
+		return null;
+	}
+	public SQLConfig addWhere(String key, Object value) {
+		if (key != null) {
+			if (where == null) {
+				where = new HashMap<String, Object>();	
+			}
+			where.put(key, value);
+		}
+		return this;
+	}
+
 	/**获取WHERE
 	 * @return
 	 * @throws Exception 
 	 */
+	@JSONField(serialize = false)
 	public String getWhereString() throws Exception {
 		return getWhereString(getMethod(), getWhere());
 	}
@@ -385,6 +521,7 @@ public class QueryConfig {
 				return " WHERE " + whereString;
 			}
 		}
+
 		return "";
 	}
 
@@ -488,7 +625,8 @@ public class QueryConfig {
 			return logic.isNot() ? NOT + condition : condition;
 		}
 
-		throw new IllegalArgumentException(key + "{}\":range 中range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
+		throw new IllegalArgumentException(key + "{}:range 类型为" + range.getClass().getSimpleName()
+				+ "！range只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
 	}
 	/**WHERE key IN ('key0', 'key1', ... )
 	 * @param in
@@ -588,27 +726,25 @@ public class QueryConfig {
 	 * @return
 	 * @throws Exception 
 	 */
+	@JSONField(serialize = false)
 	public String getSetString() throws Exception {
-		return getSetString(getMethod(), getWhere());
+		return getSetString(getMethod(), getContent());
 	}
 	/**获取SET
 	 * @param method
-	 * @param where
+	 * @param content
 	 * @return
 	 * @throws Exception 
 	 */
-	public static String getSetString(RequestMethod method, Map<String, Object> where) throws Exception {
-		Set<String> set = where == null ? null : where.keySet();
+	public static String getSetString(RequestMethod method, Map<String, Object> content) throws Exception {
+		Set<String> set = content == null ? null : content.keySet();
 		if (set != null && set.size() > 0) {
-			if (where.containsKey(ID) == false) {
-				throw new IllegalArgumentException("请设置" + ID + "！");
-			}
 			String setString = "";
 			boolean isFirst = true;
 			int keyType = 0;// 0 - =; 1 - +, 2 - -
 			Object value;
 			for (String key : set) {
-				//避免筛选到全部	value = key == null ? null : where.get(key);
+				//避免筛选到全部	value = key == null ? null : content.get(key);
 				if (key == null || ID.equals(key)) {
 					continue;
 				}
@@ -618,7 +754,7 @@ public class QueryConfig {
 				} else if (key.endsWith("-")) {
 					keyType = 2;
 				}
-				value = where.get(key);
+				value = content.get(key);
 				key = Parser.getRealKey(method, key, false, true);
 
 				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
@@ -629,7 +765,7 @@ public class QueryConfig {
 			if (setString.isEmpty()) {
 				throw new NotExistException(TAG + "getSetString  >> setString.isEmpty()");
 			}
-			return " SET " + setString + " WHERE " + ID + "='" + where.get(ID) + "' ";
+			return " SET " + setString;
 		}
 		return "";
 	}
@@ -667,27 +803,114 @@ public class QueryConfig {
 	//SET >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+	/**
+	 * @return
+	 * @throws Exception 
+	 */
+	@JSONField(serialize = false)
+	public String getSQL() throws Exception {
+		return getSQL(this);
+	}
+	/**
+	 * @param config
+	 * @return
+	 * @throws Exception 
+	 */
+	public static String getSQL(SQLConfig config) throws Exception {
+		String tablePath = config == null ? null : config.getTablePath();
+		if (StringUtil.isNotEmpty(tablePath, true) == false) {
+			Log.i(TAG, "getSQL  StringUtil.isNotEmpty(tablePath, true) == false >> return null;");
+			return null;
+		}
+		switch (config.getMethod()) {
+		case POST:
+			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
+		case PUT:
+			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString();
+		case DELETE:
+			return "DELETE FROM " + tablePath + config.getWhereString();
+		default:
+			String column = config.getColumnString();
+			return "SELECT " + column + " FROM " + getConditionString(column, tablePath, config);
+		}
+	}
+
+	/**获取条件SQL字符串
+	 * @param page 
+	 * @param column
+	 * @param table
+	 * @param where
+	 * @return
+	 * @throws Exception 
+	 */
+	private static String getConditionString(String column, String table, SQLConfig config) throws Exception {
+		String where = config.getWhereString();
+
+		String condition = table + where + (
+				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
+						"" : config.getGroupString() + config.getHavingString() + config.getOrderString()
+				)
+				; //+ config.getLimitString();
+
+		//no need to optimize
+		//		if (config.getPage() <= 0 || ID.equals(column.trim())) {
+		return condition + config.getLimitString();
+		//		}
+		//
+		//
+		//		//order: id+ -> id >= idOfStartIndex; id- -> id <= idOfStartIndex <<<<<<<<<<<<<<<<<<<
+		//		String order = StringUtil.getNoBlankString(config.getOrder());
+		//		List<String> orderList = order.isEmpty() ? null : Arrays.asList(StringUtil.split(order));
+		//
+		//		int type = 0;
+		//		if (BaseModel.isEmpty(orderList) || BaseModel.isContain(orderList, ID+"+")) {
+		//			type = 1;
+		//		}
+		//		else if (BaseModel.isContain(orderList, ID+"-")) {
+		//			type = 2;
+		//		}
+		//
+		//		if (type > 0) {
+		//			return condition.replace("WHERE",
+		//					"WHERE id " + (type == 1 ? ">=" : "<=") + " (SELECT id FROM " + table
+		//					+ where + " ORDER BY id " + (type == 1 ? "ASC" : "DESC") + " LIMIT " + config.getOffset() + ", 1) AND"
+		//					)
+		//					+ " LIMIT " + config.getCount(); //子查询起始id不一定准确，只能作为最小可能！ ;//
+		//		}
+		//		//order: id+ -> id >= idOfStartIndex; id- -> id <= idOfStartIndex >>>>>>>>>>>>>>>>>>
+		//
+		//
+		//		//结果错误！SELECT * FROM sys.User AS t0 INNER JOIN (SELECT id FROM sys.User ORDER BY date ASC LIMIT 20, 10) AS t1 ON t0.id = t1.id
+		//		//common case, inner join
+		//		condition += config.getLimitString();
+		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
+	}
+
 	/**获取查询配置
 	 * @param table
 	 * @param request
 	 * @return
 	 */
-	public static synchronized QueryConfig newQueryConfig(RequestMethod method, String table, JSONObject request) {
-		QueryConfig config = new QueryConfig(method, table);
+	public static synchronized SQLConfig newQueryConfig(RequestMethod method, String table, JSONObject request) {
+		SQLConfig config = new SQLConfig(method, table);
 
 		if (method == POST && request != null && request.get(ID) == null) {
 			request.put(ID, System.currentTimeMillis());
 		}
 		Set<String> set = request == null ? null : request.keySet();
 		if (set != null) {
-			String column = request.getString(JSONRequest.KEY_COLUMN);
-			String group = request.getString(JSONRequest.KEY_GROUP);
-			String having = request.getString(JSONRequest.KEY_HAVING);
-			String order = request.getString(JSONRequest.KEY_ORDER);
-			request.remove(JSONRequest.KEY_COLUMN);
-			request.remove(JSONRequest.KEY_GROUP);
-			request.remove(JSONRequest.KEY_HAVING);
-			request.remove(JSONRequest.KEY_ORDER);
+			String role = request.getString(KEY_ROLE);
+			String schema = request.getString(KEY_SCHEMA);
+			String column = request.getString(KEY_COLUMN);
+			String group = request.getString(KEY_GROUP);
+			String having = request.getString(KEY_HAVING);
+			String order = request.getString(KEY_ORDER);
+			request.remove(KEY_ROLE);
+			request.remove(KEY_SCHEMA);
+			request.remove(KEY_COLUMN);
+			request.remove(KEY_GROUP);
+			request.remove(KEY_HAVING);
+			request.remove(KEY_ORDER);
 
 			if (method == POST) {
 				config.setColumn(StringUtil.getString(set.toArray(new String[]{})));
@@ -704,68 +927,55 @@ public class QueryConfig {
 			} else {
 				config.setColumn(column);
 
-				Map<String, Object> transferredRequest = new HashMap<String, Object>();
+				final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
+
+				Map<String, Object> tableContent = new HashMap<String, Object>();
+				Map<String, Object> tableWhere = new HashMap<String, Object>();
 				Object value;
 				for (String key : set) {
 					value = request.get(key);
 					if (value instanceof JSONObject == false) {//只允许常规Object
-						transferredRequest.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
+						//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
+						if (isWhere || ID.equals(key)) {
+							tableWhere.put(key, value);
+						} else {
+							tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
+						}
 					}
 				}
-				config.setWhere(transferredRequest);
+
+				config.setContent(tableContent);
+				config.setWhere(tableWhere);					
 			}
 
+			config.setRole(role);
+			config.setSchema(schema);
 			config.setGroup(group);
 			config.setHaving(having);
 			config.setOrder(order);
 
 			//后面还可能用到，要还原
-			request.put(JSONRequest.KEY_COLUMN, column);
-			request.put(JSONRequest.KEY_GROUP, group);
-			request.put(JSONRequest.KEY_HAVING, having);
-			request.put(JSONRequest.KEY_ORDER, order);
+			request.put(KEY_ROLE, role);
+			request.put(KEY_SCHEMA, schema);
+			request.put(KEY_COLUMN, column);
+			request.put(KEY_GROUP, group);
+			request.put(KEY_HAVING, having);
+			request.put(KEY_ORDER, order);
 		}
 
 		try {
 			config.setId(request.getLongValue(ID));
 		} catch (Exception e) {
-			// TODO: handle exception
+			// empty
 		}
 		return config;
 	}
 
-	/**
-	 * @return
-	 * @throws Exception 
-	 */
-	public String getSQL() throws Exception {
-		return getSQL(this);
-	}
-	/**
-	 * @param config
-	 * @return
-	 * @throws Exception 
-	 */
-	public static String getSQL(QueryConfig config) throws Exception {
-		if (config == null || StringUtil.isNotEmpty(config.getTable(), true) == false) {
-			Log.i(TAG, "getSQL  config == null || StringUtil.isNotEmpty(config.getTable(), true) == false >> return null;");
-			return null;
-		}
-		RequestMethod method = config.getMethod();
-		switch (method) {
-		case POST:
-			return "INSERT INTO " + config.getTable() + config.getColumnString() + " VALUES" + config.getValuesString();
-		case PUT:
-			return "UPDATE " + config.getTable() + config.getSetString();
-		case DELETE:
-			return "DELETE FROM " + config.getTable() + config.getWhereString();
-		default:
-			return "SELECT "+ config.getColumnString() + " FROM " + config.getTable() + config.getWhereString()
-			+ (RequestMethod.isGetMethod(method, true) == false ?
-					"" : config.getGroupString() + config.getHavingString() + config.getOrderString() )
-			+ config.getLimitString();
-		}
-	}
 
+	// 导致getSetString，未设置id错误
+	//	@Override
+	//	public String toString() {
+	//		return JSON.toJSONString(this);
+	//	}
 
 }

@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.server.sql.QueryConfig;
+import zuo.biao.apijson.server.sql.SQLConfig;
 
 /**
  * @author Lemon
@@ -42,11 +42,18 @@ public interface ParserAdapter {
 	JSON parseChild(@NotNull String path, @NotNull String key, @NotNull JSON value) throws Exception;
 	
 	/**
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	JSONObject parseResponse(@NotNull JSONRequest request) throws Exception;
+	
+	/**
 	 * @param path
 	 * @param config
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject executeSQL(@NotNull String path, @NotNull QueryConfig config) throws Exception;
+	JSONObject executeSQL(@NotNull String path, @NotNull SQLConfig config) throws Exception;
 	
 }

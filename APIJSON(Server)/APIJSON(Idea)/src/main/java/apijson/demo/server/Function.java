@@ -126,8 +126,8 @@ public class Function implements FunctionList {
 		return i0 + i1;
 	}
 
-	public String newVerify(String phone) {
-		return new Controller().postAuthCode(phone);
+	public JSONObject newVerify(String phone) {
+		return new Controller().postVerify(phone);
 	}
 
 

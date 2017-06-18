@@ -34,22 +34,22 @@ import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.Pair;
 import zuo.biao.apijson.server.Parser;
 
-/**helper for query MySQL database
+/**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
-public class QueryHelper {
-	private static final String TAG = "QueryHelper";
+public class SQLExecutor {
+	private static final String TAG = "SQLExecutor";
 
-	private static final String YOUR_MYSQL_URL = "jdbc:mysql://localhost:3306/";//TODO edit to an available one
-	private static final String YOUR_MYSQL_SCHEMA = "sys";//TODO edit to an available one
-	private static final String YOUR_MYSQL_ACCOUNT = "root";//TODO edit to an available one
-	private static final String YOUR_MYSQL_PASSWORD = "apijson";//TODO edit to an available one
 
-//	private static final Map<String, Map<Integer, JSONObject>> staticCacheMap;
-//	static {
-//		staticCacheMap = new HashMap<String, Map<Integer, JSONObject>>();
-//	}
-	
+	//访问一次后丢失，可能因为static导致内存共享，别的地方改变了内部对象的值
+	//	private static final Map<String, Map<Integer, JSONObject>> staticCacheMap;
+	//	static {
+	//		staticCacheMap = new HashMap<String, Map<Integer, JSONObject>>();
+	//	}
+
+	/**
+	 * 缓存map
+	 */
 	private Map<String, Map<Integer, JSONObject>> cacheMap = new HashMap<String, Map<Integer, JSONObject>>();
 	static {
 		try {//调用Class.forName()方法加载驱动程序
@@ -59,34 +59,53 @@ public class QueryHelper {
 		}
 	}
 
+	/**获取连接
+	 * @return
+	 * @throws Exception
+	 */
 	private synchronized Connection getConnection() throws Exception {
 		Log.i(TAG, "成功加载MySQL驱动！");
-		return DriverManager.getConnection(YOUR_MYSQL_URL + YOUR_MYSQL_SCHEMA, YOUR_MYSQL_ACCOUNT, YOUR_MYSQL_PASSWORD);
+		return DriverManager.getConnection(SQLConfig.MYSQL_URI, SQLConfig.MYSQL_ACCOUNT, SQLConfig.MYSQL_PASSWORD);
 	}
 
+	/**保存缓存
+	 * @param sql
+	 * @param map
+	 * @param isStatic
+	 */
 	private synchronized void saveCache(String sql, Map<Integer, JSONObject> map, boolean isStatic) {
 		if (sql == null || map == null) { //空map有效，说明查询过sql了  || map.isEmpty()) {
 			Log.i(TAG, "saveList  sql == null || map == null >> return;");
 			return;
 		}
-//		if (isStatic) {
-//			staticCacheMap.put(sql, map);
-//		} else {
-			cacheMap.put(sql, map);
-//		}
+		//		if (isStatic) {
+		//			staticCacheMap.put(sql, map);
+		//		} else {
+		cacheMap.put(sql, map);
+		//		}
 	}
+	/**移除缓存
+	 * @param sql
+	 * @param isStatic
+	 */
 	public synchronized void removeCache(String sql, boolean isStatic) {
 		if (sql == null) {
 			Log.i(TAG, "removeList  sql == null >> return;");
 			return;
 		}
-//		if (isStatic) {
-//			staticCacheMap.remove(sql);
-//		} else {
-			cacheMap.remove(sql);
-//		}
+		//		if (isStatic) {
+		//			staticCacheMap.remove(sql);
+		//		} else {
+		cacheMap.remove(sql);
+		//		}
 	}
 
+	/**获取缓存
+	 * @param sql
+	 * @param position
+	 * @param isStatic
+	 * @return
+	 */
 	public JSONObject getFromCache(String sql, int position, boolean isStatic) {
 		Map<Integer, JSONObject> map = /** isStatic ? staticCacheMap.get(sql) : */ cacheMap.get(sql);
 		//只要map不为null，则如果 map.get(position) == null，则返回 {} ，避免再次SQL查询
@@ -100,6 +119,8 @@ public class QueryHelper {
 	private Connection connection;
 	private Statement statement;
 	private DatabaseMetaData metaData;
+	/**关闭连接，释放资源
+	 */
 	public void close() {
 		cacheMap.clear();
 		try {
@@ -117,16 +138,24 @@ public class QueryHelper {
 		cacheMap = null;
 	}
 
-	public JSONObject execute(QueryConfig config) throws Exception {
-		final String sql = QueryConfig.getSQL(config);
+	/**执行SQL
+	 * @param config
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONObject execute(SQLConfig config) throws Exception {
+
+		final String sql = SQLConfig.getSQL(config);
 		if (StringUtil.isNotEmpty(sql, true) == false) {
-			Log.e(TAG, "select  config==null||StringUtil.isNotEmpty(config.getTable(), true)==false>>return null;");
+			Log.e(TAG, "select  config==null||StringUtil.isNotEmpty(config.getSQLTable(), true)==false>>return null;");
 			return null;
 		}
 		JSONObject result = null;
 
-		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
-				+ "select  sql = " + sql
+		long startTime = System.currentTimeMillis();
+		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+				+ "\n select  startTime = " + startTime
+				+ "\n sql = " + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 		if (connection == null || connection.isClosed()) {
@@ -200,7 +229,7 @@ public class QueryHelper {
 				if (columnArray[i] == null || columnArray[i].isEmpty() || columnArray[i].startsWith("_")) {
 					Log.i(TAG, "select while (rs.next()){ ..."
 							+ " >>  columnArray[i] == " + columnArray[i]
-							+ " >> continue;");
+									+ " >> continue;");
 					continue;
 				}//允许 key:_alias, 但不允许_key, _key:alias
 				columnArray[i] = Pair.parseEntry(columnArray[i]).getValue();
@@ -240,17 +269,19 @@ public class QueryHelper {
 		saveCache(sql, resultMap, config.isCacheStatic());
 		Log.i(TAG, ">>> select  saveCache('" + sql + "', resultMap);  resultMap.size() = " + resultMap.size());
 
-		Log.d(TAG, "\n\n select  return resultMap.get(" + position + ");"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
+		long endTime = System.currentTimeMillis();
+		Log.d(TAG, "\n\n select  endTime = " + endTime + "; duration = " + (endTime - startTime)
+				+ "\n return resultMap.get(" + position + ");"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 		return resultMap.get(position);
 	}
 
 
-	/**获取全部字段名列表
+	/**获取要查询的字段名数组
 	 * @param config
 	 * @return
 	 * @throws SQLException 
 	 */
-	private String[] getColumnArray(QueryConfig config) throws SQLException {
+	private String[] getColumnArray(SQLConfig config) throws SQLException {
 		if (config == null) {
 			return null;
 		}
@@ -258,16 +289,17 @@ public class QueryHelper {
 		if (StringUtil.isNotEmpty(column, true)) {
 			return StringUtil.split(column);//column.contains(",") ? column.split(",") : new String[]{column};
 		}
+		
 		List<String> list = new ArrayList<String>();
-		String table = config.getTable();
-		ResultSet rs = metaData.getColumns(YOUR_MYSQL_SCHEMA, null, table, "%");
+		String table = config.getSQLTable();
+		ResultSet rs = metaData.getColumns(config.getSchema(), null, table, "%");
 		while (rs.next()) {
 			Log.i(TAG, rs.getString(4));
 			list.add(rs.getString(4));
 		}
 		rs.close();
+		
 		return list.toArray(new String[]{});
 	}
-
 
 }

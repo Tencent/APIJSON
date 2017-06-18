@@ -14,25 +14,34 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
-import java.rmi.AccessException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.activation.UnsupportedDataTypeException;
+import javax.servlet.http.HttpSession;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.Comment;
 import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
 import apijson.demo.server.model.Password;
-import apijson.demo.server.model.Request;
 import apijson.demo.server.model.User;
+import apijson.demo.server.model.UserPrivacy;
 import apijson.demo.server.model.Verify;
 import apijson.demo.server.model.Wallet;
-import zuo.biao.apijson.APIJSONRequest;
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.Log;
+import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.sql.QueryConfig;
+import zuo.biao.apijson.RequestRole;
+import zuo.biao.apijson.server.exception.NotLoggedInException;
+import zuo.biao.apijson.server.sql.SQLConfig;
 
 /**权限验证类
  * @author Lemon
@@ -40,191 +49,214 @@ import zuo.biao.apijson.server.sql.QueryConfig;
 public class AccessVerifier {
 	private static final String TAG = "AccessVerifier";
 
-	private static final int ACCESS_LOGIN = 1;
-	private static final int ACCESS_PAY = 2;
 
-	public static final String KEY_CURRENT_USER_ID = "currentUserId";
+	public static final String KEY_PASSWORD = "password";
 	public static final String KEY_LOGIN_PASSWORD = "loginPassword";
 	public static final String KEY_PAY_PASSWORD = "payPassword";
 
-	public static final String[] LOGIN_ACCESS_TABLE_NAMES = {"Wallet"};
-	public static final String[] PAY_ACCESS_TABLE_NAMES = {};
 
-
-	private static final Map<String, RequestMethod[]> accessMap;
+	// <TableName, <METHOD, allowRoles>>
+	// <User, <GET, [OWNER, ADMIN]>>
+	public static final Map<String, Map<RequestMethod, RequestRole[]>> accessMap;
 	static {
-		accessMap = new HashMap<String, RequestMethod[]>();
-		
-		//与客户端更好地统一
-		accessMap.put(User.class.getSimpleName(), User.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Moment.class.getSimpleName(), Moment.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Comment.class.getSimpleName(), Comment.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Wallet.class.getSimpleName(), Wallet.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Password.class.getSimpleName(), Password.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Verify.class.getSimpleName(), Verify.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Login.class.getSimpleName(), Login.class.getAnnotation(APIJSONRequest.class).method());
-		accessMap.put(Request.class.getSimpleName(), Request.class.getAnnotation(APIJSONRequest.class).method());
+		accessMap = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
 
-		//原来的做法
-		//		accessMap.put("User", RequestMethod.values());
-		//		accessMap.put("Moment", RequestMethod.values());
-		//		accessMap.put("Comment", RequestMethod.values());
-		//		accessMap.put("Wallet", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
-		//		accessMap.put("Password", new RequestMethod[]{POST_GET, POST, PUT, DELETE});
-		//		accessMap.put("Login", new RequestMethod[]{POST_GET, POST, DELETE});
-		//		accessMap.put("Request", new RequestMethod[]{GET, POST_GET});
-		//		accessMap.put("Verify", new RequestMethod[]{POST_HEAD, POST_GET, POST, DELETE});
+		accessMap.put(User.class.getSimpleName(), getAccessMap(User.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(UserPrivacy.class.getSimpleName(), getAccessMap(UserPrivacy.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(Moment.class.getSimpleName(), getAccessMap(Moment.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(Comment.class.getSimpleName(), getAccessMap(Comment.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(Verify.class.getSimpleName(), getAccessMap(Verify.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(Login.class.getSimpleName(), getAccessMap(Login.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(Password.class.getSimpleName(), getAccessMap(Password.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(Wallet.class.getSimpleName(), getAccessMap(Wallet.class.getAnnotation(MethodAccess.class)));
 	}
 
+	/**获取权限Map，每种操作都只允许对应的角色
+	 * @param access
+	 * @return
+	 */
+	private static HashMap<RequestMethod, RequestRole[]> getAccessMap(MethodAccess access) {
+		if (access == null) {
+			return null;
+		}
+
+		HashMap<RequestMethod, RequestRole[]> map = new HashMap<>();
+		map.put(RequestMethod.GET, access.GET());
+		map.put(RequestMethod.HEAD, access.HEAD());
+		map.put(RequestMethod.POST_GET, access.POST_GET());
+		map.put(RequestMethod.POST_HEAD, access.POST_HEAD());
+		map.put(RequestMethod.POST, access.POST());
+		map.put(RequestMethod.PUT, access.PUT());
+		map.put(RequestMethod.DELETE, access.DELETE());
+
+		return map;
+	}
+
+
 	/**验证权限是否通过
-	 * @param request
 	 * @param config
+	 * @param visitor
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean verify(JSONObject request, QueryConfig config) throws Exception {
+	public static boolean verify(SQLConfig config, User visitor) throws Exception {
 		String table = config == null ? null : config.getTable();
 		if (table == null) {
 			return true;
 		}
-		if (request == null) {
-			return false;
+		RequestRole role = config.getRole();
+
+		long userId = visitor == null ? 0 : visitor.getId();
+		//TODO 暂时去掉，方便测试
+		if (role != RequestRole.UNKNOWN) {//未登录的角色
+			verifyLogin(userId);
 		}
+
 		RequestMethod method = config.getMethod();
+		//验证允许的角色
+		verifyRole(table, method, role);
 
-		verifyMethod(table, method);
 
+		//验证角色，假定真实强制匹配<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		long currentUserId = request.getLongValue(KEY_CURRENT_USER_ID);
+		String userIdkey = Controller.USER_.equals(config.getTable()) || Controller.USER_PRIVACY_.equals(config.getTable())
+				? Controller.ID : Controller.USER_ID;
 
-		switch (config.getMethod()) {
-		case GET:
-		case POST_GET:
-			if ("Wallet".equals(table) || "Password".equals(table)) {
-				verifyUserId(currentUserId, config);
+		if (role == null) {
+			role = RequestRole.UNKNOWN;
+		}
+		switch (role) {
+		case LOGIN://verifyRole通过就行
+			break;
+		case CONTACT:
+		case CIRCLE:
+			//TODO 做一个缓存contactMap<userId, contactArray>，提高[]:{}查询性能， removeAccessInfo时map.remove(userId)
+			//不能在User内null -> [] ! 否则会导致某些查询加上不需要的条件！
+			List<Object> list = visitor == null || visitor.getContactIdList() == null
+			? new ArrayList<Object>() : new ArrayList<Object>(visitor.getContactIdList());
+			if (role == RequestRole.CIRCLE) {
+				list.add(userId);
+			}
+
+			//key!{}:[] 或 其它没有明确id的条件 等 可以和key{}:list组合。类型错误就报错
+			Number requestId = (Number) config.getWhere(userIdkey, true);//JSON里数值不能保证是Long，可能是Integer
+			JSONArray requestIdArray = (JSONArray) config.getWhere(userIdkey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
+			if (requestId != null) {
+				if (requestIdArray == null) {
+					requestIdArray = new JSONArray();
+				}
+				requestIdArray.add(requestId);
+			}
+
+			if (requestIdArray == null) {//可能是@得到 || requestIdArray.isEmpty()) {//请求未声明key:id或key{}:[...]条件，自动补全
+				config.addWhere(userIdkey+"{}", JSON.parseArray(list)); //key{}:[]有效，SQLConfig里throw NotExistException
+			} 
+			else {//请求已声明key:id或key{}:[]条件，直接验证
+				for (Object id : requestIdArray) {
+					if (id == null) {
+						continue;
+					}
+					if (id instanceof Number == false) {//不能准确地判断Long，可能是Integer
+						throw new UnsupportedDataTypeException(table + ".id类型错误，id类型必须是Long！");
+					}
+					if (list.contains(new Long("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
+						if (method == null) {
+							method = RequestMethod.GET;
+						}
+						throw new IllegalAccessException(userIdkey + " = " + id + " 的 " + table
+								+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+					}
+				}
 			}
 			break;
-		case POST:
-		case PUT:
-		case DELETE:
-			verifyUserId(currentUserId, config);
+		case OWNER:
+			config.addWhere(userIdkey, userId);
 			break;
-		default:
+		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
+			break;
+		default://unknown，verifyRole通过就行
 			break;
 		}
 
-		return verifyAccess(request, table, method, currentUserId);
-	}
+		//验证角色，假定真实强制匹配>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	/**
-	 * @param request
-	 * @param table 
-	 * @param method 
-	 * @param currentUserId
-	 * @return 
-	 * @throws AccessException 
-	 */
-	private static boolean verifyAccess(JSONObject request, String table, RequestMethod method, long currentUserId) throws AccessException {
-		int accessId = getAccessId(method, table);
-		if (accessId < 0) {
-			return true;
-		}
-		if (currentUserId <= 0) {
-			Log.e(TAG, "verify accessId = " + accessId
-					+ " >>  currentUserId <= 0, currentUserId = " + currentUserId);
-			throw new AccessException("请设置"+ KEY_CURRENT_USER_ID + "和对应的password！");
-		}
-		String password;
-		switch (accessId) {
-		case ACCESS_LOGIN:
-			password = StringUtil.getString(request.getString(KEY_LOGIN_PASSWORD));
-			if (password.equals(StringUtil.getString(getLoginPassword(currentUserId))) == false) {
-				Log.e(TAG, "verify accessId = " + accessId
-						+ " >> currentUserId or loginPassword error"
-						+ "  currentUserId = " + currentUserId + ", loginPassword = " + password);
-				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_LOGIN_PASSWORD + "错误！");
-			}
-			break;
-		case ACCESS_PAY:
-			password = StringUtil.getString(request.getString(KEY_PAY_PASSWORD));
-			if (password.equals(StringUtil.getString(getPayPassword(currentUserId))) == false) {
-				Log.e(TAG, "verify accessId = " + accessId
-						+ " >> currentUserId or payPassword error"
-						+ "  currentUserId = " + currentUserId + ", payPassword = " + password);
-				throw new AccessException(KEY_CURRENT_USER_ID + "或" + KEY_PAY_PASSWORD + "错误！");
-			}
-			break;
-		}
+
 		return true;
 	}
-	/**
-	 * @param currentUserId
-	 * @param config
-	 * @return 
+
+
+	/**允许请求，角色不好判断，让访问者发过来角色名，OWNER,CONTACT,ADMIN等
+	 * @param table
+	 * @param method
+	 * @param role
+	 * @return
 	 * @throws Exception 
+	 * @see {@link zuo.biao.apijson.JSONObject#KEY_ROLE} 
 	 */
-	private static boolean verifyUserId(long currentUserId, QueryConfig config) throws Exception {
-		//		if (currentUserId <= 0 || config == null) {
-		//			return true;
-		//		}
-		//		Map<String, Object> where = config.getWhere();
-		//		long userId = 0;
-		//		String table = StringUtil.getString(config.getTable());
-		//		if (where != null) {
-		//			try {
-		//				String key = "User".equals(table) ? Table.ID : Table.USER_ID;
-		//				userId = (long) where.get(key);
-		//			} catch (Exception e) {
-		//				// TODO: handle exception
-		//			}
-		//		}
-		//		if (userId != currentUserId) {
-		//			throw new IllegalArgumentException(table + "的userId和currentUserId不一致！");
-		//		}
+	public static void verifyRole(String table, RequestMethod method, RequestRole role) throws Exception {
+		Log.d(TAG, "verifyRole  table = " + table + "; method = " + method + "; role = " + role);
+		if (table != null) {
+			if (method == null) {
+				method = RequestMethod.GET;
+			}
+			if (role == null) {
+				role = RequestRole.UNKNOWN;
+			}
+			Map<RequestMethod, RequestRole[]> map = accessMap.get(table);
 
-		return true;
-	}
-
-
-
-	/**获取权限id
-	 * @param tableName
-	 * @return
-	 */
-	public static int getAccessId(RequestMethod method, String table) {
-		if (StringUtil.isNotEmpty(table, true) == false) {
-			return -1;
-		}
-		for (int i = 0; i < LOGIN_ACCESS_TABLE_NAMES.length; i++) {
-			if (table.equals(LOGIN_ACCESS_TABLE_NAMES[i])) {
-				return ACCESS_LOGIN;
+			if (map == null || BaseModel.isContain(map.get(method), role) == false) {
+				throw new IllegalAccessException(table + " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
 			}
 		}
-		for (int i = 0; i < PAY_ACCESS_TABLE_NAMES.length; i++) {
-			if (table.equals(PAY_ACCESS_TABLE_NAMES[i])) {
-				return ACCESS_PAY;
-			}
+	}
+
+
+	/**登录校验
+	 * @author 
+	 * @modifier Lemon
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void verifyLogin(HttpSession session) throws Exception {
+		verifyLogin(getUserId(session));
+	}
+	/**登录校验
+	 * @author Lemon
+	 * @param userId
+	 * @throws Exception
+	 */
+	public static void verifyLogin(Long userId) throws Exception {
+		//未登录没有权限操作
+		if (BaseModel.value(userId) <= 0) {
+			throw new NotLoggedInException("未登录，请登录后再操作！");
 		}
-		return -1;
 	}
 
-	/**获取登录密码
-	 * @param userId
+	/**获取来访用户的id
+	 * @author Lemon
+	 * @param session
+	 * @return 
+	 */
+	public static long getUserId(HttpSession session) {
+		if (session == null) {
+			return 0;
+		}
+		Long userId = (Long) session.getAttribute(Controller.USER_ID);
+		if (userId == null) {
+			User user = getUser(session);
+			userId = user == null ? 0 : BaseModel.value(user.getId());
+			session.setAttribute(Controller.USER_ID, userId);
+		}
+		return BaseModel.value(userId);
+	}
+	/**获取来访用户
+	 * @param session
 	 * @return
 	 */
-	public static String getLoginPassword(long userId) {
-		// TODO 查询并返回对应userId的登录密码
-		return "apijson";//仅测试用
+	public static User getUser(HttpSession session) {
+		return session == null ? null : (User) session.getAttribute(Controller.USER_);
 	}
 
-	/**获取支付密码
-	 * @param userId
-	 * @return
-	 */
-	public static String getPayPassword(long userId) {
-		// TODO 查询并返回对应userId的支付密码
-		return "123456";//仅测试用
-	}
 
 	/**删除请求里的权限信息
 	 * @param requestObject
@@ -232,36 +264,11 @@ public class AccessVerifier {
 	 */
 	public static JSONObject removeAccessInfo(JSONObject requestObject) {
 		if (requestObject != null) {
-			requestObject.remove(KEY_CURRENT_USER_ID);
+			requestObject.remove(KEY_PASSWORD);
 			requestObject.remove(KEY_LOGIN_PASSWORD);
 			requestObject.remove(KEY_PAY_PASSWORD);
 		}
 		return requestObject;
 	}
-
-
-	/**
-	 * @param table
-	 * @param method
-	 * @return
-	 * @throws AccessException 
-	 */
-	public static boolean verifyMethod(String table, RequestMethod method) throws AccessException {
-		RequestMethod[] methods = table == null ? null : accessMap.get(table);
-		if (methods == null || methods.length <= 0) {
-			throw new AccessException(table + "不允许访问！");
-		}
-		if (method == null) {
-			method = RequestMethod.GET;
-		}
-		for (int i = 0; i < methods.length; i++) {
-			if (method == methods[i]) {
-				return true;
-			}
-		}
-
-		throw new AccessException(table + "不支持" + method + "方法！");
-	}
-
 
 }

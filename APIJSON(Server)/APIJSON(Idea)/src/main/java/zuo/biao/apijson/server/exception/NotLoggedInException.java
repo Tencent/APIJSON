@@ -14,20 +14,20 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server.exception;
 
-/**超出范围
+/**未登录
  * @author Lemon
  */
-public class OutOfRangeException extends Exception {
+public class NotLoggedInException extends Exception {
 	private static final long serialVersionUID = 1L;
-	
-	public OutOfRangeException(String msg) {
+
+	public NotLoggedInException(String msg, Throwable t) {
+		super(msg, t);
+	}
+	public NotLoggedInException(String msg) {
 		super(msg);
 	}
-	public OutOfRangeException(Throwable t) {
+	public NotLoggedInException(Throwable t) {
 		super(t);
-	}
-	public OutOfRangeException(String msg, Throwable t) {
-		super(msg, t);
 	}
 	
 }
