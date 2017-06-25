@@ -65,7 +65,8 @@ public class SQLExecutor {
 	 */
 	private synchronized Connection getConnection() throws Exception {
 		Log.i(TAG, "成功加载MySQL驱动！");
-		return DriverManager.getConnection(SQLConfig.MYSQL_URI, SQLConfig.MYSQL_ACCOUNT, SQLConfig.MYSQL_PASSWORD);
+		return DriverManager.getConnection(SQLConfig.MYSQL_URI + "?useUnicode=true&characterEncoding=UTF-8&user="
+		+ SQLConfig.MYSQL_ACCOUNT + "&password=" + SQLConfig.MYSQL_PASSWORD);
 	}
 
 	/**保存缓存
