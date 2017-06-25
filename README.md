@@ -1,7 +1,7 @@
 # APIJSON [![Java API](https://img.shields.io/badge/Java-1.6%2B-brightgreen.svg?style=flat)](http://www.oracle.com/technetwork/java/api-141528.html) [![Android API](https://img.shields.io/badge/Android-15%2B-brightgreen.svg?style=flat)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) [![Gradle Version](https://img.shields.io/badge/gradle-2.10-green.svg)](https://docs.gradle.org/current/release-notes) [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 
-[Java](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON(Server))    [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON(Android))    [JavaScript](https://github.com/TommyLemon/APIJSON-JS)
+[Java-Server](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server)    [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android)    [JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)
 
 [English Document](https://github.com/TommyLemon/APIJSON/blob/master/README(English).md)
 
@@ -250,6 +250,7 @@ APIJSON是一种JSON传输结构协议。<br />
 </code></pre>
 
 
+[在线测试](http://139.196.140.118)
 
  
 ## <h2 id="2">2.对比传统RESTful方式<h2/>
