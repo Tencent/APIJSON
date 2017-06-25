@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
-    <script type="text/javascript" src="apijson.js"></script>
+    <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson.js" ></script>
     <title>APIJSON Test</title>
     <style type="text/css">
         html,body,div{
@@ -18,22 +18,28 @@
             margin: 0;
             padding:0;
         }
-        .title{
+        .top{
             width: 100%;
-            height:100px;
-            margin-top: 2%;
-            margin-bottom: 2%;
+            height:40px;
+            padding-left: 2%;
+            padding-right: 2%;
+            text-decoration-color: aquamarine;
+        }
+        .title{
+            width: auto;
+            height:20px;
             padding:0;
+            text-overline-color: aquamarine;
         }
         .center{
             width: 100%;
-            height: 60%;
+            height: 68%;
             margin: 0;
             padding:0;
         }
         .bottom{
             width: 100%;
-            height:50px;
+            height:40px;
             margin: 0;
             padding:0;
         }
@@ -41,16 +47,21 @@
             width: 49%;
             height:100%;
             margin: 0;
-            padding:0;
+            padding:auto;
         }
         .url{
-            width: 75%;
+            width: 74%;
             height:50px;
+            margin: 0;
+        }
+        .button{
+            width: 20px;
+            height:10px;
             margin: 0;
             padding:0;
         }
-        .button{
-            width: 24%;
+        .send{
+            width: 25%;
             height:50px;
             margin: 0;
             padding:0;
@@ -59,9 +70,13 @@
 </head>
 <body>
 <div class="match">
-    <h1 class="title" align="center">APIJSON Test</h1>
+    <div class="top" aria-orientation="horizontal">
+        <h2 class="title" align="left">APIJSON Test</h2>
+        <h2 class="button">Demo</h2>
+        <button class="button" align="right">GET</button>
+    </div>
     <div class="center" aria-orientation="horizontal">
-    <textarea class="horizontal"  height="500px" width="800px" id="input" onkeyup="javascript:onChange()">
+        <textarea class="horizontal" id="input" onkeyup="javascript:onChange()">
         {
             "[]":{
                 "User":{
@@ -69,17 +84,17 @@
                 }
             }
         }
-    </textarea>
-        <textarea class="horizontal"  height="500px" width="800px" id="output">
+        </textarea>
+        <textarea class="horizontal" id="output" readonly>
         initializing...
-    </textarea>
+        </textarea>
     </div>
     <div class="bottom" aria-orientation="horizontal">
         <input class="url" type="text" placeholder="input url here" id="url" />
-        <button class="button" id="ok" onclick="javascript:send()">Send</button>
+        <button class="send" id="ok" onclick="javascript:send()">Send</button>
     </div>
 </div>
-<script >
+<script type="text/javascript" language="JavaScript" charset="UTF-8" >
     var input = document.getElementById("input");
     var output = document.getElementById("output");
     var url = document.getElementById("url");
