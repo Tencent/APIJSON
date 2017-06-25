@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
+    <script type="text/javascript" src="apijson.js"></script>
+    <title>APIJSON Test</title>
+    <style type="text/css">
+        html,body,div{
+            width: 100%;
+            height:100%;
+            position:relative;
+            margin:0;
+            padding:0;
+        }
+        .match{
+            width: 100%;
+            height:100%;
+            margin: 0;
+            padding:0;
+        }
+        .title{
+            width: 100%;
+            height:100px;
+            margin-top: 2%;
+            margin-bottom: 2%;
+            padding:0;
+        }
+        .center{
+            width: 100%;
+            height: 60%;
+            margin: 0;
+            padding:0;
+        }
+        .bottom{
+            width: 100%;
+            height:50px;
+            margin: 0;
+            padding:0;
+        }
+        .horizontal{
+            width: 49%;
+            height:100%;
+            margin: 0;
+            padding:0;
+        }
+        .url{
+            width: 75%;
+            height:50px;
+            margin: 0;
+            padding:0;
+        }
+        .button{
+            width: 24%;
+            height:50px;
+            margin: 0;
+            padding:0;
+        }
+    </style>
+</head>
+<body>
+<div class="match">
+    <h1 class="title" align="center">APIJSON Test</h1>
+    <div class="center" aria-orientation="horizontal">
+    <textarea class="horizontal"  height="500px" width="800px" id="input" onkeyup="javascript:onChange()">
+        {
+            "[]":{
+                "User":{
+                    "sex":1
+                }
+            }
+        }
+    </textarea>
+        <textarea class="horizontal"  height="500px" width="800px" id="output">
+        initializing...
+    </textarea>
+    </div>
+    <div class="bottom" aria-orientation="horizontal">
+        <input class="url" type="text" placeholder="input url here" id="url" />
+        <button class="button" id="ok" onclick="javascript:send()">Send</button>
+    </div>
+</div>
+<script >
+    var input = document.getElementById("input");
+    var output = document.getElementById("output");
+    var url = document.getElementById("url");
+    var ok = document.getElementById("ok");
+
+    url.value = new String(url_get);
+
+    var inputted;
+    var handler;
+    /**计时回调
+     */
+    function handle(before) {
+        if (inputted != before) {
+            clearTimeout(handler);
+            return;
+        }
+
+        //格式化输入代码
+        try {
+            input.value = format(input.value);
+            ok.disabled = false;
+            output.value = "OK, click [Send] button to send a request";
+        } catch(e) {
+            console.log(e);
+            ok.disabled = true;
+            output.value = "Error! Please check and modify JSON request!";
+        }
+    }
+
+    /**输入内容改变
+     */
+    function onChange() {
+        inputted = new String(input.value);
+        clearTimeout(handler);
+
+        handler = setTimeout(function () {
+            handle(inputted);
+        }, 2*1000);
+    }
+    onChange();
+
+
+    /**发送请求
+     */
+    function send() {
+        clearTimeout(handler);
+
+        var json = JSON.parse(input.value);
+
+        output.value = "requesting...";
+        var rq = request(url.value, json, true, function () {
+            if (rq.readyState !== 4) {
+                return;
+            }
+
+            if (rq.status === 200) {
+                output.value = format(rq.responseText);
+            } else {
+                output.value = "Response(GET):\nurl = " + rq.url + "\nstatus = " + rq.status + "\nerror = " + rq.error;
+            }
+        });
+    }
+</script>
+</body>
+</html>
