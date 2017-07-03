@@ -314,7 +314,7 @@ public class Controller {
 		}
 
 		//验证码过期
-		if (System.currentTimeMillis() > (60000 + BaseModel.value(verify.getDate()))) {
+		if (System.currentTimeMillis() > (60000 + BaseModel.getTimeMillis(verify.getDate()))) {
 			new Parser(DELETE, true).parseResponse(
 					new JSONRequest(new Verify(phone)).setTag(VERIFY_)
 					);
@@ -629,8 +629,12 @@ public class Controller {
 
 		JSONObject pwdObj = requestObject.getJSONObject(PASSWORD_);
 		requestObject.remove(PASSWORD_);
-		if (pwdObj == null || pwdObj.getIntValue(TYPE) != Password.TYPE_PAY) {
-			return Parser.extendErrorResult(requestObject, new ConditionErrorException("Password type必须是支付类型！"));
+		if (pwdObj == null) {
+			pwdObj = new JSONRequest();
+		}
+		if (pwdObj.getIntValue(TYPE) != Password.TYPE_PAY) {
+//			return Parser.extendErrorResult(requestObject, new ConditionErrorException("Password type必须是支付类型！"));
+			pwdObj.put(TYPE, Password.TYPE_PAY);
 		}
 
 		JSONResponse response = new JSONResponse(
@@ -649,7 +653,7 @@ public class Controller {
 		//验证金额范围<<<<<<<<<<<<<<<<<<<<<<<
 
 		JSONObject wallet = requestObject.getJSONObject(WALLET_);
-		long id = wallet == null ? null : wallet.getLong(ID);
+		long id = wallet == null ? 0 : wallet.getLongValue(ID);
 		if (id <= 0) {
 			return Parser.extendErrorResult(requestObject, new ConditionErrorException("请设置Wallet及内部的id！"));
 		}

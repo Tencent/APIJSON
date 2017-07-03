@@ -15,7 +15,6 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.RequestMethod.GET;
-import static zuo.biao.apijson.RequestMethod.PUT;
 import static zuo.biao.apijson.StringUtil.UTF_8;
 
 import java.io.UnsupportedEncodingException;
@@ -68,7 +67,6 @@ public class Parser {
 	}
 
 	private final RequestMethod requestMethod;
-	private final boolean noVerify;//方法免验证。但内容还是需要验证，避免服务端写错代码导致产生脏数据甚至清空Table
 	/**
 	 * @param requestMethod null ? requestMethod = GET
 	 * @param noVerify 仅限于为服务端提供方法免验证特权，普通请求不要设置为true！ 如果对应Table有权限也建议用默认值false，保持和客户端权限一致
@@ -76,7 +74,9 @@ public class Parser {
 	public Parser(RequestMethod method, boolean noVerify) {
 		super();
 		this.requestMethod = method == null ? GET : method;
-		this.noVerify = noVerify; 
+		setNoVerifyRequest(noVerify);
+		setNoVerifyLogin(noVerify);
+		setNoVerifyRole(noVerify);
 	}
 
 	private HttpSession session;//可能比较大，占内存。而且不是所有地方都用
@@ -93,6 +93,27 @@ public class Parser {
 		this.globleRole = globleRole;
 		return this;
 	}
+
+	//一定要验证结构！对管理员也要验证！
+	private boolean noVerifyRequest = false;
+	private boolean noVerifyLogin = false;
+	private boolean noVerifyRole = false;
+	public Parser setNoVerifyRequest(boolean noVerifyRequest) {
+		this.noVerifyRequest = noVerifyRequest;
+		return this;
+	}
+	public Parser setNoVerifyLogin(boolean noVerifyLogin) {
+		this.noVerifyLogin = noVerifyLogin;
+		return this;
+	}
+	public Parser setNoVerifyRole(boolean noVerifyRole) {
+		this.noVerifyRole = noVerifyRole;
+		return this;
+	}
+
+
+
+
 
 
 	private JSONObject requestObject;
@@ -111,6 +132,7 @@ public class Parser {
 	 * @param request
 	 * @return
 	 */
+	@NotNull
 	public String parse(JSONObject request) {
 		return JSON.toJSONString(parseResponse(request));
 	}
@@ -119,12 +141,13 @@ public class Parser {
 	 * @param request 先parseRequest中URLDecoder.decode(request, UTF_8);再parseResponse(getCorrectRequest(...))
 	 * @return parseResponse(requestObject);
 	 */
+	@NotNull
 	public JSONObject parseResponse(String request) {
 		Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
 				+ requestMethod + "/parseResponse  request = \n" + request + "\n\n");
 
 		try {
-			requestObject = getCorrectRequest(requestMethod, parseRequest(request, requestMethod));
+			requestObject = parseRequest(request, requestMethod);
 		} catch (Exception e) {
 			return newErrorResult(e);
 		}
@@ -136,24 +159,29 @@ public class Parser {
 	 * @param request
 	 * @return requestObject
 	 */
+	@NotNull
 	public JSONObject parseResponse(JSONObject request) {
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "parseResponse  startTime = " + startTime
 				+ "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n ");
 
-		if (noVerify == false) {
-			//TODO 暂时去掉，方便测试
-			if (RequestMethod.isPublicMethod(requestMethod) == false) {
-				try {
-					AccessVerifier.verifyLogin(session);
-				} catch (Exception e) {
-					return Parser.newErrorResult(e);
+		requestObject = request;
+		if (RequestMethod.isPublicMethod(requestMethod) == false) {
+			try {
+				//TODO
+				//				if (noVerifyLogin == false) {
+				//					Verifier.verifyLogin(session);
+				//				}
+				if (noVerifyRequest == false) {
+					requestObject = getCorrectRequest(requestMethod, requestObject);
 				}
+			} catch (Exception e) {
+				return Parser.extendErrorResult(requestObject, e);
 			}
+		}
 
-			if (globleRole == null) {
-				setGlobleRole(RequestRole.get(request.getString(JSONRequest.KEY_ROLE)));
-			}
+		if (noVerifyRole == false && globleRole == null) {
+			setGlobleRole(RequestRole.get(requestObject.getString(JSONRequest.KEY_ROLE)));
 		}
 
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
@@ -173,11 +201,8 @@ public class Parser {
 		sQLExecutor = null;
 
 
-		if (noVerify == false) {
-			requestObject = AccessVerifier.removeAccessInfo(requestObject);
-		}
-		requestObject = error == null ? extendSuccessResult(requestObject)
-				: extendResult(requestObject, JSONResponse.CODE_PARTIAL_SUCCEED, "未完成全部请求：\n " + error.getMessage());
+		requestObject = AccessVerifier.removeAccessInfo(requestObject);
+		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
 
 
 		queryResultMap.clear();
@@ -235,7 +260,13 @@ public class Parser {
 		if (object == null) {
 			object = new JSONObject(true);
 		}
-		object.put(JSONResponse.KEY_CODE, code);
+		if (object.containsKey(JSONResponse.KEY_CODE) == false) {
+			object.put(JSONResponse.KEY_CODE, code);
+		}
+		String m = StringUtil.getString(object.getString(JSONResponse.KEY_MSG));
+		if (m.isEmpty() == false) {
+			msg = m + " \n " + StringUtil.getString(msg);
+		}
 		object.put(JSONResponse.KEY_MSG, msg);
 		return object;
 	}
@@ -321,7 +352,7 @@ public class Parser {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JSONObject getCorrectRequest(RequestMethod method, JSONObject request) throws Exception {
+	public static JSONObject getCorrectRequest(@NotNull RequestMethod method, JSONObject request) throws Exception {
 		if (RequestMethod.isPublicMethod(method)) {
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
@@ -362,7 +393,7 @@ public class Parser {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JSONObject getCorrectResponse(final RequestMethod method
+	public static JSONObject getCorrectResponse(@NotNull final RequestMethod method
 			, String table, JSONObject response) throws Exception {
 		//		Log.d(TAG, "getCorrectResponse  method = " + method + "; table = " + table);
 		//		if (response == null || response.isEmpty()) {//避免无效空result:{}添加内容后变有效
@@ -390,7 +421,8 @@ public class Parser {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject getStructure(RequestMethod method, String table, String key, String value) throws Exception  {
+	public static JSONObject getStructure(@NotNull final RequestMethod method, @NotNull String table,
+			String key, String value) throws Exception  {
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
 		SQLConfig config = new SQLConfig(GET, table);
 		config.setColumn("structure");
@@ -487,7 +519,12 @@ public class Parser {
 
 			@Override
 			public JSONObject parseResponse(JSONRequest request) throws Exception {
-				return new Parser(GET, noVerify).setSession(session).parseResponse(request);
+				return new Parser(GET)
+						.setSession(session)
+						//						.setNoVerifyRequest(noVerifyRequest)
+						.setNoVerifyLogin(noVerifyLogin)
+						.setNoVerifyRole(noVerifyRole)
+						.parseResponse(request);
 			}
 
 			//			@Override
@@ -781,7 +818,7 @@ public class Parser {
 	 */
 	private synchronized JSONObject getSQLObject(SQLConfig config) throws Exception {
 		Log.i(TAG, "getSQLObject  config = " + JSON.toJSONString(config));
-		if (noVerify == false) {
+		if (noVerifyRole == false) {
 			if (config.getRole() == null) {
 				if (globleRole != null) {
 					config.setRole(globleRole);
@@ -792,72 +829,6 @@ public class Parser {
 			AccessVerifier.verify(config, visitor);
 		}
 		return getCorrectResponse(requestMethod, config.getTable(), sQLExecutor.execute(config));
-	}
-
-
-
-	/**获取客户端实际需要的key
-	 * @param method
-	 * @param originKey
-	 * @param isTableKey
-	 * @param saveLogic 保留逻辑运算符 & | !
-	 * @return
-	 */
-	public static String getRealKey(RequestMethod method, String originKey, boolean isTableKey, boolean saveLogic)
-			throws Exception {
-		Log.i(TAG, "getRealKey  saveLogic = " + saveLogic + "; originKey = " + originKey);
-		if (originKey == null || zuo.biao.apijson.JSONObject.isArrayKey(originKey)) {
-			Log.w(TAG, "getRealKey  originKey == null || isArrayKey(originKey) >>  return originKey;");
-			return originKey;
-		}
-
-		String key = new String(originKey);
-		if (key.endsWith("$")) {//搜索，查询时处理
-			key = key.substring(0, key.length() - 1);
-		} else if (key.endsWith("{}")) {//被包含，或者说key对应值处于value的范围内。查询时处理
-			key = key.substring(0, key.length() - 2);
-		} else if (key.endsWith("<>")) {//包含，或者说value处于key对应值的范围内。查询时处理
-			key = key.substring(0, key.length() - 2);
-		} else if (key.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存？
-			key = key.substring(0, key.length() - 2);
-		} else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
-			key = key.substring(0, key.length() - 1);
-		} else if (key.endsWith("+")) {//延长，PUT查询时处理
-			if (method == PUT) {//不为PUT就抛异常
-				key = key.substring(0, key.length() - 1);
-			}
-		} else if (key.endsWith("-")) {//缩减，PUT查询时处理
-			if (method == PUT) {//不为PUT就抛异常
-				key = key.substring(0, key.length() - 1);
-			}
-		}
-
-		String last = null;//不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
-		if (RequestMethod.isQueryMethod(method)) {//逻辑运算符仅供GET,HEAD方法使用
-			last = key.isEmpty() ? "" : key.substring(key.length() - 1);
-			if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
-				key = key.substring(0, key.length() - 1);
-			} else {
-				last = null;//避免key + StringUtil.getString(last)错误延长
-			}
-		}
-
-		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好
-		if (isTableKey) {//不允许在column key中使用Type:key形式
-			key = Pair.parseEntry(key, true).getKey();//table以左边为准
-		} else {
-			key = Pair.parseEntry(key).getValue();//column以右边为准
-		}
-
-		if (StringUtil.isWord(key.startsWith("@") ? key.substring(1) : key) == false) {
-			throw new IllegalArgumentException(TAG + "/" + method + "  getRealKey: 字符 " + originKey + " 不合法！");
-		}
-
-		if (saveLogic && last != null) {
-			key = key + last;
-		}
-		Log.i(TAG, "getRealKey  return key = " + key);
-		return key;
 	}
 
 

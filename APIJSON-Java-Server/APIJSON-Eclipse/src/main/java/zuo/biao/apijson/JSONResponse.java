@@ -46,21 +46,21 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	//状态信息，非GET请求获得的信息<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final int CODE_SUCCEED = 200;
-	public static final int CODE_PARTIAL_SUCCEED = 206;
-	public static final int CODE_UNSUPPORTED_ENCODING = 400;
-	public static final int CODE_ILLEGAL_ACCESS = 401;
-	public static final int CODE_UNSUPPORTED_OPERATION = 403;
-	public static final int CODE_NOT_FOUND = 404;
-	public static final int CODE_ILLEGAL_ARGUMENT = 406;
-	public static final int CODE_NOT_LOGGED_IN = 407;
-	public static final int CODE_TIME_OUT = 408;
-	public static final int CODE_CONFLICT = 409;
-	public static final int CODE_CONDITION_ERROR = 412;
-	public static final int CODE_UNSUPPORTED_TYPE = 415;
-	public static final int CODE_OUT_OF_RANGE = 416;
-	public static final int CODE_NULL_POINTER = 417;
-	public static final int CODE_SERVER_ERROR = 500;
+	public static final int CODE_SUCCEED = 200; //成功
+	public static final int CODE_PARTIAL_SUCCEED = 206; //部分成功
+	public static final int CODE_UNSUPPORTED_ENCODING = 400; //编码错误
+	public static final int CODE_ILLEGAL_ACCESS = 401; //权限错误
+	public static final int CODE_UNSUPPORTED_OPERATION = 403; //禁止操作
+	public static final int CODE_NOT_FOUND = 404; //未找到
+	public static final int CODE_ILLEGAL_ARGUMENT = 406; //参数错误
+	public static final int CODE_NOT_LOGGED_IN = 407; //未登录
+	public static final int CODE_TIME_OUT = 408; //超时
+	public static final int CODE_CONFLICT = 409; //重复，已存在
+	public static final int CODE_CONDITION_ERROR = 412; //条件错误，如密码错误
+	public static final int CODE_UNSUPPORTED_TYPE = 415; //类型错误
+	public static final int CODE_OUT_OF_RANGE = 416; //超出范围
+	public static final int CODE_NULL_POINTER = 417; //对象为空
+	public static final int CODE_SERVER_ERROR = 500; //服务器内部错误
 
 
 	public static final String KEY_CODE = "code";

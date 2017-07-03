@@ -15,8 +15,10 @@ limitations under the License.*/
 package apijson.demo.server.model;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
@@ -28,8 +30,9 @@ import com.alibaba.fastjson.JSON;
 public abstract class BaseModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private Long id;
-	private Long date;
+	private Long id;       //主键，唯一标识
+	private Long userId;  //对应User表中的会员id，外键
+	private String date;   //创建时间，JSON没有Date,TimeStamp类型，都会被转成Long，不能用！
 
 	public Long getId() {
 		return id;
@@ -38,10 +41,17 @@ public abstract class BaseModel implements Serializable {
 		this.id = id;
 		return this;
 	}
-	public Long getDate() {
+	public Long getUserId() {
+		return userId;
+	}
+	public BaseModel setUserId(Long userId) {
+		this.userId = userId;
+		return this;
+	}
+	public String getDate() {
 		return date;
 	}
-	public BaseModel setDate(Long date) {
+	public BaseModel setDate(String date) {
 		this.date = date;
 		return this;
 	}
@@ -52,7 +62,29 @@ public abstract class BaseModel implements Serializable {
 		return JSON.toJSONString(this);
 	}
 	
-
+	
+	/**获取当前时间戳
+	 * @return
+	 */
+	public static Timestamp currentTimeStamp() {  
+	    return new Timestamp(new Date().getTime());  
+	}
+	/**获取时间戳 TODO 判空？ 还是要报错？
+	 * @param time
+	 * @return
+	 */
+	public static Timestamp getTimeStamp(String time) {
+		return Timestamp.valueOf(time);
+	}
+	/**获取时间毫秒值 TODO 判空？ 还是要报错？
+	 * @param time
+	 * @return
+	 */
+	public static long getTimeMillis(String time) {
+		return getTimeStamp(time).getTime();
+	}
+	
+	
 	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**判断array是否为空
 	 * @param array

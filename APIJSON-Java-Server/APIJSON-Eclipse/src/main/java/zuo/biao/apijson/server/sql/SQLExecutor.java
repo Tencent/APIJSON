@@ -20,6 +20,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -187,6 +188,7 @@ public class SQLExecutor {
 			result = Parser.newResult(updateCount > 0 ? 200 : 404
 					, updateCount > 0 ? "success" : "可能对象不存在！");
 			result.put(JSONResponse.KEY_ID, config.getId());//id一定有，一定会返回，不用抛异常来阻止关联写时前面错误导致后面无条件执行！
+			result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
 			return result;
 
 		case GET:
@@ -243,12 +245,20 @@ public class SQLExecutor {
 							+ " >> } catch (Exception e) {");
 					e.printStackTrace();
 				}
+				if (value == null) {
+					Log.i(TAG, "select while (rs.next()){ ..." + " >>  value == null >> continue;");
+					continue;
+				}
+				
 				//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < columnArray.length; i++) {"
 				//						+ "\n  >>> columnArray[i]) = " + columnArray[i] + "; value = " + value);
-				if (value != null && value instanceof String) {
+				if (value instanceof Timestamp) {
+					value = ((Timestamp) value).toString();
+				}
+				else if (value instanceof String) {
 					try {
 						json = JSON.parse((String) value);
-						if (json != null && StringUtil.isNotEmpty(json, true)) {
+						if (json != null && json instanceof JSON && StringUtil.isNotEmpty(json, true)) {
 							value = json;
 						}
 					} catch (Exception e) {
@@ -257,6 +267,7 @@ public class SQLExecutor {
 						//	+ ">> } catch (Exception e) {\n" + e.getMessage());
 					}
 				}
+				
 				result.put(columnArray[i], value);
 			}
 

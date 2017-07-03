@@ -14,6 +14,10 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import java.util.List;
+
+import com.alibaba.fastjson.JSONArray;
+
 /**encapsulator for request JSONObject, encode in default cases
  * @author Lemon
  * @see #toArray
@@ -68,9 +72,32 @@ public class JSONRequest extends JSONObject {
 
 
 
+	public static final String KEY_ID = "id";
+	public static final String KEY_ID_IN = KEY_ID + "{}";
 	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
 
-	public JSONObject setTag(String tag) {
+	/**set "id":id in Table layer
+	 * @param id
+	 * @return
+	 */
+	public JSONRequest setId(Long id) {
+		put(KEY_ID, id);
+		return this;
+	}
+	/**set id{}:[] in Table layer
+	 * @param list
+	 * @return
+	 */
+	public JSONRequest setIdIn(List<Object> list) {
+		put(KEY_ID_IN, list);
+		return this;
+	}
+	/**set "tag":tag in outermost layer
+	 * for write operations
+	 * @param tag
+	 * @return
+	 */
+	public JSONRequest setTag(String tag) {
 		put(KEY_TAG, tag);
 		return this;
 	}
@@ -86,24 +113,27 @@ public class JSONRequest extends JSONObject {
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
 
-	/**
+	/**set what to query in Array layer
 	 * @param query what need to query, Table,total,ALL?
 	 * @return
+	 * @see {@link #QUERY_TABLE}
+	 * @see {@link #QUERY_TOTAL}
+	 * @see {@link #QUERY_ALL}
 	 */
 	public JSONRequest setQuery(int query) {
 		put(KEY_QUERY, query);
 		return this;
 	}
-	/**
-	 * @param count
+	/**set maximum count of Tables to query in Array layer
+	 * @param count <= 0 || >= max ? max : count
 	 * @return
 	 */
 	public JSONRequest setCount(int count) {
 		put(KEY_COUNT, count);
 		return this;
 	}
-	/**
-	 * @param page
+	/**set page of Tables to query in Array layer
+	 * @param page <= 0 ? 0 : page
 	 * @return
 	 */
 	public JSONRequest setPage(int page) {

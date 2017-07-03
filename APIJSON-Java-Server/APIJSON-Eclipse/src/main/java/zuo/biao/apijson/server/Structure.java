@@ -14,8 +14,11 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import static zuo.biao.apijson.JSONResponse.KEY_ID;
+import static zuo.biao.apijson.JSONRequest.KEY_ID;
+import static zuo.biao.apijson.JSONRequest.KEY_ID_IN;
 import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.RequestMethod.PUT;
+import static zuo.biao.apijson.RequestMethod.DELETE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.activation.UnsupportedDataTypeException;
 import javax.validation.constraints.NotNull;
@@ -32,10 +36,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.model.Test;
+import zuo.biao.apijson.server.sql.SQLConfig;
+import zuo.biao.apijson.server.sql.SQLExecutor;
 
 //TODO 放到 zuo.biao.apijson 包内，供Android客户端校验请求结构
 /**结构类
@@ -45,6 +53,7 @@ import zuo.biao.apijson.StringUtil;
  */
 public class Structure {
 	private static final String TAG = "Structure";
+
 
 
 	private Structure() {}
@@ -104,26 +113,6 @@ public class Structure {
 
 	}
 
-	
-	//TODO 放在一个 enum StructureOperate 
-	public static final int TYPE_DEFAULT = 0;
-	public static final int TYPE_VERIFY = 1;
-	public static final int TYPE_ADD = 2;
-	public static final int TYPE_PUT = 3;
-	public static final int TYPE_REPLACE = 4;
-	public static final int TYPE_REMOVE = 5;
-
-	public static final String NAME_VERIFY = "verify";
-
-	public static final String NAME_ADD = "add";
-	public static final String NAME_PUT = "put";
-	public static final String NAME_REPLACE = "replace";
-	public static final String NAME_REMOVE = "remove";
-
-	public static final String NAME_DISALLOW = "disallow";
-	public static final String NAME_NECESSARY = "necessary";
-	
-	
 
 	/**从request提取target指定的内容
 	 * @param method
@@ -133,7 +122,7 @@ public class Structure {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject parseRequest(final RequestMethod method, final String name
+	public static JSONObject parseRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request) throws Exception {
 		Log.i(TAG, "parseRequest  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -157,16 +146,28 @@ public class Structure {
 				//				Log.i(TAG, "parseRequest.parse.onParseJSONObject  key = " + key + "; robj = " + robj);
 				if (robj == null) {
 					if (tobj != null) {//不允许不传Target中指定的Table
-						throw new IllegalArgumentException("请设置 " + key + " ！");
+						throw new IllegalArgumentException(method.name() + "请求，请设置 " + key + " ！");
 					}
 				} else if (zuo.biao.apijson.JSONObject.isTableKey(key)) {
 					if (method == POST) {
 						if (robj.containsKey(KEY_ID)) {
-							throw new IllegalArgumentException("POST " + key + " 请求不能设置" + KEY_ID + "！");
+							throw new IllegalArgumentException("POST请求， " + key + " 不能设置 " + KEY_ID + " ！");
 						}
 					} else {
-						if (RequestMethod.isQueryMethod(method) == false && robj.containsKey(KEY_ID) == false) {
-							throw new IllegalArgumentException("请设置 " + key + " 的 " + KEY_ID + "！");
+						if (RequestMethod.isQueryMethod(method) == false) {
+							//单个修改或删除
+							Object id = robj.get(KEY_ID); //如果必须传 id ，可在Request表中配置necessary
+							if (id != null && id instanceof Number == false) {
+								throw new IllegalArgumentException(method.name() + "请求， " + key
+										+ " 中 " + KEY_ID + " 对应值的类型只能是Long！");
+							}
+							
+							//批量修改或删除
+							Object arr = robj.get(KEY_ID_IN); //如果必须传 id{} ，可在Request表中配置necessary
+							if (arr != null && arr instanceof JSONArray == false) {
+								throw new IllegalArgumentException(method.name() + "请求， " + key
+										+ " 中 " + KEY_ID_IN + " 对应值的类型只能是JSONArray！");
+							}
 						}
 					}
 				} 
@@ -183,11 +184,11 @@ public class Structure {
 	 * @param name
 	 * @param target
 	 * @param response
-	 * @param callback
+	 * @param callback 
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject parseResponse(final RequestMethod method, final String name
+	public static JSONObject parseResponse(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject response, OnParseCallback callback) throws Exception {
 		Log.i(TAG, "parseResponse  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -254,7 +255,7 @@ public class Structure {
 		String[] necessarys = StringUtil.split(necessary);
 		List<String> necessaryList = necessarys == null ? new ArrayList<String>() : Arrays.asList(necessarys);
 		for (String s : necessaryList) {
-			if (real.containsKey(s) == false) {
+			if (real.get(s) == null) {//可能传null进来，这里还会通过 real.containsKey(s) == false) {
 				throw new IllegalArgumentException(name
 						+ "不能缺少 " + s + " 等[" + necessary + "]内的任何字段！");
 			}
@@ -283,7 +284,7 @@ public class Structure {
 		for (String s : disallowList) {
 			if (real.containsKey(s)) {
 				throw new IllegalArgumentException(name
-						+ "不允许传 " + s + " 等[" + disallow + "]内的任何字段！");
+						+ "不允许传 " + s + " 等" + StringUtil.getString(disallowList) + "内的任何字段！");
 			}
 		}
 		//判断是否都有不允许的字段>>>>>>>>>>>>>>>>>>>
@@ -395,13 +396,14 @@ public class Structure {
 				}
 
 				if (tk.endsWith("{}")) {//rv符合tv条件或在tv内
-					logic = new Logic(tk.substring(0, tk.length() - 2));
-					rk = logic.getKey();
-					rv = real.get(rk);
-
 					if (tv instanceof String) {//TODO  >= 0, < 10
-						//TODO
-					} else if (tv instanceof JSONArray) {
+						sqlVerify("{}", real, tk, tv);
+					} 
+					else if (tv instanceof JSONArray) {
+						logic = new Logic(tk.substring(0, tk.length() - 2));
+						rk = logic.getKey();
+						rv = real.get(rk);
+
 						if (((JSONArray) tv).contains(rv) == logic.isNot()) {
 							throw new IllegalArgumentException("operate  operate == TYPE_VERIFY"
 									+ " >> ((JSONArray) tv).contains(rv) == logic.isNot()");
@@ -415,7 +417,7 @@ public class Structure {
 					rv = real.get(rk);
 
 					if (rv instanceof JSONArray == false) {
-						throw new UnsupportedDataTypeException("");
+						throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
 					}
 
 					JSONArray array;
@@ -449,10 +451,50 @@ public class Structure {
 						throw new IllegalArgumentException("operate  operate == TYPE_VERIFY"
 								+ " >> isOr == false && logic.isOr()");
 					}
-				} else if (tk.endsWith("$")) {//TODO 正则表达式？
+				} else if (tk.endsWith("?")) {//正则表达式
+					logic = new Logic(tk.substring(0, tk.length() - 1));
+					rk = logic.getKey();
+					rv = real.get(rk);
 
+					JSONArray array;
+					if (tv instanceof JSONArray) {
+						array = (JSONArray) tv;
+					} else {
+						array = new JSONArray();
+						array.add(tv);
+					}
+
+					boolean m;
+					boolean isOr = false;
+					for (Object r : array) {
+						if (r instanceof String == false) {
+							throw new UnsupportedDataTypeException(rk + ":" + rv + "中value只支持 String 或 [String] 类型！");
+						}
+						m = Pattern.compile((String) r).matcher("" + rv).matches();
+						if (m) {
+							if (logic.isNot()) {
+								throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 !" + array + " ！");
+							}
+							if (logic.isOr()) {
+								isOr = true;
+								break;
+							}
+						} else {
+							if (logic.isAnd()) {
+								throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 &" + array + " ！");
+							}
+						}
+					}
+
+					if (isOr == false && logic.isOr()) {
+						throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 |" + array + " ！");
+					}
+
+				} else if (tk.endsWith("$")) {//搜索
+					sqlVerify("$", real, tk, tv);
+				} else {
+					throw new IllegalArgumentException("服务器Request表verify配置错误！");
 				}
-
 			} else if (type == TYPE_PUT) {
 				real.put(tk, tv);
 			} else {
@@ -469,6 +511,107 @@ public class Structure {
 		}
 
 		return real;
+	}
+
+
+	/**通过数据库执行SQL语句来验证条件
+	 * @param funChar
+	 * @param real
+	 * @param tk
+	 * @param tv
+	 * @throws Exception
+	 */
+	private static void sqlVerify(@NotNull String funChar, JSONObject real, String tk, Object tv) throws Exception {
+		//不能用Parser, 0 这种不符合 StringUtil.isName !
+		Logic logic = new Logic(tk.substring(0, tk.length() - funChar.length()));
+		String rk = logic.getKey();
+		Object rv = real.get(rk);
+
+		JSONArray array;
+		if (tv instanceof JSONArray) {
+			array = (JSONArray) tv;
+		} else {
+			array = new JSONArray();
+			array.add(tv);
+		}
+
+		SQLConfig config = new SQLConfig(RequestMethod.HEAD, 1, 0);
+		config.setTable(Test.class.getSimpleName());
+		config.setTest(true);
+		config.addWhere("'" + rv + "'" + logic.getChar() + funChar, tv);
+
+		SQLExecutor executor = new SQLExecutor();
+		JSONObject result = null;
+		try {
+			result = executor.execute(config);
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			executor.close();
+		}
+		if (result != null && JSONResponse.isExist(result.getIntValue(JSONResponse.KEY_COUNT)) == false) {
+			throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 " + logic.getChar() + array + " ！");
+		}		
+	}
+
+
+
+	//	/**
+	//	 * @param real
+	//	 * @param tk
+	//	 * @param tv
+	//	 * @param tableKeySet
+	//	 */
+	//	private static void putTargetChild(JSONObject real, String tk, Object tv, Set<String> tableKeySet) {
+	//		real.put(tk, tv);
+	//		zuo.biao.apijson.server.Entry<String, String> pair = Pair.parseEntry(tk, true);
+	//		if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
+	//			tableKeySet.add(tk);
+	//		}
+	//	}
+
+
+	public static final int TYPE_DEFAULT = 0;
+	public static final int TYPE_VERIFY = 1;
+	public static final int TYPE_ADD = 2;
+	public static final int TYPE_PUT = 3;
+	public static final int TYPE_REPLACE = 4;
+	public static final int TYPE_REMOVE = 5;
+
+	public static final String NAME_VERIFY = "verify";
+
+	public static final String NAME_ADD = "add";
+	public static final String NAME_PUT = "put";
+	public static final String NAME_REPLACE = "replace";
+	public static final String NAME_REMOVE = "remove";
+
+	public static final String NAME_DISALLOW = "disallow";
+	public static final String NAME_NECESSARY = "necessary";
+
+	/**
+	 * @param key
+	 * @return
+	 */
+	public static int getOperate(String key) {
+		if (key != null) {
+			if (NAME_VERIFY.equals(key)) {
+				return TYPE_VERIFY;
+			}
+			if (NAME_ADD.equals(key)) {
+				return TYPE_ADD;
+			}
+			if (NAME_PUT.equals(key)) {
+				return TYPE_PUT;
+			}
+			if (NAME_REPLACE.equals(key)) {
+				return TYPE_REPLACE;
+			} 
+			if (NAME_REMOVE.equals(key)) {
+				return TYPE_REMOVE;
+			}
+		}
+
+		return TYPE_DEFAULT;
 	}
 
 
