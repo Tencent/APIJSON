@@ -54,7 +54,7 @@ APIJSON是一种JSON传输结构协议。<br />
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_moment.jpg) 
 
 
-### 举几个栗子:
+### 举几个例子:
 
 #### 查询用户
 请求：
