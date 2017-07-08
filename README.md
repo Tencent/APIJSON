@@ -298,11 +298,11 @@ APIJSON是一种JSON传输结构协议。<br />
 ### <h3 id="2.6">2.6 服务端对应不同请求的返回结果<h3/>
  服务端对应不同请求的返回结果 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- User | {"code":200, "msg":"success", "data":{"id":1, "name":"xxx"...}} | {"code":200, "msg":"success", "User":{"id":1, "name":"xxx"...}}
- Moment和对应的User | 分别返回两次请求的结果<br />Moment: {"code":200, "msg":"success", "data":{"id":1, "name":"xxx"...}}<br />User: {"code":200, "msg":"success", "data":{"id":1, "name":"xxx"...}} | {"code":200, "msg":"success", "Moment":{"id":1, "content":"xxx"...}, "User":{"id":1, "name":"xxx"...}}
- User列表 | {"code":200, "msg":"success", "data":[{"id":1, "name":"xxx"...}, {"id":2...}...]} | {"code":200, "msg":"success", "[]":[{"User":{"id":1, "name":"xxx"...}}, {"User":{"id":2...}}...]}
- Moment列表，每个Moment包括发布者User和前3条Comment | {"code":200, "msg":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...]} | {"code":200, "msg":"success", "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "User":{...}, "[]":[{"Comment":{...}}, ...]}, ...]}
- User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"code":200, "msg":"success", "data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...} ...]} | 以上不同请求方法的结果:<br /> ① {"code":200, "msg":"success", "[]":[{"User":{"id":1, "name":"xxx", ...}, "Moment":{...}, "[]":[{"Comment":{...}}, ...]}, ...]}<br /><br /> ② {"code":200, "msg":"success", "User":{...}, "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{...}, ...}, ...]}, ...]}<br /><br /> ③ {"code":200, "msg":"success", "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{}}, ...]}, ...]}
+ User | {"data":{"id":1, "name":"xxx"...},"code":200, "msg":"success"} | {"User":{"id":1, "name":"xxx"...},"code":200, "msg":"success"}
+ Moment和对应的User | 分别返回两次请求的结果<br />Moment: {"data":{"id":1, "name":"xxx"...},"code":200, "msg":"success"}<br />User: {"data":{"id":1, "name":"xxx"...}, "code":200, "msg":"success"} | {"Moment":{"id":1, "content":"xxx"...}, "User":{"id":1, "name":"xxx"...},"code":200, "msg":"success"}
+ User列表 | {"data":[{"id":1, "name":"xxx"...}, {"id":2...}...], "code":200, "msg":"success"} | {"[]":[{"User":{"id":1, "name":"xxx"...}}, {"User":{"id":2...}}...], "code":200, "msg":"success"}
+ Moment列表，每个Moment包括发布者User和前3条Comment | {"data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...],"code":200, "msg":"success"} | {"[]":[{"Moment":{"id":1, "content":"xxx", ...}, "User":{...}, "[]":[{"Comment":{...}}, ...]}, ...],"code":200, "msg":"success"}
+ User发布的Moment列表，每个Moment包括发布者User和前3条Comment | {"data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...} ...],"code":200, "msg":"success"} | 以上不同请求方法的结果:<br /> ① {"[]":[{"User":{"id":1, "name":"xxx", ...}, "Moment":{...}, "[]":[{"Comment":{...}}, ...]}, ...],"code":200, "msg":"success"}<br /><br /> ② {"User":{...}, "[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{...}, ...}, ...]}, ...],"code":200, "msg":"success"}<br /><br /> ③ {"[]":[{"Moment":{"id":1, "content":"xxx", ...}, "[]":[{"Comment":{}}, ...]}, ...],"code":200, "msg":"success"}
 
 
 1.base_url指基地址，一般是顶级域名，其它分支url都是在base_url后扩展。如base_url:http://www.google.com/ ，对应的GET分支url:http://www.google.com/get/ ，下同。<br >
