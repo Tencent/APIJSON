@@ -270,7 +270,7 @@ APIJSON是一种JSON传输结构协议。<br />
  客户端请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
- 结构 | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&loginPassword=1234<br /><br />其中currentUserId和loginPassword只在请求部分接口时需要 | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, loginPassword:1234}<br /><br />其中currentUserId和loginPassword只在请求部分接口时需要
+ 结构 | base_url/table_name?key0=value0&key1=value1...<br />&currentUserId=100&loginPassword=1234<br /><br />其中currentUserId和loginPassword只在请求部分接口时需要 | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, loginPassword:1234}<br /><br />其中currentUserId和loginPassword只在请求部分接口时需要
  URL | 不同的请求对应不同的url | 相同的请求方法(GET，POST等)都用同一个url
  键值对 | key=value | key:value
  
@@ -289,8 +289,8 @@ APIJSON是一种JSON传输结构协议。<br />
 ### <h3 id="2.5">2.5 客户端对应不同需求的请求<h3/>
  客户端对应不同需求的请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- User | base_url/get/user?id=1 | [base_url/get/{"User":{"id":1}}](http://139.196.140.118:8080/get/{"User":{"id":38710}})
- Moment和对应的User | 分两次请求<br />Moment: base_url/get/moment?userId=1<br />User: base_url/get/user?id=1 | [base_url/get/{"Moment":{"userId":1}, "User":{"id":1}}](http://139.196.140.118:8080/get/{"Moment":{"userId":38710},"User":{"id":38710}})
+ User | base_url/get/user?id=1 | [base_url/get/<br >{<br > &nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":1<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"User":{"id":38710}})
+ Moment和对应的User | 分两次请求<br />Moment: base_url/get/moment?userId=1<br />User: base_url/get/user?id=1 | [base_url/get/<br >{<br > &nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "userId":1<br > &nbsp;&nbsp; }, <br > &nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":1<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"Moment":{"userId":38710},"User":{"id":38710}})
  User列表 | base_url/get/user/list?page=0&count=3&sex=0 | [base_url/get/{"[]":{"page":0, "count":3, "User":{"sex":0}}}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"User":{"sex":0}}})
  Moment列表，每个Moment包括发布者User和前3条Comment | Moment里必须有User的Object和Comment的Array<br /> base_url/get/moment/list?page=0&count=3&commentCount=3 | [base_url/get/{"[]":{"page":0, "count":3, "Moment":{}, "User":{"id@":"/Moment/userId"}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{},"User":{"id@":"%252FMoment%252FuserId"},"[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
  User发布的Moment列表，每个Moment包括发布者User和前3条Comment | Moment里必须有User的Object和Comment的Array<br /> base_url/get/moment/list?page=0&count=3&commentCount=3&userId=1 | 有以下几种方法:<br /> ① 把以上请求里的"Moment":{}, "User":{"id@":"/Moment/userId"}改为["Moment":{"userId":1}, "User":{"id":1}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"User":{"id":38710},"[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}}) <br /><br /> ② 或这样省去重复的User<br />[base_url/get/{"User":{"id":1}, "[]":{"page":0, "count":3, "Moment":{"userId":1}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://139.196.140.118:8080/get/{"User":{"id":38710},"[]":{"page":0,"count":3,"Moment":{"userId":38710},"[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})<br /><br /> ③ 如果User之前已经获取到了，还可以这样省去所有重复User<br />[base_url/get/{"[]":{"page":0, "count":3, "Moment":{"userId":1}, "[]":{"count":3, "Comment":{"momentId@":"[]/Moment/id"}}}}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
