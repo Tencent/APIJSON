@@ -298,7 +298,7 @@ APIJSON是一种JSON传输结构协议。<br />
 ### <h3 id="2.6">2.6 服务端对应不同请求的返回结果<h3/>
  服务端对应不同请求的返回结果 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- User | {"data":{"id":1, "name":"xxx"...},"code":200, "msg":"success"} | {"User":{"id":1, "name":"xxx"...},"code":200, "msg":"success"}
+ User | {<br > &nbsp;&nbsp; "data":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":1,<br > &nbsp;&nbsp;&nbsp;&nbsp; "name":"xxx"...<br > &nbsp;&nbsp; },<br > &nbsp;&nbsp; "code":200,<br > &nbsp;&nbsp; "msg":"success"<br >} | {<br > &nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":1,<br > &nbsp;&nbsp;&nbsp;&nbsp; "name":"xxx"...<br > &nbsp;&nbsp; },<br > &nbsp;&nbsp; "code":200,<br > &nbsp;&nbsp; "msg":"success"<br >}
  Moment和对应的User | 分别返回两次请求的结果<br />Moment: {"data":{"id":1, "name":"xxx"...},"code":200, "msg":"success"}<br />User: {"data":{"id":1, "name":"xxx"...}, "code":200, "msg":"success"} | {"Moment":{"id":1, "content":"xxx"...}, "User":{"id":1, "name":"xxx"...},"code":200, "msg":"success"}
  User列表 | {"data":[{"id":1, "name":"xxx"...}, {"id":2...}...], "code":200, "msg":"success"} | {"[]":[{"User":{"id":1, "name":"xxx"...}}, {"User":{"id":2...}}...], "code":200, "msg":"success"}
  Moment列表，每个Moment包括发布者User和前3条Comment | {"data":[{"id":1, "content":"xxx"..., "User":{...}, "Comment":[...]}, {"id":2...}...],"code":200, "msg":"success"} | {"[]":[{"Moment":{"id":1, "content":"xxx", ...}, "User":{...}, "[]":[{"Comment":{...}}, ...]}, ...],"code":200, "msg":"success"}
