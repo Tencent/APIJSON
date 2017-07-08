@@ -143,13 +143,13 @@ APIJSON是一种JSON传输结构协议。<br />
       "content$":"%a%"               //对象条件，搜索content中包含a的动态
     },
     "User":{
-      "id@":"/Moment/userId",        //缺省引用路径，从所处容器的父容器路径开始
+      "id@":"/Moment/userId",        //User.id = Moment.userId  缺省引用赋值路径，从所处容器的父容器路径开始
       "@column":"id,name,head"       //指定返回字段
     },
     "Comment[]":{                    //请求一个名为Comment的数组，并去除Comment包装
       "count":2,
       "Comment":{
-        "momentId@":"[]/Moment/id"   //完整引用路径
+        "momentId@":"[]/Moment/id"   //Comment.momentId = Moment.id  完整引用赋值路径
       }
     }
   }
