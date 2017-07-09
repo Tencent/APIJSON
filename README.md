@@ -46,14 +46,7 @@ APIJSON是一种JSON传输结构协议。<br />
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_1.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_2.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_3.jpg) 
-<br />
-<br />
-以下是展示APIJSON客户端APP的GIF动图，如果不能正常显示可 右击 > 打开图片 或 图片存储
-![](https://static.oschina.net/uploads/img/201704/24105310_unH8.gif) 
-![](https://static.oschina.net/uploads/img/201704/24105311_4vcc.gif) 
-![](https://static.oschina.net/uploads/img/201704/24105311_bhmH.gif) 
-<br />
-<br />
+
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/server_idea_log_complex.jpg) 
 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_request.jpg) 
