@@ -38,7 +38,7 @@ import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.model.User;
 import apijson.demo.client.model.Verify;
 import apijson.demo.client.util.HttpRequest;
-import apijson.demo.server.model.UserPrivacy;
+import apijson.demo.server.model.Privacy;
 
 /**注册、验证码登录、重置密码等密码相关界面
  * @author Lemon
@@ -345,7 +345,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		dismissProgressDialog();
 		switch (requestCode) {
 		case HTTP_CHECK_REGISTER:
-			response2 = response.getJSONResponse(HttpRequest.USER_PRIVACY_);
+			response2 = response.getJSONResponse(HttpRequest.PRIVACY_);
 			Log.i(TAG, "checkPassword result = " + resultJson);
 			runUiThread(new Runnable() {
 				@Override
@@ -428,7 +428,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			}
 			break;
 		case HTTP_RESET_PASSWORD:
-			response2 = response.getJSONResponse(UserPrivacy.class.getSimpleName());
+			response2 = response.getJSONResponse(Privacy.class.getSimpleName());
 			dismissProgressDialog();
 			if (JSONResponse.isSucceed(response2) == false) {
 				EditTextUtil.showInputedError(context, etPasswordVerify

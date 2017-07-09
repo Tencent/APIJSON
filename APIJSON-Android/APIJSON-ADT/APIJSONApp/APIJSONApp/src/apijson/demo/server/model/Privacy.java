@@ -6,7 +6,7 @@ import static zuo.biao.apijson.RequestRole.UNKNOWN;
 
 import zuo.biao.apijson.MethodAccess;
 
-/**会员隐私信息表
+/**用户隐私信息类
  * @author Lemon
  */
 @MethodAccess(
@@ -15,7 +15,7 @@ import zuo.biao.apijson.MethodAccess;
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
 		)
-public class UserPrivacy extends BaseModel {
+public class Privacy extends BaseModel {
 	private static final long serialVersionUID = 1L;
 
 	private String phone; //手机
@@ -23,16 +23,16 @@ public class UserPrivacy extends BaseModel {
 	private String payPassword; //支付密码，隐藏字段
 	private Double balance;	//余额
 
-	public UserPrivacy() {
+	public Privacy() {
 		super();
 	}
 
-	public UserPrivacy(long id) {
+	public Privacy(long id) {
 		this();
 		setId(id);
 	}
 
-	public UserPrivacy(String phone, String password) {
+	public Privacy(String phone, String password) {
 		this();
 		setPhone(phone);
 		setPassword(password);
@@ -43,7 +43,7 @@ public class UserPrivacy extends BaseModel {
 	public String getPhone() {
 		return phone;
 	}
-	public UserPrivacy setPhone(String phone) {
+	public Privacy setPhone(String phone) {
 		this.phone = phone;
 		return this;
 	}
@@ -54,7 +54,7 @@ public class UserPrivacy extends BaseModel {
 	public String get__password() {
 		return password;
 	}
-	public UserPrivacy setPassword(String password) {
+	public Privacy setPassword(String password) {
 		this.password = password;
 		return this;
 	}
@@ -65,7 +65,7 @@ public class UserPrivacy extends BaseModel {
 	public String get__payPassword() {
 		return payPassword;
 	}
-	public UserPrivacy setPayPassword(String payPassword) {
+	public Privacy setPayPassword(String payPassword) {
 		this.payPassword = payPassword;
 		return this;
 	}
@@ -73,7 +73,7 @@ public class UserPrivacy extends BaseModel {
 	public Double getBalance() {
 		return balance;
 	}
-	public UserPrivacy setBalance(Double balance) {
+	public Privacy setBalance(Double balance) {
 		this.balance = balance;
 		return this;
 	}

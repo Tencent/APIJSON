@@ -20,7 +20,6 @@ import java.util.List;
 import zuo.biao.apijson.JSONObject;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.RequestRole;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.SettingUtil;
@@ -32,8 +31,8 @@ import apijson.demo.server.model.Comment;
 import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
 import apijson.demo.server.model.Password;
+import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
-import apijson.demo.server.model.UserPrivacy;
 import apijson.demo.server.model.Verify;
 import apijson.demo.server.model.Wallet;
 
@@ -135,14 +134,14 @@ public class HttpRequest {
 
 	//加 _ 表示class名，避免PASSWORD不知道是 Password 还是 password 这种冲突
 	public static final String USER_;
-	public static final String USER_PRIVACY_;
+	public static final String PRIVACY_;
 	public static final String MOMENT_;
 	public static final String COMMENT_;
 	public static final String WALLET_;
 	public static final String VERIFY_;
 	static {
 		USER_ = User.class.getSimpleName();
-		USER_PRIVACY_ = UserPrivacy.class.getSimpleName();
+		PRIVACY_ = Privacy.class.getSimpleName();
 		MOMENT_ = Moment.class.getSimpleName();
 		COMMENT_ = Comment.class.getSimpleName();
 		WALLET_ = Wallet.class.getSimpleName();
@@ -240,7 +239,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void checkRegister(String phone, int requestCode, OnHttpResponseListener listener) {
-		head(new JSONRequest(new UserPrivacy().setPhone(phone)), requestCode, listener);
+		head(new JSONRequest(new Privacy().setPhone(phone)), requestCode, listener);
 	}
 
 	/**登录
@@ -649,10 +648,10 @@ public class HttpRequest {
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void getUserPrivacy(int requestCode, OnHttpResponseListener listener) {
+	public static void getPrivacy(int requestCode, OnHttpResponseListener listener) {
 		postGet(new JSONRequest(
-				new UserPrivacy(application.getCurrentUserId())
-				).setTag(USER_PRIVACY_), requestCode, listener);
+				new Privacy(application.getCurrentUserId())
+				).setTag(PRIVACY_), requestCode, listener);
 	}
 
 	/**修改余额
@@ -662,13 +661,13 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void changeBalance(double change, String payPassword, int requestCode, OnHttpResponseListener listener) {
-		JSONObject userPrivacy = new JSONObject(
-				new UserPrivacy(application.getCurrentUserId()).setPayPassword(payPassword)
+		JSONObject privacy = new JSONObject(
+				new Privacy(application.getCurrentUserId()).setPayPassword(payPassword)
 				);
-		userPrivacy.put("balance+", change, true);
-		JSONRequest request = new JSONRequest(USER_PRIVACY_, userPrivacy);
+		privacy.put("balance+", change, true);
+		JSONRequest request = new JSONRequest(PRIVACY_, privacy);
 
-		HttpManager.getInstance().post(URL_BASE + "put/balance", request.setTag(USER_PRIVACY_), requestCode, listener);
+		HttpManager.getInstance().post(URL_BASE + "put/balance", request.setTag(PRIVACY_), requestCode, listener);
 	}
 
 

@@ -55,7 +55,7 @@ import zuo.biao.apijson.MethodAccess;
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
 		)
-public class User extends BaseModel{
+public class User extends BaseModel {
 	private static final long serialVersionUID = 1L;
 	
 	public static final int SEX_MAIL = 0;

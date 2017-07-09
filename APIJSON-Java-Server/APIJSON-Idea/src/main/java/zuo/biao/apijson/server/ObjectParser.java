@@ -14,13 +14,23 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import static zuo.biao.apijson.JSONObject.KEY_CONDITION;
+import static zuo.biao.apijson.JSONObject.KEY_CORRECT;
+import static zuo.biao.apijson.JSONObject.KEY_DROP;
+import static zuo.biao.apijson.JSONObject.KEY_TRY;
 import static zuo.biao.apijson.RequestMethod.PUT;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
@@ -29,8 +39,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.Function;
+import apijson.demo.server.model.BaseModel;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.sql.SQLConfig;
@@ -63,24 +75,35 @@ public abstract class ObjectParser implements ParserAdapter {
 	 * name = null
 	 * @param parentPath
 	 * @param request
+	 * @throws Exception 
 	 */
-	public ObjectParser(@NotNull JSONObject request, String parentPath, int type) {
+	public ObjectParser(@NotNull JSONObject request, String parentPath, int type) throws Exception {
 		this(request, parentPath, type, null);
 	}
 
 	protected JSONObject request;//不用final是为了recycle
 	protected String parentPath;//不用final是为了recycle
 
+	protected final boolean isEmpty;//empty有效 User:{}
 	protected final int type;
 	protected String path;//不用final是为了recycle
 	protected String table;//不用final是为了recycle
 	protected final boolean isTableKey;
+
+	protected final boolean tri;
+	/**
+	 * TODO Parser内要不因为 非 TYPE_ITEM_CHILD_0 的Table 为空导致后续中断。
+	 */
+	protected final boolean drop;
+	protected JSONObject correct;
+
 	/**for single object
 	 * @param parentPath
 	 * @param request
 	 * @param name
+	 * @throws Exception 
 	 */
-	public ObjectParser(@NotNull JSONObject request, String parentPath, int type, String name) {
+	public ObjectParser(@NotNull JSONObject request, String parentPath, int type, String name) throws Exception {
 		if (request == null) {
 			throw new IllegalArgumentException(TAG + ".ObjectParser  request == null!!!");
 		}
@@ -91,7 +114,84 @@ public abstract class ObjectParser implements ParserAdapter {
 		this.path = Parser.getAbsPath(parentPath, name);
 		this.table = Pair.parseEntry(name, true).getKey();
 		this.isTableKey = zuo.biao.apijson.JSONObject.isTableKey(table);
+
+		this.isEmpty = request.isEmpty();
+		if (isEmpty) {
+			this.tri = false;
+			this.drop = false;
+		} else {
+			this.tri = request.getBooleanValue(KEY_TRY);
+			this.drop = request.getBooleanValue(KEY_DROP);
+			this.correct = request.getJSONObject(KEY_CORRECT);
+
+			request.remove(KEY_TRY);
+			request.remove(KEY_DROP);
+			request.remove(KEY_CORRECT);
+
+			try {
+				parseCorrect();
+			} catch (Exception e) {
+				if (tri == false) {
+					throw e;
+				}
+				invalidate();
+			}
+		}
+
+
 		Log.d(TAG, "ObjectParser  table = " + table + "; isTableKey = " + isTableKey);
+		Log.d(TAG, "ObjectParser  isEmpty = " + isEmpty + "; tri = " + tri + "; drop = " + drop);
+	}
+
+	public static final Map<String, Pattern> COMPILE_MAP;
+	static {
+		COMPILE_MAP = new HashMap<String, Pattern>();
+		COMPILE_MAP.put("phone", StringUtil.PATTERN_PHONE);
+		COMPILE_MAP.put("email", StringUtil.PATTERN_EMAIL);
+		COMPILE_MAP.put("id_number", StringUtil.PATTERN_ID_CARD);
+	}
+
+	protected Map<String, String> corrected;
+	/**解析 @correct 校正
+	 * @throws Exception 
+	 */
+	protected ObjectParser parseCorrect() throws Exception {
+		Set<String> set = correct == null ? null : new HashSet<>(correct.keySet());
+
+		if (set != null && set.isEmpty() == false) {//对每个需要校正的key进行正则表达式匹配校正
+			corrected = new HashMap<>();//TODO 返回全部correct内的内容，包括未校正的?  correct);
+
+			String value; //13000082001
+			String v; // phone,id_number,card_number
+			String[] posibleKeys; //[phone,email,id_number,card_number]
+
+			for (String k : set) {// k = cert
+				v = k == null ? null : correct.getString(k);
+				value = v == null ? null : request.getString(k);
+				posibleKeys = value == null ? null : StringUtil.split(v);
+
+				if (posibleKeys != null && posibleKeys.length > 0) {
+					String rk = null;
+					Pattern p;
+					for (String pk : posibleKeys) {
+						p = pk == null ? null : COMPILE_MAP.get(pk);
+						if (p != null && p.matcher(value).matches()) {
+							rk = pk;
+							break;
+						}
+					}
+
+					if (rk == null) {
+						throw new IllegalArgumentException(
+								"格式错误！找不到 " + k + ":" + value + " 对应[" + v + "]内的任何一项！");
+					}
+					request.put(rk, request.remove(k));
+					corrected.put(k, rk);
+				}
+			}
+		}
+
+		return this;
 	}
 
 
@@ -127,51 +227,76 @@ public abstract class ObjectParser implements ParserAdapter {
 	 * @throws Exception
 	 */
 	public ObjectParser parse() throws Exception {
-		breakParse = false;
+		if (isInvalidate() == false) {
+			breakParse = false;
 
-		response = new JSONObject(true);//must init
+			response = new JSONObject(true);//must init
 
-		sqlRequest = new JSONObject(true);//must init
-		sqlReponse = null;//must init
-		customMap = null;//must init
-		functionMap = null;//must init
-		childMap = null;//must init
+			sqlRequest = new JSONObject(true);//must init
+			sqlReponse = null;//must init
+			customMap = null;//must init
+			functionMap = null;//must init
+			childMap = null;//must init
 
-		Set<Entry<String, Object>> set = new LinkedHashSet<Entry<String, Object>>(request.entrySet());
-		if (set != null && set.isEmpty() == false) {//判断换取少几个变量的初始化是否值得？
-			if (isTableKey) {//非Table下不必分离出去再添加进来
-				customMap = new LinkedHashMap<String, Object>();
-				childMap = new LinkedHashMap<String, JSON>();
-			}
-			functionMap = new LinkedHashMap<String, String>();//必须执行
-
-			String key;
-			Object value;
-			for (Entry<String, Object> entry : set) {
-				value = entry.getValue();
-				if (value == null) {
-					continue;
+			Set<Entry<String, Object>> set = new LinkedHashSet<Entry<String, Object>>(request.entrySet());
+			if (set != null && set.isEmpty() == false) {//判断换取少几个变量的初始化是否值得？
+				if (isTableKey) {//非Table下不必分离出去再添加进来
+					customMap = new LinkedHashMap<String, Object>();
+					childMap = new LinkedHashMap<String, JSON>();
 				}
-				key = entry.getKey();
+				functionMap = new LinkedHashMap<String, String>();//必须执行
 
-				if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					putChild(key, (JSON) value);
-				} else if (method == PUT && value instanceof JSONArray) {//PUT JSONArray
-					onPUTArrayParse(key, (JSONArray) value);
-				} else {//JSONArray或其它Object，直接填充
-					if (onParse(key, value) == false) {
-						invalidate();
+
+				//条件<<<<<<<<<<<<<<<<<<<
+				List<String> conditionList = null;
+				if (method == PUT) { //这里只有PUTArray需要处理  || method == DELETE) {
+					String[] conditions = StringUtil.split(request.getString(KEY_CONDITION));
+					//Arrays.asList()返回值不支持add方法！
+					conditionList = new ArrayList<String>(Arrays.asList(conditions != null ? conditions : new String[]{}));
+					conditionList.add(zuo.biao.apijson.JSONRequest.KEY_ID);
+					conditionList.add(zuo.biao.apijson.JSONRequest.KEY_ID_IN);
+				}
+				//条件>>>>>>>>>>>>>>>>>>>
+
+				String key;
+				Object value;
+				for (Entry<String, Object> entry : set) {
+					if (isBreakParse()) {
+						break;
+					}
+
+					value = entry.getValue();
+					if (value == null) {
+						continue;
+					}
+					key = entry.getKey();
+
+					try {
+						if (value instanceof JSONObject) {//JSONObject，往下一级提取
+							putChild(key, (JSON) value);
+						}
+						else if (method == PUT && value instanceof JSONArray
+								&& BaseModel.isContain(conditionList, key) == false) {//PUT JSONArray
+							onPUTArrayParse(key, (JSONArray) value);
+						}
+						else {//JSONArray或其它Object，直接填充
+							if (onParse(key, value) == false) {
+								invalidate();
+							}
+						}
+					} catch (Exception e) {
+						if (tri == false) {
+							throw e;//不忽略错误，抛异常
+						}
+						invalidate();//忽略错误，还原request
 					}
 				}
-
-				if (isInvalidate()) {
-					recycle();
-					return null;
-				}
-				if (isBreakParse()) {
-					break;
-				}
 			}
+		}
+
+		if (isInvalidate()) {
+			recycle();
+			return null;
 		}
 
 		return this;
@@ -290,10 +415,10 @@ public abstract class ObjectParser implements ParserAdapter {
 		} else if (key.endsWith("-")) {//remove
 			putType = 2;
 		} else {//replace
-			throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
-					" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
+			//			throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
+			//					" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
 		}
-		String realKey = Parser.getRealKey(method, key, false, false);
+		String realKey = SQLConfig.getRealKey(method, key, false, false);
 
 		//GET > add all 或 remove all > PUT > remove key
 
@@ -380,6 +505,10 @@ public abstract class ObjectParser implements ParserAdapter {
 					throw e;
 				}
 			}
+
+			if (drop) {//丢弃Table，只为了向下提供条件
+				sqlReponse = null;
+			}
 		}
 
 		return this;
@@ -398,6 +527,12 @@ public abstract class ObjectParser implements ParserAdapter {
 			response.putAll(sqlReponse);
 		}
 
+
+		//把已校正的字段键值对corrected<originKey, correctedKey>添加进来，还是correct直接改？
+		if (corrected != null) {
+			response.put(KEY_CORRECT, corrected);
+		}
+
 		//把isTableKey时取出去的custom重新添加回来
 		if (customMap != null) {
 			response.putAll(customMap);
@@ -408,7 +543,7 @@ public abstract class ObjectParser implements ParserAdapter {
 			Set<Entry<String, String>> functionSet = functionMap == null ? null : functionMap.entrySet();
 			if (functionSet != null && functionSet.isEmpty() == false) {
 				for (Entry<String, String> entry : functionSet) {
-					response.put(Parser.getRealKey(method, entry.getKey(), false, false)
+					response.put(SQLConfig.getRealKey(method, entry.getKey(), false, false)
 							, Function.invoke(response, entry.getValue()));
 				}
 			}
@@ -442,6 +577,20 @@ public abstract class ObjectParser implements ParserAdapter {
 	/**回收内存
 	 */
 	public void recycle() {
+		//后面还可能用到，要还原
+		if (tri) {//避免返回未传的字段
+			request.put(KEY_TRY, tri);
+		}
+		if (drop) {
+			request.put(KEY_DROP, drop);
+		}
+		if (correct != null) {
+			request.put(KEY_CORRECT, correct);
+		}
+
+
+		correct = null;
+		corrected = null;
 		method = null;
 		parentPath = null;
 		path = null;

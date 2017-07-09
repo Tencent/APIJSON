@@ -19,6 +19,7 @@ import static zuo.biao.apijson.StringUtil.UTF_8;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Map;
 import java.util.Set;
 
 /**use this class instead of com.alibaba.fastjson.JSONObject, not encode in default cases
@@ -215,7 +216,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return
 	 */
 	public static boolean isTableKey(String key) {
-		return StringUtil.isBigWord(key);
+		return StringUtil.isBigName(key);
 	}
 	//judge >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -223,30 +224,18 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	//JSONObject内关键词 key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
-	/**
-	 * 角色，拥有对某些数据的某些操作的权限
-	 */
-	public static final String KEY_ROLE = "@role";
-	/**
-	 * 数据库，Table在非默认schema内时需要声明 
-	 */
-	public static final String KEY_SCHEMA = "@schema";
-	/**
-	 * 查询的Table字段或SQL函数
-	 */
-	public static final String KEY_COLUMN = "@column";
-	/**
-	 * 分组方式
-	 */
-	public static final String KEY_GROUP = "@group";
-	/**
-	 * 聚合函数条件，一般和@group一起用
-	 */
-	public static final String KEY_HAVING = "@having";
-	/**
-	 * 排序方式
-	 */
-	public static final String KEY_ORDER = "@order";
+	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
+	public static final String KEY_CONDITION = "@condition"; //条件
+	public static final String KEY_TRY = "@try"; //尝试，忽略异常
+	public static final String KEY_DROP = "@drop"; //丢弃，不返回
+	public static final String KEY_CORRECT = "@correct"; //字段校正
+	
+	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
+	public static final String KEY_ABOUT = "@about"; //关于，返回数据库表的信息，包括表说明和字段说明
+	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
+	public static final String KEY_GROUP = "@group"; //分组方式
+	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
+	public static final String KEY_ORDER = "@order"; //排序方式
 	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -258,6 +247,35 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(KEY_ROLE, role);
 		return this;
 	}
+	
+	/**set try, ignore exceptions
+	 * @param tri
+	 * @return this
+	 */
+	public JSONObject setTry(boolean tri) {
+		put(KEY_TRY, tri);
+		return this;
+	}
+	
+	/**set drop, data dropped will not return
+	 * @param drop
+	 * @return this
+	 */
+	public JSONObject setDrop(boolean drop) {
+		put(KEY_DROP, drop);
+		return this;
+	}
+	
+	/**set correct, correct keys to target ones
+	 * @param correct  Map{originKey, [posibleKeys]}， posibleKey之间用 , 隔开
+	 * @return this
+	 */
+	public JSONObject setCorrect(Map<String, String> correct) {
+		put(KEY_CORRECT, correct);
+		return this;
+	}
+	
+	
 
 	/**set schema where table was put
 	 * @param schema
@@ -265,6 +283,15 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject setSchema(String schema) {
 		put(KEY_SCHEMA, schema);
+		return this;
+	}
+
+	/**set about
+	 * @param about
+	 * @return this
+	 */
+	public JSONObject setAbout(boolean about) {
+		put(KEY_ABOUT, about);
 		return this;
 	}
 

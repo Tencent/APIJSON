@@ -31,7 +31,7 @@ public abstract class BaseModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Long id;       //主键，唯一标识
-	private Long userId;  //对应User表中的会员id，外键
+	private Long userId;   //对应User表中的id，外键
 	private String date;   //创建时间，JSON没有Date,TimeStamp类型，都会被转成Long，不能用！
 
 	public Long getId() {

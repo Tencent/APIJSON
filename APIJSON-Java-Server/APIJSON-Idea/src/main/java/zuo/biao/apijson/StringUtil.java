@@ -304,17 +304,25 @@ public class StringUtil {
 
 	//判断字符类型 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final Pattern ALPHA_PATTERN;
-	public static final Pattern PASSWORD_PATTERN;
-	public static final Pattern NAME_PATTERN;
-	public static final Pattern BIG_ALPHA_PATTERN;
-	public static final Pattern SMALL_ALPHA_PATTERN;
+	public static final Pattern PATTERN_NUMBER;
+	public static final Pattern PATTERN_PHONE;
+	public static final Pattern PATTERN_EMAIL;
+	public static final Pattern PATTERN_ID_CARD;
+	public static final Pattern PATTERN_ALPHA;
+	public static final Pattern PATTERN_PASSWORD;
+	public static final Pattern PATTERN_NAME;
+	public static final Pattern PATTERN_ALPHA_BIG;
+	public static final Pattern PATTERN_ALPHA_SMALL;
 	static {
-		ALPHA_PATTERN = Pattern.compile("[a-zA-Z]");
-		PASSWORD_PATTERN = Pattern.compile("^[0-9a-zA-Z_]+$");
-		NAME_PATTERN = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
-		BIG_ALPHA_PATTERN = Pattern.compile("[A-Z]");
-		SMALL_ALPHA_PATTERN = Pattern.compile("[a-z]");
+		PATTERN_NUMBER = Pattern.compile("^[0-9]+$");
+		PATTERN_ALPHA = Pattern.compile("^[a-zA-Z]+$");
+		PATTERN_ALPHA_BIG = Pattern.compile("^[A-Z]+$");
+		PATTERN_ALPHA_SMALL = Pattern.compile("^[a-z]+$");
+		PATTERN_NAME = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
+		PATTERN_PHONE = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$");
+		PATTERN_EMAIL = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$");
+		PATTERN_ID_CARD = Pattern.compile("(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}$)");
+		PATTERN_PASSWORD = Pattern.compile("^[0-9a-zA-Z_]+$");
 	}
 
 	/**判断手机格式是否正确
@@ -326,18 +334,15 @@ public class StringUtil {
 			return false;
 		}
 
-		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$");
-
 		currentString = phone;
-
-		return p.matcher(phone).matches();
+		return PATTERN_PHONE.matcher(phone).matches();
 	}
 	/**判断手机格式是否正确
 	 * @param s
 	 * @return
 	 */
 	public static boolean isPassword(String s) {
-		return getLength(s, false) >= 6 && PASSWORD_PATTERN.matcher(s).matches();
+		return getLength(s, false) >= 6 && PATTERN_PASSWORD.matcher(s).matches();
 	}
 	/**判断是否全是数字密码
 	 * @param s
@@ -355,12 +360,8 @@ public class StringUtil {
 			return false;
 		}
 
-		String str = "^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
-		Pattern p = Pattern.compile(str);
-
 		currentString = email;
-
-		return p.matcher(email).matches();
+		return PATTERN_EMAIL.matcher(email).matches();
 	}
 
 
@@ -380,39 +381,20 @@ public class StringUtil {
 			return false;
 		}
 
-		Pattern pattern = Pattern.compile("[0-9]");
-		Matcher matcher;
-		for (int i = 0; i < s.length(); i++) {
-			matcher = pattern.matcher(s.substring(i, i+1));
-			if(! matcher.matches()){
-				return false;
-			}
-		}
-
 		currentString = s;
-
-		return true;
+		return PATTERN_NUMBER.matcher(s).matches();
 	}
 	/**判断是否全是字母
 	 * @param s
 	 * @return
 	 */
 	public static boolean isAlpha(String s) {
-		if (s == null) {
-			Log.i(TAG, "isNumberOrAlpha  inputed == null >> return false;");
+		if (isEmpty(s, true)) {
 			return false;
-		}
-		Pattern pAlpha = Pattern.compile("[a-zA-Z]");
-		Matcher mAlpha;
-		for (int i = 0; i < s.length(); i++) {
-			mAlpha = pAlpha.matcher(s.substring(i, i+1));
-			if(! mAlpha.matches()){
-				return false;
-			}
 		}
 
 		currentString = s;
-		return true;
+		return PATTERN_ALPHA.matcher(s).matches();
 	}
 	/**判断是否全是数字或字母
 	 * @param s
@@ -422,34 +404,34 @@ public class StringUtil {
 		return isNumer(s) || isAlpha(s);
 	}
 
-	/**判断是否为单词，只能包含字母，数字或下划线
+	/**判断是否为代码名称，只能包含字母，数字或下划线
 	 * @param s
 	 * @return
 	 */
-	public static boolean isWord(String s) {
-		return s != null && NAME_PATTERN.matcher(s).matches();
+	public static boolean isName(String s) {
+		return s != null && PATTERN_NAME.matcher(s).matches();
 	}
-	/**判断是否为首字母大写的单词
+	/**判断是否为首字母大写的代码名称
 	 * @param key
 	 * @return
 	 */
-	public static boolean isBigWord(String s) {
+	public static boolean isBigName(String s) {
 		s = getString(s);
-		if (s.isEmpty() || BIG_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+		if (s.isEmpty() || PATTERN_ALPHA_BIG.matcher(s.substring(0, 1)).matches() == false) {
 			return false;
 		}
-		return s.length() <= 1 ? true : isWord(s.substring(1));
+		return s.length() <= 1 ? true : isName(s.substring(1));
 	}
-	/**判断是否为首字母小写的单词
+	/**判断是否为首字母小写的代码名称
 	 * @param key
 	 * @return
 	 */
-	public static boolean isSmallWord(String s) {
+	public static boolean isSmallName(String s) {
 		s = getString(s);
-		if (s.isEmpty() || SMALL_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+		if (s.isEmpty() || PATTERN_ALPHA_SMALL.matcher(s.substring(0, 1)).matches() == false) {
 			return false;
 		}
-		return s.length() <= 1 ? true : isWord(s.substring(1));
+		return s.length() <= 1 ? true : isName(s.substring(1));
 	}
 
 

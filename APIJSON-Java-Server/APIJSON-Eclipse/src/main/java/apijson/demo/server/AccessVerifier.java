@@ -31,7 +31,7 @@ import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
 import apijson.demo.server.model.Password;
 import apijson.demo.server.model.User;
-import apijson.demo.server.model.UserPrivacy;
+import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.Verify;
 import apijson.demo.server.model.Wallet;
 import zuo.biao.apijson.JSON;
@@ -62,7 +62,7 @@ public class AccessVerifier {
 		accessMap = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
 
 		accessMap.put(User.class.getSimpleName(), getAccessMap(User.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(UserPrivacy.class.getSimpleName(), getAccessMap(UserPrivacy.class.getAnnotation(MethodAccess.class)));
+		accessMap.put(Privacy.class.getSimpleName(), getAccessMap(Privacy.class.getAnnotation(MethodAccess.class)));
 		accessMap.put(Moment.class.getSimpleName(), getAccessMap(Moment.class.getAnnotation(MethodAccess.class)));
 		accessMap.put(Comment.class.getSimpleName(), getAccessMap(Comment.class.getAnnotation(MethodAccess.class)));
 		accessMap.put(Verify.class.getSimpleName(), getAccessMap(Verify.class.getAnnotation(MethodAccess.class)));

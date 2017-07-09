@@ -111,13 +111,13 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 		if (value == null) {//  || key == null
 			return null;
 		}
-		
+
 		com.alibaba.fastjson.JSONObject target = JSON.parseObject(value);
-		if (target == null) {
-			return null;
-		}
+		//		if (target == null) { // "tag":"User" 报错
+		//			return null;
+		//		}
 		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName() //must handle key here
-				, target, encode);
+				, target == null ? value : target, encode);
 	}
 
 	/**设置搜索

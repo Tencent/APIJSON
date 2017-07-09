@@ -50,7 +50,6 @@ import zuo.biao.apijson.MethodAccess;
 public class Moment extends BaseModel {
 	private static final long serialVersionUID = 1L;
 
-	private Long userId;
 	private String content;
 	private List<String> pictureList;
 	private List<Long> praiseUserIdList;
@@ -64,11 +63,9 @@ public class Moment extends BaseModel {
 		setId(id);
 	}
 
-	public Long getUserId() {
-		return userId;
-	}
+
 	public Moment setUserId(Long userId) {
-		this.userId = userId;
+		super.setUserId(userId);
 		return this;
 	}
 	public String getContent() {

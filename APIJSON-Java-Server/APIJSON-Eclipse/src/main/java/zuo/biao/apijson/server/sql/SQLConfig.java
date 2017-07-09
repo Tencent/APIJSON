@@ -49,7 +49,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.User;
-import apijson.demo.server.model.UserPrivacy;
+import apijson.demo.server.model.Privacy;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
@@ -110,7 +110,7 @@ public class SQLConfig {
 	static {
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
-		TABLE_KEY_MAP.put(UserPrivacy.class.getSimpleName(), "apijson_user_privacy");
+		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 	}
 
 

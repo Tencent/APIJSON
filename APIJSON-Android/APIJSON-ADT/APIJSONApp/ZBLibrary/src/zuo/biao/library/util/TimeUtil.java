@@ -243,6 +243,14 @@ public class TimeUtil {
 		return smartTime;
 	}
 
+	public static String getSmartDate(String date) {
+		date = StringUtil.getTrimedString(date);
+		try {
+			return getSmartDate(java.sql.Date.valueOf(date));
+		} catch (Exception e) {
+		}
+		return date;
+	}
 	public static String getSmartDate(Date date) {
 		return date == null ? "" : getSmartDate(date.getTime());
 	}
@@ -261,7 +269,7 @@ public class TimeUtil {
 		if (nowDetails[0] == smartDetail[0]) {//this year
 			if(nowDetails[1] == smartDetail[1]) {//this month
 				String time = " " + StringUtil.getString(new SimpleDateFormat("HH:mm").format(date));
-				
+
 				long day = nowDetails[2] - smartDetail[2];//between/(24*3600);
 				if (day >= 3) {//fomer day
 					smartDate = String.valueOf(smartDetail[2]) + "日" + time;

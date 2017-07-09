@@ -40,7 +40,7 @@ import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
 import apijson.demo.server.model.Password;
 import apijson.demo.server.model.User;
-import apijson.demo.server.model.UserPrivacy;
+import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.Verify;
 import apijson.demo.server.model.Wallet;
 import zuo.biao.apijson.JSON;
@@ -172,7 +172,7 @@ public class Controller {
 		COMMENT_ = Comment.class.getSimpleName();
 		WALLET_ = Wallet.class.getSimpleName();
 		PASSWORD_ = Password.class.getSimpleName();
-		USER_PRIVACY_ = UserPrivacy.class.getSimpleName();
+		USER_PRIVACY_ = Privacy.class.getSimpleName();
 		VERIFY_ = Verify.class.getSimpleName();
 	}
 
@@ -376,7 +376,7 @@ public class Controller {
 		//手机号是否已注册
 		JSONObject phoneResponse = new Parser(POST_HEAD, true).parseResponse(
 				new JSONRequest(
-						new UserPrivacy().setPhone(phone)
+						new Privacy().setPhone(phone)
 						)
 				);
 		JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(USER_PRIVACY_);
@@ -390,13 +390,13 @@ public class Controller {
 		//根据phone获取User
 		JSONObject privacyResponse = new Parser(POST_GET, true).parseResponse(
 				new JSONRequest(
-						new UserPrivacy().setPhone(phone)
+						new Privacy().setPhone(phone)
 						)
 				);
 		response = new JSONResponse(privacyResponse);
 
-		UserPrivacy userPrivacy = response == null ? null : response.getObject(UserPrivacy.class);
-		long userId = userPrivacy == null ? 0 : BaseModel.value(userPrivacy.getId());
+		Privacy privacy = response == null ? null : response.getObject(Privacy.class);
+		long userId = privacy == null ? 0 : BaseModel.value(privacy.getId());
 		if (userId <= 0) {
 			return privacyResponse;
 		}
@@ -406,7 +406,7 @@ public class Controller {
 		if (type == Login.TYPE_PASSWORD) {//password密码登录
 			response = new JSONResponse(
 					new Parser(POST_HEAD, true).parseResponse(
-							new JSONRequest(new UserPrivacy(userId).setPassword(password))
+							new JSONRequest(new Privacy(userId).setPassword(password))
 							)
 					);
 		} else {//verify手机验证码登录
@@ -434,8 +434,8 @@ public class Controller {
 		session.setAttribute(USER_ID, userId);//用户id
 		session.setAttribute(TYPE, type);//登录方式
 		session.setAttribute(USER_, user);//用户
-		session.setAttribute(USER_PRIVACY_, userPrivacy);//用户隐私信息
-		session.setMaxInactiveInterval(1*60);//设置session过期时间
+		session.setAttribute(USER_PRIVACY_, privacy);//用户隐私信息
+		//		session.setMaxInactiveInterval(1*60);//设置session过期时间
 
 		return response;
 	}
@@ -505,7 +505,7 @@ public class Controller {
 		//验证手机号是否已经注册
 		JSONObject check = new Parser(POST_HEAD, true).parseResponse(
 				new JSONRequest(
-						new UserPrivacy().setPhone(phone)
+						new Privacy().setPhone(phone)
 						)
 				);
 		JSONObject checkUser = check == null ? null : check.getJSONObject(USER_PRIVACY_);
@@ -527,7 +527,7 @@ public class Controller {
 		response = new JSONResponse(
 				new Parser(POST, true).parseResponse(
 						new JSONRequest(
-								new UserPrivacy(userId).setPhone(phone).setPassword(password)
+								new Privacy(userId).setPhone(phone).setPassword(password)
 								)
 						)
 				);
@@ -541,7 +541,7 @@ public class Controller {
 
 			new Parser(DELETE, true).parseResponse(
 					new JSONRequest(
-							new UserPrivacy().setPhone(phone)
+							new Privacy().setPhone(phone)
 							)
 					);
 
@@ -590,20 +590,20 @@ public class Controller {
 		if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
 			return Parser.extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
 		}
-		
+
 		response = new JSONResponse(
 				new Parser(GET, true).parseResponse(
 						new JSONRequest(
-								new UserPrivacy().setPhone(phone)
+								new Privacy().setPhone(phone)
 								)
 						)
 				);
-		UserPrivacy privacy = response.getObject(UserPrivacy.class);
+		Privacy privacy = response.getObject(Privacy.class);
 		long userId = privacy == null ? 0 : privacy.getId();
 		//修改密码
 		return new Parser(PUT, true).parseResponse(
 				new JSONRequest(
-						new UserPrivacy(userId).setPassword(password)
+						new Privacy(userId).setPassword(password)
 						)
 				);
 	}
@@ -633,7 +633,7 @@ public class Controller {
 			pwdObj = new JSONRequest();
 		}
 		if (pwdObj.getIntValue(TYPE) != Password.TYPE_PAY) {
-//			return Parser.extendErrorResult(requestObject, new ConditionErrorException("Password type必须是支付类型！"));
+			//			return Parser.extendErrorResult(requestObject, new ConditionErrorException("Password type必须是支付类型！"));
 			pwdObj.put(TYPE, Password.TYPE_PAY);
 		}
 

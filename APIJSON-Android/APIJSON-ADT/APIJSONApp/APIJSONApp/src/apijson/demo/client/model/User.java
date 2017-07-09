@@ -16,7 +16,7 @@ package apijson.demo.client.model;
 
 import android.support.annotation.NonNull;
 import apijson.demo.client.application.APIJSONApplication;
-import apijson.demo.server.model.UserPrivacy;
+import apijson.demo.server.model.Privacy;
 
 /**用户类
  * @author Lemon
@@ -24,7 +24,7 @@ import apijson.demo.server.model.UserPrivacy;
 public class User extends apijson.demo.server.model.User {
 	private static final long serialVersionUID = 1L;
 
-	private UserPrivacy privacy;
+	private Privacy privacy;
 
 	public User() {
 		super();
@@ -34,13 +34,13 @@ public class User extends apijson.demo.server.model.User {
 	}
 
 	@NonNull
-	public UserPrivacy getPrivacy() {
+	public Privacy getPrivacy() {
 		if (privacy == null) {
-			privacy = new UserPrivacy(getId());
+			privacy = new Privacy(getId());
 		}
 		return privacy;
 	}
-	public User setPrivacy(UserPrivacy privacy) {
+	public User setPrivacy(Privacy privacy) {
 		this.privacy = privacy;
 		return this;
 	}

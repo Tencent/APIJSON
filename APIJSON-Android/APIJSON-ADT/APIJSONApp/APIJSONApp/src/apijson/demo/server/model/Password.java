@@ -22,7 +22,7 @@ import static zuo.biao.apijson.RequestRole.UNKNOWN;
 import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.StringUtil;
 
-/**密码类，已用UserPrivacy替代
+/**密码类，已用privacy替代
  * @author Lemon
  * @see
  * <br >POST_HEAD:<pre>

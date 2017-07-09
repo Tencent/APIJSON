@@ -31,7 +31,7 @@ import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.model.Wallet;
 import apijson.demo.client.util.HttpRequest;
-import apijson.demo.server.model.UserPrivacy;
+import apijson.demo.server.model.Privacy;
 
 /**钱包界面
  * @author Lemon
@@ -84,8 +84,8 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	}
 
 
-	private UserPrivacy privacy;
-	public void setWallet(UserPrivacy privacy_) {
+	private Privacy privacy;
+	public void setWallet(Privacy privacy_) {
 		this.privacy = privacy_;
 		runUiThread(new Runnable() {
 
@@ -94,7 +94,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 				dismissProgressDialog();
 				tvBaseTitle.setText(getTitleName());
 				if (privacy == null) {
-					privacy = new UserPrivacy();
+					privacy = new Privacy();
 				}
 				tvWalletCount.setText(StringUtil.getPrice(privacy.getBalance(), StringUtil.PRICE_FORMAT_PREFIX));
 			}
@@ -118,7 +118,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	public void initData() {//必须调用
 
 		showProgressDialog(getTitleName());
-		HttpRequest.getUserPrivacy(HTTP_GET, this);
+		HttpRequest.getPrivacy(HTTP_GET, this);
 	}
 
 	public String getTitleName() {
@@ -187,7 +187,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 					break;
 				case HTTP_GET:
 					if (isSucceed) {
-						setWallet(response.getObject(UserPrivacy.class));
+						setWallet(response.getObject(Privacy.class));
 					} else {
 						showShortToast(R.string.get_failed);
 					}

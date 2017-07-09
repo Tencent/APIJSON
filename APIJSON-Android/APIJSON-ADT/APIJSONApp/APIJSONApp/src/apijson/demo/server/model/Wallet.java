@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 
 import zuo.biao.apijson.MethodAccess;
 
-/**钱包类，已用UserPrivacy替代
+/**钱包类，已用Privacy替代
  * @author Lemon
  * @see
  * <br >POST_GET:<pre>

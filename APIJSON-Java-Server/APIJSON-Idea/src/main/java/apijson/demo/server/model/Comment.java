@@ -33,7 +33,6 @@ public class Comment extends BaseModel {
 	private static final long  serialVersionUID = 1L;
 
 	private Long toId;
-	private Long userId;
 	private Long momentId;
 	private String content;
 	public Comment() {
@@ -52,11 +51,8 @@ public class Comment extends BaseModel {
 		this.toId = toId;
 		return this;
 	}
-	public Long getUserId() {
-		return userId;
-	}
 	public Comment setUserId(Long userId) {
-		this.userId = userId;
+		super.setUserId(userId);
 		return this;
 	}
 	public Long getMomentId() {
