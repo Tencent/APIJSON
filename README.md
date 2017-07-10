@@ -18,18 +18,18 @@
 * ### [3.对应关系总览](#3)
 * [3.1 操作方法](#3.1)
 * [3.2 功能符](#3.2)
-* ### [5.使用方法](#5)
-* [5.1 下载解压](#5.1)
-* [5.2 导入table](#5.2)
-* [5.3 运行服务端工程](#5.3)
-* [5.4 运行客户端工程](#5.4)
-* [5.5 操作客户端App](#5.5)
-* ### [6.其它](#6)
-* [6.1 相关推荐](#6.1)
-* [6.2 关于作者](#6.2)
-* [6.3 下载试用](#6.3)
-* [6.4 更新日志](#6.4)
-* [6.5 Star&Fork](#6.5)
+* ### [4.使用方法](#4)
+* [4.1 下载解压](#4.1)
+* [4.2 导入table](#4.2)
+* [4.3 运行服务端工程](#4.3)
+* [4.4 运行客户端工程](#4.4)
+* [4.4 操作客户端App](#4.5)
+* ### [5.其它](#5)
+* [5.1 相关推荐](#5.1)
+* [5.2 关于作者](#5.2)
+* [5.3 下载试用](#5.3)
+* [5.4 更新日志](#5.4)
+* [5.5 Star&Fork](#5.5)
 
 ## <h2 id="1">1.简介<h2/>
 
@@ -360,15 +360,15 @@ DELETE: <br > 删除数据，<br > 非明文 | base_url/delete/ | {<br > &nbsp;&
 
 
 
-## <h2 id="5">5.使用方法<h2/>
+## <h2 id="4">4.使用方法<h2/>
 
-### <h3 id="5.1">5.1 下载后解压APIJSON工程<h3/>
+### <h3 id="4.1">4.1 下载后解压APIJSON工程<h3/>
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
-#### 你可以跳过步骤5.2和步骤5.3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
+#### 你可以跳过步骤4.2和步骤4.3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
 
-### <h3 id="5.2">5.2 导入MySQL table文件<h3/>
+### <h3 id="4.2">4.2 导入MySQL table文件<h3/>
 
 服务端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
 我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。
@@ -396,7 +396,7 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea
 2.运行<br />
 Run > Run APIJSONApplication
 
-### <h3 id="5.4">5.4 用ADT Bundle或Android Studio运行客户端工程<h3/>
+### <h3 id="4.4">4.4 用ADT Bundle或Android Studio运行客户端工程<h3/>
 
 可以跳过这个步骤，直接下载下方提供的客户端App。
 
@@ -419,27 +419,27 @@ Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-
 2.运行<br />
 Run > Run app
 
-### <h3 id="5.5">5.5 操作客户端App<h3/>
+### <h3 id="4.5">4.5 操作客户端App<h3/>
 
 选择发送APIJSON请求并等待显示结果。<br />
 如果默认url不可用，修改为一个可用的，比如正在运行APIJSON服务端工程的电脑的IPV4地址，然后点击查询按钮重新请求。
 
-## <h2 id="6">6.其它<h2/>
+## <h2 id="5">5.其它<h2/>
 
-### <h3 id="6.1">6.1 相关推荐<h3/>
+### <h3 id="5.1">5.1 相关推荐<h3/>
 [APIJSON, 让接口和文档见鬼去吧！](https://my.oschina.net/tommylemon/blog/805459)
 
 [仿QQ空间和微信朋友圈，高解耦高复用高灵活](https://my.oschina.net/tommylemon/blog/885787)
 
 [3步创建APIJSON服务端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
-### <h3 id="6.2">6.2 关于作者<h3/>
+### <h3 id="5.2">5.2 关于作者<h3/>
 TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
 
 如果有什么问题或建议可以[提ISSUE](https://github.com/TommyLemon/APIJSON/issues)或者[发我邮件](https://github.com/TommyLemon)，交流技术，分享经验。<br >
 如果你解决了某些bug，或者新增了一些通用性强的功能，欢迎[贡献代码](https://github.com/TommyLemon/APIJSON/pulls)，感激不尽^_^
 
-### <h3 id="6.3">6.3 下载试用客户端App<h3/>
+### <h3 id="5.3">5.3 下载试用客户端App<h3/>
 
 仿微信朋友圈动态实战项目<br />
 [APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
@@ -447,9 +447,9 @@ TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br /
 测试及自动生成代码工具<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
-### <h3 id="6.4">6.4 更新日志<h3/>
+### <h3 id="5.4">5.4 更新日志<h3/>
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-### <h3 id="6.5">6.5 点Star支持我，点Fork研究它<h3/>
+### <h3 id="5.5">5.5 点Star支持我，点Fork研究它<h3/>
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
