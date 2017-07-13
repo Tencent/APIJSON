@@ -97,9 +97,9 @@ APIJSON是一种JSON传输结构协议。<br />
 <pre><code class="language-json">
 {
   "[]":{
-    "count":3,
-    "User":{
-      "@column":"id,name"
+    "count":3,             //只要3个
+    "User":{
+      "@column":"id,name"  //只要id,name这两个字段
     }
   }
 }
@@ -130,6 +130,48 @@ APIJSON是一种JSON传输结构协议。<br />
       }
     }
   ],
+  "code":200,
+  "msg":"success"
+}
+</code></pre>
+
+<br />
+
+#### 查询动态及发布者用户
+请求：
+<pre><code class="language-json">
+{
+  "Moment":{
+  },
+  "User":{
+    "id@":"Moment/userId"  //User.id = Moment.userId
+  }
+}
+</code></pre>
+
+[点击这里测试](http://139.196.140.118:8080/get/{"Moment":{},"User":{"id@":"Moment%252FuserId"}})
+
+返回：
+<pre><code class="language-json">
+{
+  "Moment":{
+    "id":12,
+    "userId":70793,
+    "date":"2017-02-08 16:06:11.0",
+    "content":"1111534034"
+  },
+  "User":{
+    "id":70793,
+    "sex":0,
+    "name":"Strong",
+    "tag":"djdj",
+    "head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000",
+    "contactIdList":[
+      38710,
+      82002
+    ]
+    "date":"2017-02-01 19:21:50.0"
+  },
   "code":200,
   "msg":"success"
 }
