@@ -328,8 +328,8 @@ APIJSON是一种JSON传输结构协议。<br />
  客户端请求 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
- 结构 | base_url/table_name?key0=value0&key1=value1...<br /><br />table_name一般只能传一个 | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...}<br /><br />TableName可传任意数量个
- URL | 不同的请求对应不同的url | 相同的请求方法(GET，POST等)都用同一个url
+ 结构 | base_url/table_name?<br />key0=value0&key1=value1...<br /><br />同一个URL内table_name只能有一个 | base_url/<br />{<br > &nbsp;&nbsp; TableName0:{<br > &nbsp;&nbsp;&nbsp;&nbsp; key0:value0,<br > &nbsp;&nbsp;&nbsp;&nbsp; key1:value1, <br > &nbsp;&nbsp;&nbsp;&nbsp; ...<br > &nbsp;&nbsp;},<br > &nbsp;&nbsp; TableName1:{<br > &nbsp;&nbsp;&nbsp;&nbsp; ...<br > &nbsp;&nbsp;}<br > &nbsp;&nbsp; ...<br >}<br /><br />同一个URL后TableName可传任意数量个
+ URL | 不同的请求对应不同的url，<br />基本上有多少请求就得有多少个接口URL | 相同的操作方法(GET，POST，DELETE)都用同一个url，<br />大部分请求都用7个通用接口URL的其中一个
  键值对 | key=value | key:value
  
  <br />
