@@ -39,6 +39,7 @@ import apijson.demo.HttpManager;
 import apijson.demo.HttpManager.OnHttpResponseListener;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
+import apijson.demo.model.BaseModel;
 import apijson.demo.model.Moment;
 import apijson.demo.model.Wallet;
 
@@ -233,7 +234,7 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 
 		if ("post".equals(method)) {
 			Moment moment = response.getObject(Moment.class);
-			id = moment == null ? 0 : moment.getId();
+			id = moment == null ? 0 : BaseModel.value(moment.getId());
 			Log.d(TAG, "onHttpResponse  post.equals(method) >>  id = " + id);
 
 		} else if ("put".equals(method)) {
