@@ -14,13 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.ui;
 
-import static zuo.biao.apijson.StringUtil.UTF_8;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONResponse;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -35,14 +28,23 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.alibaba.fastjson.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import apijson.demo.HttpManager;
 import apijson.demo.HttpManager.OnHttpResponseListener;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
+import apijson.demo.model.BaseModel;
 import apijson.demo.model.Moment;
 import apijson.demo.model.Wallet;
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
 
-import com.alibaba.fastjson.JSONObject;
+import static zuo.biao.apijson.StringUtil.UTF_8;
 
 /**请求Activity
  * 向服务器发起请求查询或操作相应数据
@@ -89,10 +91,10 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 	private boolean isAlive;
 
 	private long id;
-	private String url; 
-	private String method;   
-	private String request; 
-	private boolean encoded; 
+	private String url;
+	private String method;
+	private String request;
+	private boolean encoded;
 
 	private TextView tvRequestResult;
 	private ProgressBar pbRequest;
@@ -233,7 +235,7 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 
 		if ("post".equals(method)) {
 			Moment moment = response.getObject(Moment.class);
-			id = moment == null ? 0 : moment.getId();
+			id = moment == null ? 0 : BaseModel.value(moment.getId());
 			Log.d(TAG, "onHttpResponse  post.equals(method) >>  id = " + id);
 
 		} else if ("put".equals(method)) {
