@@ -329,7 +329,7 @@ APIJSON是一种JSON传输结构协议。<br />
 -------- | ------------ | ------------
  要求 | 客户端按照文档在对应url后面拼接键值对 | 客户端按照自己的需求在固定url后拼接JSON
  结构 | base_url/get/table_name?<br />key0=value0&key1=value1...<br /><br />同一个URL内table_name只能有一个 | base_url/get/<br />{<br > &nbsp;&nbsp; TableName0:{<br > &nbsp;&nbsp;&nbsp;&nbsp; key0:value0,<br > &nbsp;&nbsp;&nbsp;&nbsp; key1:value1,<br > &nbsp;&nbsp;&nbsp;&nbsp; ...<br > &nbsp;&nbsp; },<br > &nbsp;&nbsp; TableName1:{<br > &nbsp;&nbsp;&nbsp;&nbsp; ...<br > &nbsp;&nbsp; }<br > &nbsp;&nbsp; ...<br > }<br /><br />同一个URL后TableName可传任意数量个
- URL | 不同的请求对应不同的url，基本上有多少请求就得有多少个接口URL | 相同的操作方法(增删改查)都用同一个url，大部分请求都用7个通用接口URL的其中一个
+ URL | 不同的请求对应不同的url，基本上有多少个不同的请求就得有多少个接口URL | 相同的操作方法(增删改查)都用同一个url，大部分请求都用7个通用接口URL的其中一个
  键值对 | key=value | key:value
  
  <br />
@@ -345,7 +345,7 @@ APIJSON是一种JSON传输结构协议。<br />
 ### <h3 id="2.4">2.4 客户端解析<h3/>
  客户端解析 | 传统方式 | APIJSON
 -------- | ------------ | ------------
- 查看方式 | 查文档或等请求成功后看log | 看请求就行，所求即所得。也可以等请求成功后看日志
+ 查看方式 | 查文档或问后端，或等请求成功后看日志 | 看请求就行，所求即所得，不用查、不用问、不用等。也可以等请求成功后看日志
  方法 | 用JSON解析器来解析JSONObject | 可以用JSONResponse解析JSONObject，或使用传统方式
  
  <br />
