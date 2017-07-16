@@ -346,7 +346,7 @@ APIJSON是一种JSON传输结构协议。<br />
  客户端解析 | 传统方式 | APIJSON
 -------- | ------------ | ------------
  查看方式 | 查文档或问后端，或等请求成功后看日志 | 看请求就行，所求即所得，不用查、不用问、不用等。也可以等请求成功后看日志
- 方法 | 用JSON解析器来解析JSONObject | 可以用JSONResponse解析JSONObject，或使用传统方式
+ 解析方法 | 用JSON解析器来解析JSONObject | 可以用JSONResponse解析JSONObject，或使用传统方式
  
  <br />
  
