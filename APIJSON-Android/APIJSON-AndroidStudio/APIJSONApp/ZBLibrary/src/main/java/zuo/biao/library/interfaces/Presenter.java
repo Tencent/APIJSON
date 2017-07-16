@@ -28,6 +28,13 @@ public interface Presenter {
 	static final String INTENT_VERIFY = "INTENT_VERIFY";
 	static final String INTENT_USER_ID = "INTENT_USER_ID";
 	static final String RESULT_DATA = "RESULT_DATA";
+	static final String RESULT_ID = "RESULT_ID";
+	static final String RESULT_TYPE = "RESULT_TYPE";
+	static final String RESULT_PHONE = "RESULT_PHONE";
+	static final String RESULT_PASSWORD = "RESULT_PASSWORD";
+	static final String RESULT_VERIFY = "RESULT_VERIFY";
+	static final String RESULT_USER_ID = "RESULT_USER_ID";
+	
 	static final String ACTION_EXIT_APP = "ACTION_EXIT_APP";
 
 	/**

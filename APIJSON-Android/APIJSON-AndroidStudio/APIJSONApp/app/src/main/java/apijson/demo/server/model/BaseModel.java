@@ -12,27 +12,40 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package zuo.biao.apijson;
+package apijson.demo.server.model;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
+
+import com.alibaba.fastjson.JSON;
 
 /**base model for reduce model codes
  * @author Lemon
  * @use extends BaseModel
  */
-@SuppressWarnings("serial")
 public abstract class BaseModel implements Serializable {
-
-	private Long id;
-	private Long date;
+	private static final long serialVersionUID = 1L;
+	
+	private Long id;       //主键，唯一标识
+	private Long userId;   //对应User表中的id，外键
+	private Long date;     //创建时间，JSON没有Date,TimeStamp类型，都会被转成Long，不能用！
 
 	public Long getId() {
 		return id;
 	}
 	public BaseModel setId(Long id) {
 		this.id = id;
+		return this;
+	}
+	public Long getUserId() {
+		return userId;
+	}
+	public BaseModel setUserId(Long userId) {
+		this.userId = userId;
 		return this;
 	}
 	public Long getDate() {
@@ -42,8 +55,44 @@ public abstract class BaseModel implements Serializable {
 		this.date = date;
 		return this;
 	}
-
+	
+	
+	@Override
+	public String toString() {
+		return JSON.toJSONString(this);
+	}
+	
+	
+	/**获取当前时间戳
+	 * @return
+	 */
+	public static Timestamp currentTimeStamp() {  
+	    return new Timestamp(new Date().getTime());  
+	}
+	/**获取时间戳 TODO 判空？ 还是要报错？
+	 * @param time
+	 * @return
+	 */
+	public static Timestamp getTimeStamp(String time) {
+		return Timestamp.valueOf(time);
+	}
+	/**获取时间毫秒值 TODO 判空？ 还是要报错？
+	 * @param time
+	 * @return
+	 */
+	public static long getTimeMillis(String time) {
+		return getTimeStamp(time).getTime();
+	}
+	
+	
 	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**判断array是否为空
+	 * @param array
+	 * @return
+	 */
+	public static <T> boolean isEmpty(T[] array) {
+		return array == null || array.length <= 0;
+	}
 	/**判断collection是否为空
 	 * @param collection
 	 * @return
@@ -63,6 +112,14 @@ public abstract class BaseModel implements Serializable {
 	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	//判断是否包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**判断array是否包含a
+	 * @param array
+	 * @param a
+	 * @return
+	 */
+	public static <T> boolean isContain(T[] array, T a) {
+		return array == null ? false : Arrays.asList(array).contains(a);
+	}
 	/**判断collection是否包含object
 	 * @param collection
 	 * @param object
@@ -139,7 +196,7 @@ public abstract class BaseModel implements Serializable {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T get(Collection<T> collection, int position) {
-		return (T) (collection == null ? null : get(collection.toArray(), position));
+		return collection == null ? null : (T) get(collection.toArray(), position);
 	}
 	/**获取
 	 * @param <K>

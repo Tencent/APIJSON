@@ -14,6 +14,14 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import static zuo.biao.apijson.JSONResponse.CODE_TIME_OUT;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.library.base.BaseActivity;
+import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.TextClearSuit;
+import zuo.biao.library.util.EditTextUtil;
+import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,19 +33,12 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import apijson.demo.client.R;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.model.User;
 import apijson.demo.client.model.Verify;
 import apijson.demo.client.util.HttpRequest;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.library.base.BaseActivity;
-import zuo.biao.library.interfaces.OnBottomDragListener;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.TextClearSuit;
-import zuo.biao.library.util.EditTextUtil;
-import zuo.biao.library.util.StringUtil;
+import apijson.demo.server.model.Privacy;
 
 /**注册、验证码登录、重置密码等密码相关界面
  * @author Lemon
@@ -47,6 +48,14 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 	//启动方法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	
+	/**启动这个Activity的Intent
+	 * @param context
+	 * @return
+	 */
+	public static Intent createIntent(Context context, int type) {
+		return createIntent(context, type, null, null);
+	}
 	/**启动这个Activity的Intent
 	 * @param context
 	 * @param phone
@@ -212,7 +221,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			}
 		});
 
-		HttpRequest.getAuthCode(StringUtil.getTrimedString(etPasswordPhone), HTTP_GET_VERIFY, this);
+		HttpRequest.getVerify(StringUtil.getTrimedString(etPasswordPhone), HTTP_GET_VERIFY, this);
 	}
 
 	/**下一步
@@ -253,7 +262,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 		if (fromServer) {
 			showProgressDialog();
-			HttpRequest.checkAuthCode(StringUtil.getTrimedString(etPasswordPhone),
+			HttpRequest.checkVerify(StringUtil.getTrimedString(etPasswordPhone),
 					StringUtil.getTrimedString(etPasswordVerify), HTTP_CHECK_VERIFY, this);
 		}
 
@@ -283,9 +292,9 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 	private Intent newResult() {
 		return new Intent()
-		.putExtra(INTENT_PHONE, StringUtil.getTrimedString(etPasswordPhone))
-		.putExtra(INTENT_VERIFY, StringUtil.getTrimedString(etPasswordVerify))
-		.putExtra(INTENT_PASSWORD, StringUtil.getTrimedString(etPasswordPassword0));
+		.putExtra(RESULT_PHONE, StringUtil.getTrimedString(etPasswordPhone))
+		.putExtra(RESULT_VERIFY, StringUtil.getTrimedString(etPasswordVerify))
+		.putExtra(RESULT_PASSWORD, StringUtil.getTrimedString(etPasswordPassword0));
 	}
 
 	private void saveAndExit(Intent intent) {
@@ -336,7 +345,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		dismissProgressDialog();
 		switch (requestCode) {
 		case HTTP_CHECK_REGISTER:
-			response2 = response.getJSONResponse(User.class.getSimpleName());
+			response2 = response.getJSONResponse(HttpRequest.PRIVACY_);
 			Log.i(TAG, "checkPassword result = " + resultJson);
 			runUiThread(new Runnable() {
 				@Override
@@ -379,7 +388,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 						}
 					} else {//验证码错误
 						EditTextUtil.showInputedError(context, etPasswordVerify
-								, response.getStatus() == 408 ? "验证码已过期" : "验证码错误");
+								, response.getCode() == CODE_TIME_OUT ? "验证码已过期" : "验证码错误");
 					}
 				}
 			});
@@ -390,12 +399,12 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 				@Override
 				public void run() {
 					showVerifyGet(false);
-					if (verify == null || StringUtil.isNotEmpty(verify.getCode(), true) == false) {
+					if (verify == null || StringUtil.isNotEmpty(verify.getVerify(), true) == false) {
 						showShortToast(R.string.get_failed);
 					} else {
 						Log.i(TAG, "发送成功");
 						time.start();
-						Toast.makeText(context, "验证码是\n" + verify.getCode(), Toast.LENGTH_LONG).show();
+						Toast.makeText(context, "验证码是\n" + verify.getVerify(), Toast.LENGTH_LONG).show();
 					}
 				}
 			});
@@ -405,9 +414,9 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			dismissProgressDialog();
 			if (user == null || user.getId() <= 0 || JSONResponse.isSucceed(
 					response.getJSONResponse(User.class.getSimpleName())) == false) {
-				if (response.getStatus() == 408 || response.getStatus() == 412) {
+				if (response.getCode() == CODE_TIME_OUT || response.getCode() == 412) {
 					EditTextUtil.showInputedError(context, etPasswordVerify
-							, response.getStatus() == 408 ? "验证码已过期" : "验证码错误");
+							, response.getCode() == CODE_TIME_OUT ? "验证码已过期" : "验证码错误");
 				} else {
 					showShortToast("注册失败，请检查网络后重试");
 				}
@@ -419,7 +428,16 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			}
 			break;
 		case HTTP_RESET_PASSWORD:
-			//TODO
+			response2 = response.getJSONResponse(Privacy.class.getSimpleName());
+			dismissProgressDialog();
+			if (JSONResponse.isSucceed(response2) == false) {
+				EditTextUtil.showInputedError(context, etPasswordVerify
+						, response.getCode() == CODE_TIME_OUT ? "验证码已过期" : "验证码错误");
+			} else {
+				showShortToast("修改密码成功，请重新登录");
+
+				saveAndExit(newResult().putExtra(INTENT_PHONE, phone));
+			}
 			break;
 		default:
 			break;

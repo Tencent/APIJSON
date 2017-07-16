@@ -14,19 +14,22 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
-import zuo.biao.apijson.RequestMethod;
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.LOGIN;
+import static zuo.biao.apijson.RequestRole.OWNER;
+import static zuo.biao.apijson.RequestRole.UNKNOWN;
+
+import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.StringUtil;
 
-/**密码类
+/**密码类，已用privacy替代
  * @author Lemon
  * @see
  * <br >POST_HEAD:<pre>
 {
  "Password":{
      "disallow":"!",
-     "necessary":"id,model"
+     "necessary":"id,type"
  }
 }
  * </pre>
@@ -34,34 +37,37 @@ import zuo.biao.apijson.StringUtil;
 {
     "Password":{
         "disallow":"!",
-        "necessary":"id,password"
+        "necessary":"id,type,password"
     },
     "necessary":"oldPassword"
 }
  * </pre>
  */
-@SuppressWarnings("serial")
-@APIJSONRequest(
-		method = {RequestMethod.POST_HEAD, RequestMethod.PUT},
-		POST_HEAD = "{\"disallow\": \"!\", \"necessary\": \"id,model\"}",
-		PUT = "{\"Password\": {\"disallow\": \"!\", \"necessary\": \"id,password\"}, \"necessary\": \"oldPassword\"}"
+@Deprecated
+@MethodAccess(
+		GET = {},
+		HEAD = {},
+		POST_HEAD = {OWNER, ADMIN},
+		POST = {UNKNOWN, LOGIN, OWNER, ADMIN}
 		)
 public class Password extends BaseModel {
-
-	private String model;//table是MySQL关键字不能用！
+	private static final long serialVersionUID = 1L;
+	
+	public static final int TYPE_LOGIN = 0;
+	public static final int TYPE_PAY = 1;
+	
 	private Integer type;
 	private String password;
 
 	public Password() {
 		super();
 	}
-	public Password(String model, String phone) {
+	public Password(String phone) {
 		this();
-		setModel(model);
 		setPhone(phone);
 	}
-	public Password(String model, String phone, String password) {
-		this(model, phone);
+	public Password(String phone, String password) {
+		this(phone);
 		setPassword(password);
 	}
 
@@ -70,13 +76,6 @@ public class Password extends BaseModel {
 		return this;
 	}
 	
-	public String getModel() {
-		return StringUtil.isNotEmpty(model, true) ? model : "User";
-	}
-	public Password setModel(String model) {
-		this.model = model;
-		return this;
-	}
 	public Integer getType() {
 		return type;
 	}

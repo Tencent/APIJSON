@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-/**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出一个POST_GET方法
+/**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出POST_GET,POST_HEAD方法
  * @author Lemon
  */
 public enum RequestMethod {
@@ -52,5 +52,43 @@ public enum RequestMethod {
 	/**
 	 * 删除数据
 	 */
-	DELETE
+	DELETE;
+	
+	
+	/**是否为GET请求方法
+	 * @param method
+	 * @param containPrivate 包含私密(非明文)获取方法POST_GET
+	 * @return
+	 */
+	public static boolean isGetMethod(RequestMethod method, boolean containPrivate) {
+		boolean is = method == null || method == GET;
+		return containPrivate == false ? is : is || method == POST_GET;
+	}
+	
+	/**是否为HEAD请求方法
+	 * @param method
+	 * @param containPrivate 包含私密(非明文)获取方法POST_HEAD
+	 * @return
+	 */
+	public static boolean isHeadMethod(RequestMethod method, boolean containPrivate) {
+		boolean is = method == HEAD;
+		return containPrivate == false ? is : is || method == POST_HEAD;
+	}
+	
+	/**是否为查询的请求方法
+	 * @param method
+	 * @return 读操作(GET型或HEAD型) - true, 写操作(POST,PUT,DELETE) - false
+	 */
+	public static boolean isQueryMethod(RequestMethod method) {
+		return isGetMethod(method, true) || isHeadMethod(method, true);
+	}
+	
+	/**是否为开放(不限制请求的结构或内容；明文，浏览器能直接访问及查看)的请求方法
+	 * @param method
+	 * @return
+	 */
+	public static boolean isPublicMethod(RequestMethod method) {
+		return method == null || method == GET || method == HEAD;
+	}
+	
 }

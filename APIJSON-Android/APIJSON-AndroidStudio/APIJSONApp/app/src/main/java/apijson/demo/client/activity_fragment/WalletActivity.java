@@ -18,6 +18,8 @@ import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.EditTextInfoActivity;
+import zuo.biao.library.ui.EditTextInfoWindow;
 import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.model.Wallet;
 import apijson.demo.client.util.HttpRequest;
+import apijson.demo.server.model.Privacy;
 
 /**钱包界面
  * @author Lemon
@@ -36,7 +39,7 @@ import apijson.demo.client.util.HttpRequest;
  */
 public class WalletActivity extends BaseActivity implements OnClickListener, OnBottomDragListener
 , OnHttpResponseListener {
-	//	private static final String TAG = "WalletActivity";
+	private static final String TAG = "WalletActivity";
 
 	//启动方法<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -81,19 +84,19 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	}
 
 
-	private Wallet wallet;
-	public void setWallet(Wallet wallet_) {
-		this.wallet = wallet_;
+	private Privacy privacy;
+	public void setWallet(Privacy privacy_) {
+		this.privacy = privacy_;
 		runUiThread(new Runnable() {
 
 			@Override
 			public void run() {
 				dismissProgressDialog();
 				tvBaseTitle.setText(getTitleName());
-				if (wallet == null) {
-					wallet = new Wallet();
+				if (privacy == null) {
+					privacy = new Privacy();
 				}
-				tvWalletCount.setText(StringUtil.getPrice(wallet.getBalance(), StringUtil.PRICE_FORMAT_PREFIX));
+				tvWalletCount.setText(StringUtil.getPrice(privacy.getBalance(), StringUtil.PRICE_FORMAT_PREFIX));
 			}
 		});
 	}
@@ -115,7 +118,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	public void initData() {//必须调用
 
 		showProgressDialog(getTitleName());
-		HttpRequest.getWallet(0, this);
+		HttpRequest.getPrivacy(HTTP_GET, this);
 	}
 
 	public String getTitleName() {
@@ -151,13 +154,49 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	}
 
 
+	private static final int HTTP_GET = 1;
+	private static final int HTTP_RECHARGE = 2;
+	private static final int HTTP_WITHDRAW = 3;
+
 	private boolean isSucceed = true;
 	@Override
-	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-		JSONResponse response = new JSONResponse(resultJson);
-		isSucceed = JSONResponse.isSucceed(response);
-		
-		setWallet(response.getObject(Wallet.class));
+	public void onHttpResponse(final int requestCode, final String resultJson, Exception e) {
+		runThread(TAG + "onHttpResponse", new Runnable() {
+
+			@Override
+			public void run() {
+
+				JSONResponse response = new JSONResponse(resultJson);
+				isSucceed = JSONResponse.isSucceed(response);
+				
+				dismissProgressDialog();
+				switch (requestCode) {
+				case HTTP_RECHARGE:
+				case HTTP_WITHDRAW:
+					if (response.getCode() == JSONResponse.CODE_CONDITION_ERROR) {
+						showShortToast("密码错误！");
+					} else if (requestCode == HTTP_WITHDRAW && response.getCode() == JSONResponse.CODE_OUT_OF_RANGE) {
+						showShortToast("余额不足！");
+					} else {
+						showShortToast((requestCode == HTTP_RECHARGE ? "充值" : "提现")
+								+ getString(isSucceed ? R.string.succeed : R.string.failed));
+						if (isSucceed) {
+							initData();
+						}
+					}
+					break;
+				case HTTP_GET:
+					if (isSucceed) {
+						setWallet(response.getObject(Privacy.class));
+					} else {
+						showShortToast(R.string.get_failed);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		});
 	}
 
 	//系统自带监听<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -167,8 +206,12 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.tvWalletRecharge:
+			toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_DECIMAL, "充值", null)
+					, REQUEST_RECHARGE, false);
+			break;
 		case R.id.tvWalletWithdraw:
-			showShortToast(StringUtil.getString((TextView) v));
+			toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_DECIMAL, "提现", null)
+					, REQUEST_WITHDRAW, false);
 			break;
 		default:
 			break;
@@ -181,6 +224,50 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 	//类相关监听<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
+	private static final int REQUEST_RECHARGE = 1;
+	private static final int REQUEST_WITHDRAW = 2;
+	private static final int REQUEST_PASSWORD = 3;
+
+	private boolean isRecharge;
+	private double change;
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode != RESULT_OK) {
+			return;
+		}
+		switch (requestCode) {
+		case REQUEST_RECHARGE:
+		case REQUEST_WITHDRAW:
+			if (data == null) {
+				break;
+			}
+			String value = data.getStringExtra(EditTextInfoActivity.RESULT_VALUE);
+			try {
+				this.change = Double.valueOf(value);
+			} catch (Exception e) {
+				showShortToast("输入值不是数字！");
+			}
+			if (change <= 0 || change > 10000) {
+				showShortToast("输入值必须为0-10000间的数字！");
+			} else {
+				startActivityForResult(NumberPasswordActivity.createIntent(context), REQUEST_PASSWORD);
+				overridePendingTransition(R.anim.bottom_push_in, R.anim.fade);
+				this.isRecharge = requestCode == REQUEST_RECHARGE;
+			}
+			break;
+		case REQUEST_PASSWORD:
+			String password = data == null ? null : data.getStringExtra(EditTextInfoActivity.RESULT_PASSWORD);
+			password = StringUtil.getString(password);
+			if (password.isEmpty() == false) {
+				showProgressDialog();
+				HttpRequest.changeBalance(isRecharge ? change : -change, password
+						, isRecharge ? HTTP_RECHARGE : HTTP_WITHDRAW, this);
+			}
+			break;
+		}
+
+	}
 
 
 	//类相关监听>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

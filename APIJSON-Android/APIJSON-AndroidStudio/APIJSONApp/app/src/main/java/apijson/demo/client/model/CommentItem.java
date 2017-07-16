@@ -14,11 +14,10 @@ limitations under the License.*/
 
 package apijson.demo.client.model;
 
-import android.support.annotation.NonNull;
-
 import java.util.List;
 
-import zuo.biao.apijson.BaseModel;
+import android.support.annotation.NonNull;
+import apijson.demo.server.model.BaseModel;
 
 public class CommentItem extends BaseModel {
 	private static final long serialVersionUID = -1011007127735372824L;

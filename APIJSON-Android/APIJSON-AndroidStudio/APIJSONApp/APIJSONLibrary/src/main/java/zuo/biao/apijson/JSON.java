@@ -124,6 +124,13 @@ public class JSON {
 		return null;
 	}
 
+	/**list转JSONArray
+	 * @param list
+	 * @return
+	 */
+	public static JSONArray parseArray(List<Object> list) {
+		return new JSONArray(list);
+	}
 	/**json转JSONArray
 	 * @param json
 	 * @return

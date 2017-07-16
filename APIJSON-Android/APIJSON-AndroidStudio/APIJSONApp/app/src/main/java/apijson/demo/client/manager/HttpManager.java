@@ -102,7 +102,7 @@ public class HttpManager {
 			@Override
 			protected Exception doInBackground(Void... params) {
 				String body = request == null || request.isEmpty() ? null : JSON.toJSONString(request);
-				Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n get  url_ = " + url_ + "\n request = \n" + body);
+				Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n get  url = " + url_ + "\n request = \n" + body);
 				try {
 					String url = StringUtil.getNoBlankString(url_)
 							+ (body == null ? "" : URLEncoder.encode(StringUtil.getNoBlankString(body), UTF_8));
@@ -169,7 +169,7 @@ public class HttpManager {
 						return new Exception(TAG + ".post  AsyncTask.doInBackground  client == null >> return;");
 					}
 					String body = JSON.toJSONString(request);
-					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n get  post = " + url_ + "\n request = \n" + body);
+					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n post  url = " + url_ + "\n request = \n" + body);
 					
 					RequestBody requestBody = RequestBody.create(TYPE_JSON, body);
 

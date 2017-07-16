@@ -14,35 +14,31 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**请求方法对应的JSON结构
+/**对应方法的请求结构。
+ * 仅测试和基本的校验用，实际用Request表里的配置
  * @author Lemon
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface APIJSONRequest {
-
-	/**
-	 * @return 允许的请求方法
-	 */
-	RequestMethod[] method() default {};
-	
-	
-	/**@see {@link RequestMethod#POST_GET}
-	 * @return 该请求方法允许的结构
-	 */
-	String POST_GET() default "";
+@Retention(RUNTIME)
+@Target(TYPE)
+public @interface MethodStructure {
 
 	/**@see {@link RequestMethod#POST_HEAD}
 	 * @return 该请求方法允许的结构
 	 */
 	String POST_HEAD() default "";
+	
+	/**@see {@link RequestMethod#POST_GET}
+	 * @return 该请求方法允许的结构
+	 */
+	String POST_GET() default "";
 
 	/**@see {@link RequestMethod#POST}
 	 * @return 该请求方法允许的结构
@@ -58,4 +54,5 @@ public @interface APIJSONRequest {
 	 * @return 该请求方法允许的结构
 	 */
 	String DELETE() default "";
+	
 }

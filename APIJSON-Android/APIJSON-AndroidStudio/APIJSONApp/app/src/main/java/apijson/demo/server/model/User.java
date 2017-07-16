@@ -14,11 +14,12 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
+import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.UNKNOWN;
+
 import java.util.List;
 
-import zuo.biao.apijson.APIJSONRequest;
-import zuo.biao.apijson.BaseModel;
-import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.MethodAccess;
 
 /**用户类
  * @author Lemon
@@ -50,14 +51,13 @@ import zuo.biao.apijson.RequestMethod;
 }
  * </pre>
  */
-@APIJSONRequest(
-		method = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.PUT, RequestMethod.DELETE},
-		POST = "{\"User\": {\"disallow\": \"id\", \"necessary\": \"name,phone\"}, \"necessary\": \"loginPassword,verify\"}",
-		PUT = "{\"disallow\": \"phone\", \"necessary\": \"id\"}"
+@MethodAccess(
+		POST = {UNKNOWN, ADMIN},
+		DELETE = {ADMIN}
 		)
 public class User extends BaseModel {
-	private static final long serialVersionUID = -1635551656020732611L;
-
+	private static final long serialVersionUID = 1L;
+	
 	public static final int SEX_MAIL = 0;
 	public static final int SEX_FEMALE = 1;
 	public static final int SEX_UNKNOWN = 2;
@@ -66,10 +66,9 @@ public class User extends BaseModel {
 	private Integer sex; //性别
 	private String head; //头像url
 	private String name; //姓名
-	private String phone; //手机
 	private String tag; //标签
 	private List<String> pictureList; //照片列表
-	private List<Long> friendIdList; //朋友列表
+	private List<Long> contactIdList; //朋友列表
 
 	/**默认构造方法，JSON等解析时必须要有
 	 */
@@ -102,13 +101,6 @@ public class User extends BaseModel {
 		this.name = name;
 		return this;
 	}
-	public String getPhone() {
-		return phone;
-	}
-	public User setPhone(String phone) {
-		this.phone = phone;
-		return this;
-	}
 	public List<String> getPictureList() {
 		return pictureList;
 	}
@@ -125,11 +117,11 @@ public class User extends BaseModel {
 		return this;
 	}
 
-	public List<Long> getFriendIdList() {
-		return friendIdList;
+	public List<Long> getContactIdList() {
+		return contactIdList;
 	}
-	public User setFriendIdList(List<Long> friendIdList) {
-		this.friendIdList = friendIdList;
+	public User setContactIdList(List<Long> contactIdList) {
+		this.contactIdList = contactIdList;
 		return this;
 	}
 

@@ -59,7 +59,7 @@ public class UserView extends BaseView<User> implements OnClickListener {
 
 	public TextView tvUserViewName;
 	public TextView tvUserViewId;
-	public TextView tvUserViewPhone;
+	public TextView tvUserViewTag;
 	@SuppressLint("InflateParams")
 	@Override
 	public View createView(LayoutInflater inflater) {
@@ -71,7 +71,7 @@ public class UserView extends BaseView<User> implements OnClickListener {
 
 		tvUserViewName = findViewById(R.id.tvUserViewName, this);
 		tvUserViewId = findViewById(R.id.tvUserViewId);
-		tvUserViewPhone = findViewById(R.id.tvUserViewPhone, this);
+		tvUserViewTag = findViewById(R.id.tvUserViewTag, this);
 
 		return convertView;
 	}
@@ -93,7 +93,7 @@ public class UserView extends BaseView<User> implements OnClickListener {
 
 		tvUserViewName.setText(StringUtil.getTrimedString(data.getName()));
 		tvUserViewId.setText("ID:" + data.getId());
-		tvUserViewPhone.setText("Phone:" + StringUtil.getNoBlankString(data.getPhone()));
+		tvUserViewTag.setText("Tag:" + StringUtil.getNoBlankString(data.getTag()));
 	}
 
 	@Override

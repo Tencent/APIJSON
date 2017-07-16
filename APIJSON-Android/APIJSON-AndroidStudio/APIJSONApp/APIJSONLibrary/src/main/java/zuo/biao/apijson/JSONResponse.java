@@ -14,8 +14,6 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import static zuo.biao.apijson.StringUtil.bigAlphaPattern;
-
 import java.util.List;
 import java.util.Set;
 
@@ -26,13 +24,14 @@ import com.alibaba.fastjson.JSONObject;
  * @author Lemon
  * @see #getList
  * @see #toArray
- * @use JSONResponse response = new JSONResponse(...);
- * <br> JSONArray array = JSONResponse.toArray(response.getJSONObject(KEY_ARRAY));//not a must
+ * @use JSONResponse response = new JSONResponse(json);
+ * <br> JSONArray array = JSONResponse.toArray(response.getJSONObject("[]"));//not a must
  * <br> User user = JSONResponse.getObject(response, User.class);//not a must
  * <br> List<Comment> list = JSONResponse.getList(response.getJSONObject("Comment[]"), Comment.class);//not a must
  */
-@SuppressWarnings("serial")
 public class JSONResponse extends zuo.biao.apijson.JSONObject {
+	private static final long  serialVersionUID = 1L;
+
 	private static final String TAG = "JSONResponse";
 
 	public JSONResponse() {
@@ -47,63 +46,93 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	//状态信息，非GET请求获得的信息<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final int STATUS_SUCCEED = 200;
+	public static final int CODE_SUCCEED = 200;
+	public static final int CODE_PARTIAL_SUCCEED = 206;
+	public static final int CODE_UNSUPPORTED_ENCODING = 400;
+	public static final int CODE_ILLEGAL_ACCESS = 401;
+	public static final int CODE_UNSUPPORTED_OPERATION = 403;
+	public static final int CODE_NOT_FOUND = 404;
+	public static final int CODE_ILLEGAL_ARGUMENT = 406;
+	public static final int CODE_NOT_LOGGED_IN = 407;
+	public static final int CODE_TIME_OUT = 408;
+	public static final int CODE_CONFLICT = 409;
+	public static final int CODE_CONDITION_ERROR = 412;
+	public static final int CODE_UNSUPPORTED_TYPE = 415;
+	public static final int CODE_OUT_OF_RANGE = 416;
+	public static final int CODE_NULL_POINTER = 417;
+	public static final int CODE_SERVER_ERROR = 500;
 
 
+	public static final String KEY_CODE = "code";
+	public static final String KEY_MSG = "msg";
 	public static final String KEY_ID = "id";
-	public static final String KEY_STATUS = "status";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_TOTAL = "total";
-	public static final String KEY_MESSAGE = "message";
 
-	/**获取id
-	 * @return
-	 */
-	public long getId() {
-		return getLongValue(KEY_ID);
-	}
 	/**获取状态
 	 * @return
 	 */
-	public int getStatus() {
-		return getIntValue(KEY_STATUS);
-	}
-	/**获取数量
-	 * @return
-	 */
-	public int getCount() {
-		return getIntValue(KEY_COUNT);
-	}
-	/**获取数量
-	 * @return
-	 */
-	public int getTotal() {
+	public int getCode() {
 		try {
-			return getIntValue(KEY_TOTAL);
+			return getIntValue(KEY_CODE);
 		} catch (Exception e) {
-			// TODO: handle exception
+			//empty
 		}
 		return 0;
 	}
 	/**获取信息
 	 * @return
 	 */
-	public String getMessage() {
-		return getString(KEY_MESSAGE);
+	public String getMsg() {
+		return getString(KEY_MSG);
 	}
+	/**获取id
+	 * @return
+	 */
+	public long getId() {
+		try {
+			return getLongValue(KEY_ID);
+		} catch (Exception e) {
+			//empty
+		}
+		return 0;
+	}
+	/**获取数量
+	 * @return
+	 */
+	public int getCount() {
+		try {
+			return getIntValue(KEY_COUNT);
+		} catch (Exception e) {
+			//empty
+		}
+		return 0;
+	}
+	/**获取总数
+	 * @return
+	 */
+	public int getTotal() {
+		try {
+			return getIntValue(KEY_TOTAL);
+		} catch (Exception e) {
+			//empty
+		}
+		return 0;
+	}
+
 
 	/**是否成功
 	 * @return
 	 */
 	public boolean isSucceed() {
-		return isSucceed(getStatus());
+		return isSucceed(getCode());
 	}
 	/**是否成功
-	 * @param status
+	 * @param code
 	 * @return
 	 */
-	public static boolean isSucceed(int status) {
-		return status == STATUS_SUCCEED;
+	public static boolean isSucceed(int code) {
+		return code == CODE_SUCCEED;
 	}
 	/**是否成功
 	 * @param response
@@ -451,16 +480,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 * @return empty ? "list" : key + "List" 且首字母小写
 	 */
 	public static String getArrayKey(String key) {
-		key = StringUtil.getNoBlankString(key);
-		if (key.isEmpty()) {
-			return "list";
-		}
-
-		String first = key.substring(0, 1);
-		if (bigAlphaPattern.matcher(first).matches()) {
-			key = first.toLowerCase() + key.substring(1, key.length());
-		}
-		return key + "List";
+		return StringUtil.addSuffix(key, "list");
 	}
 
 	/**获取简单名称
