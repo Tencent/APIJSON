@@ -27,15 +27,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.Comment;
-import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
-import apijson.demo.server.model.Password;
-import apijson.demo.server.model.User;
 import apijson.demo.server.model.Privacy;
+import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
-import apijson.demo.server.model.Wallet;
 import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.RequestMethod;
@@ -57,18 +53,15 @@ public class AccessVerifier {
 
 	// <TableName, <METHOD, allowRoles>>
 	// <User, <GET, [OWNER, ADMIN]>>
-	public static final Map<String, Map<RequestMethod, RequestRole[]>> accessMap;
+	public static final Map<String, Map<RequestMethod, RequestRole[]>> ACCESS_MAP;
 	static {
-		accessMap = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
+		ACCESS_MAP = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
 
-		accessMap.put(User.class.getSimpleName(), getAccessMap(User.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(Privacy.class.getSimpleName(), getAccessMap(Privacy.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(Moment.class.getSimpleName(), getAccessMap(Moment.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(Comment.class.getSimpleName(), getAccessMap(Comment.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(Verify.class.getSimpleName(), getAccessMap(Verify.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(Login.class.getSimpleName(), getAccessMap(Login.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(Password.class.getSimpleName(), getAccessMap(Password.class.getAnnotation(MethodAccess.class)));
-		accessMap.put(Wallet.class.getSimpleName(), getAccessMap(Wallet.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(User.class.getSimpleName(), getAccessMap(User.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Privacy.class.getSimpleName(), getAccessMap(Privacy.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Moment.class.getSimpleName(), getAccessMap(Moment.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Comment.class.getSimpleName(), getAccessMap(Comment.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Verify.class.getSimpleName(), getAccessMap(Verify.class.getAnnotation(MethodAccess.class)));
 	}
 
 	/**获取权限Map，每种操作都只允许对应的角色
@@ -119,7 +112,7 @@ public class AccessVerifier {
 
 		//验证角色，假定真实强制匹配<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		String userIdkey = Controller.USER_.equals(config.getTable()) || Controller.USER_PRIVACY_.equals(config.getTable())
+		String userIdkey = Controller.USER_.equals(config.getTable()) || Controller.PRIVACY_.equals(config.getTable())
 				? Controller.ID : Controller.USER_ID;
 
 		if (role == null) {
@@ -202,7 +195,7 @@ public class AccessVerifier {
 			if (role == null) {
 				role = RequestRole.UNKNOWN;
 			}
-			Map<RequestMethod, RequestRole[]> map = accessMap.get(table);
+			Map<RequestMethod, RequestRole[]> map = ACCESS_MAP.get(table);
 
 			if (map == null || BaseModel.isContain(map.get(method), role) == false) {
 				throw new IllegalAccessException(table + " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");

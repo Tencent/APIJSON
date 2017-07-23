@@ -20,80 +20,13 @@ import static zuo.biao.apijson.RequestRole.CONTACT;
 import static zuo.biao.apijson.RequestRole.LOGIN;
 import static zuo.biao.apijson.RequestRole.OWNER;
 
-import java.util.List;
-
 import zuo.biao.apijson.MethodAccess;
 
 /**动态类
  * @author Lemon
- * @see
- * <br >POST:<pre>
-{
- "Moment":{
-     "disallow":"id",
-     "necessary":"userId,pictureList"
- }
-}
- * </pre>
- * <br >PUT:<pre>
-{
- "Moment":{
-     "disallow":"userId,date",
-     "necessary":"id"
- }
-}
- * </pre>
  */
 @MethodAccess(
 		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}//TODO 还要细分，LOGIN,CONTACT只允许修改praiseUserIdList。数据库加role没用，应该将praiseUserIdList移到Praise表
 		)
-public class Moment extends BaseModel {
-	private static final long serialVersionUID = 1L;
-
-	private String content;
-	private List<String> pictureList;
-	private List<Long> praiseUserIdList;
-	private List<Long> commentIdList;
-
-	public Moment() {
-		super();
-	}
-	public Moment(long id) {
-		this();
-		setId(id);
-	}
-
-
-	public Moment setUserId(Long userId) {
-		super.setUserId(userId);
-		return this;
-	}
-	public String getContent() {
-		return content;
-	}
-	public Moment setContent(String content) {
-		this.content = content;
-		return this;
-	}
-	public List<String> getPictureList() {
-		return pictureList;
-	}
-	public Moment setPictureList(List<String> pictureList) {
-		this.pictureList = pictureList;
-		return this;
-	}
-	public List<Long> getPraiseUserIdList() {
-		return praiseUserIdList;
-	}
-	public Moment setPraiseUserIdList(List<Long> praiseUserIdList) {
-		this.praiseUserIdList = praiseUserIdList;
-		return this;
-	}
-	public List<Long> getCommentIdList() {
-		return commentIdList;
-	}
-	public Moment setCommentIdList(List<Long> commentIdList) {
-		this.commentIdList = commentIdList;
-		return this;
-	}
+public class Moment {
 }

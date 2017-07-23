@@ -1,5 +1,5 @@
 /**
- * 
+ * models for special tables
  */
 /**
  * @author Lemon

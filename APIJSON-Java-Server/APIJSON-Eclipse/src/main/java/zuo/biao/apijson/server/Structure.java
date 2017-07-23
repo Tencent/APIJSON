@@ -17,8 +17,6 @@ package zuo.biao.apijson.server;
 import static zuo.biao.apijson.JSONRequest.KEY_ID;
 import static zuo.biao.apijson.JSONRequest.KEY_ID_IN;
 import static zuo.biao.apijson.RequestMethod.POST;
-import static zuo.biao.apijson.RequestMethod.PUT;
-import static zuo.biao.apijson.RequestMethod.DELETE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
