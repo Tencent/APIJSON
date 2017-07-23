@@ -49,7 +49,9 @@ APIJSON是一种JSON传输结构协议。<br />
 
 从此HTTP传输JSON数据没有接口，更不需要文档！<br />
 客户端再也不用和服务端沟通接口或文档问题了！再也不会被文档各种错误坑了！<br />
-服务端再也不用为了兼容旧版客户端写新版接口和文档了！再也不会被客户端随时随地没完没了地烦了！
+服务端再也不用为了兼容旧版客户端写新版接口和文档了！再也不会被客户端随时随地没完没了地烦了！<br />
+
+[为什么要用APIJSON？](https://github.com/TommyLemon/APIJSON/wiki)
 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_0.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_1.jpg) 
