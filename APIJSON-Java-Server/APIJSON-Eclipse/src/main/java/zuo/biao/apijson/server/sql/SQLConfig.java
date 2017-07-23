@@ -48,14 +48,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.demo.server.model.BaseModel;
-import apijson.demo.server.model.User;
 import apijson.demo.server.model.Privacy;
+import apijson.demo.server.model.User;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.model.Column;
+import zuo.biao.apijson.model.Table;
 import zuo.biao.apijson.server.JSONRequest;
 import zuo.biao.apijson.server.Logic;
 import zuo.biao.apijson.server.Pair;
@@ -109,6 +110,9 @@ public class SQLConfig {
 	public static final Map<String, String> TABLE_KEY_MAP;
 	static {
 		TABLE_KEY_MAP = new HashMap<String, String>();
+		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TAG);
+		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TAG);
+		
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 	}
@@ -1032,12 +1036,12 @@ public class SQLConfig {
 			Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
 			if (about) {
 				if (RequestMethod.isQueryMethod(method) == false) {
-					throw new UnsupportedOperationException(config.getTable() + " 被 @info 标注，只能进行 GET,HEAD 等查询操作！");
+					throw new UnsupportedOperationException(config.getTable() + " 被" + KEY_ABOUT + "标注，只能进行 GET,HEAD 等查询操作！");
 				}
 
 				tableWhere.put(TABLE_SCHEMA, SQLConfig.getSchema(schema));
 				tableWhere.put(TABLE_NAME, config.getSQLTable());
-				config.setTable(Column.TAG);
+				config.setTable(Column.class.getSimpleName());
 
 				schema = SCHEMA_INFORMATION;
 				column += (

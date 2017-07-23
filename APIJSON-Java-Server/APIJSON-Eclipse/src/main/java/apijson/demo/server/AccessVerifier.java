@@ -36,6 +36,9 @@ import zuo.biao.apijson.Log;
 import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
+import zuo.biao.apijson.model.Column;
+import zuo.biao.apijson.model.Table;
+import zuo.biao.apijson.model.Test;
 import zuo.biao.apijson.server.exception.NotLoggedInException;
 import zuo.biao.apijson.server.sql.SQLConfig;
 
@@ -56,6 +59,10 @@ public class AccessVerifier {
 	public static final Map<String, Map<RequestMethod, RequestRole[]>> ACCESS_MAP;
 	static {
 		ACCESS_MAP = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
+
+		ACCESS_MAP.put(Table.class.getSimpleName(), getAccessMap(Table.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Column.class.getSimpleName(), getAccessMap(Column.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Test.class.getSimpleName(), getAccessMap(Test.class.getAnnotation(MethodAccess.class)));
 
 		ACCESS_MAP.put(User.class.getSimpleName(), getAccessMap(User.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(Privacy.class.getSimpleName(), getAccessMap(Privacy.class.getAnnotation(MethodAccess.class)));
