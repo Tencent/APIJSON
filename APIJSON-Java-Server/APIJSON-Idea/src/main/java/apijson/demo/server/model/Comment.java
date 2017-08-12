@@ -18,56 +18,7 @@ import zuo.biao.apijson.MethodAccess;
 
 /**评论类
  * @author Lemon
- * @see
- * <br >POST:<pre>
-{
- "Comment":{
-     "disallow":"id",
-     "necessary":"userId,momentId,content"
- }
-}
- * </pre>
  */
 @MethodAccess
-public class Comment extends BaseModel {
-	private static final long  serialVersionUID = 1L;
-
-	private Long toId;
-	private Long momentId;
-	private String content;
-	public Comment() {
-		super();
-	}
-	public Comment(long id) {
-		this();
-		setId(id);
-	}
-
-
-	public Long getToId() {
-		return toId;
-	}
-	public Comment setToId(Long toId) {
-		this.toId = toId;
-		return this;
-	}
-	public Comment setUserId(Long userId) {
-		super.setUserId(userId);
-		return this;
-	}
-	public Long getMomentId() {
-		return momentId;
-	}
-	public Comment setMomentId(Long momentId) {
-		this.momentId = momentId;
-		return this;
-	}
-	public String getContent() {
-		return content;
-	}
-	public Comment setContent(String content) {
-		this.content = content;
-		return this;
-	}
-
+public class Comment {
 }

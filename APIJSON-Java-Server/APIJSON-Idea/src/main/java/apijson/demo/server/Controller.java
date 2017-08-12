@@ -36,16 +36,12 @@ import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.Comment;
-import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
-import apijson.demo.server.model.Password;
-import apijson.demo.server.model.User;
 import apijson.demo.server.model.Privacy;
+import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
-import apijson.demo.server.model.Wallet;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.JSONRequest;
@@ -160,19 +156,15 @@ public class Controller {
 
 
 	public static final String USER_;
+	public static final String PRIVACY_;
 	public static final String MOMENT_;
 	public static final String COMMENT_;
-	public static final String WALLET_;
-	public static final String PASSWORD_;
-	public static final String USER_PRIVACY_;
-	public static final String VERIFY_;
+	public static final String VERIFY_; //加下划线后缀是为了避免 Verify 和 verify 都叫VERIFY，分不清
 	static {
 		USER_ = User.class.getSimpleName();
+		PRIVACY_ = Privacy.class.getSimpleName();
 		MOMENT_ = Moment.class.getSimpleName();
 		COMMENT_ = Comment.class.getSimpleName();
-		WALLET_ = Wallet.class.getSimpleName();
-		PASSWORD_ = Password.class.getSimpleName();
-		USER_PRIVACY_ = Privacy.class.getSimpleName();
 		VERIFY_ = Verify.class.getSimpleName();
 	}
 
@@ -187,8 +179,8 @@ public class Controller {
 	public static final String NAME = "name";
 	public static final String PHONE = "phone";
 	public static final String PASSWORD = "password";
-	public static final String LOGIN_PASSWORD = "loginPassword";
-	public static final String PAY_PASSWORD = "payPassword";
+	public static final String _PASSWORD = "_password";
+	public static final String _PAY_PASSWORD = "_payPassword";
 	public static final String OLD_PASSWORD = "oldPassword";
 	public static final String VERIFY = "verify";
 
@@ -339,7 +331,8 @@ public class Controller {
 	}
 
 
-
+	public static final int LOGIN_TYPE_PASSWORD = 0;//密码登录
+	public static final int LOGIN_TYPE_VERIFY = 1;//验证码登录
 	/**用户登录
 	 * @param request 只用String，避免encode后未decode
 	 * @return
@@ -379,7 +372,7 @@ public class Controller {
 						new Privacy().setPhone(phone)
 						)
 				);
-		JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(USER_PRIVACY_);
+		JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
 		if (JSONResponse.isSucceed(response) == false) {
 			return response;
 		}
@@ -403,7 +396,7 @@ public class Controller {
 
 		//校验凭证 
 		int type = Integer.valueOf(0 + StringUtil.getNumber(typeString));
-		if (type == Login.TYPE_PASSWORD) {//password密码登录
+		if (type == LOGIN_TYPE_PASSWORD) {//password密码登录
 			response = new JSONResponse(
 					new Parser(POST_HEAD, true).parseResponse(
 							new JSONRequest(new Privacy(userId).setPassword(password))
@@ -415,7 +408,7 @@ public class Controller {
 		if (JSONResponse.isSucceed(response) == false) {
 			return response;
 		}
-		response = response.getJSONResponse(type == Login.TYPE_PASSWORD ? USER_PRIVACY_ : VERIFY_);
+		response = response.getJSONResponse(type == LOGIN_TYPE_PASSWORD ? PRIVACY_ : VERIFY_);
 		if (JSONResponse.isExist(response) == false) {
 			return Parser.newErrorResult(new ConditionErrorException("账号或密码错误"));
 		}
@@ -434,7 +427,7 @@ public class Controller {
 		session.setAttribute(USER_ID, userId);//用户id
 		session.setAttribute(TYPE, type);//登录方式
 		session.setAttribute(USER_, user);//用户
-		session.setAttribute(USER_PRIVACY_, privacy);//用户隐私信息
+		session.setAttribute(PRIVACY_, privacy);//用户隐私信息
 		//		session.setMaxInactiveInterval(1*60);//设置session过期时间
 
 		return response;
@@ -508,7 +501,7 @@ public class Controller {
 						new Privacy().setPhone(phone)
 						)
 				);
-		JSONObject checkUser = check == null ? null : check.getJSONObject(USER_PRIVACY_);
+		JSONObject checkUser = check == null ? null : check.getJSONObject(PRIVACY_);
 		if (checkUser == null || checkUser.getIntValue(JSONResponse.KEY_COUNT) > 0) {
 			return Parser.newErrorResult(new ConflictException("手机号" + phone + "已经注册"));
 		}
@@ -531,7 +524,7 @@ public class Controller {
 								)
 						)
 				);
-		if (JSONResponse.isSucceed(response.getJSONResponse(USER_PRIVACY_)) == false) {//创建失败，删除新增的无效User和userPrivacy
+		if (JSONResponse.isSucceed(response.getJSONResponse(PRIVACY_)) == false) {//创建失败，删除新增的无效User和userPrivacy
 
 			new Parser(DELETE, true).parseResponse(
 					new JSONRequest(
@@ -624,26 +617,39 @@ public class Controller {
 		} catch (Exception e) {
 			return Parser.newErrorResult(e);
 		}
+		JSONObject privacyObj;
+		long userId;
+		String payPassword;
+		double change;
+		try {
+			privacyObj = requestObject.getJSONObject(PRIVACY_);
+			if (privacyObj == null) {
+				throw new NullPointerException("请设置 " + PRIVACY_ + "！");
+			}
+			userId = privacyObj.getLongValue(ID);
+			payPassword = privacyObj.getString(_PAY_PASSWORD);
+			change = privacyObj.getDoubleValue("balance+");
+			
+			if (userId <= 0) {
+				throw new IllegalArgumentException(PRIVACY_ + "." + ID + ":value 中value不合法！");
+			}
+			if (StringUtil.isPassword(payPassword) == false) {
+				throw new IllegalArgumentException(PRIVACY_ + "." + _PAY_PASSWORD + ":value 中value不合法！");
+			}
+		} catch (Exception e) {
+			return Parser.extendErrorResult(requestObject, e);
+		}
 
 		//验证密码<<<<<<<<<<<<<<<<<<<<<<<
 
-		JSONObject pwdObj = requestObject.getJSONObject(PASSWORD_);
-		requestObject.remove(PASSWORD_);
-		if (pwdObj == null) {
-			pwdObj = new JSONRequest();
-		}
-		if (pwdObj.getIntValue(TYPE) != Password.TYPE_PAY) {
-			//			return Parser.extendErrorResult(requestObject, new ConditionErrorException("Password type必须是支付类型！"));
-			pwdObj.put(TYPE, Password.TYPE_PAY);
-		}
-
+		privacyObj.remove("balance+");
 		JSONResponse response = new JSONResponse(
 				new Parser(POST_HEAD, true).setSession(session).parseResponse(
-						new JSONRequest(PASSWORD_, pwdObj)
+						new JSONRequest(PRIVACY_, privacyObj)
 						)
 				);
-		response = response.getJSONResponse(PASSWORD_);
-		if (response == null || response.isExist() == false) {
+		response = response.getJSONResponse(PRIVACY_);
+		if (JSONResponse.isExist(response) == false) {
 			return Parser.extendErrorResult(requestObject, new ConditionErrorException("支付密码错误！"));
 		}
 
@@ -652,13 +658,6 @@ public class Controller {
 
 		//验证金额范围<<<<<<<<<<<<<<<<<<<<<<<
 
-		JSONObject wallet = requestObject.getJSONObject(WALLET_);
-		long id = wallet == null ? 0 : wallet.getLongValue(ID);
-		if (id <= 0) {
-			return Parser.extendErrorResult(requestObject, new ConditionErrorException("请设置Wallet及内部的id！"));
-		}
-
-		double change = wallet.getDoubleValue("balance+");
 		if (change == 0) {
 			return Parser.extendErrorResult(requestObject, new OutOfRangeException("balance+的值不能为0！"));
 		}
@@ -672,20 +671,26 @@ public class Controller {
 			response = new JSONResponse(
 					new Parser(POST_GET, true).parseResponse(
 							new JSONRequest(
-									new Wallet(id).setUserId(AccessVerifier.getUserId(session))
+									new Privacy(userId)
 									)
 							)
 					);
-			Wallet w = response == null ? null : response.getObject(Wallet.class);
-			if (w == null) {
+			Privacy privacy = response == null ? null : response.getObject(Privacy.class);
+			long id = privacy == null ? 0 : BaseModel.value(privacy.getId());
+			if (id != userId) {
 				return Parser.extendErrorResult(requestObject, new Exception("服务器内部错误！"));
 			}
 
-			if (w.getBalance() == null || w.getBalance().doubleValue() < -change) {
+			if (BaseModel.value(privacy.getBalance()) < -change) {
 				return Parser.extendErrorResult(requestObject, new OutOfRangeException("余额不足！"));
 			}
 		}
 
+		
+		privacyObj.remove(_PAY_PASSWORD);
+		privacyObj.put("balance+", change);
+		requestObject.put(PRIVACY_, privacyObj);
+		requestObject.put(JSONRequest.KEY_TAG, PRIVACY_);
 		//不免验证，里面会验证身份
 		return new Parser(PUT).setSession(session).parseResponse(requestObject);
 	}
