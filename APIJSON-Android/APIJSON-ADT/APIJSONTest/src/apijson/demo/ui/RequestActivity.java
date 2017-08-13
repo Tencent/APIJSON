@@ -41,7 +41,7 @@ import apijson.demo.R;
 import apijson.demo.StringUtil;
 import apijson.demo.model.BaseModel;
 import apijson.demo.model.Moment;
-import apijson.demo.model.Wallet;
+import apijson.demo.model.Privacy;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -230,8 +230,8 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 					+ "; isSucceed = " + JSONResponse.isSuccess(response));
 
 		} else if ("post_get".equals(method)) {
-			Wallet wallet = response.getObject(Wallet.class);
-			Log.d(TAG, "onHttpResponse  post_get.equals(method) >>  wallet = " + JSON.toJSONString(wallet));
+			Privacy privacy = response.getObject(Privacy.class);
+			Log.d(TAG, "onHttpResponse  post_get.equals(method) >>  privacy = \n" + JSON.toJSONString(privacy));
 		}
 
 

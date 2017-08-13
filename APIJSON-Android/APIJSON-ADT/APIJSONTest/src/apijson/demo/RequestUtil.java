@@ -23,8 +23,8 @@ import android.content.Context;
 import apijson.demo.application.DemoApplication;
 import apijson.demo.model.Comment;
 import apijson.demo.model.Moment;
+import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
-import apijson.demo.model.Wallet;
 
 /**请求工具类
  * @author Lemon
@@ -113,16 +113,12 @@ public class RequestUtil {
 	}
 
 	public static JSONObject newAccessErrorRequest() {
-		return new JSONRequest(new Wallet().setUserId(DEFAULT_USER_ID))
-		.setTag(Wallet.class.getSimpleName());
+		return new JSONRequest(new Privacy(DEFAULT_USER_ID));
 	}
 
 	public static JSONObject newAccessPermittedRequest() {
-		JSONRequest request = new JSONRequest();
-		request.put(new Wallet().setUserId(DEFAULT_USER_ID));
-		request.put("currentUserId", DEFAULT_USER_ID);
-		request.put("loginPassword", "apijson");
-		return request.setTag(Wallet.class.getSimpleName());
+		JSONRequest request = new JSONRequest(new Privacy(DEFAULT_USER_ID));
+		return request.setTag(Privacy.class.getSimpleName());
 	}
 
 }
