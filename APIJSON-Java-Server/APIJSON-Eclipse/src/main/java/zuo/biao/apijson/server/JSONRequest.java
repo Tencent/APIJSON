@@ -14,8 +14,10 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.util.Map;
+
 import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.SQL;
+import zuo.biao.apijson.JSONObject;
 import zuo.biao.apijson.StringUtil;
 
 /**JSONRequest for Server to replace zuo.biao.apijson.JSONRequest,
@@ -35,79 +37,56 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 	 * @param object
 	 */
 	public JSONRequest(Object object) {
-		this(null, object);
+		super(object);
 	}
 	/**
-	 * encode = false
-	 * {@link #JSONRequest(String, Object, boolean)}
 	 * @param name
 	 * @param object
 	 */
 	public JSONRequest(String name, Object object) {
-		this(name, object, false);
-	}
-	/**
-	 * {@link #JSONRequest(String, Object, boolean)}
-	 * @param object
-	 * @param encode
-	 */
-	public JSONRequest(Object object, boolean encode) {
-		super(object, encode);
-	}
-	/**
-	 * {@link #put(String, Object, boolean)}
-	 * @param name
-	 * @param object
-	 * @param encode
-	 */
-	public JSONRequest(String name, Object object, boolean encode) {
-		super(name, object, encode);
+		super(name, object);
 	}
 
-
+	
+	
+	@Override
+	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
+		super.putsAll(map);
+		return this;
+	}
 
 	/**
-	 * decode = true
-	 * @param key
-	 * return {@link #get(Object, boolean)}
+	 * @param value
+	 * @return {@link #puts(String, Object)}
 	 */
 	@Override
-	public Object get(Object key) {
-		return get(key, false);
+	public JSONRequest puts(Object value) {
+		return puts(null, value);
+	}
+	/**
+	 * @param key
+	 * @param value
+	 * @return this
+	 * @see {@link #put(String, Object)}
+	 */
+	@Override
+	public JSONRequest puts(String key, Object value) {
+		put(key, value);
+		return this;
 	}
 
 	/**
-	 * encode = false
 	 * @param value
-	 * @return {@link #put(String, boolean)}
+	 * @return {@link #put(String, Object)}
 	 */
 	@Override
 	public Object put(Object value) {
-		return put(value, false);
-	}
-	/**
-	 * @param value
-	 * @param encode
-	 * @return {@link #put(String, Object, boolean)}
-	 */
-	@Override
-	public Object put(Object value, boolean encode) {
-		return put(null, value, encode);
-	}
-	/**
-	 * encode = false
-	 * @param key
-	 * @param value
-	 * return {@link #put(String, Object, boolean)}
-	 */
-	@Override
-	public Object put(String key, Object value) {
-		return put(key, value, false);
+		return put(null, value);
 	}
 	/**自定义类型必须转为JSONObject或JSONArray，否则RequestParser解析不了
 	 */
 	@Override
-	public Object put(String key, Object value, boolean encode) {
+	public Object put(String key, Object value) {
 		if (value == null) {//  || key == null
 			return null;
 		}
@@ -117,29 +96,7 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 		//			return null;
 		//		}
 		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName() //must handle key here
-				, target == null ? value : target, encode);
-	}
-
-	/**设置搜索
-	 * @param key
-	 * @param value
-	 * @return 
-	 * @see {@link #putSearch(String, String, int)}
-	 */
-	@Override
-	public JSONRequest putSearch(String key, String value) {
-		return putSearch(key, value, SQL.SEARCH_TYPE_CONTAIN_FULL);
-	}
-	/**设置搜索
-	 * @param key
-	 * @param value
-	 * @param type
-	 * @see {@link #putSearch(String, String, int, boolean)}
-	 */
-	@Override
-	public JSONRequest putSearch(String key, String value, int type) {
-		putSearch(key, value, type, false);
-		return this;
+				, target == null ? value : target);
 	}
 
 }

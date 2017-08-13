@@ -20,17 +20,16 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-/**parser for response JSON String
+/**parser for response
  * @author Lemon
+ * @see #getObject
  * @see #getList
- * @see #toArray
  * @use JSONResponse response = new JSONResponse(json);
- * <br> JSONArray array = JSONResponse.toArray(response.getJSONObject("[]"));//not a must
- * <br> User user = JSONResponse.getObject(response, User.class);//not a must
- * <br> List<Comment> list = JSONResponse.getList(response.getJSONObject("Comment[]"), Comment.class);//not a must
+ * <br> User user = response.getObject(User.class);//not a must
+ * <br> List<Comment> commenntList = response.getList("Comment[]", Comment.class);//not a must
  */
 public class JSONResponse extends zuo.biao.apijson.JSONObject {
-	private static final long  serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
 	private static final String TAG = "JSONResponse";
 
@@ -46,7 +45,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	//状态信息，非GET请求获得的信息<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final int CODE_SUCCEED = 200; //成功
+	public static final int CODE_SUCCESS = 200; //成功
 	public static final int CODE_UNSUPPORTED_ENCODING = 400; //编码错误
 	public static final int CODE_ILLEGAL_ACCESS = 401; //权限错误
 	public static final int CODE_UNSUPPORTED_OPERATION = 403; //禁止操作
@@ -63,7 +62,8 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 
 	public static final String MSG_SUCCEED = "success"; //成功
-	public static final String MSG_SERVER_ERROR = "服务器内部错误！"; //失败
+	public static final String MSG_SERVER_ERROR = "Internal Server Error!"; //服务器内部错误
+
 	
 	public static final String KEY_CODE = "code";
 	public static final String KEY_MSG = "msg";
@@ -127,22 +127,22 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	/**是否成功
 	 * @return
 	 */
-	public boolean isSucceed() {
-		return isSucceed(getCode());
+	public boolean isSuccess() {
+		return isSuccess(getCode());
 	}
 	/**是否成功
 	 * @param code
 	 * @return
 	 */
-	public static boolean isSucceed(int code) {
-		return code == CODE_SUCCEED;
+	public static boolean isSuccess(int code) {
+		return code == CODE_SUCCESS;
 	}
 	/**是否成功
 	 * @param response
 	 * @return
 	 */
-	public static boolean isSucceed(JSONResponse response) {
-		return response != null && response.isSucceed();
+	public static boolean isSuccess(JSONResponse response) {
+		return response != null && response.isSuccess();
 	}
 
 	/**校验服务端是否存在table
@@ -259,126 +259,39 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 * @return
 	 */
 	public static <T> List<T> getList(JSONObject object, String key, Class<T> clazz) {
-		Object obj = object == null ? null : object.get(replaceArray(key));
-		if (obj == null) {
-			return null;
-		}
-		return obj instanceof JSONArray ? JSON.parseArray((JSONArray) obj, clazz) : toList((JSONObject) obj, clazz);
-	}
-	/**
-	 * @param clazz
-	 * @return
-	 */
-	public <T> List<T> toList(Class<T> clazz) {
-		return toList(this, clazz);
-	}
-	/**
-	 * @param arrayObject
-	 * @param clazz
-	 * @return
-	 */
-	public static <T> List<T> toList(JSONObject arrayObject, Class<T> clazz) {
-		return clazz == null ? null : JSON.parseArray(JSON.toJSONString(
-				toArray(arrayObject, clazz.getSimpleName())), clazz);
+		return object == null ? null : JSON.parseArray(object.getString(replaceArray(key)), clazz);
 	}
 
 	/**
 	 * key = KEY_ARRAY
-	 * @param className
 	 * @return
 	 */
-	public JSONArray getArray(String className) {
-		return getArray(KEY_ARRAY, className);
+	public JSONArray getArray() {
+		return getArray(KEY_ARRAY);
 	}
 	/**
 	 * @param key
-	 * @param className
 	 * @return
 	 */
-	public JSONArray getArray(String key, String className) {
-		return getArray(this, key, className);
+	public JSONArray getArray(String key) {
+		return getArray(this, key);
 	}
 	/**
 	 * @param object
-	 * @param key
-	 * @param className
 	 * @return
 	 */
-	public static JSONArray getArray(JSONObject object, String className) {
-		return getArray(object, KEY_ARRAY, className);
+	public static JSONArray getArray(JSONObject object) {
+		return getArray(object, KEY_ARRAY);
 	}
 	/**
 	 * key = KEY_ARRAY
 	 * @param object
-	 * @param className
+	 * @param key
 	 * @return
 	 */
-	public static JSONArray getArray(JSONObject object, String key, String className) {
-		Object obj = object == null ? null : object.get(replaceArray(key));
-		if (obj == null) {
-			return null;
-		}
-		return obj instanceof JSONArray ? (JSONArray) obj : toArray((JSONObject) obj, className);
+	public static JSONArray getArray(JSONObject object, String key) {
+		return object == null ? null : object.getJSONArray(replaceArray(key));
 	}
-
-	/**
-	 * @param className
-	 * @return
-	 */
-	public JSONArray toArray(String className) {
-		return toArray(this, className);
-	}
-	/**{0:{Table:{}}, 1:{Table:{}}...} 转化为 [{Table:{}}, {Table:{}}]
-	 * array.set(index, isContainer ? value : value.getJSONObject(className));
-	 * @param arrayObject
-	 * @param className className.equals(Table) ? {Table:{Content}} => {Content}
-	 * @return
-	 */
-	public static JSONArray toArray(JSONObject arrayObject, String className) {
-		Set<String> set = arrayObject == null ? null : arrayObject.keySet();
-		if (set == null || set.isEmpty()) {
-			return null;
-		}
-
-		// [{...},{...},...]
-		String parentString = StringUtil.getTrimedString(JSON.toJSONString(arrayObject));
-		if (parentString.isEmpty()) {
-			return null;
-		}
-		if (parentString.startsWith("[")) {
-			if (parentString.endsWith("]") == false) {
-				parentString += "]";
-			}
-			return JSON.parseArray(parentString);
-		}
-
-		//{"0":{Table:{...}}, "1":{Table:{...}}...}
-
-		className = StringUtil.getTrimedString(className);
-		boolean isContainer = true;
-
-		JSONArray array = new JSONArray(set.size());
-		JSONObject value;
-		boolean isFirst = true;
-		int index;
-		for (String key : set) {//0, 1, 2,...
-			value = StringUtil.isNumer(key) == false ? null : arrayObject.getJSONObject(key);// Table:{}
-			if (value != null) {
-				try {
-					index = Integer.valueOf(0 + key);
-					if (isFirst && isTableKey(className) && value.containsKey(className)) {// 判断是否需要提取table
-						isContainer = false;
-					}
-					array.set(index, isContainer ? value : value.getJSONObject(className));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			isFirst = false;
-		}
-		return array;
-	}
-
 
 
 	//	/**
@@ -387,90 +300,69 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	//	public JSONObject format() {
 	//		return format(this);
 	//	}
-	/**将Item[]:[{Table:{}}, {Table:{}}...] 或 Item[]:{0:{Table:{}}, 1:{Table:{}}...}
-	 *  转化为 itemList:[{Table:{}}, {Table:{}}]，如果 Item.equals(Table)，则将 {Table:{Content}} 转化为 {Content}
-	 * @param target
-	 * @param response
+	/**格式化key名称
+	 * @param object
 	 * @return
 	 */
-	public static JSONObject format(final JSONObject response) {
-		//太长查看不方便，不如debug	 Log.i(TAG, "format  response = \n" + JSON.toJSONString(response));
-		if (response == null || response.isEmpty()) {
-			Log.i(TAG, "format  response == null || response.isEmpty() >> return response;");
-			return response;
+	public static JSONObject format(final JSONObject object) {
+		//太长查看不方便，不如debug	 Log.i(TAG, "format  object = \n" + JSON.toJSONString(object));
+		if (object == null || object.isEmpty()) {
+			Log.i(TAG, "format  object == null || object.isEmpty() >> return object;");
+			return object;
 		}
-		JSONObject transferredObject = new JSONObject(true);
+		JSONObject formatedObject = new JSONObject(true);
 
-		Set<String> set = response.keySet();
+		Set<String> set = object.keySet();
 		if (set != null) {
 
 			Object value;
-			String arrayKey;
 			for (String key : set) {
-				value = response.get(key);
+				value = object.get(key);
 
-				if (value instanceof JSONArray) {//转化JSONArray内部的APIJSON Array
-					transferredObject.put(replaceArray(key), format(key, (JSONArray) value));
+				if (value instanceof JSONArray) {//JSONArray，遍历来format内部项
+					formatedObject.put(replaceArray(key), format((JSONArray) value));
 				}
-				else if (value instanceof JSONObject) {//APIJSON Array转为常规JSONArray
-					if (isArrayKey(key)) {//APIJSON Array转为常规JSONArray
-						arrayKey = key.substring(0, key.lastIndexOf(KEY_ARRAY));
-						transferredObject.put(getArrayKey(getSimpleName(arrayKey))
-								, format(key, toArray((JSONObject) value, arrayKey)));//需要将name:alias传至toArray
-					}
-					else {//常规JSONObject，往下一级提取
-						transferredObject.put(getSimpleName(key), format((JSONObject) value));
-					}
+				else if (value instanceof JSONObject) {//JSONObject，往下一级提取
+					formatedObject.put(getSimpleName(key), format((JSONObject) value));
 				}
 				else {//其它Object，直接填充
-					transferredObject.put(getSimpleName(key), value);
+					formatedObject.put(getSimpleName(key), value);
 				}
 			}
 		}
 
-		//太长查看不方便，不如debug	 Log.i(TAG, "format  return transferredObject = " + JSON.toJSONString(transferredObject));
-		return transferredObject;
+		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formatedObject = " + JSON.toJSONString(formatedObject));
+		return formatedObject;
 	}
 
-	/**
-	 * @param responseArray
+	/**格式化key名称
+	 * @param array
 	 * @return
 	 */
-	public static JSONArray format(String name, final JSONArray responseArray) {
-		//太长查看不方便，不如debug	 Log.i(TAG, "format  responseArray = \n" + JSON.toJSONString(responseArray));
-		if (responseArray == null || responseArray.isEmpty()) {
-			Log.i(TAG, "format  responseArray == null || responseArray.isEmpty() >> return response;");
-			return responseArray;
+	public static JSONArray format(final JSONArray array) {
+		//太长查看不方便，不如debug	 Log.i(TAG, "format  array = \n" + JSON.toJSONString(array));
+		if (array == null || array.isEmpty()) {
+			Log.i(TAG, "format  array == null || array.isEmpty() >> return array;");
+			return array;
 		}
-		int index = name == null ? -1 : name.lastIndexOf(KEY_ARRAY);
-		String className = index < 0 ? "" : name.substring(0, index);
-
-		JSONArray transferredArray = new JSONArray();
+		JSONArray formatedArray = new JSONArray();
 
 		Object value;
-		boolean isContainer = true;
-		boolean isFirst = true;
-		for (int i = 0; i < responseArray.size(); i++) {
-			value = responseArray.get(i);
-			if (value instanceof JSONArray) {//转化JSONArray内部的APIJSON Array
-				transferredArray.add(format(null, (JSONArray) value));
+		for (int i = 0; i < array.size(); i++) {
+			value = array.get(i);
+			if (value instanceof JSONArray) {//JSONArray，遍历来format内部项
+				formatedArray.add(format((JSONArray) value));
 			}
 			else if (value instanceof JSONObject) {//JSONObject，往下一级提取
-				//判断是否需要提取child
-				if (isFirst && isTableKey(className) && ((JSONObject) value).containsKey(className)) {
-					isContainer = false;
-				}
-				//直接添加child 或 添加提取出的child
-				transferredArray.add(format(isContainer ? (JSONObject)value : ((JSONObject)value).getJSONObject(className) ));
-				isFirst = false;
+				formatedArray.add(format((JSONObject) value));
 			}
 			else {//其它Object，直接填充
-				transferredArray.add(responseArray.get(i));
+				formatedArray.add(value);
 			}
 		}
 
-		//太长查看不方便，不如debug	 Log.i(TAG, "format  return transferredArray = " + JSON.toJSONString(transferredArray));
-		return transferredArray;
+		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formatedArray = " + JSON.toJSONString(formatedArray));
+		return formatedArray;
 	}
 
 	/**替换key+KEY_ARRAY为keyList
@@ -493,7 +385,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	/**获取简单名称
 	 * @param fullName name 或 name:alias
-	 * @return name > name; name:alias > alias
+	 * @return name => name; name:alias => alias
 	 */
 	public static String getSimpleName(String fullName) {
 		//key:alias  -> alias; key:alias[] -> alias[]

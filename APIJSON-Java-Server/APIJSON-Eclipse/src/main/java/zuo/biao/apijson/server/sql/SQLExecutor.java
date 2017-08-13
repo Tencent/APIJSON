@@ -185,7 +185,7 @@ public class SQLExecutor {
 		case DELETE:
 			long updateCount = statement.executeUpdate(sql);
 
-			result = Parser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCEED : JSONResponse.CODE_NOT_FOUND
+			result = Parser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
 					, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "可能对象不存在！");
 
 			//id或id{}一定有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！

@@ -284,13 +284,13 @@ public class Parser {
 	 * @return
 	 */
 	public static JSONObject extendSuccessResult(JSONObject object) {
-		return extendResult(object, JSONResponse.CODE_SUCCEED, JSONResponse.MSG_SUCCEED);
+		return extendResult(object, JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED);
 	}
 	/**获取请求成功的状态内容
 	 * @return
 	 */
 	public static JSONObject newSuccessResult() {
-		return newResult(JSONResponse.CODE_SUCCEED, JSONResponse.MSG_SUCCEED);
+		return newResult(JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED);
 	}
 	/**添加请求成功的状态内容
 	 * @param object
