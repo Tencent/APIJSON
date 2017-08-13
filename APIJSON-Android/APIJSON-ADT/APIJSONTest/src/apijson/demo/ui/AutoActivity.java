@@ -131,7 +131,7 @@ public class AutoActivity extends Activity {
 	}
 	public void request(String method) {
 		startActivityForResult(RequestActivity.createIntent(context, id, url, method
-				, JSON.parseObject(StringUtil.getString(tvAutoRequest)), false), REQUEST_TO_REQUEST);
+				, JSON.parseObject(StringUtil.getString(tvAutoRequest))), REQUEST_TO_REQUEST);
 	}
 
 

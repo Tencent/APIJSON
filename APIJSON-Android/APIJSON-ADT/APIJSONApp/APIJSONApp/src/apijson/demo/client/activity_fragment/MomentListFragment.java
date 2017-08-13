@@ -367,7 +367,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 				JSONRequest search = new JSONRequest();
 				if (StringUtil.isNotEmpty(value, true)) {
 					split = ":";
-					search.putSearch(HttpRequest.CONTENT, value, SQL.SEARCH_TYPE_CONTAIN_ORDER);
+					search.putsSearch(HttpRequest.CONTENT, value, SQL.SEARCH_TYPE_CONTAIN_ORDER);
 				}
 				toActivity(MomentListActivity.createIntent(context, range, id, search, false)
 						.putExtra(INTENT_TITLE, "搜索" + split + value));

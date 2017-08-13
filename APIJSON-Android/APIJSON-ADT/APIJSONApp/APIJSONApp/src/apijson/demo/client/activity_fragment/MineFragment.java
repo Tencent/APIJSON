@@ -321,7 +321,7 @@ public class MineFragment extends BaseFragment implements OnClickListener, OnDia
 		switch (requestCode) {
 		case HTTP_LOUOUT:
 			JSONResponse response = new JSONResponse(resultJson).getJSONResponse(Login.class.getSimpleName());
-			boolean succeed = JSONResponse.isSucceed(response);
+			boolean succeed = JSONResponse.isSuccess(response);
 			Log.d(TAG, succeed ? "服务端退出成功" : "服务端退出失败");
 			showShortToast(succeed ? "服务端退出成功" : "服务端退出失败");
 			break;

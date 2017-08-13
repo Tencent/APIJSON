@@ -185,9 +185,15 @@ public class SQLExecutor {
 		case DELETE:
 			long updateCount = statement.executeUpdate(sql);
 
-			result = Parser.newResult(updateCount > 0 ? 200 : 404
-					, updateCount > 0 ? "success" : "可能对象不存在！");
-			result.put(JSONResponse.KEY_ID, config.getId());//id一定有，一定会返回，不用抛异常来阻止关联写时前面错误导致后面无条件执行！
+			result = Parser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCEED : JSONResponse.CODE_NOT_FOUND
+					, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "可能对象不存在！");
+
+			//id或id{}一定有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
+			if (config.getId() > 0) {
+				result.put(JSONResponse.KEY_ID, config.getId());
+			} else {
+				result.put(JSONResponse.KEY_ID_IN, config.getWhere(JSONResponse.KEY_ID_IN, true));
+			}
 			result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
 			return result;
 
@@ -249,7 +255,7 @@ public class SQLExecutor {
 					Log.i(TAG, "select while (rs.next()){ ..." + " >>  value == null >> continue;");
 					continue;
 				}
-				
+
 				//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < columnArray.length; i++) {"
 				//						+ "\n  >>> columnArray[i]) = " + columnArray[i] + "; value = " + value);
 				if (value instanceof Timestamp) {
@@ -267,7 +273,7 @@ public class SQLExecutor {
 						//	+ ">> } catch (Exception e) {\n" + e.getMessage());
 					}
 				}
-				
+
 				result.put(columnArray[i], value);
 			}
 
@@ -301,7 +307,7 @@ public class SQLExecutor {
 		if (StringUtil.isNotEmpty(column, true)) {
 			return StringUtil.split(column);//column.contains(",") ? column.split(",") : new String[]{column};
 		}
-		
+
 		List<String> list = new ArrayList<String>();
 		String table = config.getSQLTable();
 		ResultSet rs = metaData.getColumns(config.getSchema(), null, table, "%");
@@ -310,7 +316,7 @@ public class SQLExecutor {
 			list.add(rs.getString(4));
 		}
 		rs.close();
-		
+
 		return list.toArray(new String[]{});
 	}
 

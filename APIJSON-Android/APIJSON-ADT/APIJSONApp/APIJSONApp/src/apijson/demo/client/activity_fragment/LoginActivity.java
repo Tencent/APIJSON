@@ -174,7 +174,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 				JSONResponse response = new JSONResponse(resultJson);
 				User user = response.getObject(User.class);
 
-				if (response.isSucceed() == false) {
+				if (response.isSuccess() == false) {
 					switch (response.getCode()) {
 					case JSONResponse.CODE_NOT_FOUND:
 						showShortToast("账号不存在，请先注册");

@@ -400,7 +400,7 @@ public class MomentView extends BaseView<MomentItem> implements OnClickListener
 			return;
 		}
 		JSONResponse response = new JSONResponse(result).getJSONResponse(Moment.class.getSimpleName());
-		boolean isSucceed = JSONResponse.isSucceed(response);
+		boolean isSucceed = JSONResponse.isSuccess(response);
 
 		boolean refresh = false;
 		switch (requestCode) {

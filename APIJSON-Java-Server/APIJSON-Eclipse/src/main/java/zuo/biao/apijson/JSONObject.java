@@ -225,7 +225,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
 	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
-	public static final String KEY_CONDITION = "@condition"; //条件
+	public static final String KEY_CONDITION = "@condition"; //条件 TODO 用 @where& @where| @where! 替代？
 	public static final String KEY_TRY = "@try"; //尝试，忽略异常
 	public static final String KEY_DROP = "@drop"; //丢弃，不返回
 	public static final String KEY_CORRECT = "@correct"; //字段校正

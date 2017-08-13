@@ -14,11 +14,12 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-/**encapsulator for request JSONObject, encode in default cases
+/**wrapper for request
  * @author Lemon
+ * @see #puts
  * @see #toArray
  * @use JSONRequest request = new JSONRequest(...);
- * <br> request.put(...);//not a must
+ * <br> request.puts(...);//not a must
  * <br> request.toArray(...);//not a must
  */
 public class JSONRequest extends JSONObject {
@@ -28,51 +29,34 @@ public class JSONRequest extends JSONObject {
 		super();
 	}
 	/**
-	 * encode = true
-	 * @param object must be annotated by {@link APIJSONRequest}
+	 * @param object must be annotated by {@link MethodAccess}
 	 * @see	{@link #JSONRequest(String, Object)}
 	 */
 	public JSONRequest(Object object) {
 		this(null, object);
 	}
 	/**
-	 * encode = true
 	 * @param name
 	 * @param object
-	 * @see {@link #JSONRequest(String, Object, boolean)}
+	 * @see {@link #puts(String, Object)}
 	 */
 	public JSONRequest(String name, Object object) {
-		this(name, object, true);
-	}
-	/**
-	 * @param object must be annotated by {@link APIJSONRequest}
-	 * @param encode
-	 * @see {@link #JSONRequest(String, Object, boolean)}
-	 */
-	public JSONRequest(Object object, boolean encode) {
-		this(null, object, encode);
-	}
-	/**
-	 * @param name
-	 * @param object
-	 * @param encode
-	 * @see {@link #put(String, Object, boolean)}
-	 */
-	public JSONRequest(String name, Object object, boolean encode) {
 		this();
-		put(name, object, encode);
+		puts(name, object);
 	}
 
 
 
-
-
-
+	
 	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
-
-	public JSONObject setTag(String tag) {
-		put(KEY_TAG, tag);
-		return this;
+	
+	/**set "tag":tag in outermost layer
+	 * for write operations
+	 * @param tag
+	 * @return
+	 */
+	public JSONRequest setTag(String tag) {
+		return puts(KEY_TAG, tag);
 	}
 
 
@@ -86,104 +70,63 @@ public class JSONRequest extends JSONObject {
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
 
-	/**
+	/**set what to query in Array layer
 	 * @param query what need to query, Table,total,ALL?
 	 * @return
+	 * @see {@link #QUERY_TABLE}
+	 * @see {@link #QUERY_TOTAL}
+	 * @see {@link #QUERY_ALL}
 	 */
 	public JSONRequest setQuery(int query) {
-		put(KEY_QUERY, query);
-		return this;
+		return puts(KEY_QUERY, query);
 	}
-	/**
-	 * @param count
+	/**set maximum count of Tables to query in Array layer
+	 * @param count <= 0 || >= max ? max : count
 	 * @return
 	 */
 	public JSONRequest setCount(int count) {
-		put(KEY_COUNT, count);
-		return this;
+		return puts(KEY_COUNT, count);
 	}
-	/**
-	 * @param page
+	/**set page of Tables to query in Array layer
+	 * @param page <= 0 ? 0 : page
 	 * @return
 	 */
 	public JSONRequest setPage(int page) {
-		put(KEY_PAGE, page);
-		return this;
+		return puts(KEY_PAGE, page);
 	}
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
-
-	// 导致JSONObject add >> get = null
-	//	/**
-	//	 * decode = true
-	//	 * @param key
-	//	 * return {@link #get(Object, boolean)}
-	//	 */
-	//	@Override
-	//	public Object get(Object key) {
-	//		return get(key, true);
-	//	}
-
-	/**
-	 * encode = true
-	 * @param value must be annotated by {@link APIJSONRequest}
-	 * @return {@link #put(String, boolean)}
-	 */
-	@Override
-	public Object put(Object value) {
-		return put(value, true);
-	}
-	/**
-	 * encode = true
-	 * @param key
-	 * @param value
-	 * return {@link #put(String, Object, boolean)}
-	 */
-	@Override
-	public Object put(String key, Object value) {
-		return put(key, value, true);
-	}
-
-
 	/**create a parent JSONObject named KEY_ARRAY
-	 * encode = true;
 	 * @param count
 	 * @param page
 	 * @return {@link #toArray(int, int, boolean)}
 	 */
 	public JSONRequest toArray(int count, int page) {
-		return toArray(count, page, true);
-	}
-	/**create a parent JSONObject named KEY_ARRAY
-	 * encode = true;
-	 * @param count
-	 * @param page
-	 * @return {@link #toArray(int, int, String, boolean)}
-	 */
-	public JSONRequest toArray(int count, int page, boolean encode) {
-		return toArray(count, page, null, encode);
-	}
-	/**create a parent JSONObject named name+KEY_ARRAY
-	 * encode = true;
-	 * @param count
-	 * @param page
-	 * @param name
-	 * @return {@link #toArray(int, int, String, boolean)}
-	 */
-	public JSONRequest toArray(int count, int page, String name) {
-		return toArray(count, page, name, true);
+		return toArray(count, page, null);
 	}
 	/**create a parent JSONObject named name+KEY_ARRAY. 
 	 * @param count
 	 * @param page
 	 * @param name
-	 * @param encode
 	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #add(com.alibaba.fastjson.JSONObject)} instead
 	 */
-	public JSONRequest toArray(int count, int page, String name, boolean encode) {
-		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page), encode);
+	public JSONRequest toArray(int count, int page, String name) {
+		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page));
+	}
+
+
+	
+	
+	@Override
+	public JSONRequest puts(Object value) {
+		return puts(null, value);
+	}
+	@Override
+	public JSONRequest puts(String key, Object value) {
+		super.puts(key, value);
+		return this;
 	}
 
 }

@@ -14,12 +14,9 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import static zuo.biao.apijson.StringUtil.UTF_8;
-
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,58 +84,58 @@ public class HttpManager {
 	public static final String KEY_TOKEN = "token";
 	public static final String KEY_COOKIE = "cookie";
 
+	// encode和decode太麻烦，直接都用HTTP POST
+	//	/**GET请求
+	//	 * @param paramList 请求参数列表，（可以一个键对应多个值）
+	//	 * @param url 接口url
+	//	 * @param requestCode
+	//	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
+	//	 *            {@link OnHttpResponseListener#onHttpResponse(int, String, Exception)}<br/>
+	//	 *            在发起请求的类中可以用requestCode来区分各个请求
+	//	 * @param listener
+	//	 */
+	//	public void get(final String url_, final String request, final OnHttpResponseListener listener) {
+	//		Log.d(TAG, "get  url_ = " + url_ + "; request = " + request + " >>>");
+	//		new AsyncTask<Void, Void, Exception>() {
+	//
+	//			String result;
+	//			@Override
+	//			protected Exception doInBackground(Void... params) {
+	//				try {
+	//					String url = StringUtil.getNoBlankString(url_)
+	//							+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
+	//					StringBuffer sb = new StringBuffer();
+	//					sb.append(url);
+	//
+	//					OkHttpClient client = getHttpClient(url);
+	//					if (client == null) {
+	//						return new Exception(TAG + ".get  AsyncTask.doInBackground  client == null >> return;");
+	//					}
+	//
+	//					result = getResponseJson(client, new Request.Builder()
+	//					.addHeader(KEY_TOKEN, getToken(url))
+	//					.url(sb.toString()).build());
+	//				} catch (Exception e) {
+	//					Log.e(TAG, "get  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
+	//							"} catch (Exception e) {\n" + e.getMessage());
+	//					return e;
+	//				}
+	//
+	//				return null;
+	//			}
+	//
+	//			@Override
+	//			protected void onPostExecute(Exception exception) {
+	//				super.onPostExecute(exception);
+	//				listener.onHttpResponse(0, result, exception);
+	//			}
+	//
+	//		}.execute();
+	//
+	//	}
 
-	/**GET请求
-	 * @param paramList 请求参数列表，（可以一个键对应多个值）
-	 * @param url 接口url
-	 * @param requestCode
-	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
-	 *            {@link OnHttpResponseListener#onHttpResponse(int, String, Exception)}<br/>
-	 *            在发起请求的类中可以用requestCode来区分各个请求
-	 * @param listener
-	 */
-	public void get(final String url_, final String request, final OnHttpResponseListener listener) {
-		Log.d(TAG, "get  url_ = " + url_ + "; request = " + request + " >>>");
-		new AsyncTask<Void, Void, Exception>() {
+	public static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
-			String result;
-			@Override
-			protected Exception doInBackground(Void... params) {
-				try {
-					String url = StringUtil.getNoBlankString(url_)
-							+ URLEncoder.encode(StringUtil.getNoBlankString(request), UTF_8);
-					StringBuffer sb = new StringBuffer();
-					sb.append(url);
-
-					OkHttpClient client = getHttpClient(url);
-					if (client == null) {
-						return new Exception(TAG + ".get  AsyncTask.doInBackground  client == null >> return;");
-					}
-
-					result = getResponseJson(client, new Request.Builder()
-					.addHeader(KEY_TOKEN, getToken(url))
-					.url(sb.toString()).build());
-				} catch (Exception e) {
-					Log.e(TAG, "get  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
-							"} catch (Exception e) {\n" + e.getMessage());
-					return e;
-				}
-
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Exception exception) {
-				super.onPostExecute(exception);
-				listener.onHttpResponse(0, result, exception);
-			}
-
-		}.execute();
-
-	}
-
-	public static final MediaType TYPE_JSON =MediaType.parse("application/json; charset=utf-8");
-	
 	/**POST请求
 	 * @param paramList 请求参数列表，（可以一个键对应多个值）
 	 * @param url 接口url
@@ -163,9 +160,9 @@ public class HttpManager {
 					if (client == null) {
 						return new Exception(TAG + ".post  AsyncTask.doInBackground  client == null >> return;");
 					}
-					
+
 					RequestBody requestBody = RequestBody.create(TYPE_JSON, request);
-					
+
 					result = getResponseJson(client, new Request.Builder()
 					.addHeader(KEY_TOKEN, getToken(url)).url(StringUtil.getNoBlankString(url))
 					.post(requestBody).build());

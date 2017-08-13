@@ -367,7 +367,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 	@Override
 	public List<CommentItem> parseArray(String json) {
-		return JSON.parseArray(new JSONResponse(json).getArray(CommentItem.class.getSimpleName()), CommentItem.class);
+		return new JSONResponse(json).getList(CommentItem.class);
 	}
 
 	@Override
@@ -520,7 +520,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 				if (requestCode == HTTP_GET_MOMENT) {
 					MomentItem data = JSONResponse.toObject(response, MomentItem.class);
 					if (data == null || data.getId() <= 0) {
-						if (JSONResponse.isSucceed(response)) {
+						if (JSONResponse.isSuccess(response)) {
 							showShortToast("动态不存在");
 							MomentActivity.super.finish();//需要动画，且不需要保存缓存
 							return;
@@ -534,7 +534,7 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 
 
 				JSONResponse comment = response.getJSONResponse(Comment.class.getSimpleName());
-				final boolean succeed = JSONResponse.isSucceed(comment);
+				final boolean succeed = JSONResponse.isSuccess(comment);
 				String operation = "操作";
 				switch (requestCode) {
 				case HTTP_COMMENT: // 新增评论

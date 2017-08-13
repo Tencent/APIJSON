@@ -14,11 +14,11 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import static zuo.biao.apijson.JSONObject.KEY_CONDITION;
 import static zuo.biao.apijson.JSONObject.KEY_CORRECT;
 import static zuo.biao.apijson.JSONObject.KEY_DROP;
 import static zuo.biao.apijson.JSONObject.KEY_TRY;
 import static zuo.biao.apijson.RequestMethod.PUT;
+import static zuo.biao.apijson.JSONObject.KEY_CONDITION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -272,7 +272,7 @@ public abstract class ObjectParser implements ParserAdapter {
 					key = entry.getKey();
 
 					try {
-						if (value instanceof JSONObject) {//JSONObject，往下一级提取
+						if (value instanceof JSONObject && key.startsWith("@") == false) {//JSONObject，往下一级提取
 							putChild(key, (JSON) value);
 						}
 						else if (method == PUT && value instanceof JSONArray
@@ -398,6 +398,7 @@ public abstract class ObjectParser implements ParserAdapter {
 	}
 
 
+	//TODO 需要锁表来保证获取到的 [] 不会在写入前被修改
 	/**PUT key:[]
 	 * @param key
 	 * @param array
@@ -424,7 +425,7 @@ public abstract class ObjectParser implements ParserAdapter {
 
 		//GET <<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONObject rq = new JSONObject();
-		rq.put(SQLConfig.ID, request.get(SQLConfig.ID));
+		rq.put(JSONRequest.KEY_ID, request.get(JSONRequest.KEY_ID));
 		rq.put(JSONRequest.KEY_COLUMN, realKey);
 		JSONObject rp = parseResponse(new JSONRequest(table, rq));
 		//GET >>>>>>>>>>>>>>>>>>>>>>>>>
@@ -485,12 +486,12 @@ public abstract class ObjectParser implements ParserAdapter {
 		if (isTableKey == false) {//提高性能
 			sqlReponse = new JSONObject(sqlRequest);
 		} else {
-			if (config == null) {
-				config = newQueryConfig();
-			}
-			config.setCount(count).setPage(page).setPosition(position);
 
 			try {
+				if (config == null) {
+					config = newSQLConfig();
+				}
+				config.setCount(count).setPage(page).setPosition(position);
 				sqlReponse = onSQLExecute();
 			} catch (Exception e) {
 				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
@@ -538,6 +539,8 @@ public abstract class ObjectParser implements ParserAdapter {
 			response.putAll(customMap);
 		}
 
+
+
 		//解析函数function
 		if (functionMap != null) {
 			Set<Entry<String, String>> functionSet = functionMap == null ? null : functionMap.entrySet();
@@ -564,8 +567,8 @@ public abstract class ObjectParser implements ParserAdapter {
 		return response;
 	}
 
-	protected SQLConfig newQueryConfig() {
-		return SQLConfig.newQueryConfig(method, table, sqlRequest);
+	protected SQLConfig newSQLConfig() throws Exception {
+		return SQLConfig.newSQLConfig(method, table, sqlRequest);
 	}
 	/**
 	 * response has the final value after parse (and query if isTableKey)

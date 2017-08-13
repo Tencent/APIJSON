@@ -167,7 +167,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 			public void run() {
 
 				JSONResponse response = new JSONResponse(resultJson);
-				isSucceed = JSONResponse.isSucceed(response);
+				isSucceed = JSONResponse.isSuccess(response);
 				
 				dismissProgressDialog();
 				switch (requestCode) {

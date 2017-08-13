@@ -312,7 +312,7 @@ public class NumberPasswordActivity extends BaseActivity implements OnClickListe
 		dismissProgressDialog();
 		switch (requestCode) {
 		case HTTP_SET_PASSWORD:
-			if (response.isSucceed()) {
+			if (response.isSuccess()) {
 				showShortToast(R.string.change_succeed);
 				saveAndExit(true);
 			} else {

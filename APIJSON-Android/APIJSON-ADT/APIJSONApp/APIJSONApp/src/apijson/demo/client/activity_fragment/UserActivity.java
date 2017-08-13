@@ -450,14 +450,14 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
 		JSONResponse response = new JSONResponse(resultJson);
 		JSONResponse response2 = response.getJSONResponse(User.class.getSimpleName());
-		boolean isSucceed = JSONResponse.isSucceed(response2);
+		boolean isSucceed = JSONResponse.isSuccess(response2);
 
 		dismissProgressDialog();
 		switch (requestCode) {
 		case HTTP_GET:
 			User user = response.getObject(User.class);
 			if (user == null || user.getId() <= 0) {
-				if (JSONResponse.isSucceed(response)) {
+				if (JSONResponse.isSuccess(response)) {
 					showShortToast("用户已注销");
 					super.finish();//需要动画，且不需要保存缓存
 					return;

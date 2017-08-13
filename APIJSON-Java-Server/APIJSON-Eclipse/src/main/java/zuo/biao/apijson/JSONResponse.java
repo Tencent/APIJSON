@@ -47,7 +47,6 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	//状态信息，非GET请求获得的信息<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	public static final int CODE_SUCCEED = 200; //成功
-	public static final int CODE_PARTIAL_SUCCEED = 206; //部分成功
 	public static final int CODE_UNSUPPORTED_ENCODING = 400; //编码错误
 	public static final int CODE_ILLEGAL_ACCESS = 401; //权限错误
 	public static final int CODE_UNSUPPORTED_OPERATION = 403; //禁止操作
@@ -63,9 +62,13 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	public static final int CODE_SERVER_ERROR = 500; //服务器内部错误
 
 
+	public static final String MSG_SUCCEED = "success"; //成功
+	public static final String MSG_SERVER_ERROR = "服务器内部错误！"; //失败
+	
 	public static final String KEY_CODE = "code";
 	public static final String KEY_MSG = "msg";
 	public static final String KEY_ID = "id";
+	public static final String KEY_ID_IN = KEY_ID + "{}";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_TOTAL = "total";
 
@@ -408,15 +411,18 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 				if (value instanceof JSONArray) {//转化JSONArray内部的APIJSON Array
 					transferredObject.put(replaceArray(key), format(key, (JSONArray) value));
-				} else if (value instanceof JSONObject) {//APIJSON Array转为常规JSONArray
+				}
+				else if (value instanceof JSONObject) {//APIJSON Array转为常规JSONArray
 					if (isArrayKey(key)) {//APIJSON Array转为常规JSONArray
 						arrayKey = key.substring(0, key.lastIndexOf(KEY_ARRAY));
 						transferredObject.put(getArrayKey(getSimpleName(arrayKey))
 								, format(key, toArray((JSONObject) value, arrayKey)));//需要将name:alias传至toArray
-					} else {//常规JSONObject，往下一级提取
+					}
+					else {//常规JSONObject，往下一级提取
 						transferredObject.put(getSimpleName(key), format((JSONObject) value));
 					}
-				} else {//其它Object，直接填充
+				}
+				else {//其它Object，直接填充
 					transferredObject.put(getSimpleName(key), value);
 				}
 			}
@@ -448,7 +454,8 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 			value = responseArray.get(i);
 			if (value instanceof JSONArray) {//转化JSONArray内部的APIJSON Array
 				transferredArray.add(format(null, (JSONArray) value));
-			} else if (value instanceof JSONObject) {//JSONObject，往下一级提取
+			}
+			else if (value instanceof JSONObject) {//JSONObject，往下一级提取
 				//判断是否需要提取child
 				if (isFirst && isTableKey(className) && ((JSONObject) value).containsKey(className)) {
 					isContainer = false;
@@ -456,7 +463,8 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 				//直接添加child 或 添加提取出的child
 				transferredArray.add(format(isContainer ? (JSONObject)value : ((JSONObject)value).getJSONObject(className) ));
 				isFirst = false;
-			} else {//其它Object，直接填充
+			}
+			else {//其它Object，直接填充
 				transferredArray.add(responseArray.get(i));
 			}
 		}

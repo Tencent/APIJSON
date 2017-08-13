@@ -250,4 +250,53 @@ public abstract class BaseModel implements Serializable {
 	}
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+	/**index是否在arr长度范围内
+	 * @param index
+	 * @param array
+	 * @return
+	 */
+	public static boolean isIndexInRange(Integer index, Object[] array) {
+		return index != null && index >= 0 && index < count(array);
+	}
+
+	/**获取在arr长度范围内的index
+	 * defaultIndex = 0
+	 * @param index
+	 * @param array
+	 * @return
+	 */
+	public static int getIndexInRange(Integer index, Object[] array) {
+		return getIndexInRange(index, array, 0);
+	}
+	/**获取在arr长度范围内的index
+	 * @param index
+	 * @param array
+	 * @param defaultIndex
+	 * @return
+	 */
+	public static int getIndexInRange(Integer index, Object[] array, int defaultIndex) {
+		return isIndexInRange(index, array) ? index : defaultIndex;
+	}
+
+	/**获取在arr长度范围内的index
+	 * defaultIndex = 0
+	 * @param <T>
+	 * @param index
+	 * @param array
+	 * @return
+	 */
+	public static <T> T getInRange(Integer index, T[] array) {
+		return getInRange(index, array, 0);
+	}
+	/**获取在arr长度范围内的index
+	 * @param <T>
+	 * @param index
+	 * @param array
+	 * @param defaultIndex
+	 * @return
+	 */
+	public static <T> T getInRange(Integer index, T[] array, int defaultIndex) {
+		return get(array, getIndexInRange(index, array, defaultIndex));
+	}
+
 }

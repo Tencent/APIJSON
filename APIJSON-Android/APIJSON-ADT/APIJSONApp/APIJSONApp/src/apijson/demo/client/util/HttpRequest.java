@@ -67,7 +67,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void head(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().get(URL_HEAD, request, requestCode, listener);
+		HttpManager.getInstance().post(URL_HEAD, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -75,7 +75,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void get(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().get(URL_GET, request, requestCode, listener);
+		HttpManager.getInstance().post(URL_GET, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -346,7 +346,7 @@ public class HttpRequest {
 	public static void getUser(long id, boolean withMomentList, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest(new User(id));
 		if (withMomentList) {
-			request.add(new JSONRequest(MOMENT_
+			request.putsAll(new JSONRequest(MOMENT_
 					, new JSONRequest(USER_ID, id).setColumn("pictureList").setOrder(DATE_DOWN))
 			.toArray(3, 0, MOMENT_));
 		}
@@ -365,7 +365,7 @@ public class HttpRequest {
 		List<Long> list = new ArrayList<Long>();
 		list.add(id);
 		JSONObject userObject = new JSONObject(new User(user.getId()));
-		userObject.put("contactIdList" + (isFriend ? "+" : "-"), list, true);
+		userObject.put("contactIdList" + (isFriend ? "+" : "-"), list);
 		put(new JSONRequest(USER_, userObject).setTag(USER_), requestCode, listener);
 	}
 
@@ -441,12 +441,12 @@ public class HttpRequest {
 			default:
 				break;
 			}
-			userItem.add(search);
+			userItem.putsAll(search);
 		}
 
 		JSONRequest listRequest = new JSONRequest(USER_, userItem);
 		listRequest = listRequest.toArray(count, page, USER_);
-		request.add(listRequest);
+		request.putsAll(listRequest);
 		get(request, requestCode, listener);
 	}
 
@@ -471,7 +471,7 @@ public class HttpRequest {
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		userItem.setQuery(JSONRequest.QUERY_ALL);//同时获取Table和total
-		request.add(userItem.toArray(10, 0, USER_));
+		request.putsAll(userItem.toArray(10, 0, USER_));
 		request.put("praiseCount@", "/User[]/total");//获取Table的总数total
 		//praise >>>>>>>>>>>>>>>>>>
 
@@ -526,7 +526,7 @@ public class HttpRequest {
 			break;
 		}
 		moment.setOrder(DATE_DOWN);
-		moment.add(search);
+		moment.putsAll(search);
 
 		request.put(MOMENT_, moment);
 		request.put(USER_, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
@@ -537,7 +537,7 @@ public class HttpRequest {
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		//		userItem.setQuery(JSONRequest.QUERY_ALL);
-		request.add(userItem.toArray(10, 0, USER_));
+		request.putsAll(userItem.toArray(10, 0, USER_));
 		//		request.put("praiseCount@", "/User[]/total");
 		//praise >>>>>>>>>>>>>>>>>>
 
@@ -548,7 +548,7 @@ public class HttpRequest {
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		//		commentItem.setQuery(JSONRequest.QUERY_ALL);
-		request.add(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
+		request.putsAll(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
 		//		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 
@@ -565,7 +565,7 @@ public class HttpRequest {
 		JSONObject data = new JSONObject(new Moment(id));
 		List<Long> list = new ArrayList<Long>();
 		list.add(application.getCurrentUserId());
-		data.put("praiseUserIdList" + (toPraise ? "+" : "-"), list, true);
+		data.puts("praiseUserIdList" + (toPraise ? "+" : "-"), list);
 
 		put(new JSONRequest(MOMENT_, data).setTag(MOMENT_), requestCode, listener);
 	}
@@ -597,7 +597,7 @@ public class HttpRequest {
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
 		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
-		request.put(COMMENT_, comment.setOrder(DATE_UP));
+		request.put(COMMENT_, comment.setOrder("toId+", DATE_UP));
 		request.put(USER_, new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 
 		//		if (page == 0) {
@@ -664,7 +664,7 @@ public class HttpRequest {
 		JSONObject privacy = new JSONObject(
 				new Privacy(application.getCurrentUserId()).setPayPassword(payPassword)
 				);
-		privacy.put("balance+", change, true);
+		privacy.puts("balance+", change);
 		JSONRequest request = new JSONRequest(PRIVACY_, privacy);
 
 		HttpManager.getInstance().post(URL_BASE + "put/balance", request.setTag(PRIVACY_), requestCode, listener);
