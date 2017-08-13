@@ -306,14 +306,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @param object
 	 * @return this
 	 */
-	public JSONObject putsAll(com.alibaba.fastjson.JSONObject object) {
-		putAll(object);
+	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
+		putAll(map);
 		return this;
 	}
 	@Override
-	public void putAll(Map<? extends String, ? extends Object> m) {
-		if (m != null && m.isEmpty() == false) {
-			super.putAll(m);
+	public void putAll(Map<? extends String, ? extends Object> map) {
+		if (map != null && map.isEmpty() == false) {
+			super.putAll(map);
 		}
 	}
 

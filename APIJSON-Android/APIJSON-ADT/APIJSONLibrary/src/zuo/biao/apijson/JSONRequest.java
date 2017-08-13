@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import java.util.Map;
+
 /**wrapper for request
  * @author Lemon
  * @see #puts
@@ -117,7 +119,11 @@ public class JSONRequest extends JSONObject {
 	}
 
 
-	
+	@Override
+	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
+		super.putsAll(map);
+		return this;
+	}
 	
 	@Override
 	public JSONRequest puts(Object value) {

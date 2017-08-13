@@ -29,7 +29,6 @@ import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.manager.HttpManager;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.server.model.Comment;
-import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
@@ -633,14 +632,15 @@ public class HttpRequest {
 	}
 	/**
 	 * @param id
+	 * @param userId
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void deleteComment(long id, int requestCode, OnHttpResponseListener listener) {
+	public static void deleteComment(long id, long userId, int requestCode, OnHttpResponseListener listener) {
 		delete(new JSONRequest(
-				new JSONObject(
+				COMMENT_, new JSONObject(
 						new Comment(id)
-						).setRole(application.isCurrentUser(id) ? RequestRole.OWNER.name() : RequestRole.ADMIN.name())
+						).setRole(application.isCurrentUser(userId) ? RequestRole.OWNER.name() : RequestRole.ADMIN.name())
 				).setTag(COMMENT_)
 				, requestCode, listener);
 	}
