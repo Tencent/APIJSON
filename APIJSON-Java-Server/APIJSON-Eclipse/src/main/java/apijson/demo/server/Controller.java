@@ -22,11 +22,13 @@ import static zuo.biao.apijson.RequestMethod.POST_GET;
 import static zuo.biao.apijson.RequestMethod.POST_HEAD;
 import static zuo.biao.apijson.RequestMethod.PUT;
 
+import java.net.URLDecoder;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,37 +66,37 @@ public class Controller {
 
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	//	/**获取
-	//	 * @param request 只用String，避免encode后未decode
-	//	 * @param session
-	//	 * @return
-	//	 * @see {@link RequestMethod#GET}
-	//	 */
-	//	@RequestMapping("get/{request}")
-	//	public String open_get(@PathVariable String request, HttpSession session) {
-	//		try {
-	//			request = URLDecoder.decode(request, StringUtil.UTF_8);
-	//		} catch (Exception e) {
-	//			// Parser会报错
-	//		}
-	//		return get(request, session);
-	//	}
-	//
-	//	/**计数
-	//	 * @param request 只用String，避免encode后未decode
-	//	 * @param session
-	//	 * @return
-	//	 * @see {@link RequestMethod#HEAD}
-	//	 */
-	//	@RequestMapping("head/{request}")
-	//	public String open_head(@PathVariable String request, HttpSession session) {
-	//		try {
-	//			request = URLDecoder.decode(request, StringUtil.UTF_8);
-	//		} catch (Exception e) {
-	//			// Parser会报错
-	//		}
-	//		return head(request, session);
-	//	}
+		/**获取
+		 * @param request 只用String，避免encode后未decode
+		 * @param session
+		 * @return
+		 * @see {@link RequestMethod#GET}
+		 */
+		@RequestMapping("get/{request}")
+		public String open_get(@PathVariable String request, HttpSession session) {
+			try {
+				request = URLDecoder.decode(request, StringUtil.UTF_8);
+			} catch (Exception e) {
+				// Parser会报错
+			}
+			return get(request, session);
+		}
+	
+		/**计数
+		 * @param request 只用String，避免encode后未decode
+		 * @param session
+		 * @return
+		 * @see {@link RequestMethod#HEAD}
+		 */
+		@RequestMapping("head/{request}")
+		public String open_head(@PathVariable String request, HttpSession session) {
+			try {
+				request = URLDecoder.decode(request, StringUtil.UTF_8);
+			} catch (Exception e) {
+				// Parser会报错
+			}
+			return head(request, session);
+		}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
