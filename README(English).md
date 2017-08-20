@@ -32,6 +32,8 @@ And server developers no longer have to write new apis and documents for compati
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_user.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_moment.jpg) 
 
+<br />
+<br />
 
 ### Here are some examples:
 
@@ -294,7 +296,7 @@ Response:
  Transmission | Server developers edit apis and update documents, then client developers request server and parse responses according to the documents | Client developers request server and parse responses for their requirements. No inteface! No document! No communication for any api or document between client and server developers! 
  Compatibility | Server developers add new apis tagged with v2 and update documents | Nothing need to do!
  
- <br />
+<br />
 
  Client request | Previous way | APIJSON
 -------- | ------------ | ------------
@@ -303,21 +305,21 @@ Response:
  URL | Different urls for different requests. The more diffirent kinds of request, the more different urls | One url for one method(GET,POST...), most requests use the same URL of the 7 common ones
  Key-Value Pair | key=value | key:value
 
- <br />
+<br />
  
  Server operation | Previous way | APIJSON
 -------- | ------------ | ------------
  Parse and response | Get key-value pairs and query the database with them by the default way, then encapsulate a JSON, finally return the JSON to clients | Just return what Parser#parse returned
  Way of setting JSON structure to return | Designed in servers and cannot be modified by any clients | Designed by clients and cannot be modified by servers
 
- <br />
+<br />
  
  Client parse | Previous way | APIJSON
 -------- | ------------ | ------------
  View structure | Search documents or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
  Operate | Parse JSON String from responses | Parse with JSONResponse or use previous way
 
- <br />
+<br />
 
  Client requests | Previous way | APIJSON
 -------- | ------------ | ------------
@@ -327,7 +329,7 @@ Response:
  A list, each item contains<br /> a Moment, a publisher(User)<br /> and a list of top 3 Comments | The Moment must contains an User Object and a Comment Array<br /><br /> base_url/get/moment/list?<br />page=0&count=3&commentCount=3 | [base_url/get/<br >{<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0, <br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{}, <br > &nbsp;&nbsp;&nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "id@":"/Moment/userId"<br > &nbsp;&nbsp;&nbsp;&nbsp; },<br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{},"User":{"id@":"%252FMoment%252FuserId"},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
  A list, each item contains<br /> a Moment, the same publisher(User)<br /> and a list of top 3 Comments | Each Moment must contains an User Object and a Comment Array <br /><br /> base_url/get/moment/list?<br />page=0&count=3<br />&commentCount=3&userId=38710 | Here are several ways:<br /> ① Change  <br >"Moment":{}, "User":{"id@":"/Moment/userId"}<br > to <br >["Moment":{"userId":38710}, "User":{"id":38710}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"User":{"id":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}}) <br /><br /> ② Or save repeated Users by this way<br />[base_url/get/<br >{<br > &nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":38710<br > &nbsp;&nbsp; },<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0,<br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br > &nbsp;&nbsp;&nbsp;&nbsp; }, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"User":{"id":38710},"[]":{"page":0,"count":3,"Moment":{"userId":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})<br /><br /> ③ If the User is already obtained, you can also save all repeated User by this way<br />[base_url/get/<br >{<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0,<br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br > &nbsp;&nbsp;&nbsp;&nbsp; },<br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
 
- <br />
+<br />
  
  Server responses | Previous way | APIJSON
 -------- | ------------ | ------------
