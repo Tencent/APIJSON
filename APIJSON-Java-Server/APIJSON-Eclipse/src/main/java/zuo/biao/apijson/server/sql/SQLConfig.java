@@ -1102,7 +1102,7 @@ public class SQLConfig {
 
 			tableWhere.put(TABLE_SCHEMA, SQLConfig.getSchema(schema));
 			tableWhere.put(TABLE_NAME, config.getSQLTable());
-			config.setTable(Column.TAG);
+			config.setTable(Column.class.getSimpleName());
 
 			schema = SCHEMA_INFORMATION;
 

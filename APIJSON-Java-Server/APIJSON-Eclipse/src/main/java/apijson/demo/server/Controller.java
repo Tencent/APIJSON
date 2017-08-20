@@ -66,37 +66,37 @@ public class Controller {
 
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		/**获取
-		 * @param request 只用String，避免encode后未decode
-		 * @param session
-		 * @return
-		 * @see {@link RequestMethod#GET}
-		 */
-		@RequestMapping("get/{request}")
-		public String open_get(@PathVariable String request, HttpSession session) {
-			try {
-				request = URLDecoder.decode(request, StringUtil.UTF_8);
-			} catch (Exception e) {
-				// Parser会报错
-			}
-			return get(request, session);
+	/**获取
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#GET}
+	 */
+	@RequestMapping("get/{request}")
+	public String open_get(@PathVariable String request, HttpSession session) {
+		try {
+			request = URLDecoder.decode(request, StringUtil.UTF_8);
+		} catch (Exception e) {
+			// Parser会报错
 		}
-	
-		/**计数
-		 * @param request 只用String，避免encode后未decode
-		 * @param session
-		 * @return
-		 * @see {@link RequestMethod#HEAD}
-		 */
-		@RequestMapping("head/{request}")
-		public String open_head(@PathVariable String request, HttpSession session) {
-			try {
-				request = URLDecoder.decode(request, StringUtil.UTF_8);
-			} catch (Exception e) {
-				// Parser会报错
-			}
-			return head(request, session);
+		return get(request, session);
+	}
+
+	/**计数
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#HEAD}
+	 */
+	@RequestMapping("head/{request}")
+	public String open_head(@PathVariable String request, HttpSession session) {
+		try {
+			request = URLDecoder.decode(request, StringUtil.UTF_8);
+		} catch (Exception e) {
+			// Parser会报错
 		}
+		return head(request, session);
+	}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -526,7 +526,7 @@ public class Controller {
 	public JSONObject register(@RequestBody String request) {
 		JSONObject requestObject = null;
 		String verify;
-		
+
 		JSONObject privacyObj;
 		String phone;
 		String password;
@@ -538,13 +538,13 @@ public class Controller {
 
 			verify = requestObject.getString(VERIFY);
 			requestObject.remove(VERIFY);
-			
+
 			privacyObj = requestObject.getJSONObject(PRIVACY_);
 			if (privacyObj == null) {
 				throw new NullPointerException("请设置 "  + PRIVACY_);
 			}
 			requestObject.remove(PRIVACY_);
-			
+
 			phone = privacyObj.getString(PHONE);
 			password = privacyObj.getString(_PASSWORD);
 
@@ -553,8 +553,8 @@ public class Controller {
 				throw new NullPointerException("请设置 "  + USER_);
 			}
 			name = userObj.getString(NAME);
-			
-			
+
+
 			if (StringUtil.isVerify(verify) == false) {
 				throw new IllegalArgumentException(VERIFY + ":value 中value不合法！");
 			}
@@ -595,7 +595,7 @@ public class Controller {
 
 		//生成User
 		response = new JSONResponse(new Parser(POST, true).parseResponse(requestObject));
-		
+
 		JSONResponse userRes = response.getJSONResponse(USER_);
 		long userId = userRes == null ? 0 : userRes.getId();
 		if (userId <= 0) {
