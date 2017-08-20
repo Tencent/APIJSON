@@ -11,7 +11,7 @@
 
 APIJSON is a JSON Transmission Structure Protocol.
 
-You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set.<br />
+You can set any JSON structure and request your server, and the server will response a JSON String with the structure you had set.<br />
 You can get any data with any JSON structure by requesting server just once. It's very convenient and flexible, and does not require a special api or multiple requests.<br />
 It provides additions and deletions, fuzzy search, remote function calls and so on. And you can save duplicate data and improve transmission speed as well!<br />
 
@@ -302,7 +302,7 @@ Response:
 -------- | ------------ | ------------
  Requirement | Client developers append key-value pairs to an url for a request in documents | Client developers append JSON to the url for their requirements
  Structure | base_url/get/table_name?<br />key0=value0&key1=value1...<br /><br />Only one table_name can be contained in an URL | base_url/get/<br />{<br > &nbsp;&nbsp; TableName0:{<br > &nbsp;&nbsp;&nbsp;&nbsp; key0:value0,<br > &nbsp;&nbsp;&nbsp;&nbsp; key1:value1,<br > &nbsp;&nbsp;&nbsp;&nbsp; ...<br > &nbsp;&nbsp; },<br > &nbsp;&nbsp; TableName1:{<br > &nbsp;&nbsp;&nbsp;&nbsp; ...<br > &nbsp;&nbsp; }<br > &nbsp;&nbsp; ...<br > }<br /><br />You can add TableNames as many as you want after an URL
- URL | Different urls for different requests. The more diffirent kinds of request, the more different urls | One url for one method(GET,POST...), most requests use the same URL of the 7 common ones
+ URL | Different urls for different requests. The more diffirent kinds of requests, the more different urls | One url for one method(GET,POST...), most requests use the same URL of the 7 common ones
  Key-Value Pair | key=value | key:value
 
 <br />
@@ -310,11 +310,11 @@ Response:
  Server operation | Previous way | APIJSON
 -------- | ------------ | ------------
  Parse and response | Get key-value pairs and query the database with them by the default way, then encapsulate a JSON, finally return the JSON to clients | Just return what Parser#parse returned
- Way of setting JSON structure to return | Designed in servers and cannot be modified by any clients | Designed by clients and cannot be modified by servers
+ Way of setting JSON structure of Response | Designed in servers and cannot be modified by clients | Designed by clients and cannot be modified by servers
 
 <br />
  
- Client parse | Previous way | APIJSON
+ Client resolve | Previous way | APIJSON
 -------- | ------------ | ------------
  View structure | Search documents or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
  Operate | Parse JSON String from responses | Parse with JSONResponse or use previous way
