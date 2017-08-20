@@ -11,9 +11,9 @@
 
 APIJSON is a JSON Transmission Structure Protocol.
 
-You can set any JSON structure and request your server, and the server will response a JSON String with the structure you had set.<br />
-You can get any data with any JSON structure by requesting server just once. It's very convenient and flexible, and does not require a special api or multiple requests.<br />
-It provides additions and deletions, fuzzy search, remote function calls and so on. And you can save duplicate data and improve transmission speed as well!<br />
+You can set any JSON structure and request your server, and the server will response a JSON with the structure you had set.<br />
+You can get any data by requesting server just once. It's very convenient and flexible, and does not require a special api or multiple requests.<br />
+It provides CRUD(read and write), Fuzzy Search, Remote Function Calls and so on. And you can save duplicate data and improve transmission speed as well!<br />
 
 Now you can realize JSON Transmissions without any api or document anymore!<br />
 Client developers will no longer be suffered from various error in documents, and don't have to communicate with server developers about apis or documents anymore!<br />
