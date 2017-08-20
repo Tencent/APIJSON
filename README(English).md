@@ -12,12 +12,12 @@
 APIJSON is a JSON Transmission Structure Protocol.
 
 You can set any JSON structure and request your server, and the server will return a JSON String with the structure you had set.<br />
-You can get any data with any JSON structure by requesting server just once. It's very convenient and flexible, and does not require a special interface or multiple requests.<br />
+You can get any data with any JSON structure by requesting server just once. It's very convenient and flexible, and does not require a special api or multiple requests.<br />
 It provides additions and deletions, fuzzy search, remote function calls and so on. And you can save duplicate data and improve transmission speed as well!<br />
 
-Now you can realize JSON Transmissions without any interface or doc anymore!<br />
-Client developers will no longer be suffered from various error in docs, and don't have to communicate with server developers about interfaces or docs anymore!<br />
-And server developers no longer have to write new interfaces and docs for compatibility with legacy apps! And they will no longer be endlessly disturbed by client developers at any time!
+Now you can realize JSON Transmissions without any api or document anymore!<br />
+Client developers will no longer be suffered from various error in documents, and don't have to communicate with server developers about apis or documents anymore!<br />
+And server developers no longer have to write new apis and documents for compatibility with legacy apps! And they will no longer be endlessly disturbed by client developers at any time!
 
 
 
@@ -291,13 +291,13 @@ Response:
  
  Process | Previous way | APIJSON
 -------- | ------------ | ------------
- Transmission | Server developers edit interfaces and update docs, then client developers request server and parse responses according to the docs | Client developers request server and parse responses for their requirements. No inteface! No doc! No communication for any interface or doc between client and server developers! 
- Compatibility | Server developers add new interfaces tagged with v2 and update docs | Nothing need to do!
+ Transmission | Server developers edit apis and update documents, then client developers request server and parse responses according to the documents | Client developers request server and parse responses for their requirements. No inteface! No document! No communication for any api or document between client and server developers! 
+ Compatibility | Server developers add new apis tagged with v2 and update documents | Nothing need to do!
  
  Client request | Previous way | APIJSON
 -------- | ------------ | ------------
- Requirement | Client developers append key-value pairs to an url for a request in docs | Client developers append JSON to the url for their requirements
- Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&loginPassword=1234<br /><br />The currentUserId and loginPassword is only for parts of interfaces | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, loginPassword:1234}<br /><br />The currentUserId and loginPassword is only for parts of interfaces
+ Requirement | Client developers append key-value pairs to an url for a request in documents | Client developers append JSON to the url for their requirements
+ Structure | base_url/lowercase_table_name?key0=value0&key1=value1...<br />&currentUserId=100&loginPassword=1234<br /><br />The currentUserId and loginPassword is only for parts of apis | base_url/{TableName0:{key0:value0, key1:value1 ...}, TableName1:{...}...<br />, currentUserId:100, loginPassword:1234}<br /><br />The currentUserId and loginPassword is only for parts of apis
  URL | Different urls for different requests | One url for one method(GET,POST...)
  Key-Value Pair | key=value | key:value
  
@@ -308,7 +308,7 @@ Response:
  
  Client parse | Previous way | APIJSON
 -------- | ------------ | ------------
- View structure | Search docs or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
+ View structure | Search documents or view logs after responses for requests | Just view the requests, and viewing logs after responses for requests is also supported
  Operate | Parse JSON String from responses | Parse with JSONResponse or use previous way
 
  Client requests for different requirements | Previous way | APIJSON
@@ -317,7 +317,7 @@ Response:
  Moment and it's publisher(User) | Request twice<br />Moment: <br /> base_url/get/moment?userId=38710<br /><br />User: <br /> base_url/get/user?id=38710 | Just request once<br />[base_url/get/<br >{<br > &nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br > &nbsp;&nbsp; }, <br > &nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":38710<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"Moment":{"userId":38710},"User":{"id":38710}})
  User list | base_url/get/user/list?<br />page=0&count=3&sex=0 | [base_url/get/<br >{<br > &nbsp;&nbsp; "User[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0,<br > &nbsp;&nbsp;&nbsp;&nbsp;  "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "sex":0<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"User[]":{"page":0,"count":3,"User":{"sex":0}}})
  A list, each item contains<br /> a Moment, a publisher(User)<br /> and a list of top 3 Comments | The Moment must contains an User Object and a Comment Array<br /><br /> base_url/get/moment/list?<br />page=0&count=3&commentCount=3 | [base_url/get/<br >{<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0, <br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{}, <br > &nbsp;&nbsp;&nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "id@":"/Moment/userId"<br > &nbsp;&nbsp;&nbsp;&nbsp; },<br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{},"User":{"id@":"%252FMoment%252FuserId"},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
- A list, each item contains<br /> a Moment, the same publisher(User)<br /> and a list of top 3 Comments | Each Moment must contains an User Object and a Comment Array <br /><br /> base_url/get/moment/list?<br />page=0&count=3<br />&commentCount=3&userId=38710 | Here are several ways:<br /> ① Change  <br >"Moment":{}, "User":{"id@":"/Moment/userId"}<br > to <br >["Moment":{"userId":38710}, "User":{"id":38710}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"User":{"id":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}}) <br /><br /> ② Or save 4 repeated User by this way<br />[base_url/get/<br >{<br > &nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":38710<br > &nbsp;&nbsp; },<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0,<br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br > &nbsp;&nbsp;&nbsp;&nbsp; }, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"User":{"id":38710},"[]":{"page":0,"count":3,"Moment":{"userId":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})<br /><br /> ③ If the User is already obtained, you can also save all repeated User by this way<br />[base_url/get/<br >{<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0,<br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br > &nbsp;&nbsp;&nbsp;&nbsp; },<br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
+ A list, each item contains<br /> a Moment, the same publisher(User)<br /> and a list of top 3 Comments | Each Moment must contains an User Object and a Comment Array <br /><br /> base_url/get/moment/list?<br />page=0&count=3<br />&commentCount=3&userId=38710 | Here are several ways:<br /> ① Change  <br >"Moment":{}, "User":{"id@":"/Moment/userId"}<br > to <br >["Moment":{"userId":38710}, "User":{"id":38710}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"User":{"id":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}}) <br /><br /> ② Or save repeated Users by this way<br />[base_url/get/<br >{<br > &nbsp;&nbsp; "User":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "id":38710<br > &nbsp;&nbsp; },<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0,<br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br > &nbsp;&nbsp;&nbsp;&nbsp; }, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"User":{"id":38710},"[]":{"page":0,"count":3,"Moment":{"userId":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})<br /><br /> ③ If the User is already obtained, you can also save all repeated User by this way<br />[base_url/get/<br >{<br > &nbsp;&nbsp; "[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp; "page":0,<br > &nbsp;&nbsp;&nbsp;&nbsp; "count":3, <br > &nbsp;&nbsp;&nbsp;&nbsp; "Moment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br > &nbsp;&nbsp;&nbsp;&nbsp; },<br > &nbsp;&nbsp;&nbsp;&nbsp; "Comment[]":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "count":3,<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Comment":{<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "momentId@":"[]/Moment/id"<br > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp;&nbsp;&nbsp; }<br > &nbsp;&nbsp; }<br >}](http://139.196.140.118:8080/get/{"[]":{"page":0,"count":3,"Moment":{"userId":38710},"Comment[]":{"count":3,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
  
  Server responses for different requests | Previous way | APIJSON
 -------- | ------------ | ------------
@@ -393,15 +393,21 @@ If the default url is not available, change it to an available one, such as an I
 
 ## Download Client App
 
-[APIJSONClientApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSON%28ADT%29.apk)
+App<br />
+[APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
-### If you have any questions or suggestions about APIJSON, you can send me an e-mail to tommylemon@qq.com.
+Test<br />
+[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
+
+### About the author
+TommyLemon:[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
+
+If you have any questions or suggestions, you can [create an issue](https://github.com/TommyLemon/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com)<br >
+If you fixed some bugs or added some functions, I would greatly appreciate it if you [contribute your code](https://github.com/TommyLemon/APIJSON/pulls)
 
 ## Update Log
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-## Welcome star, welcome fork
+## Star & Fork
 
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON) 
-
-# APIJSON, let interfaces go to hell !
