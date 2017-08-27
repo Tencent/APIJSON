@@ -43,14 +43,12 @@ public class CodeUtil {
 		if (set != null) {
 
 			Object value;
-			String pairKey;
 			for (String key : set) {
 				value = request.get(key);
 				if (value == null) {
 					continue;
 				}
 
-				pairKey = new String(key instanceof String ? "\"" + key + "\"" : key);
 				if (value instanceof JSONObject) {//APIJSON Array转为常规JSONArray
 					if (isArrayKey(key)) {//APIJSON Array转为常规JSONArray
 						response += NEWLINE + NEWLINE + "//" + key + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
@@ -65,22 +63,25 @@ public class CodeUtil {
 
 						String prefix = key.substring(0, key.length() - 2);
 						response += NEWLINE + NEWLINE
-								+ parentKey + ".add(" +  getItemKey(key) + ".toArray("
+								+ parentKey + ".putAll(" +  getItemKey(key) + ".toArray("
 								+ count  + ", " + page + (prefix.isEmpty() ? "" : ", \"" + prefix + "\"") + "));";
 
 						response += NEWLINE + "//" + key + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + NEWLINE;
-					} else {//常规JSONObject，往下一级提取
+					}
+					else {//常规JSONObject，往下一级提取
 						response += NEWLINE + NEWLINE + "//" + key + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
 
 						response += parse(key, (JSONObject) value);
 
-						response += NEWLINE + NEWLINE + parentKey + ".put(" + pairKey + ", " + getTableKey(key) + ");";
+						response += NEWLINE + NEWLINE + parentKey + ".put(\"" + key + "\", " + getTableKey(key) + ");";
 						response += NEWLINE + "//" + key + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + NEWLINE;
 					}
-				} else {//其它Object，直接填充
+				}
+				else {//其它Object，直接填充
 					if (value instanceof String) {
 						value = "\"" + value + "\"";
-					} else if (value instanceof JSONArray) {
+					}
+					else if (value instanceof JSONArray) {
 						String s = StringUtil.getString(value);
 						if (s.startsWith("[")) {
 							s = s.substring(1);
@@ -93,7 +94,7 @@ public class CodeUtil {
 						value = "new Object[]{" + s + "}";//反射获取泛型太麻烦，反正开发中还要改的
 					}
 
-					response += NEWLINE + parentKey + ".put(" + pairKey + ", " + value + ");";
+					response += NEWLINE + parentKey + ".put(\"" + key + "\", " + value + ");";
 				}
 			}
 		}

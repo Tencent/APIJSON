@@ -253,7 +253,7 @@ public class Controller {
 
 
 	/**生成验证码,修改为post请求
-	 * @param phone
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "post/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
@@ -290,7 +290,7 @@ public class Controller {
 	}
 
 	/**获取验证码
-	 * @param phone
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "post_get/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
@@ -307,8 +307,7 @@ public class Controller {
 	}
 
 	/**校验验证码
-	 * @param phone
-	 * @param code
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "post_head/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
