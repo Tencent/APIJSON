@@ -29,13 +29,13 @@ public enum RequestMethod {
 	 */
 	HEAD,
 	
-	/**
-	 * 通过POST来GET数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
+	/**TODO 改为GETS
+	 * 通过POST来GET数据，不显示请求内容和返回结果，并且校验请求，一般用于对安全要求比较高的请求
 	 */
 	POST_GET,
 	
-	/**
-	 * 通过POST来HEAD数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
+	/**TODO 改为HEADS
+	 * 通过POST来HEAD数据，不显示请求内容和返回结果，并且校验请求，一般用于对安全要求比较高的请求
 	 */
 	POST_HEAD,
 	

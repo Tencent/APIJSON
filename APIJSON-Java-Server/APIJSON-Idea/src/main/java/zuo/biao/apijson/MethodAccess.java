@@ -36,37 +36,37 @@ import java.lang.annotation.Target;
 public @interface MethodAccess {
 	
 	/**@see {@link RequestMethod#GET}
-	 * @return 该请求方法允许的结构 default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	 * @return 该请求方法允许的角色 default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
 	RequestRole[] GET() default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	
 	/**@see {@link RequestMethod#HEAD}
-	 * @return 该请求方法允许的结构 default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	 * @return 该请求方法允许的角色 default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
 	RequestRole[] HEAD() default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	
 	/**@see {@link RequestMethod#POST_GET}
-	 * @return 该请求方法允许的结构 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	 * @return 该请求方法允许的角色 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
 	RequestRole[] POST_GET() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	
 	/**@see {@link RequestMethod#POST_HEAD}
-	 * @return 该请求方法允许的结构 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	 * @return 该请求方法允许的角色 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
 	RequestRole[] POST_HEAD() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 
 	/**@see {@link RequestMethod#POST}
-	 * @return 该请求方法允许的结构  default {LOGIN, ADMIN};
+	 * @return 该请求方法允许的角色  default {LOGIN, ADMIN};
 	 */
 	RequestRole[] POST() default {LOGIN, ADMIN};
 
 	/**@see {@link RequestMethod#PUT}
-	 * @return 该请求方法允许的结构 default {OWNER, ADMIN};
+	 * @return 该请求方法允许的角色 default {OWNER, ADMIN};
 	 */
 	RequestRole[] PUT() default {OWNER, ADMIN};
 	
 	/**@see {@link RequestMethod#DELETE}
-	 * @return 该请求方法允许的结构 default {OWNER, ADMIN};
+	 * @return 该请求方法允许的角色 default {OWNER, ADMIN};
 	 */
 	RequestRole[] DELETE() default {OWNER, ADMIN};
 	

@@ -16,7 +16,14 @@ package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.JSONRequest.KEY_ID;
 import static zuo.biao.apijson.JSONRequest.KEY_ID_IN;
-import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.server.Operation.ADD;
+import static zuo.biao.apijson.server.Operation.DISALLOW;
+import static zuo.biao.apijson.server.Operation.NECESSARY;
+import static zuo.biao.apijson.server.Operation.PUT;
+import static zuo.biao.apijson.server.Operation.REMOVE;
+import static zuo.biao.apijson.server.Operation.REPLACE;
+import static zuo.biao.apijson.server.Operation.UNIQUE;
+import static zuo.biao.apijson.server.Operation.VERIFY;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +40,8 @@ import javax.validation.constraints.NotNull;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.demo.server.Verifier;
+import apijson.demo.server.model.BaseModel;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
@@ -47,6 +56,7 @@ import zuo.biao.apijson.server.sql.SQLExecutor;
 /**结构类
  * 增删改查: operation(add,replace,put,remove)   operation:{key0:value0, key1:value1 ...}
  * 对值校验: verify:{key0:value0, key1:value1 ...}  (key{}:range,key$:"%m%"等)
+ * 对值重复性校验: unique:"key0:, key1 ..."  (unique:"phone,email" 等)
  * @author Lemon
  */
 public class Structure {
@@ -58,26 +68,26 @@ public class Structure {
 
 
 
-	static final String requestString = "{\"Comment\":{\"disallow\": \"id\", \"necessary\": \"userId,momentId,content\"}, \"add\":{\"Comment:to\":{}}}";
-	static final String responseString = "{\"User\":{\"remove\": \"phone\", \"replace\":{\"sex\":2}, \"add\":{\"name\":\"api\"}}, \"put\":{\"Comment:to\":{}}}";
+	static final String requestString = "{\"Comment\":{\"DISALLOW\": \"id\", \"NECESSARY\": \"userId,momentId,content\"}, \"ADD\":{\"Comment:to\":{}}}";
+	static final String responseString = "{\"User\":{\"REMOVE\": \"phone\", \"REPLACE\":{\"sex\":2}, \"ADD\":{\"name\":\"api\"}}, \"PUT\":{\"Comment:to\":{}}}";
 
 	public static void test() throws Exception {
 		JSONObject request;
 		try {
 			request = JSON.parseObject("{\"Comment\":{\"userId\":0}}");
-			Log.d(TAG, "test  parseRequest = " + parseRequest(POST, "", JSON.parseObject(requestString), request));
+			Log.d(TAG, "test  parseRequest = " + parseRequest(RequestMethod.POST, "", JSON.parseObject(requestString), request));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		try {
 			request = JSON.parseObject("{\"Comment\":{\"userId\":0, \"momentId\":0, \"content\":\"apijson\"}}");
-			Log.d(TAG, "test  parseRequest = " + parseRequest(POST, "", JSON.parseObject(requestString), request));
+			Log.d(TAG, "test  parseRequest = " + parseRequest(RequestMethod.POST, "", JSON.parseObject(requestString), request));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		try {
 			request = JSON.parseObject("{\"Comment\":{\"id\":0, \"userId\":0, \"momentId\":0, \"content\":\"apijson\"}}");
-			Log.d(TAG, "test  parseRequest = " + parseRequest(POST, "", JSON.parseObject(requestString), request));
+			Log.d(TAG, "test  parseRequest = " + parseRequest(RequestMethod.POST, "", JSON.parseObject(requestString), request));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -147,7 +157,7 @@ public class Structure {
 						throw new IllegalArgumentException(method.name() + "请求，请设置 " + key + " ！");
 					}
 				} else if (zuo.biao.apijson.JSONObject.isTableKey(key)) {
-					if (method == POST) {
+					if (method == RequestMethod.POST) {
 						if (robj.containsKey(KEY_ID)) {
 							throw new IllegalArgumentException("POST请求， " + key + " 不能设置 " + KEY_ID + " ！");
 						}
@@ -155,16 +165,26 @@ public class Structure {
 						if (RequestMethod.isQueryMethod(method) == false) {
 							//单个修改或删除
 							Object id = robj.get(KEY_ID); //如果必须传 id ，可在Request表中配置necessary
-							if (id != null && id instanceof Number == false) {
-								throw new IllegalArgumentException(method.name() + "请求， " + key
-										+ " 中 " + KEY_ID + " 对应值的类型只能是Long！");
-							}
-							
-							//批量修改或删除
-							Object arr = robj.get(KEY_ID_IN); //如果必须传 id{} ，可在Request表中配置necessary
-							if (arr != null && arr instanceof JSONArray == false) {
-								throw new IllegalArgumentException(method.name() + "请求， " + key
-										+ " 中 " + KEY_ID_IN + " 对应值的类型只能是JSONArray！");
+							if (id != null) {
+								if (id instanceof Number == false) {
+									throw new IllegalArgumentException(method.name() + "请求， " + key
+											+ " 里面的 " + KEY_ID_IN + ":value 中value的类型只能是Long！");
+								}
+							} else {
+								//批量修改或删除
+								Object arr = robj.get(KEY_ID_IN); //如果必须传 id{} ，可在Request表中配置necessary
+								if (arr == null) {
+									throw new IllegalArgumentException(method.name() + "请求， " + key
+											+ " 里面 " + KEY_ID + " 和 " + KEY_ID_IN + " 必须传其中一个！");
+								}
+								if (arr instanceof JSONArray == false) {
+									throw new IllegalArgumentException(method.name() + "请求， " + key
+											+ " 里面的 " + KEY_ID_IN + ":value 中value的类型只能是 [Long] ！");
+								}
+								if (((JSONArray)arr).size() > 10) { //不允许一次操作10条以上记录
+									throw new IllegalArgumentException(method.name() + "请求， " + key
+											+ " 里面的 " + KEY_ID_IN + ":[] 中[]的长度不能超过10！");
+								}
 							}
 						}
 					}
@@ -216,24 +236,26 @@ public class Structure {
 
 
 		//获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONObject verify = target.getJSONObject(NAME_VERIFY);
-		JSONObject add = target.getJSONObject(NAME_ADD);
-		JSONObject put = target.getJSONObject(NAME_PUT);
-		JSONObject replace = target.getJSONObject(NAME_REPLACE);
+		JSONObject verify = target.getJSONObject(VERIFY.name());
+		JSONObject add = target.getJSONObject(ADD.name());
+		JSONObject put = target.getJSONObject(PUT.name());
+		JSONObject replace = target.getJSONObject(REPLACE.name());
 
-		String remove = StringUtil.getNoBlankString(target.getString(NAME_REMOVE));
-		String necessary = StringUtil.getNoBlankString(target.getString(NAME_NECESSARY));
-		String disallow = StringUtil.getNoBlankString(target.getString(NAME_DISALLOW));
+		String unique = StringUtil.getNoBlankString(target.getString(UNIQUE.name()));
+		String remove = StringUtil.getNoBlankString(target.getString(REMOVE.name()));
+		String necessary = StringUtil.getNoBlankString(target.getString(NECESSARY.name()));
+		String disallow = StringUtil.getNoBlankString(target.getString(DISALLOW.name()));
 
 		//不还原，传进来的target不应该是原来的
-		target.remove(NAME_VERIFY);
-		target.remove(NAME_ADD);
-		target.remove(NAME_PUT);
-		target.remove(NAME_REPLACE);
+		target.remove(VERIFY.name());
+		target.remove(ADD.name());
+		target.remove(PUT.name());
+		target.remove(REPLACE.name());
 
-		target.remove(NAME_REMOVE);
-		target.remove(NAME_NECESSARY);
-		target.remove(NAME_DISALLOW);
+		target.remove(UNIQUE.name());
+		target.remove(REMOVE.name());
+		target.remove(NECESSARY.name());
+		target.remove(DISALLOW.name());
 		//获取配置>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -241,7 +263,7 @@ public class Structure {
 
 
 		//移除字段<<<<<<<<<<<<<<<<<<<
-		String[] removes = StringUtil.split(StringUtil.getNoBlankString(remove));
+		String[] removes = StringUtil.split(remove);
 		if (removes != null && removes.length > 0) {
 			for (String r : removes) {
 				real.remove(r);
@@ -342,11 +364,22 @@ public class Structure {
 
 		//校验与修改Request<<<<<<<<<<<<<<<<<
 		//在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
-		real = operate(TYPE_VERIFY, verify, real);
-		real = operate(TYPE_ADD, add, real);
-		real = operate(TYPE_PUT, put, real);
-		real = operate(TYPE_REPLACE, replace, real);
+		real = operate(VERIFY, verify, real);
+		real = operate(ADD, add, real);
+		real = operate(PUT, put, real);
+		real = operate(REPLACE, replace, real);
 		//校验与修改Request>>>>>>>>>>>>>>>>>
+
+		//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
+		//校验重复<<<<<<<<<<<<<<<<<<<
+		String[] uniques = StringUtil.split(unique);
+		if (BaseModel.isEmpty(uniques) == false) {
+			long exceptId = real.getLongValue(KEY_ID);
+			for (String u : uniques) {
+				Verifier.verifyRepeat(name, u, real.get(u), exceptId);
+			}
+		}
+		//校验重复>>>>>>>>>>>>>>>>>>>
 
 		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
 		return real;
@@ -355,13 +388,13 @@ public class Structure {
 
 
 	/**执行操作
-	 * @param type
+	 * @param opt
 	 * @param targetChild
 	 * @param real
 	 * @return
 	 * @throws Exception
 	 */
-	private static JSONObject operate(int type, JSONObject targetChild, JSONObject real) throws Exception {
+	private static JSONObject operate(Operation opt, JSONObject targetChild, JSONObject real) throws Exception {
 		if (targetChild == null) {
 			return real;
 		}
@@ -369,17 +402,11 @@ public class Structure {
 			throw new IllegalArgumentException("operate  real == null!!!");
 		}
 
-		if (type <= TYPE_DEFAULT || type > TYPE_REMOVE) {
-			return real;
-		}
-
 
 		Set<Entry<String, Object>> set = new LinkedHashSet<>(targetChild.entrySet());
 		String tk;
 		Object tv;
-		String rk;
-		Object rv;
-		Logic logic;
+
 		for (Entry<String, Object> e : set) {
 			tk = e == null ? null : e.getKey();
 			if (tk == null) {
@@ -387,121 +414,17 @@ public class Structure {
 			}
 			tv = e.getValue();
 
-
-			if (type == TYPE_VERIFY) {//TODO {}, $, <>
-				if (tv == null) {
-					throw new IllegalArgumentException("operate  operate == TYPE_VERIFY >> tv == null!!!");
-				}
-
-				if (tk.endsWith("{}")) {//rv符合tv条件或在tv内
-					if (tv instanceof String) {//TODO  >= 0, < 10
-						sqlVerify("{}", real, tk, tv);
-					} 
-					else if (tv instanceof JSONArray) {
-						logic = new Logic(tk.substring(0, tk.length() - 2));
-						rk = logic.getKey();
-						rv = real.get(rk);
-
-						if (((JSONArray) tv).contains(rv) == logic.isNot()) {
-							throw new IllegalArgumentException("operate  operate == TYPE_VERIFY"
-									+ " >> ((JSONArray) tv).contains(rv) == logic.isNot()");
-						}
-					} else {
-						throw new UnsupportedDataTypeException("");
-					}
-				} else if (tk.endsWith("<>")) {//rv包含tv内的值
-					logic = new Logic(tk.substring(0, tk.length() - 2));
-					rk = logic.getKey();
-					rv = real.get(rk);
-
-					if (rv instanceof JSONArray == false) {
-						throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
-					}
-
-					JSONArray array;
-					if (tv instanceof JSONArray) {
-						array = (JSONArray) tv;
-					} else {
-						array = new JSONArray();
-						array.add(tv);
-					}
-
-					boolean isOr = false;
-					for (Object o : array) {
-						if (((JSONArray) rv).contains(o)) {
-							if (logic.isNot()) {
-								throw new IllegalArgumentException("operate  operate == TYPE_VERIFY"
-										+ " >> ((JSONArray) rv).contains(o) >> logic.isNot()");
-							}
-							if (logic.isOr()) {
-								isOr = true;
-								break;
-							}
-						} else {
-							if (logic.isAnd()) {
-								throw new IllegalArgumentException("operate  operate == TYPE_VERIFY"
-										+ " >> ((JSONArray) rv).contains(o) == false >> logic.isAnd()");
-							}
-						}
-					}
-
-					if (isOr == false && logic.isOr()) {
-						throw new IllegalArgumentException("operate  operate == TYPE_VERIFY"
-								+ " >> isOr == false && logic.isOr()");
-					}
-				} else if (tk.endsWith("?")) {//正则表达式
-					logic = new Logic(tk.substring(0, tk.length() - 1));
-					rk = logic.getKey();
-					rv = real.get(rk);
-
-					JSONArray array;
-					if (tv instanceof JSONArray) {
-						array = (JSONArray) tv;
-					} else {
-						array = new JSONArray();
-						array.add(tv);
-					}
-
-					boolean m;
-					boolean isOr = false;
-					for (Object r : array) {
-						if (r instanceof String == false) {
-							throw new UnsupportedDataTypeException(rk + ":" + rv + "中value只支持 String 或 [String] 类型！");
-						}
-						m = Pattern.compile((String) r).matcher("" + rv).matches();
-						if (m) {
-							if (logic.isNot()) {
-								throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 !" + array + " ！");
-							}
-							if (logic.isOr()) {
-								isOr = true;
-								break;
-							}
-						} else {
-							if (logic.isAnd()) {
-								throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 &" + array + " ！");
-							}
-						}
-					}
-
-					if (isOr == false && logic.isOr()) {
-						throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 |" + array + " ！");
-					}
-
-				} else if (tk.endsWith("$")) {//搜索
-					sqlVerify("$", real, tk, tv);
-				} else {
-					throw new IllegalArgumentException("服务器Request表verify配置错误！");
-				}
-			} else if (type == TYPE_PUT) {
+			if (opt == VERIFY) {
+				verify(tk, tv, real);
+			} else if (opt == PUT) {
 				real.put(tk, tv);
 			} else {
 				if (real.containsKey(tk)) {
-					if (type == TYPE_REPLACE) {
+					if (opt == REPLACE) {
 						real.put(tk, tv);
 					}
 				} else {
-					if (type == TYPE_ADD) {
+					if (opt == ADD) {
 						real.put(tk, tv);
 					}
 				}
@@ -511,6 +434,124 @@ public class Structure {
 		return real;
 	}
 
+
+	/**验证值
+	 * @param tk
+	 * @param tv
+	 * @param real
+	 * @throws Exception
+	 */
+	private static void verify(@NotNull String tk, @NotNull Object tv, @NotNull JSONObject real) throws Exception {
+		if (tv == null) {
+			throw new IllegalArgumentException("operate  operate == VERIFY " + tk + ":" + tv + " ,  >> tv == null!!!");
+		}
+
+		String rk;
+		Object rv;
+		Logic logic;
+		if (tk.endsWith("$")) { //搜索
+			sqlVerify("$", real, tk, tv);
+		}
+		else if (tk.endsWith("?")) { //正则表达式
+			logic = new Logic(tk.substring(0, tk.length() - 1));
+			rk = logic.getKey();
+			rv = real.get(rk);
+			if (rv == null) {
+				return;
+			}
+
+			JSONArray array = SQLConfig.newJSONArray(tv);
+
+			boolean m;
+			boolean isOr = false;
+			Pattern reg;
+			for (Object r : array) {
+				if (r instanceof String == false) {
+					throw new UnsupportedDataTypeException(rk + ":" + rv + " 中value只支持 String 或 [String] 类型！");
+				}
+				reg = ObjectParser.COMPILE_MAP.get(r);
+				if (reg == null) {
+					reg = Pattern.compile((String) r);
+				}
+				m = reg.matcher("" + rv).matches();
+				if (m) {
+					if (logic.isNot()) {
+						throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
+					}
+					if (logic.isOr()) {
+						isOr = true;
+						break;
+					}
+				} else {
+					if (logic.isAnd()) {
+						throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
+					}
+				}
+			}
+
+			if (isOr == false && logic.isOr()) {
+				throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
+			}
+		} 
+		else if (tk.endsWith("{}")) { //rv符合tv条件或在tv内
+			if (tv instanceof String) {//TODO  >= 0, < 10
+				sqlVerify("{}", real, tk, tv);
+			} 
+			else if (tv instanceof JSONArray) {
+				logic = new Logic(tk.substring(0, tk.length() - 2));
+				rk = logic.getKey();
+				rv = real.get(rk);
+				if (rv == null) {
+					return;
+				}
+
+				if (((JSONArray) tv).contains(rv) == logic.isNot()) {
+					throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
+				}
+			} 
+			else {
+				throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
+			}
+		}
+		else if (tk.endsWith("<>")) { //rv包含tv内的值
+			logic = new Logic(tk.substring(0, tk.length() - 2));
+			rk = logic.getKey();
+			rv = real.get(rk);
+			if (rv == null) {
+				return;
+			}
+
+			if (rv instanceof JSONArray == false) {
+				throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
+			}
+
+			JSONArray array = SQLConfig.newJSONArray(tv);
+
+			boolean isOr = false;
+			for (Object o : array) {
+				if (((JSONArray) rv).contains(o)) {
+					if (logic.isNot()) {
+						throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
+					}
+					if (logic.isOr()) {
+						isOr = true;
+						break;
+					}
+				} else {
+					if (logic.isAnd()) {
+						throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
+					}
+				}
+			}
+
+			if (isOr == false && logic.isOr()) {
+				throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
+			}
+		}
+		else {
+			throw new IllegalArgumentException("服务器Request表verify配置错误！");
+		}
+	}
 
 	/**通过数据库执行SQL语句来验证条件
 	 * @param funChar
@@ -524,13 +565,8 @@ public class Structure {
 		Logic logic = new Logic(tk.substring(0, tk.length() - funChar.length()));
 		String rk = logic.getKey();
 		Object rv = real.get(rk);
-
-		JSONArray array;
-		if (tv instanceof JSONArray) {
-			array = (JSONArray) tv;
-		} else {
-			array = new JSONArray();
-			array.add(tv);
+		if (rv == null) {
+			return;
 		}
 
 		SQLConfig config = new SQLConfig(RequestMethod.HEAD, 1, 0);
@@ -548,68 +584,8 @@ public class Structure {
 			executor.close();
 		}
 		if (result != null && JSONResponse.isExist(result.getIntValue(JSONResponse.KEY_COUNT)) == false) {
-			throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 " + logic.getChar() + array + " ！");
+			throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 " + logic.getChar() + tv + " ！");
 		}		
-	}
-
-
-
-	//	/**
-	//	 * @param real
-	//	 * @param tk
-	//	 * @param tv
-	//	 * @param tableKeySet
-	//	 */
-	//	private static void putTargetChild(JSONObject real, String tk, Object tv, Set<String> tableKeySet) {
-	//		real.put(tk, tv);
-	//		zuo.biao.apijson.server.Entry<String, String> pair = Pair.parseEntry(tk, true);
-	//		if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
-	//			tableKeySet.add(tk);
-	//		}
-	//	}
-
-
-	public static final int TYPE_DEFAULT = 0;
-	public static final int TYPE_VERIFY = 1;
-	public static final int TYPE_ADD = 2;
-	public static final int TYPE_PUT = 3;
-	public static final int TYPE_REPLACE = 4;
-	public static final int TYPE_REMOVE = 5;
-
-	public static final String NAME_VERIFY = "verify";
-
-	public static final String NAME_ADD = "add";
-	public static final String NAME_PUT = "put";
-	public static final String NAME_REPLACE = "replace";
-	public static final String NAME_REMOVE = "remove";
-
-	public static final String NAME_DISALLOW = "disallow";
-	public static final String NAME_NECESSARY = "necessary";
-
-	/**
-	 * @param key
-	 * @return
-	 */
-	public static int getOperate(String key) {
-		if (key != null) {
-			if (NAME_VERIFY.equals(key)) {
-				return TYPE_VERIFY;
-			}
-			if (NAME_ADD.equals(key)) {
-				return TYPE_ADD;
-			}
-			if (NAME_PUT.equals(key)) {
-				return TYPE_PUT;
-			}
-			if (NAME_REPLACE.equals(key)) {
-				return TYPE_REPLACE;
-			} 
-			if (NAME_REMOVE.equals(key)) {
-				return TYPE_REMOVE;
-			}
-		}
-
-		return TYPE_DEFAULT;
 	}
 
 

@@ -17,7 +17,6 @@ package zuo.biao.apijson;
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**通用字符串(String)相关类,为null时返回""
@@ -100,7 +99,7 @@ public class StringUtil {
 	 * @param array
 	 * @return {@link #getString(String[], boolean)}
 	 */
-	public static String getString(String[] array) {
+	public static String getString(Object[] array) {
 		return getString(array, false);
 	}
 	/**获取string,为null则返回""
@@ -109,7 +108,7 @@ public class StringUtil {
 	 * @param ignoreEmptyItem
 	 * @return {@link #getString(String[], String, boolean)}
 	 */
-	public static String getString(String[] array, boolean ignoreEmptyItem) {
+	public static String getString(Object[] array, boolean ignoreEmptyItem) {
 		return getString(array, null, ignoreEmptyItem);
 	}
 	/**获取string,为null则返回""
@@ -118,7 +117,7 @@ public class StringUtil {
 	 * @param split
 	 * @return {@link #getString(String[], String, boolean)}
 	 */
-	public static String getString(String[] array, String split) {
+	public static String getString(Object[] array, String split) {
 		return getString(array, split, false);
 	}
 	/**获取string,为null则返回""
@@ -127,7 +126,7 @@ public class StringUtil {
 	 * @param ignoreEmptyItem
 	 * @return
 	 */
-	public static String getString(String[] array, String split, boolean ignoreEmptyItem) {
+	public static String getString(Object[] array, String split, boolean ignoreEmptyItem) {
 		String s = "";
 		if (array != null) {
 			if (split == null) {
@@ -309,7 +308,7 @@ public class StringUtil {
 	public static final Pattern PATTERN_EMAIL;
 	public static final Pattern PATTERN_ID_CARD;
 	public static final Pattern PATTERN_ALPHA;
-	public static final Pattern PATTERN_PASSWORD;
+	public static final Pattern PATTERN_PASSWORD; //TODO
 	public static final Pattern PATTERN_NAME;
 	public static final Pattern PATTERN_ALPHA_BIG;
 	public static final Pattern PATTERN_ALPHA_SMALL;
@@ -322,7 +321,7 @@ public class StringUtil {
 		PATTERN_PHONE = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$");
 		PATTERN_EMAIL = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$");
 		PATTERN_ID_CARD = Pattern.compile("(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}$)");
-		PATTERN_PASSWORD = Pattern.compile("^[0-9a-zA-Z_]+$");
+		PATTERN_PASSWORD = Pattern.compile("^[0-9a-zA-Z]+$");
 	}
 
 	/**判断手机格式是否正确
@@ -436,21 +435,21 @@ public class StringUtil {
 
 
 	/**判断字符类型是否是身份证号
-	 * @param idCard
+	 * @param number
 	 * @return
 	 */
-	public static boolean isIDCard(String idCard) {
-		if (isNumberOrAlpha(idCard) == false) {
+	public static boolean isIDCard(String number) {
+		if (isNumberOrAlpha(number) == false) {
 			return false;
 		}
-		idCard = getString(idCard);
-		if (idCard.length() == 15) {
-			Log.i(TAG, "isIDCard idCard.length() == 15 old IDCard");
-			currentString = idCard;
+		number = getString(number);
+		if (number.length() == 15) {
+			Log.i(TAG, "isIDCard number.length() == 15 old IDCard");
+			currentString = number;
 			return true;
 		}
-		if (idCard.length() == 18) {
-			currentString = idCard;
+		if (number.length() == 18) {
+			currentString = number;
 			return true;
 		}
 

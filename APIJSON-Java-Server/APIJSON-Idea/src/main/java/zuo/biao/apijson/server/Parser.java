@@ -15,10 +15,8 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.RequestMethod.GET;
-import static zuo.biao.apijson.StringUtil.UTF_8;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +29,7 @@ import javax.validation.constraints.NotNull;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import apijson.demo.server.AccessVerifier;
+import apijson.demo.server.Verifier;
 import apijson.demo.server.model.User;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
@@ -41,6 +39,7 @@ import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConditionErrorException;
 import zuo.biao.apijson.server.exception.ConflictException;
+import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.exception.NotLoggedInException;
 import zuo.biao.apijson.server.exception.OutOfRangeException;
 import zuo.biao.apijson.server.sql.SQLConfig;
@@ -84,8 +83,8 @@ public class Parser {
 	private long visitorId;//来访用户id
 	public Parser setSession(@NotNull HttpSession session) {
 		this.session = session;
-		this.visitor = AccessVerifier.getUser(session);
-		this.visitorId = AccessVerifier.getUserId(session);
+		this.visitor = Verifier.getUser(session);
+		this.visitorId = Verifier.getUserId(session);
 		return this;
 	}
 	private RequestRole globleRole;//全局角色，对未指明角色的Table自动加上这个角色
@@ -117,7 +116,7 @@ public class Parser {
 
 
 	private JSONObject requestObject;
-	private SQLExecutor sQLExecutor;
+	private SQLExecutor sqlExecutor;
 	private Map<String, Object> queryResultMap;//path-result
 
 
@@ -190,18 +189,18 @@ public class Parser {
 		queryResultMap = new HashMap<String, Object>();
 
 		Exception error = null;
-		sQLExecutor = new SQLExecutor();
+		sqlExecutor = new SQLExecutor();
 		try {
 			requestObject = getObject(null, null, request);
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e;
 		}
-		sQLExecutor.close();
-		sQLExecutor = null;
+		sqlExecutor.close();
+		sqlExecutor = null;
 
 
-		requestObject = AccessVerifier.removeAccessInfo(requestObject);
+		requestObject = Verifier.removeAccessInfo(requestObject);
 		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
 
 
@@ -228,14 +227,22 @@ public class Parser {
 	 * @return
 	 * @throws Exception 
 	 */
+	@NotNull
 	public static JSONObject parseRequest(String request, RequestMethod method) throws Exception {
-		request = URLDecoder.decode(request, UTF_8);
+		//全走HTTP POST，不用encode和decode		
+		//		if (RequestMethod.isPublicMethod(method)) {
+		//			request = URLDecoder.decode(request, UTF_8);
+		//			Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + method
+		//					+ "/parseRequest  request = \n" + request + "\n\n");
+		//		}
 		if (method == null) {
 			method = GET;
 		}
-		Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n " + method
-				+ "/parseResponse  request = \n" + request + "\n\n");
-		return JSON.parseObject(request);
+		JSONObject obj = JSON.parseObject(request);
+		if (obj == null) {
+			throw new UnsupportedEncodingException("JSON格式不合法！");
+		}
+		return obj;
 	}
 
 
@@ -277,13 +284,13 @@ public class Parser {
 	 * @return
 	 */
 	public static JSONObject extendSuccessResult(JSONObject object) {
-		return extendResult(object, 200, "success");
+		return extendResult(object, JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED);
 	}
 	/**获取请求成功的状态内容
 	 * @return
 	 */
 	public static JSONObject newSuccessResult() {
-		return newResult(200, "success");
+		return newResult(JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED);
 	}
 	/**添加请求成功的状态内容
 	 * @param object
@@ -301,7 +308,7 @@ public class Parser {
 		if (e != null) {
 			e.printStackTrace();
 
-			int code = JSONResponse.CODE_NOT_FOUND;
+			int code;
 			if (e instanceof UnsupportedEncodingException) {
 				code = JSONResponse.CODE_UNSUPPORTED_ENCODING;
 			} 
@@ -310,6 +317,9 @@ public class Parser {
 			}
 			else if (e instanceof UnsupportedOperationException) {
 				code = JSONResponse.CODE_UNSUPPORTED_OPERATION;
+			}
+			else if (e instanceof NotExistException) {
+				code = JSONResponse.CODE_NOT_FOUND;
 			}
 			else if (e instanceof IllegalArgumentException) {
 				code = JSONResponse.CODE_ILLEGAL_ARGUMENT;
@@ -335,11 +345,14 @@ public class Parser {
 			else if (e instanceof NullPointerException) {
 				code = JSONResponse.CODE_NULL_POINTER;
 			}
+			else {
+				code = JSONResponse.CODE_SERVER_ERROR;
+			}
 
 			return newResult(code, e.getMessage());
 		}
 
-		return newResult(500, "服务器内部错误");
+		return newResult(JSONResponse.CODE_SERVER_ERROR, JSONResponse.MSG_SERVER_ERROR);
 	}
 
 
@@ -766,7 +779,7 @@ public class Parser {
 		JSONObject parent = null;
 		String[] keys = null;
 		for (String path : set) {
-			if (valuePath.startsWith(path)) {
+			if (valuePath.startsWith(path + "/")) {
 				try {
 					parent = (JSONObject) queryResultMap.get(path);
 				} catch (Exception e) {
@@ -826,9 +839,9 @@ public class Parser {
 					config.setRole(visitorId <= 0 ? RequestRole.UNKNOWN : RequestRole.LOGIN);
 				}
 			}
-			AccessVerifier.verify(config, visitor);
+			Verifier.verify(config, visitor);
 		}
-		return getCorrectResponse(requestMethod, config.getTable(), sQLExecutor.execute(config));
+		return getCorrectResponse(requestMethod, config.getTable(), sqlExecutor.execute(config));
 	}
 
 

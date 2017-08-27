@@ -25,6 +25,8 @@ import static zuo.biao.apijson.JSONObject.KEY_SCHEMA;
 import static zuo.biao.apijson.JSONRequest.KEY_COUNT;
 import static zuo.biao.apijson.JSONRequest.KEY_PAGE;
 import static zuo.biao.apijson.JSONRequest.KEY_QUERY;
+import static zuo.biao.apijson.JSONRequest.KEY_ID;
+import static zuo.biao.apijson.JSONRequest.KEY_ID_IN;
 import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
@@ -42,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -50,6 +54,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
+import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
@@ -57,7 +62,6 @@ import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.model.Column;
 import zuo.biao.apijson.model.Table;
-import zuo.biao.apijson.server.JSONRequest;
 import zuo.biao.apijson.server.Logic;
 import zuo.biao.apijson.server.Pair;
 import zuo.biao.apijson.server.exception.NotExistException;
@@ -77,12 +81,9 @@ public class SQLConfig {
 	public static final String SCHEMA_INFORMATION = "`information_schema`";
 	public static final String TABLE_SCHEMA = "`table_schema`";
 	public static final String TABLE_NAME = "`table_name`";
-	
-	
-	
-	
-	public static final String ID = JSONRequest.KEY_ID;
-	public static final String ID_IN = JSONRequest.KEY_ID_IN;
+
+
+
 
 	public static final List<String> ARRAY_KEY_LIST;
 	static {
@@ -121,6 +122,9 @@ public class SQLConfig {
 
 	private long id; //Table的id
 	private RequestMethod method; //操作方法
+	/**
+	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
+	 */
 	private RequestRole role; //发送请求的用户的角色
 	private String schema; //Table所在的数据库
 	private String table; //Table名
@@ -336,12 +340,12 @@ public class SQLConfig {
 	public String getValuesString() {
 		return values;
 	}
-	public SQLConfig setValues(String[][] values) {
+	public SQLConfig setValues(String[][] valuess) {
 		String s = "";
-		if (values != null && values.length > 0) {
-			String[] items = new String[values.length];
-			for (int i = 0; i < values.length; i++) {
-				items[i] = "(" + StringUtil.getString(values[i]) + ")";
+		if (BaseModel.isEmpty(valuess) == false) {
+			String[] items = new String[valuess.length];
+			for (int i = 0; i < valuess.length; i++) {
+				items[i] = "(" + StringUtil.getString(valuess[i]) + ")";
 			}
 			s = StringUtil.getString(items);
 		}
@@ -478,7 +482,7 @@ public class SQLConfig {
 					int index;
 					for (String k : set) {
 						index = k.indexOf(key);
-						if (index > 0 && StringUtil.isName(k.substring(index)) == false) {
+						if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
 							return where.get(k);
 						}
 					}
@@ -490,7 +494,7 @@ public class SQLConfig {
 	public SQLConfig addWhere(String key, Object value) {
 		if (key != null) {
 			if (where == null) {
-				where = new HashMap<String, Object>();	
+				where = new LinkedHashMap<String, Object>();	
 			}
 			where.put(key, value);
 		}
@@ -513,72 +517,88 @@ public class SQLConfig {
 	 */
 	public static String getWhereString(RequestMethod method, Map<String, Object> where, boolean verifyName) throws Exception {
 		Set<String> set = where == null ? null : where.keySet();
-		if (set != null && set.size() > 0) {
+		if (BaseModel.isEmpty(set)) {
+			return "";
+		}
+		String whereString = "";
+		boolean isFirst = true;
 
-			String whereString = "";
-			boolean isFirst = true;
-			int keyType = 0;// 0 - =; 1 - $, 2 - {} 
-			Object value;
-			for (String key : set) {
-				Log.d(TAG, "getWhereString  key = " + key);
-				//避免筛选到全部	value = key == null ? null : where.get(key);
-				if (key == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
-					Log.d(TAG, "getWhereString  key == null || key.startsWith(@) || key.endsWith(()) >> continue;");
-					continue;
-				}
-				if (key.endsWith("@")) {//引用
-					key = key.substring(0, key.lastIndexOf("@"));
-					//					throw new IllegalArgumentException(TAG + ".getWhereString: 字符 " + key + " 不合法！");
-				}
-				if (key.endsWith("$")) {
-					keyType = 1;
-				} 
-				else if (key.endsWith("?")) {
-					keyType = 2;
-				}
-				else if (key.endsWith("{}")) {
-					keyType = 3;
-				}
-				else if (key.endsWith("<>")) {
-					keyType = 4;
-				}
-				value = where.get(key);
-				key = getRealKey(method, key, false, true, verifyName);
+		String condition;
+		for (String key : set) {
+			condition = getWhereItem(key, where.get(key), method, verifyName);
 
-				String condition = "";
-				switch (keyType) {
-				case 1:
-					condition = getSearchString(key, value);
-					break;
-				case 2:
-					condition = getRegExpString(key, value);
-					break;
-				case 3:
-					condition = getRangeString(key, value);
-					break;
-				case 4:
-					condition = getContainString(key, value);
-					break;
-				default:
-					condition = (key + "='" + value + "'");
-					break;
-				}
-				if (StringUtil.isEmpty(condition, true)) {//避免SQL条件连接错误
-					continue;
-				}
-
-				whereString += (isFirst ? "" : AND) + condition;
-
-				isFirst = false;
+			if (StringUtil.isEmpty(condition, true)) {//避免SQL条件连接错误
+				continue;
 			}
 
-			if (whereString.isEmpty() == false) {
-				return " WHERE " + whereString;
-			}
+			whereString += (isFirst ? "" : AND) + condition;
+
+			isFirst = false;
 		}
 
-		return "";
+		String s = whereString.isEmpty() ? "" : " WHERE " + whereString;
+		
+		if (s.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
+			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
+		}
+		
+		return s;
 	}
+
+	/**
+	 * @param key
+	 * @param value
+	 * @param method
+	 * @param verifyName
+	 * @return
+	 * @throws Exception
+	 */
+	private static String getWhereItem(String key, Object value
+			, RequestMethod method, boolean verifyName) throws Exception {
+		Log.d(TAG, "getWhereItem  key = " + key);
+		//避免筛选到全部	value = key == null ? null : where.get(key);
+		if (key == null || value == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
+			Log.d(TAG, "getWhereItem  key == null || value == null"
+					+ " || key.startsWith(@) || key.endsWith(()) >> continue;");
+			return null;
+		}
+		if (key.endsWith("@")) {//引用
+			//	key = key.substring(0, key.lastIndexOf("@"));
+			throw new IllegalArgumentException(TAG + ".getWhereItem: 字符 " + key + " 不合法！");
+		}
+
+		int keyType;
+		if (key.endsWith("$")) {
+			keyType = 1;
+		} 
+		else if (key.endsWith("?")) {
+			keyType = 2;
+		}
+		else if (key.endsWith("{}")) {
+			keyType = 3;
+		}
+		else if (key.endsWith("<>")) {
+			keyType = 4;
+		}
+		else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
+			keyType = 0;
+		}
+		key = getRealKey(method, key, false, true, verifyName);
+
+		switch (keyType) {
+		case 1:
+			return getSearchString(key, value);
+		case 2:
+			return getRegExpString(key, value);
+		case 3:
+			return getRangeString(key, value);
+		case 4:
+			return getContainString(key, value);
+		default:
+			return (key + "='" + value + "'");
+		}
+	}
+
 
 	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**search key match value
@@ -595,15 +615,11 @@ public class SQLConfig {
 		key = logic.getKey();
 		Log.i(TAG, "getRangeString key = " + key);
 
-		if (value instanceof JSONArray == false) {//TODO 直接掉Like性能最好！
-			JSONArray array = new JSONArray();
-			array.add(value);
-			value = array;
-		}
-		if (((JSONArray) value).isEmpty()) {
+		JSONArray arr = newJSONArray(value);
+		if (arr.isEmpty()) {
 			return "";
 		}
-		return getSearchString(key, ((JSONArray) value).toArray(), logic.getType());
+		return getSearchString(key, arr.toArray(), logic.getType());
 	}
 	/**search key match values
 	 * @param in
@@ -653,15 +669,11 @@ public class SQLConfig {
 		key = logic.getKey();
 		Log.i(TAG, "getRangeString key = " + key);
 
-		if (value instanceof JSONArray == false) {
-			JSONArray array = new JSONArray();
-			array.add(value);
-			value = array;
-		}
-		if (((JSONArray) value).isEmpty()) {
+		JSONArray arr = newJSONArray(value);
+		if (arr.isEmpty()) {
 			return "";
 		}
-		return getRegExpString(key, ((JSONArray) value).toArray(), logic.getType());
+		return getRegExpString(key, arr.toArray(), logic.getType());
 	}
 	/**search key match RegExp values
 	 * @param in
@@ -714,9 +726,9 @@ public class SQLConfig {
 		key = logic.getKey();
 		Log.i(TAG, "getRangeString key = " + key);
 
-		if (range instanceof JSONArray) {
+		if (range instanceof List) {
 			if (logic.isOr() || logic.isNot()) {
-				return key + getInString(key, ((JSONArray) range).toArray(), logic.isNot());
+				return key + getInString(key, ((List<?>) range).toArray(), logic.isNot());
 			}
 			throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
 		}
@@ -779,12 +791,8 @@ public class SQLConfig {
 		key = logic.getKey();
 		Log.i(TAG, "getRangeString key = " + key);
 
-		if (value instanceof JSONArray == false) {//TODO 直接调Like性能最好！
-			JSONArray array = new JSONArray();
-			array.add(value);
-			value = array;
-		}
-		return getContainString(key, ((JSONArray) value).toArray(), logic.getType());
+		//TODO 直接调Like性能最好！
+		return getContainString(key, newJSONArray(value).toArray(), logic.getType());
 	}
 	/**WHERE key contains childs
 	 * @param key
@@ -830,9 +838,24 @@ public class SQLConfig {
 	//<> contain >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+	/**转为JSONArray
+	 * @param tv
+	 * @return
+	 */
+	@NotNull
+	public static JSONArray newJSONArray(Object obj) {
+		JSONArray array = new JSONArray();
+		if (obj != null) {
+			if (obj instanceof Collection) {
+				array.addAll((Collection<?>) obj);
+			} else {
+				array.add(obj);
+			}
+		}
+		return array;
+	}
+
 	//WHERE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
 
 
 	//SET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -859,7 +882,7 @@ public class SQLConfig {
 			Object value;
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : content.get(key);
-				if (key == null || ID.equals(key)) {
+				if (key == null || KEY_ID.equals(key)) {
 					continue;
 				}
 
@@ -995,7 +1018,8 @@ public class SQLConfig {
 		//		//order: id+ -> id >= idOfStartIndex; id- -> id <= idOfStartIndex >>>>>>>>>>>>>>>>>>
 		//
 		//
-		//		//结果错误！SELECT * FROM sys.User AS t0 INNER JOIN (SELECT id FROM sys.User ORDER BY date ASC LIMIT 20, 10) AS t1 ON t0.id = t1.id
+		//		//结果错误！SELECT * FROM linking_member.mes_member_user_test AS t0 INNER JOIN
+		//      (SELECT id FROM linking_member.mes_member_user_test ORDER BY date ASC LIMIT 20, 10) AS t1 ON t0.id = t1.id
 		//		//common case, inner join
 		//		condition += config.getLimitString();
 		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
@@ -1005,125 +1029,201 @@ public class SQLConfig {
 	 * @param table
 	 * @param request
 	 * @return
+	 * @throws Exception 
 	 */
-	public static synchronized SQLConfig newQueryConfig(RequestMethod method, String table, JSONObject request) {
+	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request) throws Exception {
+		if (request == null) { // User:{} 这种空内容在查询时也有效
+			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
+		}
 		SQLConfig config = new SQLConfig(method, table);
 
-		if (method == POST && request != null && request.get(ID) == null) {
-			request.put(ID, System.currentTimeMillis());
+		boolean isEmpty = request.isEmpty();
+		if (isEmpty) { // User:{} 这种空内容在查询时也有效
+			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
 
-		if (request != null && request.isEmpty() == false) {
-			String role = request.getString(KEY_ROLE);
-			String schema = request.getString(KEY_SCHEMA);
-			boolean about = request.getBooleanValue(KEY_ABOUT);
-			String condition = request.getString(KEY_CONDITION);
-			String column = StringUtil.getString(request.getString(KEY_COLUMN));
-			String group = request.getString(KEY_GROUP);
-			String having = request.getString(KEY_HAVING);
-			String order = request.getString(KEY_ORDER);
+		Object idIn = request.get(KEY_ID_IN); //可能是 id{}:">0"
 
-			request.remove(KEY_ROLE);
-			request.remove(KEY_SCHEMA);
-			request.remove(KEY_ABOUT);
-			request.remove(KEY_CONDITION);
-			request.remove(KEY_COLUMN);
-			request.remove(KEY_GROUP);
-			request.remove(KEY_HAVING);
-			request.remove(KEY_ORDER);
-
-
-			Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
-			if (about) {
-				if (RequestMethod.isQueryMethod(method) == false) {
-					throw new UnsupportedOperationException(config.getTable() + " 被" + KEY_ABOUT + "标注，只能进行 GET,HEAD 等查询操作！");
+		if (method == POST) {
+			if (idIn != null) { //不能在这里确定[]的长度，只能在外面传进来
+				if ((idIn instanceof List == false) || ((List<?>)idIn).isEmpty()) { // id{}:[] 表示同时插入多条记录
+					throw new IllegalArgumentException("POST请求，生成多条记录请用 id{}:[] ！ [] 类型为JSONArray且不能为空！");
 				}
+			} else if (request.get(KEY_ID) == null) {
+				request.put(KEY_ID, System.currentTimeMillis());
+			}
+		}
 
-				tableWhere.put(TABLE_SCHEMA, SQLConfig.getSchema(schema));
-				tableWhere.put(TABLE_NAME, config.getSQLTable());
-				config.setTable(Column.class.getSimpleName());
-
-				schema = SCHEMA_INFORMATION;
-				column += (
-						(column.isEmpty() ? "" : column + ",")
-						+ (RequestMethod.isHeadMethod(method, true) ?
-								SQL.count(column) : "column_name,column_type,is_nullable,column_default,column_comment")
-						);
+		//对id和id{}处理，这两个一定会作为条件
+		Long id = request.getLong(KEY_ID);
+		if (id != null) { //null无效
+			if (id <= 0) { //一定没有值
+				throw new NotExistException(TAG + ": newSQLConfig " + table + ".id <= 0");
 			}
 
-			Set<String> set = request == null ? null : request.keySet();
-			if (set != null && set.isEmpty() == false) {
-				if (method == POST) {
-					column = StringUtil.getString(set.toArray(new String[]{}));
+			if (idIn != null && idIn instanceof List) { //共用idArr场景少性能差
+				if (idIn != null && ((List<?>) idIn).contains(id) == false) {//empty有效  BaseModel.isEmpty(idArr) == false) {
+					Log.w(TAG, "newSQLConfig  id > 0 >> idInObj != null && idInObj.contains(id) == false >> return null;");
+					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && ((JSONArray) idIn).contains(id) == false");
+				}
+			}
+		}
 
-					String valuesString = "";
-					Collection<Object> valueCollection = request.values();
-					Object[] values = valueCollection == null || valueCollection.isEmpty() ? null : valueCollection.toArray();
-					if (values != null) {
-						for (int i = 0; i < values.length; i++) {
-							valuesString += ((i > 0 ? "," : "") + "'" + values[i] + "'");
-						}
+
+		String role = request.getString(KEY_ROLE);
+		String schema = request.getString(KEY_SCHEMA);
+		boolean about = request.getBooleanValue(KEY_ABOUT);
+		String condition = request.getString(KEY_CONDITION);
+		String column = request.getString(KEY_COLUMN);
+		String group = request.getString(KEY_GROUP);
+		String having = request.getString(KEY_HAVING);
+		String order = request.getString(KEY_ORDER);
+
+		//强制作为条件且放在最前面优化性能
+		request.remove(KEY_ID);
+		request.remove(KEY_ID_IN);
+		//关键词
+		request.remove(KEY_ROLE);
+		request.remove(KEY_SCHEMA);
+		request.remove(KEY_ABOUT);
+		request.remove(KEY_CONDITION);
+		request.remove(KEY_COLUMN);
+		request.remove(KEY_GROUP);
+		request.remove(KEY_HAVING);
+		request.remove(KEY_ORDER);
+
+
+		Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
+		if (about) { //查询字段属性
+			if (RequestMethod.isQueryMethod(method) == false) {
+				throw new UnsupportedOperationException(config.getTable()
+						+ " 被 " + KEY_ABOUT + " 标注，只能进行 GET,HEAD 等查询操作！");
+			}
+
+			tableWhere.put(TABLE_SCHEMA, SQLConfig.getSchema(schema));
+			tableWhere.put(TABLE_NAME, config.getSQLTable());
+			config.setTable(Column.class.getSimpleName());
+
+			schema = SCHEMA_INFORMATION;
+
+			column = StringUtil.getString(column);
+			if (column.isEmpty() && RequestMethod.isHeadMethod(method, true) == false) {
+				column = "column_name,column_type,is_nullable,column_default,column_comment";
+			}
+		}
+
+
+		//已经remove了id和id{}，以及@key
+		Set<String> set = request.keySet(); //前面已经判断request是否为空
+		if (method == POST) {//POST操作
+			if (BaseModel.isEmpty(set) == false) { //不能直接return，要走完下面的流程
+				List<Object> idList;
+				if (id != null) { //单条记录
+					if (idIn != null) {
+						throw new IllegalArgumentException("POST请求中 id 和 id{} 不能同时存在!");
 					}
-					config.setValues("(" + valuesString + ")");
-				} else {
-					//条件<<<<<<<<<<<<<<<<<<<
-					List<String> conditionList = null;
-					if (method == PUT || method == DELETE) {
-						String[] conditions = StringUtil.split(condition);
-						//Arrays.asList()返回值不支持add方法！
-						conditionList = new ArrayList<String>(Arrays.asList(conditions != null ? conditions : new String[]{}));
-						conditionList.add(ID);
-						conditionList.add(ID_IN);
+
+					idList = new ArrayList<Object>(1);
+					idList.add(id);
+				} else { //多条记录
+					idList = new ArrayList<Object>((JSONArray) idIn);
+				}
+
+				//idIn不为空时，valuesString有多条，唯一的区别就是id
+				String[] columns = set.toArray(new String[]{});
+
+				Collection<Object> valueCollection = request.values();
+				Object[] values = valueCollection == null ? null : valueCollection.toArray();
+
+				if (values == null || values.length != columns.length) {
+					throw new Exception("服务器内部错误:\n" + TAG
+							+ " newSQLConfig  values == null || values.length != columns.length !");
+				}
+				column = KEY_ID + "," + StringUtil.getString(columns); //set已经判断过不为空
+				final int size = columns.length + 1; //以key数量为准
+
+				String[][] valuess = new String[idList.size()][]; // [idList.size()][]
+				String[] items; //(item0, item1, ...)
+				for (int i = 0; i < idList.size(); i++) {
+					items = new String[size];
+					items[0] = "'" + idList.get(i) + "'"; //第0个就是id。所有的值都加 '' 避免SQL注入风险
+					for (int j = 1; j < size; j++) {
+						items[j] = "'" + values[j-1] + "'"; //从第1个开始，允许"null"
 					}
-					//条件>>>>>>>>>>>>>>>>>>>
+					valuess[i] = items;
+				}
+				config.setValues(valuess);
+			}
+		} 
+		else { //非POST操作
+			final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
 
-					final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
+			//条件<<<<<<<<<<<<<<<<<<<
+			List<String> conditionList = null;
+			if (isWhere == false) { //减少不必要的步骤
+				if (method == PUT || method == DELETE) {
+					String[] conditions = StringUtil.split(condition);
+					//Arrays.asList()返回值不支持add方法！
+					conditionList = BaseModel.isEmpty(conditions) ? null : Arrays.asList(conditions);
+				}
+			}
+			//条件>>>>>>>>>>>>>>>>>>>
 
-					Map<String, Object> tableContent = new HashMap<String, Object>();
-					Object value;
-					for (String key : set) {
-						value = request.get(key);
-						if (value instanceof JSONObject == false) {//只允许常规Object
-							//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-							if (isWhere || BaseModel.isContain(conditionList, key)) {
-								tableWhere.put(key, value);
-							} else {
-								tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
-							}
-						}
+			//强制作为条件且放在最前面优化性能
+			if (id != null) {
+				tableWhere.put(KEY_ID, id);
+			}
+			if (idIn != null) {
+				tableWhere.put(KEY_ID_IN, idIn);
+			}
+
+			Map<String, Object> tableContent = new HashMap<String, Object>();
+			Object value;
+			for (String key : set) {
+				value = request.get(key);
+				if (value instanceof JSONObject == false) {//只允许常规Object
+					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
+					if (isWhere || BaseModel.isContain(conditionList, key)) {
+						tableWhere.put(key, value);
+					} else {
+						tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 					}
-
-					config.setContent(tableContent);
 				}
 			}
 
-			config.setWhere(tableWhere);					
-
-			config.setRole(role);
-			//TODO condition组合，优先 |		config.setCondition(condition);
-			config.setSchema(schema);
-			config.setAbout(about);
-			config.setColumn(column);
-			config.setGroup(group);
-			config.setHaving(having);
-			config.setOrder(order);
-
-			//后面还可能用到，要还原
-			request.put(KEY_ROLE, role);
-			request.put(KEY_SCHEMA, schema);
-			request.put(KEY_ABOUT, about);
-			request.put(KEY_CONDITION, condition);
-			request.put(KEY_COLUMN, column);
-			request.put(KEY_GROUP, group);
-			request.put(KEY_HAVING, having);
-			request.put(KEY_ORDER, order);
+			config.setContent(tableContent);
 		}
 
-		try {
-			config.setId(request.getLongValue(ID));
-		} catch (Exception e) {
-			// empty
-		}
+
+		config.setWhere(tableWhere);					
+
+		config.setId(BaseModel.value(id));
+		//在	tableWhere 第0个		config.setIdIn(idIn);
+
+		config.setRole(role);
+		//TODO condition组合，优先 |		config.setCondition(condition);
+		config.setSchema(schema);
+		config.setAbout(about);
+		config.setColumn(column);
+		config.setGroup(group);
+		config.setHaving(having);
+		config.setOrder(order);
+
+		//后面还可能用到，要还原
+		//id或id{}条件
+		request.put(KEY_ID, id);
+		request.put(KEY_ID_IN, idIn);
+		//关键词
+		request.put(KEY_ROLE, role);
+		request.put(KEY_SCHEMA, schema);
+		request.put(KEY_ABOUT, about);
+		request.put(KEY_CONDITION, condition);
+		request.put(KEY_COLUMN, column);
+		request.put(KEY_GROUP, group);
+		request.put(KEY_HAVING, having);
+		request.put(KEY_ORDER, order);
+
+
 		return config;
 	}
 

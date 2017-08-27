@@ -22,6 +22,7 @@ import static zuo.biao.apijson.RequestMethod.POST_GET;
 import static zuo.biao.apijson.RequestMethod.POST_HEAD;
 import static zuo.biao.apijson.RequestMethod.PUT;
 
+import java.net.URLDecoder;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
@@ -42,6 +43,7 @@ import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
+import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.JSONRequest;
@@ -71,8 +73,13 @@ public class Controller {
 	 * @see {@link RequestMethod#GET}
 	 */
 	@RequestMapping("get/{request}")
-	public String get(@PathVariable String request, HttpSession session) {
-		return new Parser(GET).setSession(session).parse(request);
+	public String open_get(@PathVariable String request, HttpSession session) {
+		try {
+			request = URLDecoder.decode(request, StringUtil.UTF_8);
+		} catch (Exception e) {
+			// Parser会报错
+		}
+		return get(request, session);
 	}
 
 	/**计数
@@ -82,7 +89,34 @@ public class Controller {
 	 * @see {@link RequestMethod#HEAD}
 	 */
 	@RequestMapping("head/{request}")
-	public String head(@PathVariable String request, HttpSession session) {
+	public String open_head(@PathVariable String request, HttpSession session) {
+		try {
+			request = URLDecoder.decode(request, StringUtil.UTF_8);
+		} catch (Exception e) {
+			// Parser会报错
+		}
+		return head(request, session);
+	}
+
+	/**获取
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#GET}
+	 */
+	@RequestMapping(value = "get", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	public String get(@RequestBody String request, HttpSession session) {
+		return new Parser(GET).setSession(session).parse(request);
+	}
+
+	/**计数
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#HEAD}
+	 */
+	@RequestMapping(value = "head", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	public String head(@RequestBody String request, HttpSession session) {
 		return new Parser(HEAD).setSession(session).parse(request);
 	}
 
@@ -168,6 +202,7 @@ public class Controller {
 		VERIFY_ = Verify.class.getSimpleName();
 	}
 
+	public static final String COUNT = JSONResponse.KEY_COUNT;
 	public static final String TOTAL = JSONResponse.KEY_TOTAL;
 
 	public static final String RANGE = "range";
@@ -186,6 +221,7 @@ public class Controller {
 
 	public static final String SEX = "sex";
 	public static final String TYPE = "type";
+	public static final String WAY = "way";
 	public static final String CONTENT = "content";
 
 
@@ -217,18 +253,18 @@ public class Controller {
 
 
 	/**生成验证码,修改为post请求
-	 * @param phone
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "post/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject postVerify(@RequestBody String request) {
-		JSONObject requestObject;
+		JSONObject requestObject = null;
 		String phone;
 		try {
 			requestObject = Parser.parseRequest(request, POST);
 			phone = requestObject.getString(PHONE);
 		} catch (Exception e) {
-			return Parser.newErrorResult(e);
+			return Parser.extendErrorResult(requestObject, e);
 		}
 
 		new Parser(DELETE, true).parse(newVerifyRequest(phone, null));
@@ -242,7 +278,7 @@ public class Controller {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		if (verify == null || JSONResponse.isSucceed(verify.getIntValue(JSONResponse.KEY_CODE)) == false) {
+		if (verify == null || JSONResponse.isSuccess(verify.getIntValue(JSONResponse.KEY_CODE)) == false) {
 			new Parser(DELETE, true).parseResponse(new JSONRequest(new Verify(phone)));
 			return response;
 		}
@@ -254,37 +290,37 @@ public class Controller {
 	}
 
 	/**获取验证码
-	 * @param phone
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "post_get/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject getVerify(@RequestBody String request) {
-		JSONObject requestObject;
+		JSONObject requestObject = null;
 		String phone;
 		try {
 			requestObject = Parser.parseRequest(request, POST_GET);
 			phone = requestObject.getString(PHONE);
 		} catch (Exception e) {
-			return Parser.newErrorResult(e);
+			return Parser.extendErrorResult(requestObject, e);
 		}
 		return new Parser(POST_GET, true).parseResponse(newVerifyRequest(phone, null));
 	}
 
 	/**校验验证码
-	 * @param phone
-	 * @param code
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "post_head/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject headVerify(@RequestBody String request) {
+		JSONObject requestObject = null;
 		String phone;
 		String verify;
 		try {
-			JSONObject requestObject = Parser.parseRequest(request, POST_HEAD);
+			requestObject = Parser.parseRequest(request, POST_HEAD);
 			phone = requestObject.getString(PHONE);
 			verify = requestObject.getString(VERIFY);
 		} catch (Exception e) {
-			return Parser.newErrorResult(e);
+			return Parser.extendErrorResult(requestObject, e);
 		}
 		return headVerify(phone, verify);
 	}
@@ -336,35 +372,45 @@ public class Controller {
 	/**用户登录
 	 * @param request 只用String，避免encode后未decode
 	 * @return
+	 * @see
+	 * <pre>
+		{
+			"type": 0,
+			"phone": "13000082001",
+			"password": "1234567"
+		}
+	 * </pre>
 	 */
 	@RequestMapping(value = "login", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject login(@RequestBody String request, HttpSession session) {
 		JSONObject requestObject = null;
+		boolean isPassword;
+		String phone;
+		String password;
 		try {
 			requestObject = Parser.parseRequest(request, POST);
+			isPassword = requestObject.getIntValue(TYPE) == LOGIN_TYPE_PASSWORD;//登录方式
+			phone = requestObject.getString(PHONE);//手机
+			password = requestObject.getString(PASSWORD);//密码
+
+			if (StringUtil.isPhone(phone) == false) {
+				throw new IllegalArgumentException("手机号不合法！");
+			}
+
+			if (isPassword) {
+				if (StringUtil.isPassword(password) == false) {
+					throw new IllegalArgumentException("密码不合法！");
+				}
+			} else {
+				if (StringUtil.isVerify(password) == false) {
+					throw new IllegalArgumentException("验证码不合法！");
+				}
+			}
 		} catch (Exception e) {
-			return Parser.newErrorResult(e);
+			return Parser.extendErrorResult(requestObject, e);
 		}
 
-		String typeString = requestObject.getString(TYPE);//登录类型
-		String phone = requestObject.getString(PHONE);//手机
-		String password = requestObject.getString(PASSWORD);//密码
 
-		//判断手机号是否合法
-		if (StringUtil.isPhone(phone) == false) {
-			return Parser.newErrorResult(new IllegalArgumentException("手机号不合法！"));
-		}
-
-		//判断密码是否合法
-		if ("1".equals(typeString)) {
-			if (StringUtil.isVerify(password) == false) {
-				return Parser.newErrorResult(new IllegalArgumentException("验证码不合法！"));
-			}
-		} else {
-			if (StringUtil.isPassword(password) == false) {
-				return Parser.newErrorResult(new IllegalArgumentException("密码不合法！"));
-			}
-		}
 
 		//手机号是否已注册
 		JSONObject phoneResponse = new Parser(POST_HEAD, true).parseResponse(
@@ -373,7 +419,7 @@ public class Controller {
 						)
 				);
 		JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
-		if (JSONResponse.isSucceed(response) == false) {
+		if (JSONResponse.isSuccess(response) == false) {
 			return response;
 		}
 		if(JSONResponse.isExist(response) == false) {
@@ -395,8 +441,7 @@ public class Controller {
 		}
 
 		//校验凭证 
-		int type = Integer.valueOf(0 + StringUtil.getNumber(typeString));
-		if (type == LOGIN_TYPE_PASSWORD) {//password密码登录
+		if (isPassword) {//password密码登录
 			response = new JSONResponse(
 					new Parser(POST_HEAD, true).parseResponse(
 							new JSONRequest(new Privacy(userId).setPassword(password))
@@ -405,10 +450,10 @@ public class Controller {
 		} else {//verify手机验证码登录
 			response = new JSONResponse(headVerify(phone, password));
 		}
-		if (JSONResponse.isSucceed(response) == false) {
+		if (JSONResponse.isSuccess(response) == false) {
 			return response;
 		}
-		response = response.getJSONResponse(type == LOGIN_TYPE_PASSWORD ? PRIVACY_ : VERIFY_);
+		response = response.getJSONResponse(isPassword ? PRIVACY_ : VERIFY_);
 		if (JSONResponse.isExist(response) == false) {
 			return Parser.newErrorResult(new ConditionErrorException("账号或密码错误"));
 		}
@@ -425,7 +470,7 @@ public class Controller {
 
 		//登录状态保存至session
 		session.setAttribute(USER_ID, userId);//用户id
-		session.setAttribute(TYPE, type);//登录方式
+		session.setAttribute(TYPE, isPassword ? LOGIN_TYPE_PASSWORD : LOGIN_TYPE_VERIFY);//登录方式
 		session.setAttribute(USER_, user);//用户
 		session.setAttribute(PRIVACY_, privacy);//用户隐私信息
 		//		session.setMaxInactiveInterval(1*60);//设置session过期时间
@@ -439,12 +484,19 @@ public class Controller {
 	 */
 	@RequestMapping(value = "logout", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject logout(HttpSession session) {
-		long userId = AccessVerifier.getUserId(session);//必须在session.invalidate();前！
-		session.invalidate();
+		long userId;
+		try {
+			userId = Verifier.getUserId(session);//必须在session.invalidate();前！
+			Log.d(TAG, "logout  userId = " + userId + "; session.getId() = " + (session == null ? null : session.getId()));
+			session.invalidate();
+		} catch (Exception e) {
+			return Parser.newErrorResult(e);
+		}
 
 		JSONObject result = Parser.newSuccessResult();
 		JSONObject user = Parser.newSuccessResult();
 		user.put(ID, userId);
+		user.put(COUNT, 1);
 		result.put(USER_, user);
 
 		return result;
@@ -454,39 +506,73 @@ public class Controller {
 	/**注册
 	 * @param request 只用String，避免encode后未decode
 	 * @return
+	 * @see
+	 * <pre>
+		{
+			"Privacy": {
+				"phone": "13000082222",
+				"_password": "12345678"
+			},
+			"User": {
+				"name": "APIJSONUser",
+				"sex": 0
+			},
+			"verify": "2139"
+		}
+	 * </pre>
 	 */
 	@RequestMapping(value = "register", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject register(@RequestBody String request) {
 		JSONObject requestObject = null;
+		String verify;
+
+		JSONObject privacyObj;
+		String phone;
+		String password;
+
+		JSONObject userObj;
+		String name;
 		try {
-			requestObject = Parser.getCorrectRequest(POST, Parser.parseRequest(request, POST));
+			requestObject = Parser.parseRequest(request, POST);
+
+			verify = requestObject.getString(VERIFY);
+			requestObject.remove(VERIFY);
+
+			privacyObj = requestObject.getJSONObject(PRIVACY_);
+			if (privacyObj == null) {
+				throw new NullPointerException("请设置 "  + PRIVACY_);
+			}
+			requestObject.remove(PRIVACY_);
+
+			phone = privacyObj.getString(PHONE);
+			password = privacyObj.getString(_PASSWORD);
+
+			userObj = requestObject.getJSONObject(USER_);
+			if (userObj == null) {
+				throw new NullPointerException("请设置 "  + USER_);
+			}
+			name = userObj.getString(NAME);
+
+
+			if (StringUtil.isVerify(verify) == false) {
+				throw new IllegalArgumentException(VERIFY + ":value 中value不合法！");
+			}
+			if (StringUtil.isPhone(phone) == false) {
+				throw new IllegalArgumentException(PHONE + ":value 中value不合法！");
+			}
+			if (StringUtil.isPassword(password) == false) {
+				throw new IllegalArgumentException(_PASSWORD + ":value 中value不合法！");
+			}
+			if (StringUtil.isEmpty(name, true)) {
+				throw new IllegalArgumentException(NAME + ":value 中value不合法！");
+			}
 		} catch (Exception e) {
-			return Parser.newErrorResult(e);
+			return Parser.extendErrorResult(requestObject, e);
 		}
 
-		String phone = requestObject.getString(PHONE);
-		String password = StringUtil.getString(requestObject.getString(PASSWORD));
-		String verify = StringUtil.getString(requestObject.getString(VERIFY));
-		requestObject.remove(PHONE);
-		requestObject.remove(PASSWORD);
-		requestObject.remove(VERIFY);
-
-		if (StringUtil.isPhone(phone) == false) {
-			return Parser.extendErrorResult(requestObject
-					, new IllegalArgumentException("User.phone: " + phone + " 不合法！"));
-		}
-		if (StringUtil.isPassword(password) == false) {
-			return Parser.extendErrorResult(requestObject
-					, new IllegalArgumentException("User.password: " + password + " 不合法！不能小于6个字符！"));
-		}
-		if (StringUtil.isVerify(verify) == false) {
-			return Parser.extendErrorResult(requestObject
-					, new IllegalArgumentException("User.verify: " + verify + " 不合法！不能小于6个字符！"));
-		}
-
-
+		//验证码是否正确
 		JSONResponse response = new JSONResponse(headVerify(phone, verify));
-		if (JSONResponse.isSucceed(response) == false) {
+		if (JSONResponse.isSuccess(response) == false) {
 			return response;
 		}
 
@@ -507,24 +593,23 @@ public class Controller {
 		}
 
 		//生成User
-		JSONObject result = new Parser(POST, true).parseResponse(requestObject);
-		response = new JSONResponse(result);
-		if (JSONResponse.isSucceed(response) == false) {
-			return result;
+		response = new JSONResponse(new Parser(POST, true).parseResponse(requestObject));
+
+		JSONResponse userRes = response.getJSONResponse(USER_);
+		long userId = userRes == null ? 0 : userRes.getId();
+		if (userId <= 0) {
+			return response;
 		}
 
-		response = response.getJSONResponse(USER_);
-		long userId = response == null ? 0 : response.getId();
-
-		//生成UserPrivacy
-		response = new JSONResponse(
+		//生成Privacy
+		JSONResponse response2 = new JSONResponse(
 				new Parser(POST, true).parseResponse(
 						new JSONRequest(
 								new Privacy(userId).setPhone(phone).setPassword(password)
 								)
 						)
 				);
-		if (JSONResponse.isSucceed(response.getJSONResponse(PRIVACY_)) == false) {//创建失败，删除新增的无效User和userPrivacy
+		if (JSONResponse.isSuccess(response2.getJSONResponse(PRIVACY_)) == false) {//创建失败，删除新增的无效User和Privacy
 
 			new Parser(DELETE, true).parseResponse(
 					new JSONRequest(
@@ -534,49 +619,69 @@ public class Controller {
 
 			new Parser(DELETE, true).parseResponse(
 					new JSONRequest(
-							new Privacy().setPhone(phone)
+							new Privacy(userId)
 							)
 					);
 
-			return Parser.extendErrorResult(result, new Exception("服务器内部错误"));
+			return Parser.extendErrorResult(requestObject, new Exception("服务器内部错误"));
 		}
 
-		return result;
+		response.putAll(response2);
+		return response;
 	}
 
 
 	/**设置密码
 	 * @param request 只用String，避免encode后未decode
 	 * @return
+	 * @see
+	 * <pre>
+		{
+			"type": 0,
+			"password": "1234567",
+			"phone": "13000082001",
+			"verify": "1234"
+		}
+	 * </pre>
 	 */
 	@RequestMapping(value = "put/password", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject putPassword(@RequestBody String request){
 		JSONObject requestObject = null;
+		boolean isLogin;
+		String verify;
+		String phone;
+		String password;
 		try {
-			requestObject = Parser.parseRequest(request, POST);
-		} catch (Exception e) {
-			return Parser.newErrorResult(e);
-		}
-		String phone = requestObject.getString(PHONE);
-		String password = StringUtil.getString(requestObject.getString(PASSWORD));
-		String verify = StringUtil.getString(requestObject.getString(VERIFY));
+			requestObject = Parser.parseRequest(request, PUT);
 
-		if (StringUtil.isPhone(phone) == false) {
-			return Parser.extendErrorResult(requestObject
-					, new IllegalArgumentException("User.phone: " + phone + " 不合法！"));
+			isLogin = requestObject.getIntValue(TYPE) == Privacy.PASSWORD_TYPE_LOGIN;
+			verify = requestObject.getString(VERIFY);
+			phone = requestObject.getString(PHONE);
+			password = requestObject.getString(PASSWORD);
+
+			if (StringUtil.isVerify(verify) == false) {
+				throw new IllegalArgumentException(VERIFY + ":value 中value不合法！");
+			}
+			if (StringUtil.isPhone(phone) == false) {
+				throw new IllegalArgumentException(PHONE + ":value 中value不合法！");
+			}
+			if (isLogin) {
+				if (StringUtil.isPassword(password) == false) {
+					throw new IllegalArgumentException(PASSWORD + ":value 中value不合法！");
+				}
+			} else {
+				if (StringUtil.isNumberPassword(password) == false) {
+					throw new IllegalArgumentException(PASSWORD + ":value 中value不合法！");
+				}
+			}
+		} catch (Exception e) {
+			return Parser.extendErrorResult(requestObject, e);
 		}
-		if (StringUtil.isPassword(password) == false) {
-			return Parser.extendErrorResult(requestObject
-					, new IllegalArgumentException("User.password: " + password + " 不合法！不能小于6个字符！"));
-		}
-		if (StringUtil.isVerify(verify) == false) {
-			return Parser.extendErrorResult(requestObject
-					, new IllegalArgumentException("User.verify: " + verify + " 不合法！不能小于6个字符！"));
-		}
+
 
 		//校验验证码
-		JSONResponse response = new JSONResponse(headVerify(phone, requestObject.getString(VERIFY)));
-		if (JSONResponse.isSucceed(response) == false) {
+		JSONResponse response = new JSONResponse(headVerify(phone, verify));
+		if (JSONResponse.isSuccess(response) == false) {
 			return response;
 		}
 		//手机号或验证码错误
@@ -593,10 +698,16 @@ public class Controller {
 				);
 		Privacy privacy = response.getObject(Privacy.class);
 		long userId = privacy == null ? 0 : privacy.getId();
+		if (userId <= 0) {
+			return Parser.extendErrorResult(requestObject, new NotExistException("手机号未注册！"));
+		}
+
 		//修改密码
 		return new Parser(PUT, true).parseResponse(
 				new JSONRequest(
-						new Privacy(userId).setPassword(password)
+						PRIVACY_, new zuo.biao.apijson.JSONObject(
+								new Privacy(userId)
+								).puts(isLogin ? _PASSWORD : _PAY_PASSWORD, password)
 						)
 				);
 	}
@@ -607,21 +718,28 @@ public class Controller {
 	 * @param request 只用String，避免encode后未decode
 	 * @param session
 	 * @return
+	 * @see
+	 * <pre>
+		{
+			"Privacy": {
+				"id": 82001,
+				"balance+": 100,
+				"_payPassword": "123456"
+			}
+		}
+	 * </pre>
 	 */
 	@RequestMapping(value = "put/balance", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject putBalance(@RequestBody String request, HttpSession session) {
 		JSONObject requestObject = null;
-		try {
-			AccessVerifier.verifyLogin(session);
-			requestObject = Parser.getCorrectRequest(PUT, Parser.parseRequest(request, PUT));
-		} catch (Exception e) {
-			return Parser.newErrorResult(e);
-		}
 		JSONObject privacyObj;
 		long userId;
 		String payPassword;
 		double change;
 		try {
+			Verifier.verifyLogin(session);
+			requestObject = Parser.getCorrectRequest(PUT, Parser.parseRequest(request, PUT));
+
 			privacyObj = requestObject.getJSONObject(PRIVACY_);
 			if (privacyObj == null) {
 				throw new NullPointerException("请设置 " + PRIVACY_ + "！");
@@ -629,7 +747,7 @@ public class Controller {
 			userId = privacyObj.getLongValue(ID);
 			payPassword = privacyObj.getString(_PAY_PASSWORD);
 			change = privacyObj.getDoubleValue("balance+");
-			
+
 			if (userId <= 0) {
 				throw new IllegalArgumentException(PRIVACY_ + "." + ID + ":value 中value不合法！");
 			}
@@ -686,7 +804,7 @@ public class Controller {
 			}
 		}
 
-		
+
 		privacyObj.remove(_PAY_PASSWORD);
 		privacyObj.put("balance+", change);
 		requestObject.put(PRIVACY_, privacyObj);

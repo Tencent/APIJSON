@@ -14,6 +14,14 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import static zuo.biao.apijson.RequestMethod.DELETE;
+import static zuo.biao.apijson.RequestMethod.GET;
+import static zuo.biao.apijson.RequestMethod.HEAD;
+import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.RequestMethod.POST_GET;
+import static zuo.biao.apijson.RequestMethod.POST_HEAD;
+import static zuo.biao.apijson.RequestMethod.PUT;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +40,7 @@ import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.RequestMethod;
@@ -39,19 +48,23 @@ import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.model.Column;
 import zuo.biao.apijson.model.Table;
 import zuo.biao.apijson.model.Test;
+import zuo.biao.apijson.server.JSONRequest;
+import zuo.biao.apijson.server.Parser;
+import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotLoggedInException;
 import zuo.biao.apijson.server.sql.SQLConfig;
 
 /**权限验证类
  * @author Lemon
  */
-public class AccessVerifier {
-	private static final String TAG = "AccessVerifier";
+public class Verifier {
+	private static final String TAG = "Verifier";
 
 
 	public static final String KEY_PASSWORD = "password";
 	public static final String KEY_LOGIN_PASSWORD = "loginPassword";
 	public static final String KEY_PAY_PASSWORD = "payPassword";
+	public static final String KEY_OLD_PASSWORD = "oldPassword";
 
 
 	// <TableName, <METHOD, allowRoles>>
@@ -81,13 +94,13 @@ public class AccessVerifier {
 		}
 
 		HashMap<RequestMethod, RequestRole[]> map = new HashMap<>();
-		map.put(RequestMethod.GET, access.GET());
-		map.put(RequestMethod.HEAD, access.HEAD());
-		map.put(RequestMethod.POST_GET, access.POST_GET());
-		map.put(RequestMethod.POST_HEAD, access.POST_HEAD());
-		map.put(RequestMethod.POST, access.POST());
-		map.put(RequestMethod.PUT, access.PUT());
-		map.put(RequestMethod.DELETE, access.DELETE());
+		map.put(GET, access.GET());
+		map.put(HEAD, access.HEAD());
+		map.put(POST_GET, access.POST_GET());
+		map.put(POST_HEAD, access.POST_HEAD());
+		map.put(POST, access.POST());
+		map.put(PUT, access.PUT());
+		map.put(DELETE, access.DELETE());
 
 		return map;
 	}
@@ -161,7 +174,7 @@ public class AccessVerifier {
 					}
 					if (list.contains(new Long("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
 						if (method == null) {
-							method = RequestMethod.GET;
+							method = GET;
 						}
 						throw new IllegalAccessException(userIdkey + " = " + id + " 的 " + table
 								+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
@@ -197,7 +210,7 @@ public class AccessVerifier {
 		Log.d(TAG, "verifyRole  table = " + table + "; method = " + method + "; role = " + role);
 		if (table != null) {
 			if (method == null) {
-				method = RequestMethod.GET;
+				method = GET;
 			}
 			if (role == null) {
 				role = RequestRole.UNKNOWN;
@@ -218,6 +231,7 @@ public class AccessVerifier {
 	 * @throws Exception
 	 */
 	public static void verifyLogin(HttpSession session) throws Exception {
+		Log.d(TAG, "verifyLogin  session.getId() = " + (session == null ? null : session.getId()));
 		verifyLogin(getUserId(session));
 	}
 	/**登录校验
@@ -231,6 +245,50 @@ public class AccessVerifier {
 			throw new NotLoggedInException("未登录，请登录后再操作！");
 		}
 	}
+	
+	
+	
+	/**验证是否重复
+	 * @param table
+	 * @param key
+	 * @param value
+	 * @throws Exception
+	 */
+	public static void verifyRepeat(String table, String key, Object value) throws Exception {
+		verifyRepeat(table, key, value, 0);
+	}
+	/**验证是否重复
+	 * @param table
+	 * @param key
+	 * @param value
+	 * @param exceptId 不包含id
+	 * @throws Exception
+	 */
+	public static void verifyRepeat(String table, String key, Object value, long exceptId) throws Exception {
+		if (key == null || value == null) {
+			Log.e(TAG, "verifyRepeat  key == null || value == null >> return;");
+			return;
+		}
+		if (value instanceof JSON) {
+			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
+		}
+
+		JSONRequest request = new JSONRequest(key, value);
+		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
+			request.put(JSONRequest.KEY_ID + "!", exceptId);
+		}
+		JSONObject repeat = new Parser(HEAD, true).parseResponse(
+				new JSONRequest(table, request)
+				);
+		repeat = repeat == null ? null : repeat.getJSONObject(table);
+		if (repeat == null) {
+			throw new Exception("服务器内部错误  verifyRepeat  repeat == null");
+		}
+		if (repeat.getIntValue(JSONResponse.KEY_COUNT) > 0) {
+			throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
+		}
+	}
+	
 
 	/**获取来访用户的id
 	 * @author Lemon
@@ -267,6 +325,7 @@ public class AccessVerifier {
 			requestObject.remove(KEY_PASSWORD);
 			requestObject.remove(KEY_LOGIN_PASSWORD);
 			requestObject.remove(KEY_PAY_PASSWORD);
+			requestObject.remove(KEY_OLD_PASSWORD);
 		}
 		return requestObject;
 	}

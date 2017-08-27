@@ -18,6 +18,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import zuo.biao.apijson.StringUtil;
 
 /**key:value
@@ -43,6 +46,8 @@ public class Pair extends Entry<String, String> {
 		classMap.put(String.class.getSimpleName(), String.class);
 		classMap.put(Collection.class.getSimpleName(), Collection.class);//不允许指定<T>
 		classMap.put(Map.class.getSimpleName(), Map.class);//不允许指定<T>
+		classMap.put(JSONObject.class.getSimpleName(), JSONObject.class);//必须有，Map中没有getLongValue等方法
+		classMap.put(JSONArray.class.getSimpleName(), JSONArray.class);//必须有，Collection中没有?等方法
 	}
 
 

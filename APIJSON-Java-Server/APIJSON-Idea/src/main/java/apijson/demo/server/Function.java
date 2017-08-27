@@ -60,12 +60,12 @@ public class Function implements FunctionList {
 		jsonMap.put("map", map);
 
 
-		Log.i(TAG, "plus = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
-		Log.i(TAG, "count = " + invoke(jsonMap, "count(Collection:collection)"));
-		Log.i(TAG, "isContain = " + invoke(jsonMap, "isContain(Collection:collection,Object:id)"));
-		Log.i(TAG, "get(Map:map,key) = " + invoke(jsonMap, "get(Map:map,key)"));
-		Log.i(TAG, "get(Collection:collection,int:@position) = " + invoke(jsonMap, "get(Collection:collection,int:@position)"));
-		Log.i(TAG, "Integer:get(Map:map,key) = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
+		Log.i(TAG, "plus(1, -2) = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
+		Log.i(TAG, "count([1,2,4,10]) = " + invoke(jsonMap, "count(Collection:collection)"));
+		Log.i(TAG, "isContain([1,2,4,10], 10) = " + invoke(jsonMap, "isContain(Collection:collection,Object:id)"));
+		Log.i(TAG, "get({key:true}, key) = " + invoke(jsonMap, "get(Map:map,key)"));
+		Log.i(TAG, "get([1,2,4,10], 0) = " + invoke(jsonMap, "get(Collection:collection,int:@position)"));
+		Log.i(TAG, "Integer:get({key:true}, key) = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
 	}
 
 	/**反射调用
@@ -124,10 +124,6 @@ public class Function implements FunctionList {
 
 	public long plus(long i0, long i1) {
 		return i0 + i1;
-	}
-
-	public JSONObject newVerify(String phone) {
-		return new Controller().postVerify(phone);
 	}
 
 
