@@ -23,11 +23,10 @@ import android.content.Context;
 import apijson.demo.application.DemoApplication;
 import apijson.demo.model.Comment;
 import apijson.demo.model.Moment;
+import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
-import apijson.demo.model.Wallet;
 
 /**请求工具类
- * 设置encode参数只为方便展示，实际使用时并不需要
  * @author Lemon
  */
 public class RequestUtil {
@@ -42,7 +41,7 @@ public class RequestUtil {
 
 
 
-	public static JSONObject newPostRequest(boolean encode) {
+	public static JSONObject newPostRequest() {
 		Moment data = new Moment();
 		data.setUserId(DEFAULT_USER_ID);
 		data.setContent(context.getString(R.string.apijson_slogan));
@@ -50,80 +49,76 @@ public class RequestUtil {
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
 		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
 		data.setPictureList(list);
-		return new JSONRequest(data, encode).setTag(Moment.class.getSimpleName());
+		return new JSONRequest(data).setTag(Moment.class.getSimpleName());
 	}
 
-	public static JSONObject newPutRequest(long id, boolean encode) {
+	public static JSONObject newPutRequest(long id) {
 		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
 		//		data.setContent(context.getString(R.string.apijson_info));//一般可用这种方式，encode是为了展示方便
 		List<Long> list = new ArrayList<Long>();
 		list.add((long) 82001);
 		list.add((long) 82002);
-		JSONObject momentObject = new JSONObject(data, encode);
-		momentObject.put("praiseUserIdList+", list, encode);
-		momentObject.put("content", context.getString(R.string.apijson_info), encode);
-		return new JSONRequest(Moment.class.getSimpleName(), momentObject, encode).setTag(Moment.class.getSimpleName());
+		JSONObject momentObject = new JSONObject(data);
+		momentObject.put("praiseUserIdList+", list);
+		momentObject.put("content", context.getString(R.string.apijson_info));
+		return new JSONRequest(Moment.class.getSimpleName(), momentObject).setTag(Moment.class.getSimpleName());
 	}
 
-	public static JSONObject newDeleteRequest(long id, boolean encode) {
-		return new JSONRequest(new Moment(id <= 0 ? 10000 : id), encode).setTag(Moment.class.getSimpleName());
+	public static JSONObject newDeleteRequest(long id) {
+		return new JSONRequest(new Moment(id <= 0 ? 10000 : id)).setTag(Moment.class.getSimpleName());
 	}
 
 
 
 
-	public static JSONObject newSingleRequest(long id, boolean encode) {
-		return new JSONRequest(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id), encode);
+	public static JSONObject newSingleRequest(long id) {
+		return new JSONRequest(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id));
 	}
 
-	public static JSONObject newColumnsRequest(long id, boolean encode) {
-		JSONObject object = new JSONObject(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id), encode);
+	public static JSONObject newColumnsRequest(long id) {
+		JSONObject object = new JSONObject(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id));
 		object.setColumn("id,userId,content");
-		return new JSONRequest(Moment.class.getSimpleName(), object, encode);
+		return new JSONRequest(Moment.class.getSimpleName(), object);
 	}
 
-	public static JSONObject newRelyRequest(long id, boolean encode) {
+	public static JSONObject newRelyRequest(long id) {
 		JSONRequest request = new JSONRequest();
-		request.put(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id), encode);
-		request.put(User.class.getSimpleName(), new JSONRequest("id@", "Moment/userId", encode));
+		request.put(new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id));
+		request.put(User.class.getSimpleName(), new JSONRequest("id@", "Moment/userId"));
 		return request;
 	}
 
-	public static JSONObject newArrayRequest(boolean encode) {
+	public static JSONObject newArrayRequest() {
 		JSONRequest dataObject = new JSONRequest();
-		dataObject.put("name$", "%o%", encode);
-		JSONRequest request = new JSONRequest(User.class.getSimpleName(), dataObject, encode);
-		return request.toArray(5, 1, User.class.getSimpleName(), encode);
+		dataObject.put("name$", "%o%");
+		JSONRequest request = new JSONRequest(User.class.getSimpleName(), dataObject);
+		return request.toArray(5, 1, User.class.getSimpleName());
 	}
 
-	public static JSONObject newComplexRequest(boolean encode) {
+	public static JSONObject newComplexRequest() {
 		JSONRequest request = new JSONRequest();
 
 		List<Long> idList = new ArrayList<Long>();
 		idList.add(DEFAULT_USER_ID);
 		idList.add((long) 93793);
-		request.put(Moment.class.getSimpleName(), new JSONRequest("userId{}", idList, encode), encode);
+		request.put(Moment.class.getSimpleName(), new JSONRequest("userId{}", idList));
 
-		request.put(User.class.getSimpleName(), new JSONRequest("id@", "/Moment/userId", encode), encode);
+		request.put(User.class.getSimpleName(), new JSONRequest("id@", "/Moment/userId"));
 
-		request.add(new JSONRequest(Comment.class.getSimpleName()
-				, new JSONRequest("momentId@", "[]/Moment/id", encode), encode).
-				toArray(3, 0, Comment.class.getSimpleName()), encode);
+		request.putAll(new JSONRequest(Comment.class.getSimpleName()
+				, new JSONRequest("momentId@", "[]/Moment/id")).
+				toArray(3, 0, Comment.class.getSimpleName()));
 
-		return request.toArray(3, 0, encode);
+		return request.toArray(3, 0);
 	}
 
-	public static JSONObject newAccessErrorRequest(boolean encode) {
-		return new JSONRequest(new Wallet().setUserId(DEFAULT_USER_ID), encode)
-		.setTag(Wallet.class.getSimpleName());
+	public static JSONObject newAccessErrorRequest() {
+		return new JSONRequest(new Privacy(DEFAULT_USER_ID));
 	}
 
-	public static JSONObject newAccessPermittedRequest(boolean encode) {
-		JSONRequest request = new JSONRequest();
-		request.put(new Wallet().setUserId(DEFAULT_USER_ID), encode);
-		request.put("currentUserId", DEFAULT_USER_ID, encode);
-		request.put("loginPassword", "apijson", encode);
-		return request.setTag(Wallet.class.getSimpleName());
+	public static JSONObject newAccessPermittedRequest() {
+		JSONRequest request = new JSONRequest(new Privacy(DEFAULT_USER_ID));
+		return request.setTag(Privacy.class.getSimpleName());
 	}
 
 }

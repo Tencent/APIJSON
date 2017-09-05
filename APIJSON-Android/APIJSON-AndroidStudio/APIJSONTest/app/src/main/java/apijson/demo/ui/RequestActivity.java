@@ -14,6 +14,13 @@ limitations under the License.*/
 
 package apijson.demo.ui;
 
+import static zuo.biao.apijson.StringUtil.UTF_8;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -28,23 +35,15 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.alibaba.fastjson.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import apijson.demo.HttpManager;
 import apijson.demo.HttpManager.OnHttpResponseListener;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
 import apijson.demo.model.BaseModel;
 import apijson.demo.model.Moment;
-import apijson.demo.model.Wallet;
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONResponse;
+import apijson.demo.model.Privacy;
 
-import static zuo.biao.apijson.StringUtil.UTF_8;
+import com.alibaba.fastjson.JSONObject;
 
 /**请求Activity
  * 向服务器发起请求查询或操作相应数据
@@ -58,7 +57,6 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 	public static final String INTENT_URL = "INTENT_URL";
 	public static final String INTENT_METHOD = "INTENT_METHOD";
 	public static final String INTENT_REQUEST = "INTENT_REQUEST";
-	public static final String INTENT_ENCODED = "INTENT_ENCODED";
 
 	public static final String RESULT_ID = "RESULT_ID";
 	public static final String RESULT_URL = "RESULT_URL";
@@ -70,17 +68,14 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 	 * @param url
 	 * @param method
 	 * @param request
-	 * @param encoded
 	 * @return
 	 */
-	public static Intent createIntent(Context context, long id, String url, String method,
-			JSONObject request, boolean encoded) {
+	public static Intent createIntent(Context context, long id, String url, String method, JSONObject request) {
 		return new Intent(context, RequestActivity.class)
 		.putExtra(RequestActivity.INTENT_ID, id)
 		.putExtra(RequestActivity.INTENT_URL, url)
 		.putExtra(RequestActivity.INTENT_METHOD, method)
-		.putExtra(RequestActivity.INTENT_REQUEST, JSON.toJSONString(request))
-		.putExtra(RequestActivity.INTENT_ENCODED, encoded);
+		.putExtra(RequestActivity.INTENT_REQUEST, JSON.toJSONString(request));
 	}
 
 
@@ -91,10 +86,9 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 	private boolean isAlive;
 
 	private long id;
-	private String url;
-	private String method;
-	private String request;
-	private boolean encoded;
+	private String url; 
+	private String method;   
+	private String request; 
 
 	private TextView tvRequestResult;
 	private ProgressBar pbRequest;
@@ -115,20 +109,9 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 		url = getIntent().getStringExtra(INTENT_URL);
 		method = getIntent().getStringExtra(INTENT_METHOD);
 		request = getIntent().getStringExtra(INTENT_REQUEST);
-		encoded = getIntent().getBooleanExtra(INTENT_ENCODED, false);
 
 		method = StringUtil.getTrimedString(method);
 		url = StringUtil.getCorrectUrl(url);
-		if (encoded == false && request != null && request.contains("/")) {
-			//			try {//导致JSON.format(request)返回null，然后tvRequestResult就显示为null了
-			//				String s = URLEncoder.encode(new String(request), StringUtil.UTF_8);
-			//				request = s;
-			//			} catch (UnsupportedEncodingException e) {
-			//				e.printStackTrace();
-			//			}
-			request = request.replaceAll("/", "%2F");
-		}
-
 
 		tvRequestResult = (TextView) findViewById(R.id.tvRequestResult);
 		pbRequest = (ProgressBar) findViewById(R.id.pbRequest);
@@ -176,11 +159,7 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 		tvRequestResult.setText("requesting...\n\n url = " + fullUrl + "\n\n request = \n" + JSON.format(request) + "\n\n\n" + error);
 		pbRequest.setVisibility(View.VISIBLE);
 
-		if ("get".equals(method) || "head".equals(method)) {
-			HttpManager.getInstance().get(fullUrl, request, this);
-		} else {
-			HttpManager.getInstance().post(fullUrl, request, this);
-		}
+		HttpManager.getInstance().post(fullUrl, request, this);
 	}
 
 	/**用浏览器请求，只有GET请求才能正常访问
@@ -244,15 +223,15 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 
 		} else if ("delete".equals(method)) {
 			response = response.getJSONResponse(Moment.class.getSimpleName());
-			//			if (JSONResponse.isSucceed(response)) {//delete succeed
+			//			if (JSONResponse.isSuccess(response)) {//delete succeed
 			id = 0;//reuse default value
 			//			}
 			Log.d(TAG, "onHttpResponse  delete.equals(method) >>  id = " + id
-					+ "; isSucceed = " + JSONResponse.isSucceed(response));
+					+ "; isSucceed = " + JSONResponse.isSuccess(response));
 
 		} else if ("post_get".equals(method)) {
-			Wallet wallet = response.getObject(Wallet.class);
-			Log.d(TAG, "onHttpResponse  post_get.equals(method) >>  wallet = " + JSON.toJSONString(wallet));
+			Privacy privacy = response.getObject(Privacy.class);
+			Log.d(TAG, "onHttpResponse  post_get.equals(method) >>  privacy = \n" + JSON.toJSONString(privacy));
 		}
 
 

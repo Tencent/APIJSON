@@ -17,7 +17,6 @@ package zuo.biao.apijson;
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**通用字符串(String)相关类,为null时返回""
@@ -100,7 +99,7 @@ public class StringUtil {
 	 * @param array
 	 * @return {@link #getString(String[], boolean)}
 	 */
-	public static String getString(String[] array) {
+	public static String getString(Object[] array) {
 		return getString(array, false);
 	}
 	/**获取string,为null则返回""
@@ -109,7 +108,7 @@ public class StringUtil {
 	 * @param ignoreEmptyItem
 	 * @return {@link #getString(String[], String, boolean)}
 	 */
-	public static String getString(String[] array, boolean ignoreEmptyItem) {
+	public static String getString(Object[] array, boolean ignoreEmptyItem) {
 		return getString(array, null, ignoreEmptyItem);
 	}
 	/**获取string,为null则返回""
@@ -118,7 +117,7 @@ public class StringUtil {
 	 * @param split
 	 * @return {@link #getString(String[], String, boolean)}
 	 */
-	public static String getString(String[] array, String split) {
+	public static String getString(Object[] array, String split) {
 		return getString(array, split, false);
 	}
 	/**获取string,为null则返回""
@@ -127,7 +126,7 @@ public class StringUtil {
 	 * @param ignoreEmptyItem
 	 * @return
 	 */
-	public static String getString(String[] array, String split, boolean ignoreEmptyItem) {
+	public static String getString(Object[] array, String split, boolean ignoreEmptyItem) {
 		String s = "";
 		if (array != null) {
 			if (split == null) {
@@ -304,43 +303,74 @@ public class StringUtil {
 
 	//判断字符类型 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	public static final Pattern ALPHA_PATTERN;
-	public static final Pattern NAME_PATTERN;
-	public static final Pattern BIG_ALPHA_PATTERN;
-	public static final Pattern SMALL_ALPHA_PATTERN;
+	public static final Pattern PATTERN_NUMBER;
+	public static final Pattern PATTERN_PHONE;
+	public static final Pattern PATTERN_EMAIL;
+	public static final Pattern PATTERN_ID_CARD;
+	public static final Pattern PATTERN_ALPHA;
+	public static final Pattern PATTERN_PASSWORD; //TODO
+	public static final Pattern PATTERN_NAME;
+	public static final Pattern PATTERN_ALPHA_BIG;
+	public static final Pattern PATTERN_ALPHA_SMALL;
 	static {
-		ALPHA_PATTERN = Pattern.compile("[a-zA-Z]");
-		NAME_PATTERN = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
-		BIG_ALPHA_PATTERN = Pattern.compile("[A-Z]");
-		SMALL_ALPHA_PATTERN = Pattern.compile("[a-z]");
+		PATTERN_NUMBER = Pattern.compile("^[0-9]+$");
+		PATTERN_ALPHA = Pattern.compile("^[a-zA-Z]+$");
+		PATTERN_ALPHA_BIG = Pattern.compile("^[A-Z]+$");
+		PATTERN_ALPHA_SMALL = Pattern.compile("^[a-z]+$");
+		PATTERN_NAME = Pattern.compile("^[0-9a-zA-Z_]+$");//已用55个中英字符测试通过
+		PATTERN_PHONE = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$");
+		PATTERN_EMAIL = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$");
+		PATTERN_ID_CARD = Pattern.compile("(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}$)");
+		PATTERN_PASSWORD = Pattern.compile("^[0-9a-zA-Z]+$");
 	}
 
-	//判断手机格式是否正确
+	/**判断手机格式是否正确
+	 * @param phone
+	 * @return
+	 */
 	public static boolean isPhone(String phone) {
 		if (isNotEmpty(phone, true) == false) {
 			return false;
 		}
 
-		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$");
-
 		currentString = phone;
-
-		return p.matcher(phone).matches();
+		return PATTERN_PHONE.matcher(phone).matches();
 	}
-	//判断email格式是否正确
+	/**判断手机格式是否正确
+	 * @param s
+	 * @return
+	 */
+	public static boolean isPassword(String s) {
+		return getLength(s, false) >= 6 && PATTERN_PASSWORD.matcher(s).matches();
+	}
+	/**判断是否全是数字密码
+	 * @param s
+	 * @return
+	 */
+	public static boolean isNumberPassword(String s) {
+		return getLength(s, false) == 6 && isNumer(s);
+	}
+	/**判断email格式是否正确
+	 * @param email
+	 * @return
+	 */
 	public static boolean isEmail(String email) {
 		if (isNotEmpty(email, true) == false) {
 			return false;
 		}
 
-		String str = "^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$";
-		Pattern p = Pattern.compile(str);
-
 		currentString = email;
-
-		return p.matcher(email).matches();
+		return PATTERN_EMAIL.matcher(email).matches();
 	}
 
+
+	/**判断是否全是验证码
+	 * @param s
+	 * @return
+	 */
+	public static boolean isVerify(String s) {
+		return getLength(s, false) >= 4 && isNumer(s);
+	}
 	/**判断是否全是数字
 	 * @param s
 	 * @return
@@ -350,39 +380,20 @@ public class StringUtil {
 			return false;
 		}
 
-		Pattern pattern = Pattern.compile("[0-9]");
-		Matcher matcher;
-		for (int i = 0; i < s.length(); i++) {
-			matcher = pattern.matcher(s.substring(i, i+1));
-			if(! matcher.matches()){
-				return false;
-			}
-		}
-
 		currentString = s;
-
-		return true;
+		return PATTERN_NUMBER.matcher(s).matches();
 	}
 	/**判断是否全是字母
 	 * @param s
 	 * @return
 	 */
 	public static boolean isAlpha(String s) {
-		if (s == null) {
-			Log.i(TAG, "isNumberOrAlpha  inputed == null >> return false;");
+		if (isEmpty(s, true)) {
 			return false;
-		}
-		Pattern pAlpha = Pattern.compile("[a-zA-Z]");
-		Matcher mAlpha;
-		for (int i = 0; i < s.length(); i++) {
-			mAlpha = pAlpha.matcher(s.substring(i, i+1));
-			if(! mAlpha.matches()){
-				return false;
-			}
 		}
 
 		currentString = s;
-		return true;
+		return PATTERN_ALPHA.matcher(s).matches();
 	}
 	/**判断是否全是数字或字母
 	 * @param s
@@ -392,53 +403,53 @@ public class StringUtil {
 		return isNumer(s) || isAlpha(s);
 	}
 
-	/**判断是否为单词，只能包含字母，数字或下划线
+	/**判断是否为代码名称，只能包含字母，数字或下划线
 	 * @param s
 	 * @return
 	 */
-	public static boolean isWord(String s) {
-		return s != null && NAME_PATTERN.matcher(s).matches();
+	public static boolean isName(String s) {
+		return s != null && PATTERN_NAME.matcher(s).matches();
 	}
-	/**判断是否为首字母大写的单词
+	/**判断是否为首字母大写的代码名称
 	 * @param key
 	 * @return
 	 */
-	public static boolean isBigWord(String s) {
+	public static boolean isBigName(String s) {
 		s = getString(s);
-		if (s.isEmpty() || BIG_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+		if (s.isEmpty() || PATTERN_ALPHA_BIG.matcher(s.substring(0, 1)).matches() == false) {
 			return false;
 		}
-		return s.length() <= 1 ? true : isWord(s.substring(1));
+		return s.length() <= 1 ? true : isName(s.substring(1));
 	}
-	/**判断是否为首字母小写的单词
+	/**判断是否为首字母小写的代码名称
 	 * @param key
 	 * @return
 	 */
-	public static boolean isSmallWord(String s) {
+	public static boolean isSmallName(String s) {
 		s = getString(s);
-		if (s.isEmpty() || SMALL_ALPHA_PATTERN.matcher(s.substring(0, 1)).matches() == false) {
+		if (s.isEmpty() || PATTERN_ALPHA_SMALL.matcher(s.substring(0, 1)).matches() == false) {
 			return false;
 		}
-		return s.length() <= 1 ? true : isWord(s.substring(1));
+		return s.length() <= 1 ? true : isName(s.substring(1));
 	}
 
 
 	/**判断字符类型是否是身份证号
-	 * @param idCard
+	 * @param number
 	 * @return
 	 */
-	public static boolean isIDCard(String idCard) {
-		if (isNumberOrAlpha(idCard) == false) {
+	public static boolean isIDCard(String number) {
+		if (isNumberOrAlpha(number) == false) {
 			return false;
 		}
-		idCard = getString(idCard);
-		if (idCard.length() == 15) {
-			Log.i(TAG, "isIDCard idCard.length() == 15 old IDCard");
-			currentString = idCard;
+		number = getString(number);
+		if (number.length() == 15) {
+			Log.i(TAG, "isIDCard number.length() == 15 old IDCard");
+			currentString = number;
 			return true;
 		}
-		if (idCard.length() == 18) {
-			currentString = idCard;
+		if (number.length() == 18) {
+			currentString = number;
 			return true;
 		}
 

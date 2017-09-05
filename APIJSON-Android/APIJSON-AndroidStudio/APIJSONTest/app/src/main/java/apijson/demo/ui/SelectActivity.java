@@ -109,7 +109,7 @@ public class SelectActivity extends Activity implements OnClickListener {
 	 */
 	public void setRequest() {
 		for (int i = 0; i < buttons.length; i++) {
-			buttons[i].setText(JSON.format(getRequest(buttons[i], false)));
+			buttons[i].setText(JSON.format(getRequest(buttons[i])));
 		}
 	}
 
@@ -119,30 +119,30 @@ public class SelectActivity extends Activity implements OnClickListener {
 	 * @param v
 	 * @return
 	 */
-	public JSONObject getRequest(View v, boolean encode) {
+	public JSONObject getRequest(View v) {
 		switch (v.getId()) {
 		case R.id.btnSelectPost:
-			return RequestUtil.newPostRequest(encode);
+			return RequestUtil.newPostRequest();
 		case R.id.btnSelectPut:
-			return RequestUtil.newPutRequest(id, encode);
+			return RequestUtil.newPutRequest(id);
 		case R.id.btnSelectDelete:
-			return RequestUtil.newDeleteRequest(id, encode);
+			return RequestUtil.newDeleteRequest(id);
 
 		case R.id.btnSelectSingle:
-			return RequestUtil.newSingleRequest(id, encode);
+			return RequestUtil.newSingleRequest(id);
 		case R.id.btnSelectColumns:
-			return RequestUtil.newColumnsRequest(id, encode);
+			return RequestUtil.newColumnsRequest(id);
 		case R.id.btnSelectRely:
-			return RequestUtil.newRelyRequest(id, encode);
+			return RequestUtil.newRelyRequest(id);
 		case R.id.btnSelectArray:
-			return RequestUtil.newArrayRequest(encode);
+			return RequestUtil.newArrayRequest();
 
 		case R.id.btnSelectAccessError:
-			return RequestUtil.newAccessErrorRequest(encode);
+			return RequestUtil.newAccessErrorRequest();
 		case R.id.btnSelectAccessPermitted:
-			return RequestUtil.newAccessPermittedRequest(encode);
+			return RequestUtil.newAccessPermittedRequest();
 		default:
-			return RequestUtil.newComplexRequest(encode);
+			return RequestUtil.newComplexRequest();
 		}
 	}
 
@@ -153,31 +153,31 @@ public class SelectActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.btnSelectPost:
-			select(getRequest(v, true), "post");
+			select(getRequest(v), "post");
 			break;
 		case R.id.btnSelectPut:
-			select(getRequest(v, true), "put");
+			select(getRequest(v), "put");
 			break;
 		case R.id.btnSelectDelete:
-			select(getRequest(v, true), "delete");
+			select(getRequest(v), "delete");
 			break;
 
 		case R.id.btnSelectAccessError:
-			select(getRequest(v, true), "post_get");
+			select(getRequest(v), "post_get");
 			break;
 		case R.id.btnSelectAccessPermitted:
-			select(getRequest(v, true), "post_get");
+			select(getRequest(v), "post_get");
 			break;
 
 		default:
-			select(getRequest(v, true), "get");
+			select(getRequest(v), "get");
 			break;
 		}
 	}
 
 
 	private void select(JSONObject request, String method) {
-		startActivityForResult(RequestActivity.createIntent(context, id, url, method, request, true), REQUEST_TO_REQUEST);
+		startActivityForResult(RequestActivity.createIntent(context, id, url, method, request), REQUEST_TO_REQUEST);
 	}
 
 
