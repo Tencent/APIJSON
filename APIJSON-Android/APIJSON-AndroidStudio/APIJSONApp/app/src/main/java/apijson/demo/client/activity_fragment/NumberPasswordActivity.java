@@ -33,7 +33,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import apijson.demo.client.R;
 import apijson.demo.client.util.HttpRequest;
-import apijson.demo.server.model.Password;
+import apijson.demo.server.model.Privacy;
 
 /**支付密码设置界面activity
  * @author Lemon
@@ -312,7 +312,7 @@ public class NumberPasswordActivity extends BaseActivity implements OnClickListe
 		dismissProgressDialog();
 		switch (requestCode) {
 		case HTTP_SET_PASSWORD:
-			if (response.isSucceed()) {
+			if (response.isSuccess()) {
 				showShortToast(R.string.change_succeed);
 				saveAndExit(true);
 			} else {
@@ -371,7 +371,7 @@ public class NumberPasswordActivity extends BaseActivity implements OnClickListe
 			if (data != null) {
 				password = data.getStringExtra(NumberPasswordActivity.RESULT_PASSWORD);
 				if (StringUtil.isNotEmpty(password, true)) {
-					HttpRequest.setPassword(Password.TYPE_PAY, password, phone, verify
+					HttpRequest.setPassword(Privacy.PASSWORD_TYPE_PAY, password, phone, verify
 							, HTTP_SET_PASSWORD, this);
 				}
 			}

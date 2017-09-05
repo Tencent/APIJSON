@@ -29,7 +29,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import apijson.demo.client.R;
-import apijson.demo.client.model.Wallet;
 import apijson.demo.client.util.HttpRequest;
 import apijson.demo.server.model.Privacy;
 
@@ -167,7 +166,7 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 			public void run() {
 
 				JSONResponse response = new JSONResponse(resultJson);
-				isSucceed = JSONResponse.isSucceed(response);
+				isSucceed = JSONResponse.isSuccess(response);
 				
 				dismissProgressDialog();
 				switch (requestCode) {

@@ -20,6 +20,7 @@ import java.util.List;
 import zuo.biao.apijson.JSONObject;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
+import zuo.biao.apijson.RequestRole;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.util.Log;
 import zuo.biao.library.util.SettingUtil;
@@ -28,13 +29,10 @@ import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.manager.HttpManager;
 import apijson.demo.client.model.CommentItem;
 import apijson.demo.server.model.Comment;
-import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
-import apijson.demo.server.model.Password;
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
-import apijson.demo.server.model.Wallet;
 
 /**HTTP请求工具类
  * @author Lemon
@@ -67,7 +65,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void head(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().get(URL_HEAD, request, requestCode, listener);
+		HttpManager.getInstance().post(URL_HEAD, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -75,7 +73,7 @@ public class HttpRequest {
 	 * @param listener
 	 */
 	public static void get(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().get(URL_GET, request, requestCode, listener);
+		HttpManager.getInstance().post(URL_GET, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -132,19 +130,17 @@ public class HttpRequest {
 
 
 
-	//加 _ 表示class名，避免PASSWORD不知道是 Password 还是 password 这种冲突
+	//加 _ 表示class名，避免VERIFY不知道是 Verify 还是 verify 这种冲突
 	public static final String USER_;
 	public static final String PRIVACY_;
 	public static final String MOMENT_;
 	public static final String COMMENT_;
-	public static final String WALLET_;
 	public static final String VERIFY_;
 	static {
 		USER_ = User.class.getSimpleName();
 		PRIVACY_ = Privacy.class.getSimpleName();
 		MOMENT_ = Moment.class.getSimpleName();
 		COMMENT_ = Comment.class.getSimpleName();
-		WALLET_ = Wallet.class.getSimpleName();
 		VERIFY_ = Verify.class.getSimpleName();
 	}
 
@@ -157,7 +153,6 @@ public class HttpRequest {
 
 	public static final String ID = "id";
 	public static final String USER_ID = "userId";
-	public static final String CURRENT_USER_ID = "currentUserId";
 
 	public static final String NAME = "name";
 	public static final String PHONE = "phone";
@@ -209,30 +204,12 @@ public class HttpRequest {
 	 */
 	public static void register(String verify, String phone, String password, String name, int sex
 			, int requestCode, OnHttpResponseListener listener) {
-		JSONObject request = new JSONRequest(new User().setName(name).setSex(sex))
-		.setTag(USER_);
-		request.put(VERIFY, verify);
-		request.put(PHONE, phone);
-		request.put(PASSWORD, password);
+		JSONObject request = new JSONRequest(new Privacy(phone, password));
+		request.puts(new User().setName(name).setSex(sex));
+		request.puts(VERIFY, verify);
 		HttpManager.getInstance().post(URL_BASE + "register", request, requestCode, listener);
 	}
-	/**重置密码
-	 * @param verify
-	 * @param phone
-	 * @param password
-	 * @param requestCode
-	 * @param listener
-	 */
-	public static void setPassword(String verify, String phone, String password
-			, int requestCode, OnHttpResponseListener listener) {
-		JSONRequest request = new JSONRequest();
-		request.put(PHONE, phone);
-		request.put(VERIFY, verify);
-		request.put(PASSWORD, password);
 
-		HttpManager.getInstance().post(URL_BASE + "put/password"
-				, request.setTag(PASSWORD), requestCode, listener);
-	}
 	/**
 	 * @param phone
 	 * @param requestCode
@@ -253,22 +230,14 @@ public class HttpRequest {
 		request.put(TYPE, type);
 		request.put(PHONE, phone);
 		request.put(PASSWORD, password);
-		HttpManager.getInstance().post(
-				URL_BASE + "login/"
-				, request.setTag(Login.class.getSimpleName())
-				, requestCode, listener
-				);
+		HttpManager.getInstance().post(URL_BASE + "login/", request, requestCode, listener);
 	}
 	/**退出登录
 	 * @param requestCode
 	 * @param listener
 	 */
 	public static void logout(int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(
-				URL_BASE + "logout/"
-				, new JSONRequest().setTag(Login.class.getSimpleName())
-				, requestCode, listener
-				);
+		HttpManager.getInstance().post(URL_BASE + "logout/", new JSONRequest(), requestCode, listener);
 		//不能在传到服务器之前销毁session
 		new Handler().postDelayed(new Runnable() {
 
@@ -278,6 +247,38 @@ public class HttpRequest {
 			}
 		}, 500);
 	}
+
+	/**重置登录密码
+	 * @param verify
+	 * @param phone
+	 * @param password
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void setPassword(String verify, String phone, String password
+			, int requestCode, OnHttpResponseListener listener) {
+		setPassword(verify, phone, password, Privacy.PASSWORD_TYPE_LOGIN, requestCode, listener);
+	}
+	/**重置密码
+	 * @param verify
+	 * @param phone
+	 * @param password
+	 * @param type
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void setPassword(String verify, String phone, String password, int type
+			, int requestCode, OnHttpResponseListener listener) {
+		JSONRequest request = new JSONRequest();
+		request.put(VERIFY, verify);
+		request.put(PHONE, phone);
+		request.put(PASSWORD, password);
+		request.put(TYPE, type);
+
+		HttpManager.getInstance().post(URL_BASE + "put/password", request, requestCode, listener);
+	}
+
+
 
 	/**获取验证码
 	 * @param phone
@@ -316,11 +317,11 @@ public class HttpRequest {
 	 */
 	public static void setPassword(int type, String password, String phone, String verify
 			, int requestCode, OnHttpResponseListener listener) {
-		Password pwd = new Password(phone, password).setType(type);
-		JSONRequest request = new JSONRequest(pwd);
+		Privacy privacy = new Privacy(phone, password);
+		JSONRequest request = new JSONRequest(privacy);
 		request.put(VERIFY, verify);
 
-		put(request.setTag(Password.class.getSimpleName()), requestCode, listener);
+		put(request.setTag(PRIVACY_), requestCode, listener);
 	}
 
 	//account>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -346,7 +347,7 @@ public class HttpRequest {
 	public static void getUser(long id, boolean withMomentList, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest(new User(id));
 		if (withMomentList) {
-			request.add(new JSONRequest(MOMENT_
+			request.putsAll(new JSONRequest(MOMENT_
 					, new JSONRequest(USER_ID, id).setColumn("pictureList").setOrder(DATE_DOWN))
 			.toArray(3, 0, MOMENT_));
 		}
@@ -365,7 +366,7 @@ public class HttpRequest {
 		List<Long> list = new ArrayList<Long>();
 		list.add(id);
 		JSONObject userObject = new JSONObject(new User(user.getId()));
-		userObject.put("contactIdList" + (isFriend ? "+" : "-"), list, true);
+		userObject.put("contactIdList" + (isFriend ? "+" : "-"), list);
 		put(new JSONRequest(USER_, userObject).setTag(USER_), requestCode, listener);
 	}
 
@@ -441,12 +442,12 @@ public class HttpRequest {
 			default:
 				break;
 			}
-			userItem.add(search);
+			userItem.putsAll(search);
 		}
 
 		JSONRequest listRequest = new JSONRequest(USER_, userItem);
 		listRequest = listRequest.toArray(count, page, USER_);
-		request.add(listRequest);
+		request.putsAll(listRequest);
 		get(request, requestCode, listener);
 	}
 
@@ -471,7 +472,7 @@ public class HttpRequest {
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		userItem.setQuery(JSONRequest.QUERY_ALL);//同时获取Table和total
-		request.add(userItem.toArray(10, 0, USER_));
+		request.putsAll(userItem.toArray(10, 0, USER_));
 		request.put("praiseCount@", "/User[]/total");//获取Table的总数total
 		//praise >>>>>>>>>>>>>>>>>>
 
@@ -526,7 +527,7 @@ public class HttpRequest {
 			break;
 		}
 		moment.setOrder(DATE_DOWN);
-		moment.add(search);
+		moment.putsAll(search);
 
 		request.put(MOMENT_, moment);
 		request.put(USER_, new JSONRequest(ID_AT, "/Moment/userId").setColumn(COLUMNS_USER));
@@ -537,7 +538,7 @@ public class HttpRequest {
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		//		userItem.setQuery(JSONRequest.QUERY_ALL);
-		request.add(userItem.toArray(10, 0, USER_));
+		request.putsAll(userItem.toArray(10, 0, USER_));
 		//		request.put("praiseCount@", "/User[]/total");
 		//praise >>>>>>>>>>>>>>>>>>
 
@@ -548,7 +549,7 @@ public class HttpRequest {
 		.setColumn(COLUMNS_USER_SIMPLE));
 
 		//		commentItem.setQuery(JSONRequest.QUERY_ALL);
-		request.add(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
+		request.putsAll(commentItem.toArray(6, 0, CommentItem.class.getSimpleName()));
 		//		request.put("commentCount@", "/CommentItem[]/total");
 		//comment >>>>>>>>>>>>>>>>>>
 
@@ -565,7 +566,7 @@ public class HttpRequest {
 		JSONObject data = new JSONObject(new Moment(id));
 		List<Long> list = new ArrayList<Long>();
 		list.add(application.getCurrentUserId());
-		data.put("praiseUserIdList" + (toPraise ? "+" : "-"), list, true);
+		data.puts("praiseUserIdList" + (toPraise ? "+" : "-"), list);
 
 		put(new JSONRequest(MOMENT_, data).setTag(MOMENT_), requestCode, listener);
 	}
@@ -597,7 +598,7 @@ public class HttpRequest {
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
 		JSONObject comment = new JSONObject(new Comment().setMomentId(momentId));
-		request.put(COMMENT_, comment.setOrder(DATE_UP));
+		request.put(COMMENT_, comment.setOrder("toId+", DATE_UP));
 		request.put(USER_, new JSONRequest(ID_AT, "/Comment/userId").setColumn(COLUMNS_USER));
 
 		//		if (page == 0) {
@@ -631,11 +632,17 @@ public class HttpRequest {
 	}
 	/**
 	 * @param id
+	 * @param userId
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void deleteComment(long id, int requestCode, OnHttpResponseListener listener) {
-		delete(new JSONRequest(new Comment(id)).setTag(COMMENT_), requestCode, listener);
+	public static void deleteComment(long id, long userId, int requestCode, OnHttpResponseListener listener) {
+		delete(new JSONRequest(
+				COMMENT_, new JSONObject(
+						new Comment(id)
+						).setRole(application.isCurrentUser(userId) ? RequestRole.OWNER.name() : RequestRole.ADMIN.name())
+				).setTag(COMMENT_)
+				, requestCode, listener);
 	}
 
 	//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -664,7 +671,7 @@ public class HttpRequest {
 		JSONObject privacy = new JSONObject(
 				new Privacy(application.getCurrentUserId()).setPayPassword(payPassword)
 				);
-		privacy.put("balance+", change, true);
+		privacy.puts("balance+", change);
 		JSONRequest request = new JSONRequest(PRIVACY_, privacy);
 
 		HttpManager.getInstance().post(URL_BASE + "put/balance", request.setTag(PRIVACY_), requestCode, listener);

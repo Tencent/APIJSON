@@ -43,7 +43,6 @@ import apijson.demo.client.R;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseFragment;
 import apijson.demo.client.interfaces.TopBarMenuCallback;
-import apijson.demo.client.model.Login;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.HttpRequest;
 
@@ -320,8 +319,8 @@ public class MineFragment extends BaseFragment implements OnClickListener, OnDia
 		}
 		switch (requestCode) {
 		case HTTP_LOUOUT:
-			JSONResponse response = new JSONResponse(resultJson).getJSONResponse(Login.class.getSimpleName());
-			boolean succeed = JSONResponse.isSucceed(response);
+			JSONResponse response = new JSONResponse(resultJson).getJSONResponse(User.class.getSimpleName());
+			boolean succeed = JSONResponse.isSuccess(response);
 			Log.d(TAG, succeed ? "服务端退出成功" : "服务端退出失败");
 			showShortToast(succeed ? "服务端退出成功" : "服务端退出失败");
 			break;

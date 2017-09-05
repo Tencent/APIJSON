@@ -24,7 +24,7 @@ import static zuo.biao.apijson.RequestRole.UNKNOWN;
 import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.StringUtil;
 
-/**验证码类
+/**验证码
  * @author Lemon
  * @see
  * <br >POST_GET:post_get/authCode<pre>

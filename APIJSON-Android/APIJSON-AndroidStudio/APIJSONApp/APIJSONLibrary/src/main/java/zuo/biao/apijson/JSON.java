@@ -60,21 +60,24 @@ public class JSON {
 	public static String getCorrectJson(String s, boolean isArray) {
 		s = StringUtil.getTrimedString(s);
 		//		if (isArray) {
-		//			if (s.startsWith("\"")) {
+		//			while (s.startsWith("\"")) {
 		//				s = s.substring(1);
 		//			}
-		//			if (s.endsWith("\"")) {
+		//			while (s.endsWith("\"")) {
 		//				s = s.substring(0, s.length() - 1);
 		//			}
 		//		}
 		return s;//isJsonCorrect(s) ? s : null;
 	}
 
-	/**json转JSONObject
+	/**obj转JSONObject
 	 * @param json
 	 * @return
 	 */
 	public static JSONObject parseObject(Object obj) {
+		if (obj instanceof JSONObject) {
+			return (JSONObject) obj;
+		}
 		return parseObject(toJSONString(obj));
 	}
 	/**json转JSONObject
@@ -114,12 +117,16 @@ public class JSON {
 	 * @return
 	 */
 	public static <T> T parseObject(String json, Class<T> clazz) {
-		try {
-			int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
-			features |= Feature.OrderedField.getMask();
-			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, features);
-		} catch (Exception e) {
-			Log.i(TAG, "parseObject  catch \n" + e.getMessage());
+		if (clazz == null) {
+			Log.e(TAG, "parseObject  clazz == null >> return null;");
+		} else {
+			try {
+				int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
+				features |= Feature.OrderedField.getMask();
+				return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, features);
+			} catch (Exception e) {
+				Log.i(TAG, "parseObject  catch \n" + e.getMessage());
+			}
 		}
 		return null;
 	}
@@ -130,6 +137,16 @@ public class JSON {
 	 */
 	public static JSONArray parseArray(List<Object> list) {
 		return new JSONArray(list);
+	}
+	/**obj转JSONArray
+	 * @param json
+	 * @return
+	 */
+	public static JSONArray parseArray(Object obj) {
+		if (obj instanceof JSONArray) {
+			return (JSONArray) obj;
+		}
+		return parseArray(toJSONString(obj));
 	}
 	/**json转JSONArray
 	 * @param json
@@ -157,10 +174,14 @@ public class JSON {
 	 * @return
 	 */
 	public static <T> List<T> parseArray(String json, Class<T> clazz) {
-		try {
-			return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json, true), clazz);
-		} catch (Exception e) {
-			Log.i(TAG, "parseArray  catch \n" + e.getMessage());
+		if (clazz == null) {
+			Log.e(TAG, "parseArray  clazz == null >> return null;");
+		} else {
+			try {
+				return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json, true), clazz);
+			} catch (Exception e) {
+				Log.i(TAG, "parseArray  catch \n" + e.getMessage());
+			}
 		}
 		return null;
 	}

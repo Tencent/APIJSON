@@ -351,7 +351,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 				@Override
 				public void run() {
 					showVerifyGet(false);
-					if (JSONResponse.isSucceed(response2) == false) {
+					if (JSONResponse.isSuccess(response2) == false) {
 						showShortToast(R.string.get_failed);
 					} else if (JSONResponse.isExist(response2)) {
 						if (type == TYPE_REGISTER) {
@@ -412,7 +412,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		case HTTP_REGISTER:
 			User user = response.getObject(User.class);
 			dismissProgressDialog();
-			if (user == null || user.getId() <= 0 || JSONResponse.isSucceed(
+			if (user == null || user.getId() <= 0 || JSONResponse.isSuccess(
 					response.getJSONResponse(User.class.getSimpleName())) == false) {
 				if (response.getCode() == CODE_TIME_OUT || response.getCode() == 412) {
 					EditTextUtil.showInputedError(context, etPasswordVerify
@@ -430,7 +430,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		case HTTP_RESET_PASSWORD:
 			response2 = response.getJSONResponse(Privacy.class.getSimpleName());
 			dismissProgressDialog();
-			if (JSONResponse.isSucceed(response2) == false) {
+			if (JSONResponse.isSuccess(response2) == false) {
 				EditTextUtil.showInputedError(context, etPasswordVerify
 						, response.getCode() == CODE_TIME_OUT ? "验证码已过期" : "验证码错误");
 			} else {

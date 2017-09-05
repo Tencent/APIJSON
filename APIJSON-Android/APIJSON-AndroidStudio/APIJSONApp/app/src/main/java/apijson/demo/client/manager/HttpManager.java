@@ -15,37 +15,32 @@ limitations under the License.*/
 
 package apijson.demo.client.manager;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.text.TextUtils;
-
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import apijson.demo.client.application.APIJSONApplication;
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONRequest;
+import org.json.JSONException;
+
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.util.Log;
+import android.content.Context;
+import android.os.AsyncTask;
+import android.text.TextUtils;
+import apijson.demo.client.application.APIJSONApplication;
 
-import static zuo.biao.apijson.StringUtil.UTF_8;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 /**HTTP请求管理类
  * @author Lemon
@@ -85,58 +80,6 @@ public class HttpManager {
 	public static final String KEY_COOKIE = "cookie";
 
 
-	/**GET请求
-	 * @param url_ 接口url
-	 * @param request 请求
-	 * @param requestCode
-	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
-	 *            {@link OnHttpResponseListener#onHttpResponse(int, String, Exception)}<br/>
-	 *            在发起请求的类中可以用requestCode来区分各个请求
-	 * @param listener
-	 */
-	public void get(final String url_, final com.alibaba.fastjson.JSONObject request
-			, final int requestCode, final OnHttpResponseListener listener) {
-		new AsyncTask<Void, Void, Exception>() {
-
-			String result;
-			@Override
-			protected Exception doInBackground(Void... params) {
-				String body = request == null || request.isEmpty() ? null : JSON.toJSONString(request);
-				Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n get  url = " + url_ + "\n request = \n" + body);
-				try {
-					String url = StringUtil.getNoBlankString(url_)
-							+ (body == null ? "" : URLEncoder.encode(StringUtil.getNoBlankString(body), UTF_8));
-					StringBuffer sb = new StringBuffer();
-					sb.append(url);
-
-					OkHttpClient client = getHttpClient(url);
-					if (client == null) {
-						return new Exception(TAG + ".get  AsyncTask.doInBackground  client == null >> return;");
-					}
-
-					result = getResponseJson(client, new Request.Builder()
-							.addHeader(KEY_TOKEN, getToken(url))
-							.url(sb.toString()).build());
-					Log.d(TAG, "\n get  result = \n" + result + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
-				} catch (Exception e) {
-					Log.e(TAG, "get  AsyncTask.doInBackground  try {  result = getResponseJson(..." +
-							"} catch (Exception e) {\n" + e.getMessage());
-					return e;
-				}
-
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Exception exception) {
-				super.onPostExecute(exception);
-				listener.onHttpResponse(requestCode, result, exception);
-			}
-
-		}.execute();
-
-	}
-
 	public static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
 	/**POST请求
@@ -150,11 +93,6 @@ public class HttpManager {
 	 */
 	public void post(final String url_, final com.alibaba.fastjson.JSONObject request
 			, final int requestCode, final OnHttpResponseListener listener) {
-		if (request == null || request.containsKey(JSONRequest.KEY_TAG) == false) {
-			throw new IllegalArgumentException("post  " + url_ + " \n" +
-					"   request == null || request.containsKey(JSONRequest.KEY_TAG) == false !!!");
-		}
-
 		new AsyncTask<Void, Void, Exception>() {
 
 			String result;
@@ -280,7 +218,7 @@ public class HttpManager {
 	 * @throws JSONException
 	 */
 	public <T> T getValue(String json, String key) throws JSONException {
-		return getValue(new JSONObject(json), key);
+		return getValue(JSON.parseObject(json), key);
 	}
 	/**从object中获取key对应的值
 	 * *获取如果T是基本类型容易崩溃，所以需要try-catch
