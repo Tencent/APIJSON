@@ -54,9 +54,9 @@ import zuo.biao.apijson.server.sql.SQLExecutor;
 
 //TODO 放到 zuo.biao.apijson 包内，供Android客户端校验请求结构
 /**结构类
- * 增删改查: operation(add,replace,put,remove)   operation:{key0:value0, key1:value1 ...}
- * 对值校验: verify:{key0:value0, key1:value1 ...}  (key{}:range,key$:"%m%"等)
- * 对值重复性校验: unique:"key0:, key1 ..."  (unique:"phone,email" 等)
+ * 增删改查: OPERATION(ADD,REPLACE,PUT,REMOVE)   OPERATION:{key0:value0, key1:value1 ...}
+ * 对值校验: VERIFY:{key0:value0, key1:value1 ...}  (key{}:range,key$:"%m%"等)
+ * 对值重复性校验: UNIQUE:"key0:, key1 ..."  (UNIQUE:"phone,email" 等)
  * @author Lemon
  */
 public class Structure {

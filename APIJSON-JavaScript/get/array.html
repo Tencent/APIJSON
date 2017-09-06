@@ -1,45 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>GET:Array</title>
-  <script type="text/javascript" src="../apijson.js">
-  </script>
+  <script type="text/javascript" src="../RequestUtil.js"></script>
 </head>
 <body>
 <script >
-    var json = {
-        "User[]":{ //数组命名和内部对象同名时会将对象去包装 "User[]":[{"User":{Content}}, ...] => "User[]":[{Content}, ...]
-            "count":5,
-            "page":1,
-            "User":{
-                "name$":"%o%" //已通过encode函数自动转义 encodeURIComponent("%o%")
-            }
-        }
-    };
 
-    var rq = request(url_get, json, false, function () {
-        if (rq.readyState !== 4) {
-            return;
-        }
+  //单对象数组请求的简单方式
+  var rq = getArray("User", { "name$":"%o%" }, 5, 1, false, callBack);
 
-        if (rq.status === 200) {
-            alert("Response(GET):\n" + format(rq.responseText));
 
-            var rp = JSON.parse(rq.responseText);
-            var arr = rp == null ? null : rp["User[]"]; //取出数组User[]
-            if (arr != null) {
-                alert("User[] length = \n" + arr.length);
+  //普通方式<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-                var user0 = arr == null || arr.length <= 0 ? null : arr[0]; //取出User[]第0项
-                if (user0 != null) {
-                    alert("User[]/0 = \n" + format(JSON.stringify(user0)));
-                    alert("User[]/0/id = \n" + user0.id); //取出并显示User[]第0项User的id
-                }
-            }
-        } else {
-            alert("Response(GET):\nstatus" + rq.status + "\nerror:" + rq.error);
-        }
-    });
+  //    var json = {
+  //        "User[]":{
+  //            "count":5,
+  //            "page":1,
+  //            "User":{
+  //                "name$":"%o%" //已通过encode函数自动转义 encodeURIComponent("%o%")
+  //            }
+  //        }
+  //    };
+  //
+  //    var rq = request(URL_GET, json, false, callBack);
+
+
+  /**回调函数
+   */
+  function callBack() {
+    var rp = JSON.parse(rq.responseText);
+    alert("Response:\n" + format(rp));
+
+    var arr = rp == null ? null : rp["User[]"]; //取出数组User[]
+
+    if (arr != null) {
+      alert("User[].length = " + arr.length);
+
+      var user0 = arr == null || arr.length <= 0 ? null : arr[0]; //取出User[]第0项
+
+      if (user0 != null) {
+        alert("User[]/0 = \n" + format(JSON.stringify(user0)));
+        alert("User[]/0/id = " + user0.id); //取出并显示User[]第0项User的id
+        alert("User[]/0/name = " + user0.name); //取出并显示User[]第0项User的name
+      }
+    }
+  }
 </script>
 </body>
 </html>

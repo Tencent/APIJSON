@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Access Permitted</title>
-  <script type="text/javascript" src="apijson.js">
-  </script>
+  <script type="text/javascript" src="RequestUtil.js"></script>
 </head>
 <body>
 <script >
     var json = {
-        "tag":"Wallet",
-        "Wallet":{
+        "tag":"Privacy",
+        "Privacy":{
             "userId":38710
-        },
-        //以下都不需要了，新版APIJSON已用session做了自动化登录验证及自动化角色权限管理
-        "currentUserId":38710,
-        "loginPassword":"apijson"
+        }
     };
 
-    request(url_post_get, json);
+    request(URL_POST_GET, json);
 </script>
 </body>
 </html>

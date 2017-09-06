@@ -1,34 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>GET:Complex</title>
-  <script type="text/javascript" src="../apijson.js">
+  <script type="text/javascript" src="../RequestUtil.js">
   </script>
 </head>
 <body>
 <script >
-    //貌似在JavaScript里JSON注释前不能多于一个空格，否则不能解析
     var json = {
-        "[]":{ //请求一个数组
-            "page":0, //数组条件
-            "count":2,
+        "[]":{
+            "count":3,
+            "page":0,
             "Moment":{
-                "content$":"%a%" //对象条件，搜索content中包含 "a" 的动态
+                "@column":"id,userId,content,praiseUserIdList",
+                "userId{}":[
+                    38710,
+                    70793
+                ]
             },
-            "User":{ //请求一个名为User的对象
-                "id@":"/Moment/userId", //缺省依赖路径，从所处容器的父容器路径开始
-                "@column":"id,name,head" //指定返回字段
+            "User":{
+                "@column":"id,name,head",
+                "id@":"/Moment/userId" //已通过encode函数自动转义 encodeURIComponent("/Moment/userId")
             },
-            "Comment[]":{ //请求一个名为Comment的数组，并去除Comment包装
-                "count":2,
+            "[]":{
+                "count":3,
                 "Comment":{
-                    "momentId@":"[]/Moment/id" //完整依赖路径
-                }
+                    "momentId@":"[]/Moment/id" //已通过encode函数自动转义 encodeURIComponent("[]/Moment/id")
+                },
             }
         }
     };
 
-    request(url_get, json);
+    request(URL_GET, json);
 </script>
 </body>
 </html>
