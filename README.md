@@ -441,7 +441,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 #### 你可以跳过步骤4.2和步骤4.3，用我的服务器IP地址 139.196.140.118:8080 来测试服务端对客户端请求的返回结果。
 
-### <h3 id="4.2">4.2 导入MySQL table文件<h3/>
+### <h3 id="4.2">4.2 导入表文件到数据库<h3/>
 
 服务端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
 我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。
