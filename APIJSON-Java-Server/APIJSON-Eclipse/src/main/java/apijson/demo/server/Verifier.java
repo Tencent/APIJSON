@@ -18,8 +18,8 @@ import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.HEAD;
 import static zuo.biao.apijson.RequestMethod.POST;
-import static zuo.biao.apijson.RequestMethod.POST_GET;
-import static zuo.biao.apijson.RequestMethod.POST_HEAD;
+import static zuo.biao.apijson.RequestMethod.GETS;
+import static zuo.biao.apijson.RequestMethod.HEADS;
 import static zuo.biao.apijson.RequestMethod.PUT;
 
 import java.util.ArrayList;
@@ -96,8 +96,8 @@ public class Verifier {
 		HashMap<RequestMethod, RequestRole[]> map = new HashMap<>();
 		map.put(GET, access.GET());
 		map.put(HEAD, access.HEAD());
-		map.put(POST_GET, access.POST_GET());
-		map.put(POST_HEAD, access.POST_HEAD());
+		map.put(GETS, access.GETS());
+		map.put(HEADS, access.HEADS());
 		map.put(POST, access.POST());
 		map.put(PUT, access.PUT());
 		map.put(DELETE, access.DELETE());

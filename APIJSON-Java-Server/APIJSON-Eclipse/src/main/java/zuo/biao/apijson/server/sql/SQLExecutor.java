@@ -170,7 +170,7 @@ public class SQLExecutor {
 		ResultSet rs = null;
 		switch (config.getMethod()) {
 		case HEAD:
-		case POST_HEAD:
+		case HEADS:
 			rs = statement.executeQuery(sql);
 
 			result = rs.next() ? Parser.newSuccessResult()
@@ -198,7 +198,7 @@ public class SQLExecutor {
 			return result;
 
 		case GET:
-		case POST_GET:
+		case GETS:
 			break;
 
 		default://OPTIONS, TRACE等
