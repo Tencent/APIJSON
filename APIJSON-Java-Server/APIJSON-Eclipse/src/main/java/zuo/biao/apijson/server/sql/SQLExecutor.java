@@ -67,7 +67,7 @@ public class SQLExecutor {
 	private synchronized Connection getConnection() throws Exception {
 		Log.i(TAG, "成功加载MySQL驱动！");
 		return DriverManager.getConnection(SQLConfig.MYSQL_URI + "?useUnicode=true&characterEncoding=UTF-8&user="
-		+ SQLConfig.MYSQL_ACCOUNT + "&password=" + SQLConfig.MYSQL_PASSWORD);
+				+ SQLConfig.MYSQL_ACCOUNT + "&password=" + SQLConfig.MYSQL_PASSWORD);
 	}
 
 	/**保存缓存
@@ -251,26 +251,29 @@ public class SQLExecutor {
 							+ " >> } catch (Exception e) {");
 					e.printStackTrace();
 				}
-				if (value == null) {
-					Log.i(TAG, "select while (rs.next()){ ..." + " >>  value == null >> continue;");
-					continue;
-				}
+				//				if (value == null) {
+				//					Log.i(TAG, "select while (rs.next()){ ..." + " >>  value == null >> continue;");
+				//					continue;
+				//				}
 
 				//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < columnArray.length; i++) {"
 				//						+ "\n  >>> columnArray[i]) = " + columnArray[i] + "; value = " + value);
-				if (value instanceof Timestamp) {
-					value = ((Timestamp) value).toString();
-				}
-				else if (value instanceof String) {
-					try {
-						json = JSON.parse((String) value);
-						if (json != null && json instanceof JSON && StringUtil.isNotEmpty(json, true)) {
-							value = json;
+
+				if (value != null) { //数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
+					if (value instanceof Timestamp) {
+						value = ((Timestamp) value).toString();
+					}
+					else if (value instanceof String) {
+						try {
+							json = JSON.parse((String) value);
+							if (json != null && json instanceof JSON && StringUtil.isNotEmpty(json, true)) {
+								value = json;
+							}
+						} catch (Exception e) {
+							//太长 Log.i(TAG, "select  while (rs.next()){  >> i = "
+							//  + i + "  try { json = JSON.parse((String) value);"
+							//	+ ">> } catch (Exception e) {\n" + e.getMessage());
 						}
-					} catch (Exception e) {
-						//太长 Log.i(TAG, "select  while (rs.next()){  >> i = "
-						//  + i + "  try { json = JSON.parse((String) value);"
-						//	+ ">> } catch (Exception e) {\n" + e.getMessage());
 					}
 				}
 
