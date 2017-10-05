@@ -23,12 +23,12 @@ DROP TABLE IF EXISTS `Moment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Moment` (
-  `id` bigint(15) NOT NULL,
-  `userId` int(5) NOT NULL,
-  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `content` varchar(300) DEFAULT NULL,
-  `praiseUserIdList` json DEFAULT NULL,
-  `pictureList` json DEFAULT NULL,
+  `id` bigint(15) NOT NULL COMMENT '唯一标识',
+  `userId` int(5) NOT NULL COMMENT '用户id',
+  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
+  `content` varchar(300) DEFAULT NULL COMMENT '内容',
+  `praiseUserIdList` json DEFAULT NULL COMMENT '点赞的用户id列表',
+  `pictureList` json DEFAULT NULL COMMENT '图片列表',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-06  0:48:41
+-- Dump completed on 2017-10-06  1:02:35

@@ -23,12 +23,12 @@ DROP TABLE IF EXISTS `Comment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Comment` (
-  `id` bigint(15) NOT NULL,
-  `toId` bigint(15) DEFAULT NULL,
-  `userId` bigint(15) NOT NULL,
-  `momentId` bigint(15) NOT NULL,
-  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `content` varchar(1000) NOT NULL,
+  `id` bigint(15) NOT NULL COMMENT '唯一标识',
+  `toId` bigint(15) DEFAULT NULL COMMENT '被回复的id',
+  `userId` bigint(15) NOT NULL COMMENT '评论人id',
+  `momentId` bigint(15) NOT NULL COMMENT '动态id',
+  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
+  `content` varchar(1000) NOT NULL COMMENT '内容',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-06  0:48:41
+-- Dump completed on 2017-10-06  1:02:34

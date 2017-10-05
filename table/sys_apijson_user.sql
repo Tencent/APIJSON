@@ -23,14 +23,14 @@ DROP TABLE IF EXISTS `apijson_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `apijson_user` (
-  `id` bigint(15) NOT NULL AUTO_INCREMENT,
-  `sex` tinyint(2) NOT NULL DEFAULT '0',
-  `name` varchar(20) DEFAULT NULL,
-  `tag` varchar(45) DEFAULT NULL,
-  `head` varchar(300) DEFAULT NULL,
+  `id` bigint(15) NOT NULL AUTO_INCREMENT COMMENT '唯一标识',
+  `sex` tinyint(2) NOT NULL DEFAULT '0' COMMENT '性别：\n0-男\n1-女',
+  `name` varchar(20) DEFAULT NULL COMMENT '名称',
+  `tag` varchar(45) DEFAULT NULL COMMENT '标签',
+  `head` varchar(300) DEFAULT NULL COMMENT '头像url',
   `contactIdList` json DEFAULT NULL COMMENT '联系人id列表',
-  `pictureList` json DEFAULT NULL,
-  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `pictureList` json DEFAULT NULL COMMENT '照片列表',
+  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1507220582168 DEFAULT CHARSET=utf8 COMMENT='对安全要求高，不想泄漏真实名称。对外名称为 User';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-06  0:48:41
+-- Dump completed on 2017-10-06  1:02:34

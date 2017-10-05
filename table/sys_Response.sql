@@ -23,12 +23,12 @@ DROP TABLE IF EXISTS `Response`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Response` (
-  `id` int(11) NOT NULL,
-  `method` varchar(10) DEFAULT 'GET',
-  `model` varchar(20) NOT NULL,
-  `structure` json NOT NULL,
-  `description` varchar(10000) DEFAULT NULL,
-  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `id` int(11) NOT NULL COMMENT '唯一标识',
+  `method` varchar(10) DEFAULT 'GET' COMMENT '方法',
+  `model` varchar(20) NOT NULL COMMENT '表名，table是SQL关键词不能用',
+  `structure` json NOT NULL COMMENT '结构',
+  `description` varchar(10000) DEFAULT NULL COMMENT '描述',
+  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='每次启动服务器时加载整个表到内存。';
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-06  0:48:42
+-- Dump completed on 2017-10-06  1:02:35

@@ -23,12 +23,12 @@ DROP TABLE IF EXISTS `apijson_privacy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `apijson_privacy` (
-  `id` bigint(20) NOT NULL,
-  `certified` tinyint(1) NOT NULL DEFAULT '0',
+  `id` bigint(20) NOT NULL COMMENT '唯一标识',
+  `certified` tinyint(1) NOT NULL DEFAULT '0' COMMENT '已认证',
   `phone` bigint(11) NOT NULL COMMENT '手机号，仅支持 11 位数的。不支持 +86 这种国家地区开头的。如果要支持就改为 VARCHAR(14)',
-  `balance` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `_password` varchar(20) NOT NULL,
-  `_payPassword` int(6) DEFAULT NULL,
+  `balance` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '余额',
+  `_password` varchar(20) NOT NULL COMMENT '登录密码',
+  `_payPassword` int(6) DEFAULT NULL COMMENT '支付密码',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户隐私信息表。对安全要求高，不想泄漏真实名称。对外名称为 Privacy';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-06  0:48:41
+-- Dump completed on 2017-10-06  1:02:34
