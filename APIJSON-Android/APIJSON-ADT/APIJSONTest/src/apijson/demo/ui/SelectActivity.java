@@ -163,10 +163,10 @@ public class SelectActivity extends Activity implements OnClickListener {
 			break;
 
 		case R.id.btnSelectAccessError:
-			select(getRequest(v), "post_get");
+			select(getRequest(v), "gets");
 			break;
 		case R.id.btnSelectAccessPermitted:
-			select(getRequest(v), "post_get");
+			select(getRequest(v), "gets");
 			break;
 
 		default:

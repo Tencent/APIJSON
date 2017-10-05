@@ -27,7 +27,7 @@ import zuo.biao.apijson.StringUtil;
 /**验证码
  * @author Lemon
  * @see
- * <br >POST_GET:post_get/authCode<pre>
+ * <br >GETS:gets/authCode<pre>
 {
     "Verify":{
         "disallow":"id"
@@ -46,8 +46,8 @@ import zuo.biao.apijson.StringUtil;
 @MethodAccess(
 		GET = {},
 		HEAD = {},
-		POST_GET = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
-		POST_HEAD = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
+		GETS = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
+		HEADS = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
 		POST = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
 		PUT = {ADMIN},
 		DELETE = {ADMIN}

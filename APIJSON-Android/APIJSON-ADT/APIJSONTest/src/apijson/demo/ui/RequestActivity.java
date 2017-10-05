@@ -229,9 +229,9 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 			Log.d(TAG, "onHttpResponse  delete.equals(method) >>  id = " + id
 					+ "; isSucceed = " + JSONResponse.isSuccess(response));
 
-		} else if ("post_get".equals(method)) {
+		} else if ("gets".equals(method)) {
 			Privacy privacy = response.getObject(Privacy.class);
-			Log.d(TAG, "onHttpResponse  post_get.equals(method) >>  privacy = \n" + JSON.toJSONString(privacy));
+			Log.d(TAG, "onHttpResponse  gets.equals(method) >>  privacy = \n" + JSON.toJSONString(privacy));
 		}
 
 

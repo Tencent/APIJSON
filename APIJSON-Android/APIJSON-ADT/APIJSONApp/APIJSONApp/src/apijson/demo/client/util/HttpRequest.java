@@ -54,8 +54,8 @@ public class HttpRequest {
 	public static final String URL_HEAD = URL_BASE + "head/";
 	public static final String URL_GET = URL_BASE + "get/";
 	public static final String URL_POST = URL_BASE + "post/";
-	public static final String URL_POST_HEAD = URL_BASE + "post_head/";
-	public static final String URL_POST_GET = URL_BASE + "post_get/";
+	public static final String URL_HEADS = URL_BASE + "heads/";
+	public static final String URL_GETS = URL_BASE + "gets/";
 	public static final String URL_PUT = URL_BASE + "put/";
 	public static final String URL_DELETE = URL_BASE + "delete/";
 
@@ -91,7 +91,7 @@ public class HttpRequest {
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
 	public static void postHead(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(URL_POST_HEAD, request, requestCode, listener);
+		HttpManager.getInstance().post(URL_HEADS, request, requestCode, listener);
 	}
 	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
 	 * @param request
@@ -100,7 +100,7 @@ public class HttpRequest {
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
 	public static void postGet(JSONObject request, int requestCode, OnHttpResponseListener listener) {
-		HttpManager.getInstance().post(URL_POST_GET, request, requestCode, listener);
+		HttpManager.getInstance().post(URL_GETS, request, requestCode, listener);
 	}
 	/**
 	 * @param request
@@ -301,7 +301,7 @@ public class HttpRequest {
 		request.put(PHONE, phone);
 		request.put(VERIFY, verify);
 
-		HttpManager.getInstance().post(URL_BASE + "post_head/verify"
+		HttpManager.getInstance().post(URL_BASE + "heads/verify"
 				, request.setTag(VERIFY_)
 				, requestCode, listener);
 	}
