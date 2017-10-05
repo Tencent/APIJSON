@@ -14,10 +14,6 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static zuo.biao.apijson.RequestRole.ADMIN;
@@ -27,6 +23,10 @@ import static zuo.biao.apijson.RequestRole.LOGIN;
 import static zuo.biao.apijson.RequestRole.OWNER;
 import static zuo.biao.apijson.RequestRole.UNKNOWN;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 /**请求方法权限，只允许某些角色通过对应方法访问
  * @author Lemon
  */
@@ -34,26 +34,26 @@ import static zuo.biao.apijson.RequestRole.UNKNOWN;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface MethodAccess {
-
+	
 	/**@see {@link RequestMethod#GET}
 	 * @return 该请求方法允许的角色 default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
 	RequestRole[] GET() default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
-
+	
 	/**@see {@link RequestMethod#HEAD}
 	 * @return 该请求方法允许的角色 default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
 	RequestRole[] HEAD() default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
-
-	/**@see {@link RequestMethod#POST_GET}
+	
+	/**@see {@link RequestMethod#GETS}
 	 * @return 该请求方法允许的角色 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
-	RequestRole[] POST_GET() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
-
-	/**@see {@link RequestMethod#POST_HEAD}
+	RequestRole[] GETS() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	
+	/**@see {@link RequestMethod#HEADS}
 	 * @return 该请求方法允许的角色 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
-	RequestRole[] POST_HEAD() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	RequestRole[] HEADS() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 
 	/**@see {@link RequestMethod#POST}
 	 * @return 该请求方法允许的角色  default {LOGIN, ADMIN};
@@ -64,10 +64,10 @@ public @interface MethodAccess {
 	 * @return 该请求方法允许的角色 default {OWNER, ADMIN};
 	 */
 	RequestRole[] PUT() default {OWNER, ADMIN};
-
+	
 	/**@see {@link RequestMethod#DELETE}
 	 * @return 该请求方法允许的角色 default {OWNER, ADMIN};
 	 */
 	RequestRole[] DELETE() default {OWNER, ADMIN};
-
+	
 }

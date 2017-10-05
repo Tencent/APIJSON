@@ -25,7 +25,7 @@ import zuo.biao.apijson.MethodAccess;
 /**登录类，已用session替代
  * @author Lemon
  * @see
- * <br >POST_HEAD:<pre>
+ * <br >HEADS:<pre>
 {
  "Login":{
      "disallow":"!",
@@ -56,8 +56,8 @@ import zuo.biao.apijson.MethodAccess;
 @Deprecated
 @SuppressWarnings("serial")
 @MethodAccess(
-		POST_GET = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
-		POST_HEAD = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
+		GETS = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
+		HEADS = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
 		POST = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
 		PUT = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN},
 		DELETE = {UNKNOWN, LOGIN, CONTACT, OWNER, ADMIN}

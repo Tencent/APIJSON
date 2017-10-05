@@ -25,7 +25,7 @@ import zuo.biao.apijson.MethodAccess;
  */
 @MethodAccess(
 		GET = {},
-		POST_GET = {OWNER, ADMIN},
+		GETS = {OWNER, ADMIN},
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
 		)

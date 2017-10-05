@@ -45,15 +45,15 @@ public @interface MethodAccess {
 	 */
 	RequestRole[] HEAD() default {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	
-	/**@see {@link RequestMethod#POST_GET}
+	/**@see {@link RequestMethod#GETS}
 	 * @return 该请求方法允许的角色 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
-	RequestRole[] POST_GET() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	RequestRole[] GETS() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	
-	/**@see {@link RequestMethod#POST_HEAD}
+	/**@see {@link RequestMethod#HEADS}
 	 * @return 该请求方法允许的角色 default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 	 */
-	RequestRole[] POST_HEAD() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
+	RequestRole[] HEADS() default {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN};
 
 	/**@see {@link RequestMethod#POST}
 	 * @return 该请求方法允许的角色  default {LOGIN, ADMIN};

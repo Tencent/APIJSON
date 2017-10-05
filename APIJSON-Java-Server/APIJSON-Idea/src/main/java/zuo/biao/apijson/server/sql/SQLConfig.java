@@ -315,7 +315,7 @@ public class SQLConfig {
 	public String getColumnString() throws NotExistException {
 		switch (getMethod()) {
 		case HEAD:
-		case POST_HEAD:
+		case HEADS:
 			return SQL.count(column);
 		case POST:
 			if (StringUtil.isEmpty(column, true)) {

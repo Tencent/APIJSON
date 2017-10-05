@@ -372,7 +372,7 @@ public class Parser {
 
 		String tag = request.getString(JSONRequest.KEY_TAG);
 		if (StringUtil.isNotEmpty(tag, true) == false) {
-			throw new IllegalArgumentException("请指定tag！一般是table名称");
+			throw new IllegalArgumentException("请设置tag！一般是Table名");
 		}
 
 		JSONObject object = null;

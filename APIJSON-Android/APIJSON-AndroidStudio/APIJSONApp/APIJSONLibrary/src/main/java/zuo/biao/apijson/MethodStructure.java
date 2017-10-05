@@ -30,15 +30,15 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 public @interface MethodStructure {
 
-	/**@see {@link RequestMethod#POST_HEAD}
+	/**@see {@link RequestMethod#HEADS}
 	 * @return 该请求方法允许的结构
 	 */
-	String POST_HEAD() default "";
+	String HEADS() default "";
 	
-	/**@see {@link RequestMethod#POST_GET}
+	/**@see {@link RequestMethod#GETS}
 	 * @return 该请求方法允许的结构
 	 */
-	String POST_GET() default "";
+	String GETS() default "";
 
 	/**@see {@link RequestMethod#POST}
 	 * @return 该请求方法允许的结构

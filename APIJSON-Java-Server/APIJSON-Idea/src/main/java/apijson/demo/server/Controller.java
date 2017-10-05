@@ -18,8 +18,8 @@ import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.HEAD;
 import static zuo.biao.apijson.RequestMethod.POST;
-import static zuo.biao.apijson.RequestMethod.POST_GET;
-import static zuo.biao.apijson.RequestMethod.POST_HEAD;
+import static zuo.biao.apijson.RequestMethod.GETS;
+import static zuo.biao.apijson.RequestMethod.HEADS;
 import static zuo.biao.apijson.RequestMethod.PUT;
 
 import java.net.URLDecoder;
@@ -53,10 +53,11 @@ import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.exception.OutOfRangeException;
 
-/**request receiver and controller
- * <br > 如果用在金融等对安全要求很高的领域，get和head可以测试期间使用明文的HTTP GET，上线版改用非明文的HTTP POST，兼顾系统安全与开发效率。
- * <br > get,head等接口都用HTTP GET方法请求，post,put,delete等接口都用HTTP POST方法请求。
- * <br > 这样做是为了前端和客户端方便，只需要做GET和POST请求。也可以改用实际对应的方法。
+/**request controller
+ * <br > 建议全通过HTTP POST来请求:
+ * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
+ * <br > 2.提高性能 - 无需URL encode和decode
+ * <br > 3.调试方便 - 建议使用 APIJSON在线测试工具 或 Postman
  * @author Lemon
  */
 @RestController
@@ -66,37 +67,6 @@ public class Controller {
 
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	/**获取
-	 * @param request 只用String，避免encode后未decode
-	 * @param session
-	 * @return
-	 * @see {@link RequestMethod#GET}
-	 */
-	@RequestMapping("get/{request}")
-	public String open_get(@PathVariable String request, HttpSession session) {
-		try {
-			request = URLDecoder.decode(request, StringUtil.UTF_8);
-		} catch (Exception e) {
-			// Parser会报错
-		}
-		return get(request, session);
-	}
-
-	/**计数
-	 * @param request 只用String，避免encode后未decode
-	 * @param session
-	 * @return
-	 * @see {@link RequestMethod#HEAD}
-	 */
-	@RequestMapping("head/{request}")
-	public String open_head(@PathVariable String request, HttpSession session) {
-		try {
-			request = URLDecoder.decode(request, StringUtil.UTF_8);
-		} catch (Exception e) {
-			// Parser会报错
-		}
-		return head(request, session);
-	}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -120,26 +90,26 @@ public class Controller {
 		return new Parser(HEAD).setSession(session).parse(request);
 	}
 
-	/**用POST方法GET，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
+	/**限制性GET，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
 	 * @param request 只用String，避免encode后未decode
 	 * @param session
 	 * @return
-	 * @see {@link RequestMethod#POST_GET}
+	 * @see {@link RequestMethod#GETS}
 	 */
-	@RequestMapping(value = "post_get", method = org.springframework.web.bind.annotation.RequestMethod.POST)
-	public String post_get(@RequestBody String request, HttpSession session) {
-		return new Parser(POST_GET).setSession(session).parse(request);
+	@RequestMapping(value = "gets", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	public String gets(@RequestBody String request, HttpSession session) {
+		return new Parser(GETS).setSession(session).parse(request);
 	}
 
-	/**用POST方法HEAD，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
+	/**限制性HEAD，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
 	 * @param request 只用String，避免encode后未decode
 	 * @param session
 	 * @return
-	 * @see {@link RequestMethod#POST_HEAD}
+	 * @see {@link RequestMethod#HEADS}
 	 */
-	@RequestMapping(value = "post_head", method = org.springframework.web.bind.annotation.RequestMethod.POST)
-	public String post_head(@RequestBody String request, HttpSession session) {
-		return new Parser(POST_HEAD).setSession(session).parse(request);
+	@RequestMapping(value = "heads", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	public String heads(@RequestBody String request, HttpSession session) {
+		return new Parser(HEADS).setSession(session).parse(request);
 	}
 
 	/**新增
@@ -175,6 +145,45 @@ public class Controller {
 		return new Parser(DELETE).setSession(session).parse(request);
 	}
 
+	
+	
+	
+	
+	/**获取
+	 * 只为兼容HTTP GET请求，推荐用HTTP POST，可删除
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#GET}
+	 */
+	@RequestMapping("get/{request}")
+	public String open_get(@PathVariable String request, HttpSession session) {
+		try {
+			request = URLDecoder.decode(request, StringUtil.UTF_8);
+		} catch (Exception e) {
+			// Parser会报错
+		}
+		return get(request, session);
+	}
+
+	/**计数
+	 * 只为兼容HTTP GET请求，推荐用HTTP POST，可删除
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#HEAD}
+	 */
+	@RequestMapping("head/{request}")
+	public String open_head(@PathVariable String request, HttpSession session) {
+		try {
+			request = URLDecoder.decode(request, StringUtil.UTF_8);
+		} catch (Exception e) {
+			// Parser会报错
+		}
+		return head(request, session);
+	}
+	
+	
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -293,30 +302,30 @@ public class Controller {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = "post_get/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@RequestMapping(value = "gets/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject getVerify(@RequestBody String request) {
 		JSONObject requestObject = null;
 		String phone;
 		try {
-			requestObject = Parser.parseRequest(request, POST_GET);
+			requestObject = Parser.parseRequest(request, GETS);
 			phone = requestObject.getString(PHONE);
 		} catch (Exception e) {
 			return Parser.extendErrorResult(requestObject, e);
 		}
-		return new Parser(POST_GET, true).parseResponse(newVerifyRequest(phone, null));
+		return new Parser(GETS, true).parseResponse(newVerifyRequest(phone, null));
 	}
 
 	/**校验验证码
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = "post_head/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@RequestMapping(value = "heads/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
 	public JSONObject headVerify(@RequestBody String request) {
 		JSONObject requestObject = null;
 		String phone;
 		String verify;
 		try {
-			requestObject = Parser.parseRequest(request, POST_HEAD);
+			requestObject = Parser.parseRequest(request, HEADS);
 			phone = requestObject.getString(PHONE);
 			verify = requestObject.getString(VERIFY);
 		} catch (Exception e) {
@@ -332,7 +341,7 @@ public class Controller {
 	 */
 	public JSONObject headVerify(String phone, String vfy) {
 		JSONResponse response = new JSONResponse(
-				new Parser(POST_GET, true).parseResponse(
+				new Parser(GETS, true).parseResponse(
 						new JSONRequest(new Verify(phone)).setTag(VERIFY_)
 						)
 				);
@@ -350,7 +359,7 @@ public class Controller {
 		}
 
 		return new JSONResponse(
-				new Parser(POST_HEAD, true).parseResponse(
+				new Parser(HEADS, true).parseResponse(
 						new JSONRequest(new Verify(phone, vfy))
 						)
 				);
@@ -413,7 +422,7 @@ public class Controller {
 
 
 		//手机号是否已注册
-		JSONObject phoneResponse = new Parser(POST_HEAD, true).parseResponse(
+		JSONObject phoneResponse = new Parser(HEADS, true).parseResponse(
 				new JSONRequest(
 						new Privacy().setPhone(phone)
 						)
@@ -427,7 +436,7 @@ public class Controller {
 		}
 
 		//根据phone获取User
-		JSONObject privacyResponse = new Parser(POST_GET, true).parseResponse(
+		JSONObject privacyResponse = new Parser(GETS, true).parseResponse(
 				new JSONRequest(
 						new Privacy().setPhone(phone)
 						)
@@ -443,7 +452,7 @@ public class Controller {
 		//校验凭证 
 		if (isPassword) {//password密码登录
 			response = new JSONResponse(
-					new Parser(POST_HEAD, true).parseResponse(
+					new Parser(HEADS, true).parseResponse(
 							new JSONRequest(new Privacy(userId).setPassword(password))
 							)
 					);
@@ -459,7 +468,7 @@ public class Controller {
 		}
 
 		response = new JSONResponse(
-				new Parser(POST_GET, true).parseResponse(
+				new Parser(GETS, true).parseResponse(
 						new JSONRequest(new User(userId))
 						)
 				);
@@ -582,7 +591,7 @@ public class Controller {
 		}
 
 		//验证手机号是否已经注册
-		JSONObject check = new Parser(POST_HEAD, true).parseResponse(
+		JSONObject check = new Parser(HEADS, true).parseResponse(
 				new JSONRequest(
 						new Privacy().setPhone(phone)
 						)
@@ -762,7 +771,7 @@ public class Controller {
 
 		privacyObj.remove("balance+");
 		JSONResponse response = new JSONResponse(
-				new Parser(POST_HEAD, true).setSession(session).parseResponse(
+				new Parser(HEADS, true).setSession(session).parseResponse(
 						new JSONRequest(PRIVACY_, privacyObj)
 						)
 				);
@@ -787,7 +796,7 @@ public class Controller {
 
 		if (change < 0) {//提现
 			response = new JSONResponse(
-					new Parser(POST_GET, true).parseResponse(
+					new Parser(GETS, true).parseResponse(
 							new JSONRequest(
 									new Privacy(userId)
 									)

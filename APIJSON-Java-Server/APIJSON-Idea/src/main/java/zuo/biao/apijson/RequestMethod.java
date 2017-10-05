@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-/**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出POST_GET,POST_HEAD方法
+/**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出GETS,HEADS方法
  * @author Lemon
  */
 public enum RequestMethod {
@@ -29,15 +29,15 @@ public enum RequestMethod {
 	 */
 	HEAD,
 	
-	/**TODO 改为GETS
-	 * 通过POST来GET数据，不显示请求内容和返回结果，并且校验请求，一般用于对安全要求比较高的请求
+	/**Safe, Single, Simple
+	 * <br > 限制性GET，通过POST来GET数据，不显示请求内容和返回结果，并且校验请求，一般用于对安全要求比较高的请求
 	 */
-	POST_GET,
+	GETS,
 	
-	/**TODO 改为HEADS
-	 * 通过POST来HEAD数据，不显示请求内容和返回结果，并且校验请求，一般用于对安全要求比较高的请求
+	/**Safe, Single, Simple
+	 * <br > 限制性HEAD，通过POST来HEAD数据，不显示请求内容和返回结果，并且校验请求，一般用于对安全要求比较高的请求
 	 */
-	POST_HEAD,
+	HEADS,
 	
 	/**
 	 * 新增(或者说插入)数据
@@ -62,7 +62,7 @@ public enum RequestMethod {
 	 */
 	public static boolean isGetMethod(RequestMethod method, boolean containPrivate) {
 		boolean is = method == null || method == GET;
-		return containPrivate == false ? is : is || method == POST_GET;
+		return containPrivate == false ? is : is || method == GETS;
 	}
 	
 	/**是否为HEAD请求方法
@@ -72,7 +72,7 @@ public enum RequestMethod {
 	 */
 	public static boolean isHeadMethod(RequestMethod method, boolean containPrivate) {
 		boolean is = method == HEAD;
-		return containPrivate == false ? is : is || method == POST_HEAD;
+		return containPrivate == false ? is : is || method == HEADS;
 	}
 	
 	/**是否为查询的请求方法
