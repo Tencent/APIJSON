@@ -18,12 +18,11 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
@@ -32,7 +31,6 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.Pair;
 import zuo.biao.apijson.server.Parser;
 
 /**executor for query(read) or update(write) MySQL database
@@ -215,11 +213,6 @@ public class SQLExecutor {
 			return result;
 		}
 
-		String[] columnArray = getColumnArray(config);
-		if (columnArray == null || columnArray.length <= 0) {
-			return null;
-		}
-
 		rs = statement.executeQuery(sql);
 
 		//		final boolean cache = config.getCount() != 1;
@@ -227,57 +220,43 @@ public class SQLExecutor {
 		//		Log.d(TAG, "select  cache = " + cache + "; resultMap" + (resultMap == null ? "=" : "!=") + "null");
 
 		int index = -1;
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+		final int length = rsmd.getColumnCount();
+
 		while (rs.next()){
 			index ++;
 			Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
 
 			result = new JSONObject(true);
 			Object value;
-			Object json;
-			for (int i = 0; i < columnArray.length; i++) {
-				if (columnArray[i] == null || columnArray[i].isEmpty() || columnArray[i].startsWith("_")) {
-					Log.i(TAG, "select while (rs.next()){ ..."
-							+ " >>  columnArray[i] == " + columnArray[i]
-									+ " >> continue;");
-					continue;
-				}//允许 key:_alias, 但不允许_key, _key:alias
-				columnArray[i] = Pair.parseEntry(columnArray[i]).getValue();
-				try {
-					value = rs.getObject(rs.findColumn(columnArray[i]));
-				} catch (Exception e) {
-					value = null;
-					Log.i(TAG, "select while (rs.next()){ ..."
-							+ " >>  try { value = rs.getObject(rs.findColumn(columnArray[i])); ..."
-							+ " >> } catch (Exception e) {");
-					e.printStackTrace();
-				}
-				//				if (value == null) {
-				//					Log.i(TAG, "select while (rs.next()){ ..." + " >>  value == null >> continue;");
-				//					continue;
-				//				}
 
-				//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < columnArray.length; i++) {"
-				//						+ "\n  >>> columnArray[i]) = " + columnArray[i] + "; value = " + value);
+			for (int i = 1; i <= length; i++) {
+				if (rsmd.getColumnName(i).startsWith("_")) {
+					Log.i(TAG, "select while (rs.next()){ ..."
+							+ " >>  rsmd.getColumnName(i).startsWith(_) >> continue;");
+					continue;
+				}
+				
+				value = rs.getObject(i);
+				//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
+				//					Log.d(TAG, "lable:" + rsmd.getColumnLabel(i));
+				//					Log.d(TAG, "type:" + rsmd.getColumnType(i));
+				//					Log.d(TAG, "typeName:" + rsmd.getColumnTypeName(i));
+
+				//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < length; i++) {"
+				//						+ "\n  >>> value = " + value);
 
 				if (value != null) { //数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
 					if (value instanceof Timestamp) {
 						value = ((Timestamp) value).toString();
 					}
-					else if (value instanceof String) {
-						try {
-							json = JSON.parse((String) value);
-							if (json != null && json instanceof JSON && StringUtil.isNotEmpty(json, true)) {
-								value = json;
-							}
-						} catch (Exception e) {
-							//太长 Log.i(TAG, "select  while (rs.next()){  >> i = "
-							//  + i + "  try { json = JSON.parse((String) value);"
-							//	+ ">> } catch (Exception e) {\n" + e.getMessage());
-						}
+					else if (value instanceof String && isJSONType(rsmd, i)) { //json String
+						value = JSON.parse((String) value);
 					}
 				}
 
-				result.put(columnArray[i], value);
+				result.put(rsmd.getColumnLabel(i), value);
 			}
 
 			resultMap.put(index, result);
@@ -296,31 +275,19 @@ public class SQLExecutor {
 		return resultMap.get(position);
 	}
 
-
-	/**获取要查询的字段名数组
-	 * @param config
+	/**判断是否为JSON类型
+	 * @param rsmd
+	 * @param position
 	 * @return
-	 * @throws SQLException 
 	 */
-	private String[] getColumnArray(SQLConfig config) throws SQLException {
-		if (config == null) {
-			return null;
+	private boolean isJSONType(ResultSetMetaData rsmd, int position) {
+		try {
+			return rsmd.getColumnType(position) == 1 || rsmd.getColumnTypeName(position).toLowerCase().contains("json");
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		String column = config.getColumn();
-		if (StringUtil.isNotEmpty(column, true)) {
-			return StringUtil.split(column);//column.contains(",") ? column.split(",") : new String[]{column};
-		}
-
-		List<String> list = new ArrayList<String>();
-		String table = config.getSQLTable();
-		ResultSet rs = metaData.getColumns(config.getSchema(), null, table, "%");
-		while (rs.next()) {
-			Log.i(TAG, rs.getString(4));
-			list.add(rs.getString(4));
-		}
-		rs.close();
-
-		return list.toArray(new String[]{});
+		return false;
 	}
+
 
 }
