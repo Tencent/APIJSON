@@ -531,7 +531,7 @@ public class SQLConfig {
 				continue;
 			}
 
-			whereString += (isFirst ? "" : AND) + condition;
+			whereString += (isFirst ? "" : AND) + "(" + condition + ")";
 
 			isFirst = false;
 		}
@@ -639,7 +639,7 @@ public class SQLConfig {
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, values[i]);
 		}
 
-		return (Logic.isNot(type) ? NOT : "") + "(" + condition + ")";
+		return getCondition(Logic.isNot(type), condition);
 	}
 
 	/**WHERE key LIKE 'value'
@@ -693,7 +693,7 @@ public class SQLConfig {
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getRegExpString(key, (String) values[i]);
 		}
 
-		return (Logic.isNot(type) ? NOT : "") + "(" + condition + ")";
+		return getCondition(Logic.isNot(type), condition);
 	}
 
 	/**WHERE key REGEXP 'value'
@@ -747,8 +747,7 @@ public class SQLConfig {
 			if (condition.isEmpty()) {
 				return "";
 			}
-			condition = "(" + condition + ")";
-			return logic.isNot() ? NOT + condition : condition;
+			return getCondition(logic.isNot(), condition);
 		}
 
 		throw new IllegalArgumentException(key + "{}:range 类型为" + range.getClass().getSimpleName()
@@ -770,7 +769,7 @@ public class SQLConfig {
 			throw new NotExistException(TAG + ".getInString(" + key + ", [], " + not
 					+ ") >> condition.isEmpty() >> IN()");
 		}
-		return (not ? NOT : "") + " IN " + "(" + condition + ")";
+		return (not ? NOT : "") + " IN (" + condition + ")";
 	}
 	//{} range >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -814,7 +813,7 @@ public class SQLConfig {
 						childs[i] = "\"" + childs[i] + "\"";
 					}
 					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-							+ getSearchString(
+							+ "(" + getSearchString(
 									key
 									, new String[]{
 											"[" + childs[i] + "]", //全等
@@ -823,7 +822,7 @@ public class SQLConfig {
 											"%, " + childs[i] + "]" //末尾
 									}
 									, Logic.TYPE_OR
-									);
+									) + ")";
 				}
 			}
 			if (condition.isEmpty()) {
@@ -833,10 +832,19 @@ public class SQLConfig {
 		if (condition.isEmpty()) {
 			return "";
 		}
-		return (Logic.isNot(type) ? NOT : "") + "(" + condition + ")";
+		return getCondition(Logic.isNot(type), condition);
 	}
 	//<> contain >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+	/**拼接条件
+	 * @param not
+	 * @param condition
+	 * @return
+	 */
+	private static String getCondition(boolean not, String condition) {
+		return not ? NOT + "(" + condition + ")" : condition;
+	}
+	
 
 	/**转为JSONArray
 	 * @param tv
