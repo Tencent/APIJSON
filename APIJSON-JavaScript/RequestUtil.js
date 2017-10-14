@@ -3,7 +3,7 @@
  */
 const TAG_REQUEST_UTIL = 'RequestUtil';
 
-const URL_BASE = "http://139.196.140.118:8080"; // 基地址
+const URL_BASE = "http://39.108.143.172:8080"; // 基地址
 const URL_GET = URL_BASE + "/get"; // 常规获取数据方式
 const URL_HEAD = URL_BASE + "/head"; // 检查，默认是非空检查，返回数据总数
 const URL_GETS = URL_BASE + "/gets"; // 通过POST来GET数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求
@@ -135,15 +135,44 @@ function encode(json) {
 
 
 /**格式化JSON串
- * @param json {}，JSON对象
+ * @param json
  */
 function format(json) {
-  if ((json instanceof Object) == false) {
-    alertOfDebug("format  json instanceof Object == false >> json = parseJSON(json);");
-    json = parseJSON(json);
+  try {
+    return JSON.stringify(JSON.parse(json), null, "\t");
+  } catch(e) {
+    log(TAG_REQUEST_UTIL, 'format  try { ... } catch (err) { \n ' + e);
+    return json;
   }
 
-  return JSON.stringify(json, null, "\t");
+  // 导致格式化后代码很难看，像没格式化一样
+  // if (json == null || json == '') {
+  //   console.log('format  json == null || json == "" >>  return json;');
+  //   return json;
+  // }
+  //
+  // if (json instanceof Object) { //避免赋值影响传进来的json
+  //   return JSON.stringify(json, null, "\t");
+  // }
+  //
+  // var jsonObj;
+  // if (typeof json == 'string'){
+  //   try {
+  //     jsonObj = JSON.parse(json);
+  //   } catch (err) {
+  //     console.log('format  try { jsonObj = JSON.parse(json); } catch (err) { \n ' + err);
+  //     return json;
+  //   }
+  // }
+  // else {
+  //   console.log('format  json type error !');
+  //   return json;
+  // }
+  // return JSON.stringify(jsonObj, null, "\t");
+}
+
+function log(tag, msg) {
+  console.log(tag + '.' + msg);
 }
 
 /**将json字符串转为JSON对象
