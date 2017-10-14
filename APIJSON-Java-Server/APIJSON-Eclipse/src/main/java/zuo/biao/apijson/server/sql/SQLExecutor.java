@@ -15,7 +15,6 @@ limitations under the License.*/
 package zuo.biao.apijson.server.sql;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -118,7 +117,6 @@ public class SQLExecutor {
 
 	private Connection connection;
 	private Statement statement;
-	private DatabaseMetaData metaData;
 	/**关闭连接，释放资源
 	 */
 	public void close() {
@@ -133,7 +131,6 @@ public class SQLExecutor {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		metaData = null;
 		statement = null;
 		cacheMap = null;
 	}
@@ -162,7 +159,6 @@ public class SQLExecutor {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 			connection = getConnection();
 			statement = connection.createStatement(); //创建Statement对象
-			metaData = connection.getMetaData();
 		}
 		Log.i(TAG, "成功连接到数据库！");
 		ResultSet rs = null;
