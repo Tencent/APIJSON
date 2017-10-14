@@ -211,67 +211,6 @@ function isEmpty(s) {
 
 
 
-/**转为JSON对象
- * @param s
- * @return {*}
- */
-function parseObject(s) {
-  if (s == null || s instanceof Object) {
-    return s;
-  }
-  if (typeof s == 'string') {
-    if (s.indexOf("'") >= 0) {
-      s = s.replace(/'/g, "\'");
-    }
-    return JSON.parse(s);
-  }
-  return parseObject(s.toString());
-}
-
-// /**格式化JSON串
-//  * @param json
-//  */
-// function format(json) {
-//   try {
-//     return JSON.stringify(JSON.parse(json), null, "\t");
-//   } catch(e) {
-//     log(TAG_REQUEST_UTIL, 'format  try { ... } catch (err) { \n ' + err);
-//     return json;
-//   }
-//
-//   // 导致格式化后代码很难看，像没格式化一样
-//   // if (json == null || json == '') {
-//   //   console.log('format  json == null || json == "" >>  return json;');
-//   //   return json;
-//   // }
-//   //
-//   // if (json instanceof Object) { //避免赋值影响传进来的json
-//   //   return JSON.stringify(json, null, "\t");
-//   // }
-//   //
-//   // var jsonObj;
-//   // if (typeof json == 'string'){
-//   //   try {
-//   //     jsonObj = JSON.parse(json);
-//   //   } catch (err) {
-//   //     console.log('format  try { jsonObj = JSON.parse(json); } catch (err) { \n ' + err);
-//   //     return json;
-//   //   }
-//   // }
-//   // else {
-//   //   console.log('format  json type error !');
-//   //   return json;
-//   // }
-//   // return JSON.stringify(jsonObj, null, "\t");
-// }
-
-function log(tag, msg) {
-  console.log(tag + '.' + msg);
-}
-
-
-
-
 
 //常用请求<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
