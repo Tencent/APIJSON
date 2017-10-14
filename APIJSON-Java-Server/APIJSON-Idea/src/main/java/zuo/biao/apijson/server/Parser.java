@@ -643,11 +643,13 @@ public class Parser {
 
 
 		//key[]:{Table:{}}中key equals Table时 提取Table
-		boolean isContainer = true;
 		int index = name == null ? -1 : name.lastIndexOf("[]");
-		String table = index <= 0 ? null : Pair.parseEntry(name.substring(0, index), true).getKey();
-		if (JSONRequest.isTableKey(table) && request.containsKey(table)) {
-			isContainer = false;
+		String childPath = index <= 0 ? null : Pair.parseEntry(name.substring(0, index), true).getKey(); // Table-key1-key2...
+
+		//判断第一个key，即Table是否存在，如果存在就提取
+		String[] childKeys = StringUtil.split(childPath, "-", false);
+		if (childKeys == null || childKeys.length <= 0 || request.containsKey(childKeys[0]) == false) {
+			childKeys = null;
 		}
 
 
@@ -662,7 +664,7 @@ public class Parser {
 				break;
 			}
 			//key[]:{Table:{}}中key equals Table时 提取Table
-			response.add(isContainer ? parent : parent.getJSONObject(table) );
+			response.add(getValue(parent, childKeys)); //null有意义
 		}
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -675,6 +677,29 @@ public class Parser {
 		return response;
 	}
 
+
+	/**根据路径取值
+	 * @param parent
+	 * @param pathKeys
+	 * @return
+	 */
+	private static Object getValue(JSONObject parent, String[] pathKeys) {
+		if (parent == null || pathKeys == null || pathKeys.length <= 0) {
+			Log.w(TAG, "getChild  parent == null || pathKeys == null || pathKeys.length <= 0 >> return parent;");
+			return parent;
+		}
+
+		//逐层到达child的直接容器JSONObject parent
+		final int last = pathKeys.length - 1;
+		for (int i = 0; i < last; i++) {//一步一步到达指定位置
+			if (parent == null) {//不存在或路径错误(中间的key对应value不是JSONObject)
+				break;
+			}
+			parent = getJSONObject(parent, pathKeys[i]);
+		}
+
+		return parent == null ? null : parent.get(pathKeys[last]);
+	}
 
 
 	/**获取被依赖引用的key的路径, 实时替换[] -> []/i

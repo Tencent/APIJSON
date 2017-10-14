@@ -737,11 +737,21 @@ public class StringUtil {
 		return split(s, null);
 	}
 	/**将s用split分割成String[]
+	 * trim = true;
 	 * @param s
 	 * @param split
 	 * @return
 	 */
 	public static String[] split(String s, String split) {
+		return split(s, split, true);
+	}
+	/**将s用split分割成String[]
+	 * @param s
+	 * @param split
+	 * @param trim 去掉前后两端的split
+	 * @return
+	 */
+	public static String[] split(String s, String split, boolean trim) {
 		s = getString(s);
 		if (s.isEmpty()) {
 			return null;
@@ -749,11 +759,13 @@ public class StringUtil {
 		if (isNotEmpty(split, false) == false) {
 			split = ",";
 		}
-		while (s.startsWith(split)) {
-			s = s.substring(split.length());
-		}
-		while (s.endsWith(split)) {
-			s = s.substring(0, s.length() - split.length());
+		if (trim) {
+			while (s.startsWith(split)) {
+				s = s.substring(split.length());
+			}
+			while (s.endsWith(split)) {
+				s = s.substring(0, s.length() - split.length());
+			}
 		}
 		return s.contains(split) ? s.split(split) : new String[]{s};
 	}
