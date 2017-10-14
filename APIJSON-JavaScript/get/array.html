@@ -31,7 +31,7 @@
    */
   function callBack() {
     var rp = JSON.parse(rq.responseText);
-    alert("Response:\n" + format(rp));
+    alert("Response:\n" + format(JSON.stringify(rp)));
 
     var arr = rp == null ? null : rp["User[]"]; //取出数组User[]
 
