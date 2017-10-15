@@ -87,7 +87,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 	public static final int TYPE_VERIFY = 0;
 	public static final int TYPE_REGISTER = 1;
-	public static final int TYPE_RESET = 3;
+	public static final int TYPE_RESET = 2;
 
 	private int type = TYPE_VERIFY;
 	private String phone;
@@ -212,7 +212,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 	/**从服务器获取验证码
 	 */
-	private void getVerifyFromServer() {
+	private void getVerifyFromServer(int type) {
 		runUiThread(new Runnable() {
 
 			@Override
@@ -221,7 +221,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 			}
 		});
 
-		HttpRequest.getVerify(StringUtil.getTrimedString(etPasswordPhone), HTTP_GET_VERIFY, this);
+		HttpRequest.getVerify(type, StringUtil.getTrimedString(etPasswordPhone), HTTP_GET_VERIFY, this);
 	}
 
 	/**下一步
@@ -245,16 +245,20 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 		case TYPE_REGISTER:
 			register();
 			break;
-		default:
-			checkVerify(true);
+		case TYPE_VERIFY:
+			checkVerify(Verify.TYPE_LOGIN, true);
+			break;
+		case TYPE_RESET:
+			checkVerify(Verify.TYPE_PASSWORD, true);
 			break;
 		}
 	}
 
 	/**验证验证码
+	 * @param type
 	 * @param fromServer
 	 */
-	private boolean checkVerify(boolean fromServer) {
+	private boolean checkVerify(int type, boolean fromServer) {
 		if (EditTextUtil.isInputedCorrect(context, etPasswordPhone, EditTextUtil.TYPE_PHONE) == false
 				|| EditTextUtil.isInputedCorrect(context, etPasswordVerify, EditTextUtil.TYPE_VERIFY) == false) {
 			return false;
@@ -262,7 +266,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 		if (fromServer) {
 			showProgressDialog();
-			HttpRequest.checkVerify(StringUtil.getTrimedString(etPasswordPhone),
+			HttpRequest.checkVerify(type, StringUtil.getTrimedString(etPasswordPhone),
 					StringUtil.getTrimedString(etPasswordVerify), HTTP_CHECK_VERIFY, this);
 		}
 
@@ -271,7 +275,7 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 
 
 	private void register() {
-		if (checkVerify(false) == false) {
+		if (checkVerify(Verify.TYPE_REGISTER, false) == false) {
 			return;
 		}
 		showProgressDialog();
@@ -357,11 +361,11 @@ public class PasswordActivity extends BaseActivity implements OnClickListener, O
 						if (type == TYPE_REGISTER) {
 							showShortToast("手机号已经注册");
 						} else {
-							getVerifyFromServer();
+							getVerifyFromServer(type == TYPE_VERIFY ? Verify.TYPE_LOGIN : Verify.TYPE_PASSWORD);
 						}
 					} else {//手机号未被注册过
 						if (type == TYPE_REGISTER) {
-							getVerifyFromServer();
+							getVerifyFromServer(Verify.TYPE_REGISTER);
 						} else {
 							showShortToast("手机号未注册");
 						}

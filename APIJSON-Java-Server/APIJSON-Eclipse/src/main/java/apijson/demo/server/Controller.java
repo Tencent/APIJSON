@@ -145,10 +145,10 @@ public class Controller {
 		return new Parser(DELETE).setSession(session).parse(request);
 	}
 
-	
-	
-	
-	
+
+
+
+
 	/**获取
 	 * 只为兼容HTTP GET请求，推荐用HTTP POST，可删除
 	 * @param request 只用String，避免encode后未decode
@@ -182,8 +182,8 @@ public class Controller {
 		}
 		return head(request, session);
 	}
-	
-	
+
+
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -359,7 +359,8 @@ public class Controller {
 				);
 		Verify verify = response.getObject(Verify.class);
 		if (verify == null) {
-			return Parser.newErrorResult(new NotExistException("验证码不存在！"));
+			return Parser.newErrorResult(StringUtil.isEmpty(code, true)
+					? new NotExistException("验证码不存在！") : new ConditionErrorException("手机号或验证码错误！"));
 		}
 
 		//验证码过期
@@ -413,7 +414,7 @@ public class Controller {
 		String password;
 		try {
 			requestObject = Parser.parseRequest(request, POST);
-			
+
 			isPassword = requestObject.getIntValue(TYPE) == LOGIN_TYPE_PASSWORD;//登录方式
 			phone = requestObject.getString(PHONE);//手机
 			password = requestObject.getString(PASSWORD);//密码
@@ -576,7 +577,7 @@ public class Controller {
 			return Parser.extendErrorResult(requestObject, e);
 		}
 
-		
+
 		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_REGISTER, phone, verify));
 		if (JSONResponse.isSuccess(response) == false) {
 			return response;
@@ -614,11 +615,11 @@ public class Controller {
 					new JSONRequest(new Privacy(userId2))
 					);
 		}
-		
+
 		return response;
 	}
 
-	
+
 	/**
 	 * @param requestObject
 	 * @param key
@@ -644,11 +645,21 @@ public class Controller {
 	 * @return
 	 * @see
 	 * <pre>
+	    使用旧密码修改
 		{
-			"type": 0,
-			"password": "1234567",
-			"phone": "13000082001",
-			"verify": "1234"
+			"oldPassword": 123456,
+			"Privacy":{
+			  "id": 13000082001,
+			  "_password": "1234567"
+			}
+		}
+		或使用手机号+验证码修改
+		{
+			"verify": "1234",
+			"Privacy":{
+			  "phone": "13000082001",
+			  "_password": "1234567"
+			}
 		}
 	 * </pre>
 	 */
@@ -656,20 +667,20 @@ public class Controller {
 	public JSONObject putPassword(@RequestBody String request){
 		JSONObject requestObject = null;
 		String old_password;
-		String phone;
 		String verify;
+
+		int type = Verify.TYPE_PASSWORD;
 
 		JSONObject privacyObj;
 		long userId;
+		String phone;
 		String password;
 		try {
 			requestObject = Parser.parseRequest(request, PUT);
 			old_password = StringUtil.getString(requestObject.getString(OLD_PASSWORD));
-			phone = StringUtil.getString(requestObject.getString(PHONE));
 			verify = StringUtil.getString(requestObject.getString(VERIFY));
 
 			requestObject.remove(OLD_PASSWORD);
-			requestObject.remove(PHONE);
 			requestObject.remove(VERIFY);
 
 			privacyObj = requestObject.getJSONObject(PRIVACY_);
@@ -677,10 +688,19 @@ public class Controller {
 				throw new IllegalArgumentException(PRIVACY_ + " 不能为空！");
 			}
 			userId = privacyObj.getLongValue(ID);
+			phone = privacyObj.getString(PHONE);
 			password = privacyObj.getString(_PASSWORD);
-
-			if (StringUtil.isPassword(password) == false) {
-				throw new IllegalArgumentException(_PASSWORD + ":value 中value不合法！");
+			
+			if (StringUtil.isEmpty(password, true)) { //支付密码
+				type = Verify.TYPE_PAY_PASSWORD;
+				password = privacyObj.getString(_PAY_PASSWORD);
+				if (StringUtil.isNumberPassword(password) == false) {
+					throw new IllegalArgumentException(PRIVACY_ + "/" + _PAY_PASSWORD + ":value 中value不合法！");
+				}
+			} else { //登录密码
+				if (StringUtil.isPassword(password) == false) {
+					throw new IllegalArgumentException(PRIVACY_ + "/" + _PASSWORD + ":value 中value不合法！");
+				}
 			}
 		} catch (Exception e) {
 			return Parser.extendErrorResult(requestObject, e);
@@ -696,18 +716,23 @@ public class Controller {
 			}
 
 			//验证旧密码
-			JSONObject result = new Parser(HEAD, true).parseResponse(
-					new JSONRequest(
-							new Privacy(userId).setPassword(old_password)
+			Privacy privacy = new Privacy(userId);
+			if (type == Verify.TYPE_PASSWORD) {
+				privacy.setPassword(old_password);
+			} else {
+				privacy.setPayPassword(old_password);
+			}
+			JSONResponse response = new JSONResponse( 
+					new Parser(HEAD, true).parseResponse(
+							new JSONRequest(privacy)
 							)
 					);
-			JSONObject checkPrivacy = result == null ? null : result.getJSONObject(PRIVACY_);
-			if (checkPrivacy == null || checkPrivacy.getIntValue(COUNT) <= 0) {
-				return Parser.extendErrorResult(requestObject, new ConditionErrorException("原密码错误，请重新输入！"));
+			if (JSONResponse.isExist(response.getJSONResponse(PRIVACY_)) == false) {
+				return Parser.extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！"));
 			}
 		}
 		else if (StringUtil.isPhone(phone) && StringUtil.isVerify(verify)) {
-			JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_PASSWORD, phone, verify));
+			JSONResponse response = new JSONResponse(headVerify(type, phone, verify));
 			if (JSONResponse.isSuccess(response) == false) {
 				return response;
 			}
@@ -723,6 +748,7 @@ public class Controller {
 					);
 			Privacy privacy = response.getObject(Privacy.class);
 			long id = privacy == null ? 0 : BaseModel.value(privacy.getId());
+			privacyObj.remove(PHONE);
 			privacyObj.put(ID, id);
 
 			requestObject.put(PRIVACY_, privacyObj);

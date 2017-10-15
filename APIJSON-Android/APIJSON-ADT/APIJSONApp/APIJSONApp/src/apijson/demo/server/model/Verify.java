@@ -22,26 +22,9 @@ import static zuo.biao.apijson.RequestRole.OWNER;
 import static zuo.biao.apijson.RequestRole.UNKNOWN;
 
 import zuo.biao.apijson.MethodAccess;
-import zuo.biao.apijson.StringUtil;
 
 /**验证码
  * @author Lemon
- * @see
- * <br >GETS:gets/authCode<pre>
-{
-    "Verify":{
-        "disallow":"id"
-    }
-}
- * </pre>
- * <br >POST:post/authCode<pre>
-{
-    "Verify":{
-        "disallow":"!",
-        "necessary":"id"
-    }
-}
- * </pre>
  */
 @MethodAccess(
 		GET = {},
@@ -55,42 +38,50 @@ import zuo.biao.apijson.StringUtil;
 public class Verify extends BaseModel {
 	private static final long serialVersionUID = 1L;
 	
-	private String verify;
+	public static final int TYPE_LOGIN = 0; //登录
+	public static final int TYPE_REGISTER = 1; //注册
+	public static final int TYPE_PASSWORD = 2; //设置密码
+	
+	private String phone;	//手机
+	private String verify;	//验证码
+	private Integer type;	//验证类型
 
 	public Verify() {
 		super();
 	}
-	public Verify(String phone) {
+	/**type和phone为联合主键，必传
+	 * @param type
+	 * @param phone
+	 */
+	public Verify(int type, String phone) {
 		this();
+		setType(type);
 		setPhone(phone);
-	}
-	public Verify(Long phone) {
-		this();
-		setId(phone);
-	}
-	public Verify(Long phone, Integer verify) {
-		this(phone);
-		setVerify(verify == null ? null : ("" + verify));
-	}
-	public Verify(String phone, String verify) {
-		this(phone);
-		setVerify(verify);
 	}
 
 
 	public String getVerify() {
 		return verify;
 	}
-	public void setVerify(String verify) {
+	public Verify setVerify(String verify) {
 		this.verify = verify;
-	}
-
-	//phone is not column
-	//	public String getPhone() {
-	//		return StringUtil.getString(getId());
-	//	}
-	public Verify setPhone(String phone) {
-		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
 		return this;
 	}
+
+	public String getPhone() {
+		return phone;
+	}
+	public Verify setPhone(String phone) {
+		this.phone = phone;
+		return this;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+	public Verify setType(Integer type) {
+		this.type = type;
+		return this;
+	}
+
 }
