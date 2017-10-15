@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 5.7.12, for osx10.9 (x86_64)
 --
--- Host: 39.108.143.172    Database: sys
+-- Host: localhost    Database: sys
 -- ------------------------------------------------------
--- Server version	5.7.19-log
+-- Server version	5.7.16
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -32,7 +32,7 @@ CREATE TABLE `apijson_user` (
   `pictureList` json NOT NULL COMMENT '照片列表',
   `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1507220582168 DEFAULT CHARSET=utf8 COMMENT='对安全要求高，不想泄漏真实名称。对外名称为 User';
+) ENGINE=InnoDB AUTO_INCREMENT=1508066815071 DEFAULT CHARSET=utf8 COMMENT='对安全要求高，不想泄漏真实名称。对外名称为 User';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-15 15:52:42
+-- Dump completed on 2017-10-15 19:30:56
