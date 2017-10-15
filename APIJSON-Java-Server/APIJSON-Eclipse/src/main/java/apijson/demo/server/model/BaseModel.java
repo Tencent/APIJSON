@@ -23,6 +23,8 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
+import zuo.biao.apijson.StringUtil;
+
 /**base model for reduce model codes
  * @author Lemon
  * @use extends BaseModel
@@ -81,7 +83,7 @@ public abstract class BaseModel implements Serializable {
 	 * @return
 	 */
 	public static long getTimeMillis(String time) {
-		return getTimeStamp(time).getTime();
+		return StringUtil.isEmpty(time, true) ? 0 : getTimeStamp(time).getTime();
 	}
 	
 	
