@@ -337,15 +337,15 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 			if (searchType <= 0) {
 				searchType = EditTextInfoWindow.TYPE_PHONE;
 			}
-			if (searchType == EditTextInfoWindow.TYPE_NAME) {
+//			if (searchType == EditTextInfoWindow.TYPE_NAME) {
 				toActivity(EditTextInfoWindow.createIntent(context
 						, EditTextInfoWindow.TYPE_NAME, "姓名", null),
 						REQUEST_TO_EDIT_TEXT_INFO_SEARCH, false);
-			} else {
-				toActivity(EditTextInfoWindow.createIntent(context
-						, EditTextInfoWindow.TYPE_PHONE, "手机号", null),
-						REQUEST_TO_EDIT_TEXT_INFO_ADD, false);
-			}
+//			} else {
+//				toActivity(EditTextInfoWindow.createIntent(context
+//						, EditTextInfoWindow.TYPE_PHONE, "手机号", null),
+//						REQUEST_TO_EDIT_TEXT_INFO_ADD, false);
+//			}
 		}
 		
 	}

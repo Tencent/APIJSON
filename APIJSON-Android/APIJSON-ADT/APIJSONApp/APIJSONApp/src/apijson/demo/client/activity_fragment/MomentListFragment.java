@@ -37,6 +37,7 @@ import apijson.demo.client.adapter.MomentAdapter;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseHttpListFragment;
 import apijson.demo.client.interfaces.TopBarMenuCallback;
+import apijson.demo.client.model.Moment;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
@@ -204,7 +205,7 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		});
 	}
 
-	
+
 	private TextView leftMenu;
 	@SuppressLint("InflateParams")
 	@Override
@@ -260,6 +261,12 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		super.initData();
 
 	}
+
+	private boolean isAdd = false;
+	public void setIsAdd(boolean isAdd) {
+		this.isAdd = isAdd;
+	}
+
 
 	@Override
 	public void getListAsync(final int page) {
@@ -332,10 +339,17 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 				return;
 			}
 
-			showShortToast("输入为空则查看全部");
-			toActivity(EditTextInfoWindow.createIntent(context
-					, EditTextInfoWindow.TYPE_NAME, "关键词", null),
-					REQUEST_TO_EDIT_TEXT_INFO, false);
+			if (isAdd) {
+				toActivity(EditTextInfoWindow.createIntent(context
+						, EditTextInfoWindow.TYPE_NOTE, "发动态", "说点什么吧~"),
+						REQUEST_TO_EDIT_TEXT_INFO, false);
+			} else {
+				showShortToast("输入为空则查看全部");
+				toActivity(EditTextInfoWindow.createIntent(context
+						, EditTextInfoWindow.TYPE_NAME, "关键词", null),
+						REQUEST_TO_EDIT_TEXT_INFO, false);
+			}
+
 		}
 	}
 
@@ -344,6 +358,35 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		if (range == RANGE_USER_CIRCLE) {
 			super.onRefresh();
 		}
+	}
+
+	private static final int HTTP_ADD = 1;
+
+	@Override
+	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+		switch (requestCode) {
+		case HTTP_ADD:
+			JSONResponse response = new JSONResponse(resultJson);
+			response = response.getJSONResponse(Moment.class.getSimpleName());
+			
+			if (JSONResponse.isSuccess(response) == false) {
+				showShortToast("发布失败，请检查网络后重试");
+			} else {
+				runUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						showShortToast("发布成功");
+						lvBaseList.onRefresh();
+					}
+				});
+			}
+			break;
+		default:
+			super.onHttpResponse(requestCode, resultJson, e);
+			break;
+		}
+
 	}
 
 	//系统自带监听方法 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -363,14 +406,19 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		case REQUEST_TO_EDIT_TEXT_INFO:
 			if (data != null) {
 				String value = StringUtil.getString(data.getStringExtra(EditTextInfoWindow.RESULT_VALUE));
-				String split = "";
-				JSONRequest search = new JSONRequest();
-				if (StringUtil.isNotEmpty(value, true)) {
-					split = ":";
-					search.putsSearch(HttpRequest.CONTENT, value, SQL.SEARCH_TYPE_CONTAIN_ORDER);
+
+				if (isAdd) {
+					HttpRequest.addMoment(value, HTTP_ADD, this);
+				} else {
+					String split = "";
+					JSONRequest search = new JSONRequest();
+					if (StringUtil.isNotEmpty(value, true)) {
+						split = ":";
+						search.putsSearch(HttpRequest.CONTENT, value, SQL.SEARCH_TYPE_CONTAIN_ORDER);
+					}
+					toActivity(MomentListActivity.createIntent(context, range, id, search, false)
+							.putExtra(INTENT_TITLE, "搜索" + split + value));
 				}
-				toActivity(MomentListActivity.createIntent(context, range, id, search, false)
-						.putExtra(INTENT_TITLE, "搜索" + split + value));
 			}
 			break;
 		default:

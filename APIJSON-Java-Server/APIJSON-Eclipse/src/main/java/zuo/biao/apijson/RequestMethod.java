@@ -57,7 +57,7 @@ public enum RequestMethod {
 	
 	/**是否为GET请求方法
 	 * @param method
-	 * @param containPrivate 包含私密(非明文)获取方法POST_GET
+	 * @param containPrivate 包含私密(非明文)获取方法GETS
 	 * @return
 	 */
 	public static boolean isGetMethod(RequestMethod method, boolean containPrivate) {
@@ -67,7 +67,7 @@ public enum RequestMethod {
 	
 	/**是否为HEAD请求方法
 	 * @param method
-	 * @param containPrivate 包含私密(非明文)获取方法POST_HEAD
+	 * @param containPrivate 包含私密(非明文)获取方法HEADS
 	 * @return
 	 */
 	public static boolean isHeadMethod(RequestMethod method, boolean containPrivate) {
