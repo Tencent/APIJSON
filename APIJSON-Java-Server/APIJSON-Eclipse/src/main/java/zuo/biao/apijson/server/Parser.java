@@ -30,6 +30,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.Verifier;
+import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.User;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
@@ -172,6 +173,11 @@ public class Parser {
 				//					Verifier.verifyLogin(session);
 				//				}
 				if (noVerifyRequest == false) {
+					//补充全局缺省版本号
+					if (requestObject.getIntValue(JSONRequest.KEY_VERSION) <= 0) {
+						requestObject.put(JSONRequest.KEY_VERSION, session.getAttribute(JSONRequest.KEY_VERSION));
+					}
+					
 					requestObject = getCorrectRequest(requestMethod, requestObject);
 				}
 			} catch (Exception e) {

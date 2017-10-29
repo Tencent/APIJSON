@@ -211,6 +211,7 @@ public class Controller {
 		VERIFY_ = Verify.class.getSimpleName();
 	}
 
+	public static final String VERSION = JSONRequest.KEY_VERSION;
 	public static final String COUNT = JSONResponse.KEY_COUNT;
 	public static final String TOTAL = JSONResponse.KEY_TOTAL;
 
@@ -232,6 +233,7 @@ public class Controller {
 	public static final String TYPE = "type";
 	public static final String WAY = "way";
 	public static final String CONTENT = "content";
+	
 
 
 
@@ -400,9 +402,10 @@ public class Controller {
 	 * @see
 	 * <pre>
 		{
-			"type": 0,
+			"type": 0,  //登录方式，非必须  0-密码 2-验证码
 			"phone": "13000082001",
-			"password": "1234567"
+			"password": "1234567",
+			"version": 1 //全局版本号，非必须
 		}
 	 * </pre>
 	 */
@@ -412,6 +415,7 @@ public class Controller {
 		boolean isPassword;
 		String phone;
 		String password;
+		int version;
 		try {
 			requestObject = Parser.parseRequest(request, POST);
 
@@ -432,6 +436,8 @@ public class Controller {
 					throw new IllegalArgumentException("验证码不合法！");
 				}
 			}
+			
+			version = requestObject.getIntValue(VERSION);
 		} catch (Exception e) {
 			return Parser.extendErrorResult(requestObject, e);
 		}
@@ -499,6 +505,7 @@ public class Controller {
 		session.setAttribute(TYPE, isPassword ? LOGIN_TYPE_PASSWORD : LOGIN_TYPE_VERIFY);//登录方式
 		session.setAttribute(USER_, user);//用户
 		session.setAttribute(PRIVACY_, privacy);//用户隐私信息
+		session.setAttribute(VERSION, version);//用户隐私信息
 		//		session.setMaxInactiveInterval(1*60);//设置session过期时间
 
 		return response;
