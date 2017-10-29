@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>APIJSON(Idea)</name>
+	<name>APIJSON</name>
 	<description>APIJSON Server project using Spring Boot</description>
 
 	<parent>
