@@ -14,9 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.model;
 
-import zuo.biao.library.util.StringUtil;
-
-
 /**验证码类
  * @author Lemon
  */
@@ -26,32 +23,15 @@ public class Verify extends apijson.demo.server.model.Verify {
 	public Verify() {
 		super();
 	}
-	public Verify(long phone) {
-		super(phone);
+	
+	public Verify(int type, String phone) {
+		super(type, phone);
 	}
-	public Verify(String verify) {
-		this();
-		setVerify(verify);
-	}
-
+	
+	
 	@Override
 	public Long getId() {
 		return value(super.getId());
-	}
-
-	/**服务器用id作为phone
-	 * @return
-	 */
-	public String getPhone() {
-		return "" + getId();
-	}
-	public Verify setPhone(String phone) {
-		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
-		return this;
-	}
-	public Verify setPhone(Long phone) {
-		setId(Long.valueOf(0 + StringUtil.getNumber(phone)));
-		return this;
 	}
 
 }

@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -134,9 +135,15 @@ public class MomentListActivity extends BaseActivity implements OnBottomDragList
 
 	//UI显示区(操作UI，但不存在数据获取或处理代码，也不存在事件监听代码)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	private boolean isCurrentUser = false;
+	
+	private ImageView ivMomentListForward;
 	private MomentListFragment fragment;
 	@Override
 	public void initView() {//必须在onCreate方法内调用
+		ivMomentListForward = (ImageView) findViewById(R.id.ivMomentListForward);
+		ivMomentListForward.setVisibility(showSearch ? View.VISIBLE : View.GONE);
+		
 		String title;
 		switch (range) {
 		case MomentListFragment.RANGE_ALL:
@@ -146,7 +153,14 @@ public class MomentListActivity extends BaseActivity implements OnBottomDragList
 			//			title = "动态";
 			//			break;
 		case MomentListFragment.RANGE_USER:
-			title = APIJSONApplication.getInstance().isCurrentUser(id) ? "我的动态" : "TA的动态";
+			isCurrentUser = APIJSONApplication.getInstance().isCurrentUser(id);
+			title = isCurrentUser ? "我的动态" : "TA的动态";
+			if (isCurrentUser) {
+				ivMomentListForward.setVisibility(View.VISIBLE);
+				ivMomentListForward.setImageResource(R.drawable.add);
+			} else {
+				ivMomentListForward.setVisibility(View.GONE);
+			}
 			break;
 		case MomentListFragment.RANGE_USER_CIRCLE:
 			title = "朋友圈";
@@ -158,10 +172,9 @@ public class MomentListActivity extends BaseActivity implements OnBottomDragList
 		tvBaseTitle.setText(title);
 		autoSetTitle();
 
-		findViewById(R.id.ivMomentListForward).setVisibility(showSearch ? View.VISIBLE : View.GONE);
-
 
 		fragment = MomentListFragment.createInstance(range, id, search);
+		fragment.setIsAdd(isCurrentUser);
 
 		fragmentManager
 		.beginTransaction()

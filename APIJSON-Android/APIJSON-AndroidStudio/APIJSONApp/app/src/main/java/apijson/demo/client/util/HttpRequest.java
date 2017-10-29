@@ -271,9 +271,13 @@ public class HttpRequest {
 			, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
 		request.put(VERIFY, verify);
-		request.put(PHONE, phone);
-		request.put(PASSWORD, password);
-		request.put(TYPE, type);
+		Privacy privacy = new Privacy().setPhone(phone);
+		if (type == Privacy.PASSWORD_TYPE_LOGIN) {
+			privacy.setPassword(password);
+		} else {
+			privacy.setPayPassword(password);
+		}
+		request.put(privacy);
 
 		HttpManager.getInstance().post(URL_BASE + "put/password", request, requestCode, listener);
 	}
@@ -281,23 +285,26 @@ public class HttpRequest {
 
 
 	/**获取验证码
+	 * @param type
 	 * @param phone
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void getVerify(String phone, int requestCode, OnHttpResponseListener listener) {
+	public static void getVerify(int type, String phone, int requestCode, OnHttpResponseListener listener) {
 		HttpManager.getInstance().post(URL_BASE + "post/verify/"
-				, new JSONRequest(PHONE, phone).setTag(VERIFY_)
+				, new JSONRequest(PHONE, phone).puts(TYPE, type).setTag(VERIFY_)
 				, requestCode, listener);
 	}
 	/**校验验证码
+	 * @param type
 	 * @param phone
 	 * @param verify
 	 * @param requestCode
 	 * @param listener
 	 */
-	public static void checkVerify(String phone, String verify, int requestCode, OnHttpResponseListener listener) {
+	public static void checkVerify(int type, String phone, String verify, int requestCode, OnHttpResponseListener listener) {
 		JSONRequest request = new JSONRequest();
+		request.put(TYPE, type);
 		request.put(PHONE, phone);
 		request.put(VERIFY, verify);
 
@@ -571,6 +578,25 @@ public class HttpRequest {
 		put(new JSONRequest(MOMENT_, data).setTag(MOMENT_), requestCode, listener);
 	}
 
+	/**新增动态
+	 * @param content
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void addMoment(String content, int requestCode, OnHttpResponseListener listener) {
+		List<String> list = new ArrayList<String>();
+		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
+		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
+		
+		post(new JSONRequest(
+				new Moment()
+				.setUserId(application.getCurrentUserId())
+				.setContent(content)
+				.setPictureList(list)
+				).setTag(MOMENT_)
+				, requestCode, listener);		
+	}
+	
 	/**删除动态
 	 * @param id
 	 * @param requestCode
@@ -579,6 +605,7 @@ public class HttpRequest {
 	public static void deleteMoment(Long id, int requestCode, OnHttpResponseListener listener) {
 		delete(new JSONRequest(new Moment(id)).setTag(MOMENT_), requestCode, listener);
 	}
+
 
 	//Moment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
