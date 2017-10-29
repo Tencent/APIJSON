@@ -57,7 +57,7 @@ public class APIJSONApplication {
 	@Bean  
 	public CorsFilter corsFilter() {  
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();  
-		source.registerCorsConfiguration("/**", buildConfig()); // 4  
+		source.registerCorsConfiguration("/**", buildConfig());
 		return new CorsFilter(source);  
 	}  
 	/**CORS跨域配置
@@ -65,9 +65,10 @@ public class APIJSONApplication {
 	 */
 	private CorsConfiguration buildConfig() {  
 		CorsConfiguration corsConfiguration = new CorsConfiguration();  
-		corsConfiguration.addAllowedOrigin("*");  
-		corsConfiguration.addAllowedHeader("*");  
-		corsConfiguration.addAllowedMethod("*");  
+		corsConfiguration.addAllowedOrigin("*"); //允许的域名或IP地址
+		corsConfiguration.addAllowedHeader("*"); //允许的请求头
+		corsConfiguration.addAllowedMethod("*"); //允许的HTTP请求方法
+		corsConfiguration.setAllowCredentials(true); //允许发送跨域凭据，前端Axios存取JSESSIONID必须要
 		return corsConfiguration;  
 	}  
 	//支持JavaScript跨域请求 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
