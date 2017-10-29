@@ -437,7 +437,9 @@ public class Controller {
 				}
 			}
 			
+			//全局版本号
 			version = requestObject.getIntValue(VERSION);
+			requestObject.remove(VERSION);
 		} catch (Exception e) {
 			return Parser.extendErrorResult(requestObject, e);
 		}
