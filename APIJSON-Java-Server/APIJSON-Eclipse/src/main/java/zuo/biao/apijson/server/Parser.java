@@ -374,11 +374,12 @@ public class Parser {
 		if (StringUtil.isNotEmpty(tag, true) == false) {
 			throw new IllegalArgumentException("请设置tag！一般是Table名");
 		}
+		int version = request.getIntValue(JSONRequest.KEY_VERSION);
 
 		JSONObject object = null;
 		String error = "";
 		try {
-			object = getStructure(method, "Request", JSONRequest.KEY_TAG, tag);
+			object = getStructure(method, "Request", JSONRequest.KEY_TAG, tag, version);
 		} catch (Exception e) {
 			error = e.getMessage();
 		}
@@ -396,6 +397,7 @@ public class Parser {
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
 
 		request.remove(JSONRequest.KEY_TAG);
+		request.remove(JSONRequest.KEY_VERSION);
 		return Structure.parseRequest(method, "", (JSONObject) target.clone(), request);
 	}
 
@@ -431,11 +433,12 @@ public class Parser {
 	 * @param table
 	 * @param key
 	 * @param value
+	 * @param version
 	 * @return
 	 * @throws Exception
 	 */
 	public static JSONObject getStructure(@NotNull final RequestMethod method, @NotNull String table,
-			String key, String value) throws Exception  {
+			String key, String value, int version) throws Exception  {
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
 		SQLConfig config = new SQLConfig(GET, table);
 		config.setColumn("structure");
@@ -445,7 +448,12 @@ public class Parser {
 		if (key != null) {
 			where.put(key, value);
 		}
+		if (version > 0) {
+			where.put(JSONRequest.KEY_VERSION + "{}", ">=" + version);
+		}
 		config.setWhere(where);
+		config.setOrder(JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
+		config.setCount(1);
 
 		SQLExecutor qh = new SQLExecutor();
 
