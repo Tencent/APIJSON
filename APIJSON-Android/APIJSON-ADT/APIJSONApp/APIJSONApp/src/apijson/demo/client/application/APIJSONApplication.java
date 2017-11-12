@@ -19,6 +19,7 @@ import zuo.biao.library.util.StringUtil;
 import android.util.Log;
 import apijson.demo.client.manager.DataManager;
 import apijson.demo.client.model.User;
+import apijson.demo.server.model.BaseModel;
 
 /**Application
  * @author Lemon
@@ -75,13 +76,17 @@ public class APIJSONApplication extends BaseApplication {
 			return;
 		}
 
+		if (currentUser != null && user.getId().equals(currentUser.getId())
+				&& StringUtil.isNotEmpty(user.getPhone(), true) == false) {
+			user.setPhone(currentUser.getPhone());
+		}
 		currentUser = user;
 		DataManager.getInstance().saveCurrentUser(currentUser);
 	}
 
 	public void logout() {
-		DataManager.getInstance().saveUser(currentUser);
 		currentUser = null;
+		DataManager.getInstance().saveCurrentUser(currentUser);
 	}
 	
 	/**判断是否为当前用户
