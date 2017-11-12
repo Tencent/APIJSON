@@ -174,7 +174,7 @@ public class Parser {
 				//				}
 				if (noVerifyRequest == false) {
 					//补充全局缺省版本号
-					if (requestObject.getIntValue(JSONRequest.KEY_VERSION) <= 0) {
+					if (session != null && requestObject.getIntValue(JSONRequest.KEY_VERSION) <= 0) {
 						requestObject.put(JSONRequest.KEY_VERSION, session.getAttribute(JSONRequest.KEY_VERSION));
 					}
 					

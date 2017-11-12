@@ -19,7 +19,6 @@ import zuo.biao.library.util.StringUtil;
 import android.util.Log;
 import apijson.demo.client.manager.DataManager;
 import apijson.demo.client.model.User;
-import apijson.demo.server.model.BaseModel;
 
 /**Application
  * @author Lemon
