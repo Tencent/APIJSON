@@ -38,6 +38,7 @@ import apijson.demo.client.util.ActionUtil;
 import apijson.demo.client.util.HttpRequest;
 import apijson.demo.client.util.MenuUtil;
 import apijson.demo.client.view.UserView;
+import apijson.demo.server.model.Privacy;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseView.OnDataChangedListener;
@@ -188,12 +189,12 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	 * @param momentList_
 	 */
 	private void setUser(User user_, List<Moment> momentList_) {
+		if (user_ == null) {
+			Log.w(TAG, "setUser  user_ == null >> user = new User();");
+			user_ = new User();
+		}
 		this.user = user_;
 		this.momentList = momentList_;
-		if (user == null) {
-			Log.w(TAG, "setUser  user == null >> user = new User();");
-			user = new User();
-		}
 		if (momentList == null) {
 			momentList = new ArrayList<>();
 		}
@@ -211,7 +212,6 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 				userView.bindView(user);//方式三
 
 				tvUserRemark.setText(StringUtil.getTrimedString(user.getHead()));
-				tvUserPhone.setText(StringUtil.getTrimedString(user.getPhone()));
 
 				if (adapter == null) {
 					adapter = new GridAdapter(context);
@@ -219,6 +219,26 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 					gvUserMoment.setAdapter(adapter);
 				}
 				adapter.refresh(list);
+			}
+		});
+	}
+
+
+	private Privacy privacy;
+	/**显示用户隐私信息
+	 * @param privacy
+	 */
+	private void setPrivacy(Privacy privacy_) {
+		if (privacy_ == null) {
+			Log.w(TAG, "setUser  user_ == null >> user = new User();");
+			privacy_ = new Privacy();
+		}
+		this.privacy = privacy_;
+		runUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				tvUserPhone.setText(StringUtil.getTrimedString(privacy.getPhone()));
 			}
 		});
 	}
@@ -270,7 +290,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			bottomMenuView.bindView(MenuUtil.getMenuList(MenuUtil.USER, id, ! User.isFriend(currentUser, id)));
 		}
 
-		runThread(TAG + "run", new Runnable() {
+		runThread(TAG + "onDataChanged", new Runnable() {
 
 			@Override
 			public void run() {
@@ -284,10 +304,12 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 					@Override
 					public void run() {
 						setUser(user, momentList);
+						setPrivacy(null);
 					}
 				});
 
 				HttpRequest.getUser(id, ! isOnEditMode, HTTP_GET, UserActivity.this);
+				HttpRequest.getPrivacy(id, HTTP_GET_PRIVACY, UserActivity.this);
 			}
 		});
 
@@ -386,8 +408,8 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 						break;
 					case R.id.tvUserViewTag:
 						if (isOnEditMode) {
-							toActivity(EditTextInfoActivity.createIntent(context, "标签"
-									, StringUtil.getTrimedString(tvUserPhone)), REQUEST_TO_EDIT_TEXT_INFO_TAG);
+							toActivity(EditTextInfoWindow.createIntent(context
+									, "标签", user.getTag()), REQUEST_TO_EDIT_TEXT_INFO_TAG, false);
 						} else {
 							CommonUtil.copyText(context, user.getTag());
 						}
@@ -442,6 +464,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 	//对应HttpRequest.getUser(id, 0, UserActivity.this); <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	protected static final int HTTP_GET = 1;
+	protected static final int HTTP_GET_PRIVACY = 5;
 	protected static final int HTTP_ADD = 2;
 	protected static final int HTTP_DELETE = 3;
 	protected static final int HTTP_PUT = 4;
@@ -466,8 +489,14 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			}
 			setUser(user, response.getList(Moment.class.getSimpleName() + "[]", Moment.class));
 			break;
+		case HTTP_GET_PRIVACY:
+			setPrivacy(response.getObject(Privacy.class));
+			break;
 		case HTTP_ADD:
 		case HTTP_DELETE:
+			if (verifyHttpLogin(response.getCode()) == false) {
+				return;
+			}
 			if (isSucceed) {
 				showShortToast(requestCode == HTTP_ADD ? R.string.add_succeed : R.string.delete_succeed);
 				sendBroadcast(new Intent(ActionUtil.ACTION_RELOAD_CURRENT_USER));
@@ -476,6 +505,9 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			}
 			break;
 		case HTTP_PUT:
+			if (verifyHttpLogin(response.getCode()) == false) {
+				return;
+			}
 			if (isSucceed) {
 				isDataChanged = false;
 				sendBroadcast(new Intent(ActionUtil.ACTION_RELOAD_CURRENT_USER));
@@ -515,7 +547,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 			break;
 		case R.id.llUserPhone:
 			toActivity(EditTextInfoWindow.createIntent(context, EditTextInfoWindow.TYPE_PHONE
-					, "手机", user.getPhone()), REQUEST_TO_EDIT_TEXT_INFO_PHONE, false);
+					, "手机", privacy.getPhone()), REQUEST_TO_EDIT_TEXT_INFO_PHONE, false);
 			break;
 		default:
 			break;
@@ -579,7 +611,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 				user.setName(value);
 				break;
 			case REQUEST_TO_EDIT_TEXT_INFO_PHONE:
-				user.setPhone(value);
+				privacy.setPhone(value);
 				break;
 			case REQUEST_TO_EDIT_TEXT_INFO_REMARK:
 				user.setHead(value);

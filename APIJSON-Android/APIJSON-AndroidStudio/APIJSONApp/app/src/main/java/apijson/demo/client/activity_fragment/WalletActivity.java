@@ -15,7 +15,6 @@ limitations under the License.*/
 package apijson.demo.client.activity_fragment;
 
 import zuo.biao.apijson.JSONResponse;
-import zuo.biao.library.base.BaseActivity;
 import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.ui.EditTextInfoActivity;
@@ -29,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import apijson.demo.client.R;
+import apijson.demo.client.base.BaseActivity;
 import apijson.demo.client.util.HttpRequest;
 import apijson.demo.server.model.Privacy;
 
@@ -166,6 +166,10 @@ public class WalletActivity extends BaseActivity implements OnClickListener, OnB
 			public void run() {
 
 				JSONResponse response = new JSONResponse(resultJson);
+				if (verifyHttpLogin(response.getCode()) == false) {
+					return;
+				}
+				
 				isSucceed = JSONResponse.isSuccess(response);
 				
 				dismissProgressDialog();

@@ -358,6 +358,16 @@ implements CacheCallBack<User>, OnHttpResponseListener, OnBottomDragListener
 		}
 	}
 
+	
+	@Override
+	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+		JSONResponse response = new JSONResponse(resultJson);
+		if ((range == RANGE_USER_FRIEND) && verifyHttpLogin(response.getCode()) == false) {
+			return;
+		}
+		super.onHttpResponse(requestCode, resultJson, e);
+	}
+	
 	//系统自带监听方法 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 

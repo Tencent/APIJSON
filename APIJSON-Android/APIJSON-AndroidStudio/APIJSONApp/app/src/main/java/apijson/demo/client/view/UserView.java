@@ -93,7 +93,7 @@ public class UserView extends BaseView<User> implements OnClickListener {
 
 		tvUserViewName.setText(StringUtil.getTrimedString(data.getName()));
 		tvUserViewId.setText("ID:" + data.getId());
-		tvUserViewTag.setText("Tag:" + StringUtil.getNoBlankString(data.getTag()));
+		tvUserViewTag.setText("Tag:" + StringUtil.getTrimedString(data.getTag()));
 	}
 
 	@Override

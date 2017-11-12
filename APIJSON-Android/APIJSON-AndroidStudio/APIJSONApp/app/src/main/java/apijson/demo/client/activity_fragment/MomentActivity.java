@@ -17,7 +17,6 @@ package apijson.demo.client.activity_fragment;
 import java.util.List;
 
 import zuo.biao.apijson.JSONResponse;
-import zuo.biao.library.base.BaseHttpListActivity;
 import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.interfaces.AdapterCallBack;
 import zuo.biao.library.interfaces.CacheCallBack;
@@ -45,6 +44,7 @@ import android.widget.EditText;
 import apijson.demo.client.R;
 import apijson.demo.client.adapter.CommentAdapter;
 import apijson.demo.client.application.APIJSONApplication;
+import apijson.demo.client.base.BaseHttpListActivity;
 import apijson.demo.client.manager.HttpManager;
 import apijson.demo.client.model.Comment;
 import apijson.demo.client.model.CommentItem;
@@ -531,6 +531,9 @@ implements CacheCallBack<CommentItem>, OnHttpResponseListener, OnCommentClickLis
 					return;
 				}
 
+				if (verifyHttpLogin(response.getCode()) == false) {
+					return;
+				}
 
 				JSONResponse comment = response.getJSONResponse(Comment.class.getSimpleName());
 				final boolean succeed = JSONResponse.isSuccess(comment);

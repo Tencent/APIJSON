@@ -14,9 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.client.model;
 
-import android.support.annotation.NonNull;
 import apijson.demo.client.application.APIJSONApplication;
-import apijson.demo.server.model.Privacy;
 
 /**用户类
  * @author Lemon
@@ -24,7 +22,7 @@ import apijson.demo.server.model.Privacy;
 public class User extends apijson.demo.server.model.User {
 	private static final long serialVersionUID = 1L;
 
-	private Privacy privacy;
+	private String phone;//为了方便写在这里，登录成功是存入
 
 	public User() {
 		super();
@@ -33,23 +31,11 @@ public class User extends apijson.demo.server.model.User {
 		super(id);
 	}
 
-	@NonNull
-	public Privacy getPrivacy() {
-		if (privacy == null) {
-			privacy = new Privacy(getId());
-		}
-		return privacy;
-	}
-	public User setPrivacy(Privacy privacy) {
-		this.privacy = privacy;
-		return this;
-	}
-
 	public String getPhone() {
-		return getPrivacy().getPhone();
+		return phone;
 	}
 	public User setPhone(String phone) {
-		getPrivacy().setPhone(phone);
+		this.phone = phone;
 		return this;
 	}
 

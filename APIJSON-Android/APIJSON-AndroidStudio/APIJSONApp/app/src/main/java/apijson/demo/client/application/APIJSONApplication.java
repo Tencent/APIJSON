@@ -75,6 +75,10 @@ public class APIJSONApplication extends BaseApplication {
 			return;
 		}
 
+		if (currentUser != null && user.getId().equals(currentUser.getId())
+				&& StringUtil.isNotEmpty(user.getPhone(), true) == false) {
+			user.setPhone(currentUser.getPhone());
+		}
 		currentUser = user;
 		DataManager.getInstance().saveCurrentUser(currentUser);
 	}

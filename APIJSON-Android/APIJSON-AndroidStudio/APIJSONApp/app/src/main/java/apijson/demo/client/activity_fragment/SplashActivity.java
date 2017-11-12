@@ -44,5 +44,10 @@ public class SplashActivity extends Activity {
 		super.finish();
 		overridePendingTransition(R.anim.fade, R.anim.hold);
 	}
+	
+	@Override
+	public void onBackPressed() {
+		//super.onBackPressed();
+	}
 
 }

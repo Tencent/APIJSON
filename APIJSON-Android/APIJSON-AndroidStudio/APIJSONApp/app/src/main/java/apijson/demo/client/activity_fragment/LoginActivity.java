@@ -192,6 +192,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 						break;
 					}
 				} else {
+					user.setPhone(phone);
 					APIJSONApplication.getInstance().saveCurrentUser(user);
 					if (APIJSONApplication.getInstance().isLoggedIn() == false) {
 						showShortToast((requestCode == Login.TYPE_PASSWORD ? "密码" : "验证码") + "错误");
