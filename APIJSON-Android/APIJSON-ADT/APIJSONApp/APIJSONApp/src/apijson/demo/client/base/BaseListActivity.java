@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.client.base;
 
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseBroadcastReceiver;
 import zuo.biao.library.base.BaseView.OnDataChangedListener;
 import zuo.biao.library.util.Log;
@@ -51,7 +52,17 @@ extends zuo.biao.library.base.BaseListActivity<T, LV, BA> {
 		currentUserId = currentUser == null ? 0 : currentUser.getId();
 		isLoggedIn = isCurrentUserCorrect();
 	}
-
+	
+	protected boolean verifyHttpLogin(int code) {
+		if (isAlive() == false) {
+			return true;
+		}
+		if (code == JSONResponse.CODE_NOT_LOGGED_IN) {
+			APIJSONApplication.getInstance().logout();
+			setCurrentUser();
+		}
+		return verifyLogin();
+	}
 	protected static boolean isCurrentUser(long userId) {
 		return APIJSONApplication.getInstance().isCurrentUser(userId);
 	}

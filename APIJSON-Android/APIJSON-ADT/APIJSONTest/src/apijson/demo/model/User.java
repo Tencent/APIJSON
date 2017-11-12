@@ -66,7 +66,6 @@ public class User extends BaseModel {
 	private Integer sex; //性别
 	private String head; //头像url
 	private String name; //姓名
-	private String phone; //手机
 	private String tag; //标签
 	private List<String> pictureList; //照片列表
 	private List<Long> contactIdList; //联系人列表
@@ -100,13 +99,6 @@ public class User extends BaseModel {
 	}
 	public User setName(String name) {
 		this.name = name;
-		return this;
-	}
-	public String getPhone() {
-		return phone;
-	}
-	public User setPhone(String phone) {
-		this.phone = phone;
 		return this;
 	}
 	public List<String> getPictureList() {

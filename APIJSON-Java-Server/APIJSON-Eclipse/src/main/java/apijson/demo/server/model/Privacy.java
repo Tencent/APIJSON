@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.demo.server.model;
 
 import static zuo.biao.apijson.RequestRole.ADMIN;
+import static zuo.biao.apijson.RequestRole.CIRCLE;
 import static zuo.biao.apijson.RequestRole.OWNER;
 import static zuo.biao.apijson.RequestRole.UNKNOWN;
 
@@ -25,7 +26,8 @@ import zuo.biao.apijson.MethodAccess;
  */
 @MethodAccess(
 		GET = {},
-		GETS = {OWNER, ADMIN},
+		HEAD = {ADMIN},
+		GETS = {CIRCLE, OWNER, ADMIN},
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
 		)

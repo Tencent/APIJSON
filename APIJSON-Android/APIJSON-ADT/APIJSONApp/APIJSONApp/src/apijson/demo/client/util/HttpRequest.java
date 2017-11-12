@@ -90,7 +90,7 @@ public class HttpRequest {
 	 * @param listener
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
-	public static void postHead(JSONObject request, int requestCode, OnHttpResponseListener listener) {
+	public static void heads(JSONObject request, int requestCode, OnHttpResponseListener listener) {
 		HttpManager.getInstance().post(URL_HEADS, request, requestCode, listener);
 	}
 	/**用POST方法GET数据，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
@@ -99,7 +99,7 @@ public class HttpRequest {
 	 * @param listener
 	 * @must request最外层有tag，部分请求还要currentUserId和对应的password
 	 */
-	public static void postGet(JSONObject request, int requestCode, OnHttpResponseListener listener) {
+	public static void gets(JSONObject request, int requestCode, OnHttpResponseListener listener) {
 		HttpManager.getInstance().post(URL_GETS, request, requestCode, listener);
 	}
 	/**
@@ -587,7 +587,7 @@ public class HttpRequest {
 		List<String> list = new ArrayList<String>();
 		list.add("http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000");
 		list.add("http://common.cnblogs.com/images/icon_weibo_24.png");
-		
+
 		post(new JSONRequest(
 				new Moment()
 				.setUserId(application.getCurrentUserId())
@@ -596,7 +596,7 @@ public class HttpRequest {
 				).setTag(MOMENT_)
 				, requestCode, listener);		
 	}
-	
+
 	/**删除动态
 	 * @param id
 	 * @param requestCode
@@ -678,14 +678,24 @@ public class HttpRequest {
 
 	//Money<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	/**获取隐私信息
+	/**获取当前用户隐私信息
 	 * @param requestCode
 	 * @param listener
 	 */
 	public static void getPrivacy(int requestCode, OnHttpResponseListener listener) {
-		postGet(new JSONRequest(
+		gets(new JSONRequest(
 				new Privacy(application.getCurrentUserId())
 				).setTag(PRIVACY_), requestCode, listener);
+	}
+	/**获取圈子内用户隐私信息
+	 * @param id
+	 * @param requestCode
+	 * @param listener
+	 */
+	public static void getPrivacy(long id, int requestCode, OnHttpResponseListener listener) {
+		gets(new JSONRequest(
+				PRIVACY_, new JSONObject(new Privacy(id)).setRole(RequestRole.CIRCLE.name())
+				).setTag("Privacy-CIRCLE"), requestCode, listener);
 	}
 
 	/**修改余额

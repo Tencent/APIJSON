@@ -198,6 +198,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener, OnTo
 						return;
 					}
 
+					user.setPhone(phone);
 					onLoginSucceed();
 				}
 			}

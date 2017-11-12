@@ -80,8 +80,8 @@ public class APIJSONApplication extends BaseApplication {
 	}
 
 	public void logout() {
+		DataManager.getInstance().saveUser(currentUser);
 		currentUser = null;
-		DataManager.getInstance().saveCurrentUser(currentUser);
 	}
 	
 	/**判断是否为当前用户

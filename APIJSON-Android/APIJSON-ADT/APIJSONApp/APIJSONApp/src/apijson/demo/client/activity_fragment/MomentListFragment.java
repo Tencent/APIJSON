@@ -14,6 +14,19 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
+import java.util.List;
+
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONRequest;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.apijson.SQL;
+import zuo.biao.apijson.StringUtil;
+import zuo.biao.library.base.BaseView.OnDataChangedListener;
+import zuo.biao.library.interfaces.AdapterCallBack;
+import zuo.biao.library.interfaces.CacheCallBack;
+import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.EditTextInfoWindow;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -27,11 +40,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.alibaba.fastjson.JSONObject;
-
-import java.util.List;
-
 import apijson.demo.client.R;
 import apijson.demo.client.adapter.MomentAdapter;
 import apijson.demo.client.application.APIJSONApplication;
@@ -41,17 +49,8 @@ import apijson.demo.client.model.Moment;
 import apijson.demo.client.model.MomentItem;
 import apijson.demo.client.util.CommentUtil;
 import apijson.demo.client.util.HttpRequest;
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONRequest;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.SQL;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.library.base.BaseView.OnDataChangedListener;
-import zuo.biao.library.interfaces.AdapterCallBack;
-import zuo.biao.library.interfaces.CacheCallBack;
-import zuo.biao.library.interfaces.OnBottomDragListener;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.EditTextInfoWindow;
+
+import com.alibaba.fastjson.JSONObject;
 
 /**用户列表界面fragment
  * @author Lemon
@@ -364,9 +363,12 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 
 	@Override
 	public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+		JSONResponse response = new JSONResponse(resultJson);
+		if ((range == RANGE_USER_CIRCLE || requestCode == HTTP_ADD) && verifyHttpLogin(response.getCode()) == false) {
+			return;
+		}
 		switch (requestCode) {
 		case HTTP_ADD:
-			JSONResponse response = new JSONResponse(resultJson);
 			response = response.getJSONResponse(Moment.class.getSimpleName());
 			
 			if (JSONResponse.isSuccess(response) == false) {
@@ -388,6 +390,8 @@ implements CacheCallBack<MomentItem>, OnHttpResponseListener, TopBarMenuCallback
 		}
 
 	}
+
+
 
 	//系统自带监听方法 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
