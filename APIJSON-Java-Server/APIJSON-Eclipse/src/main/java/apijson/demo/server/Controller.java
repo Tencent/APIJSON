@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,7 +75,7 @@ public class Controller {
 	 * @return
 	 * @see {@link RequestMethod#GET}
 	 */
-	@RequestMapping(value = "get", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping(value = "get")
 	public String get(@RequestBody String request, HttpSession session) {
 		return new Parser(GET).setSession(session).parse(request);
 	}
@@ -85,7 +86,7 @@ public class Controller {
 	 * @return
 	 * @see {@link RequestMethod#HEAD}
 	 */
-	@RequestMapping(value = "head", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("head")
 	public String head(@RequestBody String request, HttpSession session) {
 		return new Parser(HEAD).setSession(session).parse(request);
 	}
@@ -96,7 +97,7 @@ public class Controller {
 	 * @return
 	 * @see {@link RequestMethod#GETS}
 	 */
-	@RequestMapping(value = "gets", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("gets")
 	public String gets(@RequestBody String request, HttpSession session) {
 		return new Parser(GETS).setSession(session).parse(request);
 	}
@@ -107,7 +108,7 @@ public class Controller {
 	 * @return
 	 * @see {@link RequestMethod#HEADS}
 	 */
-	@RequestMapping(value = "heads", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("heads")
 	public String heads(@RequestBody String request, HttpSession session) {
 		return new Parser(HEADS).setSession(session).parse(request);
 	}
@@ -118,7 +119,7 @@ public class Controller {
 	 * @return
 	 * @see {@link RequestMethod#POST}
 	 */
-	@RequestMapping(value = "post", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("post")
 	public String post(@RequestBody String request, HttpSession session) {
 		return new Parser(POST).setSession(session).parse(request);
 	}
@@ -129,7 +130,7 @@ public class Controller {
 	 * @return
 	 * @see {@link RequestMethod#PUT}
 	 */
-	@RequestMapping(value = "put", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("put")
 	public String put(@RequestBody String request, HttpSession session) {
 		return new Parser(PUT).setSession(session).parse(request);
 	}
@@ -140,7 +141,7 @@ public class Controller {
 	 * @return
 	 * @see {@link RequestMethod#DELETE}
 	 */
-	@RequestMapping(value = "delete", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("delete")
 	public String delete(@RequestBody String request, HttpSession session) {
 		return new Parser(DELETE).setSession(session).parse(request);
 	}
@@ -267,7 +268,7 @@ public class Controller {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = "post/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("post/verify")
 	public JSONObject postVerify(@RequestBody String request) {
 		JSONObject requestObject = null;
 		int type;
@@ -307,7 +308,7 @@ public class Controller {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = "gets/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("gets/verify")
 	public JSONObject getVerify(@RequestBody String request) {
 		JSONObject requestObject = null;
 		int type;
@@ -326,7 +327,7 @@ public class Controller {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = "heads/verify", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("heads/verify")
 	public JSONObject headVerify(@RequestBody String request) {
 		JSONObject requestObject = null;
 		int type;
@@ -409,7 +410,7 @@ public class Controller {
 		}
 	 * </pre>
 	 */
-	@RequestMapping(value = "login", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("login")
 	public JSONObject login(@RequestBody String request, HttpSession session) {
 		JSONObject requestObject = null;
 		boolean isPassword;
@@ -517,7 +518,7 @@ public class Controller {
 	 * @param session
 	 * @return
 	 */
-	@RequestMapping(value = "logout", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("logout")
 	public JSONObject logout(HttpSession session) {
 		long userId;
 		try {
@@ -556,7 +557,7 @@ public class Controller {
 		}
 	 * </pre>
 	 */
-	@RequestMapping(value = REGISTER, method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping(REGISTER)
 	public JSONObject register(@RequestBody String request) {
 		JSONObject requestObject = null;
 
@@ -672,7 +673,7 @@ public class Controller {
 		}
 	 * </pre>
 	 */
-	@RequestMapping(value = "put/password", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("put/password")
 	public JSONObject putPassword(@RequestBody String request){
 		JSONObject requestObject = null;
 		String old_password;
@@ -789,7 +790,7 @@ public class Controller {
 		}
 	 * </pre>
 	 */
-	@RequestMapping(value = "put/balance", method = org.springframework.web.bind.annotation.RequestMethod.POST)
+	@PostMapping("put/balance")
 	public JSONObject putBalance(@RequestBody String request, HttpSession session) {
 		JSONObject requestObject = null;
 		JSONObject privacyObj;

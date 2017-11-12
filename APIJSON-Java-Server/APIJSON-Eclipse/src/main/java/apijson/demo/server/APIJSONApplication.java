@@ -32,19 +32,26 @@ public class APIJSONApplication {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(APIJSONApplication.class, args);
 
+		System.out.println("\n\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<< APIJSON >>>>>>>>>>>>>>>>>>>>>>>>\n");
+		System.out.println("开始测试:远程函数 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
 			Function.test();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("\n完成测试:远程函数 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
 //		Structure.init();
 		
+		System.out.println("\n\n\n开始测试:请求校验 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
 			Structure.test();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("\n完成测试:请求校验 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+		System.out.println("\n\n<<<<<<<<<<<<<<<<<<<<<<<<< APIJSON已启动 >>>>>>>>>>>>>>>>>>>>>>>>\n");
 	}
 
 
