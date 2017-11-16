@@ -506,6 +506,8 @@ Run > Run app
 
 [仿QQ空间和微信朋友圈，高解耦高复用高灵活](https://my.oschina.net/tommylemon/blog/885787)
 
+[后端开挂:3行代码写出8个接口！](https://my.oschina.net/tommylemon/blog/1574430)
+
 [3步创建APIJSON服务端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
 ### <h3 id="5.2">5.2 关于作者<h3/>
