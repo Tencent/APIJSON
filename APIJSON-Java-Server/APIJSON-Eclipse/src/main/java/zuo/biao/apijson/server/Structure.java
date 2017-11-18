@@ -70,7 +70,9 @@ public class Structure {
 
 	static final String requestString = "{\"Comment\":{\"DISALLOW\": \"id\", \"NECESSARY\": \"userId,momentId,content\"}, \"ADD\":{\"Comment:to\":{}}}";
 	static final String responseString = "{\"User\":{\"REMOVE\": \"phone\", \"REPLACE\":{\"sex\":2}, \"ADD\":{\"name\":\"api\"}}, \"PUT\":{\"Comment:to\":{}}}";
-
+	/**测试
+	 * @throws Exception
+	 */
 	public static void test() throws Exception {
 		JSONObject request;
 		try {
@@ -121,6 +123,10 @@ public class Structure {
 
 	}
 
+	
+	
+	
+	
 
 	/**从request提取target指定的内容
 	 * @param method
