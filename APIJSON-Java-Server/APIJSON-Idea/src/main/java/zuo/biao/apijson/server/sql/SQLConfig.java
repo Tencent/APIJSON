@@ -52,8 +52,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.demo.server.model.BaseModel;
-import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
+import apijson.demo.server.model.Privacy;
+import apijson.demo.server.model.NetsbdNews;
+import apijson.demo.server.model.NetsbdNewsCategory;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
@@ -115,6 +117,8 @@ public class SQLConfig {
 		
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
+		TABLE_KEY_MAP.put(NetsbdNews.class.getSimpleName(), "ims_netsbd_news");
+		TABLE_KEY_MAP.put(NetsbdNewsCategory.class.getSimpleName(), "ims_netsbd_news_category");
 	}
 
 
