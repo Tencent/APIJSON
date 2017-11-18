@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Access Error</title>
-  <script type="text/javascript" src="apijson.js">
-  </script>
+  <script type="text/javascript" src="RequestUtil.js"></script>
 </head>
 <body>
 <script >
     var json = {
-        "tag":"Wallet",
-        "Wallet":{
-            "userId":38710
+        "Privacy":{
+            "id":38710
         }
     };
 
-    request(url_post_get, json);
+    request(URL_GETS, json);
 </script>
 </body>
 </html>

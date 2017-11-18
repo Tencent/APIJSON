@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>GET:Complex</title>
-  <script type="text/javascript" src="../apijson.js">
+  <script type="text/javascript" src="../RequestUtil.js">
   </script>
 </head>
 <body>
@@ -26,12 +27,12 @@
                 "count":3,
                 "Comment":{
                     "momentId@":"[]/Moment/id" //已通过encode函数自动转义 encodeURIComponent("[]/Moment/id")
-                },
+                }
             }
         }
     };
 
-    request(url_get, json);
+    request(URL_GET, json);
 </script>
 </body>
 </html>

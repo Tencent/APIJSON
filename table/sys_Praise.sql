@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 5.7.12, for osx10.9 (x86_64)
 --
--- Host: localhost    Database: sys
+-- Host: 39.108.143.172    Database: sys
 -- ------------------------------------------------------
--- Server version	5.7.16
+-- Server version	5.7.19-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,8 +23,8 @@ DROP TABLE IF EXISTS `Praise`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Praise` (
-  `id` bigint(15) NOT NULL,
-  `userIdList` json NOT NULL,
+  `id` bigint(15) NOT NULL COMMENT '唯一标识',
+  `userIdList` json NOT NULL COMMENT '用户id列表',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='如果对Moment写安全要求高，可以将Moment内praiserUserIdList分离到Praise表中，作为userIdList。\n权限注解也改下：\n@MethodAccess(\n		PUT = {OWNER, ADMIN}\n		)\nclass Moment {\n       …\n}\n\n@MethodAccess(\n		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}\n		)\n class Praise {\n       …\n }\n';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -48,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-06-18 21:37:27
+-- Dump completed on 2017-11-12 21:45:15
