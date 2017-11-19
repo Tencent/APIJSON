@@ -30,7 +30,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.Verifier;
-import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.User;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
@@ -177,7 +176,7 @@ public class Parser {
 					if (session != null && requestObject.getIntValue(JSONRequest.KEY_VERSION) <= 0) {
 						requestObject.put(JSONRequest.KEY_VERSION, session.getAttribute(JSONRequest.KEY_VERSION));
 					}
-					
+
 					requestObject = getCorrectRequest(requestMethod, requestObject);
 				}
 			} catch (Exception e) {
@@ -628,8 +627,9 @@ public class Parser {
 	private JSONArray getArray(String parentPath, String name, final JSONObject request) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
-		if (RequestMethod.isGetMethod(requestMethod, true) == false) {
-			throw new UnsupportedOperationException("key[]:{}只支持GET类方法！不允许传 " + name + ":{} ！");
+		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
+		if (RequestMethod.isGetMethod(requestMethod, false) == false) {
+			throw new UnsupportedOperationException("key[]:{}只支持GET方法！不允许传 " + name + ":{} ！");
 		}
 		if (request == null || request.isEmpty()) {//jsonKey-jsonValue条件
 			return null;
@@ -843,8 +843,25 @@ public class Parser {
 			}
 		}
 
-		Log.i(TAG, "getValueByPath  return parent == null ? valuePath : parent.get(keys[keys.length - 1]); >> ");
-		return parent == null ? valuePath : parent.get(keys[keys.length - 1]);
+		if (parent != null) {
+			Log.i(TAG, "getValueByPath >> get from queryResultMap >> return  parent.get(keys[keys.length - 1]);");
+			target = parent.get(keys[keys.length - 1]); //值为null应该报错NotExistExeption，一般都是id关联，不可为null，否则可能绕过安全机制
+			if (target != null) {
+				Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
+				return target;
+			}
+		}
+		
+		
+		//从requestObject中取值
+		target = getValue(requestObject, StringUtil.splitPath(valuePath));
+		if (target != null) {
+			Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
+			return target;
+		}
+		
+		Log.i(TAG, "getValueByPath  return valuePath;");
+		return valuePath;
 	}
 
 	//依赖引用关系 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

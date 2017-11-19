@@ -70,7 +70,9 @@ public class Structure {
 
 	static final String requestString = "{\"Comment\":{\"DISALLOW\": \"id\", \"NECESSARY\": \"userId,momentId,content\"}, \"ADD\":{\"Comment:to\":{}}}";
 	static final String responseString = "{\"User\":{\"REMOVE\": \"phone\", \"REPLACE\":{\"sex\":2}, \"ADD\":{\"name\":\"api\"}}, \"PUT\":{\"Comment:to\":{}}}";
-
+	/**测试
+	 * @throws Exception
+	 */
 	public static void test() throws Exception {
 		JSONObject request;
 		try {
@@ -122,6 +124,10 @@ public class Structure {
 	}
 
 
+
+
+
+
 	/**从request提取target指定的内容
 	 * @param method
 	 * @param name
@@ -154,12 +160,12 @@ public class Structure {
 				//				Log.i(TAG, "parseRequest.parse.onParseJSONObject  key = " + key + "; robj = " + robj);
 				if (robj == null) {
 					if (tobj != null) {//不允许不传Target中指定的Table
-						throw new IllegalArgumentException(method.name() + "请求，请设置 " + key + " ！");
+						throw new IllegalArgumentException(method.name() + "请求，请在 " + name + " 内传 " + key + ":{} ！");
 					}
 				} else if (zuo.biao.apijson.JSONObject.isTableKey(key)) {
 					if (method == RequestMethod.POST) {
 						if (robj.containsKey(KEY_ID)) {
-							throw new IllegalArgumentException("POST请求， " + key + " 不能设置 " + KEY_ID + " ！");
+							throw new IllegalArgumentException("POST请求，" + name + "/" + key + " 不能传 " + KEY_ID + " ！");
 						}
 					} else {
 						if (RequestMethod.isQueryMethod(method) == false) {
@@ -167,22 +173,22 @@ public class Structure {
 							Object id = robj.get(KEY_ID); //如果必须传 id ，可在Request表中配置necessary
 							if (id != null) {
 								if (id instanceof Number == false) {
-									throw new IllegalArgumentException(method.name() + "请求， " + key
+									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
 											+ " 里面的 " + KEY_ID_IN + ":value 中value的类型只能是Long！");
 								}
 							} else {
 								//批量修改或删除
 								Object arr = robj.get(KEY_ID_IN); //如果必须传 id{} ，可在Request表中配置necessary
 								if (arr == null) {
-									throw new IllegalArgumentException(method.name() + "请求， " + key
+									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
 											+ " 里面 " + KEY_ID + " 和 " + KEY_ID_IN + " 必须传其中一个！");
 								}
 								if (arr instanceof JSONArray == false) {
-									throw new IllegalArgumentException(method.name() + "请求， " + key
+									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
 											+ " 里面的 " + KEY_ID_IN + ":value 中value的类型只能是 [Long] ！");
 								}
 								if (((JSONArray)arr).size() > 10) { //不允许一次操作10条以上记录
-									throw new IllegalArgumentException(method.name() + "请求， " + key
+									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
 											+ " 里面的 " + KEY_ID_IN + ":[] 中[]的长度不能超过10！");
 								}
 							}
@@ -259,8 +265,6 @@ public class Structure {
 		//获取配置>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-		Set<String> tableKeySet = new HashSet<String>();
-
 
 		//移除字段<<<<<<<<<<<<<<<<<<<
 		String[] removes = StringUtil.split(remove);
@@ -277,42 +281,17 @@ public class Structure {
 		for (String s : necessaryList) {
 			if (real.get(s) == null) {//可能传null进来，这里还会通过 real.containsKey(s) == false) {
 				throw new IllegalArgumentException(name
-						+ "不能缺少 " + s + " 等[" + necessary + "]内的任何字段！");
+						+ " 里面不能缺少 " + s + " 等[" + necessary + "]内的任何字段！");
 			}
 		}
 		//判断必要字段是否都有>>>>>>>>>>>>>>>>>>>
 
 
-		Set<String> rkset = real.keySet();
+		Set<String> objKeySet = new HashSet<String>(); //不能用tableKeySet，仅判断 Table:{} 会导致 key:{ Table:{} } 绕过判断
 
-		//判断是否都有不允许的字段<<<<<<<<<<<<<<<<<<<
-		List<String> disallowList = new ArrayList<String>();
-		if ("!".equals(disallow)) {//所有非necessary，改成 !necessary 更好
-			if (rkset != null) {
-				for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
-					if (key != null && key.startsWith("@") == false && necessaryList.contains(key) == false) {
-						disallowList.add(key);
-					}
-				}
-			}
-		} else {
-			String[] disallows = StringUtil.split(disallow);
-			if (disallows != null && disallows.length > 0) {
-				disallowList.addAll(Arrays.asList(disallows));
-			}
-		}
-		for (String s : disallowList) {
-			if (real.containsKey(s)) {
-				throw new IllegalArgumentException(name
-						+ "不允许传 " + s + " 等" + StringUtil.getString(disallowList) + "内的任何字段！");
-			}
-		}
-		//判断是否都有不允许的字段>>>>>>>>>>>>>>>>>>>
-
-
+		//解析内容<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 		Set<Entry<String, Object>> set = new LinkedHashSet<>(target.entrySet());
-		zuo.biao.apijson.server.Entry<String, String> pair;
 		if (set.isEmpty() == false) {
 
 			String key;
@@ -332,10 +311,7 @@ public class Structure {
 				if (tvalue instanceof JSONObject) {//JSONObject，往下一级提取
 					tvalue = callback.onParseJSONObject(key, (JSONObject) tvalue, (JSONObject) rvalue);
 
-					pair = Pair.parseEntry(key, true);
-					if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())) {
-						tableKeySet.add(key);
-					}
+					objKeySet.add(key);
 				} else if (tvalue instanceof JSONArray) {//JSONArray
 					tvalue = callback.onParseJSONArray(key, (JSONArray) tvalue, (JSONArray) rvalue);
 				} else {//其它Object
@@ -349,17 +325,49 @@ public class Structure {
 
 		}
 
+		//解析内容>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-		//不允许操作未指定Table<<<<<<<<<<<<<<<<<<<<<<<<<
-		for (String rk : rkset) {
-			pair = Pair.parseEntry(rk, true);//非GET类操作不允许Table:alias别名
-			if (pair != null && zuo.biao.apijson.JSONObject.isTableKey(pair.getKey())
-					&& tableKeySet.contains(rk) == false) {
-				throw new UnsupportedOperationException("不允许操作 " + rk + " ！");
+
+		Set<String> rkset = real.keySet(); //解析内容并没有改变rkset
+
+		//解析不允许的字段<<<<<<<<<<<<<<<<<<<
+		List<String> disallowList = new ArrayList<String>();
+		if ("!".equals(disallow)) {//所有非necessary，改成 !necessary 更好
+			for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
+				if (key != null && key.startsWith("@") == false
+						&& necessaryList.contains(key) == false && objKeySet.contains(key) == false) {
+					disallowList.add(key);
+				}
+			}
+		} else {
+			String[] disallows = StringUtil.split(disallow);
+			if (disallows != null && disallows.length > 0) {
+				disallowList.addAll(Arrays.asList(disallows));
 			}
 		}
-		//不允许操作未指定Table>>>>>>>>>>>>>>>>>>>>>>>>>
+		//解析不允许的字段>>>>>>>>>>>>>>>>>>>
+
+
+		//判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
+		for (String rk : rkset) {
+			if (disallowList.contains(rk)) { //不允许的字段
+				throw new IllegalArgumentException(name
+						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(disallowList) + "内的任何字段！");
+			}
+
+			if (rk == null) { //无效的key
+				real.remove(rk);
+				continue;
+			}
+
+			//不在target内的 key:{}
+			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false && real.get(rk) instanceof JSONObject) {
+				throw new UnsupportedOperationException(name + " 里面不允许传 " + rk + ":{} ！");
+			}
+		}
+		//判断不允许传的key>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 
 		//校验与修改Request<<<<<<<<<<<<<<<<<

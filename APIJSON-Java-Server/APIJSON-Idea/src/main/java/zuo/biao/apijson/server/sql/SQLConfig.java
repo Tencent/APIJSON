@@ -1313,7 +1313,7 @@ public class SQLConfig {
 		}
 
 		if (verifyName && StringUtil.isName(key.startsWith("@") ? key.substring(1) : key) == false) {
-			throw new IllegalArgumentException(TAG + "/" + method + "  getRealKey: 字符 " + originKey + " 不合法！");
+			throw new IllegalArgumentException(method + "请求，字符 " + originKey + " 不合法！");
 		}
 
 		if (saveLogic && last != null) {
