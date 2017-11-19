@@ -843,8 +843,21 @@ public class Parser {
 			}
 		}
 
-		Log.i(TAG, "getValueByPath  return parent == null ? valuePath : parent.get(keys[keys.length - 1]); >> ");
-		return parent == null ? valuePath : parent.get(keys[keys.length - 1]);
+		if (parent != null) {
+			Log.i(TAG, "getValueByPath >> get from queryResultMap >> return  parent.get(keys[keys.length - 1]);");
+			return parent.get(keys[keys.length - 1]); //TODO 值为null是否应该报错？ NotExistExeption
+		}
+		
+		
+		//从requestObject中取值
+		target = getValue(requestObject, StringUtil.splitPath(valuePath));
+		if (target != null) {
+			Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
+			return target;
+		}
+		
+		Log.i(TAG, "getValueByPath  return valuePath;");
+		return valuePath;
 	}
 
 	//依赖引用关系 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
