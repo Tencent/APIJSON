@@ -845,7 +845,11 @@ public class Parser {
 
 		if (parent != null) {
 			Log.i(TAG, "getValueByPath >> get from queryResultMap >> return  parent.get(keys[keys.length - 1]);");
-			return parent.get(keys[keys.length - 1]); //TODO 值为null是否应该报错？ NotExistExeption
+			target = parent.get(keys[keys.length - 1]); //值为null应该报错NotExistExeption，一般都是id关联，不可为null，否则可能绕过安全机制
+			if (target != null) {
+				Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
+				return target;
+			}
 		}
 		
 		
