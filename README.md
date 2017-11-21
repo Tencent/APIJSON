@@ -56,6 +56,9 @@ APIJSON是一种JSON传输结构协议。<br />
 <br />
 [为什么要用APIJSON？](https://github.com/TommyLemon/APIJSON/wiki)
 
+![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_get.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJOSN_Auto_Commnet.jpg) 
+
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_0.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_1.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_2.jpg) 
