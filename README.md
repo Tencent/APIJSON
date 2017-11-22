@@ -515,6 +515,8 @@ Run > Run app
 
 [后端开挂:3行代码写出8个接口！](https://my.oschina.net/tommylemon/blog/1574430)
 
+[后端自动化版本管理，再也不用改URL了！](https://my.oschina.net/tommylemon/blog/1576587)
+
 [3步创建APIJSON服务端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
 ### <h3 id="5.2">5.2 关于作者<h3/>
