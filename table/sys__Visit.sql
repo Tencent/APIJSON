@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `_Visit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `_Visit` (
-  `model` varchar(20) NOT NULL,
+  `model` varchar(15) NOT NULL,
   `id` bigint(15) NOT NULL,
   `operate` tinyint(4) NOT NULL COMMENT '1-增\n2-删\n3-改\n4-查',
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -48,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-11-19 21:09:13
+-- Dump completed on 2017-11-26 19:43:29
