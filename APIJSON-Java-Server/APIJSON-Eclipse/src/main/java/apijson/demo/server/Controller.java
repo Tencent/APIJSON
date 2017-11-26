@@ -403,7 +403,7 @@ public class Controller {
 	 * @see
 	 * <pre>
 		{
-			"type": 0,  //登录方式，非必须  0-密码 2-验证码
+			"type": 0,  //登录方式，非必须  0-密码 1-验证码
 			"phone": "13000082001",
 			"password": "1234567",
 			"version": 1 //全局版本号，非必须
