@@ -2,8 +2,8 @@
 //  ViewController.swift
 //  testswift
 //
-//  Created by Tommy on 17/11/28.
-//  Copyright © 2017年 APIJSON. All rights reserved.
+//  Created by TommyLemon on 17/11/28.
+//  Copyright © 2017年 https://github.com/TommyLemon/APIJSON . All rights reserved.
 //
 
 import UIKit
@@ -29,11 +29,26 @@ class ViewController: UIViewController {
      * 通过POST请求测试APIJSON
      */
     func test() {
-    
+        
+        let url = "http://39.108.143.172:8080/get";
+        //要发送的请求数据
+        let json = [
+            //返回数据太长 "[]": [
+            "User": [ //如果对象value是空的，请用[:]表示value，否则会被Swift解析为空数组[]，而不是空对象{}
+                "sex": 1
+            ]
+            //]
+        ]
+
+        let req = toJSONString(json);
+
+        print("start http request...\n\nURL = " + url + "\nRequest = \n" + req)
+        
         //生成UI <<<<<<<<<<<<<<<<<<<<<<
-    
+        
+        
         let requestLabel = UILabel(frame:CGRect(x:20, y:10, width:400, height:130))
-        requestLabel.text = "Request:\n{\n  \"User\": {\n    \"sex\": 1\n  }\n}"
+        requestLabel.text = "Request:\n" + req;
         requestLabel.numberOfLines = 6
         self.view.addSubview(requestLabel)
         
@@ -44,25 +59,13 @@ class ViewController: UIViewController {
         
         //生成UI >>>>>>>>>>>>>>>>>>>>>
         
+    
         
-        
-        
-        print("start http request...\n")
-        
-        //要发送的请求数据
-        let json = [
-            //返回数据太长 "[]": [
-                "User": [
-                    "sex": 1
-                ]
-            //]
-        ]
 
         
         //请求URL
-        let url:NSURL! = NSURL(string: "http://39.108.143.172:8080/get")
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
+        let request:NSMutableURLRequest = NSMutableURLRequest(URL: NSURL(string: url)!)
         
         request.HTTPMethod = "POST"
         //设置发送的数据格式为JSON
@@ -80,7 +83,7 @@ class ViewController: UIViewController {
         //发起请求
         let dataTask = session.dataTaskWithRequest(request) { (data, response, error) in
            
-            print("received result!\n\n")
+            print("\n\nreceived result!\n\n")
 
             print(data)
             print(response)
@@ -91,15 +94,14 @@ class ViewController: UIViewController {
             
             print(jsonData)
             
-            let data : NSData! = try? NSJSONSerialization.dataWithJSONObject(jsonData, options: [NSJSONWritingOptions.PrettyPrinted]) as NSData!
-            let str = String(data: data, encoding: NSUTF8StringEncoding)
-            print("str = \n" + str!)
+            let res:String = self.toJSONString(jsonData);
+            print("Response = \n" + res)
             
             
             //显示返回结果
             dispatch_async(dispatch_get_main_queue(), {
                 
-                responseLable.text = "Response:\n" + str!
+                responseLable.text = "Response:\n" + res
                 print("set text end\n\n")
             });
             
@@ -107,6 +109,12 @@ class ViewController: UIViewController {
         
         //请求开始
         dataTask.resume()
+    }
+    
+    func toJSONString(jsonData: NSDictionary!) -> String {
+        let data : NSData! = try? NSJSONSerialization.dataWithJSONObject(jsonData, options: [NSJSONWritingOptions.PrettyPrinted]) as NSData!
+        let str = String(data: data, encoding: NSUTF8StringEncoding)
+        return str!
     }
     
 
