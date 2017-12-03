@@ -93,9 +93,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
     "id":38710,
     "sex":0,
     "name":"TommyLemon",
-    "certified":true,
     "tag":"Android&Java",
-    "phone":13000038710,
     "head":"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
     "date":1485948110000,
     "pictureList":[
