@@ -6,10 +6,10 @@
 [![Vue.js API](https://img.shields.io/badge/Vue.js-2.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON-JS-Vue)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-<br />
 
 [English](https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md)  &nbsp;  [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md)  &nbsp;  [在线工具](http://39.108.143.172)
 
+<br />
 
 APIJSON是一种为API而生的JSON网络传输协议。<br />
 为 简单的增删改查、复杂的查询、简单的事务操作 提供了完全自动化的API。<br />
