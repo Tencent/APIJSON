@@ -26,31 +26,31 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_get.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJOSN_Auto_Commnet.jpg) 
 
-## 特点功能
+### 特点功能
 
-### 对于前端
+#### 对于前端
 * 可一次请求任意数据、任意结构，并完全定制
 * 能去除重复数据，节省流量提高速度
 * Request和Response结构完全对应，所求即所得
 
-### 对于后端
+#### 对于后端
 * 7个通用接口可替代大部分API，不用自己写了
 * 自动校验权限、自动管理版本
 * 查询API无需划分版本，始终保持兼容
 * 支持增删改查、模糊搜索、正则匹配、远程函数
 * 提供方便的在线测试工具，自动生成文档和请求代码
 
-
-### APIJSON在线解析
+#### 在线解析
 * 自动生成文档，永远最新
 * 自动生成请求代码，支持Android和iOS
 * 自动生成所有JavaBean，一键下载
 * 自动管理测试用例，一键共享
 
-[在线测试](http://39.108.143.172)
+[点击进入](http://39.108.143.172)
 
 
-### <h3 id="5.3">5.3 下载试用客户端App<h3/>
+
+### 下载试用客户端App
 
 仿微信朋友圈动态实战项目<br />
 [APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
@@ -59,7 +59,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
 
-### <h3 id="5.2">5.2 关于作者<h3/>
+### 关于作者
 TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
 QQ群：607020115
 
@@ -67,7 +67,7 @@ QQ群：607020115
 如果你解决了某些bug，或者新增了一些通用性强的功能，欢迎[贡献代码](https://github.com/TommyLemon/APIJSON/pulls)，感激不尽^_^
 
 
-### <h3 id="5.1">5.1 相关推荐<h3/>
+### 相关推荐
 [APIJSON, 让接口和文档见鬼去吧！](https://my.oschina.net/tommylemon/blog/805459)
 
 [仿QQ空间和微信朋友圈，高解耦高复用高灵活](https://my.oschina.net/tommylemon/blog/885787)
@@ -80,11 +80,11 @@ QQ群：607020115
 
 
 
-### <h3 id="5.4">5.4 更新日志<h3/>
+### 更新日志
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-### <h3 id="5.5">5.5 点Star支持我，点Fork研究它<h3/>
-
+### 赞赏
+如果你喜欢APIJSON，感觉APIJSON帮到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
 
  
