@@ -43,7 +43,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 * 查询API无需划分版本，始终保持兼容
 * 支持增删改查、模糊搜索、正则匹配、远程函数等
 
-<br /><br />
+<br />
 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_get.jpg) 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_code.jpg) 
