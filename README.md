@@ -83,7 +83,7 @@ QQ群：607020115
 ### 更新日志
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-### 赞赏
+### 我要赞赏
 如果你喜欢APIJSON，感觉APIJSON帮到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
 
