@@ -1,7 +1,7 @@
 # APIJSON 
 [![Java-Server API](https://img.shields.io/badge/Java.Server-1.6%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server) 
-[![Android API](https://img.shields.io/badge/Android-15%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android) 
-[![iOS API](https://img.shields.io/badge/iOS-8%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS) 
+[![Android API](https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android) 
+[![iOS API](https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS) 
 [![JavaScrpit API](https://img.shields.io/badge/JavaScript-ES5%2B-brightgreen.svg?style=flat)](http://www.ecma-international.org/publications/standards/Standard.htm) 
 [![Vue.js API](https://img.shields.io/badge/Vue.js-2.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON-JS-Vue)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
