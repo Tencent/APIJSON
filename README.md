@@ -8,7 +8,7 @@
 
 [Java-Server](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server)  &nbsp;  [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android)  &nbsp;  [iOS](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS)  &nbsp;  [JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)  &nbsp;  [Vue.js](https://github.com/TommyLemon/APIJSON-JS-Vue)
 
-[English](https://github.com/TommyLemon/APIJSON/blob/master/README-English.md)  &nbsp;  [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md)  &nbsp;  [在线工具](http://39.108.143.172)
+[English](https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md)  &nbsp;  [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md)  &nbsp;  [在线工具](http://39.108.143.172)
 
 
 APIJSON是一种为API而生的JSON网络传输协议。<br />
