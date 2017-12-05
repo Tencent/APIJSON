@@ -1,12 +1,12 @@
 # APIJSON 
-[![Java API](https://img.shields.io/badge/Java-1.6%2B-brightgreen.svg?style=flat)](http://www.oracle.com/technetwork/java/api-141528.html) 
-[![Android API](https://img.shields.io/badge/Android-15%2B-brightgreen.svg?style=flat)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) 
-[![JavaScrpit API](https://img.shields.io/badge/JavaScript-ES5%2B-brightgreen.svg?style=flat)](http://www.ecma-international.org/publications/standards/Standard.htm)
+[![Java-Server API](https://img.shields.io/badge/Java.Server-1.6%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server) 
+[![Android API](https://img.shields.io/badge/Android-15%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android) 
+[![iOS API](https://img.shields.io/badge/iOS-8%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS) 
+[![JavaScrpit API](https://img.shields.io/badge/JavaScript-ES5%2B-brightgreen.svg?style=flat)](http://www.ecma-international.org/publications/standards/Standard.htm) 
+[![Vue.js API](https://img.shields.io/badge/Vue.js-2.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON-JS-Vue)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 <br />
-
-[Java-Server](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server)  &nbsp;  [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android)  &nbsp;  [iOS](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS)  &nbsp;  [JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)  &nbsp;  [Vue.js](https://github.com/TommyLemon/APIJSON-JS-Vue)
 
 [English](https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md)  &nbsp;  [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md)  &nbsp;  [在线工具](http://39.108.143.172)
 
