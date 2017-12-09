@@ -19,7 +19,11 @@ import zuo.biao.apijson.MethodAccess;
 /**字段(列名)
  * @author Lemon
  */
-@MethodAccess
+@MethodAccess(
+		POST = {},
+		PUT = {},
+		DELETE = {}
+		)
 public class Column {
 	public static final String TAG = "`columns`";
 	
