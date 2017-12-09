@@ -26,23 +26,6 @@ import zuo.biao.apijson.MethodAccess;
 
 /**动态类
  * @author Lemon
- * @see
- * <br >POST:<pre>
-{
- "Moment":{
-     "disallow":"id",
-     "necessary":"userId,pictureList"
- }
-}
- * </pre>
- * <br >PUT:<pre>
-{
- "Moment":{
-     "disallow":"userId,date",
-     "necessary":"id"
- }
-}
- * </pre>
  */
 @MethodAccess(
 		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}//TODO 还要细分，LOGIN,CONTACT只允许修改praiseUserIdList。数据库加role没用，应该将praiseUserIdList移到Praise表

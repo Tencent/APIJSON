@@ -18,15 +18,6 @@ import zuo.biao.apijson.MethodAccess;
 
 /**评论类
  * @author Lemon
- * @see
- * <br >POST:<pre>
-{
- "Comment":{
-     "disallow":"id",
-     "necessary":"userId,momentId,content"
- }
-}
- * </pre>
  */
 @MethodAccess
 public class Comment extends BaseModel {
