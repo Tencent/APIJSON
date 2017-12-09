@@ -24,34 +24,6 @@ import zuo.biao.apijson.MethodAccess;
 
 /**登录类，已用session替代
  * @author Lemon
- * @see
- * <br >HEADS:<pre>
-{
- "Login":{
-     "disallow":"!",
-     "necessary":"userId,type"
- }
-}
- * </pre>
-* <br >POST:login<pre>
-{
-    "Login":{
-        "necessary":"phone"
-    },
-    "Password":{
-        "disallow":"!",
-        "necessary":"password"
-    }
-}
- * </pre>
-* <br >POST:login<pre>
-{
-    "Login":{
-        "disallow":"!",
-        "necessary":"userId"
-    }
-}
- * </pre>
  */
 @Deprecated
 @SuppressWarnings("serial")

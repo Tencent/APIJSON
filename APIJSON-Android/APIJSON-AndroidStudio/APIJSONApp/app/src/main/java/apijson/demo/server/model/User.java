@@ -23,33 +23,6 @@ import zuo.biao.apijson.MethodAccess;
 
 /**用户类
  * @author Lemon
- * @see
- * <br >POST:post/register/user<pre>
-{
-    "User":{
-        "disallow":"id",
-        "necessary":"name,phone"
-    },
-    "necessary":"loginPassword,verify"
-}
- * </pre>
- * <br >PUT:<pre>
-{
-    "User":{
-        "disallow":"phone",
-        "necessary":"id"
-    }
-}
- * </pre>
- * <br >PUT(User.phone):put/user/phone<pre>
-{
-    "User":{
-        "disallow":"!",
-        "necessary":"id,phone"
-    },
-    "necessary":"loginPassword,verify"
-}
- * </pre>
  */
 @MethodAccess(
 		POST = {UNKNOWN, ADMIN},
