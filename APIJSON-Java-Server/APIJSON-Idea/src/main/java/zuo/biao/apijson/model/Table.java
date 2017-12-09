@@ -19,7 +19,11 @@ import zuo.biao.apijson.MethodAccess;
 /**数据库表
  * @author Lemon
  */
-@MethodAccess
+@MethodAccess(
+		POST = {},
+		PUT = {},
+		DELETE = {}
+		)
 public class Table {
 	public static final String TAG = "`tables`";
 	

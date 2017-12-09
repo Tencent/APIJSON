@@ -19,6 +19,10 @@ import zuo.biao.apijson.MethodAccess;
 /**输入条件测试类
  * @author Lemon
  */
-@MethodAccess
+@MethodAccess(
+		POST = {},
+		PUT = {},
+		DELETE = {}
+		)
 public class Test {
 }
