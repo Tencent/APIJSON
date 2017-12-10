@@ -160,6 +160,7 @@ public class SQLConfig {
 		setPage(page);
 	}
 
+	@NotNull
 	public RequestMethod getMethod() {
 		if (method == null) {
 			method = GET;
@@ -182,6 +183,7 @@ public class SQLConfig {
 	}
 
 	public RequestRole getRole() {
+		//不能 @NotNull , Parser#getSQLObject 内当getRole() == null时填充默认值
 		return role;
 	}
 	public SQLConfig setRole(String roleName) {

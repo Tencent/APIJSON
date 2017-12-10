@@ -126,7 +126,10 @@ public class Verifier {
 			return true;
 		}
 		RequestRole role = config.getRole();
-
+		if (role == null) {
+			role = RequestRole.UNKNOWN;
+		}
+		
 		long userId = visitor == null ? 0 : visitor.getId();
 		//TODO 暂时去掉，方便测试
 		if (role != RequestRole.UNKNOWN) {//未登录的角色
@@ -143,9 +146,7 @@ public class Verifier {
 		String userIdkey = Controller.USER_.equals(config.getTable()) || Controller.PRIVACY_.equals(config.getTable())
 				? Controller.ID : Controller.USER_ID;
 
-		if (role == null) {
-			role = RequestRole.UNKNOWN;
-		}
+		Number requestId;
 		switch (role) {
 		case LOGIN://verifyRole通过就行
 			break;
@@ -160,7 +161,7 @@ public class Verifier {
 			}
 
 			//key!{}:[] 或 其它没有明确id的条件 等 可以和key{}:list组合。类型错误就报错
-			Number requestId = (Number) config.getWhere(userIdkey, true);//JSON里数值不能保证是Long，可能是Integer
+			requestId = (Number) config.getWhere(userIdkey, true);//JSON里数值不能保证是Long，可能是Integer
 			JSONArray requestIdArray = (JSONArray) config.getWhere(userIdkey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
 			if (requestId != null) {
 				if (requestIdArray == null) {
@@ -181,9 +182,6 @@ public class Verifier {
 						throw new UnsupportedDataTypeException(table + ".id类型错误，id类型必须是Long！");
 					}
 					if (list.contains(new Long("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
-						if (method == null) {
-							method = GET;
-						}
 						throw new IllegalAccessException(userIdkey + " = " + id + " 的 " + table
 								+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
 					}
@@ -191,6 +189,11 @@ public class Verifier {
 			}
 			break;
 		case OWNER:
+			requestId = (Number) config.getWhere(userIdkey, true);//JSON里数值不能保证是Long，可能是Integer
+			if (requestId != null && requestId.longValue() != userId) {
+				throw new IllegalAccessException(userIdkey + " = " + requestId + " 的 " + table
+						+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+			}
 			config.addWhere(userIdkey, userId);
 			break;
 		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
@@ -253,9 +256,9 @@ public class Verifier {
 			throw new NotLoggedInException("未登录，请登录后再操作！");
 		}
 	}
-	
-	
-	
+
+
+
 	/**验证是否重复
 	 * @param table
 	 * @param key
@@ -296,7 +299,7 @@ public class Verifier {
 			throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
 		}
 	}
-	
+
 
 	/**获取来访用户的id
 	 * @author Lemon
