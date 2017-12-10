@@ -66,10 +66,6 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/server_idea_log_complex.jpg) 
 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_request.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_user.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_moment.jpg) 
-
 <br />
 <br />
 
@@ -462,7 +458,10 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 1.导入<br />
 File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
 
-2.运行<br />
+2.配置<br />
+打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
+
+3.运行<br />
 Run > Run As > Java Application > 选择APIJSONApplication > OK
 
 #### IntellIJ IDEA Ultimate
@@ -470,12 +469,15 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
 1.导入<br />
 Open > 选择刚才解压路径下的APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
 
-2.运行<br />
+2.配置<br />
+打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
+
+3.运行<br />
 Run > Run APIJSONApplication
 
 ### <h3 id="4.4">4.4 用ADT Bundle或Android Studio运行客户端工程<h3/>
 
-可以跳过这个步骤，直接下载下方提供的客户端App。
+可以跳过这个步骤，直接使用 [APIJSON在线工具](http://39.108.143.172/) 或 下载下方提供的客户端App。
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 和 OSX EI Capitan +（JDK 1.7.0_71 + ADT Bundle 20140702）+（JDK 1.8.0_91 + Android Studio 2.1.2），其中系统和软件都是64位的。
