@@ -5,7 +5,7 @@
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
 
-### 2.用Android Studio或ADT Bundle运行客户端工程<h3/>
+### 2.用Android Studio或ADT Bundle运行Android工程<h3/>
 
 可以跳过这个步骤，直接下载主页提供的 [客户端App](https://github.com/TommyLemon/APIJSON)。
 
@@ -15,16 +15,16 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 #### Android Studio
 
-1)导入<br />
-Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio)/APIJSONApp （或APIJSONTest） > OK
+1)打开<br />
+Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON-Android/APIJSON-AndroidStudio/APIJSONApp （或APIJSONTest） > OK
 
 2)运行<br />
 Run > Run app
 
 #### ADT Bundle
 
-1)导入<br />
-File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
+1)打开<br />
+File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Android-/APIJSON-ADT > Finish
 
 2)运行<br />
 Run > Run As > Android Application
