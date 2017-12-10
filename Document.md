@@ -17,12 +17,7 @@
 * [4.3 运行后端工程](#4.3)
 * [4.4 运行前端工程](#4.4)
 * [4.4 操作前端App](#4.5)
-* ### [5.其它](#5)
-* [5.1 相关推荐](#5.1)
-* [5.2 关于作者](#5.2)
-* [5.3 下载试用](#5.3)
-* [5.4 更新日志](#5.4)
-* [5.5 Star&Fork](#5.5)
+
 
 ## <h2 id="1">1.示例<h2/>
 
@@ -424,7 +419,7 @@ Run > Run APIJSONApplication
 
 ### <h3 id="4.4">4.4 用ADT Bundle或Android Studio运行前端工程<h3/>
 
-可以跳过这个步骤，直接使用 [APIJSON在线工具](http://39.108.143.172/) 或 下载下方提供的前端App。
+可以跳过这个步骤，直接使用 [APIJSON在线工具](http://39.108.143.172/) 或 下载主页提供的 [客户端App](https://github.com/TommyLemon/APIJSON)。
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 和 OSX EI Capitan +（JDK 1.7.0_71 + ADT Bundle 20140702）+（JDK 1.8.0_91 + Android Studio 2.1.2），其中系统和软件都是64位的。
@@ -451,39 +446,3 @@ Run > Run app
 如果默认url不可用，修改为一个可用的，比如正在运行APIJSON后端工程的电脑的IPV4地址，然后点击查询按钮重新请求。
 
 <br />
-<br />
-
-## <h2 id="5">5.其它<h2/>
-
-### <h3 id="5.1">5.1 相关推荐<h3/>
-[APIJSON, 让接口和文档见鬼去吧！](https://my.oschina.net/tommylemon/blog/805459)
-
-[仿QQ空间和微信朋友圈，高解耦高复用高灵活](https://my.oschina.net/tommylemon/blog/885787)
-
-[后端开挂:3行代码写出8个接口！](https://my.oschina.net/tommylemon/blog/1574430)
-
-[后端自动化版本管理，再也不用改URL了！](https://my.oschina.net/tommylemon/blog/1576587)
-
-[3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
-
-### <h3 id="5.2">5.2 关于作者<h3/>
-TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
-QQ群：607020115
-
-如果有什么问题或建议可以[提ISSUE](https://github.com/TommyLemon/APIJSON/issues)、加群或者[发我邮件](https://github.com/TommyLemon)，交流技术，分享经验。<br >
-如果你解决了某些bug，或者新增了一些通用性强的功能，欢迎[贡献代码](https://github.com/TommyLemon/APIJSON/pulls)，感激不尽^_^
-
-### <h3 id="5.3">5.3 下载试用前端App<h3/>
-
-仿微信朋友圈动态实战项目<br />
-[APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
-
-测试及自动生成代码工具<br />
-[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
-
-### <h3 id="5.4">5.4 更新日志<h3/>
-[https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
-
-### <h3 id="5.5">5.5 点Star支持我，点Fork研究它<h3/>
-
-[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
