@@ -30,8 +30,7 @@
 
 #### 查询用户
 请求：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "User":{
   }
 }
@@ -40,8 +39,7 @@
 [点击这里测试](http://39.108.143.172:8080/get/{"User":{}})
 
 返回：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "User":{
     "id":38710,
     "sex":0,
@@ -63,8 +61,7 @@
 
 #### 查询用户列表
 请求：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "[]":{
     "count":3,             //只要3个
     "User":{
@@ -77,8 +74,7 @@
 [点击这里测试](http://39.108.143.172:8080/get/{"[]":{"count":3,"User":{"@column":"id,name"}}})
 
 返回：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "[]":[
     {
       "User":{
@@ -108,8 +104,7 @@
 
 #### 查询动态及发布者用户
 请求：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "Moment":{
   },
   "User":{
@@ -121,8 +116,7 @@
 [点击这里测试](http://39.108.143.172:8080/get/{"Moment":{},"User":{"id@":"Moment%252FuserId"}})
 
 返回：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "Moment":{
     "id":12,
     "userId":70793,
@@ -150,8 +144,7 @@
 
 #### 查询类似微信朋友圈的动态列表
 请求：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "[]":{                             //请求一个数组
     "page":0,                        //数组条件
     "count":2,
@@ -175,8 +168,7 @@
 [点击这里测试](http://39.108.143.172:8080/get/{"[]":{"page":0,"count":2,"Moment":{"content$":"%2525a%2525"},"User":{"id@":"%252FMoment%252FuserId","@column":"id,name,head"},"Comment[]":{"count":2,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
 
 返回：
-<pre><code class="language-json">
-{
+<pre><code class="language-json">{
   "[]":[
     {
       "Moment":{
