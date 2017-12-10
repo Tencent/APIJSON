@@ -69,9 +69,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 #### 2.前端部署
 可以跳过这个步骤，直接使用 [APIJSON在线工具](http://39.108.143.172/) 或 下载主页提供的 [客户端App](https://github.com/TommyLemon/APIJSON)。<br />
-Android见 [APIJSON前端部署 - Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android)<br />
-iOS见 [APIJSON前端部署 - iOS](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS)<br />
-JavaScript见 [APIJSON前端部署 - JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)<br />
+见 [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android)  &nbsp;  [iOS](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS)  &nbsp;  [JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)<br />
 
 ### 下载试用客户端App
 
