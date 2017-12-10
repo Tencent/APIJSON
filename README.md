@@ -3,7 +3,7 @@
 [![Android API](https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android) 
 [![iOS API](https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS) 
 [![JavaScrpit API](https://img.shields.io/badge/JavaScript-ES5%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript) 
-[![Vue.js API](https://img.shields.io/badge/Vue.js-2.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON-JS-Vue)
+[![Vue.js API](https://img.shields.io/badge/Vue.js-2.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript/APIJSON-JS-Vue)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/TommyLemon/APIJSON/blob/master/LICENSE)
 
 
