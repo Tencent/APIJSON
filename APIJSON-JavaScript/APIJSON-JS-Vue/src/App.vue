@@ -15,7 +15,7 @@
   import axios from 'axios'
   // axios.defaults.withCredentials = true
 
-  let url_base = "http://139.196.140.118:8080"
+  let url_base = "http://39.108.143.172:8080"
   let url_get = url_base + "/get"
   let url_head = url_base + "/head"
   let url_post_get = url_base + "/post_get"
@@ -53,7 +53,7 @@
           console.log('refresh  model = \n' + JSON.stringify(model))
         }
 
-        axios.get(url_get + '/' + encodeURIComponent(JSON.stringify(
+        axios.post(url_get,
             {
               'Moment': {
                 'userId': 93793
@@ -64,13 +64,13 @@
               '[]': {
                 'count': 5,
                 'Comment': {
-                  'momentId@': encodeURIComponent('Moment/id')
+                  'momentId@': 'Moment/id'
                 },
                 'User': {
-                  'id@': encodeURIComponent('/Comment/userId')
+                  'id@': '/Comment/userId'
                 }
               }
-            })), { params: {} })
+            })
           .then(function (response) {
             refresh(response.data)
           })
