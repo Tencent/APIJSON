@@ -1,20 +1,8 @@
-# APIJSON 
-[![Java API](https://img.shields.io/badge/Java-1.6%2B-brightgreen.svg?style=flat)](http://www.oracle.com/technetwork/java/api-141528.html) 
-[![Android API](https://img.shields.io/badge/Android-15%2B-brightgreen.svg?style=flat)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) 
-[![JavaScrpit API](https://img.shields.io/badge/JavaScript-ES5%2B-brightgreen.svg?style=flat)](http://www.ecma-international.org/publications/standards/Standard.htm)
-[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+# APIJSON通用文档 
 
 <br />
 
-[Java-Server](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server)  &nbsp;  [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android)  &nbsp;  [iOS](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS)  &nbsp;  [JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)  &nbsp;  [Vue.js](https://github.com/TommyLemon/APIJSON-JS-Vue)
-
-[English Document](https://github.com/TommyLemon/APIJSON/blob/master/README-English.md)
-
-[在线测试](http://39.108.143.172)
-
-<br />
-
-* ### [1.简介](#1)
+* ### [1.示例](#1)
 * ### [2.对比传统方式](#2)
 * [2.1 开发流程](#2.1)
 * [2.2 客户端请求](#2.2)
@@ -38,38 +26,7 @@
 * [5.4 更新日志](#5.4)
 * [5.5 Star&Fork](#5.5)
 
-## <h2 id="1">1.简介<h2/>
-
-APIJSON是一种为API而生的JSON网络传输协议。<br />
-可在 简单的增删改查、复杂的查询、简单的事务操作 等场景下替代HTTP RESTful接口规范。<br />
-能大幅降低开发和沟通成本，简化开发流程，缩短开发周期。<br />
-适合中小型前后端分离的项目，尤其是互联网创业项目。<br />
-
-客户端可以定义任何JSON结构去向服务端发起请求，服务端就会返回对应结构的JSON，所求即所得。<br />
-一次请求任意结构任意数据，方便灵活，不需要专门接口或多次请求。<br />
-支持增删改查、模糊搜索、正则匹配、远程函数、自动化权限校验、自动化版本管理、自动生成文档和请求代码等。<br />
-还能去除重复数据，节省流量提高速度！<br />
-
-从此HTTP请求再也不用写接口了，更不用写文档了！<br />
-客户端再也不用和服务端沟通接口或文档问题了！再也不会被文档各种错误坑了！<br />
-服务端再也不用为了兼容旧版客户端写新版接口和文档了！再也不会被客户端随时随地没完没了地烦了！
-<br />
-[为什么要用APIJSON？](https://github.com/TommyLemon/APIJSON/wiki)
-
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_get.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJOSN_Auto_Commnet.jpg) 
-
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_0.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_1.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_2.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_3.jpg) 
-
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/server_idea_log_complex.jpg) 
-
-<br />
-<br />
-
-### 举几个例子:
+## <h2 id="1">1.示例<h2/>
 
 #### 查询用户
 请求：
