@@ -2,7 +2,7 @@
 
 ### 1.下载后解压APIJSON工程<h3/>
 
-Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
+[打开APIJSON的GitHub主页](https://github.com/TommyLemon/APIJSON) &gt; Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
 <br />
 
