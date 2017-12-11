@@ -7,7 +7,6 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 ### 2.用Android Studio或ADT Bundle运行Android工程<h3/>
 
-可以跳过这个步骤，直接下载主页提供的 [客户端App](https://github.com/TommyLemon/APIJSON)。
 
 如果以上IDE一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 和 OSX EI Capitan +（JDK 1.7.0_71 + ADT Bundle 20140702）+（JDK 1.8.0_91 + Android Studio 2.1.2），其中系统和软件都是64位的。
