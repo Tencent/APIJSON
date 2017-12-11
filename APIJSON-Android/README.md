@@ -4,6 +4,7 @@
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
+<br />
 
 ### 2.用Android Studio或ADT Bundle运行Android工程<h3/>
 
@@ -28,6 +29,7 @@ File > Import > Android > Existing Android Code Into Workspace > Next > Browse >
 2)运行<br />
 Run > Run As > Android Application
 
+<br />
 
 ### 3.测试接口<h3/>
 

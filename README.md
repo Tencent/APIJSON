@@ -82,7 +82,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 ### 关于作者
 TommyLemon：[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
-QQ群：607020115
+QQ技术交流群：607020115
 
 如果有什么问题或建议可以[提ISSUE](https://github.com/TommyLemon/APIJSON/issues)、加群或者[发我邮件](https://github.com/TommyLemon)，交流技术，分享经验。<br >
 如果你解决了某些bug，或者新增了一些功能，欢迎[贡献代码](https://github.com/TommyLemon/APIJSON/pulls)，感激不尽。

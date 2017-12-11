@@ -4,6 +4,7 @@
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
+<br />
 
 ### 2.用Xcode运行APIJSON-Swift工程<h3/>
 
@@ -14,6 +15,7 @@ Open another project > 选择刚才解压路径下的APIJSON-Master/APIJSON-iOS/
 2)运行<br />
 Product > Run
 
+<br />
 
 ### 3.测试接口<h3/>
 

@@ -4,6 +4,7 @@
 
 Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路径。
 
+<br />
 
 ### 2.运行JavaScript工程
 
@@ -21,6 +22,7 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 
 http://www.jianshu.com/p/5ba253651c3b
 
+<br />
 
 ### 3.测试接口<h3/>
 
