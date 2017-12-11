@@ -24,7 +24,7 @@ Run > Run app
 #### ADT Bundle
 
 1)打开<br />
-File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Android-/APIJSON-ADT > Finish
+File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Android/APIJSON-ADT > Finish
 
 2)运行<br />
 Run > Run As > Android Application
