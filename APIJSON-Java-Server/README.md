@@ -27,10 +27,23 @@ Clone or download &gt; Download ZIP &gt; 解压到一个路径并记住这个路
 Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Idea > OK
 
 2)配置(已有默认配置，可跳过)<br />
-打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
+打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。 <br />
+
+如果有错误，一般是Idea没有给Module分配JDK， <br />
+在Project Structure最下方的Problems会有project SDK is not defined报错。 <br /><br />
+File > Project Structure > Project > Project SDK 选已安装的JDK <br />
+如果没有，则继续 <br />
+New... > JDK > 选择JDK的安装路径 > Open <br />
+最后在底部 <br />
+Apply 或 OK <br />
 
 3)运行<br />
-Run > Run APIJSONApplication
+Run > Run APIJSONApplication <br />
+
+如果弹窗里只有Edit Configurations...这个选项，则点进去，然后 <br />
+\+ > Application > Main class 选apijson.demo.server.APIJSONApplication <br />
+最后在底部 <br />
+Apply 或 Run <br />
 
 
 #### Eclipse for JavaEE
