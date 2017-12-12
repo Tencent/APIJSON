@@ -17,7 +17,7 @@ cd D:\Downloads\APIJSON-master\APIJSON-Python<br />
 python test.py<br />
 
 如果失败，一般是因为 "python 不是内部或外部命令"，则执行： <br />
-set PATH=%PATH%;C:\Python27 <br />
+set PATH=%PATH%;C:\Python27<br />
 其中，Python27对应2.7版，如果是其它版本请修改下数字，例如3.6版就改为Python36。 <br />
 
 然后重新执行： <br />
