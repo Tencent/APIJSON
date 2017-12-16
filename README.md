@@ -98,7 +98,7 @@ QQ技术交流群：607020115
 
 [后端自动化版本管理，再也不用改URL了！](https://my.oschina.net/tommylemon/blog/1576587)
 
-[3步创建APIJSON服务端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
+[3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
 
 
