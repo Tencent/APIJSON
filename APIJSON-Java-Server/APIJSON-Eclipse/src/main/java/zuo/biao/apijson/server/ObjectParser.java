@@ -148,7 +148,7 @@ public abstract class ObjectParser implements ParserAdapter {
 		COMPILE_MAP = new HashMap<String, Pattern>();
 		COMPILE_MAP.put("phone", StringUtil.PATTERN_PHONE);
 		COMPILE_MAP.put("email", StringUtil.PATTERN_EMAIL);
-		COMPILE_MAP.put("id_number", StringUtil.PATTERN_ID_CARD);
+		COMPILE_MAP.put("idCard", StringUtil.PATTERN_ID_CARD);
 	}
 
 	protected Map<String, String> corrected;
@@ -398,7 +398,7 @@ public abstract class ObjectParser implements ParserAdapter {
 	}
 
 
-	//TODO 需要锁表来保证获取到的 [] 不会在写入前被修改
+	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！ 
 	/**PUT key:[]
 	 * @param key
 	 * @param array

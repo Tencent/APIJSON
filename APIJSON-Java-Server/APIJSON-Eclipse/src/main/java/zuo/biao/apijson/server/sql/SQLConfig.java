@@ -71,10 +71,6 @@ import zuo.biao.apijson.server.exception.NotExistException;
 public class SQLConfig {
 	private static final String TAG = "SQLConfig";
 
-	public static final String MYSQL_URI = "jdbc:mysql://localhost:3306";//TODO 改成你自己的
-	public static final String MYSQL_SCHEMA = "sys";//TODO 改成你自己的
-	public static final String MYSQL_ACCOUNT = "root";//TODO 改成你自己的
-	public static final String MYSQL_PASSWORD = "apijson";//TODO 改成你自己的
 
 
 	public static final String SCHEMA_INFORMATION = "`information_schema`";
@@ -203,7 +199,7 @@ public class SQLConfig {
 	}
 	public static String getSchema(String schema) {
 		if (StringUtil.isEmpty(schema, true)) {
-			schema = MYSQL_SCHEMA; //非默认Schema必须要有
+			schema = "sys"; //非默认Schema必须要有
 		}
 		return schema;
 	}
@@ -1027,8 +1023,8 @@ public class SQLConfig {
 		//		//order: id+ -> id >= idOfStartIndex; id- -> id <= idOfStartIndex >>>>>>>>>>>>>>>>>>
 		//
 		//
-		//		//结果错误！SELECT * FROM linking_member.mes_member_user_test AS t0 INNER JOIN
-		//      (SELECT id FROM linking_member.mes_member_user_test ORDER BY date ASC LIMIT 20, 10) AS t1 ON t0.id = t1.id
+		//		//结果错误！SELECT * FROM Test AS t0 INNER JOIN
+		//      (SELECT id FROM Test ORDER BY date ASC LIMIT 20, 10) AS t1 ON t0.id = t1.id
 		//		//common case, inner join
 		//		condition += config.getLimitString();
 		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
@@ -1117,7 +1113,7 @@ public class SQLConfig {
 
 			column = StringUtil.getString(column);
 			if (column.isEmpty() && RequestMethod.isHeadMethod(method, true) == false) {
-				column = "column_name,column_type,is_nullable,column_default,column_comment";
+				column = "column_name,column_type,column_default,column_comment";
 			}
 		}
 
