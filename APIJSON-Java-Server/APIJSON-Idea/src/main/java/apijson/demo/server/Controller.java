@@ -158,7 +158,7 @@ public class Controller {
 	 * @see {@link RequestMethod#GET}
 	 */
 	@RequestMapping("get/{request}")
-	public String open_get(@PathVariable String request, HttpSession session) {
+	public String openGet(@PathVariable String request, HttpSession session) {
 		try {
 			request = URLDecoder.decode(request, StringUtil.UTF_8);
 		} catch (Exception e) {
@@ -175,7 +175,7 @@ public class Controller {
 	 * @see {@link RequestMethod#HEAD}
 	 */
 	@RequestMapping("head/{request}")
-	public String open_head(@PathVariable String request, HttpSession session) {
+	public String openHead(@PathVariable String request, HttpSession session) {
 		try {
 			request = URLDecoder.decode(request, StringUtil.UTF_8);
 		} catch (Exception e) {
@@ -676,7 +676,7 @@ public class Controller {
 	@PostMapping("put/password")
 	public JSONObject putPassword(@RequestBody String request){
 		JSONObject requestObject = null;
-		String old_password;
+		String oldPassword;
 		String verify;
 
 		int type = Verify.TYPE_PASSWORD;
@@ -687,7 +687,7 @@ public class Controller {
 		String password;
 		try {
 			requestObject = Parser.parseRequest(request, PUT);
-			old_password = StringUtil.getString(requestObject.getString(OLD_PASSWORD));
+			oldPassword = StringUtil.getString(requestObject.getString(OLD_PASSWORD));
 			verify = StringUtil.getString(requestObject.getString(VERIFY));
 
 			requestObject.remove(OLD_PASSWORD);
@@ -717,20 +717,20 @@ public class Controller {
 		}
 
 
-		if (StringUtil.isPassword(old_password)) {
+		if (StringUtil.isPassword(oldPassword)) {
 			if (userId <= 0) { //手机号+验证码不需要userId
 				return Parser.extendErrorResult(requestObject, new IllegalArgumentException(ID + ":value 中value不合法！"));
 			}
-			if (old_password.equals(password)) {
+			if (oldPassword.equals(password)) {
 				return Parser.extendErrorResult(requestObject, new ConflictException("新旧密码不能一样！"));
 			}
 
 			//验证旧密码
 			Privacy privacy = new Privacy(userId);
 			if (type == Verify.TYPE_PASSWORD) {
-				privacy.setPassword(old_password);
+				privacy.setPassword(oldPassword);
 			} else {
-				privacy.setPayPassword(old_password);
+				privacy.setPayPassword(oldPassword);
 			}
 			JSONResponse response = new JSONResponse( 
 					new Parser(HEAD, true).parseResponse(

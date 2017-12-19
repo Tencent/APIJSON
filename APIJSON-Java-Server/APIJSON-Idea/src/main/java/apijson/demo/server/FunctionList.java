@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 
 //TODO  新增 @FunctionList ，被它注解过的List可以传到 FuntionUtil.invoke(FunctionList list, ...)
-/**可远程调用的函数列表
+/**可远程调用的函数列表，暴露功能和使用方式，而不是具体的实现细节。
  * @author Lemon
  */
 public interface FunctionList {

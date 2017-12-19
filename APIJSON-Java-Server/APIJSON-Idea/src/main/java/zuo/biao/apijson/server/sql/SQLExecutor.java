@@ -38,6 +38,9 @@ import zuo.biao.apijson.server.Parser;
 public class SQLExecutor {
 	private static final String TAG = "SQLExecutor";
 
+	public static final String MYSQL_URI = "jdbc:mysql://localhost:3306";//TODO 改成你自己的
+	public static final String MYSQL_ACCOUNT = "root";//TODO 改成你自己的
+	public static final String MYSQL_PASSWORD = "apijson";//TODO 改成你自己的
 
 	//访问一次后丢失，可能因为static导致内存共享，别的地方改变了内部对象的值
 	//	private static final Map<String, Map<Integer, JSONObject>> staticCacheMap;
@@ -63,8 +66,8 @@ public class SQLExecutor {
 	 */
 	private synchronized Connection getConnection() throws Exception {
 		Log.i(TAG, "成功加载MySQL驱动！");
-		return DriverManager.getConnection(SQLConfig.MYSQL_URI + "?useUnicode=true&characterEncoding=UTF-8&user="
-				+ SQLConfig.MYSQL_ACCOUNT + "&password=" + SQLConfig.MYSQL_PASSWORD);
+		return DriverManager.getConnection(MYSQL_URI + "?useUnicode=true&characterEncoding=UTF-8&user="
+				+ MYSQL_ACCOUNT + "&password=" + MYSQL_PASSWORD);
 	}
 
 	/**保存缓存
