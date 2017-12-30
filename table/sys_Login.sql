@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `Login`;
 CREATE TABLE `Login` (
   `id` bigint(15) NOT NULL COMMENT '唯一标识',
   `userId` bigint(15) NOT NULL COMMENT '用户id',
-  `type` tinyint(1) NOT NULL COMMENT '类型\n0-密码登录\n1-验证码登录',
+  `type` tinyint(2) NOT NULL COMMENT '类型\n0-密码登录\n1-验证码登录',
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='@deprecated，登录信息存session';
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-12-29 20:48:20
+-- Dump completed on 2017-12-30 17:36:24
