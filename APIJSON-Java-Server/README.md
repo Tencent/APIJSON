@@ -49,8 +49,6 @@ Run > Run APIJSONApplication <br />
 最后在底部 <br />
 Apply 或 Run <br />
 
-
-<br />
 <h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4>
 
 如果是Address already in use，说明8080端口被占用，<br />
