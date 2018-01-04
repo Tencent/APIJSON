@@ -7,10 +7,22 @@
 
 <br />
 
-### 2.用IntellIJ IDEA Ultimate或Eclipse for JavaEE运行后端工程
+### 2.用Eclipse for JavaEE或IntellIJ IDEA Ultimate运行后端工程
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.8.0_91 + Eclipse 4.6.1 + IntellIJ 2016.2.5
+
+
+#### Eclipse for JavaEE
+
+1)打开<br />
+File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse > Finish
+
+2)配置(已有默认配置，可跳过)<br />
+打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
+
+3)运行<br />
+Run > Run As > Java Application > 选择APIJSONApplication > OK
 
 
 #### IntellIJ IDEA Ultimate
@@ -37,17 +49,6 @@ Run > Run APIJSONApplication <br />
 最后在底部 <br />
 Apply 或 Run <br />
 
-
-#### Eclipse for JavaEE
-
-1)打开<br />
-File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse > Finish
-
-2)配置(已有默认配置，可跳过)<br />
-打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
-
-3)运行<br />
-Run > Run As > Java Application > 选择APIJSONApplication > OK
 
 <br />
 
