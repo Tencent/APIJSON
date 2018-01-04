@@ -52,11 +52,12 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
 <br />
 
 <br />
-<h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。<br />
+<h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4><br />
+
 如果是Address already in use，说明8080端口被占用，<br />
 可以关闭占用这个端口的程序(可能就是已运行的APIJSON工程) 或者 改下APIJSON工程的端口号，<br />
 参考[SpringBoot改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)<br />
-其它问题请谷歌或百度。</h4>
+其它问题请谷歌或百度。
 
 <br />
 
@@ -70,6 +71,7 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
 }
 ```
 则说明已连接上。<br />
+
 如果是404 Not Found，请把防火墙关闭，以便外网能够访问你的电脑或服务器。<br />
 其它问题请谷歌或百度。
 
