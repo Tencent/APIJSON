@@ -1,13 +1,13 @@
 # APIJSON后端部署 - Java
 
-### 1.下载后解压APIJSON工程<h3/>
+### 1.下载后解压APIJSON工程
 
 [打开APIJSON的GitHub主页](https://github.com/TommyLemon/APIJSON) &gt; Clone or download &gt; [Download ZIP](https://github.com/TommyLemon/APIJSON/archive/master.zip) &gt; 解压到一个路径并记住这个路径。
 
 
 <br />
 
-### 2.用IntellIJ IDEA Ultimate或Eclipse for JavaEE运行后端工程<h3/>
+### 2.用IntellIJ IDEA Ultimate或Eclipse for JavaEE运行后端工程
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.8.0_91 + Eclipse 4.6.1 + IntellIJ 2016.2.5
@@ -52,14 +52,16 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
 <br />
 
 <br />
-运行后会出现 APIJSON的测试日志，最后显示 APIJSON已启动 ，说明已启动完成。
-如果是Address already in use，说明8080端口被占用，
-可以关闭占用这个端口的程序(可能就是已运行的APIJSON工程) 或者 改下APIJSON工程的端口号，参考[SpringBoot改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)
-其它问题请谷歌或百度。
+<h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。<br />
+如果是Address already in use，说明8080端口被占用，<br />
+可以关闭占用这个端口的程序(可能就是已运行的APIJSON工程) 或者 改下APIJSON工程的端口号，<br />
+参考[SpringBoot改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)<br />
+其它问题请谷歌或百度。</h4>
 
+<br />
 
 ### 3.测试连接<br />
-在浏览器输入 [http://localhost:8080/get/{}](http://localhost:8080/get/{})
+在浏览器输入 [http://localhost:8080/get/{}](http://localhost:8080/get/{}) <br />
 如果出现
 ```json
 {
@@ -67,8 +69,8 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
   "msg": "success"
 }
 ```
-则说明已连接上。
-如果是404 Not Found，请把防火墙关闭，以便外网能够访问你的电脑或服务器。
+则说明已连接上。<br />
+如果是404 Not Found，请把防火墙关闭，以便外网能够访问你的电脑或服务器。<br />
 其它问题请谷歌或百度。
 
 <br />
