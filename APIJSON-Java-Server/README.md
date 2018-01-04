@@ -56,8 +56,8 @@ Apply 或 Run <br />
 <h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4><br />
 
 如果是Address already in use，说明8080端口被占用，<br />
-可以关闭占用这个端口的程序(可能就是已运行的APIJSON工程) 或者 改下APIJSON工程的端口号，<br />
-参考[SpringBoot改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)。<br />
+可以关闭占用这个端口的程序(可能就是已运行的APIJSON工程) <br />
+或者 改下APIJSON工程的端口号，参考[SpringBoot改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)。<br />
 其它问题请谷歌或百度。
 
 <br />
