@@ -51,9 +51,7 @@ Apply 或 Run <br />
 
 
 <br />
-
-<br />
-<h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4><br />
+<h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4>
 
 如果是Address already in use，说明8080端口被占用，<br />
 可以关闭占用这个端口的程序(可能就是已运行的APIJSON工程) <br />
