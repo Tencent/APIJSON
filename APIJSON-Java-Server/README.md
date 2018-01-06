@@ -76,6 +76,8 @@ Apply 或 Run <br />
 
 ### 4.导入表文件到数据库<h3/>
 
+<h4>可以先跳过，用Table, Column或者其它 你自己数据库中已有的表 来测试。</h4>
+
 后端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
 我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。
 
