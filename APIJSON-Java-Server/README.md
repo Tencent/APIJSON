@@ -16,8 +16,8 @@
 #### Eclipse for JavaEE
 
 1)打开<br />
-File > Import > Maven > Existing Maven Projects > Next > Browse
-\> 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse
+File > Import > Maven > Existing Maven Projects > Next > Browse <br />
+\> 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse <br />
 \> 勾选 APIJSONDemo 和 APIJSONLibrary > Finish
 
 2)配置(已有默认配置，可跳过)<br />
