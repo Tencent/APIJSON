@@ -16,7 +16,8 @@
 #### Eclipse for JavaEE
 
 1)打开<br />
-File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse > Finish
+File > Import > Maven > Existing Maven Projects > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse
+\> 勾选 APIJSONDemo 和 APIJSONLibrary > Finish
 
 2)配置(已有默认配置，可跳过)<br />
 打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
@@ -28,7 +29,7 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
 #### IntellIJ IDEA Ultimate
 
 1)打开<br />
-Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Idea > OK
+Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Idea/APIJSONDemo > OK
 
 如果有错误，一般是Idea没有给Module分配JDK， <br />
 在Project Structure最下方的Problems会有project SDK is not defined报错。 <br /><br />
