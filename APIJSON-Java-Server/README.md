@@ -42,7 +42,7 @@ Apply 或 OK <br />
 
 <h5>2)Demo依赖Library</h5>
 右键APIJSONDemo > Open Module Settings > Modules > apijsondemo > Dependencies <br />
-\> 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
+ > 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
 打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。 <br />
@@ -51,7 +51,7 @@ Apply 或 OK <br />
 Run > Run APIJSONApplication <br />
 
 如果弹窗里只有Edit Configurations...这个选项，则点进去，然后 <br />
-\+ > Application > Main class 选apijson.demo.server.APIJSONApplication <br />
+ \+ > Application > Main class 选apijson.demo.server.APIJSONApplication <br />
 最后在底部 <br />
 Apply 或 Run <br />
 
