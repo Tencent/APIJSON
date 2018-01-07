@@ -20,7 +20,7 @@ File > Import > Maven > Existing Maven Projects > Next > Browse <br />
 \> 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse <br />
 \> 勾选 APIJSONDemo 和 APIJSONLibrary > Finish
 
-2)配置(已有默认配置，可跳过)<br />
+2)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)<br />
 打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
 
 3)运行<br />
@@ -44,7 +44,7 @@ Apply 或 OK <br />
 右键APIJSONDemo > Open Module Settings > Modules > apijsondemo > Dependencies <br />
 \> 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
 
-3)配置(已有默认配置，可跳过)<br />
+3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)<br />
 打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。 <br />
 
 4)运行<br />
