@@ -15,7 +15,7 @@
 
 ## <h2 id="1">1.示例<h2/>
 
-#### 查询用户
+#### 获取用户
 请求：
 <pre><code class="language-json">{
   "User":{
@@ -46,7 +46,7 @@
 
 <br />
 
-#### 查询用户列表
+#### 获取用户列表
 请求：
 <pre><code class="language-json">{
   "[]":{
@@ -89,7 +89,7 @@
 
 <br />
 
-#### 查询动态及发布者用户
+#### 获取动态及发布者用户
 请求：
 <pre><code class="language-json">{
   "Moment":{
@@ -129,7 +129,7 @@
 
 <br />
 
-#### 查询类似微信朋友圈的动态列表
+#### 获取类似微信朋友圈的动态列表
 请求：
 <pre><code class="language-json">{
   "[]":{                             //请求一个数组
