@@ -20,10 +20,10 @@ File > Import > Maven > Existing Maven Projects > Next > Browse <br />
  > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse <br />
  > 勾选 APIJSONDemo 和 APIJSONLibrary > Finish
  <br /><br />
- 如果apijson-library有错误，一般是JDK版本过低<br />
+ 如果apijson-library有错误，一般是JDK版本过低，可以：<br />
  右键apijson-library > Properties > Java Compiler > 取消选择Use compliance from ... > Complier compliance level选1.7以上的 > OK
  <br /><br />
- 如果apijson-demo有错误，一般是没有依赖apijson-library<br />
+ 如果apijson-demo有错误，一般是没有依赖apijson-library，可以：<br />
  右键apijson-demo > Properties > Java Build Path > Projects > Add > 选择apijson-library > OK > OK
 
 <h5>2)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
@@ -38,8 +38,8 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
 <h5>1)打开</h5>
 Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Idea/APIJSONDemo > OK
 <br /><br />
-如果有错误，一般是Idea没有给Module分配JDK，在Project Structure最下方的Problems会有project SDK is not defined报错。
-<br /><br />
+如果有错误，一般是Idea没有给Module分配JDK，<br />
+在Project Structure最下方的Problems会有project SDK is not defined报错，可以：<br />
 File > Project Structure > Project > Project SDK 选已安装的JDK <br />
 如果没有，则继续 <br />
 New... > JDK > 选择JDK的安装路径 > Open <br />
