@@ -27,7 +27,7 @@ File > Import > Maven > Existing Maven Projects > Next > Browse <br />
  右键apijson-demo > Properties > Java Build Path > Projects > Add > 选择apijson-library > OK > OK
 
 <h5>2)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
-打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。
+打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>3)运行</h5>
 Run > Run As > Java Application > 选择APIJSONApplication > OK
@@ -51,7 +51,7 @@ Apply 或 OK <br />
  > 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
-打开 zuo.biao.apijson.server.sql.SQLConfig 类，编辑 MYSQL_URI，MYSQL_SCHEMA，MYSQL_ACCOUNT，MYSQL_PASSWORD 为你自己数据库的配置。 <br />
+打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>4)运行</h5>
 Run > Run APIJSONApplication <br />
