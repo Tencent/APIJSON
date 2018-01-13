@@ -106,26 +106,40 @@ public class Structure {
 					} else {
 						if (RequestMethod.isQueryMethod(method) == false) {
 							//单个修改或删除
-							Object id = robj.get(KEY_ID); //如果必须传 id ，可在Request表中配置necessary
-							if (id != null) {
-								if (id instanceof Number == false) {
+							Object id = null;
+							try {
+								id = robj.getLong(KEY_ID); //如果必须传 id ，可在Request表中配置NECESSARY
+							} catch (Exception e) {
+								throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
+										+ " 里面的 " + KEY_ID + ":value 中value的类型只能是 Long ！");
+							}
+							
+							JSONArray idIn = null;
+							try {
+								idIn = robj.getJSONArray(KEY_ID_IN); //如果必须传 id{} ，可在Request表中配置NECESSARY
+							} catch (Exception e) {
+								throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
+										+ " 里面的 " + KEY_ID_IN + ":value 中value的类型只能是 [Long] ！");
+							}
+							if (idIn == null) {
+								//批量修改或删除
+								if (id == null) {
 									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-											+ " 里面的 " + KEY_ID + ":value 中value的类型只能是Long！");
+											+ " 里面 " + KEY_ID + " 和 " + KEY_ID_IN + " 至少传其中一个！");
 								}
 							} else {
-								//批量修改或删除
-								Object arr = robj.get(KEY_ID_IN); //如果必须传 id{} ，可在Request表中配置necessary
-								if (arr == null) {
-									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-											+ " 里面 " + KEY_ID + " 和 " + KEY_ID_IN + " 必须传其中一个！");
-								}
-								if (arr instanceof JSONArray == false) {
-									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-											+ " 里面的 " + KEY_ID_IN + ":value 中value的类型只能是 [Long] ！");
-								}
-								if (((JSONArray)arr).size() > 10) { //不允许一次操作10条以上记录
+								if (idIn.size() > 10) { //不允许一次操作10条以上记录
 									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
 											+ " 里面的 " + KEY_ID_IN + ":[] 中[]的长度不能超过10！");
+								}
+								//解决 id{}: ["1' OR 1='1'))--"] 绕过id{}限制
+								for (int i = 0; i < idIn.size(); i++) {
+									try {
+										idIn.getLong(i);
+									} catch (Exception e) {
+										throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
+												+ " 里面的 " + KEY_ID_IN + ":[] 中所有项的类型都只能是Long！");
+									}
 								}
 							}
 						}
@@ -537,8 +551,8 @@ public class Structure {
 			throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 " + logic.getChar() + tv + " ！");
 		}		
 	}
-	
-	
+
+
 	/**验证是否重复
 	 * @param table
 	 * @param key
@@ -568,16 +582,16 @@ public class Structure {
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
 			request.put(JSONRequest.KEY_ID + "!", exceptId);
 		}
-//		JSONObject repeat = new AbstractParser(HEAD, true).parseResponse(
-//				new JSONRequest(table, request)
-//				);
-//		repeat = repeat == null ? null : repeat.getJSONObject(table);
-//		if (repeat == null) {
-//			throw new Exception("服务器内部错误  verifyRepeat  repeat == null");
-//		}
-//		if (repeat.getIntValue(JSONResponse.KEY_COUNT) > 0) {
-//			throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
-//		}
+		//		JSONObject repeat = new AbstractParser(HEAD, true).parseResponse(
+		//				new JSONRequest(table, request)
+		//				);
+		//		repeat = repeat == null ? null : repeat.getJSONObject(table);
+		//		if (repeat == null) {
+		//			throw new Exception("服务器内部错误  verifyRepeat  repeat == null");
+		//		}
+		//		if (repeat.getIntValue(JSONResponse.KEY_COUNT) > 0) {
+		//			throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
+		//		}
 	}
 
 
