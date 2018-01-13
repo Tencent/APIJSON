@@ -6,28 +6,17 @@
 
 <br />
 
-### 2.用Android Studio或ADT Bundle运行Android工程<h3/>
+### 2.用Android Studio运行Android工程<h3/>
 
 
 如果以上IDE一个都没安装，运行前先下载安装一个。<br />
-我的配置是Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 和 OSX EI Capitan +（JDK 1.7.0_71 + ADT Bundle 20140702）+（JDK 1.8.0_91 + Android Studio 2.1.2），其中系统和软件都是64位的。
-
-
-#### Android Studio
+我的配置是Windows 7 + JDK 1.7.0_71 + Android Studio 2.2 和 OSX EI Capitan + JDK 1.8.0_91 + Android Studio 3.0，其中系统和软件都是64位的。
 
 1)打开<br />
-Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON-Android/APIJSON-AndroidStudio/APIJSONApp （或APIJSONTest） > OK
+Open an existing Android Studio project > 选择刚才解压路径下的APIJSON-Master/APIJSON-Android/APIJSONApp （或APIJSONTest） > OK
 
 2)运行<br />
 Run > Run app
-
-#### ADT Bundle
-
-1)打开<br />
-File > Import > Android > Existing Android Code Into Workspace > Next > Browse > 选择刚才解压路径下的APIJSON-Master/APIJSON-Android/APIJSON-ADT > Finish
-
-2)运行<br />
-Run > Run As > Android Application
 
 <br />
 
