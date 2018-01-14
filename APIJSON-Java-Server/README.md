@@ -58,8 +58,8 @@ Run > Run APIJSONApplication <br />
 
 如果弹窗里只有Edit Configurations...这个选项，则点进去，然后 <br />
 \+ > Application > Main class 选apijson.demo.server.APIJSONApplication <br />
-> Use class path of module 选apijson-demo <br />
-> 最后在底部 Run <br />
+\> Use class path of module 选apijson-demo <br />
+\> 最后在底部 Run <br />
 
 <h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4>
 
