@@ -47,7 +47,8 @@ New... > JDK > 选择JDK的安装路径 > Open <br />
 Apply 或 OK <br />
 
 <h5>2)Demo依赖Library</h5>
-右键APIJSONDemo > Open Module Settings > Modules > apijsondemo > Dependencies <br />
+File > New > Module from Existing Sources > 选和APIJSONDemo同目录下的APIJSONLibrary > Open <br />
+> 右键APIJSONDemo > Open Module Settings > Modules > apijsondemo > Dependencies <br />
 > 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
