@@ -48,8 +48,8 @@ Apply 或 OK <br />
 
 <h5>2)Demo依赖Library</h5>
 File > New > Module from Existing Sources > 选和APIJSONDemo同目录下的APIJSONLibrary > Open <br />
-> 右键APIJSONDemo > Open Module Settings > Modules > apijsondemo > Dependencies <br />
-> 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
+> 右键APIJSONDemo > Open Module Settings > Modules > apijson-demo > Dependencies <br />
+> 左下方 + > Module Dependency > 选择apijson-library > OK > OK
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
