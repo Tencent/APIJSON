@@ -17,11 +17,11 @@
 
 <h5>1)打开</h5>
 File > Import > Maven > Existing Maven Projects > Next > Browse <br />
- > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse <br />
- > 勾选 APIJSONDemo 和 APIJSONLibrary > Finish
+> 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSON-Eclipse <br />
+> 勾选 APIJSONDemo 和 APIJSONLibrary > Finish
  <br /><br />
- 如果apijson-library有错误，一般是JDK版本过低，可以：<br />
- 右键apijson-library > Properties > Java Compiler > 取消选择Use compliance from ... > Complier compliance level选1.7以上的 > OK
+如果apijson-library有错误，一般是JDK版本过低，可以：<br />
+右键apijson-library > Properties > Java Compiler > 取消选择Use compliance from ... > Complier compliance level选1.7以上的 > OK
 
 <h5>2)Demo依赖Library</h5>
 右键apijson-demo > Properties > Java Build Path > Projects > Add > 选择apijson-library > OK > OK
@@ -48,7 +48,7 @@ Apply 或 OK <br />
 
 <h5>2)Demo依赖Library</h5>
 右键APIJSONDemo > Open Module Settings > Modules > apijsondemo > Dependencies <br />
- > 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
+> 左下方 + > Module Dependency > 选择apijsonlibrary > OK > OK
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
@@ -57,9 +57,9 @@ Apply 或 OK <br />
 Run > Run APIJSONApplication <br />
 
 如果弹窗里只有Edit Configurations...这个选项，则点进去，然后 <br />
- \+ > Application > Main class 选apijson.demo.server.APIJSONApplication <br />
- > Use class path of module 选apijson-demo <br />
- > 最后在底部 Run <br />
+\+ > Application > Main class 选apijson.demo.server.APIJSONApplication <br />
+> Use class path of module 选apijson-demo <br />
+> 最后在底部 Run <br />
 
 <h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4>
 
