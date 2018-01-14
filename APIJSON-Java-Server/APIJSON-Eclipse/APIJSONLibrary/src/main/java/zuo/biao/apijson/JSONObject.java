@@ -84,8 +84,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	//JSONObject内关键词 key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	
-	public static final String KEY_ID = "id";
-	public static final String KEY_ID_IN = KEY_ID + "{}";
+	public static String KEY_ID = "id";
+	public static String KEY_ID_IN = KEY_ID + "{}";
+	public static String KEY_USER_ID = "userId";
+	public static String KEY_USER_ID_IN = KEY_USER_ID + "{}";
 
 	/**set "id":id in Table layer
 	 * @param id
@@ -94,12 +96,27 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setId(Long id) {
 		return puts(KEY_ID, id);
 	}
-	/**set id{}:[] in Table layer
+	/**set "id{}":[] in Table layer
 	 * @param list
 	 * @return
 	 */
 	public JSONObject setIdIn(List<Object> list) {
 		return puts(KEY_ID_IN, list);
+	}
+
+	/**set "userId":userId in Table layer
+	 * @param id
+	 * @return
+	 */
+	public JSONObject setUserId(Long id) {
+		return puts(KEY_USER_ID, id);
+	}
+	/**set "userId{}":[] in Table layer
+	 * @param list
+	 * @return
+	 */
+	public JSONObject setUserIdIn(List<Object> list) {
+		return puts(KEY_USER_ID_IN, list);
 	}
 	
 	

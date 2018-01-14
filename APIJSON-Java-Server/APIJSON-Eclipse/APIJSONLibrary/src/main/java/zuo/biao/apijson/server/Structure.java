@@ -15,7 +15,7 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.JSONObject.KEY_ID;
-import static zuo.biao.apijson.JSONObject.KEY_ID_IN;
+import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
 import static zuo.biao.apijson.server.Operation.ADD;
 import static zuo.biao.apijson.server.Operation.DISALLOW;
 import static zuo.biao.apijson.server.Operation.NECESSARY;
@@ -82,7 +82,6 @@ public class Structure {
 			return null;
 		}
 
-		//TODO globleRole要不要改成@role?  只允许服务端Request表中加上可控的ADMIN角色
 		if (RequestRole.get(request.getString(JSONRequest.KEY_ROLE)) == RequestRole.ADMIN) {
 			throw new IllegalArgumentException("角色设置错误！不允许在写操作Request中传 " + name + 
 					":{ " + JSONRequest.KEY_ROLE + ":admin } ！");
@@ -105,43 +104,8 @@ public class Structure {
 						}
 					} else {
 						if (RequestMethod.isQueryMethod(method) == false) {
-							//单个修改或删除
-							Object id = null;
-							try {
-								id = robj.getLong(KEY_ID); //如果必须传 id ，可在Request表中配置NECESSARY
-							} catch (Exception e) {
-								throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-										+ " 里面的 " + KEY_ID + ":value 中value的类型只能是 Long ！");
-							}
-							
-							JSONArray idIn = null;
-							try {
-								idIn = robj.getJSONArray(KEY_ID_IN); //如果必须传 id{} ，可在Request表中配置NECESSARY
-							} catch (Exception e) {
-								throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-										+ " 里面的 " + KEY_ID_IN + ":value 中value的类型只能是 [Long] ！");
-							}
-							if (idIn == null) {
-								//批量修改或删除
-								if (id == null) {
-									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-											+ " 里面 " + KEY_ID + " 和 " + KEY_ID_IN + " 至少传其中一个！");
-								}
-							} else {
-								if (idIn.size() > 10) { //不允许一次操作10条以上记录
-									throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-											+ " 里面的 " + KEY_ID_IN + ":[] 中[]的长度不能超过10！");
-								}
-								//解决 id{}: ["1' OR 1='1'))--"] 绕过id{}限制
-								for (int i = 0; i < idIn.size(); i++) {
-									try {
-										idIn.getLong(i);
-									} catch (Exception e) {
-										throw new IllegalArgumentException(method.name() + "请求，" + name + "/" + key
-												+ " 里面的 " + KEY_ID_IN + ":[] 中所有项的类型都只能是Long！");
-									}
-								}
-							}
+							verifyId(method.name(), name, key, robj, KEY_ID, true);
+							verifyId(method.name(), name, key, robj, KEY_USER_ID, false);
 						}
 					}
 				} 
@@ -151,8 +115,61 @@ public class Structure {
 		});
 
 	}
+	
+	/**
+	 * @param method
+	 * @param name
+	 * @param key
+	 * @param robj
+	 * @param idKey
+	 * @param atLeastOne 至少有一个不为null
+	 */
+	private static void verifyId(@NotNull String method, @NotNull String name, @NotNull String key
+			, @NotNull JSONObject robj, @NotNull String idKey, boolean atLeastOne) {
+		//单个修改或删除
+		Object id = null;
+		try {
+			id = robj.getLong(idKey); //如果必须传 id ，可在Request表中配置NECESSARY
+		} catch (Exception e) {
+			throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+					+ " 里面的 " + idKey + ":value 中value的类型只能是 Long ！");
+		}
+		
+		//批量修改或删除
+		String idInKey = idKey + "{}";
+		
+		JSONArray idIn = null;
+		try {
+			idIn = robj.getJSONArray(idInKey); //如果必须传 id{} ，可在Request表中配置NECESSARY
+		} catch (Exception e) {
+			throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+					+ " 里面的 " + idInKey + ":value 中value的类型只能是 [Long] ！");
+		}
+		if (idIn == null) {
+			if (atLeastOne && id == null) {
+				throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+						+ " 里面 " + idKey + " 和 " + idInKey + " 至少传其中一个！");
+			}
+		} else {
+			if (idIn.size() > 10) { //不允许一次操作10条以上记录
+				throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+						+ " 里面的 " + idInKey + ":[] 中[]的长度不能超过10！");
+			}
+			//解决 id{}: ["1' OR 1='1'))--"] 绕过id{}限制
+			//new ArrayList<Long>(idIn) 不能检查类型，Java泛型擦除问题，居然能把 ["a"] 赋值进去还不报错
+			for (int i = 0; i < idIn.size(); i++) {
+				try {
+					idIn.getLong(i);
+				} catch (Exception e) {
+					throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+							+ " 里面的 " + idInKey + ":[] 中所有项的类型都只能是Long！");
+				}
+			}
+		}
+	}
 
 
+	
 	/**校验并将response转换为指定的内容和结构
 	 * @param method
 	 * @param name
