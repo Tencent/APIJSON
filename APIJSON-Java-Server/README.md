@@ -22,14 +22,14 @@ File > Import > Maven > Existing Maven Projects > Next > Browse <br />
  <br /><br />
  如果apijson-library有错误，一般是JDK版本过低，可以：<br />
  右键apijson-library > Properties > Java Compiler > 取消选择Use compliance from ... > Complier compliance level选1.7以上的 > OK
- <br /><br />
- 如果apijson-demo有错误，一般是没有依赖apijson-library，可以：<br />
- 右键apijson-demo > Properties > Java Build Path > Projects > Add > 选择apijson-library > OK > OK
 
-<h5>2)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
+<h5>2)Demo依赖Library</h5>
+右键apijson-demo > Properties > Java Build Path > Projects > Add > 选择apijson-library > OK > OK
+
+<h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
-<h5>3)运行</h5>
+<h5>4)运行</h5>
 Run > Run As > Java Application > 选择APIJSONApplication > OK
 
 
