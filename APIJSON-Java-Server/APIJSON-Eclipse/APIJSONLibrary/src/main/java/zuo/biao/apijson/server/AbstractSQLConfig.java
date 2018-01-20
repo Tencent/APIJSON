@@ -21,6 +21,8 @@ import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
 import static zuo.biao.apijson.JSONObject.KEY_ID;
 import static zuo.biao.apijson.JSONObject.KEY_ID_IN;
+import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
+import static zuo.biao.apijson.JSONObject.KEY_USER_ID_IN;
 import static zuo.biao.apijson.JSONObject.KEY_ORDER;
 import static zuo.biao.apijson.JSONObject.KEY_ROLE;
 import static zuo.biao.apijson.JSONObject.KEY_SCHEMA;
@@ -39,6 +41,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
@@ -511,16 +514,35 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception 
 	 */
 	public static String getWhereString(RequestMethod method, Map<String, Object> where, boolean verifyName) throws Exception {
-		Set<String> set = where == null ? null : where.keySet();
-		if (set == null || set.isEmpty()) {
+		Map<String, Object> where2 = where == null || where.isEmpty() ? null : new LinkedHashMap<String, Object>();
+		if (where2 == null) {
 			return "";
 		}
-		String whereString = "";
+		
+		//强制排序，把id,id{},userId,userId{}放最前面，保证安全、优化性能
+		Object id = where.remove(KEY_ID);
+		Object idIn = where.remove(KEY_ID_IN);
+		Object userId = where.remove(KEY_USER_ID);
+		Object userIdIn = where.remove(KEY_USER_ID_IN);
+		
+		where2.put(KEY_ID, id);
+		where2.put(KEY_ID_IN, idIn);
+		where2.put(KEY_USER_ID, userId);
+		where2.put(KEY_USER_ID_IN, userIdIn);
+		where2.putAll(where);
+		
+		
+		Set<Entry<String, Object>> set = where2.entrySet();
+		
 		boolean isFirst = true;
-
 		String condition;
-		for (String key : set) {
-			condition = getWhereItem(key, where.get(key), method, verifyName);
+		String whereString = "";
+		
+		for (Entry<String, Object> entry : set) {
+			if (entry == null) {
+				continue;
+			}
+			condition = getWhereItem(entry.getKey(), entry.getValue(), method, verifyName);
 
 			if (StringUtil.isEmpty(condition, true)) {//避免SQL条件连接错误
 				continue;
@@ -530,6 +552,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			isFirst = false;
 		}
+		
+		//还原where，后续可能用到
+		where.put(KEY_ID, id);
+		where.put(KEY_ID_IN, idIn);
+		where.put(KEY_USER_ID, userId);
+		where.put(KEY_USER_ID_IN, userIdIn);
 
 		String s = whereString.isEmpty() ? "" : " WHERE " + whereString;
 		
@@ -1041,8 +1069,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		AbstractSQLConfig config = callback.getSQLConfig(method, table);
 
-		boolean isEmpty = request.isEmpty();
-		if (isEmpty) { // User:{} 这种空内容在查询时也有效
+		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
 
