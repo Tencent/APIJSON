@@ -67,8 +67,6 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	
 	public static final String KEY_CODE = "code";
 	public static final String KEY_MSG = "msg";
-	public static final String KEY_ID = "id";
-	public static final String KEY_ID_IN = KEY_ID + "{}";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_TOTAL = "total";
 

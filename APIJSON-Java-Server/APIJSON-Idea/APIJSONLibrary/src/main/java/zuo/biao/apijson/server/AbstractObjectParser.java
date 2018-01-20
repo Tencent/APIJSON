@@ -136,10 +136,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 */
 	@Override
 	public AbstractObjectParser parseCorrect() throws Exception {
-		Set<String> set = correct == null ? null : new HashSet<String>(correct.keySet());
+		Set<String> set = correct == null ? null : new HashSet<>(correct.keySet());
 
 		if (set != null && set.isEmpty() == false) {//对每个需要校正的key进行正则表达式匹配校正
-			corrected = new HashMap<String, String>();//TODO 返回全部correct内的内容，包括未校正的?  correct);
+			corrected = new HashMap<>();//TODO 返回全部correct内的内容，包括未校正的?  correct);
 
 			String value; //13000082001
 			String v; // phone,email,idCard

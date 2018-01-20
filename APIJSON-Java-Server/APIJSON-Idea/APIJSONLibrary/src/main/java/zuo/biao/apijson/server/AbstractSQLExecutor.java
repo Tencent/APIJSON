@@ -148,7 +148,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
 					, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "可能对象不存在！");
 
-			//id或id{}一定有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
+			//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
 			if (config.getId() > 0) {
 				result.put(JSONResponse.KEY_ID, config.getId());
 			} else {

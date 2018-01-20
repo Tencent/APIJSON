@@ -78,7 +78,7 @@ public abstract class AbstractVerifier implements Verifier {
 			return null;
 		}
 
-		HashMap<RequestMethod, RequestRole[]> map = new HashMap<RequestMethod, RequestRole[]>();
+		HashMap<RequestMethod, RequestRole[]> map = new HashMap<>();
 		map.put(GET, access.GET());
 		map.put(HEAD, access.HEAD());
 		map.put(GETS, access.GETS());
