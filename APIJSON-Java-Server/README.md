@@ -19,7 +19,6 @@
 File > Import > Maven > Existing Maven Projects > Next > Browse <br />
 > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONDemo <br />
 > 勾选 /pom.xml ... apijson-demo > Finish
- <br /><br />
 
 <h5>2)Demo依赖Library</h5>
 右键libs里面的 apijson-server.jar > Build Path > Add to Build Path
