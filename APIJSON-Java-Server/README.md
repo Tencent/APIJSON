@@ -35,14 +35,6 @@ Run > Run As > Java Application > 选择APIJSONApplication > OK
 
 <h5>1)打开</h5>
 Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONDemo > OK
-<br /><br />
-如果有错误，一般是Idea没有给Module分配JDK，<br />
-在Project Structure最下方的Problems会有project SDK is not defined报错，可以：<br />
-File > Project Structure > Project > Project SDK 选已安装的JDK <br />
-如果没有，则继续 <br />
-New... > JDK > 选择JDK的安装路径 > Open <br />
-最后在底部 <br />
-Apply 或 OK <br />
 
 <h5>2)Demo依赖Library</h5>
 右键libs里面的 apijson-server.jar > Add as Library > OK
