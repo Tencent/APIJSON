@@ -95,6 +95,6 @@ Run > Run APIJSONApplication <br />
 <br />
 
 ### 5.测试接口<br />
-直接使用 [APIJSON在线工具](http://39.108.143.172/) 或 下载主页提供的 [客户端App](https://github.com/TommyLemon/APIJSON)。
+直接使用 [APIJSON在线工具](http://apijson.cn/) 或 下载主页提供的 [客户端App](https://github.com/TommyLemon/APIJSON)。
 
 <br />
