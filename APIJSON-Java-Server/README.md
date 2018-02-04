@@ -42,10 +42,10 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSOND
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>4)运行</h5>
-顶部菜单Run > Run > Edit Configurations > + > Application <br />
-\> Main class 选apijson.demo.server.APIJSONApplication <br />
-\> Use class path of module 选apijson-demo <br />
-\> 最后在底部 Run <br />
+顶部菜单Run > Run > Edit Configurations > + > Application > Configuration <br />
+> Main class 选apijson.demo.server.APIJSONApplication <br />
+> Use classpath of module 选apijson-demo <br />
+> 最后在底部 Run <br />
 
 <h4>运行后会出现 APIJSON的测试日志，最后显示 "APIJSON已启动" ，说明已启动完成。</h4>
 
