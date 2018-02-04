@@ -16,7 +16,7 @@
 #### Eclipse for JavaEE
 
 <h5>1)打开</h5>
-File > Import > Maven > Existing Maven Projects > Next > Browse <br />
+顶部菜单File > Import > Maven > Existing Maven Projects > Next > Browse <br />
 > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONDemo <br />
 > 勾选 /pom.xml ... apijson-demo > Finish
 
@@ -27,7 +27,7 @@ File > Import > Maven > Existing Maven Projects > Next > Browse <br />
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>4)运行</h5>
-Run > Run As > Java Application > 选择APIJSONApplication > OK
+顶部菜单Run > Run As > Java Application > 选择APIJSONApplication > OK
 
 
 #### IntellIJ IDEA Ultimate
@@ -42,10 +42,8 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSOND
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>4)运行</h5>
-Run > Run APIJSONApplication <br />
-
-如果弹窗里只有Edit Configurations...这个选项，则点进去，然后 <br />
-\+ > Application > Main class 选apijson.demo.server.APIJSONApplication <br />
+顶部菜单Run > Run > Edit Configurations > + > Application <br />
+\> Main class 选apijson.demo.server.APIJSONApplication <br />
 \> Use class path of module 选apijson-demo <br />
 \> 最后在底部 Run <br />
 
