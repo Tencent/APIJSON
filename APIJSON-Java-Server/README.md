@@ -43,7 +43,7 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSOND
 
 <h5>4)运行</h5>
 顶部菜单Run > Run > Edit Configurations > + > Application > Configuration <br />
-> Main class 选apijson.demo.server.APIJSONApplication <br />
+> Main class 选APIJSONApplication <br />
 > Use classpath of module 选apijson-demo <br />
 > 最后在底部 Run <br />
 
