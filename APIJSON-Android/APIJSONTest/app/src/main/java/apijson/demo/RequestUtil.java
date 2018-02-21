@@ -37,8 +37,8 @@ public class RequestUtil {
 		context = DemoApplication.getInstance();
 	}
 
-	private static final long DEFAULT_MOMENT_ID = 15;
-	private static final long DEFAULT_USER_ID = 82001;
+	public static final long DEFAULT_MOMENT_ID = 15;
+	public static final long DEFAULT_USER_ID = 82001;
 
 	public static boolean isLogMethod(String method) {
 		return "login".equals(method) || "logout".equals(method);

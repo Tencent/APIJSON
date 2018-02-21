@@ -131,10 +131,8 @@ public class SelectActivity extends Activity implements OnClickListener {
 	/**
 	 */
 	public void setRequest() {
-		if (RequestUtil.isLogMethod(method)) {
-			tvSelectLogin.setText(StringUtil.isEmpty(name, true)
-					? getString(R.string.login) : name + getString(R.string.logout));
-		}
+		tvSelectLogin.setText(StringUtil.isEmpty(name, true)
+				? getString(R.string.login) : name + getString(R.string.logout));
 
 		for (int i = 0; i < buttons.length; i++) {
 			buttons[i].setText(JSON.format(getRequest(buttons[i])));

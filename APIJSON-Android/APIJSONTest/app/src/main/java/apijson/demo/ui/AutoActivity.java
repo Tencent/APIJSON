@@ -14,7 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.ui;
 
-import zuo.biao.apijson.JSON;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -26,8 +25,11 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import apijson.demo.R;
+import apijson.demo.RequestUtil;
 import apijson.demo.StringUtil;
+import zuo.biao.apijson.JSON;
 
 /**自动生成代码
  * @author Lemon
@@ -36,8 +38,6 @@ public class AutoActivity extends Activity {
 	private static final String TAG = "AutoActivity";
 
 	public static final String KEY_REQUEST = "KEY_REQUEST";
-
-	public static final String RESULT_REQUEST = "RESULT_REQUEST";
 
 	/**
 	 * @param context
@@ -51,7 +51,7 @@ public class AutoActivity extends Activity {
 	private Activity context;
 
 	private long id;
-	private String url; 
+	private String url;
 	private String request;
 
 	private TextView tvAutoRequest;
@@ -66,12 +66,12 @@ public class AutoActivity extends Activity {
 
 		//读取保存的配置
 		SharedPreferences sp = getSharedPreferences(SelectActivity.CONFIG_PATH, Context.MODE_PRIVATE);
-		id = sp.getLong(SelectActivity.KEY_ID, id);
+		id = sp.getLong(SelectActivity.KEY_ID, RequestUtil.DEFAULT_MOMENT_ID);
 		url = sp.getString(SelectActivity.KEY_URL, null);
 		request = sp.getString(KEY_REQUEST, null);
-		
+
 		if (StringUtil.isEmpty(request, true)) {
-			request = "{\"Moment\":{\"id\":551},\"[]\":{\"count\":3,\"page\":1,\"Comment\":{\"momentId@\":\"Moment/id\",\"@column\":\"id,userId,content\"}}}";
+			request = "{\"Moment\":{\"id\":" + id + "},\"[]\":{\"count\":3,\"page\":0,\"Comment\":{\"momentId@\":\"Moment/id\",\"@column\":\"id,userId,content\"}}}";
 		}
 
 
@@ -87,11 +87,11 @@ public class AutoActivity extends Activity {
 
 
 	public void copy(View v) {
-		StringUtil.copyText(context, StringUtil.getString(tvAutoResponse));	
+		StringUtil.copyText(context, StringUtil.getString(tvAutoResponse));
 	}
 
 	public void auto(View v) {
-		auto(StringUtil.getString(tvAutoRequest));		
+		auto(StringUtil.getString(tvAutoRequest));
 	}
 
 	public void get(View v) {
@@ -135,11 +135,13 @@ public class AutoActivity extends Activity {
 	}
 
 
-	
+
 
 
 
 	private static final int REQUEST_TO_REQUEST = 1;
+
+	private Intent result;
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -151,9 +153,11 @@ public class AutoActivity extends Activity {
 			if (data == null) {
 				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
 			} else {
-				id = data.getLongExtra(RequestActivity.RESULT_ID, id);
+				result = data;
+
+				id = data.getLongExtra(RequestActivity.RESULT_ID, RequestUtil.DEFAULT_MOMENT_ID);
 				url = data.getStringExtra(RequestActivity.RESULT_URL);
-				
+
 				tvAutoResponse.setText(StringUtil.getString(JSON.format(
 						data.getStringExtra(RequestActivity.RESULT_RESPONSE))));
 			}
@@ -168,10 +172,10 @@ public class AutoActivity extends Activity {
 	public void finish() {
 		//保存配置
 		getSharedPreferences(SelectActivity.CONFIG_PATH, Context.MODE_PRIVATE)
-		.edit()
-		.remove(KEY_REQUEST)
-		.putString(KEY_REQUEST, StringUtil.getTrimedString(tvAutoRequest))
-		.commit();
+				.edit()
+				.remove(KEY_REQUEST)
+				.putString(KEY_REQUEST, StringUtil.getTrimedString(tvAutoRequest))
+				.commit();
 
 		//需要在SelectActivity实时更新
 		setResult(RESULT_OK, new Intent().
