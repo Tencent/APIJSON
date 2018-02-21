@@ -15,6 +15,8 @@
     <string name="complex">复杂结构</string>
     <string name="access_error">没有访问权限</string>
     <string name="access_permitted">允许使用权限</string>
+    <string name="login">登录</string>
+    <string name="logout">: 已登录，点击退出</string>
     <string name="auto">自动生成代码</string>
     <string name="update_log">更新日志</string>
     <string name="received_result">已获得结果！</string>

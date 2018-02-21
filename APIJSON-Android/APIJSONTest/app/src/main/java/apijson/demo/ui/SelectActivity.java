@@ -14,7 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.ui;
 
-import zuo.biao.apijson.JSON;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,12 +24,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.alibaba.fastjson.JSONObject;
+
 import apijson.demo.R;
 import apijson.demo.RequestUtil;
 import apijson.demo.StringUtil;
-
-import com.alibaba.fastjson.JSONObject;
+import zuo.biao.apijson.JSON;
 
 /**选择Activity
  * 选择向服务器发起的请求
@@ -39,16 +41,21 @@ import com.alibaba.fastjson.JSONObject;
 public class SelectActivity extends Activity implements OnClickListener {
 
 	public static final String CONFIG_PATH = "CONFIG_PATH";
-	
+
 	public static final String KEY_ID = "KEY_ID";
 	public static final String KEY_URL = "KEY_URL";
-	
+	public static final String KEY_METHOD = "KEY_METHOD";
+	public static final String KEY_NAME = "KEY_NAME";
+
 
 	private Activity context;
 
 	private long id;
 	private String url;
+	private String method;
+	private String name;
 
+	private TextView tvSelectLogin;
 	private Button[] buttons;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +68,10 @@ public class SelectActivity extends Activity implements OnClickListener {
 		SharedPreferences sp = getSharedPreferences(CONFIG_PATH, Context.MODE_PRIVATE);
 		id = sp.getLong(KEY_ID, id);
 		url = sp.getString(KEY_URL, null);
+		method = sp.getString(KEY_METHOD, null);
+		name = sp.getString(KEY_NAME, null);
 
+		tvSelectLogin = (TextView) findViewById(R.id.tvSelectLogin);
 
 		buttons = new Button[10];
 		buttons[0] = (Button) findViewById(R.id.btnSelectPost);
@@ -75,15 +85,28 @@ public class SelectActivity extends Activity implements OnClickListener {
 		buttons[8] = (Button) findViewById(R.id.btnSelectAccessError);
 		buttons[9] = (Button) findViewById(R.id.btnSelectAccessPermitted);
 
-		
+
 		setRequest();
+
+
+
+		tvSelectLogin.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (StringUtil.isEmpty(name, true)) {
+					startActivityForResult(RequestActivity.createIntent(context, id, url, "login", RequestUtil.newLoginRequest()), REQUEST_TO_REQUEST);
+				} else {
+					startActivityForResult(RequestActivity.createIntent(context, id, url, "logout", RequestUtil.newLogoutRequest()), REQUEST_TO_REQUEST);
+				}
+			}
+		});
 
 
 		for (int i = 0; i < buttons.length; i++) {
 			final int which = i;
 			buttons[which].setOnClickListener(this);
 			buttons[which].setOnLongClickListener(new OnLongClickListener() {
-				
+
 				@Override
 				public boolean onLongClick(View v) {
 					StringUtil.copyText(context, StringUtil.getString(buttons[which]));
@@ -103,46 +126,51 @@ public class SelectActivity extends Activity implements OnClickListener {
 		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
 				StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));
 	}
-	
-	
+
+
 	/**
 	 */
 	public void setRequest() {
+		if (RequestUtil.isLogMethod(method)) {
+			tvSelectLogin.setText(StringUtil.isEmpty(name, true)
+					? getString(R.string.login) : name + getString(R.string.logout));
+		}
+
 		for (int i = 0; i < buttons.length; i++) {
 			buttons[i].setText(JSON.format(getRequest(buttons[i])));
 		}
 	}
 
-	
-	
+
+
 	/**
 	 * @param v
 	 * @return
 	 */
 	public JSONObject getRequest(View v) {
 		switch (v.getId()) {
-		case R.id.btnSelectPost:
-			return RequestUtil.newPostRequest();
-		case R.id.btnSelectPut:
-			return RequestUtil.newPutRequest(id);
-		case R.id.btnSelectDelete:
-			return RequestUtil.newDeleteRequest(id);
+			case R.id.btnSelectPost:
+				return RequestUtil.newPostRequest();
+			case R.id.btnSelectPut:
+				return RequestUtil.newPutRequest(id);
+			case R.id.btnSelectDelete:
+				return RequestUtil.newDeleteRequest(id);
 
-		case R.id.btnSelectSingle:
-			return RequestUtil.newSingleRequest(id);
-		case R.id.btnSelectColumns:
-			return RequestUtil.newColumnsRequest(id);
-		case R.id.btnSelectRely:
-			return RequestUtil.newRelyRequest(id);
-		case R.id.btnSelectArray:
-			return RequestUtil.newArrayRequest();
+			case R.id.btnSelectSingle:
+				return RequestUtil.newSingleRequest(id);
+			case R.id.btnSelectColumns:
+				return RequestUtil.newColumnsRequest(id);
+			case R.id.btnSelectRely:
+				return RequestUtil.newRelyRequest(id);
+			case R.id.btnSelectArray:
+				return RequestUtil.newArrayRequest();
 
-		case R.id.btnSelectAccessError:
-			return RequestUtil.newAccessErrorRequest();
-		case R.id.btnSelectAccessPermitted:
-			return RequestUtil.newAccessPermittedRequest();
-		default:
-			return RequestUtil.newComplexRequest();
+			case R.id.btnSelectAccessError:
+				return RequestUtil.newAccessErrorRequest();
+			case R.id.btnSelectAccessPermitted:
+				return RequestUtil.newAccessPermittedRequest();
+			default:
+				return RequestUtil.newComplexRequest();
 		}
 	}
 
@@ -152,26 +180,26 @@ public class SelectActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.btnSelectPost:
-			select(getRequest(v), "post");
-			break;
-		case R.id.btnSelectPut:
-			select(getRequest(v), "put");
-			break;
-		case R.id.btnSelectDelete:
-			select(getRequest(v), "delete");
-			break;
+			case R.id.btnSelectPost:
+				select(getRequest(v), "post");
+				break;
+			case R.id.btnSelectPut:
+				select(getRequest(v), "put");
+				break;
+			case R.id.btnSelectDelete:
+				select(getRequest(v), "delete");
+				break;
 
-		case R.id.btnSelectAccessError:
-			select(getRequest(v), "gets");
-			break;
-		case R.id.btnSelectAccessPermitted:
-			select(getRequest(v), "gets");
-			break;
+			case R.id.btnSelectAccessError:
+				select(getRequest(v), "gets");
+				break;
+			case R.id.btnSelectAccessPermitted:
+				select(getRequest(v), "gets");
+				break;
 
-		default:
-			select(getRequest(v), "get");
-			break;
+			default:
+				select(getRequest(v), "get");
+				break;
 		}
 	}
 
@@ -191,28 +219,37 @@ public class SelectActivity extends Activity implements OnClickListener {
 			return;
 		}
 		switch (requestCode) {
-		case REQUEST_TO_REQUEST:
-		case REQUEST_TO_AUTO:
-			if (data == null) {
-				Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
-			} else {
-				id = data.getLongExtra(RequestActivity.RESULT_ID, id);
-				url = data.getStringExtra(RequestActivity.RESULT_URL);
+			case REQUEST_TO_REQUEST:
+			case REQUEST_TO_AUTO:
+				if (data == null) {
+					Toast.makeText(context, "onActivityResult  data == null !!!", Toast.LENGTH_SHORT).show();
+				} else {
+					url = data.getStringExtra(RequestActivity.RESULT_URL);
+					method = data.getStringExtra(RequestActivity.RESULT_METHOD);
 
-				setRequest();
+					//保存配置
+					SharedPreferences.Editor e = getSharedPreferences(CONFIG_PATH, Context.MODE_PRIVATE).edit();
 
-				//保存配置
-				getSharedPreferences(CONFIG_PATH, Context.MODE_PRIVATE)
-				.edit()
-				.remove(KEY_ID)
-				.putLong(KEY_ID, id)
-				.remove(KEY_URL)
-				.putString(KEY_URL, url)
-				.commit();
-			}
-			break;
-		default:
-			break;
+					e.remove(KEY_URL)
+							.putString(KEY_URL, url)
+							.remove(KEY_METHOD)
+							.putString(KEY_METHOD, method);
+
+					if (RequestUtil.isLogMethod(method)) {
+						name = data.getStringExtra(RequestActivity.RESULT_NAME);
+						e.remove(KEY_NAME).putString(KEY_NAME, name);
+					} else {
+						id = data.getLongExtra(RequestActivity.RESULT_ID, id);
+						e.remove(KEY_ID).putLong(KEY_ID, id);
+					}
+
+					setRequest();
+
+					e.commit();
+				}
+				break;
+			default:
+				break;
 		}
 	}
 

@@ -6,6 +6,11 @@
         style="@style/match_match"
         android:orientation="vertical" >
 
+        <Button
+            android:id="@+id/tvSelectLogin"
+            style="@style/match_wrap"
+            android:text="@string/login" />
+
         <TextView
             style="@style/select_name"
             android:text="@string/post"
@@ -98,7 +103,7 @@
             android:layout_marginTop="30dp"
             android:onClick="toAuto"
             android:text="@string/auto" />
-        
+
         <Button
             android:onClick="toUpdateLog"
             style="@style/match_wrap"

@@ -14,17 +14,18 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import zuo.biao.apijson.JSONObject;
-import zuo.biao.apijson.JSONRequest;
-import android.content.Context;
 import apijson.demo.application.DemoApplication;
 import apijson.demo.model.Comment;
 import apijson.demo.model.Moment;
 import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
+import zuo.biao.apijson.JSONObject;
+import zuo.biao.apijson.JSONRequest;
 
 /**请求工具类
  * @author Lemon
@@ -37,9 +38,21 @@ public class RequestUtil {
 	}
 
 	private static final long DEFAULT_MOMENT_ID = 15;
-	private static final long DEFAULT_USER_ID = 38710;
+	private static final long DEFAULT_USER_ID = 82001;
 
+	public static boolean isLogMethod(String method) {
+		return "login".equals(method) || "logout".equals(method);
+	}
 
+	public static JSONObject newLoginRequest() {
+		JSONRequest request = new JSONRequest();
+		request.put("phone", "13000082001");
+		request.put("password", "123456");
+		return request;
+	}
+	public static JSONObject newLogoutRequest() {
+		return new JSONRequest();
+	}
 
 	public static JSONObject newPostRequest() {
 		Moment data = new Moment();
@@ -56,8 +69,8 @@ public class RequestUtil {
 		Moment data = new Moment(id <= 0 ? DEFAULT_MOMENT_ID : id);
 		//		data.setContent(context.getString(R.string.apijson_info));//一般可用这种方式，encode是为了展示方便
 		List<Long> list = new ArrayList<Long>();
-		list.add((long) 82001);
 		list.add((long) 82002);
+		list.add((long) 82003);
 		JSONObject momentObject = new JSONObject(data);
 		momentObject.put("praiseUserIdList+", list);
 		momentObject.put("content", context.getString(R.string.apijson_info));
@@ -120,5 +133,6 @@ public class RequestUtil {
 		JSONRequest request = new JSONRequest(new Privacy(DEFAULT_USER_ID));
 		return request.setTag(Privacy.class.getSimpleName());
 	}
+
 
 }
