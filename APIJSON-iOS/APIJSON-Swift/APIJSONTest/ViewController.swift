@@ -30,7 +30,7 @@ class ViewController: UIViewController {
      */
     func test() {
         
-        let url = "http://39.108.143.172:8080/get";
+        let url = "http://apijson.cn:8080/get";
         //要发送的请求数据
         let json = [
             //返回数据太长 "[]": [

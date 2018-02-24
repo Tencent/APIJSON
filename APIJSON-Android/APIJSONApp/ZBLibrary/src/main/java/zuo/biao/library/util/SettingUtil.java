@@ -229,11 +229,11 @@ public final class SettingUtil {
 	/**
 	 * TODO 改为你的正式服务器地址
 	 */
-	public static final String URL_SERVER_ADDRESS_NORMAL_HTTP = "http://39.108.143.172:8080/";//正式服务器
+	public static final String URL_SERVER_ADDRESS_NORMAL_HTTP = "http://apijson.cn:8080/";//正式服务器
 	/**
 	 * TODO 改为你的正式服务器地址
 	 */
-	public static final String URL_SERVER_ADDRESS_NORMAL_HTTPS = "http://39.108.143.172:8080/";//正式服务器
+	public static final String URL_SERVER_ADDRESS_NORMAL_HTTPS = "http://apijson.cn:8080/";//正式服务器
 	/**
 	 * TODO 改为你的测试服务器地址,如果有的话
 	 */

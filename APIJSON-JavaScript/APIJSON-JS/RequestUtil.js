@@ -3,7 +3,7 @@
  */
 const TAG_REQUEST_UTIL = 'RequestUtil';
 
-const URL_BASE = "http://39.108.143.172:8080"; // 基地址
+const URL_BASE = "http://apijson.cn:8080"; // 基地址
 const URL_GET = URL_BASE + "/get"; // 常规获取数据方式
 const URL_HEAD = URL_BASE + "/head"; // 检查，默认是非空检查，返回数据总数
 const URL_GETS = URL_BASE + "/gets"; // 通过POST来GET数据，不显示请求内容和返回结果，一般用于对安全要求比较高的请求

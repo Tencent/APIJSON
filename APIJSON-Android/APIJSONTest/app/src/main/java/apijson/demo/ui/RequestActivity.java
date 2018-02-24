@@ -126,7 +126,7 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 
 
 		etRequestUrl.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
-				? url : "http://39.108.143.172:8080/"));//TODO 把这个ip地址改成你自己服务器的
+				? url : "http://apijson.cn:8080/"));//TODO 把这个ip地址改成你自己服务器的
 		btnRequestRequest.setText(method);
 
 		error = String.format(getResources().getString(R.string.request_error), StringUtil.getTrimedString(btnRequestRequest));
