@@ -508,7 +508,7 @@ public class Controller {
 		session.setAttribute(TYPE, isPassword ? LOGIN_TYPE_PASSWORD : LOGIN_TYPE_VERIFY);//登录方式
 		session.setAttribute(USER_, user);//用户
 		session.setAttribute(PRIVACY_, privacy);//用户隐私信息
-		session.setAttribute(VERSION, version);//用户隐私信息
+		session.setAttribute(VERSION, version);//全局默认版本号
 		//		session.setMaxInactiveInterval(1*60);//设置session过期时间
 
 		return response;

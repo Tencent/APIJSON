@@ -26,7 +26,6 @@ import zuo.biao.apijson.server.SQLCreator;
 import zuo.biao.apijson.server.SQLExecutor;
 import zuo.biao.apijson.server.Structure;
 import zuo.biao.apijson.server.Verifier;
-import zuo.biao.apijson.server.Visitor;
 
 
 /**请求解析器
@@ -35,7 +34,7 @@ import zuo.biao.apijson.server.Visitor;
 public class DemoParser extends AbstractParser implements SQLCreator {
 
 
-	public DemoParser(Visitor visitor) {
+	public DemoParser() {
 		super();
 	}
 	public DemoParser(RequestMethod method) {

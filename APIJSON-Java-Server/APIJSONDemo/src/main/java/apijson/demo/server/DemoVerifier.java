@@ -57,7 +57,9 @@ public class DemoVerifier extends AbstractVerifier {
 	@NotNull
 	@Override
 	public DemoParser createParser() {
-		return new DemoParser(visitor);
+		DemoParser parser = new DemoParser();
+		parser.setVisitor(visitor);
+		return parser;
 	}
 
 	@Override
