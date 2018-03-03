@@ -47,6 +47,7 @@ import zuo.biao.apijson.server.model.Request;
 import zuo.biao.apijson.server.model.Response;
 import zuo.biao.apijson.server.model.Table;
 import zuo.biao.apijson.server.model.Test;
+import zuo.biao.apijson.server.model.TestRecord;
 
 /**权限验证
  * @author Lemon
@@ -67,6 +68,7 @@ public abstract class AbstractVerifier implements Verifier {
 		ACCESS_MAP.put(Request.class.getSimpleName(), getAccessMap(Request.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(Response.class.getSimpleName(), getAccessMap(Response.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(Document.class.getSimpleName(), getAccessMap(Document.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(TestRecord.class.getSimpleName(), getAccessMap(TestRecord.class.getAnnotation(MethodAccess.class)));
 	}
 
 	/**获取权限Map，每种操作都只允许对应的角色
