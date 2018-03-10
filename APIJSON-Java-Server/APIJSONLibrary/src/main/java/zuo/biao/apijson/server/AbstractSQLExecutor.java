@@ -152,7 +152,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			if (config.getId() > 0) {
 				result.put(JSONResponse.KEY_ID, config.getId());
 			} else {
-				result.put(JSONResponse.KEY_ID_IN, config.getWhere(JSONResponse.KEY_ID_IN, true));
+				result.put(JSONResponse.KEY_ID + "[]", config.getWhere(JSONResponse.KEY_ID_IN, true));
 			}
 			result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
 			return result;
