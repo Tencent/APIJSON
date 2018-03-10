@@ -13,3 +13,7 @@ APIJSON-Android/APIJSON-AndroidStudio/APIJSONApp/.idea
 APIJSON-JavaScript/.idea
 
 APIJSON-JavaScript/APIJSON-JS-Vue/yarn.lock
+APIJSON-Java-Server/APIJSONDemo/.settings
+APIJSON-Java-Server/APIJSONLibrary/.settings
+*.classpath
+*.project
