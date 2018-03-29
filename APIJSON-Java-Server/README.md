@@ -81,6 +81,9 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSOND
 
 启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
+配置你自己的表请参考：
+[3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
+
 <br />
 
 ### 5.测试接口<br />
