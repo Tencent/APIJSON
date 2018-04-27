@@ -25,10 +25,10 @@ import java.util.Map;
  */
 public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final String TAG = "JSONObject";
 
-	
+
 	/**ordered
 	 */
 	public JSONObject() {
@@ -36,21 +36,21 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 	/**transfer Object to JSONObject
 	 * @param object
-	 * @see {@link #JSONObject(Object, boolean)}
+	 * @see {@link #JSONObject(Object)}
 	 */
 	public JSONObject(Object object) {
 		this(toJSONString(object));
 	}
 	/**parse JSONObject with JSON String
 	 * @param json
-	 * @see {@link #JSONObject(String, boolean)}
+	 * @see {@link #JSONObject(String)}
 	 */
 	public JSONObject(String json) {
 		this(parseObject(json));
 	}
 	/**transfer com.alibaba.fastjson.JSONObject to JSONObject
 	 * @param object
-	 * @see {@link #putsAll(com.alibaba.fastjson.JSONObject)}
+	 * @see {@link #putsAll(Map<? extends String, ? extends Object>)}
 	 */
 	public JSONObject(com.alibaba.fastjson.JSONObject object) {
 		this();
@@ -82,7 +82,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//JSONObject内关键词 key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	
+
 	public static final String KEY_ID = "id";
 	public static final String KEY_ID_IN = KEY_ID + "{}";
 
@@ -100,15 +100,15 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setIdIn(List<Object> list) {
 		return puts(KEY_ID_IN, list);
 	}
-	
-	
+
+
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
 	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	public static final String KEY_CONDITION = "@condition"; //条件 TODO 用 @where& @where| @where! 替代？
 	public static final String KEY_TRY = "@try"; //尝试，忽略异常
 	public static final String KEY_DROP = "@drop"; //丢弃，不返回
 	public static final String KEY_CORRECT = "@correct"; //字段校正
-	
+
 	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
 	public static final String KEY_ABOUT = "@about"; //关于，返回数据库表的信息，包括表说明和字段说明
 	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
@@ -125,7 +125,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setRole(String role) {
 		return puts(KEY_ROLE, role);
 	}
-	
+
 	/**set try, ignore exceptions
 	 * @param tri
 	 * @return this
@@ -133,7 +133,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setTry(boolean tri) {
 		return puts(KEY_TRY, tri);
 	}
-	
+
 	/**set drop, data dropped will not return
 	 * @param drop
 	 * @return this
@@ -141,7 +141,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setDrop(boolean drop) {
 		return puts(KEY_DROP, drop);
 	}
-	
+
 	/**set correct, correct keys to target ones
 	 * @param correct  Map{originKey, [posibleKeys]}， posibleKey之间用 , 隔开
 	 * @return this
@@ -149,8 +149,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setCorrect(Map<String, String> correct) {
 		return puts(KEY_CORRECT, correct);
 	}
-	
-	
+
+
 
 	/**set schema where table was puts
 	 * @param schema
@@ -300,10 +300,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//Request >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	
+
 
 	/**puts key-value in object into this
-	 * @param object
+	 * @param map
 	 * @return this
 	 */
 	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
@@ -318,17 +318,17 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 
-	
+
 	/**put and return this
 	 * @param value  must be annotated by {@link MethodAccess}
-	 * @return {@link #puts(String, boolean)}
+	 * @return {@link #puts(String, Object)}
 	 */
 	public JSONObject puts(Object value) {
 		return puts(null, value);
 	}
 	/**put and return this
 	 * @param key
-	 * @param value 
+	 * @param value
 	 * @return this
 	 * @see {@link #put(String, Object)}
 	 */
@@ -336,10 +336,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(key, value);
 		return this;
 	}
-	
+
 	/**put and return value
 	 * @param value  must be annotated by {@link MethodAccess}
-	 * @return {@link #put(String, boolean)}
+	 * @return {@link #put(String, Object)}
 	 */
 	public Object put(Object value) {
 		return put(null, value);
@@ -370,5 +370,5 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 
-	
+
 }

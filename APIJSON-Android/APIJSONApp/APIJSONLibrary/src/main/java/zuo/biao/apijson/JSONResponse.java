@@ -14,11 +14,11 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import java.util.List;
-import java.util.Set;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
+import java.util.Set;
 
 /**parser for response
  * @author Lemon
@@ -64,7 +64,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	public static final String MSG_SUCCEED = "success"; //成功
 	public static final String MSG_SERVER_ERROR = "Internal Server Error!"; //服务器内部错误
 
-	
+
 	public static final String KEY_CODE = "code";
 	public static final String KEY_MSG = "msg";
 	public static final String KEY_ID = "id";
@@ -310,7 +310,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 			Log.i(TAG, "format  object == null || object.isEmpty() >> return object;");
 			return object;
 		}
-		JSONObject formatedObject = new JSONObject(true);
+		JSONObject formatted = new JSONObject(true);
 
 		Set<String> set = object.keySet();
 		if (set != null) {
@@ -320,19 +320,19 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 				value = object.get(key);
 
 				if (value instanceof JSONArray) {//JSONArray，遍历来format内部项
-					formatedObject.put(replaceArray(key), format((JSONArray) value));
+					formatted.put(replaceArray(key), format((JSONArray) value));
 				}
 				else if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					formatedObject.put(getSimpleName(key), format((JSONObject) value));
+					formatted.put(getSimpleName(key), format((JSONObject) value));
 				}
 				else {//其它Object，直接填充
-					formatedObject.put(getSimpleName(key), value);
+					formatted.put(getSimpleName(key), value);
 				}
 			}
 		}
 
-		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formatedObject = " + JSON.toJSONString(formatedObject));
-		return formatedObject;
+		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formatted = " + JSON.toJSONString(formatted));
+		return formatted;
 	}
 
 	/**格式化key名称
@@ -345,24 +345,24 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 			Log.i(TAG, "format  array == null || array.isEmpty() >> return array;");
 			return array;
 		}
-		JSONArray formatedArray = new JSONArray();
+		JSONArray formatted = new JSONArray();
 
 		Object value;
 		for (int i = 0; i < array.size(); i++) {
 			value = array.get(i);
 			if (value instanceof JSONArray) {//JSONArray，遍历来format内部项
-				formatedArray.add(format((JSONArray) value));
+				formatted.add(format((JSONArray) value));
 			}
 			else if (value instanceof JSONObject) {//JSONObject，往下一级提取
-				formatedArray.add(format((JSONObject) value));
+				formatted.add(format((JSONObject) value));
 			}
 			else {//其它Object，直接填充
-				formatedArray.add(value);
+				formatted.add(value);
 			}
 		}
 
-		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formatedArray = " + JSON.toJSONString(formatedArray));
-		return formatedArray;
+		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formatted = " + JSON.toJSONString(formatted));
+		return formatted;
 	}
 
 	/**替换key+KEY_ARRAY为keyList
