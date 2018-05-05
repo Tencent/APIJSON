@@ -836,20 +836,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						childs[i] = "\"" + childs[i] + "\"";
 					}
 					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-							+ "(" + getSearchString(
-									key
-									, new String[]{
-											"[" + childs[i] + "]", //全等
-											"[" + childs[i] + ", %", //开始
-											"%, " + childs[i] + ", %", //中间
-											"%, " + childs[i] + "]" //末尾
-									}
-									, Logic.TYPE_OR
-									) + ")";
+							+ "JSON_CONTAINS(" + key + ", '" + childs[i] + "')";
 				}
 			}
 			if (condition.isEmpty()) {
-				condition = (SQL.isEmpty(key, true) + OR + getLikeString(key, "[]"));
+				condition = (SQL.isEmpty(key, true) + OR + (key + "='[]'"));
 			}
 		}
 		if (condition.isEmpty()) {
