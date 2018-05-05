@@ -125,9 +125,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public static final Map<String, Pattern> COMPILE_MAP;
 	static {
 		COMPILE_MAP = new HashMap<String, Pattern>();
-		COMPILE_MAP.put("phone", StringUtil.PATTERN_PHONE);
-		COMPILE_MAP.put("email", StringUtil.PATTERN_EMAIL);
-		COMPILE_MAP.put("idCard", StringUtil.PATTERN_ID_CARD);
 	}
 
 	protected Map<String, String> corrected;
