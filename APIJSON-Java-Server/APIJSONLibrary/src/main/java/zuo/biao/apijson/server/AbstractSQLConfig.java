@@ -617,7 +617,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getRangeString(key, value);
 		case 4:
 			return getContainString(key, value);
-		default:
+		default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
 			return (key + "='" + value + "'");
 		}
 	}
@@ -636,7 +636,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		Logic logic = new Logic(key);
 		key = logic.getKey();
-		Log.i(TAG, "getRangeString key = " + key);
+		Log.i(TAG, "getSearchString key = " + key);
 
 		JSONArray arr = newJSONArray(value);
 		if (arr.isEmpty()) {
@@ -657,7 +657,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String condition = "";
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] instanceof String == false) {
-				throw new IllegalArgumentException(key + "$\":value 中value只能为String或JSONArray<String>！");
+				throw new IllegalArgumentException(key + "$\":value 中value的类型只能为String或String[]！");
 			}
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, values[i]);
 		}
@@ -690,7 +690,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		Logic logic = new Logic(key);
 		key = logic.getKey();
-		Log.i(TAG, "getRangeString key = " + key);
+		Log.i(TAG, "getRegExpString key = " + key);
 
 		JSONArray arr = newJSONArray(value);
 		if (arr.isEmpty()) {
@@ -711,7 +711,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String condition = "";
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] instanceof String == false) {
-				throw new IllegalArgumentException(key + "$\":value 中value只能为String或JSONArray<String>！");
+				throw new IllegalArgumentException(key + "$\":value 中value的类型只能为String或String[]！");
 			}
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getRegExpString(key, (String) values[i]);
 		}
