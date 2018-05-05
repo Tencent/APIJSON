@@ -825,6 +825,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	public static String getContainString(String key, Object[] childs, int type) throws IllegalArgumentException {
+		boolean not = Logic.isNot(type);
 		String condition = "";
 		if (childs != null) {
 			for (int i = 0; i < childs.length; i++) {
@@ -840,13 +841,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 			if (condition.isEmpty()) {
-				condition = (SQL.isEmpty(key, true) + OR + (key + "='[]'"));
+				condition = (SQL.isNull(key, true) + OR + getLikeString(key, "[]")); // key = '[]' 无结果！
+			} else {
+				condition = (SQL.isNull(key, false) + AND + "(" + condition + ")");
 			}
 		}
 		if (condition.isEmpty()) {
 			return "";
 		}
-		return getCondition(Logic.isNot(type), condition);
+		return getCondition(not, condition);
 	}
 	//<> contain >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

@@ -124,7 +124,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 				+ "\n select  startTime = " + startTime
-				+ "\n sql = " + sql
+				+ "\n sql = \n " + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 		ResultSet rs = null;
