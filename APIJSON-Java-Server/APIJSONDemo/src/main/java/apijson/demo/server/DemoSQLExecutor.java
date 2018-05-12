@@ -16,13 +16,12 @@ package apijson.demo.server;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
-
-import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.server.AbstractSQLExecutor;
@@ -47,40 +46,57 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 
 
-	private SQLConfig config = null;
-	@Override
-	public JSONObject execute(SQLConfig config) throws Exception {
-		this.config = config;
-		return super.execute(config);
-	}
-
 
 	@Override
-	public ResultSet executeQuery(@NotNull String sql) throws Exception {
-		return getStatement().executeQuery(sql);
+	public ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
+		return getStatement(config).executeQuery();
 	}
 
 	@Override
-	public int executeUpdate(@NotNull String sql) throws Exception {
-		return getStatement().executeUpdate(sql);
+	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
+		return getStatement(config).executeUpdate();
 	}
 
 
 	private Connection connection = null;
-	private Statement statement = null;
+	private PreparedStatement statement = null;
 	/**
+	 * @param config 
 	 * @return
 	 * @throws Exception
 	 */
-	private Statement getStatement() throws Exception {
+	private PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
 			connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
 					+ config.getDBAccount() + "&password=" + config.getDBPassword());
-
-			statement = connection.createStatement(); //创建Statement对象
 		}
+		
+//		statement = connection.prepareStatement("SELECT ?,? FROM sys.apijson_user WHERE sex=? AND id IN (?,?,?)"); //创建Statement对象
+////		Object[] values = config.getWhere().values().toArray();
+////		if (values != null && values.length > 0) {
+////			for (int i = 0; i < values.length; i++) {
+////				statement.setObject(i + 1, values[i]);
+////			}
+////		}
+//
+//		statement.setObject(1, "id");
+//		statement.setObject(2, "name");
+//		statement.setObject(3, 0);
+//		statement.setObject(4, 82001);
+//		statement.setObject(5, 82002);
+//		statement.setObject(6, 38710);
+
+		statement = connection.prepareStatement(config.getSQL(true)); //创建Statement对象
+		List<Object> valueList = config.getPreparedValues();
+		if (valueList != null && valueList.isEmpty() == false) {
+			for (int i = 0; i < valueList.size(); i++) {
+				statement.setString(i + 1, "" + valueList.get(i));
+			}
+		}
+
+
 		return statement;
 	}
 
@@ -100,7 +116,6 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		config = null;
 		statement = null;
 		connection = null;
 	}

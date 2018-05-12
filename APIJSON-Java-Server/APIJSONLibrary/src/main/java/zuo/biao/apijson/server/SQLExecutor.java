@@ -59,14 +59,14 @@ public interface SQLExecutor {
 	 * @return
 	 * @throws SQLException
 	 */
-	ResultSet executeQuery(@NotNull String sql) throws Exception;
+	ResultSet executeQuery(@NotNull SQLConfig config) throws Exception;
 	
 	/**执行增、删、改
 	 * @param sql
 	 * @return
 	 * @throws SQLException
 	 */
-	int executeUpdate(@NotNull String sql) throws Exception;
+	int executeUpdate(@NotNull SQLConfig config) throws Exception;
 	
 
 	/**判断是否为JSON类型

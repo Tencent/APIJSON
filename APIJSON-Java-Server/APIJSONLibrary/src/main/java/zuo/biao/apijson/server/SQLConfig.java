@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.util.List;
 import java.util.Map;
 
 import zuo.biao.apijson.RequestMethod;
@@ -51,7 +52,7 @@ public interface SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	String getSQL() throws Exception;
+	String getSQL(boolean isPrepared) throws Exception;
 
 
 	
@@ -152,4 +153,6 @@ public interface SQLConfig {
 	 */
 	SQLConfig putWhere(String key, Object value);
 	
+	
+	List<Object> getPreparedValues();
 }

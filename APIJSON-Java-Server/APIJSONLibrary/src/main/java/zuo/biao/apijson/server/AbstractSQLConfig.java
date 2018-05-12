@@ -79,6 +79,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	private long id; //Table的id
 	private RequestMethod method; //操作方法
+	private boolean prepared; //预编译
 	/**
 	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
 	 */
@@ -131,7 +132,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.method = method;
 		return this;
 	}
-
+	public boolean isPrepared() {
+		return prepared;
+	}
+	public void setPrepared(boolean prepared) {
+		this.prepared = prepared;
+	}
 
 
 	@Override
@@ -306,7 +312,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return column.contains(":") == false ? column : column.replaceAll(":", " AS ");//不能在这里改，后续还要用到:
 		}
 	}
-	
+
 
 	@Override
 	public String getValues() {
@@ -513,31 +519,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static String getWhereString(RequestMethod method, Map<String, Object> where, boolean verifyName) throws Exception {
+	public String getWhereString(RequestMethod method, Map<String, Object> where, boolean verifyName) throws Exception {
 		Map<String, Object> where2 = where == null || where.isEmpty() ? null : new LinkedHashMap<String, Object>();
 		if (where2 == null) {
 			return "";
 		}
-		
+
 		//强制排序，把id,id{},userId,userId{}放最前面，保证安全、优化性能
 		Object id = where.remove(KEY_ID);
 		Object idIn = where.remove(KEY_ID_IN);
 		Object userId = where.remove(KEY_USER_ID);
 		Object userIdIn = where.remove(KEY_USER_ID_IN);
-		
+
 		where2.put(KEY_ID, id);
 		where2.put(KEY_ID_IN, idIn);
 		where2.put(KEY_USER_ID, userId);
 		where2.put(KEY_USER_ID_IN, userIdIn);
 		where2.putAll(where);
-		
-		
+
+
 		Set<Entry<String, Object>> set = where2.entrySet();
-		
+
 		boolean isFirst = true;
 		String condition;
 		String whereString = "";
-		
+
 		for (Entry<String, Object> entry : set) {
 			if (entry == null) {
 				continue;
@@ -552,7 +558,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			isFirst = false;
 		}
-		
+
 		//还原where，后续可能用到
 		where.put(KEY_ID, id);
 		where.put(KEY_ID_IN, idIn);
@@ -560,11 +566,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		where.put(KEY_USER_ID_IN, userIdIn);
 
 		String s = whereString.isEmpty() ? "" : " WHERE " + whereString;
-		
+
 		if (s.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
 			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
 		}
-		
+
 		return s;
 	}
 
@@ -576,7 +582,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	private static String getWhereItem(String key, Object value
+	private String getWhereItem(String key, Object value
 			, RequestMethod method, boolean verifyName) throws Exception {
 		Log.d(TAG, "getWhereItem  key = " + key);
 		//避免筛选到全部	value = key == null ? null : where.get(key);
@@ -618,10 +624,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case 4:
 			return getContainString(key, value);
 		default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
-			return (key + "='" + value + "'");
+			return getEqualString(key, value);
 		}
 	}
 
+
+	private String getEqualString(String key, Object value) {
+		return (key + "=" + getValue(value));
+	}
+
+
+	/**
+	 * 使用prepareStatement预编译，值为 ? ，后续动态set进去
+	 */
+	private List<Object> preparedValues = new ArrayList<>();
+	private Object getValue(@NotNull Object value) {
+		if (isPrepared()) {
+			preparedValues.add(value);
+			return "?";
+		}
+		return "'" + value + "'";
+	}
+	@Override
+	public List<Object> getPreparedValues() {
+		return preparedValues;
+	}
 
 	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**search key match value
@@ -629,7 +656,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return {@link #getSearchString(String, Object[], int)}
 	 * @throws IllegalArgumentException 
 	 */
-	public static String getSearchString(String key, Object value) throws IllegalArgumentException {
+	public String getSearchString(String key, Object value) throws IllegalArgumentException {
 		if (value == null) {
 			return "";
 		}
@@ -649,7 +676,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return LOGIC [  key LIKE 'values[i]' ]
 	 * @throws IllegalArgumentException 
 	 */
-	public static String getSearchString(String key, Object[] values, int type) throws IllegalArgumentException {
+	public String getSearchString(String key, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
 		}
@@ -670,8 +697,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param value
 	 * @return key LIKE 'value'
 	 */
-	public static String getLikeString(String key, Object value) {
-		return key + " LIKE '" + value + "'";
+	public String getLikeString(String key, Object value) {
+		return key + " LIKE "  + getValue(value);
 	}
 	//$ search >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -683,7 +710,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return {@link #getRegExpString(String, Object[], int)}
 	 * @throws IllegalArgumentException 
 	 */
-	public static String getRegExpString(String key, Object value) throws IllegalArgumentException {
+	public String getRegExpString(String key, Object value) throws IllegalArgumentException {
 		if (value == null) {
 			return "";
 		}
@@ -703,7 +730,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return LOGIC [  key REGEXP 'values[i]' ]
 	 * @throws IllegalArgumentException 
 	 */
-	public static String getRegExpString(String key, Object[] values, int type) throws IllegalArgumentException {
+	public String getRegExpString(String key, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
 		}
@@ -724,8 +751,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param value
 	 * @return key REGEXP 'value'
 	 */
-	public static String getRegExpString(String key, String value) {
-		return key + " REGEXP '" + value + "'";
+	public String getRegExpString(String key, String value) {
+		return key + " REGEXP " + getValue(value);
 	}
 	//$ search >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -738,7 +765,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return key condition0 AND key condition1 AND ...
 	 * @throws Exception 
 	 */
-	public static String getRangeString(String key, Object range) throws Exception {
+	public String getRangeString(String key, Object range) throws Exception {
 		Log.i(TAG, "getRangeString key = " + key);
 		if (range == null) {//依赖的对象都没有给出有效值，这个存在无意义。如果是客户端传的，那就能在客户端确定了。
 			throw new NotExistException(TAG + "getRangeString(" + key + ", " + range
@@ -781,11 +808,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return IN ('key0', 'key1', ... )
 	 * @throws NotExistException 
 	 */
-	public static String getInString(String key, Object[] in, boolean not) throws NotExistException {
+	public String getInString(String key, Object[] in, boolean not) throws NotExistException {
 		String condition = "";
 		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
 			for (int i = 0; i < in.length; i++) {
-				condition += ((i > 0 ? "," : "") + "'" + in[i] + "'");
+				condition += ((i > 0 ? "," : "") + getValue(in[i]));
 			}
 		}
 		if (condition.isEmpty()) {//条件如果存在必须执行，不能忽略。条件为空会导致出错，又很难保证条件不为空(@:条件)，所以还是这样好
@@ -804,7 +831,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return 	{@link #getContainString(String, Object[], int)}
 	 * @throws NotExistException
 	 */
-	public static String getContainString(String key, Object value) throws NotExistException {
+	public String getContainString(String key, Object value) throws NotExistException {
 		if (value == null) {
 			return "";
 		}
@@ -824,7 +851,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 *   OR  key LIKE '%, " + childs[i] + ", %'  OR  key LIKE '%, " + childs[i] + "]' )  ]
 	 * @throws IllegalArgumentException 
 	 */
-	public static String getContainString(String key, Object[] childs, int type) throws IllegalArgumentException {
+	public String getContainString(String key, Object[] childs, int type) throws IllegalArgumentException {
 		boolean not = Logic.isNot(type);
 		String condition = "";
 		if (childs != null) {
@@ -837,7 +864,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						childs[i] = "\"" + childs[i] + "\"";
 					}
 					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-							+ "JSON_CONTAINS(" + key + ", '" + childs[i] + "')";
+							+ "JSON_CONTAINS(" + key + ", " + getValue(childs[i]) + ")";
 				}
 			}
 			if (condition.isEmpty()) {
@@ -861,7 +888,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private static String getCondition(boolean not, String condition) {
 		return not ? NOT + "(" + condition + ")" : condition;
 	}
-	
+
 
 	/**转为JSONArray
 	 * @param tv
@@ -971,7 +998,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	@Override
-	public String getSQL() throws Exception {
+	public String getSQL(boolean prepared) throws Exception {
+		setPrepared(prepared);
 		return getSQL(this);
 	}
 	/**
@@ -1340,8 +1368,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		Log.i(TAG, "getRealKey  return key = " + key);
 		return key;
 	}
-	
-	
+
+
 	public interface Callback {
 		AbstractSQLConfig getSQLConfig(RequestMethod method, String table);
 	}

@@ -114,7 +114,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public JSONObject execute(SQLConfig config) throws Exception {
 
-		final String sql = config == null ? null : config.getSQL();
+		final String sql = config == null ? null : config.getSQL(false);
 		if (StringUtil.isNotEmpty(sql, true) == false) {
 			Log.e(TAG, "select  config==null||StringUtil.isNotEmpty(config.getSQLTable(), true)==false>>return null;");
 			return null;
@@ -131,7 +131,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		switch (config.getMethod()) {
 		case HEAD:
 		case HEADS:
-			rs = executeQuery(sql);
+			rs = executeQuery(config);
 
 			result = rs.next() ? AbstractParser.newSuccessResult()
 					: AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
@@ -143,7 +143,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		case POST:
 		case PUT:
 		case DELETE:
-			long updateCount = executeUpdate(sql);
+			long updateCount = executeUpdate(config);
 
 			result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
 					, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "可能对象不存在！");
@@ -175,7 +175,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			return result;
 		}
 
-		rs = executeQuery(sql);
+		rs = executeQuery(config);
 
 		//		final boolean cache = config.getCount() != 1;
 		Map<Integer, JSONObject> resultMap = new HashMap<Integer, JSONObject>();
