@@ -113,10 +113,18 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 */
 	@Override
 	public JSONObject execute(SQLConfig config) throws Exception {
-
-		final String sql = config == null ? null : config.getSQL(false);
+		if (config == null) {
+			Log.e(TAG, "select  config==null >> return null;");
+			return null;
+		}
+		boolean prepared = config.isPrepared();
+		
+		final String sql = config.getSQL(false);
+		
+		config.setPrepared(prepared);
+		
 		if (StringUtil.isNotEmpty(sql, true) == false) {
-			Log.e(TAG, "select  config==null||StringUtil.isNotEmpty(config.getSQLTable(), true)==false>>return null;");
+			Log.e(TAG, "select  StringUtil.isNotEmpty(sql, true) == false >> return null;");
 			return null;
 		}
 		JSONObject result = null;

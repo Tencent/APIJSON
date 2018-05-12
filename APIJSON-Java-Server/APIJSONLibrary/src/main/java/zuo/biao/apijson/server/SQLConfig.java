@@ -52,7 +52,7 @@ public interface SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	String getSQL(boolean isPrepared) throws Exception;
+	String getSQL(boolean prepared) throws Exception;
 
 
 	
@@ -154,5 +154,9 @@ public interface SQLConfig {
 	SQLConfig putWhere(String key, Object value);
 	
 	
-	List<Object> getPreparedValues();
+	boolean isPrepared();
+	
+	AbstractSQLConfig setPrepared(boolean prepared);
+	
+	List<Object> getPreparedValueList();
 }

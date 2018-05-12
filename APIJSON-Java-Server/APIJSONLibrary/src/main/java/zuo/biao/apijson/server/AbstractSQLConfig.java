@@ -79,7 +79,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	private long id; //Table的id
 	private RequestMethod method; //操作方法
-	private boolean prepared; //预编译
+	private boolean prepared = true; //预编译
 	/**
 	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
 	 */
@@ -132,11 +132,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.method = method;
 		return this;
 	}
+	@Override
 	public boolean isPrepared() {
 		return prepared;
 	}
-	public void setPrepared(boolean prepared) {
+	@Override
+	public AbstractSQLConfig setPrepared(boolean prepared) {
 		this.prepared = prepared;
+		return this;
 	}
 
 
@@ -248,7 +251,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	public String getHavingString() {
 		having = StringUtil.getTrimedString(having);
-		return having.isEmpty() ? "" : " HAVING " + having;
+		if(having.isEmpty()) {
+			return ""; 
+		}
+		if (isPrepared()) {
+			throw new UnsupportedOperationException("预编译模式下不允许传 @having:\"condition\" !");
+		}
+		return " HAVING " + having;
 	}
 
 	@Override
@@ -646,7 +655,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return "'" + value + "'";
 	}
 	@Override
-	public List<Object> getPreparedValues() {
+	public List<Object> getPreparedValueList() {
 		return preparedValues;
 	}
 
@@ -797,6 +806,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (condition.isEmpty()) {
 				return "";
 			}
+			
+			if (isPrepared()) {
+				throw new UnsupportedOperationException("预编译模式下不允许传 key{}:\"condition\" !");
+			}
+			
 			return getCondition(logic.isNot(), condition);
 		}
 
@@ -999,8 +1013,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getSQL(boolean prepared) throws Exception {
-		setPrepared(prepared);
-		return getSQL(this);
+		return getSQL(this.setPrepared(prepared));
 	}
 	/**
 	 * @param config

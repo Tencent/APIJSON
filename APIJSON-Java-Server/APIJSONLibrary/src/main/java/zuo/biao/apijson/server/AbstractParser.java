@@ -515,6 +515,7 @@ public abstract class AbstractParser implements Parser {
 	public JSONObject getStructure(@NotNull String table, String key, String value, int version) throws Exception  {
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
 		SQLConfig config = createSQLConfig().setMethod(GET).setTable(table);
+		config.setPrepared(false);
 		config.setColumn("structure");
 
 		Map<String, Object> where = new HashMap<String, Object>();

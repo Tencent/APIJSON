@@ -73,29 +73,13 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 					+ config.getDBAccount() + "&password=" + config.getDBPassword());
 		}
 		
-//		statement = connection.prepareStatement("SELECT ?,? FROM sys.apijson_user WHERE sex=? AND id IN (?,?,?)"); //创建Statement对象
-////		Object[] values = config.getWhere().values().toArray();
-////		if (values != null && values.length > 0) {
-////			for (int i = 0; i < values.length; i++) {
-////				statement.setObject(i + 1, values[i]);
-////			}
-////		}
-//
-//		statement.setObject(1, "id");
-//		statement.setObject(2, "name");
-//		statement.setObject(3, 0);
-//		statement.setObject(4, 82001);
-//		statement.setObject(5, 82002);
-//		statement.setObject(6, 38710);
-
-		statement = connection.prepareStatement(config.getSQL(true)); //创建Statement对象
-		List<Object> valueList = config.getPreparedValues();
+		statement = connection.prepareStatement(config.getSQL(config.isPrepared())); //创建Statement对象
+		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
 		if (valueList != null && valueList.isEmpty() == false) {
 			for (int i = 0; i < valueList.size(); i++) {
 				statement.setString(i + 1, "" + valueList.get(i));
 			}
 		}
-
 
 		return statement;
 	}
