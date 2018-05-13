@@ -403,12 +403,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getValuesString() {
 		return values;
 	}
-	public AbstractSQLConfig setValues(String[][] valuess) {
+	public AbstractSQLConfig setValues(Object[][] valuess) {
 		String s = "";
 		if (valuess != null && valuess.length > 0) {
-			String[] items = new String[valuess.length];
+			Object[] items = new Object[valuess.length];
+			Object[] vs;
 			for (int i = 0; i < valuess.length; i++) {
-				items[i] = "(" + StringUtil.getString(valuess[i]) + ")";
+				vs = valuess[i];
+				if (vs == null) {
+					continue;
+				}
+				
+				items[i] = "(";
+				for (int j = 0; j < vs.length; j++) {
+					items[i] += ((j <= 0 ? "" : ",") + getValue(vs[j]));
+				}
+				items[i] += ")";
 			}
 			s = StringUtil.getString(items);
 		}
@@ -1279,13 +1289,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				column = KEY_ID + "," + StringUtil.getString(columns); //set已经判断过不为空
 				final int size = columns.length + 1; //以key数量为准
 
-				String[][] valuess = new String[idList.size()][]; // [idList.size()][]
-				String[] items; //(item0, item1, ...)
+				Object[][] valuess = new Object[idList.size()][]; // [idList.size()][]
+				Object[] items; //(item0, item1, ...)
 				for (int i = 0; i < idList.size(); i++) {
-					items = new String[size];
-					items[0] = "'" + idList.get(i) + "'"; //第0个就是id。所有的值都加 '' 避免SQL注入风险
+					items = new Object[size];
+					items[0] = idList.get(i); //第0个就是id
 					for (int j = 1; j < size; j++) {
-						items[j] = "'" + values[j-1] + "'"; //从第1个开始，允许"null"
+						items[j] = values[j-1]; //从第1个开始，允许"null"
 					}
 					valuess[i] = items;
 				}
