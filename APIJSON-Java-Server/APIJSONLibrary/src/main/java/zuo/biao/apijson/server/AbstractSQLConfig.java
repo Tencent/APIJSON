@@ -233,7 +233,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	public String getGroupString() {
 		group = StringUtil.getTrimedString(group);
-		return group.isEmpty() ? "" : " GROUP BY " + group;
+		if (group.isEmpty()) {
+			return "";
+		}
+		
+		if (isPrepared()) { //不能通过 ? 来代替，因为SQLExecutor statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
+			String[] keys = StringUtil.split(group);
+			if (keys != null && keys.length > 0) {
+				for (int i = 0; i < keys.length; i++) {
+					if (StringUtil.isName(keys[i]) == false) {
+						throw new IllegalArgumentException("@group:value 中 value里面用 , 分割的每一项都必须是1个单词！");
+					}
+				}
+			}
+		}
+
+		return " GROUP BY " + group;
 	}
 
 	@Override
@@ -306,18 +321,52 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		switch (getMethod()) {
 		case HEAD:
 		case HEADS:
+			if (StringUtil.isEmpty(column, true) == false && StringUtil.isName(column) == false) {
+				throw new IllegalArgumentException("HEAD请求: @column:value 中 value必须是1个单词！");
+			}
 			return SQL.count(column);
 		case POST:
 			if (StringUtil.isEmpty(column, true)) {
 				throw new NotExistException(TAG + "getColumnString  getMethod() = POST"
 						+ " >> StringUtil.isEmpty(column, true)");
 			}
+			
+			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				String[] keys = StringUtil.split(column);
+				if (keys != null && keys.length > 0) {
+					for (int i = 0; i < keys.length; i++) {
+						if (StringUtil.isName(keys[i]) == false) {
+							throw new IllegalArgumentException("POST请求: 每一个 key:value 中的key都必须是1个单词！");
+						}
+					}
+				}
+			}
+			
 			return "(" + column + ")";
 		default:
 			column = StringUtil.getString(column);
 			if (column.isEmpty()) {
 				return "*";
 			}
+			
+			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				String[] keys = StringUtil.split(column);
+				if (keys != null && keys.length > 0) {
+					String origin;
+					String alias;
+					int index;
+					for (int i = 0; i < keys.length; i++) {
+						index = keys[i].indexOf(":"); //StringUtil.split返回数组中，子项不会有null
+						origin = index < 0 ? keys[i] : keys[i].substring(0, index);
+						alias = index < 0 ? null : keys[i].substring(index + 1);
+						
+						if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
+							throw new IllegalArgumentException("GET请求: @column:value 中 value里面用 , 分割的每一项 column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！");
+						}
+					}
+				}
+			}
+			
 			return column.contains(":") == false ? column : column.replaceAll(":", " AS ");//不能在这里改，后续还要用到:
 		}
 	}
@@ -806,11 +855,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (condition.isEmpty()) {
 				return "";
 			}
-			
+
 			if (isPrepared()) {
 				throw new UnsupportedOperationException("预编译模式下不允许传 key{}:\"condition\" !");
 			}
-			
+
 			return getCondition(logic.isNot(), condition);
 		}
 
