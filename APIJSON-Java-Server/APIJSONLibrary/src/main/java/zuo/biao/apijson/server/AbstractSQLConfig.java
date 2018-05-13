@@ -177,6 +177,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
+		if (schema != null) {
+			String s = schema.startsWith("`") && schema.endsWith("`") ? schema.substring(1, schema.length() - 1) : schema;
+			if (StringUtil.isName(s) == false) {
+				throw new IllegalArgumentException("@schema:value 中value必须是1个单词！");
+			}
+		}
 		this.schema = schema;
 		return this;
 	}
@@ -203,7 +209,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return getSchema() + "." + getSQLTable();
 	}
 	@Override
-	public AbstractSQLConfig setTable(String table) {
+	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
 		this.table = table;
 		return this;
 	}
