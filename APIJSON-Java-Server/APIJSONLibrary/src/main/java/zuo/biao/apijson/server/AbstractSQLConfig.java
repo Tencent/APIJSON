@@ -348,9 +348,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getColumnString() throws NotExistException {
 		switch (getMethod()) {
 		case HEAD:
-		case HEADS:
-			if (StringUtil.isEmpty(column, true) == false && StringUtil.isName(column) == false) {
-				throw new IllegalArgumentException("HEAD请求: @column:value 中 value必须是1个单词！");
+		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
+			if (isPrepared() && StringUtil.isEmpty(column, true) == false
+			    && column.contains(",") == false && StringUtil.isName(column) == false) {
+				throw new IllegalArgumentException("HEAD请求: @column:value 中 value里面用 , 分割的每一项都必须是1个单词！");
 			}
 			return SQL.count(column);
 		case POST:
