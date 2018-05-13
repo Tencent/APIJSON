@@ -1010,7 +1010,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
+	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
 		Set<String> set = content == null ? null : content.keySet();
 		if (set != null && set.size() > 0) {
 			String setString = "";
@@ -1032,7 +1032,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				key = getRealKey(method, key, false, true, verifyName);
 
 				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
-						? getRemoveString(key, value) : "'" + value + "'") ) );
+						? getRemoveString(key, value) : getValue(value)) ) );
 
 				isFirst = false;
 			}
@@ -1050,12 +1050,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return CONCAT (key, 'value')
 	 * @throws IllegalArgumentException
 	 */
-	public static String getAddString(String key, Object value) throws IllegalArgumentException {
+	public String getAddString(String key, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
 			return key + " + " + value;
 		}
 		if (value instanceof String) {
-			return " CONCAT (" + key + ", '" + value + "') ";
+			return " CONCAT (" + key + ", " + getValue(value) + ") ";
 		}
 		throw new IllegalArgumentException(key + "+ 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
 	}
@@ -1065,12 +1065,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return REPLACE (key, 'value', '')
 	 * @throws IllegalArgumentException
 	 */
-	public static String getRemoveString(String key, Object value) throws IllegalArgumentException {
+	public String getRemoveString(String key, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
 			return key + " - " + value;
 		}
 		if (value instanceof String) {
-			return SQL.replace(key, (String) value, "");// " replace(" + key + ", '" + value + "', '') ";
+			return SQL.replace(key, (String) getValue(value), "");// " replace(" + key + ", '" + value + "', '') ";
 		}
 		throw new IllegalArgumentException(key + "- 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
 	}
