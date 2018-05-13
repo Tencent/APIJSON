@@ -458,7 +458,7 @@ public abstract class AbstractParser implements Parser {
 			error = e.getMessage();
 		}
 		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
-			throw new UnsupportedOperationException("非开放请求必须是服务端允许的操作！ \n " + error);
+			throw new UnsupportedOperationException("非开放请求必须是Request表中校验规则允许的操作！\n " + error);
 		}
 
 		JSONObject target = null;

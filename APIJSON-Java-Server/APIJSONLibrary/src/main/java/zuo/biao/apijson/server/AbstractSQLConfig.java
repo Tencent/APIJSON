@@ -361,7 +361,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						alias = index < 0 ? null : keys[i].substring(index + 1);
 						
 						if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
-							throw new IllegalArgumentException("GET请求: @column:value 中 value里面用 , 分割的每一项 column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！");
+							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项 column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！");
 						}
 					}
 				}
