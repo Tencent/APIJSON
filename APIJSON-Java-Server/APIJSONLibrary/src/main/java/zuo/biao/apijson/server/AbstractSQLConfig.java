@@ -242,7 +242,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (keys != null && keys.length > 0) {
 				for (int i = 0; i < keys.length; i++) {
 					if (StringUtil.isName(keys[i]) == false) {
-						throw new IllegalArgumentException("@group:value 中 value里面用 , 分割的每一项都必须是1个单词！");
+						throw new IllegalArgumentException("@group:value 中 value里面用 , 分割的每一项都必须是1个单词！并且不要有空格！");
 					}
 				}
 			}
@@ -299,6 +299,28 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (order.contains("-")) {
 			order = order.replaceAll("-", " DESC ");
 		}
+		
+		if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+			String[] keys = StringUtil.split(order);
+			if (keys != null && keys.length > 0) {
+				String origin;
+				int index;
+				for (int i = 0; i < keys.length; i++) {
+					index = keys[i].trim().endsWith(" ASC") ? keys[i].lastIndexOf(" ASC") : -1; //StringUtil.split返回数组中，子项不会有null
+					if (index < 0) {
+						index = keys[i].trim().endsWith(" DESC") ? keys[i].lastIndexOf(" DESC") : -1;
+					}
+					origin = index < 0 ? keys[i] : keys[i].substring(0, index);
+					
+					 //这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
+					if (StringUtil.isName(origin) == false) {
+						throw new IllegalArgumentException("预编译模式下 @order:value 中 value里面用 , 分割的每一项"
+								+ " column+ / column- 中 column必须是1个单词！并且不要有多余的空格！");
+					}
+				}
+			}
+		}
+		
 		return " ORDER BY " + order;
 	}
 
@@ -361,7 +383,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						alias = index < 0 ? null : keys[i].substring(index + 1);
 						
 						if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
-							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项 column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！");
+							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+									+ " column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
 						}
 					}
 				}
@@ -903,7 +926,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		key = logic.getKey();
 		Log.i(TAG, "getRangeString key = " + key);
 
-		//TODO 直接调Like性能最好！
 		return getContainString(key, newJSONArray(value).toArray(), logic.getType());
 	}
 	/**WHERE key contains childs
