@@ -21,11 +21,11 @@ import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
 import static zuo.biao.apijson.JSONObject.KEY_ID;
 import static zuo.biao.apijson.JSONObject.KEY_ID_IN;
-import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
-import static zuo.biao.apijson.JSONObject.KEY_USER_ID_IN;
 import static zuo.biao.apijson.JSONObject.KEY_ORDER;
 import static zuo.biao.apijson.JSONObject.KEY_ROLE;
 import static zuo.biao.apijson.JSONObject.KEY_SCHEMA;
+import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
+import static zuo.biao.apijson.JSONObject.KEY_USER_ID_IN;
 import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.POST;
@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -276,7 +277,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return ""; 
 		}
 		if (isPrepared()) {
-			throw new UnsupportedOperationException("预编译模式下不允许传 @having:\"condition\" !");
+			throw new UnsupportedOperationException("字符串 " + having + " 不合法！预编译模式下不允许传 @having:\"condition\" !");
 		}
 		return " HAVING " + having;
 	}
@@ -857,6 +858,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	//{} range <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	
+	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
+	private static final Pattern PATTERN_RANGE;
+	static {
+		PATTERN_RANGE = Pattern.compile("^[0-9%!=<>,]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
+	}
+
+	
 	/**WHERE key > 'key0' AND key <= 'key1' AND ...
 	 * @param key
 	 * @param range "condition0,condition1..."
@@ -881,6 +890,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
 		}
 		if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
+			if (isPrepared() && PATTERN_RANGE.matcher((String) range).matches() == false) {
+				throw new UnsupportedOperationException("字符串 " + range + " 不合法！预编译模式下 key{}:\"condition\" 中 condition 必须符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
+			}
+			
 			String[] conditions = StringUtil.split((String) range);
 			String condition = "";
 			if (conditions != null) {
@@ -894,10 +907,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			if (condition.isEmpty()) {
 				return "";
-			}
-
-			if (isPrepared()) {
-				throw new UnsupportedOperationException("预编译模式下不允许传 key{}:\"condition\" !");
 			}
 
 			return getCondition(logic.isNot(), condition);
