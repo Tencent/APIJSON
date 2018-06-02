@@ -22,6 +22,10 @@ import zuo.biao.apijson.MethodAccess;
 /**测试用例文档
  * @author Lemon
  */
-@MethodAccess(GET = { LOGIN, ADMIN }, HEAD = { LOGIN, ADMIN })
+@MethodAccess(
+		GET = { LOGIN, ADMIN }, 
+		HEAD = { LOGIN, ADMIN },
+		PUT = { LOGIN, ADMIN }
+		)
 public class Document {
 }

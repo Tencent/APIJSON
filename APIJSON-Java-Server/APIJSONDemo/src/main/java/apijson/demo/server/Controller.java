@@ -367,7 +367,9 @@ public class Controller {
 		}
 
 		//验证码过期
-		if (System.currentTimeMillis() > (60*1000 + BaseModel.getTimeMillis(verify.getDate()))) {
+		long time = BaseModel.getTimeMillis(verify.getDate());
+		long now = System.currentTimeMillis();
+		if (now > 60*1000 + time) {
 			new DemoParser(DELETE, true).parseResponse(
 					new JSONRequest(new Verify(type, phone)).setTag(VERIFY_)
 					);
