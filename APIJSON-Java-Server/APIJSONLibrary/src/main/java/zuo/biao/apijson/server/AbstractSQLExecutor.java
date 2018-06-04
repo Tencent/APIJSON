@@ -118,11 +118,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			return null;
 		}
 		boolean prepared = config.isPrepared();
-		
+
 		final String sql = config.getSQL(false);
-		
+
 		config.setPrepared(prepared);
-		
+
 		if (StringUtil.isNotEmpty(sql, true) == false) {
 			Log.e(TAG, "select  StringUtil.isNotEmpty(sql, true) == false >> return null;");
 			return null;
@@ -147,7 +147,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			rs.close();
 			return result;
-			
+
 		case POST:
 		case PUT:
 		case DELETE:
@@ -254,7 +254,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public boolean isJSONType(ResultSetMetaData rsmd, int position) {
 		try {
-			return rsmd.getColumnType(position) == 1 || rsmd.getColumnTypeName(position).toLowerCase().contains("json");
+			//TODO CHAR和JSON类型的字段，getColumnType返回值都是1	，如果不用CHAR，改用VARCHAR，则可以用上面这行来提高性能。
+			//return rsmd.getColumnType(position) == 1 || rsmd.getColumnTypeName(position).toLowerCase().contains("json");
+			return rsmd.getColumnTypeName(position).toLowerCase().contains("json");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
