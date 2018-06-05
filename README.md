@@ -48,15 +48,15 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 <br />
 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_get.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_code.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/APIJSON_Auto_doc.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_get.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_code.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_doc.jpg) 
 <br /><br />
 [以下Gif图看起来比较卡，实际在手机上App运行很流畅]
 <br />
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/APIJSON_App_MomentList_Circle.gif) 
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/APIJSON_App_Moment_Name.gif) 
-![](https://github.com/TommyLemon/APIJSON/blob/master/picture/APIJSON_App_Moment_Comment.gif)
+![](https://github.com/TommyLemon/StaticResources/blob/master/APIJSON_App_MomentList_Circle.gif) 
+![](https://github.com/TommyLemon/StaticResources/blob/master/APIJSON_App_Moment_Name.gif) 
+![](https://github.com/TommyLemon/StaticResources/blob/master/APIJSON_App_Moment_Comment.gif)
 
 <br />
 
