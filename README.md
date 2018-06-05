@@ -54,9 +54,9 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 <br /><br />
 [以下Gif图看起来比较卡，实际在手机上App运行很流畅]
 <br />
-![](https://github.com/TommyLemon/StaticResources/master/APIJSON_App_MomentList_Circle.gif) 
-![](https://github.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Name.gif) 
-![](https://github.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Comment.gif)
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_MomentList_Circle.gif) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Name.gif) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Comment.gif)
 
 <br />
 
