@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://github.com/TommyLemon/APIJSON/blob/master/LICENSE)
 
 
-[English](https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md)  &nbsp;  [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md)  &nbsp;  [在线工具](http://apijson.cn)
+[English](https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md)  &nbsp;  [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md)  &nbsp;  [视频教程](http://i.youku.com/apijson)  &nbsp;  [在线工具](http://apijson.cn)
 
 ![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/logo.png) 
 
