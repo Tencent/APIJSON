@@ -663,12 +663,13 @@ public abstract class AbstractParser implements Parser {
 
 		//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONArray response = new JSONArray();
-		JSONObject parent;
 		SQLConfig config = createSQLConfig()
 				.setMethod(requestMethod)
 				.setCount(size)
 				.setPage(page)
 				.setQuery(query);
+
+		JSONObject parent;
 		//生成size个
 		for (int i = 0; i < size; i++) {
 			parent = onObjectParse(request, path, "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i));

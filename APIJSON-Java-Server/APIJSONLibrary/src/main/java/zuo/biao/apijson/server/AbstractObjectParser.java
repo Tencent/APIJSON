@@ -365,16 +365,28 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	@Override
 	public JSON onChildParse(int index, String key, JSONObject value) throws Exception {
 		boolean isFirst = index <= 0;
+		boolean isMain = isFirst && type == TYPE_ITEM;
+
 		JSON child;
 		boolean isEmpty;
-
+		
 		if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
+			if (isMain) {
+				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
+						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
+			}
+			
 			child = parser.onArrayParse(value, path, key);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
 		else {//APIJSON Object
-			child = parser.onObjectParse(value, path, key
-					, isFirst && type == TYPE_ITEM ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null);
+			if (type == TYPE_ITEM && JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey()) == false) {
+				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
+						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
+			}
+			
+			child = parser.onObjectParse(value, path, key, isMain ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null);
+			
 			isEmpty = child == null || ((JSONObject) child).isEmpty();
 			if (isFirst && isEmpty) {
 				invalidate();
