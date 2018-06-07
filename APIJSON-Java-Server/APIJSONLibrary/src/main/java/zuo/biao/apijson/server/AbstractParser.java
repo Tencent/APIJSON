@@ -680,6 +680,27 @@ public abstract class AbstractParser implements Parser {
 		}
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+		
+		/*
+		 * 支持引用取值后的数组
+			{
+			    "User-id[]": {
+			        "User": {
+			            "contactIdList<>": 82002
+			        }
+			    },
+			    "Moment-userId[]": {
+			        "Moment": {
+			            "userId{}@": "User-id[]"
+			        }
+			    }
+			}
+		 */
+		if (childKeys != null) {
+			putQueryResult(path, response);
+		}
+		
+		
 		//后面还可能用到，要还原
 		request.put(JSONRequest.KEY_QUERY, query);
 		request.put(JSONRequest.KEY_COUNT, count);
