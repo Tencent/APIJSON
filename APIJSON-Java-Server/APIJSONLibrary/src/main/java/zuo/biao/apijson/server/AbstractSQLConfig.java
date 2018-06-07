@@ -243,7 +243,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (group.isEmpty()) {
 			return "";
 		}
-		
+
 		if (isPrepared()) { //不能通过 ? 来代替，因为SQLExecutor statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
 			String[] keys = StringUtil.split(group);
 			if (keys != null && keys.length > 0) {
@@ -306,7 +306,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (order.contains("-")) {
 			order = order.replaceAll("-", " DESC ");
 		}
-		
+
 		if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 			String[] keys = StringUtil.split(order);
 			if (keys != null && keys.length > 0) {
@@ -318,8 +318,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						index = keys[i].trim().endsWith(" DESC") ? keys[i].lastIndexOf(" DESC") : -1;
 					}
 					origin = index < 0 ? keys[i] : keys[i].substring(0, index);
-					
-					 //这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
+
+					//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
 					if (StringUtil.isName(origin) == false) {
 						throw new IllegalArgumentException("预编译模式下 @order:value 中 value里面用 , 分割的每一项"
 								+ " column+ / column- 中 column必须是1个单词！并且不要有多余的空格！");
@@ -327,7 +327,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 		}
-		
+
 		return " ORDER BY " + order;
 	}
 
@@ -351,7 +351,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
 			if (isPrepared() && StringUtil.isEmpty(column, true) == false
-			    && column.contains(",") == false && StringUtil.isName(column) == false) {
+			&& column.contains(",") == false && StringUtil.isName(column) == false) {
 				throw new IllegalArgumentException("HEAD请求: @column:value 中 value里面用 , 分割的每一项都必须是1个单词！");
 			}
 			return SQL.count(column);
@@ -360,7 +360,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				throw new NotExistException(TAG + "getColumnString  getMethod() = POST"
 						+ " >> StringUtil.isEmpty(column, true)");
 			}
-			
+
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				String[] keys = StringUtil.split(column);
 				if (keys != null && keys.length > 0) {
@@ -371,14 +371,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 				}
 			}
-			
+
 			return "(" + column + ")";
 		default:
 			column = StringUtil.getString(column);
 			if (column.isEmpty()) {
 				return "*";
 			}
-			
+
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				String[] keys = StringUtil.split(column);
 				if (keys != null && keys.length > 0) {
@@ -389,7 +389,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						index = keys[i].indexOf(":"); //StringUtil.split返回数组中，子项不会有null
 						origin = index < 0 ? keys[i] : keys[i].substring(0, index);
 						alias = index < 0 ? null : keys[i].substring(index + 1);
-						
+
 						if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
 							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
 									+ " column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
@@ -397,7 +397,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 				}
 			}
-			
+
 			return column.contains(":") == false ? column : column.replaceAll(":", " AS ");//不能在这里改，后续还要用到:
 		}
 	}
@@ -421,7 +421,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (vs == null) {
 					continue;
 				}
-				
+
 				items[i] = "(";
 				for (int j = 0; j < vs.length; j++) {
 					items[i] += ((j <= 0 ? "" : ",") + getValue(vs[j]));
@@ -858,14 +858,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	//{} range <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	
+
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static final Pattern PATTERN_RANGE;
 	static {
 		PATTERN_RANGE = Pattern.compile("^[0-9%!=<>,]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
 	}
 
-	
+
 	/**WHERE key > 'key0' AND key <= 'key1' AND ...
 	 * @param key
 	 * @param range "condition0,condition1..."
@@ -893,7 +893,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (isPrepared() && PATTERN_RANGE.matcher((String) range).matches() == false) {
 				throw new UnsupportedOperationException("字符串 " + range + " 不合法！预编译模式下 key{}:\"condition\" 中 condition 必须符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
 			}
-			
+
 			String[] conditions = StringUtil.split((String) range);
 			String condition = "";
 			if (conditions != null) {
@@ -1344,13 +1344,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			Object value;
 			for (String key : set) {
 				value = request.get(key);
-				if (value instanceof JSONObject == false) {//只允许常规Object
-					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-					if (isWhere || (conditionList != null && conditionList.contains(key))) {
-						tableWhere.put(key, value);
-					} else {
-						tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
-					}
+
+				if (value instanceof Map) {//只允许常规Object
+					throw new IllegalArgumentException("不允许 " + key + " 等任何key的value类型为 {JSONObject} !");
+				}
+				
+				//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
+				if (isWhere || (conditionList != null && conditionList.contains(key))) {
+					tableWhere.put(key, value);
+				} else {
+					tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 				}
 			}
 
