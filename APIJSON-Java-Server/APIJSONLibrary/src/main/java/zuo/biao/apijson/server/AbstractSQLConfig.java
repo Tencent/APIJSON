@@ -618,17 +618,32 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				where = new LinkedHashMap<String, Object>();	
 			}
 			where.put(key, value);
-			
+
 			combine = getCombine();
 			List<String> andList = combine == null ? null : combine.get("&");
 			if (value == null) {
 				andList.remove(key);
 			}
 			else if (andList == null || andList.contains(key) == false) {
+				int i = 0;
 				if (andList == null) {
 					andList = new ArrayList<>();
 				}
-				andList.add(key); //userId的优先级不能比id高  0, key);
+				else {
+					if (andList.contains(KEY_ID)) {
+						i ++;
+					}
+					if (andList.contains(KEY_ID_IN)) {
+						i ++;
+					}
+					if (andList.contains(KEY_USER_ID)) {
+						i ++;
+					}
+					if (andList.contains(KEY_USER_ID_IN)) {
+						i ++;
+					}
+				}
+				andList.add(i, key); //userId的优先级不能比id高  0, key);
 			}
 			combine.put("&", andList);
 		}
