@@ -629,7 +629,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (andList == null) {
 					andList = new ArrayList<>();
 				}
-				else {
+				else if (andList.isEmpty() == false) {
 					if (andList.contains(KEY_ID)) {
 						i ++;
 					}
