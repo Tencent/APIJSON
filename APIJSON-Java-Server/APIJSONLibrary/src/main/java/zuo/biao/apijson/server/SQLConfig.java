@@ -134,6 +134,11 @@ public interface SQLConfig {
 	Map<String, Object> getWhere();
 	SQLConfig setWhere(Map<String, Object> where);
 	
+	Map<String, List<String>> getCombine();
+	SQLConfig setCombine(Map<String, List<String>> combine);
+	
+
+	
 	/**
 	 * exactMatch = false
 	 * @param key
@@ -159,4 +164,5 @@ public interface SQLConfig {
 	AbstractSQLConfig setPrepared(boolean prepared);
 	
 	List<Object> getPreparedValueList();
+
 }

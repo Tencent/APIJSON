@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import static zuo.biao.apijson.JSONObject.KEY_CONDITION;
+import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
 import static zuo.biao.apijson.JSONObject.KEY_CORRECT;
 import static zuo.biao.apijson.JSONObject.KEY_DROP;
 import static zuo.biao.apijson.JSONObject.KEY_TRY;
@@ -225,13 +225,22 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 
 				//条件<<<<<<<<<<<<<<<<<<<
-				List<String> conditionList = null;
+				List<String> whereList = null;
 				if (method == PUT) { //这里只有PUTArray需要处理  || method == DELETE) {
-					String[] conditions = StringUtil.split(request.getString(KEY_CONDITION));
+					String[] combine = StringUtil.split(request.getString(KEY_COMBINE));
+					if (combine != null) {
+						String w;
+						for (int i = 0; i < combine.length; i++) { //去除 &,|,! 前缀
+							w = combine[i];
+							if (w != null && (w.startsWith("&") || w.startsWith("|") || w.startsWith("!"))) {
+								combine[i] = w.substring(1);
+							}
+						}
+					}
 					//Arrays.asList()返回值不支持add方法！
-					conditionList = new ArrayList<String>(Arrays.asList(conditions != null ? conditions : new String[]{}));
-					conditionList.add(zuo.biao.apijson.JSONRequest.KEY_ID);
-					conditionList.add(zuo.biao.apijson.JSONRequest.KEY_ID_IN);
+					whereList = new ArrayList<String>(Arrays.asList(combine != null ? combine : new String[]{}));
+					whereList.add(zuo.biao.apijson.JSONRequest.KEY_ID);
+					whereList.add(zuo.biao.apijson.JSONRequest.KEY_ID_IN);
 				}
 				//条件>>>>>>>>>>>>>>>>>>>
 
@@ -259,7 +268,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 							}
 						}
 						else if (method == PUT && value instanceof JSONArray
-								&& (conditionList == null || conditionList.contains(key) == false)) {//PUT JSONArray
+								&& (whereList == null || whereList.contains(key) == false)) {//PUT JSONArray
 							onPUTArrayParse(key, (JSONArray) value);
 						}
 						else {//JSONArray或其它Object，直接填充
@@ -369,13 +378,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 		JSON child;
 		boolean isEmpty;
-		
+
 		if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
 			if (isMain) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
 			}
-			
+
 			child = parser.onArrayParse(value, path, key);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
@@ -384,9 +393,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
 			}
-			
+
 			child = parser.onObjectParse(value, path, key, isMain ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null);
-			
+
 			isEmpty = child == null || ((JSONObject) child).isEmpty();
 			if (isFirst && isEmpty) {
 				invalidate();
@@ -578,7 +587,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public Object onFunctionParse(JSONObject json, String function) throws Exception {
 		return null;
 	}
-	
+
 	@Override
 	public Object onReferenceParse(@NotNull String path) {
 		return parser.getValueByPath(path);

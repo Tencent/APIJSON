@@ -16,7 +16,7 @@ package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.JSONObject.KEY_ABOUT;
 import static zuo.biao.apijson.JSONObject.KEY_COLUMN;
-import static zuo.biao.apijson.JSONObject.KEY_CONDITION;
+import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
 import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
 import static zuo.biao.apijson.JSONObject.KEY_ID;
@@ -35,7 +35,6 @@ import static zuo.biao.apijson.SQL.NOT;
 import static zuo.biao.apijson.SQL.OR;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -95,6 +94,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private String values; //对应Table内字段的值的字符串数组，','分隔
 	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
 	private Map<String, Object> where; //筛选条件，key:value形式
+	private Map<String, List<String>> combine; //条件组合，{ "&":[key], "|":[key], "!":[key] }
 
 
 	//array item <<<<<<<<<<
@@ -555,6 +555,24 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.where = where;
 		return this;
 	}
+	@NotNull
+	@Override
+	public Map<String, List<String>> getCombine() {
+		List<String> andList = combine == null ? null : combine.get("&");
+		if (andList == null) {
+			andList = where == null ? new ArrayList<String>() : new ArrayList<String>(where.keySet());
+			if (combine == null) {
+				combine = new HashMap<>();
+			}
+			combine.put("&", andList);
+		}
+		return combine;
+	}
+	@Override
+	public AbstractSQLConfig setCombine(Map<String, List<String>> combine) {
+		this.combine = combine;
+		return this;
+	}
 	/**
 	 * noFunctionChar = false
 	 * @param key
@@ -600,6 +618,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				where = new LinkedHashMap<String, Object>();	
 			}
 			where.put(key, value);
+			
+			combine = getCombine();
+			List<String> andList = combine == null ? null : combine.get("&");
+			if (value == null) {
+				andList.remove(key);
+			}
+			else if (andList == null || andList.contains(key) == false) {
+				if (andList == null) {
+					andList = new ArrayList<>();
+				}
+				andList.add(key); //userId的优先级不能比id高  0, key);
+			}
+			combine.put("&", andList);
 		}
 		return this;
 	}
@@ -610,7 +641,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getWhereString() throws Exception {
-		return getWhereString(getMethod(), getWhere(), ! isTest());
+		return getWhereString(getMethod(), getWhere(), getCombine(), ! isTest());
 	}
 	/**获取WHERE
 	 * @param method
@@ -618,51 +649,60 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public String getWhereString(RequestMethod method, Map<String, Object> where, boolean verifyName) throws Exception {
-		Map<String, Object> where2 = where == null || where.isEmpty() ? null : new LinkedHashMap<String, Object>();
-		if (where2 == null) {
+	public String getWhereString(RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, boolean verifyName) throws Exception {
+		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
+		if (combineSet == null || combineSet.isEmpty()) {
+			Log.w(TAG, "getWhereString  combineSet == null || combineSet.isEmpty() >> return \"\";");
 			return "";
 		}
 
-		//强制排序，把id,id{},userId,userId{}放最前面，保证安全、优化性能
-		Object id = where.remove(KEY_ID);
-		Object idIn = where.remove(KEY_ID_IN);
-		Object userId = where.remove(KEY_USER_ID);
-		Object userIdIn = where.remove(KEY_USER_ID_IN);
+		List<String> keyList;
 
-		where2.put(KEY_ID, id);
-		where2.put(KEY_ID_IN, idIn);
-		where2.put(KEY_USER_ID, userId);
-		where2.put(KEY_USER_ID_IN, userIdIn);
-		where2.putAll(where);
-
-
-		Set<Entry<String, Object>> set = where2.entrySet();
-
-		boolean isFirst = true;
-		String condition;
 		String whereString = "";
 
-		for (Entry<String, Object> entry : set) {
-			if (entry == null) {
+		boolean isCombineFirst = true;
+		int logic;
+
+		boolean isItemFirst;
+		String c;
+		String cs;
+
+		for (Entry<String, List<String>> ce : combineSet) {
+			keyList = ce == null ? null : ce.getValue();
+			if (keyList == null || keyList.isEmpty()) {
 				continue;
 			}
-			condition = getWhereItem(entry.getKey(), entry.getValue(), method, verifyName);
 
-			if (StringUtil.isEmpty(condition, true)) {//避免SQL条件连接错误
-				continue;
+			if ("|".equals(ce.getKey())) {
+				logic = Logic.TYPE_OR;
+			}
+			else if ("!".equals(ce.getKey())) {
+				logic = Logic.TYPE_NOT;
+			}
+			else {
+				logic = Logic.TYPE_AND;
 			}
 
-			whereString += (isFirst ? "" : AND) + "(" + condition + ")";
 
-			isFirst = false;
+			isItemFirst = true;
+			cs = "";
+			for (String key : keyList) {
+				c = getWhereItem(key, where.get(key), method, verifyName);
+
+				if (StringUtil.isEmpty(c, true)) {//避免SQL条件连接错误
+					continue;
+				}
+
+				cs += (isItemFirst ? "" : (Logic.isAnd(logic) ? AND : OR)) + "(" + c + ")";
+
+				isItemFirst = false;
+			}
+
+
+			whereString += (isCombineFirst ? "" : AND) + (Logic.isNot(logic) ? NOT : "") + " (  " + cs + "  ) ";
+			isCombineFirst = false;
 		}
 
-		//还原where，后续可能用到
-		where.put(KEY_ID, id);
-		where.put(KEY_ID_IN, idIn);
-		where.put(KEY_USER_ID, userId);
-		where.put(KEY_USER_ID_IN, userIdIn);
 
 		String s = whereString.isEmpty() ? "" : " WHERE " + whereString;
 
@@ -1236,7 +1276,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String role = request.getString(KEY_ROLE);
 		String schema = request.getString(KEY_SCHEMA);
 		boolean about = request.getBooleanValue(KEY_ABOUT);
-		String condition = request.getString(KEY_CONDITION);
+		String combine = request.getString(KEY_COMBINE);
 		String column = request.getString(KEY_COLUMN);
 		String group = request.getString(KEY_GROUP);
 		String having = request.getString(KEY_HAVING);
@@ -1249,7 +1289,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.remove(KEY_ROLE);
 		request.remove(KEY_SCHEMA);
 		request.remove(KEY_ABOUT);
-		request.remove(KEY_CONDITION);
+		request.remove(KEY_COMBINE);
 		request.remove(KEY_COLUMN);
 		request.remove(KEY_GROUP);
 		request.remove(KEY_HAVING);
@@ -1321,24 +1361,68 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		else { //非POST操作
 			final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
 
-			//条件<<<<<<<<<<<<<<<<<<<
-			List<String> conditionList = null;
-			if (isWhere == false) { //减少不必要的步骤
-				if (method == PUT || method == DELETE) {
-					String[] conditions = StringUtil.split(condition);
-					//Arrays.asList()返回值不支持add方法！
-					conditionList = conditions == null || conditions.length <= 0 ? null : Arrays.asList(conditions);
-				}
-			}
-			//条件>>>>>>>>>>>>>>>>>>>
+			//条件<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			List<String> whereList = null;
+
+			Map<String, List<String>> combineMap = new LinkedHashMap<>();
+			List<String> andList = new ArrayList<>();
+			List<String> orList = new ArrayList<>();
+			List<String> notList = new ArrayList<>();
 
 			//强制作为条件且放在最前面优化性能
 			if (id != null) {
 				tableWhere.put(KEY_ID, id);
+				andList.add(KEY_ID);
 			}
 			if (idIn != null) {
 				tableWhere.put(KEY_ID_IN, idIn);
+				andList.add(KEY_ID_IN);
 			}
+
+			String[] ws = StringUtil.split(combine);
+			if (ws != null) {
+				if (method == DELETE) {
+					throw new IllegalArgumentException("DELETE请求不允许传 @combine:\"conditons\" !");
+				}
+				whereList = new ArrayList<>();
+
+				String w;
+				for (int i = 0; i < ws.length; i++) { //去除 &,|,! 前缀
+					w = ws[i];
+					if (w != null) {
+						if (w.startsWith("&")) {
+							w = w.substring(1);
+							andList.add(w);
+						}
+						else if (w.startsWith("|")) {
+							if (method == PUT) {
+								throw new IllegalArgumentException("字符 " + w + " 不合法！PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+							}
+							w = w.substring(1);
+							orList.add(w);
+						}
+						else if (w.startsWith("!")) {
+							if (method == PUT) {
+								throw new IllegalArgumentException("字符 " + w + " 不合法！PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+							}
+							w = w.substring(1);
+							notList.add(w);
+						}
+						else {
+							orList.add(w);
+						}
+
+						whereList.add(w);
+					}
+					if (request.containsKey(w) == false) {
+						throw new IllegalArgumentException("条件 " + w + " 不在同一表对象 TableKey:{} 里面！"
+								+ "或者是 id 或 id{} ，这两个key不允许在 @combine:value 的value里设置！");
+					}
+				}
+
+			}
+
+			//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 			Map<String, Object> tableContent = new HashMap<String, Object>();
 			Object value;
@@ -1348,14 +1432,26 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (value instanceof Map) {//只允许常规Object
 					throw new IllegalArgumentException("不允许 " + key + " 等任何key的value类型为 {JSONObject} !");
 				}
-				
+
 				//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-				if (isWhere || (conditionList != null && conditionList.contains(key))) {
+				if (isWhere) {
 					tableWhere.put(key, value);
-				} else {
+					if (whereList == null || whereList.contains(key) == false) {
+						andList.add(key);
+					}
+				}
+				else if (whereList != null && whereList.contains(key)) {
+					tableWhere.put(key, value);
+				}
+				else {
 					tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 				}
 			}
+
+			combineMap.put("&", andList);
+			combineMap.put("|", orList);
+			combineMap.put("!", notList);
+			config.setCombine(combineMap);
 
 			config.setContent(tableContent);
 		}
@@ -1367,7 +1463,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//在	tableWhere 第0个		config.setIdIn(idIn);
 
 		config.setRole(role);
-		//TODO condition组合，优先 |		config.setCondition(condition);
+		//TODO condition组合，优先 |		config.setCondition(where);
 		config.setSchema(schema);
 		config.setAbout(about);
 		config.setColumn(column);
@@ -1383,7 +1479,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.put(KEY_ROLE, role);
 		request.put(KEY_SCHEMA, schema);
 		request.put(KEY_ABOUT, about);
-		request.put(KEY_CONDITION, condition);
+		request.put(KEY_COMBINE, combine);
 		request.put(KEY_COLUMN, column);
 		request.put(KEY_GROUP, group);
 		request.put(KEY_HAVING, having);
@@ -1472,7 +1568,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		if (verifyName && StringUtil.isName(key.startsWith("@") ? key.substring(1) : key) == false) {
-			throw new IllegalArgumentException(method + "请求，字符 " + originKey + " 不合法！");
+			throw new IllegalArgumentException(method + "请求，字符 " + originKey + " 不合法！"
+					+ " key:value 中的key只能关键词 '@key' 或 'key[逻辑符][条件符]' 或 PUT请求下的 'key+' / 'key-' ！");
 		}
 
 		if (saveLogic && last != null) {

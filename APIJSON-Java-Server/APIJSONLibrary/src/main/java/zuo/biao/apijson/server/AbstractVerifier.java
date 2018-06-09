@@ -103,9 +103,9 @@ public abstract class AbstractVerifier implements Verifier {
 		return visitor;
 	}
 	@Override
-	public AbstractVerifier setVisitor(@NotNull Visitor visitor) {
+	public AbstractVerifier setVisitor(Visitor visitor) {
 		this.visitor = visitor;
-		this.visitorId = value(visitor.getId());
+		this.visitorId = visitor == null ? 0 : value(visitor.getId());
 		return this;
 	}
 
@@ -188,6 +188,7 @@ public abstract class AbstractVerifier implements Verifier {
 				throw new IllegalAccessException(visitorIdkey + " = " + requestId + " 的 " + table
 						+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
 			}
+			//TODO POST请求时应该 putContent
 			config.putWhere(visitorIdkey, visitorId);
 			break;
 		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
