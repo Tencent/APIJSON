@@ -697,7 +697,8 @@ public abstract class AbstractParser implements Parser {
 			    }
 			}
 		 */
-		if (childKeys != null) {
+		Object fo = response.isEmpty() ? null : response.get(0); //可能是远程函数返回的,而不是提取 childKeys == null || response.isEmpty()
+		if (fo instanceof Boolean || fo instanceof Number || fo instanceof String) { //[{}] 和 [[]] 都没意义
 			putQueryResult(path, response);
 		}
 		
