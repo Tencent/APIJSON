@@ -32,7 +32,7 @@ public enum Operation {
 	
 	/**
 	 * 验证是否符合预设的类型:
-	 * Boolean, Long, Double, String, Object, Array
+	 * Boolean, Long, Double, String, Object, Array //目前在业务表中还用不上，单一的类型校验已经够用 , JSON(包括 {Object}, [Array], "{Object}", "Array")
 	 */
 	TYPE,
 	/**

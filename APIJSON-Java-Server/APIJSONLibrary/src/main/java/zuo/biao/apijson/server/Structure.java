@@ -118,7 +118,7 @@ public class Structure {
 		});
 
 	}
-	
+
 	/**
 	 * @param method
 	 * @param name
@@ -137,10 +137,10 @@ public class Structure {
 			throw new IllegalArgumentException(method + "请求，" + name + "/" + key
 					+ " 里面的 " + idKey + ":value 中value的类型只能是 Long ！");
 		}
-		
+
 		//批量修改或删除
 		String idInKey = idKey + "{}";
-		
+
 		JSONArray idIn = null;
 		try {
 			idIn = robj.getJSONArray(idInKey); //如果必须传 id{} ，可在Request表中配置NECESSARY
@@ -172,7 +172,7 @@ public class Structure {
 	}
 
 
-	
+
 	/**校验并将response转换为指定的内容和结构
 	 * @param method
 	 * @param name
@@ -444,7 +444,7 @@ public class Structure {
 		if (rv == null) {
 			return;
 		}
-		
+
 		switch (t) {
 		case "Boolean":
 			//Boolean.parseBoolean(real.getString(tk)); 只会判断null和true  
@@ -481,6 +481,15 @@ public class Structure {
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 [Array] !");
 			}
 			break;
+			//目前在业务表中还用不上，单一的类型校验已经够用
+			//		case "JSON":
+			//			try {
+			//				com.alibaba.fastjson.JSON.parse(rv.toString());
+			//			} catch (Exception e) {
+			//				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 JSON ！"
+			//						+ "也就是 {Object}, [Array] 或 它们对应的字符串 '{Object}', '[Array]' 4种中的一个 !");
+			//			}
+			//			break;
 		default:
 			throw new UnsupportedDataTypeException("服务器内部错误，类型 " + t + " 不合法！Request表校验规则中"
 					+ " TYPE:{ key:value } 中的value类型必须是 [Boolean, Long, Double, String, Object, Array] 中的一个!");
