@@ -14,7 +14,6 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import static zuo.biao.apijson.JSONObject.KEY_ABOUT;
 import static zuo.biao.apijson.JSONObject.KEY_COLUMN;
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
 import static zuo.biao.apijson.JSONObject.KEY_GROUP;
@@ -86,7 +85,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private RequestRole role; //发送请求的用户的角色
 	private String schema; //Table所在的数据库
 	private String table; //Table名
-	private boolean about; //关于，返回数据库表的信息，包括表说明和字段说明
 	private String group; //分组方式的字符串数组，','分隔
 	private String having; //聚合函数的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
@@ -212,16 +210,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
 		this.table = table;
-		return this;
-	}
-
-	@Override
-	public boolean isAbout() {
-		return about;
-	}
-	@Override
-	public AbstractSQLConfig setAbout(boolean about) {
-		this.about = about;
 		return this;
 	}
 
@@ -1290,7 +1278,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String role = request.getString(KEY_ROLE);
 		String schema = request.getString(KEY_SCHEMA);
-		boolean about = request.getBooleanValue(KEY_ABOUT);
 		String combine = request.getString(KEY_COMBINE);
 		String column = request.getString(KEY_COLUMN);
 		String group = request.getString(KEY_GROUP);
@@ -1303,7 +1290,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//关键词
 		request.remove(KEY_ROLE);
 		request.remove(KEY_SCHEMA);
-		request.remove(KEY_ABOUT);
 		request.remove(KEY_COMBINE);
 		request.remove(KEY_COLUMN);
 		request.remove(KEY_GROUP);
@@ -1312,24 +1298,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
-		if (about) { //查询字段属性
-			if (RequestMethod.isQueryMethod(method) == false) {
-				throw new UnsupportedOperationException(config.getTable()
-						+ " 被 " + KEY_ABOUT + " 标注，只能进行 GET,HEAD 等查询操作！");
-			}
-
-			tableWhere.put(TABLE_SCHEMA, schema);
-			tableWhere.put(TABLE_NAME, config.getSQLTable());
-			config.setTable(Column.class.getSimpleName());
-
-			schema = SCHEMA_INFORMATION;
-
-			column = StringUtil.getString(column);
-			if (column.isEmpty() && RequestMethod.isHeadMethod(method, true) == false) {
-				column = "column_name,column_type,is_nullable,column_default,column_comment";
-			}
-		}
-
 
 		//已经remove了id和id{}，以及@key
 		Set<String> set = request.keySet(); //前面已经判断request是否为空
@@ -1478,9 +1446,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//在	tableWhere 第0个		config.setIdIn(idIn);
 
 		config.setRole(role);
-		//TODO condition组合，优先 |		config.setCondition(where);
 		config.setSchema(schema);
-		config.setAbout(about);
 		config.setColumn(column);
 		config.setGroup(group);
 		config.setHaving(having);
@@ -1493,7 +1459,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//关键词
 		request.put(KEY_ROLE, role);
 		request.put(KEY_SCHEMA, schema);
-		request.put(KEY_ABOUT, about);
 		request.put(KEY_COMBINE, combine);
 		request.put(KEY_COLUMN, column);
 		request.put(KEY_GROUP, group);

@@ -127,7 +127,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_CORRECT = "@correct"; //字段校正
 	
 	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
-	public static final String KEY_ABOUT = "@about"; //关于，返回数据库表的信息，包括表说明和字段说明
 	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
 	public static final String KEY_COMBINE = "@combine"; //条件组合，每个条件key前面可以放&,|,!逻辑关系  "id!{},&sex,!name&$"
 	public static final String KEY_GROUP = "@group"; //分组方式
@@ -139,7 +138,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST = new ArrayList<String>();
 		TABLE_KEY_LIST.add(KEY_ROLE);
 		TABLE_KEY_LIST.add(KEY_SCHEMA);
-		TABLE_KEY_LIST.add(KEY_ABOUT);
 		TABLE_KEY_LIST.add(KEY_COLUMN);
 		TABLE_KEY_LIST.add(KEY_COMBINE);
 		TABLE_KEY_LIST.add(KEY_GROUP);
@@ -192,14 +190,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return puts(KEY_SCHEMA, schema);
 	}
 
-	/**set about
-	 * @param about
-	 * @return this
-	 */
-	public JSONObject setAbout(boolean about) {
-		return puts(KEY_ABOUT, about);
-	}
-
 	/**set keys need to be returned
 	 * @param keys  key0, key1, key2 ...
 	 * @return {@link #setColumn(String)}
@@ -216,14 +206,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 	/**set combination of keys for conditions
-	 * @param keys  key0, key1, key2 ...
+	 * @param keys  key0,&key1,|key2,!kye3 ...
 	 * @return {@link #setColumn(String)}
 	 */
 	public JSONObject setCombine(String... keys) {
 		return setCombine(StringUtil.getString(keys, true));
 	}
 	/**set combination of keys for conditions
-	 * @param keys  "key0,key1,key2..."
+	 * @param keys  key0,&key1,|key2,!kye3 ...
 	 * @return
 	 */
 	public JSONObject setCombine(String keys) {

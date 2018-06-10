@@ -108,9 +108,6 @@ public interface SQLConfig {
 	
 	SQLConfig setTable(String table);
 
-	boolean isAbout();
-	SQLConfig setAbout(boolean about);
-
 	String getGroup();
 	SQLConfig setGroup(String group);
 

@@ -182,13 +182,13 @@ public abstract class AbstractVerifier implements Verifier {
 				}
 			}
 			break;
-		case OWNER:
+		case OWNER: //TODO POST请求应该取values里的值！
 			requestId = (Number) config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
 			if (requestId != null && requestId.longValue() != visitorId) {
 				throw new IllegalAccessException(visitorIdkey + " = " + requestId + " 的 " + table
 						+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
 			}
-			//TODO POST请求时应该 putContent
+			//TODO POST请求时应该 setValues
 			config.putWhere(visitorIdkey, visitorId);
 			break;
 		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
