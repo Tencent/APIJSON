@@ -31,13 +31,14 @@ public enum Operation {
 	NECESSARY,
 	
 	/**
+	 * 验证是否符合预设的类型:
+	 * Boolean, Long, Double, String, Object, Array
+	 */
+	TYPE,
+	/**
 	 * 验证是否符合预设的条件
 	 */
 	VERIFY,
-	/**TODO
-	 * 验证是否符合预设的类型
-	 */
-	TYPE,
 	/**
 	 * 验证是否不存在，除了本身的记录
 	 */

@@ -24,12 +24,15 @@ import static zuo.biao.apijson.server.Operation.REMOVE;
 import static zuo.biao.apijson.server.Operation.REPLACE;
 import static zuo.biao.apijson.server.Operation.UNIQUE;
 import static zuo.biao.apijson.server.Operation.VERIFY;
+import static zuo.biao.apijson.server.Operation.TYPE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -211,6 +214,7 @@ public class Structure {
 
 
 		//获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		JSONObject type = target.getJSONObject(TYPE.name());
 		JSONObject verify = target.getJSONObject(VERIFY.name());
 		JSONObject add = target.getJSONObject(ADD.name());
 		JSONObject put = target.getJSONObject(PUT.name());
@@ -222,6 +226,7 @@ public class Structure {
 		String disallow = StringUtil.getNoBlankString(target.getString(DISALLOW.name()));
 
 		//不还原，传进来的target不应该是原来的
+		target.remove(TYPE.name());
 		target.remove(VERIFY.name());
 		target.remove(ADD.name());
 		target.remove(PUT.name());
@@ -341,6 +346,7 @@ public class Structure {
 
 		//校验与修改Request<<<<<<<<<<<<<<<<<
 		//在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
+		real = operate(TYPE, type, real, creator);
 		real = operate(VERIFY, verify, real, creator);
 		real = operate(ADD, add, real, creator);
 		real = operate(PUT, put, real, creator);
@@ -392,16 +398,22 @@ public class Structure {
 			}
 			tv = e.getValue();
 
-			if (opt == VERIFY) {
+			if (opt == TYPE) {
+				type(tk, tv, real);
+			}
+			else if (opt == VERIFY) {
 				verify(tk, tv, real, creator);
-			} else if (opt == PUT) {
+			}
+			else if (opt == PUT) {
 				real.put(tk, tv);
-			} else {
+			}
+			else {
 				if (real.containsKey(tk)) {
 					if (opt == REPLACE) {
 						real.put(tk, tv);
 					}
-				} else {
+				}
+				else {
 					if (opt == ADD) {
 						real.put(tk, tv);
 					}
@@ -411,6 +423,71 @@ public class Structure {
 
 		return real;
 	}
+
+
+	/**验证值类型
+	 * @param tk
+	 * @param tv
+	 * @param real
+	 * @throws Exception 
+	 */
+	private static void type(@NotNull String tk, Object tv, @NotNull JSONObject real) throws Exception {
+		if (tv == null) {
+			return;
+		}
+		if (tv instanceof String == false) {
+			throw new UnsupportedDataTypeException("服务器内部错误，" + tk + ":value 的value不合法！"
+					+ "Request表校验规则中 TYPE:{ key:value } 中的value只能是String类型！");
+		}
+		String t = (String) tv;
+		Object rv = real.get(tk);
+		if (rv == null) {
+			return;
+		}
+		
+		switch (t) {
+		case "Boolean":
+			//Boolean.parseBoolean(real.getString(tk)); 只会判断null和true  
+			if (rv instanceof Boolean == false) { //JSONObject.getBoolean 可转换Number类型 
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 Boolean !");
+			}
+			break;
+		case "Long":
+			try {
+				Long.parseLong(real.getString(tk)); //1.23会转换为1  real.getLong(tk); 
+			} catch (Exception e) {
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 Long !");
+			}
+			break;
+		case "Double":
+			try {
+				Double.parseDouble(rv.toString());
+			} catch (Exception e) {
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 Double !");
+			}
+			break;
+		case "String":
+			if (rv instanceof String == false) { //JSONObject.getString 可转换任何类型 
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 String !");
+			}
+			break;
+		case "Object":
+			if (rv instanceof Map == false) { //JSONObject.getJSONObject 可转换String类型 
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 {Object} !");
+			}
+			break;
+		case "Array":
+			if (rv instanceof Collection == false) { //JSONObject.getJSONArray 可转换String类型 
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 [Array] !");
+			}
+			break;
+		default:
+			throw new UnsupportedDataTypeException("服务器内部错误，类型 " + t + " 不合法！Request表校验规则中"
+					+ " TYPE:{ key:value } 中的value类型必须是 [Boolean, Long, Double, String, Object, Array] 中的一个!");
+		}
+	}
+
+
 
 
 	/**验证值
