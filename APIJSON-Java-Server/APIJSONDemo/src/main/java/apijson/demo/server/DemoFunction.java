@@ -14,16 +14,13 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.server.Function;
+import zuo.biao.apijson.server.NotNull;
 
 
 /**可远程调用的函数类
@@ -35,228 +32,234 @@ public class DemoFunction extends Function implements FunctionList {
 
 	public static void test() throws Exception {
 		int i0 = 1, i1 = -2;
-		Map<String, Object> jsonMap = new HashMap<String, Object>(); 
-		jsonMap.put("id", 10);
-		jsonMap.put("i0", i0);
-		jsonMap.put("i1", i1);
+		JSONObject request = new JSONObject(); 
+		request.put("id", 10);
+		request.put("i0", i0);
+		request.put("i1", i1);
 		JSONArray arr = new JSONArray();
 		arr.add(new JSONObject());
-		jsonMap.put("arr", arr);
+		request.put("arr", arr);
 
-		JSONArray collection = new JSONArray();
-		collection.add(1);//new JSONObject());
-		collection.add(2);//new JSONObject());
-		collection.add(4);//new JSONObject());
-		collection.add(10);//new JSONObject());
-		jsonMap.put("collection", collection);
+		JSONArray array = new JSONArray();
+		array.add(1);//new JSONObject());
+		array.add(2);//new JSONObject());
+		array.add(4);//new JSONObject());
+		array.add(10);//new JSONObject());
+		request.put("array", array);
 
-		jsonMap.put("position", 1);
-		jsonMap.put("@position", 0);
+		request.put("position", 1);
+		request.put("@position", 0);
 
-		jsonMap.put("key", "key");
-		Map<String, Boolean> map = new HashMap<String, Boolean>();
-		map.put("key", true);
-		jsonMap.put("map", map);
+		request.put("key", "key");
+		JSONObject object = new JSONObject();
+		object.put("key", true);
+		request.put("object", object);
 
 
-		Log.i(TAG, "plus(1, -2) = " + invoke(jsonMap, "plus(long:i0,long:i1)"));
-		Log.i(TAG, "count([1,2,4,10]) = " + invoke(jsonMap, "count(Collection:collection)"));
-		Log.i(TAG, "isContain([1,2,4,10], 10) = " + invoke(jsonMap, "isContain(Collection:collection,Object:id)"));
-		Log.i(TAG, "get({key:true}, key) = " + invoke(jsonMap, "get(Map:map,key)"));
-		Log.i(TAG, "get([1,2,4,10], 0) = " + invoke(jsonMap, "get(Collection:collection,int:@position)"));
-		Log.i(TAG, "Integer:get({key:true}, key) = " + invoke(jsonMap, "Integer:get(Map:map,key)"));
+		Log.i(TAG, "plus(1,-2) = " + invoke(request, "plus(i0,i1)"));
+		Log.i(TAG, "count([1,2,4,10]) = " + invoke(request, "countArray(array)"));
+		Log.i(TAG, "isContain([1,2,4,10], 10) = " + invoke(request, "isContain(array,id)"));
+		Log.i(TAG, "getFromArray([1,2,4,10], 0) = " + invoke(request, "getFromArray(array,@position)"));
+		Log.i(TAG, "getFromObject({key:true}, key) = " + invoke(request, "getFromObject(object,key)"));
+
+		try {
+			Log.i(TAG, "Object:getFromObject({key:true}, key) = " + invoke(request, "Object:getFromObject(object,key)")); //NoSuchMethodException
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			Log.i(TAG, "getFromObject({key:true}, Object:key) = " + invoke(request, "getFromObject(object,Object:key)")); //NoSuchMethodException
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 
 
-	public static final DemoFunction instance = new DemoFunction();
+	public static final DemoFunction instance;
+	static {
+		instance = new DemoFunction();
+	}
 	/**反射调用
-	 * @param jsonMap
-	 * @param function 例如get(Map:map,key)，参数只允许引用，不能直接传值
+	 * @param request
+	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
 	 * @return
 	 */
-	public static Object invoke(Map<String, Object> jsonMap, String function) throws Exception {
+	public static Object invoke(JSONObject request, String function) throws Exception {
 		//TODO  不允许调用invoke，避免死循环
 		//		if (function.startsWith("invoke(")) {
 		//			
 		//		}
-		return invoke(instance, jsonMap, function);
+		return invoke(instance, request, function);
 	}
 
 
 
 
-	public String search(String key) {
+	public String search(@NotNull JSONObject request, String key) {
 		return null;
 	}
 
-	public long plus(long i0, long i1) {
-		return i0 + i1;
+	public double plus(@NotNull JSONObject request, String i0, String i1) {
+		return request.getDoubleValue(i0) + request.getDoubleValue(i1);
 	}
-
+	public double minus(@NotNull JSONObject request, String i0, String i1) {
+		return request.getDoubleValue(i0) - request.getDoubleValue(i1);
+	}
+	public double multiply(@NotNull JSONObject request, String i0, String i1) {
+		return request.getDoubleValue(i0) * request.getDoubleValue(i1);
+	}
+	public double divide(@NotNull JSONObject request, String i0, String i1) {
+		return request.getDoubleValue(i0) / request.getDoubleValue(i1);
+	}
 
 	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	/**判断collection是否为空
-	 * @param collection
+	/**判断array是否为空
+	 * @param request
+	 * @param array
 	 * @return
 	 */
 	@Override
-	public <T> boolean isEmpty(Collection<T> collection) {
-		return BaseModel.isEmpty(collection);
+	public boolean isArrayEmpty(@NotNull JSONObject request, String array) {
+		return BaseModel.isEmpty(request.getJSONArray(array));
 	}
-	/**判断map是否为空
-	 * @param <K>
-	 * @param <V>
-	 * @param map
-	 * @return
-	 */
-	@Override
-	public <K, V> boolean isEmpty(Map<K, V> map) {
-		return BaseModel.isEmpty(map); 
-	}
-	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-	//判断是否为包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	/**判断collection是否包含object
-	 * @param collection
+	/**判断object是否为空
+	 * @param request
 	 * @param object
 	 * @return
 	 */
 	@Override
-	public <T> boolean isContain(Collection<T> collection, T object) {
-		return BaseModel.isContain(collection, object);
+	public boolean isObjectEmpty(@NotNull JSONObject request, String object) {
+		return BaseModel.isEmpty(request.getJSONObject(object)); 
 	}
-	/**判断map是否包含key
-	 * @param <K>
-	 * @param <V>
-	 * @param map
-	 * @param key
-	 * @return
-	 */
-	@Override
-	public <K, V> boolean isContainKey(Map<K, V> map, K key) { 
-		return BaseModel.isContainKey(map, key); 
-	}
-	/**判断map是否包含value
-	 * @param <K>
-	 * @param <V>
-	 * @param map
+	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	//判断是否为包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**判断array是否包含value
+	 * @param request
+	 * @param array
 	 * @param value
 	 * @return
 	 */
 	@Override
-	public <K, V> boolean isContainValue(Map<K, V> map, V value) { 
-		return BaseModel.isContainValue(map, value);
+	public boolean isContain(@NotNull JSONObject request, String array, String value) {
+		return BaseModel.isContain(request.getJSONArray(array), request.get(value));
+	}
+	/**判断object是否包含key
+	 * @param request
+	 * @param object
+	 * @param key
+	 * @return
+	 */
+	@Override
+	public boolean isContainKey(@NotNull JSONObject request, String object, String key) { 
+		return BaseModel.isContainKey(request.getJSONObject(object), request.getString(key)); 
+	}
+	/**判断object是否包含value
+	 * @param request
+	 * @param object
+	 * @param value
+	 * @return
+	 */
+	@Override
+	public boolean isContainValue(@NotNull JSONObject request, String object, String value) { 
+		return BaseModel.isContainValue(request.getJSONObject(object), request.get(value));
 	}
 	//判断是否为包含 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 	//获取集合长度 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取数量
-	 * @param <T>
+	 * @param request
 	 * @param array
 	 * @return
 	 */
 	@Override
-	public <T> int count(T[] array) {  
-		return BaseModel.count(array); 
+	public int countArray(@NotNull JSONObject request, String array) { 
+		return BaseModel.count(request.getJSONArray(array)); 
 	}
 	/**获取数量
-	 * @param <T>
-	 * @param collection List, Vector, Set等都是Collection的子类
+	 * @param request
+	 * @param object
 	 * @return
 	 */
 	@Override
-	public <T> int count(Collection<T> collection) { 
-		return BaseModel.count(collection); 
-	}
-	/**获取数量
-	 * @param <K>
-	 * @param <V>
-	 * @param map
-	 * @return
-	 */
-	@Override
-	public <K, V> int count(Map<K, V> map) {
-		return BaseModel.count(map); 
+	public int countObject(@NotNull JSONObject request, String object) {
+		return BaseModel.count(request.getJSONObject(object)); 
 	}
 	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-	//获取集合长度 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	//根据键获取值 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取
-	 * @param <T>
+	 ** @param request
 	 * @param array
+	 * @param position
 	 * @return
 	 */
 	@Override
-	public <T> T get(T[] array, int position) { 
-		return BaseModel.get(array, position);
+	public Object getFromArray(@NotNull JSONObject request, String array, String position) { 
+		return BaseModel.get(request.getJSONArray(array), request.getIntValue(position)); 
 	}
 	/**获取
-	 * @param <T>
-	 * @param collection List, Vector, Set等都是Collection的子类
+	 * @param request
+	 * @param object
+	 * @param key
 	 * @return
 	 */
 	@Override
-	public <T> T get(Collection<T> collection, int position) { 
-		return BaseModel.get(collection, position); 
+	public Object getFromObject(@NotNull JSONObject request, String object, String key) { 
+		return BaseModel.get(request.getJSONObject(object), request.getString(key));
 	}
-	/**获取
-	 * @param <K>
-	 * @param <V>
-	 * @param map null ? null
-	 * @param key null ? null : map.get(key);
-	 * @return
-	 */
-	@Override
-	public <K, V> V get(Map<K, V> map, K key) { 
-		return BaseModel.get(map, key);
-	}
-	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//根据键获取值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
 	//获取非基本类型对应基本类型的非空值 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
 	@Override
-	public boolean value(Boolean value) { 
-		return BaseModel.value(value); 
+	public boolean booleanValue(@NotNull JSONObject request, String value) { 
+		return request.getBooleanValue(value);
 	}
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
 	@Override
-	public int value(Integer value) {  
-		return BaseModel.value(value); 
+	public int intValue(@NotNull JSONObject request, String value) {  
+		return request.getIntValue(value);
 	}
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
 	@Override
-	public long value(Long value) {   
-		return BaseModel.value(value); 
+	public long longValue(@NotNull JSONObject request, String value) {   
+		return request.getLongValue(value);
 	}
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
 	@Override
-	public float value(Float value) {  
-		return BaseModel.value(value); 
+	public float floatValue(@NotNull JSONObject request, String value) {  
+		return request.getFloatValue(value);
 	}
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
 	@Override
-	public double value(Double value) {    
-		return BaseModel.value(value);
+	public double doubleValue(@NotNull JSONObject request, String value) {    
+		return request.getDoubleValue(value); 
 	}
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

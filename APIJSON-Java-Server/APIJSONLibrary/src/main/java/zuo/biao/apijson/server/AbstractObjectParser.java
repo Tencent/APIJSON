@@ -350,7 +350,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 		if (key.endsWith("()")) {
 			if (value instanceof String == false) {
-				throw new IllegalArgumentException(path + "/" + key + "():function() 后面必须为函数String！");
+				throw new IllegalArgumentException(path + "/" + key + ":function() 后面必须为函数String！");
 			}
 			functionMap.put(key, (String) value);
 		} else if (isTable && key.startsWith("@") && JSONRequest.TABLE_KEY_LIST.contains(key) == false) {

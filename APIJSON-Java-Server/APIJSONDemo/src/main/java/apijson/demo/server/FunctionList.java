@@ -14,131 +14,124 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
-import java.util.Collection;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
+
+import zuo.biao.apijson.server.NotNull;
 
 
-//TODO  新增 @FunctionList ，被它注解过的List可以传到 FuntionUtil.invoke(FunctionList list, ...)
+//TODO  新增 @FunctionList ，被它注解过的List可以传到 Funtion.invoke(FunctionList list, ...)
 /**可远程调用的函数列表，暴露功能和使用方式，而不是具体的实现细节。
  * @author Lemon
  */
 public interface FunctionList {
 
 	//判断是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	/**判断collection是否为空
-	 * @param collection
+	/**判断array是否为空
+	 * @param request
+	 * @param array
 	 * @return
 	 */
-	public <T> boolean isEmpty(Collection<T> collection);
-	/**判断map是否为空
-	 * @param <K>
-	 * @param <V>
-	 * @param map
-	 * @return
-	 */
-	public <K, V> boolean isEmpty(Map<K, V> map);
-	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
-	//判断是否为包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	/**判断collection是否包含object
-	 * @param collection
+	public boolean isArrayEmpty(@NotNull JSONObject request, String array);
+	/**判断object是否为空
+	 * @param request
 	 * @param object
 	 * @return
 	 */
-	public <T> boolean isContain(Collection<T> collection, T object);
-	/**判断map是否包含key
-	 * @param <K>
-	 * @param <V>
-	 * @param map
-	 * @param key
-	 * @return
-	 */
-	public <K, V> boolean isContainKey(Map<K, V> map, K key);
-	/**判断map是否包含value
-	 * @param <K>
-	 * @param <V>
-	 * @param map
+	public boolean isObjectEmpty(@NotNull JSONObject request, String object);
+	//判断是否为空 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	//判断是否为包含 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**判断array是否包含value
+	 * @param request
+	 * @param array
 	 * @param value
 	 * @return
 	 */
-	public <K, V> boolean isContainValue(Map<K, V> map, V value);
+	public boolean isContain(@NotNull JSONObject request, String array, String value);
+	/**判断object是否包含key
+	 * @param request
+	 * @param object
+	 * @param key
+	 * @return
+	 */
+	public boolean isContainKey(@NotNull JSONObject request, String object, String key);
+
+	/**判断object是否包含value
+	 * @param request
+	 * @param object
+	 * @param value
+	 * @return
+	 */
+	public boolean isContainValue(@NotNull JSONObject request, String object, String value);
 	//判断是否为包含 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
 	//获取集合长度 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取数量
-	 * @param <T>
+	 * @param request
 	 * @param array
 	 * @return
 	 */
-	public <T> int count(T[] array);
+	public int countArray(@NotNull JSONObject request, String array);
 	/**获取数量
-	 * @param <T>
-	 * @param collection List, Vector, Set等都是Collection的子类
+	 * @param request
+	 * @param object
 	 * @return
 	 */
-	public <T> int count(Collection<T> collection);
-	/**获取数量
-	 * @param <K>
-	 * @param <V>
-	 * @param map
-	 * @return
-	 */
-	public <K, V> int count(Map<K, V> map);
+	public int countObject(@NotNull JSONObject request, String object);
 	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
-	//获取集合长度 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	//根据键获取值 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取
-	 * @param <T>
+	 ** @param request
 	 * @param array
+	 * @param position
 	 * @return
 	 */
-	public <T> T get(T[] array, int position);
+	public Object getFromArray(@NotNull JSONObject request, String array, String position);
 	/**获取
-	 * @param <T>
-	 * @param collection List, Vector, Set等都是Collection的子类
+	 * @param request
+	 * @param object
+	 * @param key
 	 * @return
 	 */
-	public <T> T get(Collection<T> collection, int position);
-	/**获取
-	 * @param <K>
-	 * @param <V>
-	 * @param map null ? null
-	 * @param key null ? null : map.get(key);
-	 * @return
-	 */
-	public <K, V> V get(Map<K, V> map, K key);
-	//获取集合长度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	public Object getFromObject(@NotNull JSONObject request, String object, String key);
+	//根据键获取值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	
 	
 	//获取非基本类型对应基本类型的非空值 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
-	public boolean value(Boolean value);
+	public boolean booleanValue(@NotNull JSONObject request, String value);
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
-	public int value(Integer value);
+	public int intValue(@NotNull JSONObject request, String value);
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
-	public long value(Long value);
+	public long longValue(@NotNull JSONObject request, String value);
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
-	public float value(Float value);
+	public float floatValue(@NotNull JSONObject request, String value);
 	/**获取非空值
+	 * @param request
 	 * @param value
 	 * @return
 	 */
-	public double value(Double value);
+	public double doubleValue(@NotNull JSONObject request, String value);
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }
