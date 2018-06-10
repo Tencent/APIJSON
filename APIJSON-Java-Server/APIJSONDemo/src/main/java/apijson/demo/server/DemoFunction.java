@@ -62,16 +62,6 @@ public class DemoFunction extends Function implements FunctionList {
 		Log.i(TAG, "getFromArray([1,2,4,10], 0) = " + invoke(request, "getFromArray(array,@position)"));
 		Log.i(TAG, "getFromObject({key:true}, key) = " + invoke(request, "getFromObject(object,key)"));
 
-		try {
-			Log.i(TAG, "Object:getFromObject({key:true}, key) = " + invoke(request, "Object:getFromObject(object,key)")); //NoSuchMethodException
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		try {
-			Log.i(TAG, "getFromObject({key:true}, Object:key) = " + invoke(request, "getFromObject(object,Object:key)")); //NoSuchMethodException
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 
