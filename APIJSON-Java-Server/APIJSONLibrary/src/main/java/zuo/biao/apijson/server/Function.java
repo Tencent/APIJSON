@@ -16,14 +16,13 @@ package zuo.biao.apijson.server;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.Log;
 import zuo.biao.apijson.StringUtil;
 
 /**可远程调用的函数类
  * @author Lemon
  */
 public class Function {
-	private static final String TAG = "Function";
+//	private static final String TAG = "Function";
 
 	/**反射调用
 	 * @param fun
@@ -37,8 +36,9 @@ public class Function {
 		int end = function.lastIndexOf(")");
 		String method = function.substring(0, start);
 		if (StringUtil.isEmpty(method, true)) {
-			Log.i(TAG, "invoke  StringUtil.isEmpty(method, true) >> return null;");
-			return null;
+			throw new IllegalArgumentException("字符 " + function + " 不合法！远程函数的名称function不能为空，"
+					+ "且必须为 function(key0,key1,...) 这种单函数格式！"
+					+ "\nfunction必须符合Java函数命名，key是用于在request内取值的键！");
 		}
 
 		String[] keys = StringUtil.split(function.substring(start + 1, end));
@@ -82,7 +82,25 @@ public class Function {
 		//				}
 		//			}
 
-		return invoke(fun, method, types, values); 
+		try {
+			return invoke(fun, method, types, values); 
+		} catch (Exception e) {
+			if (e instanceof NoSuchMethodException) {
+				String f = method + "(JSONObject request";
+				for (int i = 0; i < length; i++) {
+					f += (", String " + keys[i]);
+				}
+				f += ")";
+				
+				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + f + " 不在后端工程的DemoFunction内！"
+						+ "\n请检查函数名和参数数量是否与已定义的函数一致！"
+						+ "\n且必须为 function(key0,key1,...) 这种单函数格式！"
+						+ "\nfunction必须符合Java函数命名，key是用于在request内取值的键！"
+						+ "\n调用时不要有空格！");
+			}
+			throw e;
+		}
+		
 	}
 	/**反射调用
 	 * @param methodName
