@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.StringUtil;
@@ -22,7 +24,7 @@ import zuo.biao.apijson.StringUtil;
  * @author Lemon
  */
 public class Function {
-//	private static final String TAG = "Function";
+	//	private static final String TAG = "Function";
 
 	/**反射调用
 	 * @param fun
@@ -86,22 +88,22 @@ public class Function {
 			return invoke(fun, method, types, values); 
 		} catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
-				String f = method + "(JSONObject request";
-				for (int i = 0; i < length; i++) {
-					f += (", String " + keys[i]);
-				}
-				f += ")";
-				
-				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + f + " 不在后端工程的DemoFunction内！"
+				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(method, keys) + " 不在后端工程的DemoFunction内！"
 						+ "\n请检查函数名和参数数量是否与已定义的函数一致！"
 						+ "\n且必须为 function(key0,key1,...) 这种单函数格式！"
 						+ "\nfunction必须符合Java函数命名，key是用于在request内取值的键！"
 						+ "\n调用时不要有空格！");
 			}
+			if (e instanceof InvocationTargetException) {
+				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数传参类型错误！"
+						+ "\n请检查 key:value 中value的类型是否满足已定义的函数 " + getFunction(method, keys) + " 的要求！");
+			}
 			throw e;
 		}
-		
+
 	}
+
+
 	/**反射调用
 	 * @param methodName
 	 * @param parameterTypes
@@ -110,6 +112,25 @@ public class Function {
 	 */
 	public static Object invoke(@NotNull Function fun, @NotNull String methodName, @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
 		return fun.getClass().getDeclaredMethod(methodName, parameterTypes).invoke(fun, args);
+	}
+
+	/**
+	 * @param method
+	 * @param keys
+	 * @return
+	 */
+	private static String getFunction(String method, String[] keys) {
+		String f = method + "(JSONObject request";
+		
+		if (keys != null) {
+			for (int i = 0; i < keys.length; i++) {
+				f += (", String " + keys[i]);
+			}
+		}
+		
+		f += ")";
+		
+		return f;
 	}
 
 }
