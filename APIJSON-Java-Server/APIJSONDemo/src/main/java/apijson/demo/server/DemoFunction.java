@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.List;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -133,7 +135,12 @@ public class DemoFunction extends Function implements FunctionList {
 	 */
 	@Override
 	public boolean isContain(@NotNull JSONObject request, String array, String value) {
-		return BaseModel.isContain(request.getJSONArray(array), request.get(value));
+		//解决isContain((List<Long>) [82001,...], (Integer) 82001) == false及类似问题, list元素可能是从数据库查到的bigint类型的值
+		//		return BaseModel.isContain(request.getJSONArray(array), request.get(value));
+
+		//不用准确的的 request.getString(value).getClass() ，因为Long值转Integer崩溃，而且转成一种类型本身就和字符串对比效果一样了。
+		List<String> list = com.alibaba.fastjson.JSON.parseArray(request.getString(array), String.class);
+		return list != null && list.contains(request.getString(value));
 	}
 	/**判断object是否包含key
 	 * @param request
