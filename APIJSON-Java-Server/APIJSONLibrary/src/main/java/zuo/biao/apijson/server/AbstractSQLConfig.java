@@ -1379,14 +1379,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						}
 						else if (w.startsWith("|")) {
 							if (method == PUT) {
-								throw new IllegalArgumentException("字符 " + w + " 不合法！PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+								throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+										+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
 							}
 							w = w.substring(1);
 							orList.add(w);
 						}
 						else if (w.startsWith("!")) {
 							if (method == PUT) {
-								throw new IllegalArgumentException("字符 " + w + " 不合法！PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+								throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+										+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
 							}
 							w = w.substring(1);
 							notList.add(w);
@@ -1395,11 +1397,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							orList.add(w);
 						}
 
+						if (w.isEmpty()) {
+							throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
+						}
+						else {
+							if (KEY_ID.equals(w) || KEY_ID_IN.equals(w) || KEY_USER_ID.equals(w) || KEY_USER_ID_IN.equals(w)) {
+								throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 不合法！"
+										+ "不允许传 [" + KEY_ID + ", " + KEY_ID_IN + ", " + KEY_USER_ID + ", " + KEY_USER_ID_IN + "] 其中任何一个！");
+							}
+						}
+
 						whereList.add(w);
 					}
 					if (request.containsKey(w) == false) {
-						throw new IllegalArgumentException("条件 " + w + " 不在同一表对象 TableKey:{} 里面！"
-								+ "或者是 id 或 id{} ，这两个key不允许在 @combine:value 的value里设置！");
+						throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
 					}
 				}
 
