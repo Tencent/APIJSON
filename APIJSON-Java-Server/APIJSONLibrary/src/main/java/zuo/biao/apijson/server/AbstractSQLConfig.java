@@ -27,6 +27,8 @@ import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
 import static zuo.biao.apijson.JSONObject.KEY_USER_ID_IN;
 import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
+import static zuo.biao.apijson.RequestMethod.GETS;
+import static zuo.biao.apijson.RequestMethod.HEADS;
 import static zuo.biao.apijson.RequestMethod.POST;
 import static zuo.biao.apijson.RequestMethod.PUT;
 import static zuo.biao.apijson.SQL.AND;
@@ -1364,8 +1366,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			String[] ws = StringUtil.split(combine);
 			if (ws != null) {
-				if (method == DELETE) {
-					throw new IllegalArgumentException("DELETE请求不允许传 @combine:\"conditons\" !");
+				if (method == DELETE || method == GETS || method == HEADS) {
+					throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:\"conditons\" !");
 				}
 				whereList = new ArrayList<>();
 
