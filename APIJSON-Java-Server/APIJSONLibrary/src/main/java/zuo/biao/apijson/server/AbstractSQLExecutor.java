@@ -199,37 +199,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
 
 			result = new JSONObject(true);
-			Object value;
 
 			for (int i = 1; i <= length; i++) {
-				if (rsmd.getColumnName(i).startsWith("_")) {
-					Log.i(TAG, "select while (rs.next()){ ..."
-							+ " >>  rsmd.getColumnName(i).startsWith(_) >> continue;");
-					continue;
-				}
-
-				value = rs.getObject(i);
-				//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
-				//					Log.d(TAG, "lable:" + rsmd.getColumnLabel(i));
-				//					Log.d(TAG, "type:" + rsmd.getColumnType(i));
-				//					Log.d(TAG, "typeName:" + rsmd.getColumnTypeName(i));
-
-				//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < length; i++) {"
-				//						+ "\n  >>> value = " + value);
-
-				if (value != null) { //数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
-					if (value instanceof Timestamp) {
-						value = ((Timestamp) value).toString();
-					}
-					else if (value instanceof String && isJSONType(rsmd, i)) { //json String
-						value = JSON.parse((String) value);
-					}
-				}
-
-				result.put(rsmd.getColumnLabel(i), value);
+				
+				result = onPutColumn(config, rs, rsmd, index, result, i);
 			}
 
-			resultMap.put(index, result);
+			resultMap = onPutTable(config, rs, rsmd, resultMap, index, result);
+			
 			Log.d(TAG, "\n select  while (rs.next()) { resultMap.put( " + index + ", result); "
 					+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 		}
@@ -246,6 +223,66 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 
+	/**table.put(rsmd.getColumnLabel(i), rs.getObject(i));
+	 * @param config 
+	 * @param rs
+	 * @param rsmd
+	 * @param tablePosition 从0开始
+	 * @param table
+	 * @param columnIndex 从1开始
+	 * @return result
+	 * @throws Exception
+	 */
+	protected JSONObject onPutColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, int tablePosition, @NotNull JSONObject table, int columnIndex) throws Exception {
+		
+		if (rsmd.getColumnName(columnIndex).startsWith("_")) {
+			Log.i(TAG, "select while (rs.next()){ ..."
+					+ " >>  rsmd.getColumnName(i).startsWith(_) >> continue;");
+			return table;
+		}
+
+		Object value = rs.getObject(columnIndex);
+		//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
+		//					Log.d(TAG, "lable:" + rsmd.getColumnLabel(i));
+		//					Log.d(TAG, "type:" + rsmd.getColumnType(i));
+		//					Log.d(TAG, "typeName:" + rsmd.getColumnTypeName(i));
+
+		//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < length; i++) {"
+		//						+ "\n  >>> value = " + value);
+
+		if (value != null) { //数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
+			if (value instanceof Timestamp) {
+				value = ((Timestamp) value).toString();
+			}
+			else if (value instanceof String && isJSONType(rsmd, columnIndex)) { //json String
+				value = JSON.parse((String) value);
+			}
+		}
+
+		table.put(rsmd.getColumnLabel(columnIndex), value);
+		
+		return table;
+	}
+
+	/**resultMap.put(position, table);
+	 * @param config 
+	 * @param rs
+	 * @param rsmd
+	 * @param resultMap
+	 * @param position
+	 * @param table
+	 * @return resultMap
+	 */
+	protected Map<Integer, JSONObject> onPutTable(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, @NotNull Map<Integer, JSONObject> resultMap, int position, @NotNull JSONObject table) {
+		
+		resultMap.put(position, table);
+		return resultMap;
+	}
+	
+	
+	
 	/**判断是否为JSON类型
 	 * @param rsmd
 	 * @param position
