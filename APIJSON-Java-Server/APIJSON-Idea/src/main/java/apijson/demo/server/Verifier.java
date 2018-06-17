@@ -33,12 +33,12 @@ import javax.servlet.http.HttpSession;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import apijson.demo.server.model.BaseModel;	
-import apijson.demo.server.model.Comment;	
-import apijson.demo.server.model.Login;	
-import apijson.demo.server.model.Moment;	
-import apijson.demo.server.model.Privacy;	
-import apijson.demo.server.model.User;	
+import apijson.demo.server.model.BaseModel;
+import apijson.demo.server.model.Comment;
+import apijson.demo.server.model.Login;
+import apijson.demo.server.model.Moment;
+import apijson.demo.server.model.Privacy;
+import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
@@ -88,8 +88,6 @@ public class Verifier {
 		ACCESS_MAP.put(Comment.class.getSimpleName(), getAccessMap(Comment.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(Verify.class.getSimpleName(), getAccessMap(Verify.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(Login.class.getSimpleName(), getAccessMap(Login.class.getAnnotation(MethodAccess.class)));
-		
-
 	}
 
 	/**获取权限Map，每种操作都只允许对应的角色
