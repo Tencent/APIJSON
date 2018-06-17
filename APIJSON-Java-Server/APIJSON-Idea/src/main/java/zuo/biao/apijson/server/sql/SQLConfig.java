@@ -52,8 +52,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.demo.server.model.BaseModel;
-import apijson.demo.server.model.User;
 import apijson.demo.server.model.Privacy;
+import apijson.demo.server.model.User;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
