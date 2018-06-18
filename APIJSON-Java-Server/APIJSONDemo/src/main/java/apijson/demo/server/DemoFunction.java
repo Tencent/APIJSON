@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -92,11 +93,11 @@ public class DemoFunction extends Function implements FunctionList {
 	
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
 	 * @param request
-	 * @return
+	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
 	 * @throws Exception
 	 */
 	public JSONArray getIdList(@NotNull JSONObject request) throws Exception {
-		return new JSONArray(Arrays.asList(12, 15, 301, 82001, 82002, 38710)); //只能用JSONArray，用long[]会在SQLConfig解析崩溃
+		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
 	}
 	
 	/**TODO 仅用来测试 "key-()":"verifyAccess()"
