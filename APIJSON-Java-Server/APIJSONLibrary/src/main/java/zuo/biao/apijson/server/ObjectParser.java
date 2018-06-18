@@ -117,6 +117,10 @@ public interface ObjectParser {
 	 */
 	JSONObject response() throws Exception;
 
+	void onFunctionResponse(String type) throws Exception;
+
+	void onChildResponse() throws Exception;
+	
 
 	SQLConfig newSQLConfig() throws Exception;
 
@@ -147,7 +151,7 @@ public interface ObjectParser {
 	JSONObject getSqlReponse();
 
 	Map<String, Object> getCustomMap();
-	Map<String, String> getFunctionMap();
+	Map<String, Map<String, String>> getFunctionMap();
 	Map<String, JSONObject> getChildMap();
 
 

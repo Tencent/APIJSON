@@ -95,6 +95,10 @@ public class Function {
 						+ "\n调用时不要有空格！");
 			}
 			if (e instanceof InvocationTargetException) {
+				Throwable te = ((InvocationTargetException) e).getTargetException();
+				if (StringUtil.isEmpty(te.getMessage(), true) == false) { //到处把函数声明throws Exception改成throws Throwable挺麻烦
+					throw te instanceof Exception ? (Exception) te : new Exception(te.getMessage());
+				}
 				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数传参类型错误！"
 						+ "\n请检查 key:value 中value的类型是否满足已定义的函数 " + getFunction(method, keys) + " 的要求！");
 			}

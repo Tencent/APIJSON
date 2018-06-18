@@ -193,8 +193,21 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	protected JSONObject response;
 	protected JSONObject sqlRequest;
 	protected JSONObject sqlReponse;
+	/**
+	 * 自定义关键词
+	 */
 	protected Map<String, Object> customMap;
-	protected Map<String, String> functionMap;
+	/**
+	 * 远程函数
+	 * {"-":{ "key-()":value }, "0":{ "key()":value }, "+":{ "key+()":value } }
+	 * - : 在executeSQL前解析
+	 * 0 : 在executeSQL后、onChildParse前解析
+	 * + : 在onChildParse后解析
+	 */
+	protected Map<String, Map<String, String>> functionMap;
+	/**
+	 * 子对象
+	 */
 	protected Map<String, JSONObject> childMap;
 
 	/**解析成员
@@ -221,7 +234,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					customMap = new LinkedHashMap<String, Object>();
 					childMap = new LinkedHashMap<String, JSONObject>();
 				}
-				functionMap = new LinkedHashMap<String, String>();//必须执行
+				functionMap = new LinkedHashMap<String, Map<String, String>>();//必须执行
 
 
 				//条件<<<<<<<<<<<<<<<<<<<
@@ -283,6 +296,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						invalidate();//忽略错误，还原request
 					}
 				}
+				
+				onFunctionResponse("-");
 			}
 		}
 
@@ -352,10 +367,35 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			if (value instanceof String == false) {
 				throw new IllegalArgumentException(path + "/" + key + ":function() 后面必须为函数String！");
 			}
-			functionMap.put(key, (String) value);
-		} else if (isTable && key.startsWith("@") && JSONRequest.TABLE_KEY_LIST.contains(key) == false) {
+			
+			String k = key.substring(0, key.length() - 2);
+			
+			String type; //远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里用 "-","0","+" 更直观，转用 -1,0,1 对性能提升不大。
+			if (k.endsWith("-")) {
+				type = "-";
+				k = k.substring(0, k.length() - 1);
+			}
+			else if (k.endsWith("+")) {
+				type = "+";
+				k = k.substring(0, k.length() - 1);
+			}
+			else {
+				type = "0";
+			}
+			
+			//远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里循环里new出来对性能影响不大。
+			Map<String, String> map = functionMap.get(type);
+			if (map == null) {
+				map = new LinkedHashMap<>();
+			}
+			map.put(k, (String) value);
+			
+			functionMap.put(type, map);
+		}
+		else if (isTable && key.startsWith("@") && JSONRequest.TABLE_KEY_LIST.contains(key) == false) {
 			customMap.put(key, value);
-		} else {
+		}
+		else {
 			sqlRequest.put(key, value);
 		}
 
@@ -554,18 +594,45 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
 
+		onFunctionResponse("0");
+		
+		onChildResponse();
+	
+		onFunctionResponse("+");
+
+		onComplete();
+
+		return response;
+	}
+
+
+	@Override
+	public void onFunctionResponse(String type) throws Exception {
+		Map<String, String> map = functionMap == null ? null : functionMap.get(type);
 
 		//解析函数function
-		if (functionMap != null) {
-			Set<Entry<String, String>> functionSet = functionMap == null ? null : functionMap.entrySet();
-			if (functionSet != null && functionSet.isEmpty() == false) {
-				for (Entry<String, String> entry : functionSet) {
-					response.put(AbstractSQLConfig.getRealKey(method, entry.getKey(), false, false)
-							, onFunctionParse(response, entry.getValue()));
+		Set<Entry<String, String>> functionSet = map == null ? null : map.entrySet();
+		if (functionSet != null && functionSet.isEmpty() == false) {
+			JSONObject json = "-".equals(type) ? request : response;
+			
+			String key;
+			Object value;
+			for (Entry<String, String> entry : functionSet) {
+				
+				value = onFunctionParse(json, entry.getValue());
+				
+				if (value != null) {
+					key = AbstractSQLConfig.getRealKey(method, entry.getKey(), false, false);
+					
+					response.put(key, value);
+					parser.putQueryResult(AbstractParser.getAbsPath(path, key), value);
 				}
 			}
 		}
-
+	}
+	
+	@Override
+	public void onChildResponse() throws Exception {
 		//把isTable时取出去child解析后重新添加回来
 		Set<Entry<String, JSONObject>> set = childMap == null ? null : childMap.entrySet();
 		if (set != null) {
@@ -577,11 +644,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				}
 			}
 		}
-
-		onComplete();
-
-		return response;
 	}
+
 
 	@Override
 	public Object onFunctionParse(JSONObject json, String function) throws Exception {
@@ -712,7 +776,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		return customMap;
 	}
 	@Override
-	public Map<String, String> getFunctionMap() {
+	public Map<String, Map<String, String>> getFunctionMap() {
 		return functionMap;
 	}
 	@Override

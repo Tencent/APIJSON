@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
@@ -21,6 +22,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
 import zuo.biao.apijson.Log;
+import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.server.Function;
 import zuo.biao.apijson.server.NotNull;
 
@@ -87,10 +89,33 @@ public class DemoFunction extends Function implements FunctionList {
 
 
 
-
-	public String search(@NotNull JSONObject request, String key) {
+	
+	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONArray getIdList(@NotNull JSONObject request) throws Exception {
+		return new JSONArray(Arrays.asList(12, 15, 301, 82001, 82002, 38710)); //只能用JSONArray，用long[]会在SQLConfig解析崩溃
+	}
+	
+	/**TODO 仅用来测试 "key-()":"verifyAccess()"
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public Object verifyAccess(@NotNull JSONObject request) throws Exception {
+		long userId = request.getLongValue(zuo.biao.apijson.JSONObject.KEY_USER_ID);
+		RequestRole role = RequestRole.get(request.getString(zuo.biao.apijson.JSONObject.KEY_ROLE));
+		if (userId != 70793 && role == RequestRole.ADMIN) {
+			throw new IllegalAccessException("verifyAccess:ADMIN账号只能为70793！");
+		}
 		return null;
 	}
+	
+	
+	
+	
 
 	public double plus(@NotNull JSONObject request, String i0, String i1) {
 		return request.getDoubleValue(i0) + request.getDoubleValue(i1);
@@ -260,4 +285,7 @@ public class DemoFunction extends Function implements FunctionList {
 	}
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
+	
+	
 }
