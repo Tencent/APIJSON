@@ -230,7 +230,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 			Set<Entry<String, Object>> set = new LinkedHashSet<Entry<String, Object>>(request.entrySet());
 			if (set != null && set.isEmpty() == false) {//判断换取少几个变量的初始化是否值得？
-				if (isTable) {//非Table下不必分离出去再添加进来
+				if (isTable) {//非Table下必须保证原有顺序！否则 count,page 会丢, total@:"/[]/total" 会在[]:{}前执行！
 					customMap = new LinkedHashMap<String, Object>();
 					childMap = new LinkedHashMap<String, JSONObject>();
 				}
@@ -275,7 +275,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						if (value instanceof JSONObject && key.startsWith("@") == false) {//JSONObject，往下一级提取
 							if (childMap != null) {//添加到childMap，最后再解析
 								childMap.put(key, (JSONObject)value);
-							} else {//直接解析并替换原来的
+							}
+							else {//直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
 								response.put(key, onChildParse(index, key, (JSONObject)value));
 								index ++;
 							}
@@ -296,8 +297,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						invalidate();//忽略错误，还原request
 					}
 				}
-				
-				onFunctionResponse("-");
+
+				//非Table内的函数会被滞后在onChildParse后调用！ onFunctionResponse("-");
 			}
 		}
 
@@ -367,30 +368,34 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			if (value instanceof String == false) {
 				throw new IllegalArgumentException(path + "/" + key + ":function() 后面必须为函数String！");
 			}
-			
+
 			String k = key.substring(0, key.length() - 2);
-			
+
 			String type; //远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里用 "-","0","+" 更直观，转用 -1,0,1 对性能提升不大。
-			if (k.endsWith("-")) {
+			if (k.endsWith("-")) { //不能封装到functionMap后批量执行，否则会导致非Table内的 key-():function() 在onChildParse后执行！
 				type = "-";
 				k = k.substring(0, k.length() - 1);
-			}
-			else if (k.endsWith("+")) {
-				type = "+";
-				k = k.substring(0, k.length() - 1);
+
+				parseFunction(request, k, (String) value);
 			}
 			else {
-				type = "0";
+				if (k.endsWith("+")) {
+					type = "+";
+					k = k.substring(0, k.length() - 1);
+				}
+				else {
+					type = "0";
+				}
+
+				//远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里循环里new出来对性能影响不大。
+				Map<String, String> map = functionMap.get(type);
+				if (map == null) {
+					map = new LinkedHashMap<>();
+				}
+				map.put(k, (String) value);
+
+				functionMap.put(type, map);
 			}
-			
-			//远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里循环里new出来对性能影响不大。
-			Map<String, String> map = functionMap.get(type);
-			if (map == null) {
-				map = new LinkedHashMap<>();
-			}
-			map.put(k, (String) value);
-			
-			functionMap.put(type, map);
 		}
 		else if (isTable && key.startsWith("@") && JSONRequest.TABLE_KEY_LIST.contains(key) == false) {
 			customMap.put(key, value);
@@ -595,9 +600,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 
 		onFunctionResponse("0");
-		
+
 		onChildResponse();
-	
+
 		onFunctionResponse("+");
 
 		onComplete();
@@ -613,24 +618,27 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		//解析函数function
 		Set<Entry<String, String>> functionSet = map == null ? null : map.entrySet();
 		if (functionSet != null && functionSet.isEmpty() == false) {
-			JSONObject json = "-".equals(type) ? request : response;
-			
-			String key;
-			Object value;
+//			JSONObject json = "-".equals(type) ? request : response; // key-():function 是实时执行，而不是在这里批量执行
+
 			for (Entry<String, String> entry : functionSet) {
-				
-				value = onFunctionParse(json, entry.getValue());
-				
-				if (value != null) {
-					key = AbstractSQLConfig.getRealKey(method, entry.getKey(), false, false);
-					
-					response.put(key, value);
-					parser.putQueryResult(AbstractParser.getAbsPath(path, key), value);
-				}
+
+//				parseFunction(json, entry.getKey(), entry.getValue());
+				parseFunction(response, entry.getKey(), entry.getValue());
 			}
 		}
 	}
-	
+
+	public void parseFunction(JSONObject json, String key, String value) throws Exception {
+		Object result = onFunctionParse(json, value);
+
+		if (result != null) {
+			String k = AbstractSQLConfig.getRealKey(method, key, false, false);
+
+			response.put(k, result);
+			parser.putQueryResult(AbstractParser.getAbsPath(path, k), result);
+		}
+	}
+
 	@Override
 	public void onChildResponse() throws Exception {
 		//把isTable时取出去child解析后重新添加回来
