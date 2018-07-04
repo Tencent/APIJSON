@@ -1,6 +1,6 @@
 # APIJSON 
 [![Java-Server API](https://img.shields.io/badge/Java.Server-1.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server) 
-[![CSharp-Server API](https://img.shields.io/badge/CSharp.Server-1.7%2B-brightgreen.svg?style=flat)](https://github.com/liaozb/APIJSON.NET) 
+[![CSharp-Server API](https://img.shields.io/badge/CSharp.Server-2.5%2B-brightgreen.svg?style=flat)](https://github.com/liaozb/APIJSON.NET) 
 [![MySQL API](https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/table) 
 [![Android API](https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android) 
 [![iOS API](https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS) 
