@@ -102,6 +102,11 @@ QQ技术交流群：607020115
 [3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
 
+### 其它项目
+[APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具。
+
+[APIJSON.NET](https://github.com/liaozb/APIJSON.NET/tree/master/APIJSON.NET) 使用 C# 开发的服务端库。
+
 
 ### 持续更新
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
