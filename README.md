@@ -105,7 +105,7 @@ QQ技术交流群：607020115
 ### 其它项目
 [APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具。
 
-[APIJSON.NET](https://github.com/liaozb/APIJSON.NET/tree/master/APIJSON.NET) 使用 C# 开发的服务端库。
+[APIJSON.NET](https://github.com/liaozb/APIJSON.NET) 使用 C# 开发的服务端库。
 
 
 ### 持续更新
