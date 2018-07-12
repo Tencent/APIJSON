@@ -73,7 +73,7 @@ public class DemoParser extends AbstractParser implements SQLCreator {
 	@Override
 	public DemoObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
 
-		return new DemoObjectParser(request, parentPath, name, arrayConfig) {
+		return new DemoObjectParser(session, request, parentPath, name, arrayConfig) {
 
 			//TODO 删除，onPUTArrayParse改用MySQL函数JSON_ADD, JSON_REMOVE等
 			@Override

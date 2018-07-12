@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONObject;
@@ -37,14 +38,16 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	}
 
 
+	private DemoFunction function;
 	/**for single object
 	 * @param parentPath
 	 * @param request
 	 * @param name
 	 * @throws Exception 
 	 */
-	public DemoObjectParser(@NotNull JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
+	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
 		super(request, parentPath, name, arrayConfig);
+		function = new DemoFunction(session);
 	}
 	
 	@Override
@@ -66,8 +69,8 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 
 
 	@Override
-	public Object onFunctionParse(JSONObject json, String function) throws Exception {
-		return DemoFunction.invoke(json, function);
+	public Object onFunctionParse(JSONObject json, String fun) throws Exception {
+		return function.invoke(json, fun);
 	}
 
 

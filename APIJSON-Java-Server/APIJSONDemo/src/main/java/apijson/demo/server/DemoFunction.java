@@ -16,7 +16,10 @@ package apijson.demo.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -24,6 +27,7 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.demo.server.model.BaseModel;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestRole;
+import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.Function;
 import zuo.biao.apijson.server.NotNull;
 
@@ -33,7 +37,11 @@ import zuo.biao.apijson.server.NotNull;
  */
 public class DemoFunction extends Function implements FunctionList {
 	private static final String TAG = "DemoFunction";
-
+	
+	private final HttpSession session;
+	public DemoFunction(HttpSession session) {
+		this.session = session;
+	}
 
 	public static void test() throws Exception {
 		int i0 = 1, i1 = -2;
@@ -61,35 +69,76 @@ public class DemoFunction extends Function implements FunctionList {
 		request.put("object", object);
 
 
-		Log.i(TAG, "plus(1,-2) = " + invoke(request, "plus(i0,i1)"));
-		Log.i(TAG, "count([1,2,4,10]) = " + invoke(request, "countArray(array)"));
-		Log.i(TAG, "isContain([1,2,4,10], 10) = " + invoke(request, "isContain(array,id)"));
-		Log.i(TAG, "getFromArray([1,2,4,10], 0) = " + invoke(request, "getFromArray(array,@position)"));
-		Log.i(TAG, "getFromObject({key:true}, key) = " + invoke(request, "getFromObject(object,key)"));
+		Log.i(TAG, "plus(1,-2) = " + new DemoFunction(null).invoke(request, "plus(i0,i1)"));
+		Log.i(TAG, "count([1,2,4,10]) = " + new DemoFunction(null).invoke(request, "countArray(array)"));
+		Log.i(TAG, "isContain([1,2,4,10], 10) = " + new DemoFunction(null).invoke(request, "isContain(array,id)"));
+		Log.i(TAG, "getFromArray([1,2,4,10], 0) = " + new DemoFunction(null).invoke(request, "getFromArray(array,@position)"));
+		Log.i(TAG, "getFromObject({key:true}, key) = " + new DemoFunction(null).invoke(request, "getFromObject(object,key)"));
 
 	}
 
 
 
-	public static final DemoFunction instance;
-	static {
-		instance = new DemoFunction();
-	}
+
 	/**反射调用
 	 * @param request
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
 	 * @return
 	 */
-	public static Object invoke(JSONObject request, String function) throws Exception {
+	public Object invoke(JSONObject request, String function) throws Exception {
 		//TODO  不允许调用invoke，避免死循环
 		//		if (function.startsWith("invoke(")) {
 		//			
 		//		}
-		return invoke(instance, request, function);
+		return invoke(this, request, function);
 	}
 
 
-
+	
+	/**
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public Object verifyIdList(@NotNull JSONObject request, @NotNull String idList) throws Exception {
+		Object obj = request.get(idList);
+		if (obj instanceof Collection == false) {
+			throw new IllegalArgumentException(idList + " 不符合 Array 类型! 结构必须是 [] ！");
+		}
+		JSONArray array = (JSONArray) obj;
+		if (array != null) {
+			for (int i = 0; i < array.size(); i++) {
+				if (array.get(i) instanceof Long == false && array.get(i) instanceof Integer == false) {
+					throw new IllegalArgumentException(idList + " 内字符 " + array.getString(i) + " 不符合 Long 类型!");
+				}
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public Object verifyURLList(@NotNull JSONObject request, @NotNull String urlList) throws Exception {
+		Object obj = request.get(urlList);
+		if (obj instanceof Collection == false) {
+			throw new IllegalArgumentException(urlList + " 不符合 Array 类型! 结构必须是 [] ！");
+		}
+		JSONArray array = (JSONArray) obj;
+		if (array != null) {
+			for (int i = 0; i < array.size(); i++) {
+				if (StringUtil.isUrl(array.getString(i)) == false) {
+					throw new IllegalArgumentException(urlList + " 内字符 " + array.getString(i) + " 不符合 URL 格式!");
+				}
+			}
+		}
+		return null;
+	}
+	
+	
 	
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
 	 * @param request
@@ -99,6 +148,7 @@ public class DemoFunction extends Function implements FunctionList {
 	public JSONArray getIdList(@NotNull JSONObject request) throws Exception {
 		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
 	}
+
 	
 	/**TODO 仅用来测试 "key-()":"verifyAccess()"
 	 * @param request
@@ -108,8 +158,8 @@ public class DemoFunction extends Function implements FunctionList {
 	public Object verifyAccess(@NotNull JSONObject request) throws Exception {
 		long userId = request.getLongValue(zuo.biao.apijson.JSONObject.KEY_USER_ID);
 		RequestRole role = RequestRole.get(request.getString(zuo.biao.apijson.JSONObject.KEY_ROLE));
-		if (userId != 70793 && role == RequestRole.ADMIN) {
-			throw new IllegalAccessException("verifyAccess:ADMIN账号只能为70793！");
+		if (role == RequestRole.OWNER && userId != DemoVerifier.getVisitorId(session)) {
+			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}
 		return null;
 	}
