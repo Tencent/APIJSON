@@ -25,10 +25,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
+import apijson.demo.server.model.Comment;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.Function;
+import zuo.biao.apijson.server.JSONRequest;
 import zuo.biao.apijson.server.NotNull;
 
 
@@ -37,7 +41,7 @@ import zuo.biao.apijson.server.NotNull;
  */
 public class DemoFunction extends Function implements FunctionList {
 	private static final String TAG = "DemoFunction";
-	
+
 	private final HttpSession session;
 	public DemoFunction(HttpSession session) {
 		this.session = session;
@@ -94,7 +98,7 @@ public class DemoFunction extends Function implements FunctionList {
 	}
 
 
-	
+
 	/**
 	 * @param request
 	 * @return
@@ -115,8 +119,8 @@ public class DemoFunction extends Function implements FunctionList {
 		}
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * @param request
 	 * @return
@@ -137,9 +141,75 @@ public class DemoFunction extends Function implements FunctionList {
 		}
 		return null;
 	}
+
+	/**判断array是否为空
+	 * @param request
+	 * @param array
+	 * @return
+	 */
+	public int deleteChildComment(@NotNull JSONObject rq, @NotNull String toId) throws Exception {
+		long tid = rq.getLongValue(toId);
+		if (tid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+			return 0;
+		}
+
+		//递归获取到全部子评论id
+		
+		JSONRequest request = new JSONRequest();
+		
+		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		JSONRequest comment = new JSONRequest();
+		comment.put("id{}", getChildCommentIdList(tid));
+		request.put("Comment", comment);
+		
+		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+		JSONObject rp = new DemoParser(RequestMethod.DELETE).setNoVerify(true).parseResponse(request);
+		
+		JSONObject c = rp.getJSONObject("Comment");
+		return c == null ? 0 : c.getIntValue(JSONResponse.KEY_COUNT);
+	}
+
+
+	private JSONArray getChildCommentIdList(long tid) {
+		
+		JSONArray arr = new JSONArray();
+		
+		JSONRequest request = new JSONRequest();
+		
+		//Comment-id[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		JSONRequest idItem = new JSONRequest();
+		
+		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		JSONRequest comment = new JSONRequest();
+		comment.put("toId", tid);
+		comment.setColumn("id");
+		idItem.put("Comment", comment);
+		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		
+		request.putAll(idItem.toArray(0, 0, "Comment-id"));
+		//Comment-id[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		
+		JSONObject rp = new DemoParser().setNoVerify(true).parseResponse(request);
+
+		JSONArray a = rp.getJSONArray("Comment-id[]");
+		if (a != null) {
+			arr.addAll(a);
+			
+			JSONArray a2;
+			for (int i = 0; i < a.size(); i++) {
+				
+				a2 = getChildCommentIdList(a.getLongValue(i));
+				if (a2 != null) {
+					arr.addAll(a2);
+				}
+			}
+		}
+		
+		return arr;
+	}
 	
-	
-	
+
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
 	 * @param request
 	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
@@ -149,7 +219,7 @@ public class DemoFunction extends Function implements FunctionList {
 		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
 	}
 
-	
+
 	/**TODO 仅用来测试 "key-()":"verifyAccess()"
 	 * @param request
 	 * @return
@@ -163,10 +233,10 @@ public class DemoFunction extends Function implements FunctionList {
 		}
 		return null;
 	}
-	
-	
-	
-	
+
+
+
+
 
 	public double plus(@NotNull JSONObject request, String i0, String i1) {
 		return request.getDoubleValue(i0) + request.getDoubleValue(i1);
@@ -337,6 +407,6 @@ public class DemoFunction extends Function implements FunctionList {
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-	
-	
+
+
 }
