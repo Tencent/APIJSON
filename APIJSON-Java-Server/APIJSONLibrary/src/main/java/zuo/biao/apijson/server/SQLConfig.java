@@ -19,6 +19,7 @@ import java.util.Map;
 
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
+import zuo.biao.apijson.server.AbstractSQLConfig.Callback;
 
 /**SQL配置
  * @author Lemon
@@ -160,6 +161,22 @@ public interface SQLConfig {
 	
 	AbstractSQLConfig setPrepared(boolean prepared);
 	
+	boolean isMain();
+
+	AbstractSQLConfig setMain(boolean main);
+
+	
 	List<Object> getPreparedValueList();
+
+	List<Map<String, Object>> getJoin();
+
+	SQLConfig setJoin(List<Map<String, Object>> join);
+
+	String getAlias();
+
+	AbstractSQLConfig setAlias(String alias);
+
+
+
 
 }

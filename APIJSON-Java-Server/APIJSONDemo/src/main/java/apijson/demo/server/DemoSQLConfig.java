@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.List;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.Privacy;
@@ -74,8 +77,8 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request) throws Exception {
-		return newSQLConfig(method, table, request, new Callback() {
+	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Map<String, Object>> join) throws Exception {
+		return newSQLConfig(method, table, request, join, new Callback() {
 
 			@Override
 			public DemoSQLConfig getSQLConfig(RequestMethod method, String table) {

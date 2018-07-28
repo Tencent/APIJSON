@@ -81,17 +81,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private long id; //Table的id
 	private RequestMethod method; //操作方法
 	private boolean prepared = true; //预编译
+	private boolean main = true;
 	/**
 	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
 	 */
 	private RequestRole role; //发送请求的用户的角色
-	private String schema; //Table所在的数据库
-	private String table; //Table名
+	private String schema; //表所在的数据库
+	private String table; //表名
+	private String alias; //表别名
 	private String group; //分组方式的字符串数组，','分隔
 	private String having; //聚合函数的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
-	private String column; //Table内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
-	private String values; //对应Table内字段的值的字符串数组，','分隔
+	private String column; //表内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
+	private String values; //对应表内字段的值的字符串数组，','分隔
 	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
 	private Map<String, Object> where; //筛选条件，key:value形式
 	private Map<String, List<String>> combine; //条件组合，{ "&":[key], "|":[key], "!":[key] }
@@ -103,6 +105,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private int position; //Table在[]中的位置
 	private int query; //JSONRequest.query
 	private int type; //ObjectParser.type
+	private List<Map<String, Object>> join; //join
 	//array item >>>>>>>>>>
 	private boolean test; //测试
 	private boolean cacheStatic; //静态缓存
@@ -140,6 +143,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setPrepared(boolean prepared) {
 		this.prepared = prepared;
+		return this;
+	}
+	@Override
+	public boolean isMain() {
+		return main;
+	}
+	@Override
+	public AbstractSQLConfig setMain(boolean main) {
+		this.main = main;
 		return this;
 	}
 
@@ -202,7 +214,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getSQLTable() {
-		return TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
+		return (TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table)
+				+ ( join != null && join.isEmpty() == false  //副表已经在 parseJoin 里加了 AS
+				&& isMain() && RequestMethod.isQueryMethod(method) ? " AS " + getAlias() : "");
 	}
 	@JSONField(serialize = false)
 	@Override
@@ -212,6 +226,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
 		this.table = table;
+		return this;
+	}
+	@Override
+	public String getAlias() {
+		if (StringUtil.isEmpty(alias, true)) {
+			alias = getTable();
+		}
+		return alias;
+	}
+	@Override
+	public AbstractSQLConfig setAlias(String alias) {
+		this.alias = alias;
 		return this;
 	}
 
@@ -297,6 +323,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			order = order.replaceAll("-", " DESC ");
 		}
 
+		//TODO  column, order, group 都改用 List<String> 存储！！！，并且每个字段都要加 Table. 前缀！
 		if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 			String[] keys = StringUtil.split(order);
 			if (keys != null && keys.length > 0) {
@@ -336,7 +363,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return this;
 	}
 	@JSONField(serialize = false)
-	public String getColumnString() throws NotExistException {
+	public String getColumnString() throws Exception {
 		switch (getMethod()) {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
@@ -363,32 +390,61 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 
 			return "(" + column + ")";
-		default:
-			column = StringUtil.getString(column);
-			if (column.isEmpty()) {
-				return "*";
+		case GET:
+		case GETS:
+			boolean isQuery = RequestMethod.isQueryMethod(method);
+			String joinColumn = "";
+			if (isQuery && join != null) {
+				SQLConfig c;
+				for (Map<String, Object> map : join) {
+					c = (SQLConfig) map.get("config");
+					c.setAlias(c.getTable());
+					joinColumn += ((AbstractSQLConfig) c).getColumnString();
+				}
 			}
 
-			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
-				String[] keys = StringUtil.split(column);
-				if (keys != null && keys.length > 0) {
-					String origin;
-					String alias;
-					int index;
-					for (int i = 0; i < keys.length; i++) {
-						index = keys[i].indexOf(":"); //StringUtil.split返回数组中，子项不会有null
-						origin = index < 0 ? keys[i] : keys[i].substring(0, index);
-						alias = index < 0 ? null : keys[i].substring(index + 1);
+			String tableAlias = getAlias();
+			boolean forceAlias = isQuery && (isMain() == false || StringUtil.isEmpty(joinColumn, true) == false);
 
+			column = StringUtil.getString(column);
+			if (column.isEmpty()) {
+				return forceAlias == false ? "*" : (tableAlias + ".*" + (StringUtil.isEmpty(joinColumn, true) ? "" : "," + joinColumn));
+			}
+
+			String c = column;
+			//			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+			String[] keys = StringUtil.split(column);
+			if (keys != null && keys.length > 0) {
+				String origin;
+				String alias;
+				int index;
+				for (int i = 0; i < keys.length; i++) {
+					index = keys[i].indexOf(":"); //StringUtil.split返回数组中，子项不会有null
+					origin = index < 0 ? keys[i] : keys[i].substring(0, index);
+					alias = index < 0 ? null : keys[i].substring(index + 1);
+
+					if (isPrepared()) {
 						if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
 							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
 									+ " column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
 						}
 					}
+
+					if (forceAlias) {
+						keys[i] = tableAlias + "." + origin + " AS `" + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + "`";
+					} else {
+						keys[i] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS `" + alias + "`");
+					}
 				}
+				//				}
+
+				c = StringUtil.getString(keys);
 			}
 
-			return column.contains(":") == false ? column : column.replaceAll(":", " AS ");//不能在这里改，后续还要用到:
+			return c.contains(":") == false ? c : c.replaceAll(":", " AS ") + (StringUtil.isEmpty(joinColumn, true) ? "" : "," + joinColumn);//不能在这里改，后续还要用到:
+
+		default:
+			throw new UnsupportedOperationException("服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(method) + " 等 [GET,GETS,HEAD,HEADS,POST] 外的ReuqestMethod！");
 		}
 	}
 
@@ -482,6 +538,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setType(int type) {
 		this.type = type;
+		return this;
+	}
+	@Override
+	public List<Map<String, Object>> getJoin() {
+		return join;
+	}
+	@Override
+	public SQLConfig setJoin(List<Map<String, Object>> join) {
+		this.join = join;
 		return this;
 	}
 
@@ -1193,7 +1258,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private static String getConditionString(String column, String table, AbstractSQLConfig config) throws Exception {
 		String where = config.getWhereString();
 
-		String condition = table + where + (
+		String condition = table + config.getJoinString() + where + (
 				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
 						"" : config.getGroupString() + config.getHavingString() + config.getOrderString()
 				)
@@ -1234,13 +1299,29 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
 	}
 
+	public String getJoinString() {
+		String joinOns = "";
+		if (join != null) {
+			String j;
+			boolean first = true;
+			for (Map<String, Object> map : join) {
+				j = (String) map.get("join");
+				if (j != null) {
+					joinOns += (first ? "" : AND) + j;
+					first = false;
+				}
+			}
+		}
+		return joinOns;
+	}
+
 	/**获取查询配置
 	 * @param table
 	 * @param request
 	 * @return
 	 * @throws Exception 
 	 */
-	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, Callback callback) throws Exception {
+	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Map<String, Object>> join, Callback callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
@@ -1464,6 +1545,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
+		config.setJoin(parseJoin(method, join, callback));
+
+		//TODO 解析JOIN，包括 @column，@group 等要合并
 
 		//后面还可能用到，要还原
 		//id或id{}条件
@@ -1478,9 +1562,49 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.put(KEY_HAVING, having);
 		request.put(KEY_ORDER, order);
 
-
 		return config;
 	}
+
+	public static List<Map<String, Object>> parseJoin(RequestMethod method, List<Map<String, Object>> join, Callback callback) throws Exception {
+
+		//TODO 解析出 SQLConfig 再合并 column, order, group 等
+		if (join == null || join.isEmpty()) {
+			return null;
+		}
+
+
+		String name;
+		for (Map<String, Object> map : join) {
+			name = (String) map.get("name");
+			SQLConfig childConfig = newSQLConfig(method, name, (JSONObject) map.get("table"), null, callback);
+			SQLConfig childConfig2 = newSQLConfig(method, name, (JSONObject) map.get("table"), null, callback);
+			childConfig.setMain(false).setCount(1).setPage(0).setPosition(0);
+			childConfig2.setCount(1).setPage(0).setPosition(0);
+
+			// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>
+			map.put("join", getJoinType((String) map.get("type")) + " " + childConfig.getTablePath() + " AS "
+					+ name + " ON " + childConfig.getTable() + "." + (String) map.get("key") + " = "
+					+ (String) map.get("targetTable") + "." + (String) map.get("targetKey"));
+			map.put("config", childConfig);
+			map.put("config2", childConfig2);
+		}
+
+		return join;
+	}
+
+	private static String getJoinType(String type) {
+		switch (type) {
+		case "&":
+			return " INNER JOIN ";
+		case "<":
+			return " LEFT JOIN ";
+		case ">":
+			return " RIGIHT JOIN ";
+		default:
+			return " FULL JOIN ";
+		}
+	}
+
 
 
 

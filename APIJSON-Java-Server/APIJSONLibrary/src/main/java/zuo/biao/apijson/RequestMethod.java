@@ -90,5 +90,9 @@ public enum RequestMethod {
 	public static boolean isPublicMethod(RequestMethod method) {
 		return method == null || method == GET || method == HEAD;
 	}
+
+	public static String getName(RequestMethod method) {
+		return method == null ? GET.name() : method.name();
+	}
 	
 }

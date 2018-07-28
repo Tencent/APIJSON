@@ -64,7 +64,7 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 
 	@Override
 	public SQLConfig newSQLConfig() throws Exception {
-		return DemoSQLConfig.newSQLConfig(method, table, sqlRequest);
+		return DemoSQLConfig.newSQLConfig(method, table, sqlRequest, join);
 	}
 
 

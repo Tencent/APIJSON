@@ -19,7 +19,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -194,6 +198,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		final int length = rsmd.getColumnCount();
 
+		//<SELECT * FROM Comment WHERE momentId = '470', { id: 1, content: "csdgs" }>
+		Map<String, JSONObject> childMap = new HashMap<>(); //要存到cacheMap
+		// WHERE id = ? AND ... 或 WHERE ... AND id = ? 强制排序 remove 再 put，还是重新 getSQL吧
+
+
 		while (rs.next()){
 			index ++;
 			Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
@@ -201,17 +210,29 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			result = new JSONObject(true);
 
 			for (int i = 1; i <= length; i++) {
-				
-				result = onPutColumn(config, rs, rsmd, index, result, i);
+
+				result = onPutColumn(config, rs, rsmd, index, result, i, childMap);
 			}
 
 			resultMap = onPutTable(config, rs, rsmd, resultMap, index, result);
-			
+
 			Log.d(TAG, "\n select  while (rs.next()) { resultMap.put( " + index + ", result); "
 					+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 		}
 
 		rs.close();
+
+
+		//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
+		Set<Entry<String, JSONObject>> set = childMap.entrySet();
+
+		//<sql, Table>
+		for (Entry<String, JSONObject> entry : set) {
+			Map<Integer, JSONObject> m = new HashMap<Integer, JSONObject>();
+			m.put(0, entry.getValue());
+			putCache(entry.getKey(), m, false);
+		}
+
 
 		putCache(sql, resultMap, config.isCacheStatic());
 		Log.i(TAG, ">>> select  putCache('" + sql + "', resultMap);  resultMap.size() = " + resultMap.size());
@@ -230,16 +251,61 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 * @param tablePosition 从0开始
 	 * @param table
 	 * @param columnIndex 从1开始
+	 * @param childMap 
 	 * @return result
 	 * @throws Exception
 	 */
 	protected JSONObject onPutColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, int tablePosition, @NotNull JSONObject table, int columnIndex) throws Exception {
-		
+			, int tablePosition, @NotNull JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+
 		if (rsmd.getColumnName(columnIndex).startsWith("_")) {
 			Log.i(TAG, "select while (rs.next()){ ..."
 					+ " >>  rsmd.getColumnName(i).startsWith(_) >> continue;");
 			return table;
+		}
+
+		String lable = rsmd.getColumnLabel(columnIndex);
+		int dotIndex = lable.indexOf(".");
+		String column = dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
+
+		String childTable = dotIndex < 0 ? null : lable.substring(0, dotIndex);
+
+		JSONObject finalTable = null;
+		String childSql = null;
+		SQLConfig childConfig = null;
+
+		if (childTable == null) {
+			finalTable = table;
+		}
+		else {
+			lable = column;
+
+			//<sql, Table>
+
+			List<Map<String, Object>> join = config.getJoin();
+			if (join != null) {
+				for (Map<String, Object> m : join) {
+					if (childTable.equals(m.get("name"))) {
+
+						childConfig = (SQLConfig) m.get("config2"); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+
+						childConfig.putWhere((String) m.get("key"), table.get(m.get("targetKey")));
+						childSql = childConfig.getSQL(false);
+						
+						if (StringUtil.isEmpty(childSql, true)) {
+							return table;
+						}
+
+						finalTable = (JSONObject) childMap.get(childSql);
+						break;
+					}
+				}
+			}
+
+			if (finalTable == null) {
+				finalTable = new JSONObject(true);
+				childMap.put(childSql, finalTable);
+			}
 		}
 
 		Object value = rs.getObject(columnIndex);
@@ -260,8 +326,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 		}
 
-		table.put(rsmd.getColumnLabel(columnIndex), value);
-		
+		finalTable.put(lable, value);
+
 		return table;
 	}
 
@@ -276,13 +342,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 */
 	protected Map<Integer, JSONObject> onPutTable(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
 			, @NotNull Map<Integer, JSONObject> resultMap, int position, @NotNull JSONObject table) {
-		
+
 		resultMap.put(position, table);
 		return resultMap;
 	}
-	
-	
-	
+
+
+
 	/**判断是否为JSON类型
 	 * @param rsmd
 	 * @param position

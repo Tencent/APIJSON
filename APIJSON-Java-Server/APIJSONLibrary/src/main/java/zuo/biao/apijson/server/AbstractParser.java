@@ -17,7 +17,10 @@ package zuo.biao.apijson.server;
 import static zuo.biao.apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,12 +81,12 @@ public abstract class AbstractParser implements Parser {
 	public Visitor getVisitor() {
 		if (visitor == null) {
 			visitor = new Visitor() {
-				
+
 				@Override
 				public Long getId() {
 					return 0L;
 				}
-				
+
 				@Override
 				public List<Long> getContactIdList() {
 					return null;
@@ -302,8 +305,8 @@ public abstract class AbstractParser implements Parser {
 	protected void onVerifyContent() throws Exception {
 		requestObject = parseCorrectRequest();
 	}
-	
-	
+
+
 	/**解析请求JSONObject
 	 * @param request => URLDecoder.decode(request, UTF_8);
 	 * @return
@@ -560,7 +563,7 @@ public abstract class AbstractParser implements Parser {
 		if (request == null) {// Moment:{}   || request.isEmpty()) {//key-value条件
 			return null;
 		}
-		
+
 		int type = arrayConfig == null ? 0 : arrayConfig.getType();
 
 		ObjectParser op = createObjectParser(request, parentPath, name, arrayConfig).parse();
@@ -618,7 +621,7 @@ public abstract class AbstractParser implements Parser {
 	 * @throws Exception
 	 */
 	@Override
-	public JSONArray onArrayParse(final JSONObject request, String parentPath, String name) throws Exception {
+	public JSONArray onArrayParse(JSONObject request, String parentPath, String name) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
@@ -634,10 +637,12 @@ public abstract class AbstractParser implements Parser {
 		final int query = request.getIntValue(JSONRequest.KEY_QUERY);
 		final int count = request.getIntValue(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
+		final String join = request.getString(JSONRequest.KEY_JOIN);
 		request.remove(JSONRequest.KEY_QUERY);
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
-		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page);
+		request.remove(JSONRequest.KEY_JOIN);
+		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page + "; join = " + join);
 
 		if (request.isEmpty()) {//如果条件成立，说明所有的 parentPath/name:request 中request都无效！！！
 			Log.e(TAG, "getArray  request.isEmpty() >> return null;");
@@ -667,7 +672,8 @@ public abstract class AbstractParser implements Parser {
 				.setMethod(requestMethod)
 				.setCount(size)
 				.setPage(page)
-				.setQuery(query);
+				.setQuery(query)
+				.setJoin(onJoinParse(join, request));
 
 		JSONObject parent;
 		//生成size个
@@ -681,7 +687,7 @@ public abstract class AbstractParser implements Parser {
 		}
 		//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		
+
 		/*
 		 * 支持引用取值后的数组
 			{
@@ -701,15 +707,180 @@ public abstract class AbstractParser implements Parser {
 		if (fo instanceof Boolean || fo instanceof Number || fo instanceof String) { //[{}] 和 [[]] 都没意义
 			putQueryResult(path, response);
 		}
-		
-		
+
+
 		//后面还可能用到，要还原
 		request.put(JSONRequest.KEY_QUERY, query);
 		request.put(JSONRequest.KEY_COUNT, count);
 		request.put(JSONRequest.KEY_PAGE, page);
+		request.put(JSONRequest.KEY_JOIN, join);
 
 		Log.i(TAG, "getArray  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
 		return response;
+	}
+
+	/**多表同时筛选
+	 * @param join "&/User/id@,</User[]/User/id{}@,</[]/Comment/momentId@"
+	 * @param request
+	 * @return 
+	 * @throws Exception 
+	 */
+	private List<Map<String, Object>> onJoinParse(String join, JSONObject request) throws Exception {
+		String[] sArr = request == null || request.isEmpty() ? null : StringUtil.split(join);
+		if (sArr == null || sArr.length <= 0) {
+			Log.e(TAG, "doJoin  sArr == null || sArr.length <= 0 >> return request;");
+			return null;
+		}
+
+		List<Map<String, Object>> joinList = new ArrayList<>();
+
+
+		JSONObject tableObj;
+		String targetPath;
+
+		JSONObject targetObj;
+		String targetTable;
+		String targetKey;
+
+		String path;
+
+		//		List<String> onList = new ArrayList<>();
+		for (int i = 0; i < sArr.length; i++) {//User/id@
+			//分割 /Table/key
+			path = "" + sArr[i];
+
+			int index = path.indexOf("/");
+			if (index < 0) {
+				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
+						+ "必须为 &/Table0/key0,</Table1/key1,... 这种形式！");
+			}
+			String type = path.substring(0, index); //& | ! < > ( ) <> () *
+			if (StringUtil.isEmpty(type, true)) {
+				type = "|"; // FULL JOIN / UNIOIN
+			}
+			path = path.substring(index + 1);
+
+			index = path.indexOf("/");
+			String table = index < 0 ? null : path.substring(0, index);//User
+			String key = StringUtil.isEmpty(table, true) ? null : path.substring(index + 1);//id@
+			if (StringUtil.isEmpty(key, true)) {
+				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
+						+ "必须为 &/Table0/key0,</Table1/key1,... 这种形式！");
+			}
+
+			//取出Table对应的JSONObject，及内部引用赋值 key:value
+			tableObj = request.getJSONObject(table);
+			targetPath = tableObj == null ? null : tableObj.getString(key+"@");
+			if (StringUtil.isEmpty(targetPath, true)) {
+				throw new IllegalArgumentException(table + "." + key + "@:value 中value必须为引用赋值的路径 '/targetTable/targetKey' ！");
+			}
+
+			//取出引用赋值路径targetPath对应的Table和key
+			index = targetPath.lastIndexOf("/");
+			targetKey = index < 0 ? null : targetPath.substring(index + 1);
+			if (StringUtil.isEmpty(targetKey, true)) {
+				throw new IllegalArgumentException(table + "." + key + "@:'/targetTable/targetKey' 中targetKey不能为空！");
+			}
+
+			targetPath = targetPath.substring(0, index);
+			index = targetPath.lastIndexOf("/");
+			targetTable = index < 0 ? targetPath : targetPath.substring(index + 1);
+
+
+			//对引用的JSONObject添加条件
+			targetObj = request.getJSONObject(targetTable);
+			if (targetObj == null) {
+				throw new IllegalArgumentException(targetTable + "." + targetKey
+						+ "@:'/targetTable/targetKey' 中路径对应的对象不存在！");
+			}
+			targetObj.put(key+"@", targetObj.remove(key+"@")); //保证和SQLExcecutor缓存的Config里where顺序一致，生成的SQL也就一致
+
+			Map<String, Object> joinMap = new LinkedHashMap<>();
+			joinMap.put("type", type); //TODO 要么减少数量，要么封装为一个对象
+			joinMap.put("key", key);
+			joinMap.put("targetKey", targetKey);
+			joinMap.put("targetTable", targetTable);
+			joinMap.put("name", table);
+			joinMap.put("table", getJoinObject(table, tableObj, key));
+
+			joinList.add(joinMap);
+
+			//			onList.add(table + "." + key + " = " + targetTable + "." + targetKey); // ON User.id = Moment.userId
+
+		}
+
+
+		//拼接多个 SQLConfig 的SQL语句，然后执行，再把结果分别缓存(Moment, User等)到 SQLExecutor 的 cacheMap
+		//		AbstractSQLConfig config0 = null;
+		//		String sql = "SELECT " + config0.getColumnString() + " FROM " + config0.getTable() + " INNER JOIN " + targetTable + " ON "
+		//				+ onList.get(0) + config0.getGroupString() + config0.getHavingString() + config0.getOrderString();
+
+
+		return joinList;
+	}
+
+
+
+	private static final List<String> JOIN_COPY_KEY_LIST;
+	static {//TODO 不全
+		JOIN_COPY_KEY_LIST = new ArrayList<String>();
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_SCHEMA);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COLUMN);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COMBINE);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_GROUP);
+	}
+
+	/**
+	 * 取指定json对象的id集合
+	 * @param table
+	 * @param key
+	 * @param obj
+	 * @param targetKey 
+	 * @return null ? 全部 : 有限的数组
+	 */
+	private JSONObject getJoinObject(String table, JSONObject obj, String key) {
+		if (obj == null || obj.isEmpty()) {
+			Log.e(TAG, "getIdList  obj == null || obj.isEmpty() >> return null;");
+			return null;
+		}
+		if (StringUtil.isEmpty(key, true)) {
+			Log.e(TAG, "getIdList  StringUtil.isEmpty(key, true) >> return null;");
+			return null;
+		}
+
+		//取出所有join条件
+		JSONObject requestObj = new JSONObject(true);//(JSONObject) obj.clone();//
+		HashSet<String> set = new HashSet<>(obj.keySet());
+		for (String k : set) {
+			if (StringUtil.isEmpty(k, true)) {
+				continue;
+			}
+
+			if (k.startsWith("@")) {
+				if (JOIN_COPY_KEY_LIST.contains(k)) {
+					requestObj.put(k, obj.get(k)); //保留
+				}
+			}
+			else {
+				if (k.endsWith("@")) {
+					if (k.equals(key+"@")) {
+						continue;
+					}
+					throw new UnsupportedOperationException(table + "." + k + " 不合法！" + JSONRequest.KEY_JOIN
+							+ " 关联的Table中只能有1个 key@:value ！");
+				}
+
+				if (k.contains("()") == false) { //不需要远程函数
+					//					requestObj.put(k, obj.remove(k)); //remove是为了避免重复查询副表
+					requestObj.put(k, obj.get(k)); //remove是为了避免重复查询副表
+				}
+			}
+		}
+
+
+		return requestObj;
 	}
 
 

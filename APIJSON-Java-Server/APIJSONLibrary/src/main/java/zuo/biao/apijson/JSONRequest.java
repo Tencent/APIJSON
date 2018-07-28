@@ -82,6 +82,7 @@ public class JSONRequest extends JSONObject {
 	public static final String KEY_QUERY = "query";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
+	public static final String KEY_JOIN = "join";
 
 	public static final List<String> ARRAY_KEY_LIST;
 	static {
