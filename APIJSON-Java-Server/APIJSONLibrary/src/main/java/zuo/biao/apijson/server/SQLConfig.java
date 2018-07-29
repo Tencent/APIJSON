@@ -168,9 +168,9 @@ public interface SQLConfig {
 	
 	List<Object> getPreparedValueList();
 
-	List<Map<String, Object>> getJoin();
+	List<Join> getJoinList();
 
-	SQLConfig setJoin(List<Map<String, Object>> join);
+	SQLConfig setJoinList(List<Join> joinList);
 
 	String getAlias();
 

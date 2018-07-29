@@ -15,7 +15,6 @@ limitations under the License.*/
 package apijson.demo.server;
 
 import java.util.List;
-import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -24,6 +23,7 @@ import apijson.demo.server.model.User;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.AbstractSQLConfig;
+import zuo.biao.apijson.server.Join;
 import zuo.biao.apijson.server.SQLConfig;
 
 
@@ -77,8 +77,8 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Map<String, Object>> join) throws Exception {
-		return newSQLConfig(method, table, request, join, new Callback() {
+	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList) throws Exception {
+		return newSQLConfig(method, table, request, joinList, new Callback() {
 
 			@Override
 			public DemoSQLConfig getSQLConfig(RequestMethod method, String table) {

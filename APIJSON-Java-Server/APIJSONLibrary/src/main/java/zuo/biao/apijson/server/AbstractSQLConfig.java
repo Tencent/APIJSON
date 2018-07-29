@@ -105,7 +105,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private int position; //Table在[]中的位置
 	private int query; //JSONRequest.query
 	private int type; //ObjectParser.type
-	private List<Map<String, Object>> join; //join
+	private List<Join> joinList; //joinList
 	//array item >>>>>>>>>>
 	private boolean test; //测试
 	private boolean cacheStatic; //静态缓存
@@ -215,7 +215,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public String getSQLTable() {
 		return (TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table)
-				+ ( join != null && join.isEmpty() == false  //副表已经在 parseJoin 里加了 AS
+				+ ( joinList != null && joinList.isEmpty() == false  //副表已经在 parseJoin 里加了 AS
 				&& isMain() && RequestMethod.isQueryMethod(method) ? " AS " + getAlias() : "");
 	}
 	@JSONField(serialize = false)
@@ -394,10 +394,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case GETS:
 			boolean isQuery = RequestMethod.isQueryMethod(method);
 			String joinColumn = "";
-			if (isQuery && join != null) {
+			if (isQuery && joinList != null) {
 				SQLConfig c;
-				for (Map<String, Object> map : join) {
-					c = (SQLConfig) map.get("config");
+				for (Join j : joinList) {
+					c = j.getJoinConfig();
 					c.setAlias(c.getTable());
 					joinColumn += ((AbstractSQLConfig) c).getColumnString();
 				}
@@ -541,12 +541,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return this;
 	}
 	@Override
-	public List<Map<String, Object>> getJoin() {
-		return join;
+	public List<Join> getJoinList() {
+		return joinList;
 	}
 	@Override
-	public SQLConfig setJoin(List<Map<String, Object>> join) {
-		this.join = join;
+	public SQLConfig setJoinList(List<Join> joinList) {
+		this.joinList = joinList;
 		return this;
 	}
 
@@ -1301,13 +1301,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	public String getJoinString() {
 		String joinOns = "";
-		if (join != null) {
-			String j;
+		if (joinList != null) {
+			String sql;
 			boolean first = true;
-			for (Map<String, Object> map : join) {
-				j = (String) map.get("join");
-				if (j != null) {
-					joinOns += (first ? "" : AND) + j;
+			for (Join j: joinList) {
+				sql = j.getJoinSQL();
+				if (sql != null) {
+					joinOns += (first ? "" : AND) + sql;
 					first = false;
 				}
 			}
@@ -1321,7 +1321,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Map<String, Object>> join, Callback callback) throws Exception {
+	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList, Callback callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
@@ -1545,7 +1545,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
-		config.setJoin(parseJoin(method, join, callback));
+		config.setJoinList(parseJoin(method, joinList, callback));
 
 		//TODO 解析JOIN，包括 @column，@group 等要合并
 
@@ -1565,45 +1565,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return config;
 	}
 
-	public static List<Map<String, Object>> parseJoin(RequestMethod method, List<Map<String, Object>> join, Callback callback) throws Exception {
+	public static List<Join> parseJoin(RequestMethod method, List<Join> joinList, Callback callback) throws Exception {
 
 		//TODO 解析出 SQLConfig 再合并 column, order, group 等
-		if (join == null || join.isEmpty()) {
+		if (joinList == null || joinList.isEmpty()) {
 			return null;
 		}
 
 
 		String name;
-		for (Map<String, Object> map : join) {
-			name = (String) map.get("name");
-			SQLConfig childConfig = newSQLConfig(method, name, (JSONObject) map.get("table"), null, callback);
-			SQLConfig childConfig2 = newSQLConfig(method, name, (JSONObject) map.get("table"), null, callback);
-			childConfig.setMain(false).setCount(1).setPage(0).setPosition(0);
-			childConfig2.setCount(1).setPage(0).setPosition(0);
+		for (Join j : joinList) {
+			name = j.getName();
+			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback).setMain(false);
+			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, callback).setCount(1);
 
-			// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>
-			map.put("join", getJoinType((String) map.get("type")) + " " + childConfig.getTablePath() + " AS "
-					+ name + " ON " + childConfig.getTable() + "." + (String) map.get("key") + " = "
-					+ (String) map.get("targetTable") + "." + (String) map.get("targetKey"));
-			map.put("config", childConfig);
-			map.put("config2", childConfig2);
+			j.setJoinConfig(joinConfig);
+			j.setCacheConfig(cacheConfig);
+			// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
+			j.setJoinSQL(j.getJoinTypeName() + " " + joinConfig.getTablePath() + " AS "
+					+ name + " ON " + joinConfig.getTable() + "." + j.getKey() + " = "
+					+ j.getTargetName() + "." + j.getTargetKey());
 		}
 
-		return join;
+		return joinList;
 	}
 
-	private static String getJoinType(String type) {
-		switch (type) {
-		case "&":
-			return " INNER JOIN ";
-		case "<":
-			return " LEFT JOIN ";
-		case ">":
-			return " RIGIHT JOIN ";
-		default:
-			return " FULL JOIN ";
-		}
-	}
 
 
 

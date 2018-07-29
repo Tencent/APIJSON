@@ -20,7 +20,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -673,7 +672,7 @@ public abstract class AbstractParser implements Parser {
 				.setCount(size)
 				.setPage(page)
 				.setQuery(query)
-				.setJoin(onJoinParse(join, request));
+				.setJoinList(onJoinParse(join, request));
 
 		JSONObject parent;
 		//生成size个
@@ -725,14 +724,14 @@ public abstract class AbstractParser implements Parser {
 	 * @return 
 	 * @throws Exception 
 	 */
-	private List<Map<String, Object>> onJoinParse(String join, JSONObject request) throws Exception {
+	private List<Join> onJoinParse(String join, JSONObject request) throws Exception {
 		String[] sArr = request == null || request.isEmpty() ? null : StringUtil.split(join);
 		if (sArr == null || sArr.length <= 0) {
 			Log.e(TAG, "doJoin  sArr == null || sArr.length <= 0 >> return request;");
 			return null;
 		}
 
-		List<Map<String, Object>> joinList = new ArrayList<>();
+		List<Join> joinList = new ArrayList<>();
 
 
 		JSONObject tableObj;
@@ -754,9 +753,9 @@ public abstract class AbstractParser implements Parser {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
 						+ "必须为 &/Table0/key0,</Table1/key1,... 这种形式！");
 			}
-			String type = path.substring(0, index); //& | ! < > ( ) <> () *
-			if (StringUtil.isEmpty(type, true)) {
-				type = "|"; // FULL JOIN / UNIOIN
+			String joinType = path.substring(0, index); //& | ! < > ( ) <> () *
+			if (StringUtil.isEmpty(joinType, true)) {
+				joinType = "|"; // FULL JOIN / UNIOIN
 			}
 			path = path.substring(index + 1);
 
@@ -795,15 +794,15 @@ public abstract class AbstractParser implements Parser {
 			}
 			targetObj.put(key+"@", targetObj.remove(key+"@")); //保证和SQLExcecutor缓存的Config里where顺序一致，生成的SQL也就一致
 
-			Map<String, Object> joinMap = new LinkedHashMap<>();
-			joinMap.put("type", type); //TODO 要么减少数量，要么封装为一个对象
-			joinMap.put("key", key);
-			joinMap.put("targetKey", targetKey);
-			joinMap.put("targetTable", targetTable);
-			joinMap.put("name", table);
-			joinMap.put("table", getJoinObject(table, tableObj, key));
+			Join j = new Join();
+			j.setJoinType(joinType);
+			j.setTable(getJoinObject(table, tableObj, key));
+			j.setName(table);
+			j.setKey(key);
+			j.setTargetName(targetTable);
+			j.setTargetKey(targetKey);
 
-			joinList.add(joinMap);
+			joinList.add(j);
 
 			//			onList.add(table + "." + key + " = " + targetTable + "." + targetKey); // ON User.id = Moment.userId
 

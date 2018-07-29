@@ -63,7 +63,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	protected SQLConfig arrayConfig;//不用final是为了recycle
 
 	protected final int type;
-	protected final List<Map<String, Object>> join;
+	protected final List<Join> joinList;
 	protected final boolean isTable;
 	protected final String path;
 	protected final String table;
@@ -91,7 +91,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		this.arrayConfig = arrayConfig;
 
 		this.type = arrayConfig == null ? 0 : arrayConfig.getType();
-		this.join = arrayConfig == null ? null : arrayConfig.getJoin();
+		this.joinList = arrayConfig == null ? null : arrayConfig.getJoinList();
 		this.path = AbstractParser.getAbsPath(parentPath, name);
 		this.table = Pair.parseEntry(name, true).getKey();
 		this.isTable = zuo.biao.apijson.JSONObject.isTableKey(table);

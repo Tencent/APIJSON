@@ -19,7 +19,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -282,14 +281,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			//<sql, Table>
 
-			List<Map<String, Object>> join = config.getJoin();
-			if (join != null) {
-				for (Map<String, Object> m : join) {
-					if (childTable.equals(m.get("name"))) {
+			List<Join> joinList = config.getJoinList();
+			if (joinList != null) {
+				for (Join j : joinList) {
+					if (childTable.equals(j.getName())) {
 
-						childConfig = (SQLConfig) m.get("config2"); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+						childConfig = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
 
-						childConfig.putWhere((String) m.get("key"), table.get(m.get("targetKey")));
+						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()));
 						childSql = childConfig.getSQL(false);
 						
 						if (StringUtil.isEmpty(childSql, true)) {
