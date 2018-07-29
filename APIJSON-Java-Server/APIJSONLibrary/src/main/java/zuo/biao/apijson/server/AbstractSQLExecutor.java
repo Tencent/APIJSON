@@ -255,7 +255,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 * @throws Exception
 	 */
 	protected JSONObject onPutColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, int tablePosition, @NotNull JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
 
 		if (rsmd.getColumnName(columnIndex).startsWith("_")) {
 			Log.i(TAG, "select while (rs.next()){ ..."
@@ -263,6 +263,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			return table;
 		}
 
+		//TODO 改为  rsmd.getTableName(columnIndex) 支持副表不传 @column ， 但如何判断是副表？传 mainTableMain进来
 		String lable = rsmd.getColumnLabel(columnIndex);
 		int dotIndex = lable.indexOf(".");
 		String column = dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
