@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class Join {
 
-	private String joinType; // "&" - INNER, "|" - FULL/UNION, "<" - LEFT, ">" - RIGHT
+	private String joinType; // "&" - INNER, "|" - FULL, "!" - OUTTER, "<" - LEFT, ">" - RIGHT
 	private String relateType; // "" - 一对一, "{}" - 一对多, "<>" - 多对一
 	private JSONObject table; // { "id@":"/Moment/userId" }
 	private String name; //User
