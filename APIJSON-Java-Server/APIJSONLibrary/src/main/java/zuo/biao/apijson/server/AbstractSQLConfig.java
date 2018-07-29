@@ -254,23 +254,29 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	@JSONField(serialize = false)
 	public String getGroupString() {
+		//TODO 加上子表的group
+		
 		group = StringUtil.getTrimedString(group);
 		if (group.isEmpty()) {
 			return "";
 		}
 
-		if (isPrepared()) { //不能通过 ? 来代替，因为SQLExecutor statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
-			String[] keys = StringUtil.split(group);
-			if (keys != null && keys.length > 0) {
-				for (int i = 0; i < keys.length; i++) {
-					if (StringUtil.isName(keys[i]) == false) {
-						throw new IllegalArgumentException("@group:value 中 value里面用 , 分割的每一项都必须是1个单词！并且不要有空格！");
-					}
-				}
-			}
+		String[] keys = StringUtil.split(group);
+		if (keys == null || keys.length <= 0) {
+			return "";
 		}
 
-		return " GROUP BY " + group;
+		for (int i = 0; i < keys.length; i++) {
+			if (isPrepared()) { //不能通过 ? 来代替，因为SQLExecutor statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
+				if (StringUtil.isName(keys[i]) == false) {
+					throw new IllegalArgumentException("@group:value 中 value里面用 , 分割的每一项都必须是1个单词！并且不要有空格！");
+				}
+			}
+
+			keys[i] = getKey(keys[i]);
+		}
+
+		return " GROUP BY " + StringUtil.getString(keys);
 	}
 
 	@Override
@@ -311,6 +317,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	@JSONField(serialize = false)
 	public String getOrderString() {
+		//TODO 加上子表的order
+
 		order = StringUtil.getTrimedString(order);
 		if (order.isEmpty()) {
 			return "";
@@ -321,30 +329,37 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (order.contains("-")) {
 			order = order.replaceAll("-", " DESC ");
 		}
-
+		
 		//TODO  column, order, group 都改用 List<String> 存储！！！，并且每个字段都要加 Table. 前缀！
-		if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
-			String[] keys = StringUtil.split(order);
-			if (keys != null && keys.length > 0) {
-				String origin;
-				int index;
-				for (int i = 0; i < keys.length; i++) {
-					index = keys[i].trim().endsWith(" ASC") ? keys[i].lastIndexOf(" ASC") : -1; //StringUtil.split返回数组中，子项不会有null
-					if (index < 0) {
-						index = keys[i].trim().endsWith(" DESC") ? keys[i].lastIndexOf(" DESC") : -1;
-					}
-					origin = index < 0 ? keys[i] : keys[i].substring(0, index);
-
-					//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
-					if (StringUtil.isName(origin) == false) {
-						throw new IllegalArgumentException("预编译模式下 @order:value 中 value里面用 , 分割的每一项"
-								+ " column+ / column- 中 column必须是1个单词！并且不要有多余的空格！");
-					}
-				}
-			}
+		String[] keys = StringUtil.split(order);
+		if (keys == null || keys.length <= 0) {
+			return "";
 		}
 
-		return " ORDER BY " + order;
+		String origin;
+		String sort;
+		int index;
+		for (int i = 0; i < keys.length; i++) {
+			index = keys[i].trim().endsWith(" ASC") ? keys[i].lastIndexOf(" ASC") : -1; //StringUtil.split返回数组中，子项不会有null
+			if (index < 0) {
+				index = keys[i].trim().endsWith(" DESC") ? keys[i].lastIndexOf(" DESC") : -1;
+				sort = index <= 0 ? "" : " DESC ";
+			} else {
+				sort = " ASC ";
+			}
+			origin = index < 0 ? keys[i] : keys[i].substring(0, index);
+
+			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
+				if (StringUtil.isName(origin) == false) {
+					throw new IllegalArgumentException("预编译模式下 @order:value 中 value里面用 , 分割的每一项"
+							+ " column+ / column- 中 column必须是1个单词！并且不要有多余的空格！");
+				}
+			}
+			keys[i] = getKey(origin) + sort;
+		}
+		
+		return " ORDER BY " + StringUtil.getString(keys);
 	}
 
 
@@ -699,7 +714,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						i ++;
 					}
 				}
-				
+
 				if (prior) {
 					andList.add(i, key); //userId的优先级不能比id高  0, key);
 				} else {
@@ -800,11 +815,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
 					js = jc.getWhereString(false);
 					jc.setMain(isMain);
-					
+
 					if (StringUtil.isEmpty(js, true)) {
 						continue;
 					}
-					
+
 					whereString = " ( "
 							+ getCondition(
 									Logic.isNot(logic), 
@@ -813,7 +828,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 									+ " ( " + js + " ) "
 									)
 							+ " ) ";
-					
+
 					preparedValueList.addAll(jc.getPreparedValueList());
 					break;
 					//可能 LEFT JOIN 和 INNER JOIN 同时存在				default:
@@ -915,7 +930,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.preparedValueList = preparedValueList;
 		return this;
 	}
-	
+
 	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**search key match value
 	 * @param in
@@ -1412,7 +1427,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							+ j.getName() + " ON " + jc.getTable() + "." + j.getKey() + " = "
 							+ j.getTargetName() + "." + j.getTargetKey();
 					jc.setMain(false).setKeyPrefix(true);
-					
+
 					preparedValueList.addAll(jc.getPreparedValueList());
 					break;
 				default:
