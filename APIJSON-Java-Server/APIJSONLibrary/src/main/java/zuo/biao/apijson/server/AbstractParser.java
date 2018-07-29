@@ -848,6 +848,10 @@ public abstract class AbstractParser implements Parser {
 			Log.e(TAG, "getIdList  StringUtil.isEmpty(key, true) >> return null;");
 			return null;
 		}
+		if (StringUtil.isEmpty(obj.getString(JSONRequest.KEY_COLUMN), true)) {
+			throw new IllegalArgumentException("join的副表 " + table + " 必须有非空的 " + JSONRequest.KEY_COLUMN
+					+ " ! 否则JOIN的性能优化无效，反而多耗性能！");
+		}
 
 		//取出所有join条件
 		JSONObject requestObj = new JSONObject(true);//(JSONObject) obj.clone();//
