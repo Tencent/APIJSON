@@ -19,7 +19,7 @@ import static zuo.biao.apijson.RequestMethod.GET;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -754,9 +754,9 @@ public abstract class AbstractParser implements Parser {
 						+ "必须为 &/Table0/key0,</Table1/key1,... 这种形式！");
 			}
 			String joinType = path.substring(0, index); //& | ! < > ( ) <> () *
-			if (StringUtil.isEmpty(joinType, true)) {
-				joinType = "|"; // FULL JOIN / UNIOIN
-			}
+//			if (StringUtil.isEmpty(joinType, true)) {
+//				joinType = "|"; // FULL JOIN
+//			}
 			path = path.substring(index + 1);
 
 			index = path.indexOf("/");
@@ -769,16 +769,16 @@ public abstract class AbstractParser implements Parser {
 
 			//取出Table对应的JSONObject，及内部引用赋值 key:value
 			tableObj = request.getJSONObject(table);
-			targetPath = tableObj == null ? null : tableObj.getString(key+"@");
+			targetPath = tableObj == null ? null : tableObj.getString(key);
 			if (StringUtil.isEmpty(targetPath, true)) {
-				throw new IllegalArgumentException(table + "." + key + "@:value 中value必须为引用赋值的路径 '/targetTable/targetKey' ！");
+				throw new IllegalArgumentException(table + "." + key + ":value 中value必须为引用赋值的路径 '/targetTable/targetKey' ！");
 			}
 
 			//取出引用赋值路径targetPath对应的Table和key
 			index = targetPath.lastIndexOf("/");
 			targetKey = index < 0 ? null : targetPath.substring(index + 1);
 			if (StringUtil.isEmpty(targetKey, true)) {
-				throw new IllegalArgumentException(table + "." + key + "@:'/targetTable/targetKey' 中targetKey不能为空！");
+				throw new IllegalArgumentException(table + "." + key + ":'/targetTable/targetKey' 中targetKey不能为空！");
 			}
 
 			targetPath = targetPath.substring(0, index);
@@ -790,17 +790,18 @@ public abstract class AbstractParser implements Parser {
 			targetObj = request.getJSONObject(targetTable);
 			if (targetObj == null) {
 				throw new IllegalArgumentException(targetTable + "." + targetKey
-						+ "@:'/targetTable/targetKey' 中路径对应的对象不存在！");
+						+ ":'/targetTable/targetKey' 中路径对应的对象不存在！");
 			}
-			targetObj.put(key+"@", targetObj.remove(key+"@")); //保证和SQLExcecutor缓存的Config里where顺序一致，生成的SQL也就一致
+			
+			tableObj.put(key, tableObj.remove(key)); //保证和SQLExcecutor缓存的Config里where顺序一致，生成的SQL也就一致
 
 			Join j = new Join();
 			j.setJoinType(joinType);
-			j.setTable(getJoinObject(table, tableObj, key));
 			j.setName(table);
-			j.setKey(key);
 			j.setTargetName(targetTable);
 			j.setTargetKey(targetKey);
+			j.setKeyAndType(key);
+			j.setTable(getJoinObject(table, tableObj, key));
 
 			joinList.add(j);
 
@@ -855,7 +856,7 @@ public abstract class AbstractParser implements Parser {
 
 		//取出所有join条件
 		JSONObject requestObj = new JSONObject(true);//(JSONObject) obj.clone();//
-		HashSet<String> set = new HashSet<>(obj.keySet());
+		Set<String> set = new LinkedHashSet<>(obj.keySet());
 		for (String k : set) {
 			if (StringUtil.isEmpty(k, true)) {
 				continue;
@@ -868,7 +869,7 @@ public abstract class AbstractParser implements Parser {
 			}
 			else {
 				if (k.endsWith("@")) {
-					if (k.equals(key+"@")) {
+					if (k.equals(key)) {
 						continue;
 					}
 					throw new UnsupportedOperationException(table + "." + k + " 不合法！" + JSONRequest.KEY_JOIN

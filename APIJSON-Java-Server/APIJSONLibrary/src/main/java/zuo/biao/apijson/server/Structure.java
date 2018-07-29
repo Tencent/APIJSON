@@ -639,7 +639,7 @@ public class Structure {
 		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(Test.class.getSimpleName());
 		config.setTest(true);
-		config.putWhere("'" + rv + "'" + logic.getChar() + funChar, tv);
+		config.putWhere("'" + rv + "'" + logic.getChar() + funChar, tv, false);
 
 		SQLExecutor executor = creator.createSQLExecutor();
 		JSONObject result = null;

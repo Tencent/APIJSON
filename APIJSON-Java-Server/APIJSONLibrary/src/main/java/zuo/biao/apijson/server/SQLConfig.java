@@ -19,7 +19,6 @@ import java.util.Map;
 
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
-import zuo.biao.apijson.server.AbstractSQLConfig.Callback;
 
 /**SQL配置
  * @author Lemon
@@ -154,19 +153,20 @@ public interface SQLConfig {
 	 * @param value
 	 * @return
 	 */
-	SQLConfig putWhere(String key, Object value);
+	SQLConfig putWhere(String key, Object value, boolean prior);
 	
 	
 	boolean isPrepared();
 	
-	AbstractSQLConfig setPrepared(boolean prepared);
+	SQLConfig setPrepared(boolean prepared);
 	
 	boolean isMain();
 
-	AbstractSQLConfig setMain(boolean main);
+	SQLConfig setMain(boolean main);
 
 	
 	List<Object> getPreparedValueList();
+	SQLConfig setPreparedValueList(List<Object> preparedValueList);
 
 	List<Join> getJoinList();
 
@@ -174,7 +174,13 @@ public interface SQLConfig {
 
 	String getAlias();
 
-	AbstractSQLConfig setAlias(String alias);
+	SQLConfig setAlias(String alias);
+
+	String getWhereString(boolean hasPrefix) throws Exception;
+
+	boolean isKeyPrefix();
+
+	SQLConfig setKeyPrefix(boolean keyPrefix);
 
 
 

@@ -165,7 +165,7 @@ public abstract class AbstractVerifier implements Verifier {
 			}
 
 			if (requestIdArray == null) {//可能是@得到 || requestIdArray.isEmpty()) {//请求未声明key:id或key{}:[...]条件，自动补全
-				config.putWhere(visitorIdkey+"{}", JSON.parseArray(list)); //key{}:[]有效，SQLConfig里throw NotExistException
+				config.putWhere(visitorIdkey+"{}", JSON.parseArray(list), true); //key{}:[]有效，SQLConfig里throw NotExistException
 			} 
 			else {//请求已声明key:id或key{}:[]条件，直接验证
 				for (Object id : requestIdArray) {
@@ -189,7 +189,7 @@ public abstract class AbstractVerifier implements Verifier {
 						+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
 			}
 			//TODO POST请求时应该 setValues
-			config.putWhere(visitorIdkey, visitorId);
+			config.putWhere(visitorIdkey, visitorId, true);
 			break;
 		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
 			break;

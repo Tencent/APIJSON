@@ -29,7 +29,6 @@ public class Join {
 	private String targetName; // Moment
 	private String targetKey; // userId
 
-	private String joinSQL; //TODO 是否必要? 直接SQLConfig.getJoinString时生成？   LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
 	private SQLConfig joinConfig;
 	private SQLConfig cacheConfig;
 
@@ -79,12 +78,6 @@ public class Join {
 	}
 
 
-	public String getJoinSQL() {
-		return joinSQL;
-	}
-	public void setJoinSQL(String joinSQL) {
-		this.joinSQL = joinSQL;
-	}
 	public SQLConfig getJoinConfig() {
 		return joinConfig;
 	}
@@ -98,21 +91,43 @@ public class Join {
 		this.cacheConfig = cacheConfig;
 	}
 
+	
+	public void setKeyAndType(@NotNull String originKey) throws Exception { //id, id@, id{}@, contactIdList<>@ ...
+		if (originKey.endsWith("@")) {
+			originKey = originKey.substring(0, originKey.length() - 1);
+		}
+		else { //TODO 暂时只允许 User.id = Moment.userId 字段关联，不允许 User.id = 82001 这种
+			throw new IllegalArgumentException(joinType + "/.../" + name + "/" + originKey + " 不合法！join:'.../refKey'" + " 中 refKey 必须以 @ 结尾！");
+		}
+		
+		if (originKey.endsWith("{}")) {
+			setRelateType("{}");
+			setKey(originKey.substring(0, originKey.length() - 2));
+		}
+		else if (originKey.endsWith("<>")) {
+			setRelateType("<>");
+			setKey(originKey.substring(0, originKey.length() - 2));
+		}
+		else {
+			setRelateType("");
+			setKey(originKey);
+		}
+	}
 
 	public String getJoinTypeName() throws Exception {
 		return getJoinTypeName(joinType);
 	}
-	public static String getJoinTypeName(String type) throws Exception {
+	public static String getJoinTypeName(@NotNull String type) throws Exception {
 		switch (type) {
+		case "":
 		case "&":
-			return " INNER JOIN ";
+		case "|": //不支持 <>, [] ，避免太多符号
+		case "!":
+			return " INNER JOIN "; //TODO & | ! 通过 WHERE NOT( {B.where} OR {B.where} ) 解决
 		case "<":
 			return " LEFT JOIN ";
 		case ">":
 			return " RIGIHT JOIN ";
-		case "":
-		case "|":
-			return " FULL JOIN ";
 		default:
 			throw new UnsupportedOperationException("服务器内部错误：不支持JOIN类型 " + type + " !");
 		}

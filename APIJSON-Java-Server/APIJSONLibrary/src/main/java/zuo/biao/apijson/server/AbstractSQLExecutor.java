@@ -288,7 +288,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 						childConfig = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
 
-						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()));
+						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()), false);
 						childSql = childConfig.getSQL(false);
 						
 						if (StringUtil.isEmpty(childSql, true)) {

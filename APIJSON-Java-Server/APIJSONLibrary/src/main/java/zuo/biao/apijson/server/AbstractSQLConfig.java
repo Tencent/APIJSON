@@ -215,8 +215,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public String getSQLTable() {
 		return (TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table)
-				+ ( joinList != null && joinList.isEmpty() == false  //副表已经在 parseJoin 里加了 AS
-				&& isMain() && RequestMethod.isQueryMethod(method) ? " AS " + getAlias() : "");
+				+ ( isKeyPrefix() ? " AS " + getAlias() : "");
 	}
 	@JSONField(serialize = false)
 	@Override
@@ -396,19 +395,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String joinColumn = "";
 			if (isQuery && joinList != null) {
 				SQLConfig c;
+				boolean first = true;
 				for (Join j : joinList) {
 					c = j.getJoinConfig();
 					c.setAlias(c.getTable());
-					joinColumn += ((AbstractSQLConfig) c).getColumnString();
+					joinColumn += (first ? "" : ", ") + ((AbstractSQLConfig) c).getColumnString();
+
+					first = false;
 				}
 			}
 
 			String tableAlias = getAlias();
-			boolean forceAlias = isQuery && (isMain() == false || StringUtil.isEmpty(joinColumn, true) == false);
 
 			column = StringUtil.getString(column);
 			if (column.isEmpty()) {
-				return forceAlias == false ? "*" : (tableAlias + ".*" + (StringUtil.isEmpty(joinColumn, true) ? "" : "," + joinColumn));
+				return isKeyPrefix() == false ? "*" : (tableAlias + ".*" + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn));
 			}
 
 			String c = column;
@@ -430,7 +431,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						}
 					}
 
-					if (forceAlias) {
+					if (isKeyPrefix()) {
 						keys[i] = tableAlias + "." + origin + " AS `" + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + "`";
 					} else {
 						keys[i] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS `" + alias + "`");
@@ -441,7 +442,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				c = StringUtil.getString(keys);
 			}
 
-			return c.contains(":") == false ? c : c.replaceAll(":", " AS ") + (StringUtil.isEmpty(joinColumn, true) ? "" : "," + joinColumn);//不能在这里改，后续还要用到:
+			return c.contains(":") == false ? c : c.replaceAll(":", " AS ") + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
 
 		default:
 			throw new UnsupportedOperationException("服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(method) + " 等 [GET,GETS,HEAD,HEADS,POST] 外的ReuqestMethod！");
@@ -667,7 +668,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return null;
 	}
 	@Override
-	public AbstractSQLConfig putWhere(String key, Object value) {
+	public AbstractSQLConfig putWhere(String key, Object value, boolean prior) {
 		if (key != null) {
 			if (where == null) {
 				where = new LinkedHashMap<String, Object>();	
@@ -684,7 +685,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (andList == null) {
 					andList = new ArrayList<>();
 				}
-				else if (andList.isEmpty() == false) {
+				else if (prior && andList.isEmpty() == false) {
 					if (andList.contains(KEY_ID)) {
 						i ++;
 					}
@@ -698,7 +699,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						i ++;
 					}
 				}
-				andList.add(i, key); //userId的优先级不能比id高  0, key);
+				
+				if (prior) {
+					andList.add(i, key); //userId的优先级不能比id高  0, key);
+				} else {
+					andList.add(key); //AbstractSQLExecutor.onPutColumn里getSQL，要保证缓存的SQL和查询的SQL里 where 的 key:value 顺序一致
+				}
 			}
 			combine.put("&", andList);
 		}
@@ -710,8 +716,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
-	public String getWhereString() throws Exception {
-		return getWhereString(getMethod(), getWhere(), getCombine(), ! isTest());
+	@Override
+	public String getWhereString(boolean hasPrefix) throws Exception {
+		return getWhereString(hasPrefix, getMethod(), getWhere(), getCombine(), getJoinList(), ! isTest());
 	}
 	/**获取WHERE
 	 * @param method
@@ -719,7 +726,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public String getWhereString(RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, boolean verifyName) throws Exception {
+	@JSONField(serialize = false)
+	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
 		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
 		if (combineSet == null || combineSet.isEmpty()) {
 			Log.w(TAG, "getWhereString  combineSet == null || combineSet.isEmpty() >> return \"\";");
@@ -774,7 +782,47 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 
-		String s = whereString.isEmpty() ? "" : " WHERE " + whereString;
+		if (joinList != null) {
+
+			SQLConfig jc;
+			String js;
+			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
+			for (Join j : joinList) {
+				switch (j.getJoinType()) {
+				case "":
+				case "|": //不支持 <>, [] ，避免太多符号
+				case "&":
+				case "!":
+					logic = Logic.getType(j.getJoinType());
+
+					jc = j.getJoinConfig();
+					boolean isMain = jc.isMain();
+					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
+					js = jc.getWhereString(false);
+					jc.setMain(isMain);
+					
+					if (StringUtil.isEmpty(js, true)) {
+						continue;
+					}
+					
+					whereString = " ( "
+							+ getCondition(
+									Logic.isNot(logic), 
+									whereString
+									+ ( StringUtil.isEmpty(whereString, true) ? "" : (Logic.isAnd(logic) ? AND : OR) )
+									+ " ( " + js + " ) "
+									)
+							+ " ) ";
+					
+					preparedValueList.addAll(jc.getPreparedValueList());
+					break;
+					//可能 LEFT JOIN 和 INNER JOIN 同时存在				default:
+					//					throw new UnsupportedOperationException("");
+				}
+			}
+		}
+
+		String s = whereString.isEmpty() ? "" : (hasPrefix ? " WHERE " : "") + whereString;
 
 		if (s.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
 			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
@@ -838,33 +886,43 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
-	private String getEqualString(String key, Object value) {
-		return (key + "=" + getValue(value));
+	@JSONField(serialize = false)
+	public String getEqualString(String key, Object value) {
+		return getKey(key) + "=" + getValue(value);
 	}
 
+	public String getKey(String key) {
+		return (isKeyPrefix() ? getAlias() + "." : "") + key;
+	}
 
 	/**
 	 * 使用prepareStatement预编译，值为 ? ，后续动态set进去
 	 */
-	private List<Object> preparedValues = new ArrayList<>();
+	private List<Object> preparedValueList = new ArrayList<>();
 	private Object getValue(@NotNull Object value) {
 		if (isPrepared()) {
-			preparedValues.add(value);
+			preparedValueList.add(value);
 			return "?";
 		}
 		return "'" + value + "'";
 	}
 	@Override
 	public List<Object> getPreparedValueList() {
-		return preparedValues;
+		return preparedValueList;
 	}
-
+	@Override
+	public AbstractSQLConfig setPreparedValueList(List<Object> preparedValueList) {
+		this.preparedValueList = preparedValueList;
+		return this;
+	}
+	
 	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**search key match value
 	 * @param in
 	 * @return {@link #getSearchString(String, Object[], int)}
 	 * @throws IllegalArgumentException 
 	 */
+	@JSONField(serialize = false)
 	public String getSearchString(String key, Object value) throws IllegalArgumentException {
 		if (value == null) {
 			return "";
@@ -885,6 +943,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return LOGIC [  key LIKE 'values[i]' ]
 	 * @throws IllegalArgumentException 
 	 */
+	@JSONField(serialize = false)
 	public String getSearchString(String key, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
@@ -906,9 +965,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param value
 	 * @return key LIKE 'value'
 	 */
+	@JSONField(serialize = false)
 	public String getLikeString(String key, Object value) {
-		return key + " LIKE "  + getValue(value);
+		return getKey(key) + " LIKE "  + getValue(value);
 	}
+
 	//$ search >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -919,6 +980,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return {@link #getRegExpString(String, Object[], int)}
 	 * @throws IllegalArgumentException 
 	 */
+	@JSONField(serialize = false)
 	public String getRegExpString(String key, Object value) throws IllegalArgumentException {
 		if (value == null) {
 			return "";
@@ -939,6 +1001,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return LOGIC [  key REGEXP 'values[i]' ]
 	 * @throws IllegalArgumentException 
 	 */
+	@JSONField(serialize = false)
 	public String getRegExpString(String key, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
@@ -960,8 +1023,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param value
 	 * @return key REGEXP 'value'
 	 */
+	@JSONField(serialize = false)
 	public String getRegExpString(String key, String value) {
-		return key + " REGEXP " + getValue(value);
+		return getKey(key) + " REGEXP " + getValue(value);
 	}
 	//$ search >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -982,6 +1046,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return key condition0 AND key condition1 AND ...
 	 * @throws Exception 
 	 */
+	@JSONField(serialize = false)
 	public String getRangeString(String key, Object range) throws Exception {
 		Log.i(TAG, "getRangeString key = " + key);
 		if (range == null) {//依赖的对象都没有给出有效值，这个存在无意义。如果是客户端传的，那就能在客户端确定了。
@@ -995,7 +1060,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		if (range instanceof List) {
 			if (logic.isOr() || logic.isNot()) {
-				return key + getInString(key, ((List<?>) range).toArray(), logic.isNot());
+				return getKey(key) + getInString(key, ((List<?>) range).toArray(), logic.isNot());
 			}
 			throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
 		}
@@ -1011,7 +1076,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				for (int i = 0; i < conditions.length; i++) {//对函数条件length(key)<=5这种不再在开头加key
 					index = conditions[i] == null ? -1 : conditions[i].indexOf("(");
 					condition += ((i <= 0 ? "" : (logic.isAnd() ? AND : OR))//连接方式
-							+ (index >= 0 && index < conditions[i].indexOf(")") ? "" : key + " ")//函数和非函数条件
+							+ (index >= 0 && index < conditions[i].indexOf(")") ? "" : getKey(key) + " ")//函数和非函数条件
 							+ conditions[i]);//单个条件
 				}
 			}
@@ -1030,6 +1095,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return IN ('key0', 'key1', ... )
 	 * @throws NotExistException 
 	 */
+	@JSONField(serialize = false)
 	public String getInString(String key, Object[] in, boolean not) throws NotExistException {
 		String condition = "";
 		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
@@ -1053,6 +1119,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return 	{@link #getContainString(String, Object[], int)}
 	 * @throws NotExistException
 	 */
+	@JSONField(serialize = false)
 	public String getContainString(String key, Object value) throws NotExistException {
 		if (value == null) {
 			return "";
@@ -1072,6 +1139,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 *   OR  key LIKE '%, " + childs[i] + ", %'  OR  key LIKE '%, " + childs[i] + "]' )  ]
 	 * @throws IllegalArgumentException 
 	 */
+	@JSONField(serialize = false)
 	public String getContainString(String key, Object[] childs, int type) throws IllegalArgumentException {
 		boolean not = Logic.isNot(type);
 		String condition = "";
@@ -1085,7 +1153,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						childs[i] = "\"" + childs[i] + "\"";
 					}
 					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-							+ "JSON_CONTAINS(" + key + ", " + getValue(childs[i]) + ")";
+							+ "JSON_CONTAINS(" + getKey(key) + ", " + getValue(childs[i]) + ")";
 				}
 			}
 			if (condition.isEmpty()) {
@@ -1146,6 +1214,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
+	@JSONField(serialize = false)
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
 		Set<String> set = content == null ? null : content.keySet();
 		if (set != null && set.size() > 0) {
@@ -1186,6 +1255,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return CONCAT (key, 'value')
 	 * @throws IllegalArgumentException
 	 */
+	@JSONField(serialize = false)
 	public String getAddString(String key, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
 			return key + " + " + value;
@@ -1201,6 +1271,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return REPLACE (key, 'value', '')
 	 * @throws IllegalArgumentException
 	 */
+	@JSONField(serialize = false)
 	public String getRemoveString(String key, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
 			return key + " - " + value;
@@ -1238,10 +1309,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case POST:
 			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
 		case PUT:
-			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString();
+			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true);
 		case DELETE:
-			return "DELETE FROM " + tablePath + config.getWhereString();
+			return "DELETE FROM " + tablePath + config.getWhereString(true);
 		default:
+			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
 			return "SELECT " + column + " FROM " + getConditionString(column, tablePath, config);
 		}
@@ -1256,7 +1328,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception 
 	 */
 	private static String getConditionString(String column, String table, AbstractSQLConfig config) throws Exception {
-		String where = config.getWhereString();
+		String where = config.getWhereString(true);
 
 		String condition = table + config.getJoinString() + where + (
 				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
@@ -1299,17 +1371,55 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
 	}
 
-	public String getJoinString() {
+
+	private boolean keyPrefix;
+	@Override
+	public boolean isKeyPrefix() {
+		return keyPrefix;
+	}
+	@Override
+	public AbstractSQLConfig setKeyPrefix(boolean keyPrefix) {
+		this.keyPrefix = keyPrefix;
+		return this;
+	}
+
+
+
+	public String getJoinString() throws Exception {
 		String joinOns = "";
 		if (joinList != null) {
-			String sql;
-			boolean first = true;
-			for (Join j: joinList) {
-				sql = j.getJoinSQL();
-				if (sql != null) {
-					joinOns += (first ? "" : AND) + sql;
-					first = false;
+			String sql = null;
+			SQLConfig jc;
+			for (Join j : joinList) {
+
+				//LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
+				// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
+				jc = j.getJoinConfig();
+				jc.setPrepared(isPrepared());
+
+				switch (j.getJoinType()) {
+				case "":
+				case "|": //不支持 <>, [] ，避免太多符号
+				case "&":
+				case "!":
+					sql = " INNER JOIN " + jc.getTablePath() + " ON " + jc.getTable() + "." + j.getKey() + " = "
+							+ j.getTargetName() + "." + j.getTargetKey();
+					break;
+				case "<":
+				case ">":
+					jc.setMain(true).setKeyPrefix(false);
+					sql = ( ">".equals(j.getJoinType()) ? " RIGHT" : " LEFT") + " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS "
+							+ j.getName() + " ON " + jc.getTable() + "." + j.getKey() + " = "
+							+ j.getTargetName() + "." + j.getTargetKey();
+					jc.setMain(false).setKeyPrefix(true);
+					
+					preparedValueList.addAll(jc.getPreparedValueList());
+					break;
+				default:
+					throw new UnsupportedOperationException("服务器内部错误：不支持JOIN类型 " + type + " !");
 				}
+
+				joinOns += "  \n  " + sql;
 			}
 		}
 		return joinOns;
@@ -1501,7 +1611,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-			Map<String, Object> tableContent = new HashMap<String, Object>();
+			Map<String, Object> tableContent = new LinkedHashMap<String, Object>();
 			Object value;
 			for (String key : set) {
 				value = request.get(key);
@@ -1547,6 +1657,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setOrder(order);
 		config.setJoinList(parseJoin(method, joinList, callback));
 
+		config.setKeyPrefix(RequestMethod.isQueryMethod(method) && (config.isMain() == false || (joinList != null && joinList.isEmpty() == false)));
+
 		//TODO 解析JOIN，包括 @column，@group 等要合并
 
 		//后面还可能用到，要还原
@@ -1565,6 +1677,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return config;
 	}
 
+
 	public static List<Join> parseJoin(RequestMethod method, List<Join> joinList, Callback callback) throws Exception {
 
 		//TODO 解析出 SQLConfig 再合并 column, order, group 等
@@ -1576,15 +1689,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String name;
 		for (Join j : joinList) {
 			name = j.getName();
-			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback).setMain(false);
+			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback).setMain(false).setKeyPrefix(true);
 			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, callback).setCount(1);
 
 			j.setJoinConfig(joinConfig);
 			j.setCacheConfig(cacheConfig);
-			// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
-			j.setJoinSQL(j.getJoinTypeName() + " " + joinConfig.getTablePath() + " AS "
-					+ name + " ON " + joinConfig.getTable() + "." + j.getKey() + " = "
-					+ j.getTargetName() + "." + j.getTargetKey());
 		}
 
 		return joinList;
