@@ -327,14 +327,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			method = expression.substring(0, start);
 
 			if (StringUtil.isName(method) == false) {
-				throw new IllegalArgumentException("字符 " + method + " 不合法！@having:\"function0(...)condition0;function1(...)condition1...\""
+				throw new IllegalArgumentException("字符 " + method + " 不合法！"
+						+ "预编译模式下 @having:\"function0(arg0,arg1,...)operator value;function1(arg0,arg1,...)operator value\""
 						+ " 中SQL函数名 function 必须符合正则表达式 ^[0-9a-zA-Z_]+$ ！");
 			}
 
 			suffix = expression.substring(end + 1, expression.length());
 
 			if (isPrepared() && PATTERN_RANGE.matcher((String) suffix).matches() == false) {
-				throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！预编译模式下 @having:\"function0(...)condition0;function1(...)condition1...\""
+				throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
+						+ "预编译模式下 @having:\"function0(arg0,arg1,...)operator value;function1(arg0,arg1,...)operator value\""
 						+ " 中 condition 必须符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
 			}
 
@@ -342,8 +344,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			for (int j = 0; j < ckeys.length; j++) {
 
-				if (isPrepared() && StringUtil.isName(ckeys[j]) == false) {
-					throw new IllegalArgumentException("@having:'function0(arg0,arg1,...);function1(arg0,arg1,...)' 中所有 arg 都必须是1个单词！并且不要有空格！");
+				if (isPrepared() && (StringUtil.isName(ckeys[j]) == false || ckeys[j].startsWith("_"))) {
+					throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
+							+ "预编译模式下 @having:\"function0(arg0,arg1,...)operator value;function1(arg0,arg1,...)operator value\""
+							+ " 中所有 arg 都必须是1个不以 _ 开头的单词！并且不要有空格！");
 				}
 
 				ckeys[j] = getKey(ckeys[j]);
