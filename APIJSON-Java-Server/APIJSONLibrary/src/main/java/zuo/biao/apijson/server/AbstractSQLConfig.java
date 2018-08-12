@@ -255,7 +255,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	public String getGroupString() {
 		//TODO 加上子表的group
-		
+
 		group = StringUtil.getTrimedString(group);
 		if (group.isEmpty()) {
 			return "";
@@ -291,16 +291,68 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.having = having;
 		return this;
 	}
+	/**
+	 * @return HAVING conditoin0 AND condition1 OR condition2 ...
+	 */
 	@JSONField(serialize = false)
 	public String getHavingString() {
 		having = StringUtil.getTrimedString(having);
 		if(having.isEmpty()) {
 			return ""; 
 		}
-		if (isPrepared()) {
-			throw new UnsupportedOperationException("字符串 " + having + " 不合法！预编译模式下不允许传 @having:\"condition\" !");
+
+		String[] keys = StringUtil.split(having, ";");
+		if (keys == null || keys.length <= 0) {
+			return "";
 		}
-		return " HAVING " + having;
+
+		String expression;
+		String method;
+		//暂时不允许 String prefix;
+		String suffix;
+
+		//fun0(arg0,arg1,...);fun1(arg0,arg1,...)
+		for (int i = 0; i < keys.length; i++) {
+
+			//fun(arg0,arg1,...)
+			expression = keys[i];
+
+			//TODO 支持 maxId>=100 这种没括号的
+			int start = expression.indexOf("(");
+			int end = expression.indexOf(")");
+			if (start >= end) {
+				throw new IllegalArgumentException("字符 " + expression + " 不合法！@having:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
+			}
+
+			method = expression.substring(0, start);
+
+			if (StringUtil.isName(method) == false) {
+				throw new IllegalArgumentException("字符 " + method + " 不合法！@having:\"function0(...)condition0;function1(...)condition1...\""
+						+ " 中SQL函数名 function 必须符合正则表达式 ^[0-9a-zA-Z_]+$ ！");
+			}
+
+			suffix = expression.substring(end + 1, expression.length());
+
+			if (isPrepared() && PATTERN_RANGE.matcher((String) suffix).matches() == false) {
+				throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！预编译模式下 @having:\"function0(...)condition0;function1(...)condition1...\""
+						+ " 中 condition 必须符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
+			}
+
+			String[] ckeys = StringUtil.split(expression.substring(start + 1, end));
+
+			for (int j = 0; j < ckeys.length; j++) {
+
+				if (isPrepared() && StringUtil.isName(ckeys[j]) == false) {
+					throw new IllegalArgumentException("@having:'function0(arg0,arg1,...);function1(arg0,arg1,...)' 中所有 arg 都必须是1个单词！并且不要有空格！");
+				}
+
+				ckeys[j] = getKey(ckeys[j]);
+			}
+
+			keys[i] = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
+		}
+
+		return " HAVING " + StringUtil.getString(keys, AND); //TODO 支持 OR, NOT 参考 @combine:"&key0,|key1,!key2"
 	}
 
 	@Override
@@ -329,7 +381,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (order.contains("-")) {
 			order = order.replaceAll("-", " DESC ");
 		}
-		
+
 		//TODO  column, order, group 都改用 List<String> 存储！！！，并且每个字段都要加 Table. 前缀！
 		String[] keys = StringUtil.split(order);
 		if (keys == null || keys.length <= 0) {
@@ -358,7 +410,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			keys[i] = getKey(origin) + sort;
 		}
-		
+
 		return " ORDER BY " + StringUtil.getString(keys);
 	}
 
