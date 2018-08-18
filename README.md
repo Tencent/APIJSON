@@ -61,7 +61,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 <br />
 
 ### 为什么要用APIJSON？
-[前后端9大痛点解析](https://github.com/TommyLemon/APIJSON/wiki)
+[前后端10大痛点解析](https://github.com/TommyLemon/APIJSON/wiki)
 
 ### 快速上手
 
