@@ -535,7 +535,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					String alias;
 					int index;
 					for (int j = 0; j < ckeys.length; j++) {
-						index = isColumn ? -1 : ckeys[j].indexOf(":"); //StringUtil.split返回数组中，子项不会有null
+						index = ckeys[j].lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
 						origin = index < 0 ? ckeys[j] : ckeys[j].substring(0, index);
 						alias = index < 0 ? null : ckeys[j].substring(index + 1);
 
