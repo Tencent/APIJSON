@@ -358,7 +358,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public boolean isJSONType(ResultSetMetaData rsmd, int position) {
 		try {
 			//TODO CHAR和JSON类型的字段，getColumnType返回值都是1	，如果不用CHAR，改用VARCHAR，则可以用上面这行来提高性能。
-			//return rsmd.getColumnType(position) == 1 || rsmd.getColumnTypeName(position).toLowerCase().contains("json");
+			//return rsmd.getColumnType(position) == 1;
 			return rsmd.getColumnTypeName(position).toLowerCase().contains("json");
 		} catch (SQLException e) {
 			e.printStackTrace();

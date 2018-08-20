@@ -317,7 +317,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			//fun(arg0,arg1,...)
 			expression = keys[i];
 
-			//TODO 支持 maxId>=100 这种没括号的
 			int start = expression.indexOf("(");
 			if (start < 0) {
 				if (isPrepared() && PATTERN_HAVING.matcher(expression).matches() == false) {
@@ -365,7 +364,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 
-			//keys[i] = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
+			keys[i] = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
 		}
 
 		return " HAVING " + StringUtil.getString(keys, AND); //TODO 支持 OR, NOT 参考 @combine:"&key0,|key1,!key2"
@@ -490,45 +489,123 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			String tableAlias = getAlias();
 
-			column = StringUtil.getString(column);
-			if (column.isEmpty()) {
+			String c = StringUtil.getString(column); //id,name;json_length(contactIdList):contactCount;...
+
+			String[] keys = StringUtil.split(c, ";");
+			if (keys == null || keys.length <= 0) {
 				return isKeyPrefix() == false ? "*" : (tableAlias + ".*" + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn));
 			}
 
-			String c = column;
-			//			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
-			String[] keys = StringUtil.split(column);
-			if (keys != null && keys.length > 0) {
-				String origin;
-				String alias;
-				int index;
-				for (int i = 0; i < keys.length; i++) {
-					index = keys[i].indexOf(":"); //StringUtil.split返回数组中，子项不会有null
-					origin = index < 0 ? keys[i] : keys[i].substring(0, index);
-					alias = index < 0 ? null : keys[i].substring(index + 1);
 
-					if (isPrepared()) {
-						if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
-							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
-									+ " column:alias 中 column必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
+			String expression;
+			String method = null;
+
+			//...;fun0(arg0,arg1,...):fun0;fun1(arg0,arg1,...):fun1;...
+			for (int i = 0; i < keys.length; i++) {
+
+				//fun(arg0,arg1,...)
+				expression = keys[i];
+
+				int start = expression.indexOf("(");
+				int end = 0;
+				if (start >= 0) {
+					end = expression.indexOf(")");
+					if (start >= end) {
+						throw new IllegalArgumentException("字符 " + expression + " 不合法！"
+								+ "@having:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
+					}
+
+					method = expression.substring(0, start);
+
+					if (StringUtil.isName(method) == false) {
+						throw new IllegalArgumentException("字符 " + method + " 不合法！"
+								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中SQL函数名 function 必须符合正则表达式 ^[0-9a-zA-Z_]+$ ！");
+					}
+				}
+
+				boolean isColumn = start < 0;
+
+				String[] ckeys = StringUtil.split(isColumn ? expression : expression.substring(start + 1, end));
+
+				//			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				if (ckeys != null && ckeys.length > 0) {
+
+					String origin;
+					String alias;
+					int index;
+					for (int j = 0; j < ckeys.length; j++) {
+						index = isColumn ? -1 : ckeys[j].indexOf(":"); //StringUtil.split返回数组中，子项不会有null
+						origin = index < 0 ? ckeys[j] : ckeys[j].substring(0, index);
+						alias = index < 0 ? null : ckeys[j].substring(index + 1);
+
+						if (isPrepared()) {
+							if (isColumn) {
+								if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
+									throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+											+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
+								}
+							}
+							else {
+								if ((StringUtil.isName(ckeys[j]) == false || ckeys[j].startsWith("_"))) {
+									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
+											+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+											+ " 中所有 arg 都必须是1个不以 _ 开头的单词！并且不要有空格！");
+								}
+							}
+						}
+
+						if (isKeyPrefix()) {
+							ckeys[j] = tableAlias + "." + origin;
+							if (isColumn) {
+								ckeys[j] += " AS `" + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + "`";
+							}
+						} else {
+							ckeys[j] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS `" + alias + "`");
+						}
+					}
+					//				}
+
+				}
+
+				if (isColumn) {
+					keys[i] = StringUtil.getString(ckeys);
+				}
+				else {
+					String suffix = expression.substring(end + 1, expression.length()); //:contactCount
+					String alias = suffix.startsWith(":") ? suffix.substring(1) : null; //contactCount
+
+					if (StringUtil.isEmpty(alias, true)) {
+						if (suffix.isEmpty() == false) {
+							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
+									+ " function(arg0,arg1,...):alias 中 alias 如果有就必须是1个单词！并且不要有多余的空格！");
+						}
+					} 
+					else {
+						if (StringUtil.isEmpty(alias, true) == false && StringUtil.isName(alias) == false) {
+							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
+									+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
 						}
 					}
 
+
+					String origin = method + "(" + StringUtil.getString(ckeys) + ")";
 					if (isKeyPrefix()) {
-						keys[i] = tableAlias + "." + origin + " AS `" + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + "`";
-					} else {
+						keys[i] = origin + " AS `" + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? method : alias) + "`";
+					}
+					else {
 						keys[i] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS `" + alias + "`");
 					}
 				}
-				//				}
 
-				c = StringUtil.getString(keys);
 			}
+			
+			c = StringUtil.getString(keys);
 
 			return c.contains(":") == false ? c : c.replaceAll(":", " AS ") + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
 
 		default:
-			throw new UnsupportedOperationException("服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(method) + " 等 [GET,GETS,HEAD,HEADS,POST] 外的ReuqestMethod！");
+			throw new UnsupportedOperationException("服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(getMethod()) + " 等 [GET,GETS,HEAD,HEADS,POST] 外的ReuqestMethod！");
 		}
 	}
 
