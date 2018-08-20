@@ -319,41 +319,53 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			//TODO 支持 maxId>=100 这种没括号的
 			int start = expression.indexOf("(");
+			if (start < 0) {
+				if (isPrepared() && PATTERN_HAVING.matcher(expression).matches() == false) {
+					throw new UnsupportedOperationException("字符串 " + expression + " 不合法！"
+							+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+							+ " 中 column?value 必须符合正则表达式 ^[A-Za-z0-9%!=<>]+$ ！不允许空格！");
+				}
+				continue;
+			}
+
 			int end = expression.indexOf(")");
 			if (start >= end) {
-				throw new IllegalArgumentException("字符 " + expression + " 不合法！@having:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
+				throw new IllegalArgumentException("字符 " + expression + " 不合法！"
+						+ "@having:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
 			}
 
 			method = expression.substring(0, start);
 
 			if (StringUtil.isName(method) == false) {
 				throw new IllegalArgumentException("字符 " + method + " 不合法！"
-						+ "预编译模式下 @having:\"function0(arg0,arg1,...)operator value;function1(arg0,arg1,...)operator value\""
+						+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
 						+ " 中SQL函数名 function 必须符合正则表达式 ^[0-9a-zA-Z_]+$ ！");
 			}
 
 			suffix = expression.substring(end + 1, expression.length());
 
-			if (isPrepared() && PATTERN_RANGE.matcher((String) suffix).matches() == false) {
+			if (isPrepared() && PATTERN_HAVING_SUFFIX.matcher((String) suffix).matches() == false) {
 				throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
-						+ "预编译模式下 @having:\"function0(arg0,arg1,...)operator value;function1(arg0,arg1,...)operator value\""
-						+ " 中 condition 必须符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
+						+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+						+ " 中 ?value 必须符合正则表达式 ^[0-9%!=<>]+$ ！不允许空格！");
 			}
 
 			String[] ckeys = StringUtil.split(expression.substring(start + 1, end));
 
-			for (int j = 0; j < ckeys.length; j++) {
+			if (ckeys != null) {
+				for (int j = 0; j < ckeys.length; j++) {
 
-				if (isPrepared() && (StringUtil.isName(ckeys[j]) == false || ckeys[j].startsWith("_"))) {
-					throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
-							+ "预编译模式下 @having:\"function0(arg0,arg1,...)operator value;function1(arg0,arg1,...)operator value\""
-							+ " 中所有 arg 都必须是1个不以 _ 开头的单词！并且不要有空格！");
+					if (isPrepared() && (StringUtil.isName(ckeys[j]) == false || ckeys[j].startsWith("_"))) {
+						throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
+								+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+								+ " 中所有 arg 都必须是1个不以 _ 开头的单词！并且不要有空格！");
+					}
+
+					ckeys[j] = getKey(ckeys[j]);
 				}
-
-				ckeys[j] = getKey(ckeys[j]);
 			}
 
-			keys[i] = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
+			//keys[i] = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
 		}
 
 		return " HAVING " + StringUtil.getString(keys, AND); //TODO 支持 OR, NOT 参考 @combine:"&key0,|key1,!key2"
@@ -461,7 +473,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			return "(" + column + ")";
 		case GET:
-		case GETS:
+		case GETS: //TODO 支持SQL函数 json_length(contactIdList):contactCount
 			boolean isQuery = RequestMethod.isQueryMethod(method);
 			String joinColumn = "";
 			if (isQuery && joinList != null) {
@@ -1106,8 +1118,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static final Pattern PATTERN_RANGE;
+	private static final Pattern PATTERN_HAVING;
+	private static final Pattern PATTERN_HAVING_SUFFIX;
 	static {
 		PATTERN_RANGE = Pattern.compile("^[0-9%!=<>,]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
+		PATTERN_HAVING = Pattern.compile("^[A-Za-z0-9%!=<>]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
+		PATTERN_HAVING_SUFFIX = Pattern.compile("^[0-9%!=<>]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
 	}
 
 
