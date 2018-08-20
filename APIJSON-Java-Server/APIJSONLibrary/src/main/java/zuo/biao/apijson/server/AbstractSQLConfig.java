@@ -602,10 +602,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			
 			c = StringUtil.getString(keys);
 
-			return c.contains(":") == false ? c : c.replaceAll(":", " AS ") + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
+			return (c.contains(":") == false ? c : c.replaceAll(":", " AS ")) + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
 
 		default:
-			throw new UnsupportedOperationException("服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(getMethod()) + " 等 [GET,GETS,HEAD,HEADS,POST] 外的ReuqestMethod！");
+			throw new UnsupportedOperationException(
+					"服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(getMethod())
+					+ " 等 [GET,GETS,HEAD,HEADS,POST] 外的ReuqestMethod！"
+					);
 		}
 	}
 
