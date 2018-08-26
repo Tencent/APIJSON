@@ -131,6 +131,11 @@ public abstract class AbstractParser implements Parser {
 		this.globleRole = globleRole;
 		return this;
 	}
+	protected String globleDatabase;
+	public AbstractParser setGlobleDatabase(String globleDatabase) {
+		this.globleDatabase = globleDatabase;
+		return this;
+	}
 
 	@Override
 	public boolean isNoVerify() {
@@ -256,6 +261,13 @@ public abstract class AbstractParser implements Parser {
 			} catch (Exception e) {
 				return extendErrorResult(requestObject, e);
 			}
+		}
+		
+		try {
+			setGlobleDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
+			requestObject.remove(JSONRequest.KEY_DATABASE);
+		} catch (Exception e) {
+			return extendErrorResult(requestObject, e);
 		}
 
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
@@ -1096,6 +1108,11 @@ public abstract class AbstractParser implements Parser {
 			}
 			verifier.verify(config);
 		}
+		
+		if (config.getDatabase() == null && globleDatabase != null) {
+			config.setDatabase(globleDatabase);
+		}
+		
 		return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config));
 	}
 

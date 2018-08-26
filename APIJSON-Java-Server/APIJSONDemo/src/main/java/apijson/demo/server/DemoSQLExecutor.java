@@ -42,7 +42,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		try { //加载驱动程序
 			Class.forName("org.postgresql.Driver");
 			Log.d(TAG, "成功加载 PostgresSQL 驱动！");
@@ -65,6 +65,8 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 	}
 
 
+	//TODO 根据不同数据库来分组存 connection 和 statement，例如 Map<database, connection>，
+	//	解决一次请求中有2个以上不同数据库类型导致后面的查询都用第一个的数据库类型
 	private Connection connection = null;
 	private PreparedStatement statement = null;
 	/**
@@ -76,7 +78,6 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
-			
 			if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) { //PostgreSQL 不允许 cross-database
 				connection = DriverManager.getConnection(config.getDBUri() + "/" + config.getSchema(), config.getDBAccount(), config.getDBPassword());
 			}
@@ -85,14 +86,14 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 						+ config.getDBAccount() + "&password=" + config.getDBPassword());
 			}
 		}
-		
+
 		statement = connection.prepareStatement(config.getSQL(config.isPrepared())); //创建Statement对象
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
-		
+
 		if (valueList != null && valueList.isEmpty() == false) {
-			
+
 			for (int i = 0; i < valueList.size(); i++) {
-				
+
 				if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) {
 					statement.setObject(i + 1, valueList.get(i)); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
 				}
