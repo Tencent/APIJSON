@@ -17,7 +17,6 @@ package apijson.demo.server;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
@@ -45,7 +44,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	@Override
 	public String getDBUri() {
 		//TODO 改成你自己的
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432" : "jdbc:mysql://localhost:3306";
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432/postgres" : "jdbc:mysql://localhost:3306";
 	}
 	@Override
 	public String getDBAccount() {
@@ -61,10 +60,9 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		return StringUtil.isEmpty(s, true) ? "sys" : s; //TODO 改成你自己的
 	}
 	
-	@JSONField(serialize = false)
 	@Override
-	public String getTablePath() { //PostgreSQL 不允许 cross-database
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? getSQLTable() : super.getTablePath();
+	public String getAlias() { //getTable 不能小写，因为Verifier用大小写敏感的名称判断权限
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? super.getAlias().toLowerCase() : super.getAlias();
 	}
 	
 

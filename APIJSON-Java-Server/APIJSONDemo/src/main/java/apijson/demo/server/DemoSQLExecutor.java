@@ -82,7 +82,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
 			if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) { //PostgreSQL 不允许 cross-database
-				connection = DriverManager.getConnection(config.getDBUri() + "/" + config.getSchema(), config.getDBAccount(), config.getDBPassword());
+				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
 			}
 			else {
 				connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
