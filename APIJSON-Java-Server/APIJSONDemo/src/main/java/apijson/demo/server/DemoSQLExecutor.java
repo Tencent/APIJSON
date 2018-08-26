@@ -68,8 +68,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 	}
 
 
-	//TODO 根据不同数据库来分组存 connection 和 statement，例如 Map<database, connection>，
-	//	解决一次请求中有2个以上不同数据库类型导致后面的查询都用第一个的数据库类型
+	//TODO String 改为 enum Database 解决大小写不一致(MySQL, mysql等)导致创建多余的 Connection
 	private Map<String, Connection> connectionMap = new HashMap<>();
 	/**
 	 * @param config 
