@@ -83,7 +83,7 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSOND
 启动Navicat &gt; 双击 localhost &gt; 双击 postgres &gt; 右键 postgres &gt; <br /> 如果没有 sys 模式则先右键新建一个 &gt; 运行 SQL 文件 &gt; 根据你使用的数据库类型来选择刚才解压路径下的 APIJSON-Master/MySQL 和 APIJSON-Master/PostgreSQL <br />
 &gt; 开始 &gt; 右键 postgres 里的 sys &gt; 刷新， sys/表 会出现添加的表。
 
-#### MySQL 还可以使用 MySQLWorkbench 来导入
+#### 使用 MySQLWorkbench（仅限MySQL）
 启动MySQLWorkbench &gt; 进入一个Connection &gt; 如果没有 sys Schema则先右键新建一个 &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/MySQL &gt; Start Import &gt; 刷新SCHEMAS， 左下方 sys/tables 会出现添加的表。
 
 配置你自己的表请参考：
