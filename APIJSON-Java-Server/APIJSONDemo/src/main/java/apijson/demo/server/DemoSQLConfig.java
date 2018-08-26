@@ -45,15 +45,15 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	@Override
 	public String getDBUri() {
 		//TODO 改成你自己的
-		return DATABASE_POSTGRESQL.equals(getDatabase()) ? "jdbc:postgresql://localhost:5432" : "jdbc:mysql://localhost:3306";
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432" : "jdbc:mysql://localhost:3306";
 	}
 	@Override
 	public String getDBAccount() {
-		return DATABASE_POSTGRESQL.equals(getDatabase()) ? "postgres" : "root"; //TODO 改成你自己的
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "postgres" : "root"; //TODO 改成你自己的
 	}
 	@Override
 	public String getDBPassword() {
-		return DATABASE_POSTGRESQL.equals(getDatabase()) ? null : "apijson"; //TODO 改成你自己的
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "apijson"; //TODO 改成你自己的
 	}
 	@Override
 	public String getSchema() {
@@ -63,8 +63,8 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	
 	@JSONField(serialize = false)
 	@Override
-	public String getTablePath() {
-		return DATABASE_POSTGRESQL.equals(getDatabase()) ? getSQLTable() : super.getTablePath();
+	public String getTablePath() { //PostgreSQL 不允许 cross-database
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? getSQLTable() : super.getTablePath();
 	}
 	
 

@@ -77,7 +77,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
 			
-			if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) {
+			if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) { //PostgreSQL 不允许 cross-database
 				connection = DriverManager.getConnection(config.getDBUri() + "/" + config.getSchema(), config.getDBAccount(), config.getDBPassword());
 			}
 			else {
@@ -93,7 +93,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 			
 			for (int i = 0; i < valueList.size(); i++) {
 				
-				if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) {
+				if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) {
 					statement.setObject(i + 1, valueList.get(i)); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
 				}
 				else {
