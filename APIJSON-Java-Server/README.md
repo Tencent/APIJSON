@@ -77,9 +77,9 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSOND
 <h4>可以先跳过，用Table, Column或者其它 你自己数据库中已有的表 来测试。</h4>
 
 后端需要MySQL Server和MySQLWorkbench，没有安装的都先下载安装一个。<br />
-我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8，其中系统和软件都是64位的。
+我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8 + Postgre 2.1.5，其中系统和软件都是64位的。
 
-启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/table &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
+启动MySQLWorkbench &gt; 进入一个Connection &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/MySQL &gt; Start Import &gt; 刷新SCHEMAS, 左下方sys/tables会出现添加的table。
 
 配置你自己的表请参考：
 [3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
