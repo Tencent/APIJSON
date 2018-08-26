@@ -16,6 +16,7 @@ package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.JSONObject.KEY_COLUMN;
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
+import static zuo.biao.apijson.JSONObject.KEY_DATABASE;
 import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
 import static zuo.biao.apijson.JSONObject.KEY_ID;
@@ -86,7 +87,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
 	 */
 	private RequestRole role; //发送请求的用户的角色
-	private String schema; //表所在的数据库
+	private String database; //表所在的数据库类型
+	private String schema; //表所在的数据库名
 	private String table; //表名
 	private String alias; //表别名
 	private String group; //分组方式的字符串数组，','分隔
@@ -180,6 +182,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return this;
 	}
 
+	@Override
+	public String getDatabase() {
+		return database;
+	}
+	@Override
+	public SQLConfig setDatabase(String database) {
+		this.database = database;
+		return this;
+	}
+	
 	@Override
 	public String getSchema() {
 		String sqlTable = getSQLTable();
@@ -761,7 +773,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 */
 	public static String getLimitString(int page, int count) {
-		return count <= 0 ? "" : " LIMIT " + getOffset(page, count) + ", " + count;
+		return count <= 0 ? "" : " LIMIT " + count + " OFFSET " + getOffset(page, count);
 	}
 
 	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -1637,6 +1649,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String role = request.getString(KEY_ROLE);
+		String database = request.getString(KEY_DATABASE);
 		String schema = request.getString(KEY_SCHEMA);
 		String combine = request.getString(KEY_COMBINE);
 		String column = request.getString(KEY_COLUMN);
@@ -1649,6 +1662,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.remove(KEY_ID_IN);
 		//关键词
 		request.remove(KEY_ROLE);
+		request.remove(KEY_DATABASE);
 		request.remove(KEY_SCHEMA);
 		request.remove(KEY_COMBINE);
 		request.remove(KEY_COLUMN);
@@ -1817,6 +1831,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//在	tableWhere 第0个		config.setIdIn(idIn);
 
 		config.setRole(role);
+		config.setDatabase(database);
 		config.setSchema(schema);
 		config.setColumn(column);
 		config.setGroup(group);
@@ -1834,6 +1849,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.put(KEY_ID_IN, idIn);
 		//关键词
 		request.put(KEY_ROLE, role);
+		request.put(KEY_DATABASE, database);
 		request.put(KEY_SCHEMA, schema);
 		request.put(KEY_COMBINE, combine);
 		request.put(KEY_COLUMN, column);

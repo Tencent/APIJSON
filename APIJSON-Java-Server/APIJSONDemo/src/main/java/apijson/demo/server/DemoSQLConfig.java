@@ -17,6 +17,7 @@ package apijson.demo.server;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
@@ -32,6 +33,9 @@ import zuo.biao.apijson.server.SQLConfig;
  */
 public class DemoSQLConfig extends AbstractSQLConfig {
 
+	public static final String DATABASE_MYSQL = "MySQL";
+	public static final String DATABASE_POSTGRESQL = "PostgreSQL";
+	
 	//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	static {
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
@@ -40,20 +44,27 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	@Override
 	public String getDBUri() {
-		return "jdbc:mysql://localhost:3306"; //TODO 改成你自己的
+		//TODO 改成你自己的
+		return DATABASE_POSTGRESQL.equals(getDatabase()) ? "jdbc:postgresql://localhost:5432" : "jdbc:mysql://localhost:3306";
 	}
 	@Override
 	public String getDBAccount() {
-		return "root"; //TODO 改成你自己的
+		return DATABASE_POSTGRESQL.equals(getDatabase()) ? "postgres" : "root"; //TODO 改成你自己的
 	}
 	@Override
 	public String getDBPassword() {
-		return "apijson"; //TODO 改成你自己的
+		return DATABASE_POSTGRESQL.equals(getDatabase()) ? null : "apijson"; //TODO 改成你自己的
 	}
 	@Override
 	public String getSchema() {
 		String s = super.getSchema();
 		return StringUtil.isEmpty(s, true) ? "sys" : s; //TODO 改成你自己的
+	}
+	
+	@JSONField(serialize = false)
+	@Override
+	public String getTablePath() {
+		return DATABASE_POSTGRESQL.equals(getDatabase()) ? getSQLTable() : super.getTablePath();
 	}
 	
 

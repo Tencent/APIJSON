@@ -90,6 +90,9 @@ public interface SQLConfig {
 	RequestRole getRole();
 	SQLConfig setRole(RequestRole role);
 
+	String getDatabase();
+	SQLConfig setDatabase(String database);
+
 	String getSchema();
 	SQLConfig setSchema(String schema);
 	

@@ -36,9 +36,16 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 
 	static {
-		try {//调用Class.forName()方法加载驱动程序
+		try { //加载驱动程序
 			Class.forName("com.mysql.jdbc.Driver");
-			Log.d(TAG, "成功加载MySQL驱动！");
+			Log.d(TAG, "成功加载 MySQL 驱动！");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		try { //加载驱动程序
+			Class.forName("org.postgresql.Driver");
+			Log.d(TAG, "成功加载 PostgresSQL 驱动！");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -69,15 +76,29 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
-			connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
-					+ config.getDBAccount() + "&password=" + config.getDBPassword());
+			
+			if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) {
+				connection = DriverManager.getConnection(config.getDBUri() + "/" + config.getSchema(), config.getDBAccount(), config.getDBPassword());
+			}
+			else {
+				connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
+						+ config.getDBAccount() + "&password=" + config.getDBPassword());
+			}
 		}
 		
 		statement = connection.prepareStatement(config.getSQL(config.isPrepared())); //创建Statement对象
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
+		
 		if (valueList != null && valueList.isEmpty() == false) {
+			
 			for (int i = 0; i < valueList.size(); i++) {
-				statement.setString(i + 1, "" + valueList.get(i));
+				
+				if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) {
+					statement.setObject(i + 1, valueList.get(i)); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
+				}
+				else {
+					statement.setString(i + 1, "" + valueList.get(i)); //MySQL setObject 不支持 JSON 类型
+				}
 			}
 		}
 

@@ -126,6 +126,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_DROP = "@drop"; //丢弃，不返回
 	public static final String KEY_CORRECT = "@correct"; //字段校正
 	
+	public static final String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
 	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
 	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
 	public static final String KEY_COMBINE = "@combine"; //条件组合，每个条件key前面可以放&,|,!逻辑关系  "id!{},&sex,!name&$"
@@ -137,6 +138,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	static {
 		TABLE_KEY_LIST = new ArrayList<String>();
 		TABLE_KEY_LIST.add(KEY_ROLE);
+		TABLE_KEY_LIST.add(KEY_DATABASE);
 		TABLE_KEY_LIST.add(KEY_SCHEMA);
 		TABLE_KEY_LIST.add(KEY_COLUMN);
 		TABLE_KEY_LIST.add(KEY_COMBINE);
@@ -182,6 +184,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	
 	
 
+	/**set database where table was puts
+	 * @param database
+	 * @return this
+	 */
+	public JSONObject setDatabase(String database) {
+		return puts(KEY_DATABASE, database);
+		
+	}
 	/**set schema where table was puts
 	 * @param schema
 	 * @return this
