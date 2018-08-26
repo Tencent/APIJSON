@@ -19,7 +19,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
@@ -67,14 +70,15 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 	//TODO 根据不同数据库来分组存 connection 和 statement，例如 Map<database, connection>，
 	//	解决一次请求中有2个以上不同数据库类型导致后面的查询都用第一个的数据库类型
-	private Connection connection = null;
-	private PreparedStatement statement = null;
+	private Map<String, Connection> connectionMap = new HashMap<>();
 	/**
 	 * @param config 
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("resource")
 	private PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
+		Connection connection = connectionMap.get(config.getDatabase());
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
@@ -85,9 +89,10 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 				connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
 						+ config.getDBAccount() + "&password=" + config.getDBPassword());
 			}
+			connectionMap.put(config.getDatabase(), connection);
 		}
 
-		statement = connection.prepareStatement(config.getSQL(config.isPrepared())); //创建Statement对象
+		PreparedStatement statement = connection.prepareStatement(config.getSQL(config.isPrepared())); //创建Statement对象
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
 
 		if (valueList != null && valueList.isEmpty() == false) {
@@ -102,6 +107,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 				}
 			}
 		}
+		// statement.close();
 
 		return statement;
 	}
@@ -112,20 +118,27 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 	@Override
 	public void close() {
 		super.close();
-		try {
-			if (statement != null && statement.isClosed() == false) {
-				statement.close();
-			}
-			if (connection != null && connection.isClosed() == false) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+
+		if (connectionMap == null) {
+			return;
 		}
-		statement = null;
-		connection = null;
+		
+		Collection<Connection> connections = connectionMap.values();
+		
+		if (connections != null) {
+			for (Connection connection : connections) {
+				try {
+					if (connection != null && connection.isClosed() == false) {
+						connection.close();
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		connectionMap.clear();
+		connectionMap = null;
 	}
-
-
 
 }
