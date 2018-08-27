@@ -6,7 +6,7 @@
 [![JavaScrpit API](https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript) 
 [![Vue.js API](https://img.shields.io/badge/Vue.js-2.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript/APIJSON-JS-Vue)
 [![Python API](https://img.shields.io/badge/Python-2.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Python) <br />
-[![MySQL API](https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/table) 
+[![MySQL API](https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/MySQL) 
 [![PostgreSQL API](https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/PostgreSQL) 
 
 
