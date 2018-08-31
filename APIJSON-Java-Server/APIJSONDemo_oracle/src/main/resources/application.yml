@@ -1,0 +1,5 @@
+url: jdbc:oracle:thin:@192.168.2.155:1521:orcl
+username: db3
+password: 123456
+driverclassame: oracle.jdbc.driver.OracleDriver
+schema: db3
