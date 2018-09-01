@@ -8,7 +8,7 @@
 [![Python API](https://img.shields.io/badge/Python-2.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Python) <br />
 [![MySQL API](https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/MySQL) 
 [![PostgreSQL API](https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/PostgreSQL) 
-[![Oracle API](https://img.shields.io/badge/Oracle-18%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server/APIJSONDemo_oracle) 
+[![Oracle API](https://img.shields.io/badge/Oracle-18%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/Oracle) 
 
 
 [English](https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md)  &nbsp;  [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md)  &nbsp;  [视频教程](http://i.youku.com/apijson)  &nbsp;  [在线工具](http://apijson.org)
@@ -87,8 +87,8 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 ## 关于作者
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" height="90" width="90" ></a>
-  <a href="https://github.com/linlwqq"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="90" width="90" ></a>
   <a href="https://github.com/1906522096"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="90" width="90" ></a>
+  <a href="https://github.com/linlwqq"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="90" width="90" ></a>
 </div>
 
 <br />
