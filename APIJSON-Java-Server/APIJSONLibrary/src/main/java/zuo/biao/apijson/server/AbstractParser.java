@@ -136,6 +136,11 @@ public abstract class AbstractParser implements Parser {
 		this.globleDatabase = globleDatabase;
 		return this;
 	}
+	protected boolean globleFormat;
+	public AbstractParser setGlobleFormat(Boolean globleFormat) {
+		this.globleFormat = globleFormat;
+		return this;
+	}
 
 	@Override
 	public boolean isNoVerify() {
@@ -265,7 +270,10 @@ public abstract class AbstractParser implements Parser {
 		
 		try {
 			setGlobleDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
+			setGlobleFormat(requestObject.getBooleanValue(JSONRequest.KEY_FORMAT));
+			
 			requestObject.remove(JSONRequest.KEY_DATABASE);
+			requestObject.remove(JSONRequest.KEY_FORMAT);
 		} catch (Exception e) {
 			return extendErrorResult(requestObject, e);
 		}
@@ -306,7 +314,7 @@ public abstract class AbstractParser implements Parser {
 		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + (endTime - startTime)
 				+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
 
-		return requestObject;
+		return globleFormat ? new JSONResponse(requestObject) : requestObject;
 	}
 
 

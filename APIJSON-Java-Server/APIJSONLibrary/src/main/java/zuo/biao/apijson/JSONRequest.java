@@ -54,6 +54,7 @@ public class JSONRequest extends JSONObject {
 	
 	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
 	public static final String KEY_VERSION = "version";//只在最外层，最外层用JSONRequest
+	public static final String KEY_FORMAT = "format";//只在最外层，最外层用JSONRequest
 	
 	/**set "tag":tag in outermost layer
 	 * for write operations
@@ -70,6 +71,14 @@ public class JSONRequest extends JSONObject {
 	 */
 	public JSONRequest setVersion(String version) {
 		return puts(KEY_VERSION, version);
+	}
+	/**set "format":format in outermost layer
+	 * for format APIJSON special keys to normal keys of response
+	 * @param version
+	 * @return
+	 */
+	public JSONRequest setFormat(Boolean format) {
+		return puts(KEY_FORMAT, format);
 	}
 
 
