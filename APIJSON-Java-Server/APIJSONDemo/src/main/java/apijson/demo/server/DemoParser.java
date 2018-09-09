@@ -67,9 +67,17 @@ public class DemoParser extends AbstractParser implements SQLCreator {
 	public SQLExecutor createSQLExecutor() {
 		return new DemoSQLExecutor();
 	}
-	
-	
-	
+
+	@Override
+	public JSONObject parseResponse(JSONObject request) {
+		//补充format
+		if (session != null && request != null && request.get(JSONRequest.KEY_FORMAT) == null) {
+			request.put(JSONRequest.KEY_FORMAT, session.getAttribute(JSONRequest.KEY_FORMAT));
+		}
+		return super.parseResponse(request);
+	}
+
+
 	@Override
 	public DemoObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
 
@@ -106,12 +114,12 @@ public class DemoParser extends AbstractParser implements SQLCreator {
 		}.setMethod(requestMethod).setParser(this);
 	}
 
-	
-	
+
+
 	@Override
 	protected void onVerifyContent() throws Exception {
-		//补充全局缺省版本号
-		if (session != null && requestObject.getIntValue(JSONRequest.KEY_VERSION) <= 0) {
+		//补充全局缺省版本号  //可能在默认为1的前提下这个请求version就需要为0  requestObject.getIntValue(JSONRequest.KEY_VERSION) <= 0) {
+		if (session != null && requestObject.get(JSONRequest.KEY_VERSION) == null) {
 			requestObject.put(JSONRequest.KEY_VERSION, session.getAttribute(JSONRequest.KEY_VERSION));
 		}
 		super.onVerifyContent();

@@ -213,6 +213,7 @@ public class Controller {
 	}
 
 	public static final String VERSION = JSONRequest.KEY_VERSION;
+	public static final String FORMAT = JSONRequest.KEY_FORMAT;
 	public static final String COUNT = JSONResponse.KEY_COUNT;
 	public static final String TOTAL = JSONResponse.KEY_TOTAL;
 
@@ -419,6 +420,7 @@ public class Controller {
 		String phone;
 		String password;
 		int version;
+		Boolean format;
 		try {
 			requestObject = DemoParser.parseRequest(request);
 
@@ -440,9 +442,11 @@ public class Controller {
 				}
 			}
 			
-			//全局版本号
+			//全局版本号，是否格式化
 			version = requestObject.getIntValue(VERSION);
+			format = requestObject.getBoolean(FORMAT);
 			requestObject.remove(VERSION);
+			requestObject.remove(FORMAT);
 		} catch (Exception e) {
 			return DemoParser.extendErrorResult(requestObject, e);
 		}
@@ -511,6 +515,7 @@ public class Controller {
 		session.setAttribute(USER_, user);//用户
 		session.setAttribute(PRIVACY_, privacy);//用户隐私信息
 		session.setAttribute(VERSION, version);//全局默认版本号
+		session.setAttribute(FORMAT, format);//全局默认格式化配置
 		//		session.setMaxInactiveInterval(1*60);//设置session过期时间
 
 		return response;
