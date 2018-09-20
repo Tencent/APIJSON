@@ -113,10 +113,11 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 
 ### 其它项目
-[APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具。
+[APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具，自动生成文档与注释、自动生成代码、自动化回归测试、自动静态检查等。
 
-[APIJSON.NET](https://github.com/liaozb/APIJSON.NET) 使用 C# 开发的服务端库。
+[APIJSON.NET](https://github.com/liaozb/APIJSON.NET) 使用 C# 开发的服务端库，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite
 
+[APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
 
 ### 持续更新
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
