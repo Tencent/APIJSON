@@ -2,8 +2,8 @@ package apijson.demo.server.config;
 
 import org.ho.yaml.Yaml;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,9 +13,8 @@ import java.util.Map;
  * @description
  */
 public class ConfigYml {
-    public Map read() {
-        String fileName = this.getClass().getClassLoader().getResource("application.yml").getPath();//获取文件路径
-        File dumpFile=new File(fileName);
+    public Map read() {        
+        InputStream dumpFile = this.getClass().getClassLoader().getResourceAsStream("application.yml");
         Map father = null;
         try {
             father = Yaml.loadType(dumpFile, HashMap.class);
