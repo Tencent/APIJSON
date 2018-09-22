@@ -45,7 +45,7 @@ import zuo.biao.apijson.server.exception.OutOfRangeException;
 /**parser for parsing request to JSONObject
  * @author Lemon
  */
-public abstract class AbstractParser implements Parser {
+public abstract class AbstractParser implements Parser, SQLCreator {
 	protected static final String TAG = "AbstractParser";
 
 
@@ -340,9 +340,11 @@ public abstract class AbstractParser implements Parser {
 		return obj;
 	}
 
-
-
-
+	@Override
+	public JSONObject parseCorrectRequest(JSONObject target) throws Exception {
+		return Structure.parseRequest(requestMethod, "", target, requestObject, getMaxUpdateCount(), this);
+	}
+	
 
 	/**新建带状态内容的JSONObject
 	 * @param code

@@ -22,16 +22,14 @@ import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.server.AbstractParser;
 import zuo.biao.apijson.server.JSONRequest;
 import zuo.biao.apijson.server.SQLConfig;
-import zuo.biao.apijson.server.SQLCreator;
 import zuo.biao.apijson.server.SQLExecutor;
-import zuo.biao.apijson.server.Structure;
 import zuo.biao.apijson.server.Verifier;
 
 
 /**请求解析器
  * @author Lemon
  */
-public class DemoParser extends AbstractParser implements SQLCreator {
+public class DemoParser extends AbstractParser {
 
 
 	public DemoParser() {
@@ -123,12 +121,6 @@ public class DemoParser extends AbstractParser implements SQLCreator {
 			requestObject.put(JSONRequest.KEY_VERSION, session.getAttribute(JSONRequest.KEY_VERSION));
 		}
 		super.onVerifyContent();
-	}
-
-
-	@Override
-	public JSONObject parseCorrectRequest(JSONObject target) throws Exception {
-		return Structure.parseRequest(requestMethod, "", target, requestObject, getMaxUpdateCount(), this);
 	}
 
 	//	//可重写来设置最大查询数量
