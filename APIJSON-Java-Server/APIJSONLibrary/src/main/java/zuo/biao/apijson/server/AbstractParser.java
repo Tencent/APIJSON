@@ -670,7 +670,8 @@ public abstract class AbstractParser implements Parser {
 
 
 		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
-		int size = count <= 0 || count > 100 ? 100 : count;//count为每页数量，size为第page页实际数量，max(size) = count
+		int max = getMaxQueryCount();
+		int size = count <= 0 || count > max ? max : count;//count为每页数量，size为第page页实际数量，max(size) = count
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
 
 
@@ -907,6 +908,15 @@ public abstract class AbstractParser implements Parser {
 		return requestObj;
 	}
 
+	@Override
+	public int getMaxQueryCount() {
+		return MAX_QUERY_COUNT;
+	}
+	@Override
+	public int getMaxUpdateCount() {
+		return MAX_UPDATE_COUNT;
+	}
+	
 
 	/**根据路径取值
 	 * @param parent

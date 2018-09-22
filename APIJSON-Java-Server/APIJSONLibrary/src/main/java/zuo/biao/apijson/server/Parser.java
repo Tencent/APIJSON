@@ -24,6 +24,10 @@ import zuo.biao.apijson.RequestMethod;
  */
 public interface Parser {
 
+	int MAX_QUERY_COUNT = 100;
+	int MAX_UPDATE_COUNT = 10;
+	
+	
 	@NotNull
 	Visitor getVisitor();
 	Parser setVisitor(@NotNull Visitor visitor);
@@ -83,6 +87,9 @@ public interface Parser {
 
 	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception;
 
+	int getMaxQueryCount();
+	int getMaxUpdateCount();
+	
 	void putQueryResult(String path, Object result);
 
 
@@ -90,6 +97,5 @@ public interface Parser {
 
 
 	JSONObject executeSQL(SQLConfig config) throws Exception;
-
 
 }

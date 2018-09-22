@@ -1872,6 +1872,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String name;
 		for (Join j : joinList) {
 			name = j.getName();
+			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
 			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback).setMain(false).setKeyPrefix(true);
 			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, callback).setCount(1);
 

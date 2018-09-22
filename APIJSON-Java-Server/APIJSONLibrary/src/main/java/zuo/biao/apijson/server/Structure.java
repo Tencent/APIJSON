@@ -59,11 +59,7 @@ import zuo.biao.apijson.server.model.Test;
 public class Structure {
 	private static final String TAG = "Structure";
 
-
-
 	private Structure() {}
-
-
 
 
 	/**从request提取target指定的内容
@@ -71,12 +67,26 @@ public class Structure {
 	 * @param name
 	 * @param target
 	 * @param request
-	 * @param creator 
+	 * @param creator
 	 * @return
 	 * @throws Exception
 	 */
 	public static JSONObject parseRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request, final SQLCreator creator) throws Exception {
+		return parseRequest(method, name, target, request, Parser.MAX_UPDATE_COUNT, creator);
+	}
+	/**从request提取target指定的内容
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param request
+	 * @param maxUpdateCount
+	 * @param creator
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject parseRequest(@NotNull final RequestMethod method, final String name
+			, final JSONObject target, final JSONObject request, final int maxUpdateCount, final SQLCreator creator) throws Exception {
 		Log.i(TAG, "parseRequest  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
 				+ "\n request = \n" + JSON.toJSONString(request));
@@ -107,13 +117,13 @@ public class Structure {
 						}
 					} else {
 						if (RequestMethod.isQueryMethod(method) == false) {
-							verifyId(method.name(), name, key, robj, KEY_ID, true);
-							verifyId(method.name(), name, key, robj, KEY_USER_ID, false);
+							verifyId(method.name(), name, key, robj, KEY_ID, maxUpdateCount, true);
+							verifyId(method.name(), name, key, robj, KEY_USER_ID, maxUpdateCount, false);
 						}
 					}
 				} 
 
-				return parseRequest(method, key, tobj, robj, creator);
+				return parseRequest(method, key, tobj, robj, maxUpdateCount, creator);
 			}
 		});
 
@@ -128,7 +138,7 @@ public class Structure {
 	 * @param atLeastOne 至少有一个不为null
 	 */
 	private static void verifyId(@NotNull String method, @NotNull String name, @NotNull String key
-			, @NotNull JSONObject robj, @NotNull String idKey, boolean atLeastOne) {
+			, @NotNull JSONObject robj, @NotNull String idKey, final int maxUpdateCount, boolean atLeastOne) {
 		//单个修改或删除
 		Object id = null;
 		try {
@@ -154,9 +164,9 @@ public class Structure {
 						+ " 里面 " + idKey + " 和 " + idInKey + " 至少传其中一个！");
 			}
 		} else {
-			if (idIn.size() > 10) { //不允许一次操作10条以上记录
+			if (idIn.size() > maxUpdateCount) { //不允许一次操作 maxUpdateCount 条以上记录
 				throw new IllegalArgumentException(method + "请求，" + name + "/" + key
-						+ " 里面的 " + idInKey + ":[] 中[]的长度不能超过10！");
+						+ " 里面的 " + idInKey + ":[] 中[]的长度不能超过 " + maxUpdateCount + " ！");
 			}
 			//解决 id{}: ["1' OR 1='1'))--"] 绕过id{}限制
 			//new ArrayList<Long>(idIn) 不能检查类型，Java泛型擦除问题，居然能把 ["a"] 赋值进去还不报错

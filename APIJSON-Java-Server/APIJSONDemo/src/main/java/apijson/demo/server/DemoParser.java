@@ -128,7 +128,13 @@ public class DemoParser extends AbstractParser implements SQLCreator {
 
 	@Override
 	public JSONObject parseCorrectRequest(JSONObject target) throws Exception {
-		return Structure.parseRequest(requestMethod, "", target, requestObject, this);
+		return Structure.parseRequest(requestMethod, "", target, requestObject, getMaxUpdateCount(), this);
 	}
+
+	//	//可重写来设置最大查询数量
+	//	@Override
+	//	public int getMaxQueryCount() {
+	//		return 50;
+	//	}
 
 }
