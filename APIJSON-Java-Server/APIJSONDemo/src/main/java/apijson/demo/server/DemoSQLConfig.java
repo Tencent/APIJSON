@@ -32,8 +32,6 @@ import zuo.biao.apijson.server.SQLConfig;
  */
 public class DemoSQLConfig extends AbstractSQLConfig {
 
-	public static final String DATABASE_MYSQL = "MySQL";
-	public static final String DATABASE_POSTGRESQL = "PostgreSQL";
 	
 	//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	static {

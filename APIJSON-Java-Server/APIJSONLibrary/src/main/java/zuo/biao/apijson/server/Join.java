@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class Join {
 
-	private String joinType; // "&" - INNER, "|" - FULL, "!" - OUTTER, "<" - LEFT, ">" - RIGHT
+	private String joinType; // "&" - INNER, "|" - FULL, "!" - OUTTER, "<" - LEFT, ">" - RIGHT, "*" - CROSS, "^" - SIDE
 	private String relateType; // "" - 一对一, "{}" - 一对多, "<>" - 多对一
 	private JSONObject table; // { "id@":"/Moment/userId" }
 	private String name; //User
@@ -111,25 +111,6 @@ public class Join {
 		else {
 			setRelateType("");
 			setKey(originKey);
-		}
-	}
-
-	public String getJoinTypeName() throws Exception {
-		return getJoinTypeName(joinType);
-	}
-	public static String getJoinTypeName(@NotNull String type) throws Exception {
-		switch (type) {
-		case "":
-		case "&":
-		case "|": //不支持 <>, [] ，避免太多符号
-		case "!":
-			return " INNER JOIN "; //TODO & | ! 通过 WHERE NOT( {B.where} OR {B.where} ) 解决
-		case "<":
-			return " LEFT JOIN ";
-		case ">":
-			return " RIGIHT JOIN ";
-		default:
-			throw new UnsupportedOperationException("服务器内部错误：不支持JOIN类型 " + type + " !");
 		}
 	}
 

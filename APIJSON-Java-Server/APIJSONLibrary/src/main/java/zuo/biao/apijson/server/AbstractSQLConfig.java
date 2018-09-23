@@ -50,6 +50,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.sun.xml.internal.ws.util.StringUtils;
 
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
@@ -191,7 +192,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.database = database;
 		return this;
 	}
-	
+
 	@Override
 	public String getSchema() {
 		String sqlTable = getSQLTable();
@@ -611,7 +612,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 			}
-			
+
 			c = StringUtil.getString(keys);
 
 			return (c.contains(":") == false ? c : c.replaceAll(":", " AS ")) + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
@@ -959,6 +960,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		if (joinList != null) {
 
+			String newWs = "";
+			String ws = "" + whereString;
+			
+			List<Object> newPvl = new ArrayList<>();
+			List<Object> pvl = new ArrayList<>(preparedValueList);
+			
 			SQLConfig jc;
 			String js;
 			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
@@ -968,8 +975,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "|": //不支持 <>, [] ，避免太多符号
 				case "&":
 				case "!":
-					logic = Logic.getType(j.getJoinType());
-
+				case "^":
+				case "*":
 					jc = j.getJoinConfig();
 					boolean isMain = jc.isMain();
 					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
@@ -980,21 +987,44 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						continue;
 					}
 
-					whereString = " ( "
-							+ getCondition(
-									Logic.isNot(logic), 
-									whereString
-									+ ( StringUtil.isEmpty(whereString, true) ? "" : (Logic.isAnd(logic) ? AND : OR) )
-									+ " ( " + js + " ) "
-									)
-							+ " ) ";
+					if (StringUtil.isEmpty(newWs, true) == false) {
+						newWs += AND;
+					}
+					
+					if ("^".equals(j.getJoinType())) { // (A & ! B) | (B & ! A)
+						newWs += " (   ( " + ws + ( StringUtil.isEmpty(ws, true) ? "" : AND + NOT ) + " ( " + js + " ) ) "
+								+ OR
+								+ " ( " + js + AND + NOT + " ( " + ws + " )  )   ) ";
+						
+						newPvl.addAll(pvl);
+						newPvl.addAll(jc.getPreparedValueList());
+						newPvl.addAll(jc.getPreparedValueList());
+						newPvl.addAll(pvl);
+					}
+					else {
+						logic = Logic.getType(j.getJoinType());
 
-					preparedValueList.addAll(jc.getPreparedValueList());
+						newWs += " ( "
+								+ getCondition(
+										Logic.isNot(logic), 
+										ws
+										+ ( StringUtil.isEmpty(ws, true) ? "" : (Logic.isAnd(logic) ? AND : OR) )
+										+ " ( " + js + " ) "
+										)
+								+ " ) ";
+						
+						newPvl.addAll(pvl);
+						newPvl.addAll(jc.getPreparedValueList());
+					}
+
 					break;
 					//可能 LEFT JOIN 和 INNER JOIN 同时存在				default:
 					//					throw new UnsupportedOperationException("");
 				}
 			}
+			
+			whereString = newWs;
+			preparedValueList = newPvl;
 		}
 
 		String s = whereString.isEmpty() ? "" : (hasPrefix ? " WHERE " : "") + whereString;
@@ -1581,8 +1611,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "|": //不支持 <>, [] ，避免太多符号
 				case "&":
 				case "!":
-					sql = " INNER JOIN " + jc.getTablePath() + " ON " + jc.getTable() + "." + j.getKey() + " = "
-							+ j.getTargetName() + "." + j.getTargetKey();
+				case "^":
+				case "*":
+					sql = ("*".equals(j.getJoinType()) ? " CROSS JOIN " : " INNER JOIN ") + jc.getTablePath()
+					+ " ON " + jc.getTable() + "." + j.getKey() + " = " + j.getTargetName() + "." + j.getTargetKey();
 					break;
 				case "<":
 				case ">":
@@ -1595,7 +1627,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					preparedValueList.addAll(jc.getPreparedValueList());
 					break;
 				default:
-					throw new UnsupportedOperationException("服务器内部错误：不支持JOIN类型 " + type + " !");
+					throw new UnsupportedOperationException("服务器内部错误：不支持JOIN类型 " + j.getJoinType() + " !");
 				}
 
 				joinOns += "  \n  " + sql;
@@ -1882,11 +1914,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (RequestMethod.isHeadMethod(method, true)) {
 				joinConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
 				joinConfig.setColumn(j.getKey()); //优化性能，不取非必要的字段
-				
+
 				cacheConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
 				cacheConfig.setColumn(j.getKey()); //优化性能，不取非必要的字段
 			}
-			
+
 			j.setJoinConfig(joinConfig);
 			j.setCacheConfig(cacheConfig);
 		}

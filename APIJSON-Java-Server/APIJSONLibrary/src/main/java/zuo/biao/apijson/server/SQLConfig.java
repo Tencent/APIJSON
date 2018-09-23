@@ -25,13 +25,16 @@ import zuo.biao.apijson.RequestRole;
  */
 public interface SQLConfig {
 
+	String DATABASE_MYSQL = "MySQL";
+	String DATABASE_POSTGRESQL = "PostgreSQL";
+	
 	String SCHEMA_INFORMATION = "`information_schema`";
 	String TABLE_SCHEMA = "`table_schema`";
 	String TABLE_NAME = "`table_name`";
 	
-	public static final int TYPE_CHILD = 0;
-	public static final int TYPE_ITEM = 1;
-	public static final int TYPE_ITEM_CHILD_0 = 2;
+	int TYPE_CHILD = 0;
+	int TYPE_ITEM = 1;
+	int TYPE_ITEM_CHILD_0 = 2;
 	
 	/**获取数据库地址
 	 * @return
