@@ -1876,6 +1876,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback).setMain(false).setKeyPrefix(true);
 			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, callback).setCount(1);
 
+			//解决 query: 1/2 查数量时报错  
+			/* SELECT  count(*)  AS count  FROM sys.Moment AS Moment  
+			   LEFT JOIN ( SELECT count(*)  AS count FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
+			if (RequestMethod.isHeadMethod(method, true)) {
+				joinConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
+				joinConfig.setColumn(j.getKey()); //优化性能，不取非必要的字段
+				
+				cacheConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
+				cacheConfig.setColumn(j.getKey()); //优化性能，不取非必要的字段
+			}
+			
 			j.setJoinConfig(joinConfig);
 			j.setCacheConfig(cacheConfig);
 		}
