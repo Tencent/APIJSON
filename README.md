@@ -115,9 +115,9 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 ### 其它项目
 [APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具，自动生成文档与注释、自动生成代码、自动化回归测试、自动静态检查等
 
-[APIJSON.NET](https://github.com/liaozb/APIJSON.NET) APIJSON C# 版，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite
+[APIJSON.NET](https://github.com/liaozb/APIJSON.NET) C# 版 APIJSON ，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite
 
-[apijson](https://github.com/TEsTsLA/apijson) APIJSON Node.js(TypeScript) 版，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite, MariaDB, WebSQL
+[apijson](https://github.com/TEsTsLA/apijson) Node.js(TypeScript) 版 APIJSON，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite, MariaDB, WebSQL
 
 [APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
 
