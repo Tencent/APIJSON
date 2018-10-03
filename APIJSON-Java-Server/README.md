@@ -1,5 +1,10 @@
 # APIJSON后端部署 - Java
 
+#### 现成的开箱即用 jar包 见
+https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
+<br />
+<br />
+
 ### 1.下载后解压APIJSON工程
 
 [打开APIJSON的GitHub主页](https://github.com/TommyLemon/APIJSON) &gt; Clone or download &gt; [Download ZIP](https://github.com/TommyLemon/APIJSON/archive/master.zip) &gt; 解压到一个路径并记住这个路径。
