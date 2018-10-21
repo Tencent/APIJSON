@@ -4,7 +4,7 @@
 [![Oracle API](https://img.shields.io/badge/Oracle-11%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/Oracle) <br />
 [![Java-Server API](https://img.shields.io/badge/Java-1.7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server) 
 [![CSharp-Server API](https://img.shields.io/badge/CSharp-2.1%2B-brightgreen.svg?style=flat)](https://github.com/liaozb/APIJSON.NET) 
-[![PHP-Server API](https://img.shields.io/badge/PHP-7.0%2B-brightgreen.svg?style=flat)](https://github.com/TEsTsLA/apijson) 
+[![PHP-Server API](https://img.shields.io/badge/PHP-7.0%2B-brightgreen.svg?style=flat)](https://github.com/orchie/apijson) 
 [![Node.js-Server API](https://img.shields.io/badge/Node.js-ES6%2B-brightgreen.svg?style=flat)](https://github.com/TEsTsLA/apijson) <br />
 [![Android API](https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android) 
 [![iOS API](https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat)](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS) 
@@ -117,6 +117,8 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 [APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具，自动生成文档与注释、自动生成代码、自动化回归测试、自动静态检查等
 
 [APIJSON.NET](https://github.com/liaozb/APIJSON.NET) C# 版 APIJSON ，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite
+
+[apijson](https://github.com/orchie/apijson) PHP 版 APIJSON，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite 等
 
 [apijson](https://github.com/TEsTsLA/apijson) Node.ts 版 APIJSON，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite, MariaDB, WebSQL
 
