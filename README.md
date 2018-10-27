@@ -2,8 +2,8 @@
   APIJSON
 </p>
 <p align="center">🚀后端接口和文档自动化，前端(客户端) 定制返回JSON的数据和结构！</p>
-
-<li align="center" style="list-style: none">
+<ul style="list-style: none">
+<li align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-11%2B-brightgreen.svg?style=flat"></a>
@@ -25,6 +25,7 @@
   <a href="http://i.youku.com/apijson">视频教程</a>
   <a href="http://apijson.org">在线工具</a>
 </li>
+</ul>
 <p align="center" >
   <img src="https://raw.githubusercontent.com/TommyLemon/APIJSON/master/logo.png" />
 </p>
