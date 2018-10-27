@@ -19,7 +19,7 @@
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </li>
-<ul style="list-style: none">
+<ul style="list-style-type:none">
 <li align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md">English</a>
   <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document.md">通用文档</a>
