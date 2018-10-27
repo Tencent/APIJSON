@@ -19,12 +19,14 @@
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </li>
-<li align="center" style="list-style: none">
-  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md"> English </a>
-  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document.md"> 通用文档 </a>
-  <a href="http://i.youku.com/apijson"> 视频教程 </a>
-  <a href="http://apijson.org"> 在线工具 </a>
+<ul style="list-style: none">
+<li align="center" >
+  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md">English</a>
+  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document.md">通用文档</a>
+  <a href="http://i.youku.com/apijson">视频教程</a>
+  <a href="http://apijson.org">在线工具</a>
 </li>
+</ul >
 <p align="center" >
   <img src="https://raw.githubusercontent.com/TommyLemon/APIJSON/master/logo.png" />
 </p>
