@@ -1,4 +1,4 @@
-<h1 align="center" style="text-align:center">
+<h1 align="center" style="text-align:center;border-bottom:none">
   APIJSON
 </h1>
 <p align="center">🚀后端接口和文档自动化，前端(客户端) 定制返回JSON的数据和结构！</p>
