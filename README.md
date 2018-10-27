@@ -1,25 +1,25 @@
-<p align="center" style="font-size: xx-large;color: black">
+<h1 align="center" style="text-align:center">
   APIJSON
-</p>
+</h1>
 <p align="center">🚀后端接口和文档自动化，前端(客户端) 定制返回JSON的数据和结构！</p>
 
-<p align="center" style="line-height:10px">
+<p align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-11%2B-brightgreen.svg?style=flat"></a>
 </p>
-<p align="center" style="line-height:10px">
+<p align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server"><img src="https://img.shields.io/badge/Java-1.7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://img.shields.io/badge/CSharp-2.1%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/orchie/apijson"><img src="https://img.shields.io/badge/PHP-7.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TEsTsLA/apijson"><img src="https://img.shields.io/badge/Node.js-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
-<p align="center" style="padding:0 auto">
+<p align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
-<p align="center" style="padding:0 auto">
+<p align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md">English</a>
   <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document.md">通用文档</a>
   <a href="http://i.youku.com/apijson">视频教程</a>
