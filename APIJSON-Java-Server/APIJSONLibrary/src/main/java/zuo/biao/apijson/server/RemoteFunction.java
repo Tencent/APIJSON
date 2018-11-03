@@ -23,8 +23,8 @@ import zuo.biao.apijson.StringUtil;
 /**可远程调用的函数类
  * @author Lemon
  */
-public class Function {
-	//	private static final String TAG = "Function";
+public class RemoteFunction {
+	//	private static final String TAG = "RemoteFunction";
 
 	/**反射调用
 	 * @param fun
@@ -32,7 +32,7 @@ public class Function {
 	 * @param function 例如get(Map:map,key)，参数只允许引用，不能直接传值
 	 * @return
 	 */
-	public static Object invoke(@NotNull Function fun, @NotNull JSONObject request, @NotNull String function) throws Exception {
+	public static Object invoke(@NotNull RemoteFunction fun, @NotNull JSONObject request, @NotNull String function) throws Exception {
 
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
@@ -114,7 +114,7 @@ public class Function {
 	 * @param args
 	 * @return
 	 */
-	public static Object invoke(@NotNull Function fun, @NotNull String methodName, @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
+	public static Object invoke(@NotNull RemoteFunction fun, @NotNull String methodName, @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
 		return fun.getClass().getDeclaredMethod(methodName, parameterTypes).invoke(fun, args);
 	}
 
@@ -123,7 +123,7 @@ public class Function {
 	 * @param keys
 	 * @return
 	 */
-	private static String getFunction(String method, String[] keys) {
+	public static String getFunction(String method, String[] keys) {
 		String f = method + "(JSONObject request";
 		
 		if (keys != null) {

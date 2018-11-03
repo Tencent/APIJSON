@@ -22,9 +22,9 @@ import static zuo.biao.apijson.server.Operation.NECESSARY;
 import static zuo.biao.apijson.server.Operation.PUT;
 import static zuo.biao.apijson.server.Operation.REMOVE;
 import static zuo.biao.apijson.server.Operation.REPLACE;
+import static zuo.biao.apijson.server.Operation.TYPE;
 import static zuo.biao.apijson.server.Operation.UNIQUE;
 import static zuo.biao.apijson.server.Operation.VERIFY;
-import static zuo.biao.apijson.server.Operation.TYPE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +46,6 @@ import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.model.Test;
 
@@ -95,10 +94,11 @@ public class Structure {
 			return null;
 		}
 
-		if (RequestRole.get(request.getString(JSONRequest.KEY_ROLE)) == RequestRole.ADMIN) {
-			throw new IllegalArgumentException("角色设置错误！不允许在写操作Request中传 " + name + 
-					":{ " + JSONRequest.KEY_ROLE + ":admin } ！");
-		}
+		//已在 Verifier 中处理
+		//		if (RequestRole.get(request.getString(JSONRequest.KEY_ROLE)) == RequestRole.ADMIN) {
+		//			throw new IllegalArgumentException("角色设置错误！不允许在写操作Request中传 " + name + 
+		//					":{ " + JSONRequest.KEY_ROLE + ":admin } ！");
+		//		}
 
 		//解析
 		return parse(name, target, request, creator, new OnParseCallback() {

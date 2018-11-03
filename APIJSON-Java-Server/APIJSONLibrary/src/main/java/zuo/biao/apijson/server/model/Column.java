@@ -21,6 +21,6 @@ import zuo.biao.apijson.MethodAccess;
  */
 @MethodAccess(POST = {}, PUT = {}, DELETE = {})
 public class Column {
-	public static final String TAG = "`columns`";
+	public static final String TAG = "columns";
 
 }

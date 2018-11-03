@@ -477,7 +477,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			//			throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
 			//					" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
 		}
-		String realKey = AbstractSQLConfig.getRealKey(method, key, false, false);
+		String realKey = AbstractSQLConfig.getRealKey(method, key, false, false, "`"); //FIXME PG 是 "
 
 		//GET > add all 或 remove all > PUT > remove key
 
@@ -634,7 +634,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		Object result = onFunctionParse(json, value);
 
 		if (result != null) {
-			String k = AbstractSQLConfig.getRealKey(method, key, false, false);
+			String k = AbstractSQLConfig.getRealKey(method, key, false, false, "`"); //FIXME PG 是 "
 
 			response.put(k, result);
 			parser.putQueryResult(AbstractParser.getAbsPath(path, k), result);

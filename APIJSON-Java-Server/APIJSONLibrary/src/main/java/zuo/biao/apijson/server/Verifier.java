@@ -43,11 +43,15 @@ public interface Verifier {
 	void verifyRole(String table, RequestMethod method, RequestRole role) throws Exception;
 
 	/**登录校验
-	 * @author Lemon
-	 * @param userId
+	 * @param config
 	 * @throws Exception
 	 */
 	void verifyLogin() throws Exception;
+	/**管理员角色校验
+	 * @param config
+	 * @throws Exception
+	 */
+	void verifyAdmin() throws Exception;
 
 
 

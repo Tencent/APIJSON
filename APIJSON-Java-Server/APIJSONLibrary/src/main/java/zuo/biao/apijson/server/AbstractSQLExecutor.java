@@ -202,15 +202,21 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		// WHERE id = ? AND ... 或 WHERE ... AND id = ? 强制排序 remove 再 put，还是重新 getSQL吧
 
 
+		boolean hasJoin = config.hasJoin();
+		int viceColumnStart = length; //第一个副表字段的index
 		while (rs.next()){
 			index ++;
 			Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
 
 			result = new JSONObject(true);
-
+			
 			for (int i = 1; i <= length; i++) {
 
-				result = onPutColumn(config, rs, rsmd, index, result, i, childMap);
+				if (hasJoin && viceColumnStart >= length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
+					viceColumnStart = i;
+				}
+				
+				result = onPutColumn(config, rs, rsmd, index, result, i, hasJoin && i >= viceColumnStart ? childMap : null);
 			}
 
 			resultMap = onPutTable(config, rs, rsmd, resultMap, index, result);
@@ -263,12 +269,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			return table;
 		}
 
-		//TODO 改为  rsmd.getTableName(columnIndex) 支持副表不传 @column ， 但如何判断是副表？传 mainTableMain进来
-		String lable = rsmd.getColumnLabel(columnIndex);
-		int dotIndex = lable.indexOf(".");
-		String column = dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
+		//已改为  rsmd.getTableName(columnIndex) 支持副表不传 @column ， 但如何判断是副表？childMap != null
+//		String lable = rsmd.getColumnLabel(columnIndex);
+//		int dotIndex = lable.indexOf(".");
+		String lable = rsmd.getColumnLabel(columnIndex);//dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
 
-		String childTable = dotIndex < 0 ? null : lable.substring(0, dotIndex);
+		String childTable = childMap == null ? null : rsmd.getTableName(columnIndex); //dotIndex < 0 ? null : lable.substring(0, dotIndex);
 
 		JSONObject finalTable = null;
 		String childSql = null;
@@ -278,16 +284,16 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			finalTable = table;
 		}
 		else {
-			lable = column;
+//			lable = column;
 
 			//<sql, Table>
 
 			List<Join> joinList = config.getJoinList();
 			if (joinList != null) {
 				for (Join j : joinList) {
-					if (childTable.equals(j.getName())) {
-
-						childConfig = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+					childConfig = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+					
+					if (childTable.equalsIgnoreCase(childConfig.getSQLTable())) {
 
 						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()), false);
 						childSql = childConfig.getSQL(false);

@@ -37,8 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
-import apijson.demo.server.model.Comment;
-import apijson.demo.server.model.Moment;
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
@@ -201,14 +199,10 @@ public class Controller {
 
 	public static final String USER_;
 	public static final String PRIVACY_;
-	public static final String MOMENT_;
-	public static final String COMMENT_;
 	public static final String VERIFY_; //加下划线后缀是为了避免 Verify 和 verify 都叫VERIFY，分不清
 	static {
 		USER_ = User.class.getSimpleName();
 		PRIVACY_ = Privacy.class.getSimpleName();
-		MOMENT_ = Moment.class.getSimpleName();
-		COMMENT_ = Comment.class.getSimpleName();
 		VERIFY_ = Verify.class.getSimpleName();
 	}
 
@@ -216,8 +210,6 @@ public class Controller {
 	public static final String FORMAT = JSONRequest.KEY_FORMAT;
 	public static final String COUNT = JSONResponse.KEY_COUNT;
 	public static final String TOTAL = JSONResponse.KEY_TOTAL;
-
-	public static final String RANGE = "range";
 
 	public static final String ID = "id";
 	public static final String USER_ID = "userId";
@@ -231,38 +223,8 @@ public class Controller {
 	public static final String OLD_PASSWORD = "oldPassword";
 	public static final String VERIFY = "verify";
 
-	public static final String SEX = "sex";
 	public static final String TYPE = "type";
-	public static final String WAY = "way";
-	public static final String CONTENT = "content";
 	
-
-
-
-
-	public static final String DATE_UP = "date+";//同 "date ASC"
-	public static final String DATE_DOWN = "date-";//同 "date DESC"
-
-	public static final String ID_AT = ID + "@";
-	public static final String USER_ID_AT = USER_ID + "@";
-	public static final String MOMENT_ID_AT = "momentId@";
-	public static final String COMMENT_ID_AT = "commentId@";
-
-	public static final String ID_IN = ID + "{}";
-	public static final String USER_ID_IN = USER_ID + "{}";
-	public static final String MOMENT_ID_IN = "momentId{}";
-	public static final String COMMENT_ID_IN = "commentId{}";
-
-	public static final String NAME_SEARCH = NAME + "$";
-	public static final String PHONE_SEARCH = PHONE + "$";
-	public static final String CONTENT_SEARCH = CONTENT + "$";
-
-
-
-	public static final String COLUMNS_USER_SIMPLE = "id,name";
-	public static final String COLUMNS_USER = "id,sex,name,head";
-
-
 
 
 	/**生成验证码,修改为post请求

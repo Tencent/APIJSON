@@ -90,7 +90,7 @@ public class JSONRequest extends zuo.biao.apijson.JSONRequest {
 			return null;
 		}
 
-		com.alibaba.fastjson.JSONObject target = JSON.parseObject(value);
+		Object target = JSON.parse(value);
 		//		if (target == null) { // "tag":"User" 报错
 		//			return null;
 		//		}

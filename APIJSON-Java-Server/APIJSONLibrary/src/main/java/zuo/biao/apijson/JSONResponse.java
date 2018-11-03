@@ -81,11 +81,29 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 		}
 		return 0;
 	}
-	/**获取信息
+	/**获取状态
+	 * @return
+	 */
+	public static int getCode(JSONObject reponse) {
+		try {
+			return reponse.getIntValue(KEY_CODE);
+		} catch (Exception e) {
+			//empty
+		}
+		return 0;
+	}
+	/**获取状态描述
 	 * @return
 	 */
 	public String getMsg() {
 		return getString(KEY_MSG);
+	}
+	/**获取状态描述
+	 * @param reponse
+	 * @return
+	 */
+	public static String getMsg(JSONObject reponse) {
+		return reponse == null ? null : reponse.getString(KEY_MSG);
 	}
 	/**获取id
 	 * @return
@@ -142,6 +160,13 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	public static boolean isSuccess(JSONResponse response) {
 		return response != null && response.isSuccess();
 	}
+	/**是否成功
+	 * @param response
+	 * @return
+	 */
+	public static boolean isSuccess(JSONObject response) {
+		return isSuccess(response.getIntValue(KEY_CODE));
+	}
 
 	/**校验服务端是否存在table
 	 * @return
@@ -171,6 +196,15 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	public JSONResponse getJSONResponse(String key) {
 		return getObject(key, JSONResponse.class);
 	}
+	//cannot get javaBeanDeserizer
+//	/**获取内部的JSONResponse
+//	 * @param response
+//	 * @param key
+//	 * @return
+//	 */
+//	public static JSONResponse getJSONResponse(JSONObject response, String key) {
+//		return response == null ? null : response.getObject(key, JSONResponse.class);
+//	}
 	//状态信息，非GET请求获得的信息>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 

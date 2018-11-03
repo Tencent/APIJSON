@@ -43,6 +43,7 @@ import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotLoggedInException;
 import zuo.biao.apijson.server.model.Column;
 import zuo.biao.apijson.server.model.Document;
+import zuo.biao.apijson.server.model.Function;
 import zuo.biao.apijson.server.model.Request;
 import zuo.biao.apijson.server.model.Response;
 import zuo.biao.apijson.server.model.Table;
@@ -69,6 +70,7 @@ public abstract class AbstractVerifier implements Verifier {
 		ACCESS_MAP.put(Response.class.getSimpleName(), getAccessMap(Response.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(Document.class.getSimpleName(), getAccessMap(Document.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(TestRecord.class.getSimpleName(), getAccessMap(TestRecord.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Function.class.getSimpleName(), getAccessMap(Function.class.getAnnotation(MethodAccess.class)));
 	}
 
 	/**获取权限Map，每种操作都只允许对应的角色
@@ -192,6 +194,7 @@ public abstract class AbstractVerifier implements Verifier {
 			config.putWhere(visitorIdkey, visitorId, true);
 			break;
 		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
+			verifyAdmin();
 			break;
 		default://unknown，verifyRole通过就行
 			break;
@@ -202,6 +205,7 @@ public abstract class AbstractVerifier implements Verifier {
 
 		return true;
 	}
+
 
 
 
@@ -244,7 +248,11 @@ public abstract class AbstractVerifier implements Verifier {
 			throw new NotLoggedInException("未登录，请登录后再操作！");
 		}
 	}
-
+	
+	@Override
+	public void verifyAdmin() throws Exception {
+		throw new UnsupportedOperationException("不支持 ADMIN 角色！");
+	}
 
 
 	/**验证是否重复

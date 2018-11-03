@@ -70,6 +70,20 @@ public class JSON {
 		return s;//isJsonCorrect(s) ? s : null;
 	}
 
+	/**
+	 * @param json
+	 * @return
+	 */
+	public static Object parse(Object obj) {
+		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
+		features |= Feature.OrderedField.getMask();
+		try {
+			return com.alibaba.fastjson.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), features);
+		} catch (Exception e) {
+			Log.i(TAG, "parse  catch \n" + e.getMessage());
+		}
+		return null;
+	}
 	/**obj转JSONObject
 	 * @param json
 	 * @return
@@ -224,14 +238,14 @@ public class JSON {
 	 * @return
 	 */
 	public static String format(String json) {
-		return format(parseObject(json));
+		return format(parse(json));
 	}
 	/**格式化，显示更好看
 	 * @param object
 	 * @return
 	 */
-	public static String format(JSONObject object) {
-		return toJSONString(object, SerializerFeature.PrettyFormat);
+	public static String format(Object json) {
+		return toJSONString(json, SerializerFeature.PrettyFormat);
 	}
 
 	/**判断是否为JSONObject

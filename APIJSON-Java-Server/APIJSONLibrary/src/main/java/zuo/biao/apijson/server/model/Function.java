@@ -16,11 +16,9 @@ package zuo.biao.apijson.server.model;
 
 import zuo.biao.apijson.MethodAccess;
 
-/**数据库表
+/**远程函数
  * @author Lemon
  */
 @MethodAccess(POST = {}, PUT = {}, DELETE = {})
-public class Table {
-	public static final String TAG = "tables";
-
+public class Function {
 }

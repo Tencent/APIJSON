@@ -50,10 +50,10 @@ public enum RequestRole {
 	//	static {
 	//		HIGHS = new RequestRole[] {OWNER, ADMIN};
 	//	}
-	
+
 	public static final String[] NAMES = {
 			UNKNOWN.name(), LOGIN.name(), CONTACT.name(), CIRCLE.name(), OWNER.name(), ADMIN.name()
-			};
+	};
 
 	public static RequestRole get(String name) throws Exception {
 		if (name == null) {

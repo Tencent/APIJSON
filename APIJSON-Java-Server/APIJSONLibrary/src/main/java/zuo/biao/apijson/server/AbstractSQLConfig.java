@@ -50,7 +50,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.sun.xml.internal.ws.util.StringUtils;
 
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
@@ -194,9 +193,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	@Override
+	public String getQuote() {
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "\"" : "`";
+	}
+
+	@Override
 	public String getSchema() {
 		String sqlTable = getSQLTable();
-		if (sqlTable != null && sqlTable.startsWith("`")) {
+		if (StringUtil.isEmpty(schema, true) && (Table.TAG.equals(sqlTable) || Column.TAG.equals(sqlTable)) ) {
 			return SCHEMA_INFORMATION;
 		}
 		return schema;
@@ -204,7 +208,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
 		if (schema != null) {
-			String s = schema.startsWith("`") && schema.endsWith("`") ? schema.substring(1, schema.length() - 1) : schema;
+			String quote = getQuote();
+			String s = schema.startsWith(quote) && schema.endsWith(quote) ? schema.substring(1, schema.length() - 1) : schema;
 			if (StringUtil.isName(s) == false) {
 				throw new IllegalArgumentException("@schema:value 中value必须是1个单词！");
 			}
@@ -227,13 +232,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getSQLTable() {
-		return (TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table)
-				+ ( isKeyPrefix() ? " AS " + getAlias() : "");
+		String t = TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? t.toLowerCase() : t;
 	}
 	@JSONField(serialize = false)
 	@Override
 	public String getTablePath() {
-		return getSchema() + "." + getSQLTable();
+		String q = getQuote();
+		return q + getSchema() + q + "." + q + getSQLTable() + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
 	}
 	@Override
 	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
@@ -245,7 +251,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (StringUtil.isEmpty(alias, true)) {
 			alias = getTable();
 		}
-		return alias;
+		String q = getQuote();
+		//getTable 不能小写，因为Verifier用大小写敏感的名称判断权限		
+		return q + (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? alias.toLowerCase() : alias) + q;
 	}
 	@Override
 	public AbstractSQLConfig setAlias(String alias) {
@@ -540,6 +548,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				boolean isColumn = start < 0;
 
 				String[] ckeys = StringUtil.split(isColumn ? expression : expression.substring(start + 1, end));
+				String quote = getQuote();
 
 				//			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				if (ckeys != null && ckeys.length > 0) {
@@ -568,13 +577,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							}
 						}
 
+						//JOIN 副表不再在外层加副表名前缀 userId AS `Commet.userId`， 而是直接 userId AS `userId`
+						origin = quote + origin + quote;
 						if (isKeyPrefix()) {
 							ckeys[j] = tableAlias + "." + origin;
-							if (isColumn) {
-								ckeys[j] += " AS `" + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + "`";
+							//							if (isColumn) {
+							//								ckeys[j] += " AS " + quote + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + quote;
+							//							}
+							if (isColumn && StringUtil.isEmpty(alias, true) == false) {
+								ckeys[j] += " AS " + quote + alias + quote;
 							}
 						} else {
-							ckeys[j] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS `" + alias + "`");
+							ckeys[j] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
 						}
 					}
 					//				}
@@ -603,12 +617,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 					String origin = method + "(" + StringUtil.getString(ckeys) + ")";
-					if (isKeyPrefix()) {
-						keys[i] = origin + " AS `" + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? method : alias) + "`";
-					}
-					else {
-						keys[i] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS `" + alias + "`");
-					}
+					//					if (isKeyPrefix()) {
+					//						keys[i] = origin + " AS " + quote + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? method : alias) + quote;
+					//					}
+					//					else {
+					keys[i] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
+					//					}
 				}
 
 			}
@@ -725,6 +739,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public SQLConfig setJoinList(List<Join> joinList) {
 		this.joinList = joinList;
 		return this;
+	}
+	@Override
+	public boolean hasJoin() {
+		return joinList != null && joinList.isEmpty() == false;
 	}
 
 	@Override
@@ -962,10 +980,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			String newWs = "";
 			String ws = "" + whereString;
-			
+
 			List<Object> newPvl = new ArrayList<>();
 			List<Object> pvl = new ArrayList<>(preparedValueList);
-			
+
 			SQLConfig jc;
 			String js;
 			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
@@ -990,12 +1008,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (StringUtil.isEmpty(newWs, true) == false) {
 						newWs += AND;
 					}
-					
+
 					if ("^".equals(j.getJoinType())) { // (A & ! B) | (B & ! A)
 						newWs += " (   ( " + ws + ( StringUtil.isEmpty(ws, true) ? "" : AND + NOT ) + " ( " + js + " ) ) "
 								+ OR
 								+ " ( " + js + AND + NOT + " ( " + ws + " )  )   ) ";
-						
+
 						newPvl.addAll(pvl);
 						newPvl.addAll(jc.getPreparedValueList());
 						newPvl.addAll(jc.getPreparedValueList());
@@ -1012,7 +1030,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 										+ " ( " + js + " ) "
 										)
 								+ " ) ";
-						
+
 						newPvl.addAll(pvl);
 						newPvl.addAll(jc.getPreparedValueList());
 					}
@@ -1022,7 +1040,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					//					throw new UnsupportedOperationException("");
 				}
 			}
-			
+
 			whereString = newWs;
 			preparedValueList = newPvl;
 		}
@@ -1074,7 +1092,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
 			keyType = 0;
 		}
-		key = getRealKey(method, key, false, true, verifyName);
+		key = getRealKey(method, key, false, true, verifyName, getQuote());
 
 		switch (keyType) {
 		case 1:
@@ -1097,7 +1115,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	public String getKey(String key) {
-		return (isKeyPrefix() ? getAlias() + "." : "") + key;
+		String q = getQuote();
+		return (isKeyPrefix() ? getAlias() + "." : "") + q  + key + q;
 	}
 
 	/**
@@ -1427,10 +1446,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
 		Set<String> set = content == null ? null : content.keySet();
 		if (set != null && set.size() > 0) {
+			String quote = getQuote();
+
 			String setString = "";
 			boolean isFirst = true;
 			int keyType = 0;// 0 - =; 1 - +, 2 - -
 			Object value;
+
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : content.get(key);
 				if (key == null || KEY_ID.equals(key)) {
@@ -1443,7 +1465,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					keyType = 2;
 				}
 				value = content.get(key);
-				key = getRealKey(method, key, false, true, verifyName);
+				key = getRealKey(method, key, false, true, verifyName, quote);
 
 				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
 						? getRemoveString(key, value) : getValue(value)) ) );
@@ -1597,14 +1619,25 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getJoinString() throws Exception {
 		String joinOns = "";
 		if (joinList != null) {
+			String quote = getQuote();
+
 			String sql = null;
 			SQLConfig jc;
+			String jt;
+			String tn;
 			for (Join j : joinList) {
 
 				//LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
 				// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
 				jc = j.getJoinConfig();
 				jc.setPrepared(isPrepared());
+
+				jt = jc.getTable();
+				tn = j.getTargetName();
+				if (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase())) {
+					jt = jt.toLowerCase();
+					tn = tn.toLowerCase();
+				}
 
 				switch (j.getJoinType()) {
 				case "":
@@ -1614,14 +1647,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "^":
 				case "*":
 					sql = ("*".equals(j.getJoinType()) ? " CROSS JOIN " : " INNER JOIN ") + jc.getTablePath()
-					+ " ON " + jc.getTable() + "." + j.getKey() + " = " + j.getTargetName() + "." + j.getTargetKey();
+					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tn + quote + "." + quote + j.getTargetKey() + quote;
 					break;
 				case "<":
 				case ">":
 					jc.setMain(true).setKeyPrefix(false);
 					sql = ( ">".equals(j.getJoinType()) ? " RIGHT" : " LEFT") + " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS "
-							+ j.getName() + " ON " + jc.getTable() + "." + j.getKey() + " = "
-							+ j.getTargetName() + "." + j.getTargetKey();
+							+ quote + jt + quote + " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = "
+							+ quote + tn + quote + "." + quote + j.getTargetKey() + quote;
 					jc.setMain(false).setKeyPrefix(true);
 
 					preparedValueList.addAll(jc.getPreparedValueList());
@@ -1647,6 +1680,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
 		AbstractSQLConfig config = callback.getSQLConfig(method, table);
+
+		//放后面会导致主表是空对象时 joinList 未解析
+		config.setJoinList(parseJoin(method, joinList, callback));
+		config.setKeyPrefix(RequestMethod.isQueryMethod(method) && (config.isMain() == false || (joinList != null && joinList.isEmpty() == false)));
 
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
@@ -1869,9 +1906,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
-		config.setJoinList(parseJoin(method, joinList, callback));
-
-		config.setKeyPrefix(RequestMethod.isQueryMethod(method) && (config.isMain() == false || (joinList != null && joinList.isEmpty() == false)));
 
 		//TODO 解析JOIN，包括 @column，@group 等要合并
 
@@ -1939,8 +1973,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 */
 	public static String getRealKey(RequestMethod method, String originKey
-			, boolean isTableKey, boolean saveLogic) throws Exception {
-		return getRealKey(method, originKey, isTableKey, saveLogic, true);
+			, boolean isTableKey, boolean saveLogic, String quote) throws Exception {
+		return getRealKey(method, originKey, isTableKey, saveLogic, true, quote);
 	}
 	/**获取客户端实际需要的key
 	 * @param method
@@ -1951,9 +1985,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 */
 	public static String getRealKey(RequestMethod method, String originKey
-			, boolean isTableKey, boolean saveLogic, boolean verifyName) throws Exception {
+			, boolean isTableKey, boolean saveLogic, boolean verifyName, String quote) throws Exception {
 		Log.i(TAG, "getRealKey  saveLogic = " + saveLogic + "; originKey = " + originKey);
-		if (originKey == null || originKey.startsWith("`") || zuo.biao.apijson.JSONObject.isArrayKey(originKey)) {
+		if (originKey == null || originKey.startsWith(quote) || zuo.biao.apijson.JSONObject.isArrayKey(originKey)) {
 			Log.w(TAG, "getRealKey  originKey == null || originKey.startsWith(`)"
 					+ " || zuo.biao.apijson.JSONObject.isArrayKey(originKey) >>  return originKey;");
 			return originKey;

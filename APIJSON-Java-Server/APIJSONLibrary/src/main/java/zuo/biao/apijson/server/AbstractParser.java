@@ -783,7 +783,8 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 			path = path.substring(index + 1);
 
 			index = path.indexOf("/");
-			String table = index < 0 ? null : path.substring(0, index);//User
+			String tableKey = index < 0 ? null : path.substring(0, index); //User:owner
+			String table = Pair.parseEntry(tableKey, true).getKey(); //User
 			String key = StringUtil.isEmpty(table, true) ? null : path.substring(index + 1);//id@
 			if (StringUtil.isEmpty(key, true)) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
@@ -791,17 +792,17 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 			}
 
 			//取出Table对应的JSONObject，及内部引用赋值 key:value
-			tableObj = request.getJSONObject(table);
+			tableObj = request.getJSONObject(tableKey);
 			targetPath = tableObj == null ? null : tableObj.getString(key);
 			if (StringUtil.isEmpty(targetPath, true)) {
-				throw new IllegalArgumentException(table + "." + key + ":value 中value必须为引用赋值的路径 '/targetTable/targetKey' ！");
+				throw new IllegalArgumentException(tableKey + "." + key + ":value 中value必须为引用赋值的路径 '/targetTable/targetKey' ！");
 			}
 
 			//取出引用赋值路径targetPath对应的Table和key
 			index = targetPath.lastIndexOf("/");
 			targetKey = index < 0 ? null : targetPath.substring(index + 1);
 			if (StringUtil.isEmpty(targetKey, true)) {
-				throw new IllegalArgumentException(table + "." + key + ":'/targetTable/targetKey' 中targetKey不能为空！");
+				throw new IllegalArgumentException(tableKey + "." + key + ":'/targetTable/targetKey' 中targetKey不能为空！");
 			}
 
 			targetPath = targetPath.substring(0, index);
@@ -847,12 +848,13 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 	private static final List<String> JOIN_COPY_KEY_LIST;
 	static {//TODO 不全
 		JOIN_COPY_KEY_LIST = new ArrayList<String>();
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATABASE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_SCHEMA);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COLUMN);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COMBINE);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_GROUP);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
 	}
 
 	/**
@@ -871,10 +873,6 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		if (StringUtil.isEmpty(key, true)) {
 			Log.e(TAG, "getIdList  StringUtil.isEmpty(key, true) >> return null;");
 			return null;
-		}
-		if (StringUtil.isEmpty(obj.getString(JSONRequest.KEY_COLUMN), true)) {
-			throw new IllegalArgumentException("join的副表 " + table + " 必须有非空的 " + JSONRequest.KEY_COLUMN
-					+ " ! 否则JOIN的性能优化无效，反而多耗性能！");
 		}
 
 		//取出所有join条件

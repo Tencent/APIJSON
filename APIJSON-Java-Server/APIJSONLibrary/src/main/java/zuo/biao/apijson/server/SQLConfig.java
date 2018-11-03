@@ -28,9 +28,9 @@ public interface SQLConfig {
 	String DATABASE_MYSQL = "MySQL";
 	String DATABASE_POSTGRESQL = "PostgreSQL";
 	
-	String SCHEMA_INFORMATION = "`information_schema`";
-	String TABLE_SCHEMA = "`table_schema`";
-	String TABLE_NAME = "`table_name`";
+	String SCHEMA_INFORMATION = "information_schema";
+	String TABLE_SCHEMA = "table_schema";
+	String TABLE_NAME = "table_name";
 	
 	int TYPE_CHILD = 0;
 	int TYPE_ITEM = 1;
@@ -96,6 +96,8 @@ public interface SQLConfig {
 	String getDatabase();
 	SQLConfig setDatabase(String database);
 
+	String getQuote();
+	
 	String getSchema();
 	SQLConfig setSchema(String schema);
 	
@@ -178,6 +180,8 @@ public interface SQLConfig {
 
 	SQLConfig setJoinList(List<Join> joinList);
 
+	boolean hasJoin();
+	
 	String getAlias();
 
 	SQLConfig setAlias(String alias);
@@ -187,8 +191,5 @@ public interface SQLConfig {
 	boolean isKeyPrefix();
 
 	SQLConfig setKeyPrefix(boolean keyPrefix);
-
-
-
 
 }

@@ -58,10 +58,6 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		return StringUtil.isEmpty(s, true) ? "sys" : s; //TODO 改成你自己的
 	}
 	
-	@Override
-	public String getAlias() { //getTable 不能小写，因为Verifier用大小写敏感的名称判断权限
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? super.getAlias().toLowerCase() : super.getAlias();
-	}
 	
 
 	public DemoSQLConfig() {

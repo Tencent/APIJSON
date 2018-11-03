@@ -24,6 +24,7 @@ import static zuo.biao.apijson.RequestRole.OWNER;
 import static zuo.biao.apijson.RequestRole.UNKNOWN;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -33,6 +34,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
+@Inherited
 public @interface MethodAccess {
 	
 	/**@see {@link RequestMethod#GET}
