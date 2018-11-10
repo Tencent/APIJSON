@@ -37,6 +37,7 @@ import static zuo.biao.apijson.SQL.NOT;
 import static zuo.biao.apijson.SQL.OR;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -94,8 +95,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private String group; //分组方式的字符串数组，','分隔
 	private String having; //聚合函数的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
-	private String column; //表内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
-	private String values; //对应表内字段的值的字符串数组，','分隔
+	private List<String> column; //表内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
+	private List<List<Object>> values; //对应表内字段的值的字符串数组，','分隔
 	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
 	private Map<String, Object> where; //筛选条件，key:value形式
 	private Map<String, List<String>> combine; //条件组合，{ "&":[key], "|":[key], "!":[key] }
@@ -453,14 +454,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	@Override
-	public String getColumn() {
+	public List<String> getColumn() {
 		return column;
 	}
-	public AbstractSQLConfig setColumn(String... keys) {
-		return setColumn(StringUtil.getString(keys));
-	}
 	@Override
-	public AbstractSQLConfig setColumn(String column) {
+	public AbstractSQLConfig setColumn(List<String> column) {
 		this.column = column;
 		return this;
 	}
@@ -469,29 +467,28 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		switch (getMethod()) {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
-			if (isPrepared() && StringUtil.isEmpty(column, true) == false
-			&& column.contains(",") == false && StringUtil.isName(column) == false) {
-				throw new IllegalArgumentException("HEAD请求: @column:value 中 value里面用 , 分割的每一项都必须是1个单词！");
+			if (isPrepared() && column != null) {
+				for (String c : column) {
+					if (StringUtil.isName(c) == false) {
+						throw new IllegalArgumentException("HEAD请求: @column:value 中 value里面用 , 分割的每一项都必须是1个单词！");
+					}
+				}
 			}
-			return SQL.count(column);
+			return SQL.count(column != null && column.size() == 1 ? column.get(0) : "*");
 		case POST:
-			if (StringUtil.isEmpty(column, true)) {
-				throw new NotExistException(TAG + "getColumnString  getMethod() = POST"
-						+ " >> StringUtil.isEmpty(column, true)");
+			if (column == null || column.isEmpty()) {
+				throw new IllegalArgumentException("POST 请求必须在Table内设置要保存的 key:value ！");
 			}
 
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
-				String[] keys = StringUtil.split(column);
-				if (keys != null && keys.length > 0) {
-					for (int i = 0; i < keys.length; i++) {
-						if (StringUtil.isName(keys[i]) == false) {
-							throw new IllegalArgumentException("POST请求: 每一个 key:value 中的key都必须是1个单词！");
-						}
+				for (String c : column) {
+					if (StringUtil.isName(c) == false) {
+						throw new IllegalArgumentException("POST请求: 每一个 key:value 中的key都必须是1个单词！");
 					}
 				}
 			}
 
-			return "(" + column + ")";
+			return "(" + StringUtil.getString(column.toArray()) + ")";
 		case GET:
 		case GETS: //TODO 支持SQL函数 json_length(contactIdList):contactCount
 			boolean isQuery = RequestMethod.isQueryMethod(method);
@@ -510,9 +507,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			String tableAlias = getAlias();
 
-			String c = StringUtil.getString(column); //id,name;json_length(contactIdList):contactCount;...
+			//			String c = StringUtil.getString(column); //id,name;json_length(contactIdList):contactCount;...
 
-			String[] keys = StringUtil.split(c, ";");
+			String[] keys = column == null ? null : column.toArray(new String[]{}); //StringUtil.split(c, ";");
 			if (keys == null || keys.length <= 0) {
 				return isKeyPrefix() == false ? "*" : (tableAlias + ".*" + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn));
 			}
@@ -627,7 +624,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			}
 
-			c = StringUtil.getString(keys);
+			String c = StringUtil.getString(keys);
 
 			return (c.contains(":") == false ? c : c.replaceAll(":", " AS ")) + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
 
@@ -641,37 +638,34 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	@Override
-	public String getValues() {
+	public List<List<Object>> getValues() {
 		return values;
 	}
 	@JSONField(serialize = false)
 	public String getValuesString() {
-		return values;
-	}
-	public AbstractSQLConfig setValues(Object[][] valuess) {
 		String s = "";
-		if (valuess != null && valuess.length > 0) {
-			Object[] items = new Object[valuess.length];
-			Object[] vs;
-			for (int i = 0; i < valuess.length; i++) {
-				vs = valuess[i];
+		if (values != null && values.size() > 0) {
+			Object[] items = new Object[values.size()];
+			List<Object> vs;
+			for (int i = 0; i < values.size(); i++) {
+				vs = values.get(i);
 				if (vs == null) {
 					continue;
 				}
 
 				items[i] = "(";
-				for (int j = 0; j < vs.length; j++) {
-					items[i] += ((j <= 0 ? "" : ",") + getValue(vs[j]));
+				for (int j = 0; j < vs.size(); j++) {
+					items[i] += ((j <= 0 ? "" : ",") + getValue(vs.get(j)));
 				}
 				items[i] += ")";
 			}
 			s = StringUtil.getString(items);
 		}
-		return setValues(s);
+		return s;
 	}
 	@Override
-	public AbstractSQLConfig setValues(String values) {
-		this.values = values;
+	public AbstractSQLConfig setValues(List<List<Object>> valuess) {
+		this.values = valuess;
 		return this;
 	}
 
@@ -1120,7 +1114,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (value instanceof Collection<?>) {
 			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
 		}
-		
+
 		boolean not = key.endsWith("!"); // & | 没有任何意义，写法多了不好控制 
 		if (not) {
 			key = key.substring(0, key.length() - 1);
@@ -1520,7 +1514,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
 		Set<String> set = content == null ? null : content.keySet();
 		String setString = "";
-		
+
 		if (set != null && set.size() > 0) {
 			String quote = getQuote();
 
@@ -1548,7 +1542,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				isFirst = false;
 			}
 		}
-		
+
 		if (setString.isEmpty()) {
 			throw new IllegalArgumentException("PUT 请求必须在Table内设置要修改的 key:value ！");
 		}
@@ -1846,15 +1840,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				column = KEY_ID + "," + StringUtil.getString(columns); //set已经判断过不为空
 				final int size = columns.length + 1; //以key数量为准
 
-				Object[][] valuess = new Object[idList.size()][]; // [idList.size()][]
-				Object[] items; //(item0, item1, ...)
+				List<List<Object>> valuess = new ArrayList<>(idList.size()); // [idList.size()][]
+				List<Object> items; //(item0, item1, ...)
 				for (int i = 0; i < idList.size(); i++) {
-					items = new Object[size];
-					items[0] = idList.get(i); //第0个就是id
+					items = new ArrayList<>(size);
+					items.add(idList.get(i)); //第0个就是id
 					for (int j = 1; j < size; j++) {
-						items[j] = values[j-1]; //从第1个开始，允许"null"
+						items.add(values[j-1]); //从第1个开始，允许"null"
 					}
-					valuess[i] = items;
+					valuess.add(items);
 				}
 				config.setValues(valuess);
 			}
@@ -1968,7 +1962,24 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			config.setContent(tableContent);
 		}
 
+		List<String> cs = new ArrayList<>();
+		String[] fks = StringUtil.split(column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
+		if (fks != null) {
+			String[] ks;
+			for (String fk : fks) {
+				if (fk.contains("(")) { //fun0(key0,...)
+					cs.add(fk);
+				}
+				else { //key0,key1...
+					ks = StringUtil.split(fk);
+					if (ks != null && ks.length > 0) {
+						cs.addAll(Arrays.asList(ks));
+					}
+				}
+			}
+		}
 
+		config.setColumn(cs);
 		config.setWhere(tableWhere);					
 
 		config.setId(id == null ? 0 : id);
@@ -1977,7 +1988,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setRole(role);
 		config.setDatabase(database);
 		config.setSchema(schema);
-		config.setColumn(column);
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
@@ -2022,10 +2032,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			   LEFT JOIN ( SELECT count(*)  AS count FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
 			if (RequestMethod.isHeadMethod(method, true)) {
 				joinConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
-				joinConfig.setColumn(j.getKey()); //优化性能，不取非必要的字段
+				joinConfig.setColumn(Arrays.asList(j.getKey())); //优化性能，不取非必要的字段
 
 				cacheConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
-				cacheConfig.setColumn(j.getKey()); //优化性能，不取非必要的字段
+				cacheConfig.setColumn(Arrays.asList(j.getKey())); //优化性能，不取非必要的字段
 			}
 
 			j.setJoinConfig(joinConfig);

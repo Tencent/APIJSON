@@ -77,14 +77,14 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String getString(Object object) {
-		return object == null ? "" : getString(String.valueOf(object));
+		return object == null ? "" : object.toString();
 	}
 	/**获取string,为null则返回""
 	 * @param cs
 	 * @return
 	 */
 	public static String getString(CharSequence cs) {
-		return cs == null ? "" : getString(cs.toString());
+		return cs == null ? "" : cs.toString();
 	}
 	/**获取string,为null则返回""
 	 * @param s

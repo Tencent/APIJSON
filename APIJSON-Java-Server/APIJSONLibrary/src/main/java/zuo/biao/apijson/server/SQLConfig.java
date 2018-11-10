@@ -125,11 +125,11 @@ public interface SQLConfig {
 	String getOrder();
 	SQLConfig setOrder(String order);
 
-	String getColumn();
-	SQLConfig setColumn(String column);
+	List<String> getColumn();
+	SQLConfig setColumn(List<String> column);
 
-	String getValues();
-	SQLConfig setValues(String values);
+	List<List<Object>> getValues();
+	SQLConfig setValues(List<List<Object>> values);
 
 	Map<String, Object> getContent();
 	SQLConfig setContent(Map<String, Object> content);

@@ -18,6 +18,7 @@ import static zuo.biao.apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -540,7 +541,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		//获取指定的JSON结构 <<<<<<<<<<<<<<
 		SQLConfig config = createSQLConfig().setMethod(GET).setTable(table);
 		config.setPrepared(false);
-		config.setColumn("structure");
+		config.setColumn(Arrays.asList("structure"));
 
 		Map<String, Object> where = new HashMap<String, Object>();
 		where.put("method", requestMethod.name());

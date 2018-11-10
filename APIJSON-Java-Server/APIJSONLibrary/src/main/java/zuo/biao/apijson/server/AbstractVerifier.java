@@ -39,6 +39,7 @@ import zuo.biao.apijson.Log;
 import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
+import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotLoggedInException;
 import zuo.biao.apijson.server.model.Column;
@@ -56,7 +57,7 @@ import zuo.biao.apijson.server.model.TestRecord;
 public abstract class AbstractVerifier implements Verifier {
 	private static final String TAG = "AbstractVerifier";
 
-	
+
 	// <TableName, <METHOD, allowRoles>>
 	// <User, <GET, [OWNER, ADMIN]>>
 	public static final Map<String, Map<RequestMethod, RequestRole[]>> ACCESS_MAP;
@@ -94,8 +95,8 @@ public abstract class AbstractVerifier implements Verifier {
 		return map;
 	}
 
-	
-	
+
+
 	@NotNull
 	protected Visitor visitor;
 	protected long visitorId;
@@ -127,7 +128,7 @@ public abstract class AbstractVerifier implements Verifier {
 		if (role == null) {
 			role = RequestRole.UNKNOWN;
 		}
-		
+
 		//TODO 暂时去掉，方便测试
 		if (role != RequestRole.UNKNOWN) {//未登录的角色
 			verifyLogin();
@@ -184,14 +185,50 @@ public abstract class AbstractVerifier implements Verifier {
 				}
 			}
 			break;
-		case OWNER: //TODO POST请求应该取values里的值！
-			requestId = (Number) config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
-			if (requestId != null && requestId.longValue() != visitorId) {
-				throw new IllegalAccessException(visitorIdkey + " = " + requestId + " 的 " + table
-						+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+		case OWNER:
+			if (config.getMethod() == RequestMethod.POST) {
+				List<String> c = config.getColumn();
+				List<List<Object>> ovs = config.getValues();
+				if ( (c == null || c.isEmpty()) || (ovs == null || ovs.isEmpty()) ) {
+					throw new IllegalArgumentException("POST 请求必须在Table内设置要保存的 key:value ！");
+				}
+
+				int index = c.indexOf(visitorIdkey);
+				if (index >= 0) {
+					Object oid;
+					for (List<Object> ovl : ovs) {
+						oid = ovl == null || index >= ovl.size() ? null : ovl.get(index);
+						if (oid == null || StringUtil.getString(oid).equals("" + visitorId) == false) {
+							throw new IllegalAccessException(visitorIdkey + " = " + oid + " 的 " + table
+									+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+						}
+					}
+				}
+				else {
+					List<String> nc = new ArrayList<>(c);
+					nc.add(visitorIdkey);
+					config.setColumn(nc);
+
+					List<List<Object>> nvs = new ArrayList<>();
+					List<Object> nvl;
+					for (List<Object> ovl : ovs) {
+						nvl = ovl == null || ovl.isEmpty() ? new ArrayList<>() : new ArrayList<>(ovl);
+						nvl.add(visitorId);
+						nvs.add(nvl);
+					}
+
+					config.setValues(nvs);
+				}
 			}
-			//TODO POST请求时应该 setValues
-			config.putWhere(visitorIdkey, visitorId, true);
+			else {
+				requestId = (Number) config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
+				if (requestId != null && requestId.longValue() != visitorId) {
+					throw new IllegalAccessException(visitorIdkey + " = " + requestId + " 的 " + table
+							+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+				}
+
+				config.putWhere(visitorIdkey, visitorId, true);
+			}
 			break;
 		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
 			verifyAdmin();
@@ -248,7 +285,7 @@ public abstract class AbstractVerifier implements Verifier {
 			throw new NotLoggedInException("未登录，请登录后再操作！");
 		}
 	}
-	
+
 	@Override
 	public void verifyAdmin() throws Exception {
 		throw new UnsupportedOperationException("不支持 ADMIN 角色！");
@@ -307,7 +344,7 @@ public abstract class AbstractVerifier implements Verifier {
 	public JSONObject removeAccessInfo(JSONObject requestObject) {
 		return requestObject;
 	}
-	
+
 	public static long value(Long v) {
 		return v == null ? 0 : v;
 	}

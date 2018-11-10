@@ -60,7 +60,7 @@ public @interface MethodAccess {
 	/**@see {@link RequestMethod#POST}
 	 * @return 该请求方法允许的角色  default {LOGIN, ADMIN};
 	 */
-	RequestRole[] POST() default {LOGIN, ADMIN};
+	RequestRole[] POST() default {OWNER, ADMIN};
 
 	/**@see {@link RequestMethod#PUT}
 	 * @return 该请求方法允许的角色 default {OWNER, ADMIN};
