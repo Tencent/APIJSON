@@ -1519,10 +1519,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
 		Set<String> set = content == null ? null : content.keySet();
+		String setString = "";
+		
 		if (set != null && set.size() > 0) {
 			String quote = getQuote();
 
-			String setString = "";
 			boolean isFirst = true;
 			int keyType = 0;// 0 - =; 1 - +, 2 - -
 			Object value;
@@ -1546,12 +1547,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				isFirst = false;
 			}
-			if (setString.isEmpty()) {
-				throw new NotExistException(TAG + "getSetString  >> setString.isEmpty()");
-			}
-			return " SET " + setString;
 		}
-		return "";
+		
+		if (setString.isEmpty()) {
+			throw new IllegalArgumentException("PUT 请求必须在Table内设置要修改的 key:value ！");
+		}
+		return " SET " + setString;
 	}
 
 	/**SET key = CONCAT (key, 'value')
