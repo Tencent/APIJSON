@@ -46,11 +46,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
+import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
@@ -1080,14 +1080,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (key.endsWith("$")) {
 			keyType = 1;
 		} 
-		else if (key.endsWith("?")) {
-			keyType = 2;
+		else if (key.endsWith("~") || key.endsWith("?")) { //TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法 
+			keyType = key.charAt(key.length() - 2) == '*' ? -2 : 2;  //FIXME StringIndexOutOfBoundsException
 		}
-		else if (key.endsWith("{}")) {
+		else if (key.endsWith("%")) {
 			keyType = 3;
 		}
-		else if (key.endsWith("<>")) {
+		else if (key.endsWith("{}")) {
 			keyType = 4;
+		}
+		else if (key.endsWith("<>")) {
+			keyType = 5;
 		}
 		else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
 			keyType = 0;
@@ -1097,11 +1100,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		switch (keyType) {
 		case 1:
 			return getSearchString(key, value);
+		case -2:
 		case 2:
-			return getRegExpString(key, value);
+			return getRegExpString(key, value, keyType < 0);
 		case 3:
-			return getRangeString(key, value);
+			return getBetweenString(key, value);
 		case 4:
+			return getRangeString(key, value);
+		case 5:
 			return getContainString(key, value);
 		default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
 			return getEqualString(key, value);
@@ -1111,7 +1117,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@JSONField(serialize = false)
 	public String getEqualString(String key, Object value) {
-		return getKey(key) + "=" + getValue(value);
+		boolean not = key.endsWith("!"); // & | 没有任何意义，写法多了不好控制 
+		if (not) {
+			key = key.substring(0, key.length() - 1);
+		}
+		if (StringUtil.isName(key) == false) {
+			throw new IllegalArgumentException("\"" + key + "\":value 中key不合法！不支持 ! 以外的逻辑符 ！");
+		}
+		return getKey(key) + (not ? "!=" : "=") + getValue(value);
 	}
 
 	public String getKey(String key) {
@@ -1198,14 +1211,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 
-	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	/**search key match RegExps value
-	 * @param in
-	 * @return {@link #getRegExpString(String, Object[], int)}
+	//~ regexp <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	/**search key match RegExp values
+	 * @param key
+	 * @param value
+	 * @param ignoreCase 
+	 * @return {@link #getRegExpString(String, Object[], int, boolean)}
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getRegExpString(String key, Object value) throws IllegalArgumentException {
+	public String getRegExpString(String key, Object value, boolean ignoreCase) throws IllegalArgumentException {
 		if (value == null) {
 			return "";
 		}
@@ -1218,15 +1233,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (arr.isEmpty()) {
 			return "";
 		}
-		return getRegExpString(key, arr.toArray(), logic.getType());
+		return getRegExpString(key, arr.toArray(), logic.getType(), ignoreCase);
 	}
 	/**search key match RegExp values
-	 * @param in
+	 * @param key
+	 * @param values
+	 * @param type 
+	 * @param ignoreCase 
 	 * @return LOGIC [  key REGEXP 'values[i]' ]
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getRegExpString(String key, Object[] values, int type) throws IllegalArgumentException {
+	public String getRegExpString(String key, Object[] values, int type, boolean ignoreCase) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
 		}
@@ -1236,7 +1254,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (values[i] instanceof String == false) {
 				throw new IllegalArgumentException(key + "$\":value 中value的类型只能为String或String[]！");
 			}
-			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getRegExpString(key, (String) values[i]);
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getRegExpString(key, (String) values[i], ignoreCase);
 		}
 
 		return getCondition(Logic.isNot(type), condition);
@@ -1245,13 +1263,65 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**WHERE key REGEXP 'value'
 	 * @param key
 	 * @param value
+	 * @param ignoreCase
 	 * @return key REGEXP 'value'
 	 */
 	@JSONField(serialize = false)
-	public String getRegExpString(String key, String value) {
-		return getKey(key) + " REGEXP " + getValue(value);
+	public String getRegExpString(String key, String value, boolean ignoreCase) {
+		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
 	}
-	//$ search >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+	//% between <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	/**WHERE key BETWEEN 'value0' AND 'value1'
+	 * @param key
+	 * @param value
+	 * @return key BETWEEN 'value0' AND 'value1'
+	 */
+	@JSONField(serialize = false)
+	public String getBetweenString(String key, Object value) {
+		boolean not = key.endsWith("!"); //不能用 new Logic(key) 因为默认是 | ，而 BETWEEN 只能接 AND
+		if (not) {
+			key = key.substring(0, key.length() - 1);
+		}
+		if (StringUtil.isName(key) == false) {
+			throw new IllegalArgumentException(key + "%\":value 中key不合法！不支持 ! 以外的逻辑符 ！");
+		}
+
+		Object[] vs;
+		if (value instanceof String) {
+			vs = StringUtil.split((String) value);
+			//			int index = ((String) value).indexOf(",");
+			//			if (index < 0) {
+			//				throw new IllegalArgumentException(key + "%\":value 中value的类型为 String 时必须包括逗号 , ！前面缺省为 min(key) ，后面缺省为 max(key)");
+			//			}
+			//			if (index == 0) {
+			//				start = "(SELECT min(key) FROM getSQLTable())"
+			//			}
+		}
+		else if (value instanceof Collection<?>) {
+			vs = ((Collection<?>) value).toArray();
+		}
+		else {
+			throw new IllegalArgumentException(key + "%\":value 中value不合法！类型只能为 1个逗号分隔的String 或者 只有Boolean[2]或Number[2]或String[2] ！");
+		}
+
+		if (vs == null || vs.length != 2) {
+			throw new IllegalArgumentException(key + "%\":value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
+		}
+
+		Object start = vs[0];
+		Object end = vs[1];
+		if (JSON.isBooleanOrNumberOrString(start) == false || JSON.isBooleanOrNumberOrString(end) == false) {
+			throw new IllegalArgumentException(key + "%\":value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
+		}
+
+		return getKey(key) + (not ? NOT : "") + " BETWEEN " + getValue(start) + AND + getValue(end);
+	}
+	//% between >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
@@ -1997,7 +2067,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (key.endsWith("$")) {//搜索，查询时处理
 			key = key.substring(0, key.length() - 1);
 		}
-		else if (key.endsWith("?")) {//匹配正则表达式，查询时处理
+		else if (key.endsWith("~") || key.endsWith("?")) {//匹配正则表达式，查询时处理  TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法 
+			key = key.substring(0, key.length() - 1);
+			if (key.endsWith("*")) {//忽略大小写
+				key = key.substring(0, key.length() - 1);
+			}
+		}
+		else if (key.endsWith("%")) {//数字、文本、日期范围，BETWEEN AND
 			key = key.substring(0, key.length() - 1);
 		}
 		else if (key.endsWith("{}")) {//被包含，或者说key对应值处于value的范围内。查询时处理

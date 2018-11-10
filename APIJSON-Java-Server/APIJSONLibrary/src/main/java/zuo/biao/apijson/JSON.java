@@ -287,4 +287,12 @@ public class JSON {
 		return false;
 	}
 
+	/**判断是否为 Boolean,Number,String 中的一种
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isBooleanOrNumberOrString(Object obj) {
+		return obj instanceof Boolean || obj instanceof Number || obj instanceof String;
+	}
+
 }
