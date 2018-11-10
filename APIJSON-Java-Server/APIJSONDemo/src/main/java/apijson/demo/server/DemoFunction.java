@@ -194,10 +194,39 @@ public class DemoFunction extends RemoteFunction {
 		}
 		return null;
 	}
+	
+	
+	/**
+	 * @param rq
+	 * @param momentId
+	 * @return
+	 * @throws Exception
+	 */
+	public int deleteCommentOfMoment(@NotNull JSONObject rq, @NotNull String momentId) throws Exception {
+		long mid = rq.getLongValue(momentId);
+		if (mid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+			return 0;
+		}
 
-	/**判断array是否为空
-	 * @param request
-	 * @param array
+		JSONRequest request = new JSONRequest();
+
+		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		JSONRequest comment = new JSONRequest();
+		comment.put("momentId", mid);
+		
+		request.put("Comment", comment);
+		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+		JSONObject rp = new DemoParser(RequestMethod.DELETE).setNoVerify(true).parseResponse(request);
+
+		JSONObject c = rp.getJSONObject("Comment");
+		return c == null ? 0 : c.getIntValue(JSONResponse.KEY_COUNT);
+	}
+	
+
+	/**删除评论的子评论
+	 * @param rq
+	 * @param toId
 	 * @return
 	 */
 	public int deleteChildComment(@NotNull JSONObject rq, @NotNull String toId) throws Exception {
@@ -213,8 +242,8 @@ public class DemoFunction extends RemoteFunction {
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONRequest comment = new JSONRequest();
 		comment.put("id{}", getChildCommentIdList(tid));
-		request.put("Comment", comment);
 
+		request.put("Comment", comment);
 		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		JSONObject rp = new DemoParser(RequestMethod.DELETE).setNoVerify(true).parseResponse(request);
