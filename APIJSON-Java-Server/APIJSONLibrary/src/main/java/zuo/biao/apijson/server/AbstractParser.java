@@ -795,14 +795,14 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 			tableObj = request.getJSONObject(tableKey);
 			targetPath = tableObj == null ? null : tableObj.getString(key);
 			if (StringUtil.isEmpty(targetPath, true)) {
-				throw new IllegalArgumentException(tableKey + "." + key + ":value 中value必须为引用赋值的路径 '/targetTable/targetKey' ！");
+				throw new IllegalArgumentException("/" + path + ":value 中value必须为引用赋值的路径 '/targetTable/targetKey' ！");
 			}
 
 			//取出引用赋值路径targetPath对应的Table和key
 			index = targetPath.lastIndexOf("/");
 			targetKey = index < 0 ? null : targetPath.substring(index + 1);
 			if (StringUtil.isEmpty(targetKey, true)) {
-				throw new IllegalArgumentException(tableKey + "." + key + ":'/targetTable/targetKey' 中targetKey不能为空！");
+				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中targetKey不能为空！");
 			}
 
 			targetPath = targetPath.substring(0, index);
