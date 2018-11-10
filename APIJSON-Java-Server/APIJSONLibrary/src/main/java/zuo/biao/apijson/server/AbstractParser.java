@@ -470,7 +470,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 
 		String tag = requestObject.getString(JSONRequest.KEY_TAG);
 		if (StringUtil.isNotEmpty(tag, true) == false) {
-			throw new IllegalArgumentException("请设置tag！一般是Table名");
+			throw new IllegalArgumentException("请在最外层设置tag！一般是Table名，例如 \"tag\": \"User\" ");
 		}
 		int version = requestObject.getIntValue(JSONRequest.KEY_VERSION);
 
