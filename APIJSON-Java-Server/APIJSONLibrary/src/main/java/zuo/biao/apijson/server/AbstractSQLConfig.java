@@ -1117,12 +1117,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@JSONField(serialize = false)
 	public String getEqualString(String key, Object value) {
+		if (value instanceof Collection<?>) {
+			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
+		}
+		
 		boolean not = key.endsWith("!"); // & | 没有任何意义，写法多了不好控制 
 		if (not) {
 			key = key.substring(0, key.length() - 1);
 		}
 		if (StringUtil.isName(key) == false) {
-			throw new IllegalArgumentException("\"" + key + "\":value 中key不合法！不支持 ! 以外的逻辑符 ！");
+			throw new IllegalArgumentException(key + ":value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
 		return getKey(key) + (not ? "!=" : "=") + getValue(value);
 	}
@@ -1189,7 +1193,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String condition = "";
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] instanceof String == false) {
-				throw new IllegalArgumentException(key + "$\":value 中value的类型只能为String或String[]！");
+				throw new IllegalArgumentException(key + "$:value 中value的类型只能为String或String[]！");
 			}
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, values[i]);
 		}
@@ -1252,7 +1256,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String condition = "";
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] instanceof String == false) {
-				throw new IllegalArgumentException(key + "$\":value 中value的类型只能为String或String[]！");
+				throw new IllegalArgumentException(key + "$:value 中value的类型只能为String或String[]！");
 			}
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getRegExpString(key, (String) values[i], ignoreCase);
 		}
@@ -1288,7 +1292,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			key = key.substring(0, key.length() - 1);
 		}
 		if (StringUtil.isName(key) == false) {
-			throw new IllegalArgumentException(key + "%\":value 中key不合法！不支持 ! 以外的逻辑符 ！");
+			throw new IllegalArgumentException(key + "%:value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
 
 		Object[] vs;
@@ -1296,7 +1300,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			vs = StringUtil.split((String) value);
 			//			int index = ((String) value).indexOf(",");
 			//			if (index < 0) {
-			//				throw new IllegalArgumentException(key + "%\":value 中value的类型为 String 时必须包括逗号 , ！前面缺省为 min(key) ，后面缺省为 max(key)");
+			//				throw new IllegalArgumentException(key + "%:value 中value的类型为 String 时必须包括逗号 , ！前面缺省为 min(key) ，后面缺省为 max(key)");
 			//			}
 			//			if (index == 0) {
 			//				start = "(SELECT min(key) FROM getSQLTable())"
@@ -1306,17 +1310,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			vs = ((Collection<?>) value).toArray();
 		}
 		else {
-			throw new IllegalArgumentException(key + "%\":value 中value不合法！类型只能为 1个逗号分隔的String 或者 只有Boolean[2]或Number[2]或String[2] ！");
+			throw new IllegalArgumentException(key + "%:value 中value不合法！类型只能为 1个逗号分隔的String 或者 只有Boolean[2]或Number[2]或String[2] ！");
 		}
 
 		if (vs == null || vs.length != 2) {
-			throw new IllegalArgumentException(key + "%\":value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
+			throw new IllegalArgumentException(key + "%:value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
 		}
 
 		Object start = vs[0];
 		Object end = vs[1];
 		if (JSON.isBooleanOrNumberOrString(start) == false || JSON.isBooleanOrNumberOrString(end) == false) {
-			throw new IllegalArgumentException(key + "%\":value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
+			throw new IllegalArgumentException(key + "%:value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
 		}
 
 		return getKey(key) + (not ? NOT : "") + " BETWEEN " + getValue(start) + AND + getValue(end);
@@ -1445,7 +1449,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			for (int i = 0; i < childs.length; i++) {
 				if (childs[i] != null) {
 					if (childs[i] instanceof JSON) {
-						throw new IllegalArgumentException(key + "<>\":value 中value类型不能为JSON！");
+						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
 					}
 					if (childs[i] instanceof String) {
 						childs[i] = "\"" + childs[i] + "\"";
