@@ -47,6 +47,7 @@ import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.model.Test;
 
 /**结构类
@@ -369,7 +370,7 @@ public class Structure {
 		if (uniques != null && uniques.length > 0) {
 			long exceptId = real.getLongValue(KEY_ID);
 			for (String u : uniques) {
-				verifyRepeat(name, u, real.get(u), exceptId);
+				verifyRepeat(name, u, real.get(u), exceptId, creator);
 			}
 		}
 		//校验重复>>>>>>>>>>>>>>>>>>>
@@ -655,8 +656,6 @@ public class Structure {
 		JSONObject result = null;
 		try {
 			result = executor.execute(config);
-		} catch (Exception e) {
-			throw e;
 		} finally {
 			executor.close();
 		}
@@ -672,8 +671,8 @@ public class Structure {
 	 * @param value
 	 * @throws Exception
 	 */
-	public static void verifyRepeat(String table, String key, Object value) throws Exception {
-		verifyRepeat(table, key, value, 0);
+	public static void verifyRepeat(String table, String key, Object value, @NotNull SQLCreator creator) throws Exception {
+		verifyRepeat(table, key, value, 0, creator);
 	}
 	/**验证是否重复
 	 * @param table
@@ -682,7 +681,7 @@ public class Structure {
 	 * @param exceptId 不包含id
 	 * @throws Exception
 	 */
-	public static void verifyRepeat(String table, String key, Object value, long exceptId) throws Exception {
+	public static void verifyRepeat(String table, String key, Object value, long exceptId, @NotNull SQLCreator creator) throws Exception {
 		if (key == null || value == null) {
 			Log.e(TAG, "verifyRepeat  key == null || value == null >> return;");
 			return;
@@ -690,21 +689,27 @@ public class Structure {
 		if (value instanceof JSON) {
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
-
-		JSONRequest request = new JSONRequest(key, value);
+		
+		
+		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
+		config.setTable(table);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
-			request.put(JSONRequest.KEY_ID + "!", exceptId);
+			config.putWhere(JSONRequest.KEY_ID + "!", exceptId, false);
 		}
-		//		JSONObject repeat = new AbstractParser(HEAD, true).parseResponse(
-		//				new JSONRequest(table, request)
-		//				);
-		//		repeat = repeat == null ? null : repeat.getJSONObject(table);
-		//		if (repeat == null) {
-		//			throw new Exception("服务器内部错误  verifyRepeat  repeat == null");
-		//		}
-		//		if (repeat.getIntValue(JSONResponse.KEY_COUNT) > 0) {
-		//			throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
-		//		}
+		config.putWhere(key, value, false);
+
+		SQLExecutor executor = creator.createSQLExecutor();
+		try {
+			JSONObject result = executor.execute(config);
+			if (result == null) {
+				throw new Exception("服务器内部错误  verifyRepeat  result == null");
+			}
+			if (result.getIntValue(JSONResponse.KEY_COUNT) > 0) {
+				throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
+			}
+		} finally {
+			executor.close();
+		}
 	}
 
 
