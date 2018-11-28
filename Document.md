@@ -341,7 +341,7 @@ DELETE: <br > 删除数据 | base_url/delete/ | {<br > &nbsp;&nbsp; TableName:{<
 2."tag":tag 后面的tag是非GET、HEAD请求中匹配请求的JSON结构的key，一般是要查询的table的名称，由后端Request表中指定。下同。<br >
 3.GET、HEAD请求是开放请求，可任意组合任意嵌套。其它请求为受限制的安全/私密请求，对应的 方法、tag、结构 都必须和 后端Request表中所指定的 一一对应，否则请求将不被通过。下同。<br >
 4.GETS与GET、HEADS与HEAD分别为同一类型的操作方法，请求稍有不同但返回结果相同。下同。<br >
-5.在HTTP通信中，APIJSON 的 get,gets,head,heads,post,put,delete 操作方法全用HTTP POST请求。下同。<br >
+5.在HTTP通信中，自动化接口(get,gets,head,heads,post,put,delete) 全用HTTP POST请求。下同。<br >
 6.所有JSONObject都视为容器(或者文件夹)，结构为 {...} ，里面可以放普通对象或子容器。下同。<br >
 7.每个对象都有一个唯一的路径(或者叫地址)，假设对象名为refKey，则用 key0/key1/.../refKey 表示。下同。
 
