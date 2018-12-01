@@ -528,7 +528,7 @@ public class Structure {
 		if (tk.endsWith("$")) { //搜索
 			sqlVerify("$", real, tk, tv, creator);
 		}
-		else if (tk.endsWith("?")) { //正则表达式
+		else if (tk.endsWith("~") || tk.endsWith("?")) { //TODO 正则表达式, 以后可能取消支持 ? 作为 正则匹配 的功能符
 			logic = new Logic(tk.substring(0, tk.length() - 1));
 			rk = logic.getKey();
 			rv = real.get(rk);
