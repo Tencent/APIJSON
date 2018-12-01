@@ -167,7 +167,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 * @return
 	 */
 	public static boolean isSuccess(JSONObject response) {
-		return isSuccess(response.getIntValue(KEY_CODE));
+		return response != null && isSuccess(response.getIntValue(KEY_CODE));
 	}
 
 	/**校验服务端是否存在table

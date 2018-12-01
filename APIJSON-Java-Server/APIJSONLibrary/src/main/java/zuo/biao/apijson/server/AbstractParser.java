@@ -315,7 +315,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + (endTime - startTime)
 				+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
 
-		return globleFormat ? new JSONResponse(requestObject) : requestObject;
+		return globleFormat && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 	}
 
 

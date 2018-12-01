@@ -126,8 +126,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		config.setPrepared(prepared);
 
-		if (StringUtil.isNotEmpty(sql, true) == false) {
-			Log.e(TAG, "select  StringUtil.isNotEmpty(sql, true) == false >> return null;");
+		if (StringUtil.isEmpty(sql, true)) {
+			Log.e(TAG, "select  StringUtil.isEmpty(sql, true) >> return null;");
 			return null;
 		}
 		JSONObject result = null;

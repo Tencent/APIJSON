@@ -403,9 +403,9 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 			return null;
 		}
 		if (StringUtil.isEmpty(key, true)) {
-			Class<?> clazz = value.getClass();
-			if (clazz == null || clazz.getAnnotation(MethodAccess.class) == null) {
-				throw new IllegalArgumentException("puts  StringUtil.isNotEmpty(key, true) == false" +
+			Class<?> clazz = value.getClass(); //should not return null
+			if (clazz.getAnnotation(MethodAccess.class) == null) {
+				throw new IllegalArgumentException("puts  StringUtil.isEmpty(key, true)" +
 						" && clazz == null || clazz.getAnnotation(MethodAccess.class) == null" +
 						" \n key为空时仅支持 类型被@MethodAccess注解 的value !!!" +
 						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！" +
