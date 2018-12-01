@@ -399,43 +399,63 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 		return formatedArray;
 	}
 
+
+	/**获取表名称
+	 * @param fullName name 或 name:alias
+	 * @return name => name; name:alias => alias
+	 */
+	public static String getTableName(String fullName) {
+		//key:alias  -> alias; key:alias[] -> alias[]
+		int index = fullName == null ? -1 : fullName.indexOf(":");
+		return index < 0 ? fullName : fullName.substring(0, index);
+	}
+	
+	/**获取变量名
+	 * @param fullName
+	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
+	 */
+	public static String getVariableName(String fullName) {
+		return formatKey(fullName, true, true, true, true);
+	}
+
 	/**格式化数组的名称 key[] => keyList; key:alias[] => aliasList; Table-column[] => tableColumnList
 	 * @param key empty ? "list" : key + "List" 且首字母小写
-	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatAt = false, formatColon = true, formatHyphen = true, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = false, formatAt = false, formatHyphen = true, firstCase = true
 	 */
 	public static String formatArrayKey(String key) {
 		if (isArrayKey(key)) {
-			key = StringUtil.addSuffix(key.substring(0, key.lastIndexOf(KEY_ARRAY)), "list");
+			key = StringUtil.addSuffix(key.substring(0, key.length() - 2), "list");
 		}
 		int index = key == null ? -1 : key.indexOf(":");
 		if (index >= 0) {
 			return key.substring(index + 1); //不处理自定义的
 		}
-		
+
 		return formatKey(key, false, false, true, true); //节约性能，除了表对象 Table-column:alias[] ，一般都符合变量命名规范
 	}
 
 	/**格式化对象的名称 name => name; name:alias => alias
 	 * @param key name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatAt = false, formatColon = true, formatHyphen = false, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = false, formatAt = false, formatHyphen = false, firstCase = true
 	 */
 	public static String formatObjectKey(String key) {
 		int index = key == null ? -1 : key.indexOf(":");
 		if (index >= 0) {
 			return key.substring(index + 1); //不处理自定义的
 		}
-		
+
 		return formatKey(key, false, false, false, true); //节约性能，除了表对象 Table:alias ，一般都符合变量命名规范
 	}
 
 	/**格式化普通值的名称 name => name; name:alias => alias 
 	 * @param fullName name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatAt = true, formatColon = false, formatHyphen = false, firstCase = false
+	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = false
 	 */
 	public static String formatOtherKey(String fullName) {
-		return formatKey(fullName, true, false, false, false); //节约性能，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
+		return formatKey(fullName, false, true, false, false); //节约性能，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
 	}
-	
+
+
 	/**格式化名称
 	 * @param fullName name 或 name:alias
 	 * @param formatAt 去除前缀 @ ， @a => a
@@ -444,17 +464,17 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	 * @param firstCase 第一个单词首字母小写，后面的首字母大写， Ab => ab ; A-b-Cd => aBCd
 	 * @return name => name; name:alias => alias
 	 */
-	public static String formatKey(String fullName, boolean formatAt, boolean formatColon, boolean formatHyphen, boolean firstCase) {
+	public static String formatKey(String fullName, boolean formatColon, boolean formatAt, boolean formatHyphen, boolean firstCase) {
 		if (fullName == null) {
 			Log.w(TAG, "formatKey  fullName == null >> return null;");
 			return null;
 		}
-		
-		if (formatAt) { //关键词只去掉前缀，不格式化单词，例如 @a-b 返回 a-b ，最后不会调用 setter
-			fullName = formatAt(fullName);
-		}
+
 		if (formatColon) {
 			fullName = formatColon(fullName);
+		}
+		if (formatAt) { //关键词只去掉前缀，不格式化单词，例如 @a-b 返回 a-b ，最后不会调用 setter
+			fullName = formatAt(fullName);
 		}
 		if (formatHyphen) {
 			fullName = formatHyphen(fullName, firstCase);
@@ -462,7 +482,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 		return firstCase ? StringUtil.firstCase(fullName) : fullName; //不格式化普通 key:value (value 不为 [], {}) 的 key 
 	}
-	
+
 	/**"@key" => "key"
 	 * @param key
 	 * @return
@@ -478,7 +498,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 		int index = key.indexOf(":");
 		return index < 0 ? key : key.substring(index + 1);
 	}
-	
+
 	/**A-b-cd-Efg => ABCdEfg
 	 * @param key
 	 * @return
@@ -486,7 +506,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 	public static String formatHyphen(@NotNull String key, boolean firstCase) {
 		boolean first = true;
 		int index;
-		
+
 		String name = "";
 		String part;
 		do {

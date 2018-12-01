@@ -252,9 +252,8 @@ public class Controller {
 		JSONObject verify = null;
 		try {
 			verify = response.getJSONObject(VERIFY_);
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+		} catch (Exception e) {}
+		
 		if (verify == null || JSONResponse.isSuccess(verify.getIntValue(JSONResponse.KEY_CODE)) == false) {
 			new DemoParser(DELETE, true).parseResponse(new JSONRequest(new Verify(type, phone)));
 			return response;
