@@ -224,7 +224,7 @@ public class Controller {
 	public static final String VERIFY = "verify";
 
 	public static final String TYPE = "type";
-	
+
 
 
 	/**生成验证码,修改为post请求
@@ -247,13 +247,14 @@ public class Controller {
 		new DemoParser(DELETE, true).parse(newVerifyRequest(type, phone, null));
 
 		JSONObject response = new DemoParser(POST, true).parseResponse(
-				newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000)));
+				newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000))
+				);
 
 		JSONObject verify = null;
 		try {
-			verify = response.getJSONObject(VERIFY_);
+			verify = response.getJSONObject(StringUtil.firstCase(VERIFY_));
 		} catch (Exception e) {}
-		
+
 		if (verify == null || JSONResponse.isSuccess(verify.getIntValue(JSONResponse.KEY_CODE)) == false) {
 			new DemoParser(DELETE, true).parseResponse(new JSONRequest(new Verify(type, phone)));
 			return response;
@@ -340,7 +341,7 @@ public class Controller {
 
 		return new JSONResponse(
 				new DemoParser(HEADS, true).parseResponse(
-						new JSONRequest(new Verify(type, phone).setVerify(code))
+						new JSONRequest(new Verify(type, phone).setVerify(code)).setFormat(true)
 						)
 				);
 	}
@@ -352,8 +353,8 @@ public class Controller {
 	 * @param verify
 	 * @return
 	 */
-	private JSONObject newVerifyRequest(int type, String phone, String verify) {
-		return new JSONRequest(new Verify(type, phone).setVerify(verify)).setTag(VERIFY_);
+	private zuo.biao.apijson.JSONRequest newVerifyRequest(int type, String phone, String verify) {
+		return new JSONRequest(new Verify(type, phone).setVerify(verify)).setTag(VERIFY_).setFormat(true);
 	}
 
 
@@ -402,7 +403,7 @@ public class Controller {
 					throw new IllegalArgumentException("验证码不合法！");
 				}
 			}
-			
+
 			//全局版本号，是否格式化
 			version = requestObject.getIntValue(VERSION);
 			format = requestObject.getBoolean(FORMAT);
@@ -432,7 +433,7 @@ public class Controller {
 		JSONObject privacyResponse = new DemoParser(GETS, true).parseResponse(
 				new JSONRequest(
 						new Privacy().setPhone(phone)
-						)
+						).setFormat(true)
 				);
 		response = new JSONResponse(privacyResponse);
 
@@ -462,7 +463,7 @@ public class Controller {
 
 		response = new JSONResponse(
 				new DemoParser(GETS, true).parseResponse(
-						new JSONRequest(new User(userId))
+						new JSONRequest(new User(userId)).setFormat(true)
 						)
 				);
 		User user = response.getObject(User.class);
@@ -501,7 +502,7 @@ public class Controller {
 		JSONObject user = DemoParser.newSuccessResult();
 		user.put(ID, userId);
 		user.put(COUNT, 1);
-		result.put(USER_, user);
+		result.put(StringUtil.firstCase(USER_), user);
 
 		return result;
 	}
@@ -571,6 +572,7 @@ public class Controller {
 		if (StringUtil.isEmpty(requestObject.getString(JSONRequest.KEY_TAG), true)) {
 			requestObject.put(JSONRequest.KEY_TAG, REGISTER);
 		}
+		requestObject.put(JSONRequest.KEY_FORMAT, true);
 		response = new JSONResponse( 
 				new DemoParser(POST).setNoVerifyLogin(true).parseResponse(requestObject)
 				);
@@ -668,7 +670,7 @@ public class Controller {
 			userId = privacyObj.getLongValue(ID);
 			phone = privacyObj.getString(PHONE);
 			password = privacyObj.getString(_PASSWORD);
-			
+
 			if (StringUtil.isEmpty(password, true)) { //支付密码
 				type = Verify.TYPE_PAY_PASSWORD;
 				password = privacyObj.getString(_PAY_PASSWORD);
@@ -702,7 +704,7 @@ public class Controller {
 			}
 			JSONResponse response = new JSONResponse( 
 					new DemoParser(HEAD, true).parseResponse(
-							new JSONRequest(privacy)
+							new JSONRequest(privacy).setFormat(true)
 							)
 					);
 			if (JSONResponse.isExist(response.getJSONResponse(PRIVACY_)) == false) {
@@ -737,6 +739,7 @@ public class Controller {
 
 
 		//		requestObject.put(JSONRequest.KEY_TAG, "Password");
+		requestObject.put(JSONRequest.KEY_FORMAT, true);
 		//修改密码
 		return new DemoParser(PUT, true).parseResponse(requestObject);
 	}
@@ -838,6 +841,7 @@ public class Controller {
 		privacyObj.put("balance+", change);
 		requestObject.put(PRIVACY_, privacyObj);
 		requestObject.put(JSONRequest.KEY_TAG, PRIVACY_);
+		requestObject.put(JSONRequest.KEY_FORMAT, true);
 		//不免验证，里面会验证身份
 		return new DemoParser(PUT).setSession(session).parseResponse(requestObject);
 	}
