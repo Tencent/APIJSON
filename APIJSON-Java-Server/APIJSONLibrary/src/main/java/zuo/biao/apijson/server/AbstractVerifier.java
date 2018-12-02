@@ -42,6 +42,7 @@ import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotLoggedInException;
+import zuo.biao.apijson.server.model.Access;
 import zuo.biao.apijson.server.model.Column;
 import zuo.biao.apijson.server.model.Document;
 import zuo.biao.apijson.server.model.Function;
@@ -72,6 +73,7 @@ public abstract class AbstractVerifier implements Verifier {
 		ACCESS_MAP.put(Document.class.getSimpleName(), getAccessMap(Document.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(TestRecord.class.getSimpleName(), getAccessMap(TestRecord.class.getAnnotation(MethodAccess.class)));
 		ACCESS_MAP.put(Function.class.getSimpleName(), getAccessMap(Function.class.getAnnotation(MethodAccess.class)));
+		ACCESS_MAP.put(Access.class.getSimpleName(), getAccessMap(Access.class.getAnnotation(MethodAccess.class)));
 	}
 
 	/**获取权限Map，每种操作都只允许对应的角色

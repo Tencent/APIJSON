@@ -539,6 +539,16 @@ public class DemoFunction extends RemoteFunction {
 	}
 	//获取非基本类型对应基本类型的非空值 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+	/**获取value，当value为null时获取defaultValue
+	 * @param request
+	 * @param value
+	 * @param defaultValue
+	 * @return v == null ? request.get(defaultValue) : v
+	 */
+	public Object getWithDefault(@NotNull JSONObject request, String value, String defaultValue) {    
+		Object v = request.get(value); 
+		return v == null ? request.get(defaultValue) : v; 
+	}
 
 
 
