@@ -14,12 +14,12 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import java.util.List;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+
+import java.util.List;
 
 /**阿里FastJSON封装类 防止解析时异常
  * @author Lemon
@@ -33,9 +33,9 @@ public class JSON {
 	 */
 	public static boolean isJsonCorrect(String s) {
 		//太长		Log.i(TAG, "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
-		if (s == null 
-				//				|| s.equals("[]") 
-				//				|| s.equals("{}") 
+		if (s == null
+				//				|| s.equals("[]")
+				//				|| s.equals("{}")
 				|| s.equals("")
 				|| s.equals("[null]")
 				|| s.equals("{null}")
@@ -70,6 +70,20 @@ public class JSON {
 		return s;//isJsonCorrect(s) ? s : null;
 	}
 
+	/**
+	 * @param json
+	 * @return
+	 */
+	public static Object parse(Object obj) {
+		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
+		features |= Feature.OrderedField.getMask();
+		try {
+			return com.alibaba.fastjson.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), features);
+		} catch (Exception e) {
+			Log.i(TAG, "parse  catch \n" + e.getMessage());
+		}
+		return null;
+	}
 	/**obj转JSONObject
 	 * @param json
 	 * @return
@@ -139,7 +153,7 @@ public class JSON {
 		return new JSONArray(list);
 	}
 	/**obj转JSONArray
-	 * @param json
+	 * @param obj
 	 * @return
 	 */
 	public static JSONArray parseArray(Object obj) {
@@ -224,13 +238,13 @@ public class JSON {
 	 * @return
 	 */
 	public static String format(String json) {
-		return format(parseObject(json));
+		return format(parse(json));
 	}
 	/**格式化，显示更好看
 	 * @param object
 	 * @return
 	 */
-	public static String format(JSONObject object) {
+	public static String format(Object object) {
 		return toJSONString(object, SerializerFeature.PrettyFormat);
 	}
 
@@ -271,6 +285,14 @@ public class JSON {
 		}
 
 		return false;
+	}
+
+	/**判断是否为 Boolean,Number,String 中的一种
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isBooleanOrNumberOrString(Object obj) {
+		return obj instanceof Boolean || obj instanceof Number || obj instanceof String;
 	}
 
 }

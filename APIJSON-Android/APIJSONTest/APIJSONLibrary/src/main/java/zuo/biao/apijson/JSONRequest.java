@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**wrapper for request
@@ -49,9 +51,11 @@ public class JSONRequest extends JSONObject {
 
 
 
-	
+
 	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
-	
+	public static final String KEY_VERSION = "version";//只在最外层，最外层用JSONRequest
+	public static final String KEY_FORMAT = "format";//只在最外层，最外层用JSONRequest
+
 	/**set "tag":tag in outermost layer
 	 * for write operations
 	 * @param tag
@@ -59,6 +63,22 @@ public class JSONRequest extends JSONObject {
 	 */
 	public JSONRequest setTag(String tag) {
 		return puts(KEY_TAG, tag);
+	}
+	/**set "version":version in outermost layer
+	 * for target version of request
+	 * @param version
+	 * @return
+	 */
+	public JSONRequest setVersion(String version) {
+		return puts(KEY_VERSION, version);
+	}
+	/**set "format":format in outermost layer
+	 * for format APIJSON special keys to normal keys of response
+	 * @param format
+	 * @return
+	 */
+	public JSONRequest setFormat(Boolean format) {
+		return puts(KEY_FORMAT, format);
 	}
 
 
@@ -71,6 +91,15 @@ public class JSONRequest extends JSONObject {
 	public static final String KEY_QUERY = "query";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
+	public static final String KEY_JOIN = "join";
+
+	public static final List<String> ARRAY_KEY_LIST;
+	static {
+		ARRAY_KEY_LIST = new ArrayList<String>();
+		ARRAY_KEY_LIST.add(KEY_QUERY);
+		ARRAY_KEY_LIST.add(KEY_COUNT);
+		ARRAY_KEY_LIST.add(KEY_PAGE);
+	}
 
 	/**set what to query in Array layer
 	 * @param query what need to query, Table,total,ALL?
@@ -103,16 +132,16 @@ public class JSONRequest extends JSONObject {
 	/**create a parent JSONObject named KEY_ARRAY
 	 * @param count
 	 * @param page
-	 * @return {@link #toArray(int, int, boolean)}
+	 * @return {@link #toArray(int, int)}
 	 */
 	public JSONRequest toArray(int count, int page) {
 		return toArray(count, page, null);
 	}
-	/**create a parent JSONObject named name+KEY_ARRAY. 
+	/**create a parent JSONObject named name+KEY_ARRAY.
 	 * @param count
 	 * @param page
 	 * @param name
-	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #add(com.alibaba.fastjson.JSONObject)} instead
+	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #putsAll(Map<? extends String, ? extends Object>)} instead
 	 */
 	public JSONRequest toArray(int count, int page, String name) {
 		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page));
@@ -124,7 +153,7 @@ public class JSONRequest extends JSONObject {
 		super.putsAll(map);
 		return this;
 	}
-	
+
 	@Override
 	public JSONRequest puts(Object value) {
 		return puts(null, value);
