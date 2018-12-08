@@ -20,8 +20,6 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.server.NotNull;
-
 /**parser for response
  * @author Lemon
  * @see #getObject
@@ -412,7 +410,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	/**获取变量名
 	 * @param fullName
-	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String getVariableName(String fullName) {
 		if (isArrayKey(fullName)) {
@@ -423,7 +421,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	/**格式化数组的名称 key[] => keyList; key:alias[] => aliasList; Table-column[] => tableColumnList
 	 * @param key empty ? "list" : key + "List" 且首字母小写
-	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = true, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String formatArrayKey(String key) {
 		if (isArrayKey(key)) {
@@ -439,7 +437,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 
 	/**格式化对象的名称 name => name; name:alias => alias
 	 * @param key name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = true
 	 */
 	public static String formatObjectKey(String key) {
 		int index = key == null ? -1 : key.indexOf(":");
@@ -450,9 +448,9 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 		return formatKey(key, false, true, false, true); //节约性能，除了表对象 Table:alias ，一般都符合变量命名规范
 	}
 
-	/**格式化普通值的名称 name => name; name:alias => alias 
+	/**格式化普通值的名称 name => name; name:alias => alias
 	 * @param fullName name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = false
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = false
 	 */
 	public static String formatOtherKey(String fullName) {
 		return formatKey(fullName, false, true, false, false); //节约性能，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
@@ -483,7 +481,7 @@ public class JSONResponse extends zuo.biao.apijson.JSONObject {
 			fullName = formatHyphen(fullName, firstCase);
 		}
 
-		return firstCase ? StringUtil.firstCase(fullName) : fullName; //不格式化普通 key:value (value 不为 [], {}) 的 key 
+		return firstCase ? StringUtil.firstCase(fullName) : fullName; //不格式化普通 key:value (value 不为 [], {}) 的 key
 	}
 
 	/**"@key" => "key"

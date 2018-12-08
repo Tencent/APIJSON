@@ -51,11 +51,11 @@ public class JSONRequest extends JSONObject {
 
 
 
-	
+
 	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
 	public static final String KEY_VERSION = "version";//只在最外层，最外层用JSONRequest
 	public static final String KEY_FORMAT = "format";//只在最外层，最外层用JSONRequest
-	
+
 	/**set "tag":tag in outermost layer
 	 * for write operations
 	 * @param tag
@@ -74,7 +74,7 @@ public class JSONRequest extends JSONObject {
 	}
 	/**set "format":format in outermost layer
 	 * for format APIJSON special keys to normal keys of response
-	 * @param version
+	 * @param format
 	 * @return
 	 */
 	public JSONRequest setFormat(Boolean format) {
@@ -100,7 +100,7 @@ public class JSONRequest extends JSONObject {
 		ARRAY_KEY_LIST.add(KEY_COUNT);
 		ARRAY_KEY_LIST.add(KEY_PAGE);
 	}
-	
+
 	/**set what to query in Array layer
 	 * @param query what need to query, Table,total,ALL?
 	 * @return
@@ -132,16 +132,16 @@ public class JSONRequest extends JSONObject {
 	/**create a parent JSONObject named KEY_ARRAY
 	 * @param count
 	 * @param page
-	 * @return {@link #toArray(int, int, boolean)}
+	 * @return {@link #toArray(int, int)}
 	 */
 	public JSONRequest toArray(int count, int page) {
 		return toArray(count, page, null);
 	}
-	/**create a parent JSONObject named name+KEY_ARRAY. 
+	/**create a parent JSONObject named name+KEY_ARRAY.
 	 * @param count
 	 * @param page
 	 * @param name
-	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #add(com.alibaba.fastjson.JSONObject)} instead
+	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #putsAll(Map<? extends String, ? extends Object>)} instead
 	 */
 	public JSONRequest toArray(int count, int page, String name) {
 		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page));
@@ -153,7 +153,7 @@ public class JSONRequest extends JSONObject {
 		super.putsAll(map);
 		return this;
 	}
-	
+
 	@Override
 	public JSONRequest puts(Object value) {
 		return puts(null, value);

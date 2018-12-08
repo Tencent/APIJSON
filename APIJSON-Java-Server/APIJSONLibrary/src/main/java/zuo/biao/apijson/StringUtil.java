@@ -97,7 +97,7 @@ public class StringUtil {
 	 * ignoreEmptyItem = false;
 	 * split = ","
 	 * @param array
-	 * @return {@link #getString(String[], boolean)}
+	 * @return {@link #getString(Object[], boolean)}
 	 */
 	public static String getString(Object[] array) {
 		return getString(array, false);
@@ -106,7 +106,7 @@ public class StringUtil {
 	 * split = ","
 	 * @param array
 	 * @param ignoreEmptyItem
-	 * @return {@link #getString(String[], String, boolean)}
+	 * @return {@link #getString(Object[], boolean)}
 	 */
 	public static String getString(Object[] array, boolean ignoreEmptyItem) {
 		return getString(array, null, ignoreEmptyItem);
@@ -115,7 +115,7 @@ public class StringUtil {
 	 * ignoreEmptyItem = false;
 	 * @param array
 	 * @param split
-	 * @return {@link #getString(String[], String, boolean)}
+	 * @return {@link #getString(Object[], String, boolean)}
 	 */
 	public static String getString(Object[] array, String split) {
 		return getString(array, split, false);
@@ -411,7 +411,7 @@ public class StringUtil {
 		return s != null && PATTERN_NAME.matcher(s).matches();
 	}
 	/**判断是否为首字母大写的代码名称
-	 * @param key
+	 * @param s
 	 * @return
 	 */
 	public static boolean isBigName(String s) {
@@ -422,7 +422,7 @@ public class StringUtil {
 		return s.length() <= 1 ? true : isName(s.substring(1));
 	}
 	/**判断是否为首字母小写的代码名称
-	 * @param key
+	 * @param s
 	 * @return
 	 */
 	public static boolean isSmallName(String s) {
@@ -491,7 +491,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isPath(String path) {
-		return StringUtil.isNotEmpty(path, true) && path.contains(SEPARATOR) 
+		return StringUtil.isNotEmpty(path, true) && path.contains(SEPARATOR)
 				&& path.contains(SEPARATOR + SEPARATOR) == false && path.endsWith(SEPARATOR) == false;
 	}
 

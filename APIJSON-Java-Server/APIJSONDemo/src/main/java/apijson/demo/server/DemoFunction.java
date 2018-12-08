@@ -28,11 +28,11 @@ import apijson.demo.server.model.BaseModel;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
+import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.JSONRequest;
-import zuo.biao.apijson.server.NotNull;
 import zuo.biao.apijson.server.RemoteFunction;
 
 

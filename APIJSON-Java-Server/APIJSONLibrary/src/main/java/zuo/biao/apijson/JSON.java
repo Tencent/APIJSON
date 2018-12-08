@@ -14,12 +14,12 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
-import java.util.List;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+
+import java.util.List;
 
 /**阿里FastJSON封装类 防止解析时异常
  * @author Lemon
@@ -33,9 +33,9 @@ public class JSON {
 	 */
 	public static boolean isJsonCorrect(String s) {
 		//太长		Log.i(TAG, "isJsonCorrect  <<<<     " + s + "     >>>>>>>");
-		if (s == null 
-				//				|| s.equals("[]") 
-				//				|| s.equals("{}") 
+		if (s == null
+				//				|| s.equals("[]")
+				//				|| s.equals("{}")
 				|| s.equals("")
 				|| s.equals("[null]")
 				|| s.equals("{null}")
@@ -153,7 +153,7 @@ public class JSON {
 		return new JSONArray(list);
 	}
 	/**obj转JSONArray
-	 * @param json
+	 * @param obj
 	 * @return
 	 */
 	public static JSONArray parseArray(Object obj) {
@@ -244,8 +244,8 @@ public class JSON {
 	 * @param object
 	 * @return
 	 */
-	public static String format(Object json) {
-		return toJSONString(json, SerializerFeature.PrettyFormat);
+	public static String format(Object object) {
+		return toJSONString(object, SerializerFeature.PrettyFormat);
 	}
 
 	/**判断是否为JSONObject

@@ -37,21 +37,21 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 	/**transfer Object to JSONObject
 	 * @param object
-	 * @see {@link #JSONObject(Object, boolean)}
+	 * @see {@link #JSONObject(Object)}
 	 */
 	public JSONObject(Object object) {
 		this(toJSONString(object));
 	}
 	/**parse JSONObject with JSON String
 	 * @param json
-	 * @see {@link #JSONObject(String, boolean)}
+	 * @see {@link #JSONObject(String)}
 	 */
 	public JSONObject(String json) {
 		this(parseObject(json));
 	}
 	/**transfer com.alibaba.fastjson.JSONObject to JSONObject
 	 * @param object
-	 * @see {@link #putsAll(com.alibaba.fastjson.JSONObject)}
+	 * @see {@link #putsAll(Map<? extends String, ? extends Object>)}
 	 */
 	public JSONObject(com.alibaba.fastjson.JSONObject object) {
 		this();
@@ -350,7 +350,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	
 
 	/**puts key-value in object into this
-	 * @param object
+	 * @param map
 	 * @return this
 	 */
 	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
@@ -365,10 +365,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 
-	
+
 	/**put and return this
 	 * @param value  must be annotated by {@link MethodAccess}
-	 * @return {@link #puts(String, boolean)}
+	 * @return {@link #puts(String, Object)}
 	 */
 	public JSONObject puts(Object value) {
 		return puts(null, value);
@@ -383,10 +383,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		put(key, value);
 		return this;
 	}
-	
+
 	/**put and return value
 	 * @param value  must be annotated by {@link MethodAccess}
-	 * @return {@link #put(String, boolean)}
+	 * @return {@link #put(String, Object)}
 	 */
 	public Object put(Object value) {
 		return put(null, value);
@@ -406,7 +406,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 			Class<?> clazz = value.getClass(); //should not return null
 			if (clazz.getAnnotation(MethodAccess.class) == null) {
 				throw new IllegalArgumentException("puts  StringUtil.isEmpty(key, true)" +
-						" && clazz == null || clazz.getAnnotation(MethodAccess.class) == null" +
+						" clazz.getAnnotation(MethodAccess.class) == null" +
 						" \n key为空时仅支持 类型被@MethodAccess注解 的value !!!" +
 						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！" +
 						" \n 如果是类似 key[]:{} 结构的请求，建议用 putsAll(...) ！");

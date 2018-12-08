@@ -16,6 +16,8 @@ package zuo.biao.apijson.server;
 
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.NotNull;
+
 /**JOIN 配置
  * @author Lemon
  */

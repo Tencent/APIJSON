@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +26,10 @@ import java.util.Map;
  */
 public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	private static final long serialVersionUID = 1L;
-
+	
 	private static final String TAG = "JSONObject";
 
-
+	
 	/**ordered
 	 */
 	public JSONObject() {
@@ -82,9 +83,11 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//JSONObject内关键词 key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
-	public static final String KEY_ID = "id";
-	public static final String KEY_ID_IN = KEY_ID + "{}";
+	
+	public static String KEY_ID = "id";
+	public static String KEY_ID_IN = KEY_ID + "{}";
+	public static String KEY_USER_ID = "userId";
+	public static String KEY_USER_ID_IN = KEY_USER_ID + "{}";
 
 	/**set "id":id in Table layer
 	 * @param id
@@ -93,7 +96,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setId(Long id) {
 		return puts(KEY_ID, id);
 	}
-	/**set id{}:[] in Table layer
+	/**set "id{}":[] in Table layer
 	 * @param list
 	 * @return
 	 */
@@ -101,20 +104,49 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return puts(KEY_ID_IN, list);
 	}
 
-
+	/**set "userId":userId in Table layer
+	 * @param id
+	 * @return
+	 */
+	public JSONObject setUserId(Long id) {
+		return puts(KEY_USER_ID, id);
+	}
+	/**set "userId{}":[] in Table layer
+	 * @param list
+	 * @return
+	 */
+	public JSONObject setUserIdIn(List<Object> list) {
+		return puts(KEY_USER_ID_IN, list);
+	}
+	
+	
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
 	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
-	public static final String KEY_CONDITION = "@condition"; //条件 TODO 用 @where& @where| @where! 替代？
 	public static final String KEY_TRY = "@try"; //尝试，忽略异常
 	public static final String KEY_DROP = "@drop"; //丢弃，不返回
 	public static final String KEY_CORRECT = "@correct"; //字段校正
-
+	
+	public static final String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
 	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
-	public static final String KEY_ABOUT = "@about"; //关于，返回数据库表的信息，包括表说明和字段说明
 	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
+	public static final String KEY_COMBINE = "@combine"; //条件组合，每个条件key前面可以放&,|,!逻辑关系  "id!{},&sex,!name&$"
 	public static final String KEY_GROUP = "@group"; //分组方式
 	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_ORDER = "@order"; //排序方式
+	
+	public static final List<String> TABLE_KEY_LIST;
+	static {
+		TABLE_KEY_LIST = new ArrayList<String>();
+		TABLE_KEY_LIST.add(KEY_ROLE);
+		TABLE_KEY_LIST.add(KEY_DATABASE);
+		TABLE_KEY_LIST.add(KEY_SCHEMA);
+		TABLE_KEY_LIST.add(KEY_COLUMN);
+		TABLE_KEY_LIST.add(KEY_COMBINE);
+		TABLE_KEY_LIST.add(KEY_GROUP);
+		TABLE_KEY_LIST.add(KEY_HAVING);
+		TABLE_KEY_LIST.add(KEY_ORDER);
+	}
+
 	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -125,7 +157,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setRole(String role) {
 		return puts(KEY_ROLE, role);
 	}
-
+	
 	/**set try, ignore exceptions
 	 * @param tri
 	 * @return this
@@ -133,7 +165,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setTry(boolean tri) {
 		return puts(KEY_TRY, tri);
 	}
-
+	
 	/**set drop, data dropped will not return
 	 * @param drop
 	 * @return this
@@ -141,7 +173,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setDrop(boolean drop) {
 		return puts(KEY_DROP, drop);
 	}
-
+	
 	/**set correct, correct keys to target ones
 	 * @param correct  Map{originKey, [posibleKeys]}， posibleKey之间用 , 隔开
 	 * @return this
@@ -149,23 +181,23 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setCorrect(Map<String, String> correct) {
 		return puts(KEY_CORRECT, correct);
 	}
+	
+	
 
-
-
+	/**set database where table was puts
+	 * @param database
+	 * @return this
+	 */
+	public JSONObject setDatabase(String database) {
+		return puts(KEY_DATABASE, database);
+		
+	}
 	/**set schema where table was puts
 	 * @param schema
 	 * @return this
 	 */
 	public JSONObject setSchema(String schema) {
 		return puts(KEY_SCHEMA, schema);
-	}
-
-	/**set about
-	 * @param about
-	 * @return this
-	 */
-	public JSONObject setAbout(boolean about) {
-		return puts(KEY_ABOUT, about);
 	}
 
 	/**set keys need to be returned
@@ -181,6 +213,21 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject setColumn(String keys) {
 		return puts(KEY_COLUMN, keys);
+	}
+
+	/**set combination of keys for conditions
+	 * @param keys  key0,&key1,|key2,!kye3 ...
+	 * @return {@link #setColumn(String)}
+	 */
+	public JSONObject setCombine(String... keys) {
+		return setCombine(StringUtil.getString(keys, true));
+	}
+	/**set combination of keys for conditions
+	 * @param keys  key0,&key1,|key2,!kye3 ...
+	 * @return
+	 */
+	public JSONObject setCombine(String keys) {
+		return puts(KEY_COMBINE, keys);
 	}
 
 	/**set keys for group by
@@ -300,7 +347,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//Request >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
+	
 
 	/**puts key-value in object into this
 	 * @param map
@@ -328,7 +375,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 	/**put and return this
 	 * @param key
-	 * @param value
+	 * @param value 
 	 * @return this
 	 * @see {@link #put(String, Object)}
 	 */
@@ -356,10 +403,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 			return null;
 		}
 		if (StringUtil.isEmpty(key, true)) {
-			Class<?> clazz = value.getClass();
-			if (clazz == null || clazz.getAnnotation(MethodAccess.class) == null) {
-				throw new IllegalArgumentException("puts  StringUtil.isNotEmpty(key, true) == false" +
-						" && clazz == null || clazz.getAnnotation(MethodAccess.class) == null" +
+			Class<?> clazz = value.getClass(); //should not return null
+			if (clazz.getAnnotation(MethodAccess.class) == null) {
+				throw new IllegalArgumentException("puts  StringUtil.isEmpty(key, true)" +
+						" clazz.getAnnotation(MethodAccess.class) == null" +
 						" \n key为空时仅支持 类型被@MethodAccess注解 的value !!!" +
 						" \n 如果一定要这么用，请对 " + clazz.getName() + " 注解！" +
 						" \n 如果是类似 key[]:{} 结构的请求，建议用 putsAll(...) ！");
@@ -370,5 +417,5 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 
-
+	
 }

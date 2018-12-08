@@ -30,7 +30,7 @@ public enum RequestRole {
 	/**联系人，必须已登录
 	 */
 	CONTACT,
-	
+
 	/**圈子成员(CONTACT + OWNER)，必须已登录
 	 */
 	CIRCLE,
@@ -51,13 +51,19 @@ public enum RequestRole {
 	//		HIGHS = new RequestRole[] {OWNER, ADMIN};
 	//	}
 
-	public static RequestRole get(String name) {
-		try {//Enum.valueOf只要找不到对应的值就会抛异常
+	public static final String[] NAMES = {
+			UNKNOWN.name(), LOGIN.name(), CONTACT.name(), CIRCLE.name(), OWNER.name(), ADMIN.name()
+	};
+
+	public static RequestRole get(String name) throws Exception {
+		if (name == null) {
+			return null;
+		}
+		try { //Enum.valueOf只要找不到对应的值就会抛异常
 			return RequestRole.valueOf(StringUtil.toUpperCase(name));
 		} catch (Exception e) {
-			//empty
+			throw new IllegalArgumentException("角色 " + name + " 不存在！只能是[" + StringUtil.getString(NAMES) + "]中的一种！", e);
 		}
-		return null;
 	}
 
 }

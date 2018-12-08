@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
 
 /**简化Parser，getObject和getArray(getArrayConfig)都能用

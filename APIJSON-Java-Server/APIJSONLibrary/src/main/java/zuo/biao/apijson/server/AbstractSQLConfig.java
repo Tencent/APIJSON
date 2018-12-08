@@ -53,6 +53,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.Log;
+import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
 import zuo.biao.apijson.SQL;

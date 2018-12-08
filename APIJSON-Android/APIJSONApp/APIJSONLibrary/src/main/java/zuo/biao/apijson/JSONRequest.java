@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package zuo.biao.apijson;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**wrapper for request
@@ -52,6 +54,7 @@ public class JSONRequest extends JSONObject {
 
 	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
 	public static final String KEY_VERSION = "version";//只在最外层，最外层用JSONRequest
+	public static final String KEY_FORMAT = "format";//只在最外层，最外层用JSONRequest
 
 	/**set "tag":tag in outermost layer
 	 * for write operations
@@ -62,12 +65,20 @@ public class JSONRequest extends JSONObject {
 		return puts(KEY_TAG, tag);
 	}
 	/**set "version":version in outermost layer
-	 * for write operations
+	 * for target version of request
 	 * @param version
 	 * @return
 	 */
-	public JSONRequest setVersion(int version) {
+	public JSONRequest setVersion(String version) {
 		return puts(KEY_VERSION, version);
+	}
+	/**set "format":format in outermost layer
+	 * for format APIJSON special keys to normal keys of response
+	 * @param format
+	 * @return
+	 */
+	public JSONRequest setFormat(Boolean format) {
+		return puts(KEY_FORMAT, format);
 	}
 
 
@@ -80,6 +91,15 @@ public class JSONRequest extends JSONObject {
 	public static final String KEY_QUERY = "query";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
+	public static final String KEY_JOIN = "join";
+
+	public static final List<String> ARRAY_KEY_LIST;
+	static {
+		ARRAY_KEY_LIST = new ArrayList<String>();
+		ARRAY_KEY_LIST.add(KEY_QUERY);
+		ARRAY_KEY_LIST.add(KEY_COUNT);
+		ARRAY_KEY_LIST.add(KEY_PAGE);
+	}
 
 	/**set what to query in Array layer
 	 * @param query what need to query, Table,total,ALL?
