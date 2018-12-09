@@ -161,7 +161,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "没权限访问或对象不存在！");
 
 			//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
-			if (config.getId() > 0) {
+			if (config.getId() != null) {
 				result.put(JSONResponse.KEY_ID, config.getId());
 			} else {
 				result.put(JSONResponse.KEY_ID + "[]", config.getWhere(JSONResponse.KEY_ID_IN, true));

@@ -142,13 +142,12 @@ public class Structure {
 	private static void verifyId(@NotNull String method, @NotNull String name, @NotNull String key
 			, @NotNull JSONObject robj, @NotNull String idKey, final int maxUpdateCount, boolean atLeastOne) {
 		//单个修改或删除
-		Object id = null;
-		try {
-			id = robj.getLong(idKey); //如果必须传 id ，可在Request表中配置NECESSARY
-		} catch (Exception e) {
+		Object id = robj.get(idKey); //如果必须传 id ，可在Request表中配置NECESSARY
+		if (id != null && id instanceof Number == false && id instanceof String == false) {
 			throw new IllegalArgumentException(method + "请求，" + name + "/" + key
-					+ " 里面的 " + idKey + ":value 中value的类型只能是 Long ！");
+					+ " 里面的 " + idKey + ":value 中value的类型只能是 Long 或 String ！");
 		}
+		
 
 		//批量修改或删除
 		String idInKey = idKey + "{}";
@@ -173,11 +172,10 @@ public class Structure {
 			//解决 id{}: ["1' OR 1='1'))--"] 绕过id{}限制
 			//new ArrayList<Long>(idIn) 不能检查类型，Java泛型擦除问题，居然能把 ["a"] 赋值进去还不报错
 			for (int i = 0; i < idIn.size(); i++) {
-				try {
-					idIn.getLong(i);
-				} catch (Exception e) {
+				Object o = idIn.get(i);
+				if (o != null && o instanceof Number == false && o instanceof String == false) {
 					throw new IllegalArgumentException(method + "请求，" + name + "/" + key
-							+ " 里面的 " + idInKey + ":[] 中所有项的类型都只能是Long！");
+							+ " 里面的 " + idInKey + ":[] 中所有项的类型都只能是 Long 或 String ！");
 				}
 			}
 		}

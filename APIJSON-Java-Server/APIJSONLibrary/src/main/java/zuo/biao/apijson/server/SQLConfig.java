@@ -87,8 +87,8 @@ public interface SQLConfig {
 	RequestMethod getMethod();
 	SQLConfig setMethod(RequestMethod method);
 	
-	long getId();
-	SQLConfig setId(long id);
+	Object getId();
+	SQLConfig setId(Object id);
 
 	RequestRole getRole();
 	SQLConfig setRole(RequestRole role);

@@ -81,7 +81,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 
-	private long id; //Table的id
+	private Object id; //Table的id
 	private RequestMethod method; //操作方法
 	private boolean prepared = true; //预编译
 	private boolean main = true;
@@ -161,11 +161,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	@Override
-	public long getId() {
+	public Object getId() {
 		return id;
 	}
 	@Override
-	public AbstractSQLConfig setId(long id) {
+	public AbstractSQLConfig setId(Object id) {
 		this.id = id;
 		return this;
 	}
@@ -1739,7 +1739,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return joinOns;
 	}
 
-	/**获取查询配置
+	/**新建SQL配置
 	 * @param table
 	 * @param request
 	 * @return
@@ -1772,14 +1772,24 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		//对id和id{}处理，这两个一定会作为条件
-		Long id = request.getLong(KEY_ID);
+		Object id = request.get(KEY_ID);
 		if (id != null) { //null无效
-			if (id <= 0) { //一定没有值
-				throw new NotExistException(TAG + ": newSQLConfig " + table + ".id <= 0");
+			if (id instanceof Number) { 
+				if (((Number) id).longValue() <= 0) { //一定没有值
+					throw new NotExistException(TAG + ": newSQLConfig " + table + ".id <= 0");
+				}
+			}
+			else if (id instanceof String) {
+				if (StringUtil.isEmpty(id, true)) { //一定没有值
+					throw new NotExistException(TAG + ": newSQLConfig StringUtil.isEmpty(" + table + ".id, true)");
+				}
+			}
+			else {
+				throw new IllegalArgumentException(KEY_ID + ":value 中 value 的类型只能是 Long 或 String ！");
 			}
 
-			if (idIn != null && idIn instanceof List) { //共用idArr场景少性能差
-				if (idIn != null && ((List<?>) idIn).contains(id) == false) {//empty有效  BaseModel.isEmpty(idArr) == false) {
+			if (idIn != null && idIn instanceof List) { //共用idIn场景少性能差
+				if (idIn != null && ((List<?>) idIn).contains(id) == false) {//empty有效  BaseModel.isEmpty(idIn) == false) {
 					Log.w(TAG, "newSQLConfig  id > 0 >> idInObj != null && idInObj.contains(id) == false >> return null;");
 					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && ((JSONArray) idIn).contains(id) == false");
 				}
@@ -1983,7 +1993,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setColumn(cs);
 		config.setWhere(tableWhere);					
 
-		config.setId(id == null ? 0 : id);
+		config.setId(id);
 		//在	tableWhere 第0个		config.setIdIn(idIn);
 
 		config.setRole(role);
