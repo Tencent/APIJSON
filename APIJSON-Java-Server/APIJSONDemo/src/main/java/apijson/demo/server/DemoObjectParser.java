@@ -57,7 +57,7 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	}
 
 	@Override
-	public DemoObjectParser setParser(Parser parser) {
+	public DemoObjectParser setParser(Parser<?> parser) {
 		super.setParser(parser);
 		return this;
 	}

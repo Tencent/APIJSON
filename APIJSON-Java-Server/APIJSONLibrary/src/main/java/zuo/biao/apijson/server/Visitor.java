@@ -19,10 +19,10 @@ import java.util.List;
 /**来访者
  * @author Lemon
  */
-public interface Visitor {
+public interface Visitor<T> {
 
-	Long getId();
+	T getId();
 
-	List<Long> getContactIdList();
+	List<T> getContactIdList();
 
 }

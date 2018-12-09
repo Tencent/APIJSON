@@ -23,38 +23,38 @@ import zuo.biao.apijson.RequestMethod;
 /**解析器
  * @author Lemon
  */
-public interface Parser {
+public interface Parser<T> {
 
 	int MAX_QUERY_COUNT = 100;
 	int MAX_UPDATE_COUNT = 10;
 	
 	
 	@NotNull
-	Visitor getVisitor();
-	Parser setVisitor(@NotNull Visitor visitor);
+	Visitor<T> getVisitor();
+	Parser<T> setVisitor(@NotNull Visitor<T> visitor);
 
 	@NotNull
 	RequestMethod getMethod();
-	Parser setMethod(@NotNull RequestMethod method);
+	Parser<T> setMethod(@NotNull RequestMethod method);
 
 	JSONObject getRequest();
-	Parser setRequest(JSONObject request);
+	Parser<T> setRequest(JSONObject request);
 
 	boolean isNoVerify();
-	Parser setNoVerify(boolean noVerify);
+	Parser<T> setNoVerify(boolean noVerify);
 
 	boolean isNoVerifyLogin();
-	Parser setNoVerifyLogin(boolean noVerifyLogin);
+	Parser<T> setNoVerifyLogin(boolean noVerifyLogin);
 
 	boolean isNoVerifyRole();
-	Parser setNoVerifyRole(boolean noVerifyRole);
+	Parser<T> setNoVerifyRole(boolean noVerifyRole);
 
 	boolean isNoVerifyContent();
-	Parser setNoVerifyContent(boolean noVerifyContent);
+	Parser<T> setNoVerifyContent(boolean noVerifyContent);
 
 	
 	@NotNull
-	Verifier createVerifier();
+	Verifier<T> createVerifier();
 
 	@NotNull
 	SQLConfig createSQLConfig();

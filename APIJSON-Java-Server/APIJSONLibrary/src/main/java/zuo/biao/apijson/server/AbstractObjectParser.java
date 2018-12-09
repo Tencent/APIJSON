@@ -52,8 +52,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	private static final String TAG = "ObjectParser";
 
 	@NotNull
-	protected Parser parser;
-	public AbstractObjectParser setParser(Parser parser) {
+	protected Parser<?> parser;
+	public AbstractObjectParser setParser(Parser<?> parser) {
 		this.parser = parser;
 		return this;
 	}

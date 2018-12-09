@@ -29,7 +29,7 @@ import zuo.biao.apijson.server.Visitor;
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
 		)
-public class User extends BaseModel implements Visitor {
+public class User extends BaseModel implements Visitor<Long> {
 	private static final long serialVersionUID = 1L;
 	
 	public static final int SEX_MAIL = 0;

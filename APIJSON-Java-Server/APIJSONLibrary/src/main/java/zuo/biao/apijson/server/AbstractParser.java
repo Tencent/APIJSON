@@ -47,7 +47,7 @@ import zuo.biao.apijson.server.exception.OutOfRangeException;
 /**parser for parsing request to JSONObject
  * @author Lemon
  */
-public abstract class AbstractParser implements Parser, SQLCreator {
+public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
 
 
@@ -76,20 +76,20 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 	}
 
 	@NotNull
-	protected Visitor visitor;
+	protected Visitor<T> visitor;
 	@NotNull
 	@Override
-	public Visitor getVisitor() {
+	public Visitor<T> getVisitor() {
 		if (visitor == null) {
-			visitor = new Visitor() {
+			visitor = new Visitor<T>() {
 
 				@Override
-				public Long getId() {
-					return 0L;
+				public T getId() {
+					return null;
 				}
 
 				@Override
-				public List<Long> getContactIdList() {
+				public List<T> getContactIdList() {
 					return null;
 				}
 			};
@@ -97,7 +97,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		return visitor;
 	}
 	@Override
-	public AbstractParser setVisitor(@NotNull Visitor visitor) {
+	public AbstractParser<T> setVisitor(@NotNull Visitor<T> visitor) {
 		this.visitor = visitor;
 		return this;
 	}
@@ -110,7 +110,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 	}
 	@NotNull
 	@Override
-	public AbstractParser setMethod(RequestMethod method) {
+	public AbstractParser<T> setMethod(RequestMethod method) {
 		this.requestMethod = method == null ? GET : method;
 		return this;
 	}
@@ -121,25 +121,25 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		return requestObject;
 	}
 	@Override
-	public AbstractParser setRequest(JSONObject request) {
+	public AbstractParser<T> setRequest(JSONObject request) {
 		this.requestObject = request;
 		return this;
 	}
 
 
-	protected Verifier verifier;
+	protected Verifier<T> verifier;
 	protected RequestRole globleRole;
-	public AbstractParser setGlobleRole(RequestRole globleRole) {
+	public AbstractParser<T> setGlobleRole(RequestRole globleRole) {
 		this.globleRole = globleRole;
 		return this;
 	}
 	protected String globleDatabase;
-	public AbstractParser setGlobleDatabase(String globleDatabase) {
+	public AbstractParser<T> setGlobleDatabase(String globleDatabase) {
 		this.globleDatabase = globleDatabase;
 		return this;
 	}
 	protected boolean globleFormat;
-	public AbstractParser setGlobleFormat(Boolean globleFormat) {
+	public AbstractParser<T> setGlobleFormat(Boolean globleFormat) {
 		this.globleFormat = globleFormat;
 		return this;
 	}
@@ -149,7 +149,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		return noVerifyLogin && noVerifyRole && noVerifyContent;
 	}
 	@Override
-	public AbstractParser setNoVerify(boolean noVerify) {
+	public AbstractParser<T> setNoVerify(boolean noVerify) {
 		setNoVerifyLogin(noVerify);
 		setNoVerifyRole(noVerify);
 		setNoVerifyContent(noVerify);
@@ -162,7 +162,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		return noVerifyLogin;
 	}
 	@Override
-	public AbstractParser setNoVerifyLogin(boolean noVerifyLogin) {
+	public AbstractParser<T> setNoVerifyLogin(boolean noVerifyLogin) {
 		this.noVerifyLogin = noVerifyLogin;
 		return this;
 	}
@@ -172,7 +172,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		return noVerifyRole;
 	}
 	@Override
-	public AbstractParser setNoVerifyRole(boolean noVerifyRole) {
+	public AbstractParser<T> setNoVerifyRole(boolean noVerifyRole) {
 		this.noVerifyRole = noVerifyRole;
 		return this;
 	}
@@ -182,7 +182,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 		return noVerifyContent;
 	}
 	@Override
-	public AbstractParser setNoVerifyContent(boolean noVerifyContent) {
+	public AbstractParser<T> setNoVerifyContent(boolean noVerifyContent) {
 		this.noVerifyContent = noVerifyContent;
 		return this;
 	}
@@ -1123,7 +1123,7 @@ public abstract class AbstractParser implements Parser, SQLCreator {
 				if (globleRole != null) {
 					config.setRole(globleRole);
 				} else {
-					config.setRole(getVisitor().getId() <= 0 ? RequestRole.UNKNOWN : RequestRole.LOGIN);
+					config.setRole(getVisitor().getId() == null ? RequestRole.UNKNOWN : RequestRole.LOGIN);
 				}
 			}
 			verifier.verify(config);

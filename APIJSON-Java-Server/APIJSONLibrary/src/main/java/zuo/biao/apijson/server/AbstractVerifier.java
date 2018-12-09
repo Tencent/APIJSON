@@ -55,8 +55,9 @@ import zuo.biao.apijson.server.model.TestRecord;
 
 /**权限验证
  * @author Lemon
+ * @param <T> id 与 userId 的类型，一般为 Long
  */
-public abstract class AbstractVerifier implements Verifier {
+public abstract class AbstractVerifier<T> implements Verifier<T> {
 	private static final String TAG = "AbstractVerifier";
 
 
@@ -101,17 +102,23 @@ public abstract class AbstractVerifier implements Verifier {
 
 
 	@NotNull
-	protected Visitor visitor;
-	protected long visitorId;
+	protected Visitor<T> visitor;
+	protected Object visitorId;
 	@NotNull
 	@Override
-	public Visitor getVisitor() {
+	public Visitor<T> getVisitor() {
 		return visitor;
 	}
 	@Override
-	public AbstractVerifier setVisitor(Visitor visitor) {
+	public AbstractVerifier<T> setVisitor(Visitor<T> visitor) {
 		this.visitor = visitor;
-		this.visitorId = visitor == null ? 0 : value(visitor.getId());
+		this.visitorId = visitor == null ? null : visitor.getId();
+
+		//导致内部调用且放行校验(noVerifyLogin, noVerifyRole)也抛异常
+		//		if (visitorId == null) {
+		//			throw new NullPointerException(TAG + ".setVisitor visitorId == null !!! 可能导致权限校验失效，引发安全问题！");
+		//		}
+
 		return this;
 	}
 
@@ -132,21 +139,20 @@ public abstract class AbstractVerifier implements Verifier {
 			role = RequestRole.UNKNOWN;
 		}
 
-		//TODO 暂时去掉，方便测试
 		if (role != RequestRole.UNKNOWN) {//未登录的角色
 			verifyLogin();
 		}
 
 		RequestMethod method = config.getMethod();
-		//验证允许的角色
-		verifyRole(table, method, role);
+
+		verifyRole(table, method, role);//验证允许的角色
 
 
 		//验证角色，假定真实强制匹配<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 		String visitorIdkey = getVisitorIdKey(config.getTable());
 
-		Number requestId;
+		Object requestId;
 		switch (role) {
 		case LOGIN://verifyRole通过就行
 			break;
@@ -224,8 +230,8 @@ public abstract class AbstractVerifier implements Verifier {
 				}
 			}
 			else {
-				requestId = (Number) config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
-				if (requestId != null && requestId.longValue() != visitorId) {
+				requestId = config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
+				if (requestId != null && StringUtil.getString(requestId).equals(StringUtil.getString(visitorId)) == false) {
 					throw new IllegalAccessException(visitorIdkey + " = " + requestId + " 的 " + table
 							+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
 				}
@@ -233,7 +239,7 @@ public abstract class AbstractVerifier implements Verifier {
 				config.putWhere(visitorIdkey, visitorId, true);
 			}
 			break;
-		case ADMIN://这里不好做，在特定接口内部判断？ TODO  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
+		case ADMIN://这里不好做，在特定接口内部判。 可以是  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
 			verifyAdmin();
 			break;
 		default://unknown，verifyRole通过就行
@@ -284,14 +290,29 @@ public abstract class AbstractVerifier implements Verifier {
 	@Override
 	public void verifyLogin() throws Exception {
 		//未登录没有权限操作
-		if (visitorId <= 0) {
+		if (visitorId == null) {
 			throw new NotLoggedInException("未登录，请登录后再操作！");
 		}
+		
+		if (visitorId instanceof Number) {
+			if (((Number) visitorId).longValue() <= 0) {
+				throw new NotLoggedInException("未登录，请登录后再操作！");
+			}
+		} 
+		else if (visitorId instanceof String) {
+			if (StringUtil.isEmpty(visitorId, true)) {
+				throw new NotLoggedInException("未登录，请登录后再操作！");
+			}
+		}
+		else {
+			throw new UnsupportedDataTypeException("visitorId 只能是 Long 或 String 类型！");
+		}
+
 	}
 
 	@Override
 	public void verifyAdmin() throws Exception {
-		throw new UnsupportedOperationException("不支持 ADMIN 角色！");
+		throw new UnsupportedOperationException("不支持 ADMIN 角色！如果要支持就在子类重写这个方法来校验 ADMIN 角色，不通过则 throw IllegalAccessException!");
 	}
 
 
@@ -348,8 +369,5 @@ public abstract class AbstractVerifier implements Verifier {
 		return requestObject;
 	}
 
-	public static long value(Long v) {
-		return v == null ? 0 : v;
-	}
 
 }

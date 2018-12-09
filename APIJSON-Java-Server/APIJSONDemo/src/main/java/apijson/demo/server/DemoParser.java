@@ -22,14 +22,12 @@ import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.server.AbstractParser;
 import zuo.biao.apijson.server.JSONRequest;
 import zuo.biao.apijson.server.SQLConfig;
-import zuo.biao.apijson.server.SQLExecutor;
-import zuo.biao.apijson.server.Verifier;
 
 
 /**请求解析器
  * @author Lemon
  */
-public class DemoParser extends AbstractParser {
+public class DemoParser extends AbstractParser<Long> {
 
 
 	public DemoParser() {
@@ -46,7 +44,7 @@ public class DemoParser extends AbstractParser {
 	public HttpSession getSession() {
 		return session;
 	}
-	public AbstractParser setSession(HttpSession session) {
+	public DemoParser setSession(HttpSession session) {
 		this.session = session;
 		setVisitor(DemoVerifier.getVisitor(session));
 		return this;
@@ -54,15 +52,15 @@ public class DemoParser extends AbstractParser {
 
 
 	@Override
-	public Verifier createVerifier() {
+	public DemoVerifier createVerifier() {
 		return new DemoVerifier();
 	}
 	@Override
-	public SQLConfig createSQLConfig() {
+	public DemoSQLConfig createSQLConfig() {
 		return new DemoSQLConfig();
 	}
 	@Override
-	public SQLExecutor createSQLExecutor() {
+	public DemoSQLExecutor createSQLExecutor() {
 		return new DemoSQLExecutor();
 	}
 

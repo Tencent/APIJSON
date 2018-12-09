@@ -23,7 +23,7 @@ import zuo.biao.apijson.RequestRole;
 /**权限验证器
  * @author Lemon
  */
-public interface Verifier {
+public interface Verifier<T> {
 
 	/**验证权限是否通过
 	 * @param config
@@ -77,12 +77,12 @@ public interface Verifier {
 	JSONObject removeAccessInfo(JSONObject request);
 	
 	@NotNull
-	Parser createParser();
+	Parser<T> createParser();
 	
 
 	@NotNull
-	Visitor getVisitor();
-	Verifier setVisitor(@NotNull Visitor visitor);
+	Visitor<T> getVisitor();
+	Verifier<T> setVisitor(@NotNull Visitor<T> visitor);
 
 	
 	String getVisitorKey();
