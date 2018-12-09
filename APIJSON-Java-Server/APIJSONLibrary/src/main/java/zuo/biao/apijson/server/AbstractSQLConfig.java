@@ -1767,7 +1767,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new IllegalArgumentException("POST请求，生成多条记录请用 id{}:[] ！ [] 类型为JSONArray且不能为空！");
 				}
 			} else if (request.get(KEY_ID) == null) {
-				request.put(KEY_ID, System.currentTimeMillis());
+				request.put(KEY_ID, callback.newId(method, table));
 			}
 		}
 
@@ -2156,7 +2156,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	public interface Callback {
+		/**获取 SQLConfig 的实例
+		 * @param method
+		 * @param table
+		 * @return
+		 */
 		AbstractSQLConfig getSQLConfig(RequestMethod method, String table);
+
+		/**为 post 请求新建 id， 只能是 Long 或 String
+		 * @param method
+		 * @param table
+		 * @return
+		 */
+		Object newId(RequestMethod method, String table);
 	}
 
 }

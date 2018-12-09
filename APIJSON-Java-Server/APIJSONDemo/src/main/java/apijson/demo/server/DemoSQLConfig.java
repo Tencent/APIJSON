@@ -87,6 +87,11 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 			public DemoSQLConfig getSQLConfig(RequestMethod method, String table) {
 				return new DemoSQLConfig(method, table);
 			}
+			
+			@Override
+			public Object newId(RequestMethod method, String table) {
+				return System.currentTimeMillis(); //为 post 请求提供 id， 只能是 Long 或 String
+			}
 		});
 	}
 
