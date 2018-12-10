@@ -101,7 +101,7 @@ public class DemoVerifier extends AbstractVerifier {
 		Long id = (Long) session.getAttribute(Controller.USER_ID);
 		if (id == null) {
 			Visitor v = getVisitor(session);
-			id = v == null ? 0 : value(v.getId());
+			id = v == null ? 0 : value((Long) v.getId());
 			session.setAttribute(Controller.USER_ID, id);
 		}
 		return value(id);
