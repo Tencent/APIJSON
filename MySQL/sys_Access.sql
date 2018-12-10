@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `Access`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Access` (
   `id` bigint(15) NOT NULL AUTO_INCREMENT COMMENT '唯一标识',
-  `schema` varchar(20) NOT NULL DEFAULT 'sys',
+  `schema` varchar(20) NOT NULL DEFAULT 'sys' COMMENT '集合空间',
   `name` varchar(50) NOT NULL COMMENT '实际表名，例如 apijson_user',
   `alias` varchar(20) DEFAULT NULL COMMENT '外部调用的表别名，例如 User',
   `get` varchar(100) NOT NULL DEFAULT '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]' COMMENT '允许 get 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]\n用 JSON 类型不能设置默认值，反正权限对应的需求是明确的，也不需要自动转 JSONArray。',
@@ -34,7 +34,7 @@ CREATE TABLE `Access` (
   `post` varchar(100) NOT NULL DEFAULT '["OWNER", "ADMIN"]' COMMENT '允许 post 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]',
   `put` varchar(100) NOT NULL DEFAULT '["OWNER", "ADMIN"]' COMMENT '允许 put 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]',
   `delete` varchar(100) NOT NULL DEFAULT '["OWNER", "ADMIN"]' COMMENT '允许 delete 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]',
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8 COMMENT='权限配置';
@@ -59,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-29  0:48:55
+-- Dump completed on 2018-12-10 23:39:35
