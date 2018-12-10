@@ -114,6 +114,9 @@ public class DemoVerifier extends AbstractVerifier {
 		return session == null ? null : (Visitor) session.getAttribute(Controller.USER_);
 	}
 
+	public static long value(Long v) {
+		return v == null ? 0 : v;
+	}
 
 
 }
