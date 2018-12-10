@@ -360,14 +360,4 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 	}
 
 
-
-	/**删除请求里的权限信息
-	 * @param requestObject
-	 * @return
-	 */
-	public JSONObject removeAccessInfo(JSONObject requestObject) {
-		return requestObject;
-	}
-
-
 }

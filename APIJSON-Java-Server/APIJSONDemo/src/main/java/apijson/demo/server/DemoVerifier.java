@@ -17,6 +17,8 @@ package apijson.demo.server;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 
+import com.alibaba.fastjson.JSONObject;
+
 import apijson.demo.server.model.Comment;
 import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
@@ -32,14 +34,8 @@ import zuo.biao.apijson.server.Visitor;
 /**权限验证器
  * @author Lemon
  */
-public class DemoVerifier extends AbstractVerifier {
+public class DemoVerifier extends AbstractVerifier<Long> {
 	private static final String TAG = "DemoVerifier";
-
-
-	public static final String KEY_PASSWORD = "password";
-	public static final String KEY_LOGIN_PASSWORD = "loginPassword";
-	public static final String KEY_PAY_PASSWORD = "payPassword";
-	public static final String KEY_OLD_PASSWORD = "oldPassword";
 
 
 	// <TableName, <METHOD, allowRoles>>
@@ -100,8 +96,8 @@ public class DemoVerifier extends AbstractVerifier {
 		}
 		Long id = (Long) session.getAttribute(Controller.USER_ID);
 		if (id == null) {
-			Visitor v = getVisitor(session);
-			id = v == null ? 0 : value((Long) v.getId());
+			Visitor<Long> v = getVisitor(session);
+			id = v == null ? 0 : value(v.getId());
 			session.setAttribute(Controller.USER_ID, id);
 		}
 		return value(id);
@@ -110,13 +106,22 @@ public class DemoVerifier extends AbstractVerifier {
 	 * @param session
 	 * @return
 	 */
-	public static Visitor getVisitor(HttpSession session) {
-		return session == null ? null : (Visitor) session.getAttribute(Controller.USER_);
+	@SuppressWarnings("unchecked")
+	public static Visitor<Long> getVisitor(HttpSession session) {
+		return session == null ? null : (Visitor<Long>) session.getAttribute(Controller.USER_);
 	}
 
 	public static long value(Long v) {
 		return v == null ? 0 : v;
 	}
 
+	/**删除请求里的权限信息
+	 * @param requestObject
+	 * @return
+	 */
+	@Deprecated
+	public JSONObject removeAccessInfo(JSONObject requestObject) {
+		return requestObject;
+	}
 
 }
