@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,19 +205,19 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 		boolean hasJoin = config.hasJoin();
-		int viceColumnStart = length; //第一个副表字段的index
+		int viceColumnStart = length + 1; //第一个副表字段的index
 		while (rs.next()){
 			index ++;
 			Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
 
 			result = new JSONObject(true);
-			
+
 			for (int i = 1; i <= length; i++) {
 
-				if (hasJoin && viceColumnStart >= length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
+				if (hasJoin && viceColumnStart > length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
 					viceColumnStart = i;
 				}
-				
+
 				result = onPutColumn(config, rs, rsmd, index, result, i, hasJoin && i >= viceColumnStart ? childMap : null);
 			}
 
@@ -227,6 +228,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 
 		rs.close();
+
+
+		//TODO @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+		executeAppJoin(config, resultMap, childMap);
+
+		//TODO @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 
 		//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
@@ -250,6 +259,111 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 
+	/**TODO @ APP JOIN 查询副表并缓存到 childMap
+	 * @param config
+	 * @param resultMap
+	 * @param childMap
+	 * @throws Exception 
+	 */
+	protected void executeAppJoin(SQLConfig config, Map<Integer, JSONObject> resultMap, Map<String, JSONObject> childMap) throws Exception {
+		List<Join> joinList = config.getJoinList();
+		if (joinList != null) {
+
+			SQLConfig jc;
+			SQLConfig cc;
+
+			for (Join j : joinList) {
+				if (j.isAppJoin() == false) {
+					Log.i(TAG, "executeAppJoin  for (Join j : joinList) >> j.isAppJoin() == false >>  continue;");
+					continue;
+				}
+
+				jc = j.getJoinConfig();
+				cc = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+				
+				//取出 "id@": "@/User/userId" 中所有 userId 的值
+				List<Object> targetValueList = new ArrayList<>();
+				JSONObject mainTable;
+				Object targetValue;
+				
+				for (int i = 0; i < resultMap.size(); i++) {
+					mainTable = resultMap.get(i);
+					targetValue = mainTable == null ? null : mainTable.get(j.getTargetKey());
+					
+					if (targetValue != null && targetValueList.contains(targetValue) == false) {
+						targetValueList.add(targetValue);
+					}
+				}
+
+
+				//替换为 "id{}": [userId1, userId2, userId3...]
+				jc.putWhere(j.getOriginKey(), null, false);
+				jc.putWhere(j.getKey() + "{}", targetValueList, false);
+
+				jc.setMain(true).setPreparedValueList(new ArrayList<>());
+				
+				boolean prepared = jc.isPrepared();
+				final String sql = jc.getSQL(false);
+				jc.setPrepared(prepared);
+
+				if (StringUtil.isEmpty(sql, true)) {
+					throw new NullPointerException(TAG + ".executeAppJoin  StringUtil.isEmpty(sql, true) >> return null;");
+				}
+				
+				long startTime = System.currentTimeMillis();
+				Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+						+ "\n executeAppJoin  startTime = " + startTime
+						+ "\n sql = \n " + sql
+						+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+				
+				//执行副表的批量查询 并 缓存到 childMap
+				ResultSet rs = executeQuery(jc);
+
+				int index = -1;
+
+				ResultSetMetaData rsmd = rs.getMetaData();
+				final int length = rsmd.getColumnCount();
+
+				JSONObject result;
+				String cacheSql;
+				while (rs.next()){
+					index ++;
+					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n executeAppJoin while (rs.next()){  index = " + index + "\n\n");
+
+					result = new JSONObject(true);
+
+					for (int i = 1; i <= length; i++) {
+
+						result = onPutColumn(jc, rs, rsmd, index, result, i, null);
+					}
+
+					//每个 result 都要用新的 SQL 来存 childResultMap = onPutTable(config, rs, rsmd, childResultMap, index, result);
+
+					Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultMap.put( " + index + ", result); "
+							+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
+					
+					//缓存到 childMap
+					cc.putWhere(j.getKey(), result.get(j.getKey()), false);
+					cacheSql = cc.getSQL(false);
+					childMap.put(cacheSql, result);
+
+					Log.d(TAG, ">>> executeAppJoin childMap.put('" + cacheSql + "', result);  childMap.size() = " + childMap.size());
+				}
+
+				rs.close();
+				
+
+				long endTime = System.currentTimeMillis();
+				Log.d(TAG, "\n\n executeAppJoin  endTime = " + endTime + "; duration = " + (endTime - startTime)
+						+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
+				
+			}
+		}
+
+	}
+
+
+
 	/**table.put(rsmd.getColumnLabel(i), rs.getObject(i));
 	 * @param config 
 	 * @param rs
@@ -271,8 +385,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 
 		//已改为  rsmd.getTableName(columnIndex) 支持副表不传 @column ， 但如何判断是副表？childMap != null
-//		String lable = rsmd.getColumnLabel(columnIndex);
-//		int dotIndex = lable.indexOf(".");
+		//		String lable = rsmd.getColumnLabel(columnIndex);
+		//		int dotIndex = lable.indexOf(".");
 		String lable = rsmd.getColumnLabel(columnIndex);//dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
 
 		String childTable = childMap == null ? null : rsmd.getTableName(columnIndex); //dotIndex < 0 ? null : lable.substring(0, dotIndex);
@@ -285,20 +399,20 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			finalTable = table;
 		}
 		else {
-//			lable = column;
+			//			lable = column;
 
 			//<sql, Table>
 
 			List<Join> joinList = config.getJoinList();
 			if (joinList != null) {
 				for (Join j : joinList) {
-					childConfig = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
-					
-					if (childTable.equalsIgnoreCase(childConfig.getSQLTable())) {
+					childConfig = j.isAppJoin() ? null : j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+
+					if (childConfig != null && childTable.equalsIgnoreCase(childConfig.getSQLTable())) {
 
 						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()), false);
 						childSql = childConfig.getSQL(false);
-						
+
 						if (StringUtil.isEmpty(childSql, true)) {
 							return table;
 						}

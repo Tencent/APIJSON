@@ -22,8 +22,13 @@ import zuo.biao.apijson.NotNull;
  * @author Lemon
  */
 public class Join {
+	
+	private String path;
+	
+	private String originKey;
+	private String originValue;
 
-	private String joinType; // "&" - INNER, "|" - FULL, "!" - OUTTER, "<" - LEFT, ">" - RIGHT, "*" - CROSS, "^" - SIDE
+	private String joinType; // "@" - APP, "&" - INNER, "|" - FULL, "!" - OUTTER, "<" - LEFT, ">" - RIGHT, "^" - SIDE, "*" - CROSS
 	private String relateType; // "" - 一对一, "{}" - 一对多, "<>" - 多对一
 	private JSONObject table; // { "id@":"/Moment/userId" }
 	private String name; //User
@@ -34,7 +39,26 @@ public class Join {
 	private SQLConfig joinConfig;
 	private SQLConfig cacheConfig;
 
+	public String getPath() {
+		return path;
+	}
+	public void setPath(String path) {
+		this.path = path;
+	}
 
+	public String getOriginKey() {
+		return originKey;
+	}
+	public void setOriginKey(String originKey) {
+		this.originKey = originKey;
+	}
+	public String getOriginValue() {
+		return originValue;
+	}
+	public void setOriginValue(String originValue) {
+		this.originValue = originValue;
+	}
+	
 	public String getJoinType() {
 		return joinType;
 	}
@@ -115,5 +139,24 @@ public class Join {
 			setKey(originKey);
 		}
 	}
+	
+	
+	
+	public boolean isSQLJoin() {
+		return ! isAppJoin();
+	}
+	
+	public static boolean isSQLJoin(Join j) {
+		return j != null && j.isSQLJoin();
+	}
+	
+	public boolean isAppJoin() {
+		return "@".equals(getJoinType());
+	}
+	
+	public static boolean isAppJoin(Join j) {
+		return j != null && j.isAppJoin();
+	}
+
 
 }

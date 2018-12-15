@@ -491,13 +491,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			return "(" + StringUtil.getString(column.toArray()) + ")";
 		case GET:
-		case GETS: //TODO 支持SQL函数 json_length(contactIdList):contactCount
+		case GETS:
 			boolean isQuery = RequestMethod.isQueryMethod(method);
 			String joinColumn = "";
 			if (isQuery && joinList != null) {
 				SQLConfig c;
 				boolean first = true;
 				for (Join j : joinList) {
+					if (j.isAppJoin()) {
+						continue;
+					}
+					
 					c = j.getJoinConfig();
 					c.setAlias(c.getTable());
 					joinColumn += (first ? "" : ", ") + ((AbstractSQLConfig) c).getColumnString();
@@ -637,7 +641,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 	}
 
-
+	
 	@Override
 	public List<List<Object>> getValues() {
 		return values;
@@ -862,10 +866,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (where == null) {
 				where = new LinkedHashMap<String, Object>();	
 			}
-			where.put(key, value);
+			if (value == null) {
+				where.remove(key);
+			} else {
+				where.put(key, value);
+			}
 
 			combine = getCombine();
-			List<String> andList = combine == null ? null : combine.get("&");
+			List<String> andList = combine.get("&");
 			if (value == null) {
 				andList.remove(key);
 			}
@@ -984,12 +992,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
 			for (Join j : joinList) {
 				switch (j.getJoinType()) {
-				case "":
-				case "|": //不支持 <>, [] ，避免太多符号
-				case "&":
-				case "!":
-				case "^":
-				case "*":
+				case "@": // APP JOIN
+					newWs = whereString; //解决 生成的 SQL 里 where = null
+					newPvl = preparedValueList;  //解决总是 preparedValueList = new ArrayList
+					break;
+
+				case "<": // LEFT JOIN
+				case ">": // RIGHT JOIN
+					break;
+
+				case "":  // FULL JOIN 
+				case "|": // FULL JOIN  不支持 <>, [] ，避免太多符号
+				case "&": // INNER JOIN 
+				case "!": // OUTTER JOIN
+				case "^": // SIDE JOIN
+				case "*": // CROSS JOIN
 					jc = j.getJoinConfig();
 					boolean isMain = jc.isMain();
 					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
@@ -1031,8 +1048,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					break;
-					//可能 LEFT JOIN 和 INNER JOIN 同时存在				default:
-					//					throw new UnsupportedOperationException("");
+				default:
+					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
 				}
 			}
 
@@ -1688,6 +1705,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	public String getJoinString() throws Exception {
 		String joinOns = "";
+
 		if (joinList != null) {
 			String quote = getQuote();
 
@@ -1696,6 +1714,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String jt;
 			String tn;
 			for (Join j : joinList) {
+				if (j.isAppJoin()) { // APP JOIN，只是作为一个标记，执行完主表的查询后自动执行副表的查询 User.id IN($commentIdList)
+					continue;
+				}
 
 				//LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
 				// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
@@ -1709,18 +1730,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					tn = tn.toLowerCase();
 				}
 
-				switch (j.getJoinType()) {
-				case "":
-				case "|": //不支持 <>, [] ，避免太多符号
-				case "&":
-				case "!":
-				case "^":
-				case "*":
-					sql = ("*".equals(j.getJoinType()) ? " CROSS JOIN " : " INNER JOIN ") + jc.getTablePath()
-					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tn + quote + "." + quote + j.getTargetKey() + quote;
-					break;
-				case "<":
-				case ">":
+				switch (j.getJoinType()) { //TODO $ SELF JOIN
+				//				case "@": // APP JOIN
+				//					continue;
+
+				case "<": // LEFT JOIN
+				case ">": // RIGHT JOIN
 					jc.setMain(true).setKeyPrefix(false);
 					sql = ( ">".equals(j.getJoinType()) ? " RIGHT" : " LEFT") + " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS "
 							+ quote + jt + quote + " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = "
@@ -1729,13 +1744,24 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 					preparedValueList.addAll(jc.getPreparedValueList());
 					break;
+
+				case "":  // FULL JOIN 
+				case "|": // FULL JOIN  不支持 <>, [] ，避免太多符号
+				case "&": // INNER JOIN 
+				case "!": // OUTTER JOIN
+				case "^": // SIDE JOIN
+					//场景少且性能差，默认禁用	case "*": // CROSS JOIN
+					sql = ("*".equals(j.getJoinType()) ? " CROSS JOIN " : " INNER JOIN ") + jc.getTablePath()
+					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tn + quote + "." + quote + j.getTargetKey() + quote;
+					break;
 				default:
-					throw new UnsupportedOperationException("服务器内部错误：不支持JOIN类型 " + j.getJoinType() + " !");
+					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
 				}
 
 				joinOns += "  \n  " + sql;
 			}
 		}
+
 		return joinOns;
 	}
 
@@ -1752,8 +1778,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		AbstractSQLConfig config = callback.getSQLConfig(method, table);
 
 		//放后面会导致主表是空对象时 joinList 未解析
-		config.setJoinList(parseJoin(method, joinList, callback));
-		config.setKeyPrefix(RequestMethod.isQueryMethod(method) && (config.isMain() == false || (joinList != null && joinList.isEmpty() == false)));
+		config = parseJoin(method, config, joinList, callback);
 
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
@@ -2023,11 +2048,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
-	public static List<Join> parseJoin(RequestMethod method, List<Join> joinList, Callback callback) throws Exception {
+	/**
+	 * @param method
+	 * @param config
+	 * @param joinList
+	 * @param callback
+	 * @return
+	 * @throws Exception
+	 */
+	public static AbstractSQLConfig parseJoin(RequestMethod method, AbstractSQLConfig config, List<Join> joinList, Callback callback) throws Exception {
+		boolean isQuery = RequestMethod.isQueryMethod(method);
+		config.setKeyPrefix(isQuery && config.isMain() == false);
 
 		//TODO 解析出 SQLConfig 再合并 column, order, group 等
-		if (joinList == null || joinList.isEmpty()) {
-			return null;
+		if (joinList == null || joinList.isEmpty() || RequestMethod.isQueryMethod(method) == false) {
+			return config;
 		}
 
 
@@ -2035,8 +2070,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		for (Join j : joinList) {
 			name = j.getName();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
-			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback).setMain(false).setKeyPrefix(true);
+			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback);
 			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, callback).setCount(1);
+
+			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
+				if (isQuery) {
+					config.setKeyPrefix(true);
+				}
+
+				joinConfig.setMain(false).setKeyPrefix(true);
+			}
 
 			//解决 query: 1/2 查数量时报错  
 			/* SELECT  count(*)  AS count  FROM sys.Moment AS Moment  
@@ -2053,10 +2096,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			j.setCacheConfig(cacheConfig);
 		}
 
-		return joinList;
+		config.setJoinList(joinList);
+
+		return config;
 	}
-
-
 
 
 

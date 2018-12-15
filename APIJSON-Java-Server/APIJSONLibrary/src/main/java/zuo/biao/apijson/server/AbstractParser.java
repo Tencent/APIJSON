@@ -822,6 +822,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			tableObj.put(key, tableObj.remove(key)); //保证和SQLExcecutor缓存的Config里where顺序一致，生成的SQL也就一致
 
 			Join j = new Join();
+			j.setPath(path);
+			j.setOriginKey(key);
+			j.setOriginValue(targetPath);
 			j.setJoinType(joinType);
 			j.setName(table);
 			j.setTargetName(targetTable);
