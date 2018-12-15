@@ -206,7 +206,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		boolean hasJoin = config.hasJoin();
 		int viceColumnStart = length + 1; //第一个副表字段的index
-		while (rs.next()){
+		while (rs.next()) {
 			index ++;
 			Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
 
@@ -326,7 +326,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				JSONObject result;
 				String cacheSql;
-				while (rs.next()){
+				while (rs.next()) { //FIXME 同时有 @ APP JOIN 和 < 等 SQL JOIN 时，next = false 总是无法进入循环，导致缓存失效，可能是连接池或线程问题
 					index ++;
 					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n executeAppJoin while (rs.next()){  index = " + index + "\n\n");
 
