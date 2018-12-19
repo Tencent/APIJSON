@@ -152,7 +152,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 [APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
 
-感谢热心的作者们的贡献，点 Star 支持下他们吧 ^_^
+感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
 ### 持续更新
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
