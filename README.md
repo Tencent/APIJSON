@@ -158,7 +158,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
 ### 我要赞赏
-创作不易，右上角点 ⭐Star 支持下吧，谢谢 ^_^ <br />
+创作不易，右上角点 ⭐Star 支持下本项目吧，谢谢 ^_^ <br />
 [https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON)
 
  
