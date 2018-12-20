@@ -28,6 +28,7 @@ import zuo.biao.apijson.server.SQLConfig;
 
 
 /**SQL配置
+ * TiDB 用法和 MySQL 一致
  * @author Lemon
  */
 public class DemoSQLConfig extends AbstractSQLConfig {
@@ -41,7 +42,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	@Override
 	public String getDBUri() {
-		//TODO 改成你自己的
+		//TODO 改成你自己的，TiDB 默认端口为 4000
 		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432/postgres" : "jdbc:mysql://localhost:3306";
 	}
 	@Override
@@ -50,7 +51,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	}
 	@Override
 	public String getDBPassword() {
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "apijson"; //TODO 改成你自己的
+		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "apijson"; //TODO 改成你自己的，TiDB 默认密码为空字符串 ""
 	}
 	@Override
 	public String getSchema() {

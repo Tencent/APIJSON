@@ -16,7 +16,10 @@ package apijson.demo.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -25,6 +28,7 @@ import org.springframework.web.filter.CorsFilter;
 /**application
  * @author Lemon
  */
+@Configuration
 @SpringBootApplication
 public class APIJSONApplication {
 
@@ -40,7 +44,7 @@ public class APIJSONApplication {
 		}
 		System.out.println("\n完成测试:远程函数 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
-		
+
 		System.out.println("\n\n\n开始测试:请求校验 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
 			StructureUtil.test();
@@ -53,6 +57,16 @@ public class APIJSONApplication {
 	}
 
 
+	@Bean
+	public EmbeddedServletContainerCustomizer containerCustomizer() {
+		return new EmbeddedServletContainerCustomizer() {
+
+			@Override
+			public void customize(ConfigurableEmbeddedServletContainer container) {
+				container.setPort(8080); //自定义端口号，如果和 TiDB 等其它程序端口有冲突，可改为 8081, 9090, 9091 等未被占用的端口 	
+			}
+		};
+	}
 
 	//支持JavaScript跨域请求<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/** 
