@@ -103,6 +103,11 @@ public class DemoFunction extends RemoteFunction {
 		//Function[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		JSONObject response = new DemoParser(RequestMethod.GET, true).parseResponse(request);
+		if (JSONResponse.isSuccess(response) == false) {
+			Log.e(TAG, "\n\n\n\n\n !!!! 查询远程函数异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
+			return;
+		}
+		
 		JSONArray fl = response.getJSONArray("Function[]");
 		if (fl == null || fl.isEmpty()) {
 			Log.d(TAG, "没有可用的远程函数");
