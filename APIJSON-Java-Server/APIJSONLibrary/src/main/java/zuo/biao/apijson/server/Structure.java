@@ -24,6 +24,7 @@ import static zuo.biao.apijson.server.Operation.REMOVE;
 import static zuo.biao.apijson.server.Operation.REPLACE;
 import static zuo.biao.apijson.server.Operation.TYPE;
 import static zuo.biao.apijson.server.Operation.UNIQUE;
+import static zuo.biao.apijson.server.Operation.UPDATE;
 import static zuo.biao.apijson.server.Operation.VERIFY;
 
 import java.util.ArrayList;
@@ -227,6 +228,7 @@ public class Structure {
 		JSONObject type = target.getJSONObject(TYPE.name());
 		JSONObject verify = target.getJSONObject(VERIFY.name());
 		JSONObject add = target.getJSONObject(ADD.name());
+		JSONObject update = target.getJSONObject(UPDATE.name());
 		JSONObject put = target.getJSONObject(PUT.name());
 		JSONObject replace = target.getJSONObject(REPLACE.name());
 
@@ -239,6 +241,7 @@ public class Structure {
 		target.remove(TYPE.name());
 		target.remove(VERIFY.name());
 		target.remove(ADD.name());
+		target.remove(UPDATE.name());
 		target.remove(PUT.name());
 		target.remove(REPLACE.name());
 
@@ -359,6 +362,7 @@ public class Structure {
 		real = operate(TYPE, type, real, creator);
 		real = operate(VERIFY, verify, real, creator);
 		real = operate(ADD, add, real, creator);
+		real = operate(UPDATE, update, real, creator);
 		real = operate(PUT, put, real, creator);
 		real = operate(REPLACE, replace, real, creator);
 		//校验与修改Request>>>>>>>>>>>>>>>>>
@@ -413,6 +417,9 @@ public class Structure {
 			}
 			else if (opt == VERIFY) {
 				verify(tk, tv, real, creator);
+			}
+			else if (opt == UPDATE) {
+				real.put(tk, tv);
 			}
 			else if (opt == PUT) {
 				real.put(tk, tv);

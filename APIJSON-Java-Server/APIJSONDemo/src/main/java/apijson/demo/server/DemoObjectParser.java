@@ -38,7 +38,7 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	}
 
 
-	private DemoFunction function;
+	
 	/**for single object
 	 * @param parentPath
 	 * @param request
@@ -47,7 +47,6 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	 */
 	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
 		super(request, parentPath, name, arrayConfig);
-		function = new DemoFunction(session);
 	}
 	
 	@Override
@@ -65,12 +64,6 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	@Override
 	public SQLConfig newSQLConfig() throws Exception {
 		return DemoSQLConfig.newSQLConfig(method, table, sqlRequest, joinList);
-	}
-
-
-	@Override
-	public Object onFunctionParse(JSONObject json, String fun) throws Exception {
-		return function.invoke(json, fun);
 	}
 
 

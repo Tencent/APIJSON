@@ -42,8 +42,10 @@ import zuo.biao.apijson.server.RemoteFunction;
 public class DemoFunction extends RemoteFunction {
 	private static final String TAG = "DemoFunction";
 
+	private final RequestMethod method;
 	private final HttpSession session;
-	public DemoFunction(HttpSession session) {
+	public DemoFunction(RequestMethod method, HttpSession session) {
+		this.method = method;
 		this.session = session;
 	}
 
@@ -73,11 +75,11 @@ public class DemoFunction extends RemoteFunction {
 		request.put("object", object);
 
 
-		Log.i(TAG, "plus(1,-2) = " + new DemoFunction(null).invoke(request, "plus(i0,i1)"));
-		Log.i(TAG, "count([1,2,4,10]) = " + new DemoFunction(null).invoke(request, "countArray(array)"));
-		Log.i(TAG, "isContain([1,2,4,10], 10) = " + new DemoFunction(null).invoke(request, "isContain(array,id)"));
-		Log.i(TAG, "getFromArray([1,2,4,10], 0) = " + new DemoFunction(null).invoke(request, "getFromArray(array,@position)"));
-		Log.i(TAG, "getFromObject({key:true}, key) = " + new DemoFunction(null).invoke(request, "getFromObject(object,key)"));
+		Log.i(TAG, "plus(1,-2) = " + new DemoFunction(null, null).invoke("plus(i0,i1)", request));
+		Log.i(TAG, "count([1,2,4,10]) = " + new DemoFunction(null, null).invoke("countArray(array)", request));
+		Log.i(TAG, "isContain([1,2,4,10], 10) = " + new DemoFunction(null, null).invoke("isContain(array,id)", request));
+		Log.i(TAG, "getFromArray([1,2,4,10], 0) = " + new DemoFunction(null, null).invoke("getFromArray(array,@position)", request));
+		Log.i(TAG, "getFromObject({key:true}, key) = " + new DemoFunction(null, null).invoke("getFromObject(object,key)", request));
 
 		forceUseable();
 	}
@@ -138,16 +140,12 @@ public class DemoFunction extends RemoteFunction {
 	}
 
 	/**反射调用
-	 * @param request
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
+	 * @param json 不作为第一个参数，就不能远程调用invoke，避免死循环
 	 * @return
 	 */
-	public Object invoke(JSONObject request, String function) throws Exception {
-		//TODO  不允许调用invoke，避免死循环
-		//		if (function.startsWith("invoke(")) {
-		//			
-		//		}
-		return invoke(this, request, function);
+	public Object invoke(String function, JSONObject json) throws Exception {
+		return invoke(this, json, function);
 	}
 
 
@@ -203,6 +201,10 @@ public class DemoFunction extends RemoteFunction {
 	 * @throws Exception
 	 */
 	public int deleteCommentOfMoment(@NotNull JSONObject rq, @NotNull String momentId) throws Exception {
+		if (method != RequestMethod.DELETE) {
+			throw new UnsupportedOperationException("远程函数 deleteCommentOfMoment 只支持 DELETE 方法！");
+		}
+		
 		long mid = rq.getLongValue(momentId);
 		if (mid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
@@ -230,6 +232,10 @@ public class DemoFunction extends RemoteFunction {
 	 * @return
 	 */
 	public int deleteChildComment(@NotNull JSONObject rq, @NotNull String toId) throws Exception {
+		if (method != RequestMethod.DELETE) {
+			throw new UnsupportedOperationException("远程函数 deleteChildComment 只支持 DELETE 方法！");
+		}
+		
 		long tid = rq.getLongValue(toId);
 		if (tid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;

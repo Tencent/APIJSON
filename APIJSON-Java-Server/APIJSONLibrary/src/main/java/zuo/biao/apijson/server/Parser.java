@@ -86,6 +86,14 @@ public interface Parser<T> {
 
 	JSONArray onArrayParse(JSONObject request, String parentPath, String name) throws Exception;
 
+	/**解析远程函数
+	 * @param object
+	 * @param function
+	 * @return
+	 * @throws Exception
+	 */
+	Object onFunctionParse(JSONObject object, String function) throws Exception;
+	
 	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception;
 
 	int getMaxQueryCount();

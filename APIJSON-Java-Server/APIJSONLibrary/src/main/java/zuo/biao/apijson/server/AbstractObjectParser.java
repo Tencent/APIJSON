@@ -632,7 +632,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	}
 
 	public void parseFunction(JSONObject json, String key, String value) throws Exception {
-		Object result = onFunctionParse(json, value);
+		Object result = parser.onFunctionParse(json, value);
 
 		if (result != null) {
 			String k = AbstractSQLConfig.getRealKey(method, key, false, false, "`"); //FIXME PG 是 "
@@ -658,10 +658,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	}
 
 
-	@Override
-	public Object onFunctionParse(JSONObject json, String function) throws Exception {
-		return null;
-	}
 
 	@Override
 	public Object onReferenceParse(@NotNull String path) {

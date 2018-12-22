@@ -73,14 +73,6 @@ public interface ObjectParser {
 	 */
 	Object onReferenceParse(@NotNull String path);
 
-	/**解析远程函数
-	 * @param json
-	 * @param function
-	 * @return
-	 * @throws Exception
-	 */
-	Object onFunctionParse(JSONObject json, String function) throws Exception;
-	
 	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！ 
 	/**PUT key:[]
 	 * @param key

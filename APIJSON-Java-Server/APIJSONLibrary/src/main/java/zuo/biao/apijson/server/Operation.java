@@ -51,7 +51,9 @@ public enum Operation {
 	/**
 	 * 强行放入，不存在时就添加，存在时就修改
 	 */
-	PUT,
+	UPDATE,
+	@Deprecated
+	PUT, //use UPDATE instead，容易和 RequestMethod.PUT 混淆，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 PUT
 	/**
 	 * 替换，当要被替换的对象存在时
 	 */

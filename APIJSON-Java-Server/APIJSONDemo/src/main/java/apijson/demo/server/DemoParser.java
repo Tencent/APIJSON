@@ -73,6 +73,15 @@ public class DemoParser extends AbstractParser<Long> {
 		return super.parseResponse(request);
 	}
 
+	private DemoFunction function;
+	@Override
+	public Object onFunctionParse(JSONObject json, String fun) throws Exception {
+		if (function == null) {
+			function = new DemoFunction(requestMethod, session);
+		}
+		return function.invoke(fun, json);
+	}
+
 
 	@Override
 	public DemoObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
