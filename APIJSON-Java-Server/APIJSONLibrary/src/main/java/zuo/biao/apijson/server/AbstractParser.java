@@ -297,7 +297,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		sqlExecutor = null;
 
 
-		requestObject = verifier.removeAccessInfo(requestObject);
 		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
 
 

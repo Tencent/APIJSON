@@ -358,6 +358,5 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 			throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
 		}
 	}
-
-
+	
 }

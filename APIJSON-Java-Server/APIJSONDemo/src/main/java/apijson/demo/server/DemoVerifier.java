@@ -115,13 +115,5 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 		return v == null ? 0 : v;
 	}
 
-	/**删除请求里的权限信息
-	 * @param requestObject
-	 * @return
-	 */
-	@Deprecated
-	public JSONObject removeAccessInfo(JSONObject requestObject) {
-		return requestObject;
-	}
 
 }

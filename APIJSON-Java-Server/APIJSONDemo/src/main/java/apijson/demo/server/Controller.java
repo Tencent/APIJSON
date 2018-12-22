@@ -424,10 +424,10 @@ public class Controller {
 						new Privacy().setPhone(phone)
 						)
 				);
-		JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
-		if (JSONResponse.isSuccess(response) == false) {
-			return response;
+		if (JSONResponse.isSuccess(phoneResponse) == false) {
+			return DemoParser.newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), phoneResponse.getString(JSONResponse.KEY_MSG));
 		}
+		JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
 		if(JSONResponse.isExist(response) == false) {
 			return DemoParser.newErrorResult(new NotExistException("手机号未注册"));
 		}

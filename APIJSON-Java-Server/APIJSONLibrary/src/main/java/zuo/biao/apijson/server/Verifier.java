@@ -74,8 +74,6 @@ public interface Verifier<T> {
 	void verifyRepeat(String table, String key, Object value, long exceptId) throws Exception;
 	
 
-	JSONObject removeAccessInfo(JSONObject request);
-	
 	@NotNull
 	Parser<T> createParser();
 	
