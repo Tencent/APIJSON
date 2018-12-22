@@ -232,7 +232,7 @@ public class DemoFunction extends RemoteFunction {
 	 * @return
 	 */
 	public int deleteChildComment(@NotNull JSONObject rq, @NotNull String toId) throws Exception {
-		if (method != RequestMethod.DELETE) {
+		if (method != RequestMethod.DELETE) { //TODO 如果这样的判断太多，可以把 DemoFunction 分成对应不同 RequestMethod 的 GetFunciton 等，创建时根据 method 判断用哪个
 			throw new UnsupportedOperationException("远程函数 deleteChildComment 只支持 DELETE 方法！");
 		}
 		

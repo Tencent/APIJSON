@@ -359,6 +359,7 @@ public class Controller {
 
 
 	public static final String LOGIN = "login";
+	public static final String REMEMBER = "remember";
 
 	public static final int LOGIN_TYPE_PASSWORD = 0;//密码登录
 	public static final int LOGIN_TYPE_VERIFY = 1;//验证码登录
@@ -381,6 +382,7 @@ public class Controller {
 		boolean isPassword;
 		String phone;
 		String password;
+		boolean remember;
 		int version;
 		Boolean format;
 		try {
@@ -404,9 +406,10 @@ public class Controller {
 				}
 			}
 
-			//全局版本号，是否格式化
+			remember = requestObject.getBooleanValue(REMEMBER);
 			version = requestObject.getIntValue(VERSION);
 			format = requestObject.getBoolean(FORMAT);
+			requestObject.remove(REMEMBER);
 			requestObject.remove(VERSION);
 			requestObject.remove(FORMAT);
 		} catch (Exception e) {
@@ -472,14 +475,16 @@ public class Controller {
 		}
 
 		//登录状态保存至session
-		session.setAttribute(USER_ID, userId);//用户id
-		session.setAttribute(TYPE, isPassword ? LOGIN_TYPE_PASSWORD : LOGIN_TYPE_VERIFY);//登录方式
-		session.setAttribute(USER_, user);//用户
-		session.setAttribute(PRIVACY_, privacy);//用户隐私信息
-		session.setAttribute(VERSION, version);//全局默认版本号
-		session.setAttribute(FORMAT, format);//全局默认格式化配置
-		//		session.setMaxInactiveInterval(1*60);//设置session过期时间
+		session.setAttribute(USER_ID, userId); //用户id
+		session.setAttribute(TYPE, isPassword ? LOGIN_TYPE_PASSWORD : LOGIN_TYPE_VERIFY); //登录方式
+		session.setAttribute(USER_, user); //用户
+		session.setAttribute(PRIVACY_, privacy); //用户隐私信息
+		session.setAttribute(REMEMBER, remember); //记住登录
+		session.setAttribute(VERSION, version); //全局默认版本号
+		session.setAttribute(FORMAT, format); //全局默认格式化配置
+		session.setMaxInactiveInterval(60*60*24*(remember ? 7 : 1)); //设置session过期时间
 
+		response.put(REMEMBER, remember);
 		return response;
 	}
 
