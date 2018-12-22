@@ -1,4 +1,5 @@
 # APIJSON后端部署 - Java
+以下是简单的部署说明，也可以看这个详细的 [图文入门教程](https://github.com/TommyLemon/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md)
 
 #### 用现成的开箱即用 jar包 极速部署 见
 https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
