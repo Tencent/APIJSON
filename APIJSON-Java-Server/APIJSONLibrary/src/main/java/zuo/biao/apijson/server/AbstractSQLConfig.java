@@ -501,7 +501,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (j.isAppJoin()) {
 						continue;
 					}
-					
+
 					c = j.getJoinConfig();
 					c.setAlias(c.getTable());
 					joinColumn += (first ? "" : ", ") + ((AbstractSQLConfig) c).getColumnString();
@@ -641,7 +641,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 	}
 
-	
+
 	@Override
 	public List<List<Object>> getValues() {
 		return values;
@@ -1214,7 +1214,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	/**WHERE key LIKE 'value'
-	 * @param key endsWith("!") ? key = key.substring(0, key.length() - 1) + NOT;
+	 * @param key
 	 * @param value
 	 * @return key LIKE 'value'
 	 */
@@ -1292,51 +1292,74 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	//% between <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	/**WHERE key BETWEEN 'value0' AND 'value1'
+	/**WHERE key BETWEEN 'start' AND 'end'
 	 * @param key
-	 * @param value
-	 * @return key BETWEEN 'value0' AND 'value1'
+	 * @param value 'start,end'
+	 * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
+	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getBetweenString(String key, Object value) {
-		boolean not = key.endsWith("!"); //不能用 new Logic(key) 因为默认是 | ，而 BETWEEN 只能接 AND
-		if (not) {
-			key = key.substring(0, key.length() - 1);
-		}
-		if (StringUtil.isName(key) == false) {
-			throw new IllegalArgumentException(key + "%:value 中key不合法！不支持 ! 以外的逻辑符 ！");
+	public String getBetweenString(String key, Object value) throws IllegalArgumentException {
+		if (value == null) {
+			return "";
 		}
 
-		Object[] vs;
-		if (value instanceof String) {
-			vs = StringUtil.split((String) value);
-			//			int index = ((String) value).indexOf(",");
-			//			if (index < 0) {
-			//				throw new IllegalArgumentException(key + "%:value 中value的类型为 String 时必须包括逗号 , ！前面缺省为 min(key) ，后面缺省为 max(key)");
-			//			}
-			//			if (index == 0) {
-			//				start = "(SELECT min(key) FROM getSQLTable())"
-			//			}
-		}
-		else if (value instanceof Collection<?>) {
-			vs = ((Collection<?>) value).toArray();
-		}
-		else {
-			throw new IllegalArgumentException(key + "%:value 中value不合法！类型只能为 1个逗号分隔的String 或者 只有Boolean[2]或Number[2]或String[2] ！");
-		}
+		Logic logic = new Logic(key);
+		key = logic.getKey();
+		Log.i(TAG, "getBetweenString key = " + key);
 
-		if (vs == null || vs.length != 2) {
-			throw new IllegalArgumentException(key + "%:value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
+		JSONArray arr = newJSONArray(value);
+		if (arr.isEmpty()) {
+			return "";
 		}
-
-		Object start = vs[0];
-		Object end = vs[1];
-		if (JSON.isBooleanOrNumberOrString(start) == false || JSON.isBooleanOrNumberOrString(end) == false) {
-			throw new IllegalArgumentException(key + "%:value 中value不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 JSONArray 时只能是 Boolean[2]或Number[2]或String[2] ！");
-		}
-
-		return getKey(key) + (not ? NOT : "") + " BETWEEN " + getValue(start) + AND + getValue(end);
+		return getBetweenString(key, arr.toArray(), logic.getType());
 	}
+
+	/**WHERE key BETWEEN 'start' AND 'end'
+	 * @param key
+	 * @param value 'start,end' TODO 在 '1,2' 和 ['1,2', '3,4'] 基础上新增支持 [1, 2] 和 [[1,2], [3,4]] ？
+	 * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
+	 * @throws IllegalArgumentException 
+	 */
+	@JSONField(serialize = false)
+	public String getBetweenString(String key, Object[] values, int type) throws IllegalArgumentException {
+		if (values == null || values.length <= 0) {
+			return "";
+		}
+
+		String condition = "";
+		String[] vs;
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] instanceof String == false) {
+				throw new IllegalArgumentException(key + "%:value 中 value 的类型只能为 String 或 String[] ！");
+			}
+			
+			vs = StringUtil.split((String) values[i]);
+			if (vs == null || vs.length != 2) {
+				throw new IllegalArgumentException(key + "%:value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
+			}
+			
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + "(" + getBetweenString(key, vs[0], vs[1]) + ")";
+		}
+
+		return getCondition(Logic.isNot(type), condition);
+	}
+
+	/**WHERE key BETWEEN 'start' AND 'end'
+	 * @param key
+	 * @param value 'start,end' TODO 在 '1,2' 和 ['1,2', '3,4'] 基础上新增支持 [1, 2] 和 [[1,2], [3,4]] ？
+	 * @return key BETWEEN 'start' AND 'end'
+	 * @throws IllegalArgumentException 
+	 */
+	@JSONField(serialize = false)
+	public String getBetweenString(String key, Object start, Object end) throws IllegalArgumentException {
+		if (JSON.isBooleanOrNumberOrString(start) == false || JSON.isBooleanOrNumberOrString(end) == false) {
+			throw new IllegalArgumentException(key + "%:value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
+		}
+		return getKey(key) + " BETWEEN " + getValue(start) + AND + getValue(end);
+	}
+
+
 	//% between >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
