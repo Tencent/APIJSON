@@ -743,16 +743,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String[] split(String s, String split) {
-		return split(s, split, false);
-	}
-	/**将s用split分割成String[]
-	 * split = null
-	 * @param s
-	 * @param trim 去掉前后两端的split
-	 * @return
-	 */
-	public static String[] split(String s, boolean trim) {
-		return split(s, null, trim);
+		return split(s, split, true);
 	}
 	/**将s用split分割成String[]
 	 * @param s
