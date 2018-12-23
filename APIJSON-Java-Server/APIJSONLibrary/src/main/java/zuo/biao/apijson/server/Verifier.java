@@ -14,8 +14,6 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
-import com.alibaba.fastjson.JSONObject;
-
 import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;

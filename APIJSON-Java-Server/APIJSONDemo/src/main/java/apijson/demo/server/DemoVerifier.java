@@ -17,8 +17,6 @@ package apijson.demo.server;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 
-import com.alibaba.fastjson.JSONObject;
-
 import apijson.demo.server.model.Comment;
 import apijson.demo.server.model.Login;
 import apijson.demo.server.model.Moment;
