@@ -27,7 +27,7 @@ CREATE TABLE `Request` (
   `version` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'GET,HEAD可用任意结构访问任意开放内容，不需要这个字段。\n其它的操作因为写入了结构和内容，所以都需要，按照不同的version选择对应的structure。\n\n自动化版本管理：\nRequest JSON最外层可以传  “version”:Integer 。\n1.未传或 <= 0，用最新版。 “@order”:”version-“\n2.已传且 > 0，用version以上的可用版本的最低版本。 “@order”:”version+”, “version{}”:”>={version}”',
   `method` varchar(10) DEFAULT 'GETS' COMMENT '只限于GET,HEAD外的操作方法。',
   `tag` varchar(20) NOT NULL COMMENT '标签',
-  `structure` json NOT NULL COMMENT '结构',
+  `structure` json NOT NULL COMMENT '结构。\nTODO 里面的 PUT 改为 UPDATE，避免和请求 PUT 搞混。',
   `detail` varchar(10000) DEFAULT NULL COMMENT '详细说明',
   `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   PRIMARY KEY (`id`)
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-12-10 23:39:34
+-- Dump completed on 2018-12-27 23:20:17
