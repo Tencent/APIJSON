@@ -17,6 +17,7 @@ package zuo.biao.apijson.server;
 import static zuo.biao.apijson.JSONObject.KEY_COLUMN;
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
 import static zuo.biao.apijson.JSONObject.KEY_DATABASE;
+import static zuo.biao.apijson.JSONObject.KEY_FROM;
 import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
 import static zuo.biao.apijson.JSONObject.KEY_ID;
@@ -96,6 +97,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private String group; //分组方式的字符串数组，','分隔
 	private String having; //聚合函数的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
+	private Subquery from; //子查询临时表
 	private List<String> column; //表内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
 	private List<List<Object>> values; //对应表内字段的值的字符串数组，','分隔
 	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
@@ -110,7 +112,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private int query; //JSONRequest.query
 	private int type; //ObjectParser.type
 	private List<Join> joinList; //连表 配置列表
-	private List<Subquery> subqueryList; //子查询 配置列表
 	//array item >>>>>>>>>>
 	private boolean test; //测试
 	private boolean cacheStatic; //静态缓存
@@ -454,6 +455,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
+	@Override
+	public Subquery getFrom() {
+		return from;
+	}
+	@Override
+	public AbstractSQLConfig setFrom(Subquery from) {
+		this.from = from;
+		return this;
+	}
 
 	@Override
 	public List<String> getColumn() {
@@ -745,18 +755,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return joinList != null && joinList.isEmpty() == false;
 	}
 	
-	@Override
-	public List<Subquery> getSubqueryList() {
-		return subqueryList;
-	}
-	@Override
-	public void setSubqueryList(List<Subquery> subqueryList) {
-		this.subqueryList = subqueryList;
-	}
-	@Override
-	public boolean hasSubquery() {
-		return subqueryList != null && subqueryList.isEmpty() == false;
-	}
 
 	@Override
 	public boolean isTest() {
@@ -1688,6 +1686,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private static String getConditionString(String column, String table, AbstractSQLConfig config) throws Exception {
 		String where = config.getWhereString(true);
 
+		Subquery from = config.getFrom();
+		if (from != null) {
+			table = config.getSubqueryString(from) + " AS " + config.getKey(from.getFrom()) + " "; //TODO Comment:c 转为  AS `Comment:c`
+		}
+		
 		String condition = table + config.getJoinString() + where + (
 				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
 						"" : config.getGroupString() + config.getHavingString() + config.getOrderString()
@@ -1866,6 +1869,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String database = request.getString(KEY_DATABASE);
 		String schema = request.getString(KEY_SCHEMA);
 		String combine = request.getString(KEY_COMBINE);
+		Subquery from = (Subquery) request.get(KEY_FROM);
 		String column = request.getString(KEY_COLUMN);
 		String group = request.getString(KEY_GROUP);
 		String having = request.getString(KEY_HAVING);
@@ -1879,6 +1883,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.remove(KEY_DATABASE);
 		request.remove(KEY_SCHEMA);
 		request.remove(KEY_COMBINE);
+		request.remove(KEY_FROM);
 		request.remove(KEY_COLUMN);
 		request.remove(KEY_GROUP);
 		request.remove(KEY_HAVING);
@@ -2055,6 +2060,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
+		config.setFrom(from);
 		config.setColumn(cs);
 		config.setWhere(tableWhere);					
 
@@ -2079,6 +2085,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.put(KEY_DATABASE, database);
 		request.put(KEY_SCHEMA, schema);
 		request.put(KEY_COMBINE, combine);
+		request.put(KEY_FROM, from);
 		request.put(KEY_COLUMN, column);
 		request.put(KEY_GROUP, group);
 		request.put(KEY_HAVING, having);

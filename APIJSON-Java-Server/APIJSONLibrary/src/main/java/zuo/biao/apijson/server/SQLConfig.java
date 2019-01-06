@@ -125,6 +125,9 @@ public interface SQLConfig {
 	String getOrder();
 	SQLConfig setOrder(String order);
 
+	Subquery getFrom();
+	SQLConfig setFrom(Subquery from);
+	
 	List<String> getColumn();
 	SQLConfig setColumn(List<String> column);
 
@@ -194,12 +197,6 @@ public interface SQLConfig {
 
 	boolean hasJoin();
 	
-	
-	List<Subquery> getSubqueryList();
-
-	void setSubqueryList(List<Subquery> subqueryList);
-
-	boolean hasSubquery();
 	
 	String getSubqueryString(Subquery subquery) throws Exception;
 

@@ -25,6 +25,7 @@ public class Subquery {
 	private String originKey;
 	private JSONObject originValue;
 
+	private String from; // any, all
 	private String range; // any, all
 	private String key; //id
 	private SQLConfig config;
@@ -47,6 +48,13 @@ public class Subquery {
 	}
 	public void setOriginValue(JSONObject originValue) {
 		this.originValue = originValue;
+	}
+	
+	public String getFrom() {
+		return from;
+	}
+	public void setFrom(String from) {
+		this.from = from;
 	}
 	public String getRange() {
 		return range;

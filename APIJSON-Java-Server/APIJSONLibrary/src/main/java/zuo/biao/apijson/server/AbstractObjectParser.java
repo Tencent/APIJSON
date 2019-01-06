@@ -352,10 +352,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				SQLConfig cfg = arrObj == null ? null : (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
 				
 				Subquery s = new Subquery();
-				s.setPath(parentPath);
+				s.setPath(path);
 				s.setOriginKey(key);
 				s.setOriginValue(subquery);
 
+				s.setFrom(from);
 				s.setRange(range);
 				s.setKey(replaceKey);
 				s.setConfig(cfg);
