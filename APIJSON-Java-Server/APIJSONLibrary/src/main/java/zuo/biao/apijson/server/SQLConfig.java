@@ -176,11 +176,6 @@ public interface SQLConfig {
 	List<Object> getPreparedValueList();
 	SQLConfig setPreparedValueList(List<Object> preparedValueList);
 
-	List<Join> getJoinList();
-
-	SQLConfig setJoinList(List<Join> joinList);
-
-	boolean hasJoin();
 	
 	String getAlias();
 
@@ -191,5 +186,21 @@ public interface SQLConfig {
 	boolean isKeyPrefix();
 
 	SQLConfig setKeyPrefix(boolean keyPrefix);
+
+	
+	List<Join> getJoinList();
+
+	SQLConfig setJoinList(List<Join> joinList);
+
+	boolean hasJoin();
+	
+	
+	List<Subquery> getSubqueryList();
+
+	void setSubqueryList(List<Subquery> subqueryList);
+
+	boolean hasSubquery();
+	
+	String getSubqueryString(Subquery subquery) throws Exception;
 
 }

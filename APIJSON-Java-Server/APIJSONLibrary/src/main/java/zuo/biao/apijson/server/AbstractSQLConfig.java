@@ -109,7 +109,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private int position; //Table在[]中的位置
 	private int query; //JSONRequest.query
 	private int type; //ObjectParser.type
-	private List<Join> joinList; //joinList
+	private List<Join> joinList; //连表 配置列表
+	private List<Subquery> subqueryList; //子查询 配置列表
 	//array item >>>>>>>>>>
 	private boolean test; //测试
 	private boolean cacheStatic; //静态缓存
@@ -742,6 +743,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public boolean hasJoin() {
 		return joinList != null && joinList.isEmpty() == false;
+	}
+	
+	@Override
+	public List<Subquery> getSubqueryList() {
+		return subqueryList;
+	}
+	@Override
+	public void setSubqueryList(List<Subquery> subqueryList) {
+		this.subqueryList = subqueryList;
+	}
+	@Override
+	public boolean hasSubquery() {
+		return subqueryList != null && subqueryList.isEmpty() == false;
 	}
 
 	@Override
@@ -1401,7 +1415,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
 		}
-		if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
+		else if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
 			if (isPrepared() && PATTERN_RANGE.matcher((String) range).matches() == false) {
 				throw new UnsupportedOperationException("字符串 " + range + " 不合法！预编译模式下 key{}:\"condition\" 中 condition 必须符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
 			}
@@ -1422,6 +1436,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 
 			return getCondition(logic.isNot(), condition);
+		}
+		else if (range instanceof Subquery) { //如果在 Parser 解析成 SQL 字符串再引用，没法保证安全性，毕竟可以再通过远程函数等方式来拼接再替代，最后引用的字符串就能注入
+			return getKey(key) + (logic.isNot() ? NOT : "") + " IN " + getSubqueryString((Subquery) range);
 		}
 
 		throw new IllegalArgumentException(key + "{}:range 类型为" + range.getClass().getSimpleName()
