@@ -81,21 +81,25 @@ public interface ObjectParser {
 	 */
 	void onPUTArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception;
 
+	/**SQL 配置，for single object
+	 * @return {@link #setSQLConfig(int, int, int)}
+	 * @throws Exception
+	 */
+	ObjectParser setSQLConfig() throws Exception;
+
+	/**SQL 配置
+	 * @return 
+	 * @throws Exception
+	 */
+	ObjectParser setSQLConfig(int count, int page, int position) throws Exception;
 	
-	/**SQL查询，for single object
-	 * @return {@link #executeSQL(int, int, int)}
+	
+	/**执行 SQL
+	 * @return 
 	 * @throws Exception
 	 */
 	ObjectParser executeSQL() throws Exception;
 
-	/**SQL查询，for array item
-	 * @param count
-	 * @param page
-	 * @param position
-	 * @return this
-	 * @throws Exception
-	 */
-	ObjectParser executeSQL(int count, int page, int position) throws Exception;
 	
 	/**
 	 * @return

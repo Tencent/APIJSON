@@ -122,7 +122,7 @@ public class DemoParser extends AbstractParser<Long> {
 
 
 	@Override
-	protected void onVerifyContent() throws Exception {
+	public void onVerifyContent() throws Exception {
 		//补充全局缺省版本号  //可能在默认为1的前提下这个请求version就需要为0  requestObject.getIntValue(JSONRequest.KEY_VERSION) <= 0) {
 		if (session != null && requestObject.get(JSONRequest.KEY_VERSION) == null) {
 			requestObject.put(JSONRequest.KEY_VERSION, session.getAttribute(JSONRequest.KEY_VERSION));

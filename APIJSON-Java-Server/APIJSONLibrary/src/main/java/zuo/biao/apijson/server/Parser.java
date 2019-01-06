@@ -105,6 +105,10 @@ public interface Parser<T> {
 	Object getValueByPath(String valuePath);
 
 
+	void onVerifyLogin() throws Exception;
+	void onVerifyContent() throws Exception;
+	void onVerifyRole(SQLConfig config) throws Exception;
+	
 	JSONObject executeSQL(SQLConfig config) throws Exception;
 
 }

@@ -319,11 +319,37 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 
-	protected void onVerifyLogin() throws Exception {
+	@Override
+	public void onVerifyLogin() throws Exception {
 		verifier.verifyLogin();
 	}
-	protected void onVerifyContent() throws Exception {
+	@Override
+	public void onVerifyContent() throws Exception {
 		requestObject = parseCorrectRequest();
+	}
+	/**校验角色及对应操作的权限
+	 * @param config
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public void onVerifyRole(@NotNull SQLConfig config) throws Exception {
+		Log.i(TAG, "executeSQL  config = " + JSON.toJSONString(config));
+		if (config.getDatabase() == null && globleDatabase != null) {
+			config.setDatabase(globleDatabase);
+		}
+		
+		if (noVerifyRole == false) {
+			if (config.getRole() == null) {
+				if (globleRole != null) {
+					config.setRole(globleRole);
+				} else {
+					config.setRole(getVisitor().getId() == null ? RequestRole.UNKNOWN : RequestRole.LOGIN);
+				}
+			}
+			verifier.verify(config);
+		}
+		
 	}
 
 
@@ -594,14 +620,14 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		JSONObject response = null;
 		if (op != null) {//TODO SQL查询结果为空时，functionMap和customMap还有没有意义？
 			if (arrayConfig == null) {//Common
-				response = op.executeSQL().response();
+				response = op.setSQLConfig().executeSQL().response();
 			} else {//Array Item Child
 				int query = arrayConfig.getQuery();
 
 				//total 这里不能用arrayConfig.getType()，因为在createObjectParser.onChildParse传到onObjectParse时已被改掉
 				if (type == SQLConfig.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE
 						&& arrayConfig.getPosition() == 0) {
-					JSONObject rp = op.setMethod(RequestMethod.HEAD).executeSQL().getSqlReponse();
+					JSONObject rp = op.setMethod(RequestMethod.HEAD).setSQLConfig().executeSQL().getSqlReponse();
 					if (rp != null) {
 						int index = parentPath.lastIndexOf("]/");
 						if (index >= 0) {
@@ -621,9 +647,10 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 				if (query == JSONRequest.QUERY_TOTAL) {
 					response = null;//不再往后查询
 				} else {
-					response = op.executeSQL(
-							arrayConfig.getCount(), arrayConfig.getPage(), arrayConfig.getPosition()
-							).response();
+					response = op
+							.setSQLConfig(arrayConfig.getCount(), arrayConfig.getPage(), arrayConfig.getPosition())
+							.executeSQL()
+							.response();
 					//					itemConfig = op.getConfig();
 				}
 			}
@@ -1112,29 +1139,13 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 
-	/**获取数据库返回的String
+	/**执行 SQL 并返回 JSONObject
 	 * @param config
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public synchronized JSONObject executeSQL(SQLConfig config) throws Exception {
-		Log.i(TAG, "executeSQL  config = " + JSON.toJSONString(config));
-		if (noVerifyRole == false) {
-			if (config.getRole() == null) {
-				if (globleRole != null) {
-					config.setRole(globleRole);
-				} else {
-					config.setRole(getVisitor().getId() == null ? RequestRole.UNKNOWN : RequestRole.LOGIN);
-				}
-			}
-			verifier.verify(config);
-		}
-		
-		if (config.getDatabase() == null && globleDatabase != null) {
-			config.setDatabase(globleDatabase);
-		}
-		
+	public synchronized JSONObject executeSQL(@NotNull SQLConfig config) throws Exception {
 		return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config));
 	}
 

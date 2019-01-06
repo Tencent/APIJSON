@@ -15,6 +15,7 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
+import static zuo.biao.apijson.JSONObject.KEY_SQL;
 import static zuo.biao.apijson.JSONObject.KEY_CORRECT;
 import static zuo.biao.apijson.JSONObject.KEY_DROP;
 import static zuo.biao.apijson.JSONObject.KEY_TRY;
@@ -49,7 +50,7 @@ import zuo.biao.apijson.server.exception.NotExistException;
  * @author Lemon
  */
 public abstract class AbstractObjectParser implements ObjectParser {
-	private static final String TAG = "ObjectParser";
+	private static final String TAG = "AbstractObjectParser";
 
 	@NotNull
 	protected Parser<?> parser;
@@ -75,7 +76,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 * TODO Parser内要不因为 非 TYPE_ITEM_CHILD_0 的Table 为空导致后续中断。
 	 */
 	protected final boolean drop;
-	protected JSONObject correct;
+	protected final JSONObject correct;
+	protected final JSONObject sql;
 
 	/**for single object
 	 * @param parentPath
@@ -101,14 +103,19 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		if (isEmpty) {
 			this.tri = false;
 			this.drop = false;
-		} else {
+			this.correct = null;
+			this.sql = null;
+		}
+		else {
 			this.tri = request.getBooleanValue(KEY_TRY);
 			this.drop = request.getBooleanValue(KEY_DROP);
 			this.correct = request.getJSONObject(KEY_CORRECT);
+			this.sql = request.getJSONObject(KEY_SQL);
 
 			request.remove(KEY_TRY);
 			request.remove(KEY_DROP);
 			request.remove(KEY_CORRECT);
+			request.remove(KEY_SQL);
 
 			try {
 				parseCorrect();
@@ -121,8 +128,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
 
-		Log.d(TAG, "ObjectParser  table = " + table + "; isTable = " + isTable);
-		Log.d(TAG, "ObjectParser  isEmpty = " + isEmpty + "; tri = " + tri + "; drop = " + drop);
+		Log.d(TAG, "AbstractObjectParser  table = " + table + "; isTable = " + isTable);
+		Log.d(TAG, "AbstractObjectParser  isEmpty = " + isEmpty + "; tri = " + tri + "; drop = " + drop);
 	}
 
 	public static final Map<String, Pattern> COMPILE_MAP;
@@ -162,8 +169,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					}
 
 					if (rk == null) {
-						throw new IllegalArgumentException(
-								"格式错误！找不到 " + k + ":" + value + " 对应[" + v + "]内的任何一项！");
+						throw new IllegalArgumentException("格式错误！找不到 " + k + ":" + value + " 对应[" + v + "]内的任何一项！");
 					}
 					request.put(rk, request.remove(k));
 					corrected.put(k, rk);
@@ -523,15 +529,31 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	}
 
-
-	/**SQL查询，for single object
-	 * @return {@link #executeSQL(int, int, int)}
+	/**SQL 配置，for single object
+	 * @return {@link #setSQLConfig(int, int, int)}
 	 * @throws Exception
 	 */
 	@Override
-	public AbstractObjectParser executeSQL() throws Exception {
-		return executeSQL(1, 0, 0);
+	public AbstractObjectParser setSQLConfig() throws Exception {
+		return setSQLConfig(1, 0, 0);
 	}
+
+	@Override
+	public AbstractObjectParser setSQLConfig(int count, int page, int position) throws Exception {
+		if (isTable == false) {
+			return this;
+		}
+		
+		if (sqlConfig == null) {
+			sqlConfig = newSQLConfig();
+		}
+		sqlConfig.setCount(count).setPage(page).setPosition(position);
+		
+		parser.onVerifyRole(sqlConfig);
+		
+		return this;
+	}
+
 
 	protected SQLConfig sqlConfig = null;//array item复用
 	/**SQL查询，for array item
@@ -542,17 +564,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 * @throws Exception
 	 */
 	@Override
-	public AbstractObjectParser executeSQL(int count, int page, int position) throws Exception {
+	public AbstractObjectParser executeSQL() throws Exception {
 		//执行SQL操作数据库
 		if (isTable == false) {//提高性能
 			sqlReponse = new JSONObject(sqlRequest);
 		} else {
-
 			try {
-				if (sqlConfig == null) {
-					sqlConfig = newSQLConfig();
-				}
-				sqlConfig.setCount(count).setPage(page).setPosition(position);
 				sqlReponse = onSQLExecute();
 			} catch (Exception e) {
 				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
@@ -621,11 +638,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		//解析函数function
 		Set<Entry<String, String>> functionSet = map == null ? null : map.entrySet();
 		if (functionSet != null && functionSet.isEmpty() == false) {
-//			JSONObject json = "-".equals(type) ? request : response; // key-():function 是实时执行，而不是在这里批量执行
+			//			JSONObject json = "-".equals(type) ? request : response; // key-():function 是实时执行，而不是在这里批量执行
 
 			for (Entry<String, String> entry : functionSet) {
 
-//				parseFunction(json, entry.getKey(), entry.getValue());
+				//				parseFunction(json, entry.getKey(), entry.getValue());
 				parseFunction(response, entry.getKey(), entry.getValue());
 			}
 		}
@@ -696,9 +713,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		if (correct != null) {
 			request.put(KEY_CORRECT, correct);
 		}
+		if (sql != null) {
+			request.put(KEY_SQL, sql);
+		}
 
 
-		correct = null;
 		corrected = null;
 		method = null;
 		parentPath = null;
