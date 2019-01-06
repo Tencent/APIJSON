@@ -339,14 +339,14 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				}
 
 				
-				JSONArray arr = parser.onArrayParse(subquery, AbstractParser.getAbsPath(path, replaceKey), replaceKey, true);
+				JSONArray arr = parser.onArrayParse(subquery, AbstractParser.getAbsPath(path, replaceKey), "[]", true);
 				
 				JSONObject obj = arr == null || arr.isEmpty() ? null : arr.getJSONObject(0);
 
 				String from = subquery.getString("from");
 				JSONObject arrObj = obj.getJSONObject(from);
 				if (arrObj == null) {
-					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ from:value } 中 value 对应的数组对象不存在！");
+					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ from:value } 中 value 对应的主表对象不存在！");
 				}
 //				
 				SQLConfig cfg = arrObj == null ? null : (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
@@ -360,11 +360,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				s.setRange(range);
 				s.setKey(replaceKey);
 				s.setConfig(cfg);
-				
-				parser.putQueryResult(AbstractParser.getAbsPath(path, key), s); //字符串引用保证不了安全性 parser.getSQL(cfg));
 
 				key = replaceKey;
 				value = s; //(range == null || range.isEmpty() ? "" : "range") + "(" + cfg.getSQL(false) + ") ";
+
+				parser.putQueryResult(AbstractParser.getAbsPath(path, key), s); //字符串引用保证不了安全性 parser.getSQL(cfg));
 			}
 			else if (value instanceof String) { // 引用赋值路径
 
