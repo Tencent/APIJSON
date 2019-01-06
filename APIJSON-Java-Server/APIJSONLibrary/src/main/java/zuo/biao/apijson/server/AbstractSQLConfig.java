@@ -1140,7 +1140,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	@JSONField(serialize = false)
-	public String getEqualString(String key, Object value) {
+	public String getEqualString(String key, Object value) throws Exception {
 		if (value instanceof Collection<?>) {
 			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
 		}
@@ -1152,7 +1152,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (StringUtil.isName(key) == false) {
 			throw new IllegalArgumentException(key + ":value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
-		return getKey(key) + (not ? "!=" : "=") + getValue(value);
+		
+		return getKey(key) + (not ? "!=" : "=") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
 	}
 
 	public String getKey(String key) {
@@ -1852,13 +1853,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new NotExistException(TAG + ": newSQLConfig StringUtil.isEmpty(" + table + ".id, true)");
 				}
 			}
+			else if (id instanceof Subquery) {}
 			else {
-				throw new IllegalArgumentException(KEY_ID + ":value 中 value 的类型只能是 Long 或 String ！");
+				throw new IllegalArgumentException(KEY_ID + ":value 中 value 的类型只能是 Long , String 或 Subquery ！");
 			}
 
-			if (idIn != null && idIn instanceof List) { //共用idIn场景少性能差
-				if (idIn != null && ((List<?>) idIn).contains(id) == false) {//empty有效  BaseModel.isEmpty(idIn) == false) {
-					Log.w(TAG, "newSQLConfig  id > 0 >> idInObj != null && idInObj.contains(id) == false >> return null;");
+			if (idIn instanceof List) { //共用idIn场景少性能差
+				if (((List<?>) idIn).contains(id) == false) {//empty有效  BaseModel.isEmpty(idIn) == false) {
 					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && ((JSONArray) idIn).contains(id) == false");
 				}
 			}
