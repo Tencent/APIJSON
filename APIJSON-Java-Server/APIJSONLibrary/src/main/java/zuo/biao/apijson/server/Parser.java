@@ -82,9 +82,9 @@ public interface Parser<T> {
 
 
 
-	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception;
+	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;
 
-	JSONArray onArrayParse(JSONObject request, String parentPath, String name) throws Exception;
+	JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception;
 
 	/**解析远程函数
 	 * @param object
@@ -94,7 +94,7 @@ public interface Parser<T> {
 	 */
 	Object onFunctionParse(JSONObject object, String function) throws Exception;
 	
-	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception;
+	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;
 
 	int getMaxQueryCount();
 	int getMaxUpdateCount();
@@ -109,6 +109,6 @@ public interface Parser<T> {
 	void onVerifyContent() throws Exception;
 	void onVerifyRole(SQLConfig config) throws Exception;
 	
-	JSONObject executeSQL(SQLConfig config) throws Exception;
+	JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception;
 
 }

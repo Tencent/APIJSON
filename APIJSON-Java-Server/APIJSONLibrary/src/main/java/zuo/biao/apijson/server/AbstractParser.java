@@ -288,7 +288,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		Exception error = null;
 		sqlExecutor = createSQLExecutor();
 		try {
-			requestObject = onObjectParse(request, null, null, null);
+			requestObject = onObjectParse(request, null, null, null, false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e;
@@ -605,7 +605,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 */
 	@Override
 	public JSONObject onObjectParse(final JSONObject request
-			, String parentPath, String name, final SQLConfig arrayConfig) throws Exception {
+			, String parentPath, String name, final SQLConfig arrayConfig, boolean isSubquery) throws Exception {
 		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
 				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
 		if (request == null) {// Moment:{}   || request.isEmpty()) {//key-value条件
@@ -614,14 +614,15 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		int type = arrayConfig == null ? 0 : arrayConfig.getType();
 
-		ObjectParser op = createObjectParser(request, parentPath, name, arrayConfig).parse();
+		ObjectParser op = createObjectParser(request, parentPath, name, arrayConfig, isSubquery).parse();
 
 
 		JSONObject response = null;
 		if (op != null) {//TODO SQL查询结果为空时，functionMap和customMap还有没有意义？
 			if (arrayConfig == null) {//Common
 				response = op.setSQLConfig().executeSQL().response();
-			} else {//Array Item Child
+			}
+			else {//Array Item Child
 				int query = arrayConfig.getQuery();
 
 				//total 这里不能用arrayConfig.getType()，因为在createObjectParser.onChildParse传到onObjectParse时已被改掉
@@ -670,7 +671,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @throws Exception
 	 */
 	@Override
-	public JSONArray onArrayParse(JSONObject request, String parentPath, String name) throws Exception {
+	public JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception {
 		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
@@ -700,7 +701,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 
 		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
-		int max = getMaxQueryCount();
+		int max = isSubquery ? count : getMaxQueryCount();
 		int size = count <= 0 || count > max ? max : count;//count为每页数量，size为第page页实际数量，max(size) = count
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
 
@@ -727,8 +728,8 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		JSONObject parent;
 		//生成size个
-		for (int i = 0; i < size; i++) {
-			parent = onObjectParse(request, path, "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i));
+		for (int i = 0; i < (isSubquery ? 1 : size); i++) {
+			parent = onObjectParse(request, path, "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
 			if (parent == null || parent.isEmpty()) {
 				break;
 			}
@@ -1139,13 +1140,21 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 
+	public static final String KEY_CONFIG = "config";
+	
 	/**执行 SQL 并返回 JSONObject
 	 * @param config
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public synchronized JSONObject executeSQL(@NotNull SQLConfig config) throws Exception {
+	public synchronized JSONObject executeSQL(@NotNull SQLConfig config, boolean isSubquery) throws Exception {
+		if (isSubquery) {
+			JSONObject sqlObj = new JSONObject(true);
+			sqlObj.put(KEY_CONFIG, config);
+			return sqlObj;//容易丢失信息 JSON.parseObject(config);
+		}
+		
 		return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config));
 	}
 

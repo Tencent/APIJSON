@@ -84,9 +84,9 @@ public class DemoParser extends AbstractParser<Long> {
 
 
 	@Override
-	public DemoObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
+	public DemoObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception {
 
-		return new DemoObjectParser(session, request, parentPath, name, arrayConfig) {
+		return new DemoObjectParser(session, request, parentPath, name, arrayConfig, isSubquery) {
 
 			//TODO 删除，onPUTArrayParse改用MySQL函数JSON_ADD, JSON_REMOVE等
 			@Override

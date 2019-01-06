@@ -45,8 +45,8 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	 * @param name
 	 * @throws Exception 
 	 */
-	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, String name, SQLConfig arrayConfig) throws Exception {
-		super(request, parentPath, name, arrayConfig);
+	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception {
+		super(request, parentPath, name, arrayConfig, isSubquery);
 	}
 	
 	@Override
