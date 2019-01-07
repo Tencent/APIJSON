@@ -3,7 +3,7 @@
   APIJSON
 </h1>
 
-<p align="center">🚀A JSON Transmission Protocol for auto providing APIs and Documents on the Web.</p>
+<p align="center">🚀A JSON Transmission Protocol and an Object/Relational Mapping for auto providing APIs and Documents.</p>
 
 <p align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
