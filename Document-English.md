@@ -1,15 +1,39 @@
-# APIJSON 
-[![GitHub release](https://img.shields.io/github/release/TommyLemon/APIJSON.svg)](https://github.com/TommyLemon/APIJSON/releases)
-[![Java API](https://img.shields.io/badge/Java-1.6%2B-brightgreen.svg?style=flat)](http://www.oracle.com/technetwork/java/api-141528.html) 
-[![Android API](https://img.shields.io/badge/Android-15%2B-brightgreen.svg?style=flat)](https://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels) 
-[![JavaScrpit API](https://img.shields.io/badge/JavaScript-ES5%2B-brightgreen.svg?style=flat)](http://www.ecma-international.org/publications/standards/Standard.htm)
-[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-<br />
+<h1 align="center" style="text-align:center;">
+  APIJSON
+</h1>
 
-[Java-Server](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server)    [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android)    [JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)    [Vue.js](https://github.com/TommyLemon/APIJSON-JS-Vue)
+<p align="center">🚀A JSON Transmission Protocol for auto providing APIs and Documents on the Web.</p>
 
-[查看中文文档](https://github.com/TommyLemon/APIJSON/blob/master/README.md)
+<p align="center" >
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-11%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/MySQL"><img src="https://img.shields.io/badge/TiDB-2.1%2B-brightgreen.svg?style=flat"></a>
+</p>
+<p align="center" >
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Java-Server"><img src="https://img.shields.io/badge/Java-1.7%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://img.shields.io/badge/CSharp-2.1%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/orchie/apijson"><img src="https://img.shields.io/badge/PHP-7.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/TEsTsLA/apijson"><img src="https://img.shields.io/badge/Node.js-ES6%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://img.shields.io/badge/Python-3%2B-brightgreen.svg?style=flat"></a>
+</p>
+<p align="center" >
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
+</p>
+<p align="center" >
+  <a href="https://github.com/TommyLemon/APIJSON">中文版</a>
+  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md">Documents</a>
+  <a href="http://i.youku.com/apijson">Videos</a>
+  <a href="http://apijson.org">Tests</a>
+</p>
+
+<p align="center" >
+  <img src="https://raw.githubusercontent.com/TommyLemon/APIJSON/master/logo.png" />
+</p>
+
 
 [Online Test](http://apijson.cn)
 
@@ -53,16 +77,22 @@ And server developers no longer have to write new apis and documents for compati
 
 
 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_0.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_1.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_2.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/apijson_all_pages_3.jpg) 
+<br />
 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/server_idea_log_complex.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_get.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_code.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_doc.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_test.jpg) 
 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_request.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_user.jpg) 
-![](https://raw.githubusercontent.com/TommyLemon/APIJSON/master/picture/mysql_workbench_moment.jpg) 
+<br /><br />
+
+<br />
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_MomentList_Circle.gif) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Name.gif) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Comment.gif)
+
+<br />
 
 <br />
 <br />
