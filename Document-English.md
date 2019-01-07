@@ -25,9 +25,9 @@
 </p>
 <p align="center" >
   <a href="https://github.com/TommyLemon/APIJSON">中文版</a>
-  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md">Documents</a>
-  <a href="http://i.youku.com/apijson">Videos</a>
-  <a href="http://apijson.org">Tests</a>
+  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md">Document</a>
+  <a href="http://i.youku.com/apijson">Video</a>
+  <a href="http://apijson.org">Test</a>
 </p>
 
 <p align="center" >
