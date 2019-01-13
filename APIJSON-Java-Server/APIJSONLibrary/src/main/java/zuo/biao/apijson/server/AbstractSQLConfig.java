@@ -754,7 +754,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public boolean hasJoin() {
 		return joinList != null && joinList.isEmpty() == false;
 	}
-	
+
 
 	@Override
 	public boolean isTest() {
@@ -1152,7 +1152,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (StringUtil.isName(key) == false) {
 			throw new IllegalArgumentException(key + ":value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
-		
+
 		return getKey(key) + (not ? "!=" : "=") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
 	}
 
@@ -1346,12 +1346,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (values[i] instanceof String == false) {
 				throw new IllegalArgumentException(key + "%:value 中 value 的类型只能为 String 或 String[] ！");
 			}
-			
+
 			vs = StringUtil.split((String) values[i]);
 			if (vs == null || vs.length != 2) {
 				throw new IllegalArgumentException(key + "%:value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
 			}
-			
+
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + "(" + getBetweenString(key, vs[0], vs[1]) + ")";
 		}
 
@@ -1522,6 +1522,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	//<> contain >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
+
+	//key@:{} Subquery <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	@Override
+	public String getSubqueryString(Subquery subquery) throws Exception {
+		String range = subquery.getRange();
+		SQLConfig cfg = subquery.getConfig();
+
+		cfg.setPreparedValueList(new ArrayList<>());
+		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + cfg.getSQL(isPrepared()) + ") ";
+		
+		preparedValueList.addAll(cfg.getPreparedValueList());
+		
+		return sql;
+	}
+
+	//key@:{} Subquery >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
 	/**拼接条件
 	 * @param not
 	 * @param condition
@@ -1689,9 +1710,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		Subquery from = config.getFrom();
 		if (from != null) {
-			table = config.getSubqueryString(from) + " AS " + config.getKey(from.getFrom()) + " "; //TODO Comment:c 转为  AS `Comment:c`
+			table = config.getSubqueryString(from) + " AS " + config.getAlias() + " "; //TODO Comment:c 转为  AS `Comment:c`
 		}
-		
+
 		String condition = table + config.getJoinString() + where + (
 				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
 						"" : config.getGroupString() + config.getHavingString() + config.getOrderString()

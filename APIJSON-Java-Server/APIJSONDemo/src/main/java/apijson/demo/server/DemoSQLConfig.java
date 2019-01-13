@@ -59,14 +59,6 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		String s = super.getSchema();
 		return StringUtil.isEmpty(s, true) ? "sys" : s; //TODO 改成你自己的
 	}
-	
-	@Override
-	public String getSubqueryString(Subquery subquery) throws Exception {
-		//TODO 用 SQLExecutor 的 preparedStatement 返回的
-//		String range = subquery.getRange();
-//		return (range  == null || range.isEmpty() ? "" : range) + "(" + subquery.getConfig().getSQL(false) + ") ";
-		throw new UnsupportedOperationException("未解决 SQL 注入，暂不支持");
-	}
 
 	public DemoSQLConfig() {
 		this(RequestMethod.GET);

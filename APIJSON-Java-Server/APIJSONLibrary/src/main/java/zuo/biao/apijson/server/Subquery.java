@@ -22,13 +22,13 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 public class Subquery {
 	
-	private String path; // any, all
-	private String originKey;
-	private JSONObject originValue;
+	private String path; // []/0/User
+	private String originKey; //id{}@
+	private JSONObject originValue; // { "from": "Comment", "Comment": {...} }
 
-	private String from; // any, all
+	private String from; // Comment
 	private String range; // any, all
-	private String key; //id
+	private String key; //id{}
 	private SQLConfig config;
 	
 	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
