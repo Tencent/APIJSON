@@ -686,7 +686,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		
 		//不能改变，因为后面可能继续用到，导致1以上都改变 []:{0:{Comment[]:{0:{Comment:{}},1:{...},...}},1:{...},...}
 		final int query = request.getIntValue(JSONRequest.KEY_QUERY);
-		final Integer count = request.getInteger(JSONRequest.KEY_COUNT);
+		final Integer count = request.getInteger(JSONRequest.KEY_COUNT); //TODO 如果不想用默认数量可以改成 getIntValue(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
 		final String join = request.getString(JSONRequest.KEY_JOIN);
 		request.remove(JSONRequest.KEY_QUERY);
