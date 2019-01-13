@@ -25,6 +25,7 @@ import zuo.biao.apijson.RequestMethod;
  */
 public interface Parser<T> {
 
+	int DEFAULT_QUERY_COUNT = 10;
 	int MAX_QUERY_COUNT = 100;
 	int MAX_UPDATE_COUNT = 10;
 	
@@ -96,6 +97,7 @@ public interface Parser<T> {
 	
 	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;
 
+	int getDefaultQueryCount();
 	int getMaxQueryCount();
 	int getMaxUpdateCount();
 	

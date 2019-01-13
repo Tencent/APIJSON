@@ -25,7 +25,6 @@ import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.AbstractSQLConfig;
 import zuo.biao.apijson.server.Join;
 import zuo.biao.apijson.server.SQLConfig;
-import zuo.biao.apijson.server.Subquery;
 
 
 /**SQL配置

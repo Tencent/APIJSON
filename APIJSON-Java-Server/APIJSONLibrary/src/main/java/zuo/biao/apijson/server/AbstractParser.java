@@ -682,10 +682,11 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			return null;
 		}
 		String path = getAbsPath(parentPath, name);
-
+		
+		
 		//不能改变，因为后面可能继续用到，导致1以上都改变 []:{0:{Comment[]:{0:{Comment:{}},1:{...},...}},1:{...},...}
 		final int query = request.getIntValue(JSONRequest.KEY_QUERY);
-		final int count = request.getIntValue(JSONRequest.KEY_COUNT);
+		final Integer count = request.getInteger(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
 		final String join = request.getString(JSONRequest.KEY_JOIN);
 		request.remove(JSONRequest.KEY_QUERY);
@@ -701,8 +702,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 
 		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
-		int max = isSubquery ? count : getMaxQueryCount();
-		int size = count <= 0 || count > max ? max : count;//count为每页数量，size为第page页实际数量，max(size) = count
+		int count2 = isSubquery || count != null ? (count == null ? 0 : count) : getDefaultQueryCount();
+		int max = isSubquery ? count2 : getMaxQueryCount();
+		int size = count2 <= 0 || count2 > max ? max : count2;//count为每页数量，size为第page页实际数量，max(size) = count
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
 
 
@@ -940,6 +942,10 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		return requestObj;
 	}
 
+	@Override
+	public int getDefaultQueryCount() {
+		return DEFAULT_QUERY_COUNT;
+	}
 	@Override
 	public int getMaxQueryCount() {
 		return MAX_QUERY_COUNT;
