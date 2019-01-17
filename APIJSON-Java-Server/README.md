@@ -30,7 +30,7 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 右键libs里面的 apijson-server.jar > Build Path > Add to Build Path
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
-打开 [apijson.demo.server.DemoSQLConfig](https://github.com/TommyLemon/APIJSON/blob/fd80bb931f560109da98af4eaa38bb2b9a21ec68/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/server/DemoSQLConfig.java) 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
+打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>4)运行</h5>
 顶部菜单Run > Run As > Java Application > 选择APIJSONApplication > OK
@@ -45,7 +45,7 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSOND
 右键libs里面的 apijson-server.jar > Add as Library > OK
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
-打开 [apijson.demo.server.DemoSQLConfig](https://github.com/TommyLemon/APIJSON/blob/fd80bb931f560109da98af4eaa38bb2b9a21ec68/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/server/DemoSQLConfig.java) 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
+打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>4)运行</h5>
 顶部菜单Run > Run > Edit Configurations > + > Application > Configuration <br />
