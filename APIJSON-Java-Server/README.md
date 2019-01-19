@@ -23,7 +23,7 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 
 <h5>1)打开</h5>
 顶部菜单File > Import > Maven > Existing Maven Projects > Next > Browse <br />
-> 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONDemo <br />
+> 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONBoot <br />
 > 勾选 /pom.xml ... apijson-demo > Finish
 
 <h5>2)Demo依赖Library</h5>
@@ -39,7 +39,7 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 #### IntellIJ IDEA Ultimate
 
 <h5>1)打开</h5>
-Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONDemo > OK
+Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONBoot > OK
 
 <h5>2)Demo依赖Library</h5>
 右键libs里面的 apijson-server.jar > Add as Library > OK
