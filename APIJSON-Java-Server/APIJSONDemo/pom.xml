@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>apijson.demo.server</groupId>
-	<artifactId>apijson-demo</artifactId>
+	<artifactId>apijson-boot</artifactId>
 	<version>3.3.0</version>
 	<packaging>jar</packaging>
 
-	<name>APIJSONDemo</name>
-	<description>Demo project for APIJSON Server</description>
+	<name>APIJSONBoot</name>
+	<description>Demo project for APIJSON Server based on SpringBoot</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

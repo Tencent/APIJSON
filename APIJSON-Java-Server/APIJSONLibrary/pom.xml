@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>zuo.biao.apijson.server</groupId>
-	<artifactId>apijson-library</artifactId>
+	<artifactId>apijson-orm</artifactId>
 	<version>3.3.0</version>
 	<packaging>jar</packaging>
 
-	<name>APIJSONLibrary</name>
-	<description>APIJSON Server Library</description>
+	<name>APIJSONORM</name>
+	<description>APIJSON ORM Library</description>
 
 
 	<properties>
