@@ -113,6 +113,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
   <a href="https://github.com/TommyLemon/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="90" width="90" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="90" width="90" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="90" width="90" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="90" width="90" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/33"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="90" width="90" ></a>
 </div>
 <br />
