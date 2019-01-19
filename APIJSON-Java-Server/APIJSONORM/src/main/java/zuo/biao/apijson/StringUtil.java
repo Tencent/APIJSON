@@ -837,6 +837,29 @@ public class StringUtil {
 		return s.toLowerCase();
 	}
 
+	public static String concat(String left, String right) {
+		return concat(left, right, null);
+	}
+	public static String concat(String left, String right, String split) {
+		return concat(left, right, split, true);
+	}
+	public static String concat(String left, String right, boolean trim) {
+		return concat(left, right, null, trim);
+	}
+	public static String concat(String left, String right, String split, boolean trim) {
+		if (isEmpty(left, trim)) {
+			return right;
+		}
+		if (isEmpty(right, trim)) {
+			return left;
+		}
+
+		if (split == null) {
+			split = ",";
+		}
+		return left + split + right;
+	}
+
 	//校正（自动补全等）字符串>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

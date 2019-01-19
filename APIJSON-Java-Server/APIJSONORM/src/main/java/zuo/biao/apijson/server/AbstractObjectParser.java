@@ -334,8 +334,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				
 				JSONObject subquery = (JSONObject) value;
 				String range = subquery.getString("range");
-				if (range != null && "any".equals(range) == false && "all".equals(range) == false) {
-					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 [any, all] 中的一个！");
+				if (range != null && "ANY".equals(range) == false && "ALL".equals(range) == false) {
+					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 [ANY, ALL] 中的一个！");
 				}
 
 				

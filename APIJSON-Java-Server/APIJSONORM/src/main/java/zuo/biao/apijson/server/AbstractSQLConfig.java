@@ -476,6 +476,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	@JSONField(serialize = false)
 	public String getColumnString() throws Exception {
+		return getColumnString(false);
+	}
+	@JSONField(serialize = false)
+	public String getColumnString(boolean inSQLJoin) throws Exception {
 		switch (getMethod()) {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
@@ -506,17 +510,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			boolean isQuery = RequestMethod.isQueryMethod(method);
 			String joinColumn = "";
 			if (isQuery && joinList != null) {
-				SQLConfig c;
+				SQLConfig cfg;
+				String c;
 				boolean first = true;
 				for (Join j : joinList) {
 					if (j.isAppJoin()) {
 						continue;
 					}
 
-					c = j.getJoinConfig();
-					c.setAlias(c.getTable());
-					joinColumn += (first ? "" : ", ") + ((AbstractSQLConfig) c).getColumnString();
+					cfg = j.getJoinConfig();
+					cfg.setAlias(cfg.getTable());
 
+					c = ((AbstractSQLConfig) cfg).getColumnString(true);
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinColumn += (first ? "" : ", ") + c;
+					}
+
+					inSQLJoin = true;
 					first = false;
 				}
 			}
@@ -527,7 +537,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			String[] keys = column == null ? null : column.toArray(new String[]{}); //StringUtil.split(c, ";");
 			if (keys == null || keys.length <= 0) {
-				return isKeyPrefix() == false ? "*" : (tableAlias + ".*" + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn));
+				
+				boolean noColumn = column != null && inSQLJoin;
+				String mc = isKeyPrefix() == false ? (noColumn ? "" : "*") : (noColumn ? "" : tableAlias + ".*");
+				
+				return StringUtil.concat(mc, joinColumn, ", ", true);
 			}
 
 
@@ -2114,7 +2128,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		config.setFrom(from);
-		config.setColumn(cs);
+		config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
 		config.setWhere(tableWhere);					
 
 		config.setId(id);
