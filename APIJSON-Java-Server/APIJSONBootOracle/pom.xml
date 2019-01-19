@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>apijson.demo.server</groupId>
-	<artifactId>apijson-demo-oracle</artifactId>
+	<artifactId>apijson-boot-oracle</artifactId>
 	<version>3.3.0</version>
 	<packaging>jar</packaging>
 
-	<name>APIJSONDemoOracle</name>
-	<description>Demo project for APIJSON Server</description>
+	<name>APIJSONBootOracle</name>
+	<description>Demo project for APIJSON Server based on SpringBoot And Oracle</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

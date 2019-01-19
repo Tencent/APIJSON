@@ -18,3 +18,6 @@ APIJSON-Java-Server/APIJSONLibrary/.settings
 *.classpath
 *.project
 APIJSON-Java-Server/APIJSONDemo_oracle/.settings
+APIJSON-Java-Server/APIJSONBoot/.settings
+APIJSON-Java-Server/APIJSONORM/.settings
+APIJSON-Java-Server/APIJSONBootOracle/.settings
