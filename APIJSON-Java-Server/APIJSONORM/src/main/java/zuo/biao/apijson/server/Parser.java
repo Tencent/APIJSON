@@ -27,6 +27,7 @@ public interface Parser<T> {
 
 	int DEFAULT_QUERY_COUNT = 10;
 	int MAX_QUERY_COUNT = 100;
+	int MAX_QUERY_PAGE = 100;
 	int MAX_UPDATE_COUNT = 10;
 	
 	
@@ -99,6 +100,7 @@ public interface Parser<T> {
 
 	int getDefaultQueryCount();
 	int getMaxQueryCount();
+	int getMaxQueryPage();
 	int getMaxUpdateCount();
 	
 	void putQueryResult(String path, Object result);

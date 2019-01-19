@@ -269,11 +269,11 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 				return extendErrorResult(requestObject, e);
 			}
 		}
-		
+
 		try {
 			setGlobleDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
 			setGlobleFormat(requestObject.getBooleanValue(JSONRequest.KEY_FORMAT));
-			
+
 			requestObject.remove(JSONRequest.KEY_DATABASE);
 			requestObject.remove(JSONRequest.KEY_FORMAT);
 		} catch (Exception e) {
@@ -338,7 +338,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		if (config.getDatabase() == null && globleDatabase != null) {
 			config.setDatabase(globleDatabase);
 		}
-		
+
 		if (noVerifyRole == false) {
 			if (config.getRole() == null) {
 				if (globleRole != null) {
@@ -349,7 +349,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			}
 			verifier.verify(config);
 		}
-		
+
 	}
 
 
@@ -371,7 +371,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	public JSONObject parseCorrectRequest(JSONObject target) throws Exception {
 		return Structure.parseRequest(requestMethod, "", target, requestObject, getMaxUpdateCount(), this);
 	}
-	
+
 
 	/**新建带状态内容的JSONObject
 	 * @param code
@@ -682,13 +682,50 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			return null;
 		}
 		String path = getAbsPath(parentPath, name);
-		
-		
+
+
 		//不能改变，因为后面可能继续用到，导致1以上都改变 []:{0:{Comment[]:{0:{Comment:{}},1:{...},...}},1:{...},...}
-		final int query = request.getIntValue(JSONRequest.KEY_QUERY);
+		final String query = request.getString(JSONRequest.KEY_QUERY);
 		final Integer count = request.getInteger(JSONRequest.KEY_COUNT); //TODO 如果不想用默认数量可以改成 getIntValue(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
 		final String join = request.getString(JSONRequest.KEY_JOIN);
+
+		int query2;
+		if (query == null) {
+			query2 = JSONRequest.QUERY_TABLE;
+		}
+		else {
+			switch (query) {
+			case "0":
+			case "TABLE":
+				query2 = JSONRequest.QUERY_TABLE;
+				break;
+			case "1":
+			case "TOTAL":
+				query2 = JSONRequest.QUERY_TOTAL;
+				break;
+			case "2":
+			case "ALL":
+				query2 = JSONRequest.QUERY_ALL;
+				break;
+			default:
+				throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_QUERY + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [TABLE, TOTAL, ALL] 内 !");
+			}
+		}
+
+		int maxPage = getMaxQueryPage();
+		if (page < 0 || page > maxPage) {
+			throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_PAGE + ":value 中 value 的值不合法！必须在 0-" + maxPage + " 内 !");
+		}
+
+		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
+		int count2 = isSubquery || count != null ? (count == null ? 0 : count) : getDefaultQueryCount();
+		int max = isSubquery ? count2 : getMaxQueryCount();
+
+		if (count2 < 0 || count2 > max) {
+			throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_COUNT + ":value 中 value 的值不合法！必须在 0-" + max + " 内 !");
+		}
+		
 		request.remove(JSONRequest.KEY_QUERY);
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
@@ -701,10 +738,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		}
 
 
-		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取
-		int count2 = isSubquery || count != null ? (count == null ? 0 : count) : getDefaultQueryCount();
-		int max = isSubquery ? count2 : getMaxQueryCount();
-		int size = count2 <= 0 || count2 > max ? max : count2;//count为每页数量，size为第page页实际数量，max(size) = count
+		int size = count2 == 0 ? max : count2;//count为每页数量，size为第page页实际数量，max(size) = count
 		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
 
 
@@ -725,7 +759,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 				.setMethod(requestMethod)
 				.setCount(size)
 				.setPage(page)
-				.setQuery(query)
+				.setQuery(query2)
 				.setJoinList(onJoinParse(join, request));
 
 		JSONObject parent;
@@ -808,9 +842,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 						+ "必须为 &/Table0/key0,</Table1/key1,... 这种形式！");
 			}
 			String joinType = path.substring(0, index); //& | ! < > ( ) <> () *
-//			if (StringUtil.isEmpty(joinType, true)) {
-//				joinType = "|"; // FULL JOIN
-//			}
+			//			if (StringUtil.isEmpty(joinType, true)) {
+			//				joinType = "|"; // FULL JOIN
+			//			}
 			path = path.substring(index + 1);
 
 			index = path.indexOf("/");
@@ -847,7 +881,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 				throw new IllegalArgumentException(targetTable + "." + targetKey
 						+ ":'/targetTable/targetKey' 中路径对应的对象不存在！");
 			}
-			
+
 			tableObj.put(key, tableObj.remove(key)); //保证和SQLExcecutor缓存的Config里where顺序一致，生成的SQL也就一致
 
 			Join j = new Join();
@@ -951,10 +985,14 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		return MAX_QUERY_COUNT;
 	}
 	@Override
+	public int getMaxQueryPage() {
+		return MAX_QUERY_PAGE;
+	}
+	@Override
 	public int getMaxUpdateCount() {
 		return MAX_UPDATE_COUNT;
 	}
-	
+
 
 	/**根据路径取值
 	 * @param parent
@@ -1147,7 +1185,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 
 	public static final String KEY_CONFIG = "config";
-	
+
 	/**执行 SQL 并返回 JSONObject
 	 * @param config
 	 * @return
@@ -1160,7 +1198,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			sqlObj.put(KEY_CONFIG, config);
 			return sqlObj;//容易丢失信息 JSON.parseObject(config);
 		}
-		
+
 		return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config));
 	}
 
