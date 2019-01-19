@@ -14,10 +14,14 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.io.BufferedReader;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
+
+import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.server.AbstractSQLExecutor;
@@ -111,6 +117,28 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		return statement;
 	}
 
+	@Override
+	protected Object getValue(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+		Object value = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
+		
+		if (value instanceof Blob) { //FIXME 存的是 abcde，取出来直接就是 [97, 98, 99, 100, 101] 这种 byte[] 类型，没有经过以下处理，但最终序列化后又变成了字符串 YWJjZGU=
+			value = new String(((Blob) value).getBytes(1, (int) ((Blob) value).length()), "UTF-8");
+		}
+		else if (value instanceof Clob) {
+			
+			StringBuffer sb = new StringBuffer(); 
+			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream()); 
+			String s = br.readLine();
+			while (s != null) {
+				sb.append(s); 
+				s = br.readLine(); 
+			}
+			value = sb.toString();
+		}
+		
+		return value;
+	}
 
 	/**关闭连接，释放资源
 	 */

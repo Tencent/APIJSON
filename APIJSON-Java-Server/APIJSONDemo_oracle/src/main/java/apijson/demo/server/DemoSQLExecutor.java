@@ -6,6 +6,11 @@ import zuo.biao.apijson.server.AbstractSQLExecutor;
 import zuo.biao.apijson.server.SQLConfig;
 
 import javax.validation.constraints.NotNull;
+
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonFormat.Value;
+
+import java.io.BufferedReader;
 import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
@@ -82,6 +87,29 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		return statement;
 	}
 
+	
+	@Override
+	protected Object getValue(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+		Object value = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
+		
+		if (value instanceof Blob) {
+			value = new String(((Blob) value).getBytes(1, (int) ((Blob) value).length()), "UTF-8");
+		}
+		else if (value instanceof Clob) {
+			
+			StringBuffer sb = new StringBuffer(); 
+			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream()); 
+			String s = br.readLine();
+			while (s != null) {
+				sb.append(s); 
+				s = br.readLine(); 
+			}
+			value = sb.toString();
+		}
+		
+		return value;
+	}
 
 	/**关闭连接，释放资源
 	 */

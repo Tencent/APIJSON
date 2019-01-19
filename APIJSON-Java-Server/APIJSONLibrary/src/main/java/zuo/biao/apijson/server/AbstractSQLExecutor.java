@@ -37,7 +37,7 @@ import zuo.biao.apijson.StringUtil;
  * @author Lemon
  */
 public abstract class AbstractSQLExecutor implements SQLExecutor {
-	private static final String TAG = "SQLExecutor";
+	private static final String TAG = "AbstractSQLExecutor";
 
 
 	//访问一次后丢失，可能因为static导致内存共享，别的地方改变了内部对象的值
@@ -280,16 +280,16 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				jc = j.getJoinConfig();
 				cc = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
-				
+
 				//取出 "id@": "@/User/userId" 中所有 userId 的值
 				List<Object> targetValueList = new ArrayList<>();
 				JSONObject mainTable;
 				Object targetValue;
-				
+
 				for (int i = 0; i < resultMap.size(); i++) {
 					mainTable = resultMap.get(i);
 					targetValue = mainTable == null ? null : mainTable.get(j.getTargetKey());
-					
+
 					if (targetValue != null && targetValueList.contains(targetValue) == false) {
 						targetValueList.add(targetValue);
 					}
@@ -301,7 +301,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				jc.putWhere(j.getKey() + "{}", targetValueList, false);
 
 				jc.setMain(true).setPreparedValueList(new ArrayList<>());
-				
+
 				boolean prepared = jc.isPrepared();
 				final String sql = jc.getSQL(false);
 				jc.setPrepared(prepared);
@@ -309,13 +309,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				if (StringUtil.isEmpty(sql, true)) {
 					throw new NullPointerException(TAG + ".executeAppJoin  StringUtil.isEmpty(sql, true) >> return null;");
 				}
-				
+
 				long startTime = System.currentTimeMillis();
 				Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 						+ "\n executeAppJoin  startTime = " + startTime
 						+ "\n sql = \n " + sql
 						+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-				
+
 				//执行副表的批量查询 并 缓存到 childMap
 				ResultSet rs = executeQuery(jc);
 
@@ -341,7 +341,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultMap.put( " + index + ", result); "
 							+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
-					
+
 					//缓存到 childMap
 					cc.putWhere(j.getKey(), result.get(j.getKey()), false);
 					cacheSql = cc.getSQL(false);
@@ -351,12 +351,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				}
 
 				rs.close();
-				
+
 
 				long endTime = System.currentTimeMillis();
 				Log.d(TAG, "\n\n executeAppJoin  endTime = " + endTime + "; duration = " + (endTime - startTime)
 						+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
-				
+
 			}
 		}
 
@@ -429,25 +429,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 		}
 
-		Object value = rs.getObject(columnIndex);
-		//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
-		//					Log.d(TAG, "lable:" + rsmd.getColumnLabel(i));
-		//					Log.d(TAG, "type:" + rsmd.getColumnType(i));
-		//					Log.d(TAG, "typeName:" + rsmd.getColumnTypeName(i));
-
-		//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < length; i++) {"
-		//						+ "\n  >>> value = " + value);
-
-		if (value != null) { //数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
-			if (value instanceof Timestamp) {
-				value = ((Timestamp) value).toString();
-			}
-			else if (value instanceof String && isJSONType(rsmd, columnIndex)) { //json String
-				value = JSON.parse((String) value);
-			}
-		}
-
-		finalTable.put(lable, value);
+		finalTable.put(lable, getValue(config, rs, rsmd, tablePosition, table, columnIndex, childMap));
 
 		return table;
 	}
@@ -469,6 +451,29 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 
+	protected Object getValue(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+		
+		Object value = rs.getObject(columnIndex);
+		//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
+		//					Log.d(TAG, "lable:" + rsmd.getColumnLabel(i));
+		//					Log.d(TAG, "type:" + rsmd.getColumnType(i));
+		//					Log.d(TAG, "typeName:" + rsmd.getColumnTypeName(i));
+
+		//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < length; i++) {"
+		//						+ "\n  >>> value = " + value);
+
+		//数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
+		if (value instanceof Timestamp) {
+			value = ((Timestamp) value).toString();
+		}
+		else if (value instanceof String && isJSONType(rsmd, columnIndex)) { //json String
+			value = JSON.parse((String) value);
+		}
+
+		return value;
+	}
+	
 
 	/**判断是否为JSON类型
 	 * @param rsmd

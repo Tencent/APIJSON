@@ -67,7 +67,7 @@ import zuo.biao.apijson.server.model.Table;
  * @author Lemon
  */
 public abstract class AbstractSQLConfig implements SQLConfig {
-	private static final String TAG = "SQLConfig";
+	private static final String TAG = "AbstractSQLConfig";
 
 
 	/**
