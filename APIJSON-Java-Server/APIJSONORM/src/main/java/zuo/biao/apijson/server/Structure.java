@@ -20,6 +20,7 @@ import static zuo.biao.apijson.server.Operation.ADD;
 import static zuo.biao.apijson.server.Operation.DISALLOW;
 import static zuo.biao.apijson.server.Operation.NECESSARY;
 import static zuo.biao.apijson.server.Operation.PUT;
+import static zuo.biao.apijson.server.Operation.INSERT;
 import static zuo.biao.apijson.server.Operation.REMOVE;
 import static zuo.biao.apijson.server.Operation.REPLACE;
 import static zuo.biao.apijson.server.Operation.TYPE;
@@ -27,6 +28,7 @@ import static zuo.biao.apijson.server.Operation.UNIQUE;
 import static zuo.biao.apijson.server.Operation.UPDATE;
 import static zuo.biao.apijson.server.Operation.VERIFY;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -148,7 +150,7 @@ public class Structure {
 			throw new IllegalArgumentException(method + "请求，" + name + "/" + key
 					+ " 里面的 " + idKey + ":value 中value的类型只能是 Long 或 String ！");
 		}
-		
+
 
 		//批量修改或删除
 		String idInKey = idKey + "{}";
@@ -227,6 +229,7 @@ public class Structure {
 		//获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONObject type = target.getJSONObject(TYPE.name());
 		JSONObject verify = target.getJSONObject(VERIFY.name());
+		JSONObject insert = target.getJSONObject(INSERT.name());
 		JSONObject add = target.getJSONObject(ADD.name());
 		JSONObject update = target.getJSONObject(UPDATE.name());
 		JSONObject put = target.getJSONObject(PUT.name());
@@ -240,6 +243,7 @@ public class Structure {
 		//不还原，传进来的target不应该是原来的
 		target.remove(TYPE.name());
 		target.remove(VERIFY.name());
+		target.remove(INSERT.name());
 		target.remove(ADD.name());
 		target.remove(UPDATE.name());
 		target.remove(PUT.name());
@@ -361,6 +365,7 @@ public class Structure {
 		//在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
 		real = operate(TYPE, type, real, creator);
 		real = operate(VERIFY, verify, real, creator);
+		real = operate(INSERT, insert, real, creator);
 		real = operate(ADD, add, real, creator);
 		real = operate(UPDATE, update, real, creator);
 		real = operate(PUT, put, real, creator);
@@ -431,6 +436,9 @@ public class Structure {
 					}
 				}
 				else {
+					if (opt == INSERT) {
+						real.put(tk, tv);
+					}
 					if (opt == ADD) {
 						real.put(tk, tv);
 					}
@@ -448,72 +456,142 @@ public class Structure {
 	 * @param real
 	 * @throws Exception 
 	 */
-	private static void type(@NotNull String tk, Object tv, @NotNull JSONObject real) throws Exception {
-		if (tv == null) {
-			return;
-		}
+	public static void type(@NotNull String tk, Object tv, @NotNull JSONObject real) throws UnsupportedDataTypeException {
 		if (tv instanceof String == false) {
 			throw new UnsupportedDataTypeException("服务器内部错误，" + tk + ":value 的value不合法！"
 					+ "Request表校验规则中 TYPE:{ key:value } 中的value只能是String类型！");
 		}
-		String t = (String) tv;
-		Object rv = real.get(tk);
-		if (rv == null) {
-			return;
-		}
 
-		switch (t) {
-		case "Boolean":
-			//Boolean.parseBoolean(real.getString(tk)); 只会判断null和true  
-			if (rv instanceof Boolean == false) { //JSONObject.getBoolean 可转换Number类型 
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 Boolean !");
-			}
-			break;
-		case "Long":
-			try {
-				Long.parseLong(real.getString(tk)); //1.23会转换为1  real.getLong(tk); 
-			} catch (Exception e) {
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 Long !");
-			}
-			break;
-		case "Double":
-			try {
-				Double.parseDouble(rv.toString());
-			} catch (Exception e) {
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 Double !");
-			}
-			break;
-		case "String":
-			if (rv instanceof String == false) { //JSONObject.getString 可转换任何类型 
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 String !");
-			}
-			break;
-		case "Object":
-			if (rv instanceof Map == false) { //JSONObject.getJSONObject 可转换String类型 
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 {Object} !");
-			}
-			break;
-		case "Array":
-			if (rv instanceof Collection == false) { //JSONObject.getJSONArray 可转换String类型 
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 [Array] !");
-			}
-			break;
-			//目前在业务表中还用不上，单一的类型校验已经够用
-			//		case "JSON":
-			//			try {
-			//				com.alibaba.fastjson.JSON.parse(rv.toString());
-			//			} catch (Exception e) {
-			//				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 JSON ！"
-			//						+ "也就是 {Object}, [Array] 或 它们对应的字符串 '{Object}', '[Array]' 4种中的一个 !");
-			//			}
-			//			break;
-		default:
-			throw new UnsupportedDataTypeException("服务器内部错误，类型 " + t + " 不合法！Request表校验规则中"
-					+ " TYPE:{ key:value } 中的value类型必须是 [Boolean, Long, Double, String, Object, Array] 中的一个!");
-		}
+		type(tk, (String) tv, real.get(tk));
 	}
 
 
+	public static void type(@NotNull String tk, @NotNull String tv, Object rv) throws UnsupportedDataTypeException {
+		if (rv == null) {
+			return;
+		}
+		
+		switch (tv) {
+		case "BOOLEAN":
+		case "Boolean": // @Deprecated，用 BOOLEAN 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Boolean
+			//Boolean.parseBoolean(real.getString(tk)); 只会判断null和true  
+			if (rv instanceof Boolean == false) { //JSONObject.getBoolean 可转换Number类型 
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 BOOLEAN !");
+			}
+			break;
+		case "NUMBER": // 整数
+		case "Long": // @Deprecated，用 Number 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Long
+			try {
+				Long.parseLong(rv.toString()); //1.23会转换为1  real.getLong(tk); 
+			} catch (Exception e) {
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 NUMBER !");
+			}
+			break;
+		case "DECIMAL": // 小数
+		case "Double": // @Deprecated，用 Decimal 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Double
+			try {
+				Double.parseDouble(rv.toString());
+			} catch (Exception e) {
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 DECIMAL !");
+			}
+			break;
+		case "STRING":
+		case "String": // @Deprecated，用 STRING 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 String
+		case "URL":
+			if (rv instanceof String == false) { //JSONObject.getString 可转换任何类型 
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 STRING !");
+			}
+			if (tv.equals("URL")) {
+				try {
+					new URL((String) rv);
+				} catch (Exception e) {
+					throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 URL !");
+				}
+			}
+			break;
+		case "OBJECT":
+		case "Object": // @Deprecated，用 OBJECT 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Object
+			if (rv instanceof Map == false) { //JSONObject.getJSONObject 可转换String类型 
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 OBJECT !");
+			}
+			break;
+		default:
+			switch (tv) {
+			case "ARRAY":
+			case "Array": // @Deprecated，用 ARRAY 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Array
+				if (rv instanceof Collection == false) { //JSONObject.getJSONArray 可转换String类型 
+					throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 ARRAY !");
+				}
+				break;
+			case "BOOLEAN[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "BOOLEAN", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 BOOLEAN[] !");
+					}
+				}
+				break;
+			case "NUMBER[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "NUMBER", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 NUMBER[] !");
+					}
+				}
+				break;
+			case "DECIMAL[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "DECIMAL", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 DECIMAL[] !");
+					}
+				}
+				break;
+			case "STRING[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "STRING", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 STRING[] !");
+					}
+				}
+				break;
+			case "URL[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "URL", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 URL[] !");
+					}
+				}
+				break;
+				//目前在业务表中还用不上，单一的类型校验已经够用
+				//		case "JSON":
+				//			try {
+				//				com.alibaba.fastjson.JSON.parse(rv.toString());
+				//			} catch (Exception e) {
+				//				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 JSON ！"
+				//						+ "也就是 {Object}, [Array] 或 它们对应的字符串 '{Object}', '[Array]' 4种中的一个 !");
+				//			}
+				//			break;
+
+			default:
+				throw new UnsupportedDataTypeException(
+						"服务器内部错误，类型 " + tv + " 不合法！Request表校验规则中 TYPE:{ key:value } 中的 value 必须是"
+						+ " [ Boolean, Number, Decimal, String, URL, Object, Array, Boolean[], Number[], Decimal[], String[], URL[] ] 中的一个!");
+			}
+			
+		}
+		
+	}
 
 
 	/**验证值
@@ -695,8 +773,8 @@ public class Structure {
 		if (value instanceof JSON) {
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
-		
-		
+
+
 		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
