@@ -537,10 +537,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			String[] keys = column == null ? null : column.toArray(new String[]{}); //StringUtil.split(c, ";");
 			if (keys == null || keys.length <= 0) {
-				
+
 				boolean noColumn = column != null && inSQLJoin;
 				String mc = isKeyPrefix() == false ? (noColumn ? "" : "*") : (noColumn ? "" : tableAlias + ".*");
-				
+
 				return StringUtil.concat(mc, joinColumn, ", ", true);
 			}
 
@@ -1015,14 +1015,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			SQLConfig jc;
 			String js;
+			
+			boolean changed = false;
 			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
 			for (Join j : joinList) {
 				switch (j.getJoinType()) {
 				case "@": // APP JOIN
-					newWs = whereString; //解决 生成的 SQL 里 where = null
-					newPvl = preparedValueList;  //解决总是 preparedValueList = new ArrayList
-					break;
-
 				case "<": // LEFT JOIN
 				case ">": // RIGHT JOIN
 					break;
@@ -1073,14 +1071,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						newPvl.addAll(jc.getPreparedValueList());
 					}
 
+					changed = true;
 					break;
 				default:
 					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
 				}
 			}
 
-			whereString = newWs;
-			preparedValueList = newPvl;
+			if (changed) {
+				whereString = newWs;
+				preparedValueList = newPvl;
+			}
 		}
 
 		String s = whereString.isEmpty() ? "" : (hasPrefix ? " WHERE " : "") + whereString;
