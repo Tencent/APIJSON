@@ -586,7 +586,7 @@ public class Structure {
 			default:
 				throw new UnsupportedDataTypeException(
 						"服务器内部错误，类型 " + tv + " 不合法！Request表校验规则中 TYPE:{ key:value } 中的 value 必须是"
-						+ " [ Boolean, Number, Decimal, String, URL, Object, Array, Boolean[], Number[], Decimal[], String[], URL[] ] 中的一个!");
+						+ " [ BOOLEAN, NUMBER, DECIMAL, STRING, URL, OBJECT, ARRAY, BOOLEAN[], NUMBER[], DECIMAL[], STRING[], URL[] ] 中的一个!");
 			}
 			
 		}
