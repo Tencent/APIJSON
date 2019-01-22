@@ -12,8 +12,8 @@ import com.jfinal.template.Engine;
 public class AppRunnableConfig extends JFinalConfig {
 
 	public static void main(String[] args) {
-        UndertowServer.start(AppRunnableConfig.class);
-    }
+                UndertowServer.start(AppRunnableConfig.class);
+        }
 	
 	public void configRoute(Routes me) {
 		me.add("/", Controller.class);
