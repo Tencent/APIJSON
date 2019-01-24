@@ -159,7 +159,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 ### 持续更新
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
 
-### 码云主页
+### GVP - 码云最有价值开源项目
 https://gitee.com/TommyLemon/APIJSON
 
 ### 我要赞赏
