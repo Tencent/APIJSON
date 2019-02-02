@@ -9,7 +9,8 @@ import com.jfinal.config.Routes;
 import com.jfinal.server.undertow.UndertowServer;
 import com.jfinal.template.Engine;
 
-/**右键这个类 > Run As > Java Application
+/**JFinalConfig
+ * 右键这个类 > Run As > Java Application
  * @author Lemon
  * @see
  * <pre>

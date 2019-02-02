@@ -25,7 +25,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 
-/**application
+/**SpringBootApplication
+ * 右键这个类 > Run As > Java Application
  * @author Lemon
  */
 @Configuration
