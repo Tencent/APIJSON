@@ -1193,7 +1193,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(key + ":value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
 
-		return getKey(key) + (not ? "!=" : "=") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
+		return getKey(key) + (not ? " != " : " = ") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
 	}
 
 	@JSONField(serialize = false)
@@ -1205,7 +1205,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(key + type + ":value 中key不合法！比较运算 [>, <, >=, <=] 不支持 [&, !, |] 中任何逻辑运算符 ！");
 		}
 		
-		return getKey(key) + type + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
+		return getKey(key) + " " + type + " " + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
 	}
 
 	public String getKey(String key) {
