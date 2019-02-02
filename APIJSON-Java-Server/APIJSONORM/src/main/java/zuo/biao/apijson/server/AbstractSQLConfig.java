@@ -1134,6 +1134,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		else if (key.endsWith("<>")) {
 			keyType = 6;
 		}
+		else if (key.endsWith(">=")) {
+			keyType = 7;
+		}
+		else if (key.endsWith("<=")) {
+			keyType = 8;
+		}
+		else if (key.endsWith(">")) {
+			keyType = 9;
+		}
+		else if (key.endsWith("<")) {
+			keyType = 10;
+		}
 		else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
 			keyType = 0;
 		}
@@ -1153,6 +1165,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getExistsString(key, value);
 		case 6:
 			return getContainString(key, value);
+		case 7:
+			return getCompareString(key, value, ">=");
+		case 8:
+			return getCompareString(key, value, "<=");
+		case 9:
+			return getCompareString(key, value, ">");
+		case 10:
+			return getCompareString(key, value, "<");
 		default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
 			return getEqualString(key, value);
 		}
@@ -1161,7 +1181,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@JSONField(serialize = false)
 	public String getEqualString(String key, Object value) throws Exception {
-		if (value instanceof Collection<?>) {
+		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
 			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
 		}
 
@@ -1174,6 +1194,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		return getKey(key) + (not ? "!=" : "=") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
+	}
+
+	@JSONField(serialize = false)
+	public String getCompareString(String key, Object value, String type) throws Exception {
+		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
+			throw new IllegalArgumentException(key + type + ":value 中value不合法！比较运算 [>, <, >=, <=] 只支持 [Boolean, Number, String] 内的类型 ！");
+		}
+		if (StringUtil.isName(key) == false) {
+			throw new IllegalArgumentException(key + type + ":value 中key不合法！比较运算 [>, <, >=, <=] 不支持 [&, !, |] 中任何逻辑运算符 ！");
+		}
+		
+		return getKey(key) + type + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
 	}
 
 	public String getKey(String key) {
@@ -2273,6 +2305,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			key = key.substring(0, key.length() - 2);
 		} 
 		else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
+			key = key.substring(0, key.length() - 1);
+		}
+		else if (key.endsWith(">=")) {//比较。查询时处理
+			key = key.substring(0, key.length() - 2);
+		}
+		else if (key.endsWith("<=")) {//比较。查询时处理
+			key = key.substring(0, key.length() - 2);
+		}
+		else if (key.endsWith(">")) {//比较。查询时处理
+			key = key.substring(0, key.length() - 1);
+		}
+		else if (key.endsWith("<")) {//比较。查询时处理
 			key = key.substring(0, key.length() - 1);
 		}
 		else if (key.endsWith("+")) {//延长，PUT查询时处理
