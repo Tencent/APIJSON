@@ -1,6 +1,12 @@
 package apijson.demo.server;
 
+import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
+import static zuo.biao.apijson.RequestMethod.GETS;
+import static zuo.biao.apijson.RequestMethod.HEAD;
+import static zuo.biao.apijson.RequestMethod.HEADS;
+import static zuo.biao.apijson.RequestMethod.POST;
+import static zuo.biao.apijson.RequestMethod.PUT;
 
 import com.jfinal.kit.HttpKit;
 
@@ -33,7 +39,7 @@ public class Controller extends com.jfinal.core.Controller {
 	 * @see {@link RequestMethod#HEAD}
 	 */
 	public void head() {
-		renderJson(new DemoParser(GET).setSession(getSession()).parse(HttpKit.readData(getRequest())));
+		renderJson(new DemoParser(HEAD).setSession(getSession()).parse(HttpKit.readData(getRequest())));
 	}
 
 	/**限制性GET，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
@@ -43,7 +49,7 @@ public class Controller extends com.jfinal.core.Controller {
 	 * @see {@link RequestMethod#GETS}
 	 */
 	public void gets() {
-		renderJson(new DemoParser(GET).setSession(getSession()).parse(HttpKit.readData(getRequest())));
+		renderJson(new DemoParser(GETS).setSession(getSession()).parse(HttpKit.readData(getRequest())));
 	}
 
 	/**限制性HEAD，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
@@ -53,7 +59,7 @@ public class Controller extends com.jfinal.core.Controller {
 	 * @see {@link RequestMethod#HEADS}
 	 */
 	public void heads() {
-		renderJson(new DemoParser(GET).setSession(getSession()).parse(HttpKit.readData(getRequest())));
+		renderJson(new DemoParser(HEADS).setSession(getSession()).parse(HttpKit.readData(getRequest())));
 	}
 
 	/**新增
@@ -63,7 +69,7 @@ public class Controller extends com.jfinal.core.Controller {
 	 * @see {@link RequestMethod#POST}
 	 */
 	public void post() {
-		renderJson(new DemoParser(GET).setSession(getSession()).parse(HttpKit.readData(getRequest())));
+		renderJson(new DemoParser(POST).setSession(getSession()).parse(HttpKit.readData(getRequest())));
 	}
 
 	/**修改
@@ -73,7 +79,7 @@ public class Controller extends com.jfinal.core.Controller {
 	 * @see {@link RequestMethod#PUT}
 	 */
 	public void put() {
-		renderJson(new DemoParser(GET).setSession(getSession()).parse(HttpKit.readData(getRequest())));
+		renderJson(new DemoParser(PUT).setSession(getSession()).parse(HttpKit.readData(getRequest())));
 	}
 
 	/**删除
@@ -83,7 +89,7 @@ public class Controller extends com.jfinal.core.Controller {
 	 * @see {@link RequestMethod#DELETE}
 	 */
 	public void delete() {
-		renderJson(new DemoParser(GET).setSession(getSession()).parse(HttpKit.readData(getRequest())));
+		renderJson(new DemoParser(DELETE).setSession(getSession()).parse(HttpKit.readData(getRequest())));
 	}
 
 
