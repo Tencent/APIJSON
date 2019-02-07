@@ -30,8 +30,11 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import org.postgresql.util.PGobject;
+
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.server.AbstractSQLExecutor;
 import zuo.biao.apijson.server.SQLConfig;
@@ -136,7 +139,10 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 			}
 			value = sb.toString();
 		}
-		
+		else if (value instanceof PGobject) {
+			value = JSON.parse(((PGobject) value).getValue());
+		}
+
 		return value;
 	}
 
