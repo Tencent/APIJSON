@@ -105,13 +105,23 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 		if (valueList != null && valueList.isEmpty() == false) {
 
+			Object v;
 			for (int i = 0; i < valueList.size(); i++) {
-
+				v = valueList.get(i); //JSON.isBooleanOrNumberOrString(v) 解决 PostgreSQL: Can't infer the SQL type to use for an instance of com.alibaba.fastjson.JSONArray
+				
 				if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) {
-					statement.setObject(i + 1, valueList.get(i)); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
+					if (JSON.isBooleanOrNumberOrString(v)) {
+						statement.setObject(i + 1, v); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
+					}
+					else {
+						PGobject o = new PGobject();
+						o.setType("jsonb");
+						o.setValue(v.toString());
+						statement.setObject(i + 1, o); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
+					}
 				}
 				else {
-					statement.setString(i + 1, "" + valueList.get(i)); //MySQL setObject 不支持 JSON 类型
+					statement.setString(i + 1, v.toString()); //MySQL setObject 不支持 JSON 类型
 				}
 			}
 		}
