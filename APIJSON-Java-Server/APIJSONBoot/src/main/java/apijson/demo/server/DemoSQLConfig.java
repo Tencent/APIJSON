@@ -39,6 +39,11 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 	}
+	
+//	@Override
+//	public String getDatabase() {
+//		return DATABASE_POSTGRESQL;
+//	}
 
 	@Override
 	public String getDBUri() {

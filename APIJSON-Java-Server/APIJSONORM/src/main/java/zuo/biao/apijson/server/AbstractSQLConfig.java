@@ -236,8 +236,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getSQLTable() {
-		String t = TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? t.toLowerCase() : t;
+		//		String t = TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
+		//如果要强制小写，则可在子类重写这个方法再 toLowerCase		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? t.toLowerCase() : t;
+		return TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
 	}
 	@JSONField(serialize = false)
 	@Override
@@ -257,7 +258,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		String q = getQuote();
 		//getTable 不能小写，因为Verifier用大小写敏感的名称判断权限		
-		return q + (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? alias.toLowerCase() : alias) + q;
+		//如果要强制小写，则可在子类重写这个方法再 toLowerCase  return q + (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? alias.toLowerCase() : alias) + q;
+		return q + alias + q;
 	}
 	@Override
 	public AbstractSQLConfig setAlias(String alias) {
@@ -490,21 +492,24 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 				}
 			}
-			return SQL.count(column != null && column.size() == 1 ? column.get(0) : "*");
+			return SQL.count(column != null && column.size() == 1 ? getKey(column.get(0)) : "*");
 		case POST:
 			if (column == null || column.isEmpty()) {
 				throw new IllegalArgumentException("POST 请求必须在Table内设置要保存的 key:value ！");
 			}
 
-			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
-				for (String c : column) {
-					if (StringUtil.isName(c) == false) {
-						throw new IllegalArgumentException("POST请求: 每一个 key:value 中的key都必须是1个单词！");
-					}
+			String s = "";
+			boolean pfirst = true;
+			for (String c : column) {
+				if (isPrepared() && StringUtil.isName(c) == false) {  //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+					throw new IllegalArgumentException("POST请求: 每一个 key:value 中的key都必须是1个单词！");
 				}
+				s += ((pfirst ? "" : ",") + getKey(c));
+				
+				pfirst = false;
 			}
 
-			return "(" + StringUtil.getString(column.toArray()) + ")";
+			return "(" + s + ")";
 		case GET:
 		case GETS:
 			boolean isQuery = RequestMethod.isQueryMethod(method);
@@ -1015,7 +1020,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			SQLConfig jc;
 			String js;
-			
+
 			boolean changed = false;
 			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
 			for (Join j : joinList) {
@@ -1204,7 +1209,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (StringUtil.isName(key) == false) {
 			throw new IllegalArgumentException(key + type + ":value 中key不合法！比较运算 [>, <, >=, <=] 不支持 [&, !, |] 中任何逻辑运算符 ！");
 		}
-		
+
 		return getKey(key) + " " + type + " " + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
 	}
 
@@ -1349,6 +1354,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getRegExpString(String key, String value, boolean ignoreCase) {
+		if (DATABASE_POSTGRESQL.equals(getDatabase())) {
+			return getKey(key) + " ~" + (ignoreCase ? "* " : " ") + getValue(value);
+		}
 		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
 	}
 	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1583,14 +1591,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (childs[i] instanceof String) {
 						childs[i] = "\"" + childs[i] + "\"";
 					}
-					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-							+ "json_contains(" + getKey(key) + ", " + getValue(childs[i]) + ")";
+					
+					if (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase())) {
+						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
+								+ getKey(key) + " @> " + getValue(childs[i]);
+					} else {
+						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
+								+ "json_contains(" + getKey(key) + ", " + getValue(childs[i]) + ")";
+					}
 				}
 			}
 			if (condition.isEmpty()) {
-				condition = (SQL.isNull(key, true) + OR + getLikeString(key, "[]")); // key = '[]' 无结果！
+				condition = (getKey(key) + SQL.isNull(true) + OR + getLikeString(key, "[]")); // key = '[]' 无结果！
 			} else {
-				condition = (SQL.isNull(key, false) + AND + "(" + condition + ")");
+				condition = (getKey(key) + SQL.isNull(false) + AND + "(" + condition + ")");
 			}
 		}
 		if (condition.isEmpty()) {
@@ -1692,7 +1706,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				value = content.get(key);
 				key = getRealKey(method, key, false, true, verifyName, quote);
 
-				setString += (isFirst ? "" : ", ") + (key + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
+				setString += (isFirst ? "" : ", ") + (getKey(key) + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
 						? getRemoveString(key, value) : getValue(value)) ) );
 
 				isFirst = false;
@@ -1714,10 +1728,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	public String getAddString(String key, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
-			return key + " + " + value;
+			return getKey(key) + " + " + value;
 		}
 		if (value instanceof String) {
-			return " CONCAT (" + key + ", " + getValue(value) + ") ";
+			return " CONCAT (" + getKey(key) + ", " + getValue(value) + ") ";
 		}
 		throw new IllegalArgumentException(key + "+ 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
 	}
@@ -1730,10 +1744,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	public String getRemoveString(String key, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
-			return key + " - " + value;
+			return getKey(key) + " - " + value;
 		}
 		if (value instanceof String) {
-			return SQL.replace(key, (String) getValue(value), "");// " replace(" + key + ", '" + value + "', '') ";
+			return SQL.replace(getKey(key), (String) getValue(value), "");// " replace(" + key + ", '" + value + "', '') ";
 		}
 		throw new IllegalArgumentException(key + "- 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
 	}
@@ -1868,10 +1882,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				jt = jc.getTable();
 				tn = j.getTargetName();
-				if (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase())) {
-					jt = jt.toLowerCase();
-					tn = tn.toLowerCase();
-				}
+
+				//如果要强制小写，则可在子类重写这个方法再 toLowerCase
+				//				if (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase())) {
+				//					jt = jt.toLowerCase();
+				//					tn = tn.toLowerCase();
+				//				}
 
 				switch (j.getJoinType()) { //TODO $ SELF JOIN
 				//				case "@": // APP JOIN
