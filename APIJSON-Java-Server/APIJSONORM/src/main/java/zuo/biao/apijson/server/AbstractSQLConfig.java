@@ -198,7 +198,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@Override
 	public String getQuote() {
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "\"" : "`";
+		return DATABASE_POSTGRESQL.equals(getDatabase()) ? "\"" : "`";
 	}
 
 	@Override
@@ -237,7 +237,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public String getSQLTable() {
 		//		String t = TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
-		//如果要强制小写，则可在子类重写这个方法再 toLowerCase		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? t.toLowerCase() : t;
+		//如果要强制小写，则可在子类重写这个方法再 toLowerCase		return DATABASE_POSTGRESQL.equals(getDatabase()) ? t.toLowerCase() : t;
 		return TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
 	}
 	@JSONField(serialize = false)
@@ -258,7 +258,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		String q = getQuote();
 		//getTable 不能小写，因为Verifier用大小写敏感的名称判断权限		
-		//如果要强制小写，则可在子类重写这个方法再 toLowerCase  return q + (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? alias.toLowerCase() : alias) + q;
+		//如果要强制小写，则可在子类重写这个方法再 toLowerCase  return q + (DATABASE_POSTGRESQL.equals(getDatabase()) ? alias.toLowerCase() : alias) + q;
 		return q + alias + q;
 	}
 	@Override
@@ -1227,7 +1227,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			preparedValueList.add(value);
 			return "?";
 		}
-		return value instanceof Number || value instanceof Boolean ? value :  "'" + value + "'";
+		return (value instanceof Number || value instanceof Boolean) && DATABASE_POSTGRESQL.equals(getDatabase()) ? value :  "'" + value + "'";
 	}
 	@Override
 	public List<Object> getPreparedValueList() {
@@ -1589,7 +1589,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
 					}
 					
-					if (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase())) {
+					if (DATABASE_POSTGRESQL.equals(getDatabase())) {
 						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
 								+ getKey(key) + " @> " + getValue(newJSONArray(childs[i])); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
 					} else {
@@ -1881,7 +1881,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				tn = j.getTargetName();
 
 				//如果要强制小写，则可在子类重写这个方法再 toLowerCase
-				//				if (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase())) {
+				//				if (DATABASE_POSTGRESQL.equals(getDatabase())) {
 				//					jt = jt.toLowerCase();
 				//					tn = tn.toLowerCase();
 				//				}

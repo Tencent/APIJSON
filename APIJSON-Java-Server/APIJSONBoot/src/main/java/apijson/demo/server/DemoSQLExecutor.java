@@ -90,7 +90,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
-			if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) { //PostgreSQL 不允许 cross-database
+			if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) { //PostgreSQL 不允许 cross-database
 				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
 			}
 			else {
@@ -109,7 +109,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 			for (int i = 0; i < valueList.size(); i++) {
 				v = valueList.get(i); //JSON.isBooleanOrNumberOrString(v) 解决 PostgreSQL: Can't infer the SQL type to use for an instance of com.alibaba.fastjson.JSONArray
 				
-				if (DemoSQLConfig.DATABASE_POSTGRESQL.equalsIgnoreCase(config.getDatabase())) {
+				if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) {
 					if (JSON.isBooleanOrNumberOrString(v)) {
 						statement.setObject(i + 1, v); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
 					}

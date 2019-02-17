@@ -25,8 +25,8 @@ import zuo.biao.apijson.RequestRole;
  */
 public interface SQLConfig {
 
-	String DATABASE_MYSQL = "MySQL";
-	String DATABASE_POSTGRESQL = "PostgreSQL";
+	String DATABASE_MYSQL = "MYSQL";
+	String DATABASE_POSTGRESQL = "POSTGRESQL";
 	
 	String SCHEMA_INFORMATION = "information_schema";
 	String TABLE_SCHEMA = "table_schema";
