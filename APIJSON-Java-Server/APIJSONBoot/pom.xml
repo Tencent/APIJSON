@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo.server</groupId>
 	<artifactId>apijson-boot</artifactId>
-	<version>3.3.0</version>
+	<version>3.4.8</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONBoot</name>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.21</version>
+			<version>1.2.55</version>
 		</dependency>
 	</dependencies>
 
