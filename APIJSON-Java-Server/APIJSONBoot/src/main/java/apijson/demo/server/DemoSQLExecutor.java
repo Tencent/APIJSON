@@ -116,12 +116,12 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 					else {
 						PGobject o = new PGobject();
 						o.setType("jsonb");
-						o.setValue(v.toString());
-						statement.setObject(i + 1, o); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
+						o.setValue(v == null ? null : v.toString());
+						statement.setObject(i + 1, o); //PostgreSQL 除了基本类型，其它的必须通过 PGobject 设置进去，否则 jsonb = varchar 等报错
 					}
 				}
 				else {
-					statement.setString(i + 1, v.toString()); //MySQL setObject 不支持 JSON 类型
+					statement.setString(i + 1, v == null ? null : v.toString()); //MySQL setObject 不支持 JSON 类型
 				}
 			}
 		}

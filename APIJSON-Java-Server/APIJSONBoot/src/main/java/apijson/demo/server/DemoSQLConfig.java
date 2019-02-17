@@ -40,9 +40,11 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 	}
 	
+	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
 //	@Override
 //	public String getDatabase() {
-//		return DATABASE_POSTGRESQL;
+//		String db = super.getDatabase();
+//		return db == null ? DATABASE_POSTGRESQL : db;
 //	}
 
 	@Override

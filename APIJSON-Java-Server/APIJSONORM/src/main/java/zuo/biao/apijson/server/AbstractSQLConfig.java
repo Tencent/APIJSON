@@ -1227,7 +1227,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			preparedValueList.add(value);
 			return "?";
 		}
-		return "'" + value + "'";
+		return value instanceof Number || value instanceof Boolean ? value :  "'" + value + "'";
 	}
 	@Override
 	public List<Object> getPreparedValueList() {
@@ -1588,13 +1588,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (childs[i] instanceof JSON) {
 						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
 					}
-					if (childs[i] instanceof String) {
-						childs[i] = "\"" + childs[i] + "\"";
-					}
 					
 					if (DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase())) {
 						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-								+ getKey(key) + " @> " + getValue(childs[i]);
+								+ getKey(key) + " @> " + getValue(newJSONArray(childs[i])); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
 					} else {
 						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
 								+ "json_contains(" + getKey(key) + ", " + getValue(childs[i]) + ")";
