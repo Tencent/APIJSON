@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.Map;
+import java.util.Set;
+
 import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSONObject;
@@ -67,8 +70,22 @@ public class DemoParser extends AbstractParser<Long> {
 	@Override
 	public JSONObject parseResponse(JSONObject request) {
 		//补充format
-		if (session != null && request != null && request.get(JSONRequest.KEY_FORMAT) == null) {
-			request.put(JSONRequest.KEY_FORMAT, session.getAttribute(JSONRequest.KEY_FORMAT));
+		if (session != null && request != null) {
+			if (request.get(JSONRequest.KEY_FORMAT) == null) {
+				request.put(JSONRequest.KEY_FORMAT, session.getAttribute(JSONRequest.KEY_FORMAT));
+			}
+			if (request.get(Controller.DEFAULTS) == null) {
+				JSONObject defaults = (JSONObject) session.getAttribute(Controller.DEFAULTS);
+				Set<Map.Entry<String, Object>> set = defaults == null ? null : defaults.entrySet();
+
+				if (set != null) {
+					for (Map.Entry<String, Object> e : set) {
+						if (e != null && request.get(e.getKey()) == null) {
+							request.put(e.getKey(), e.getValue());
+						}
+					}
+				}
+			}
 		}
 		return super.parseResponse(request);
 	}

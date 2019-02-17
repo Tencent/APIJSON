@@ -360,6 +360,7 @@ public class Controller {
 
 	public static final String LOGIN = "login";
 	public static final String REMEMBER = "remember";
+	public static final String DEFAULTS = "defaults";
 
 	public static final int LOGIN_TYPE_PASSWORD = 0;//密码登录
 	public static final int LOGIN_TYPE_VERIFY = 1;//验证码登录
@@ -382,9 +383,10 @@ public class Controller {
 		boolean isPassword;
 		String phone;
 		String password;
-		boolean remember;
 		int version;
 		Boolean format;
+		boolean remember;
+		JSONObject defaults;
 		try {
 			requestObject = DemoParser.parseRequest(request);
 
@@ -406,12 +408,14 @@ public class Controller {
 				}
 			}
 
-			remember = requestObject.getBooleanValue(REMEMBER);
 			version = requestObject.getIntValue(VERSION);
 			format = requestObject.getBoolean(FORMAT);
-			requestObject.remove(REMEMBER);
+			remember = requestObject.getBooleanValue(REMEMBER);
+			defaults = requestObject.getJSONObject(DEFAULTS); //默认加到每个请求最外层的字段
 			requestObject.remove(VERSION);
 			requestObject.remove(FORMAT);
+			requestObject.remove(REMEMBER);
+			requestObject.remove(DEFAULTS);
 		} catch (Exception e) {
 			return DemoParser.extendErrorResult(requestObject, e);
 		}
@@ -479,12 +483,14 @@ public class Controller {
 		session.setAttribute(TYPE, isPassword ? LOGIN_TYPE_PASSWORD : LOGIN_TYPE_VERIFY); //登录方式
 		session.setAttribute(USER_, user); //用户
 		session.setAttribute(PRIVACY_, privacy); //用户隐私信息
-		session.setAttribute(REMEMBER, remember); //记住登录
 		session.setAttribute(VERSION, version); //全局默认版本号
 		session.setAttribute(FORMAT, format); //全局默认格式化配置
+		session.setAttribute(REMEMBER, remember); //是否记住登录
+		session.setAttribute(DEFAULTS, defaults); //给每个请求JSON最外层加的字段
 		session.setMaxInactiveInterval(60*60*24*(remember ? 7 : 1)); //设置session过期时间
 
 		response.put(REMEMBER, remember);
+		response.put(DEFAULTS, defaults);
 		return response;
 	}
 
