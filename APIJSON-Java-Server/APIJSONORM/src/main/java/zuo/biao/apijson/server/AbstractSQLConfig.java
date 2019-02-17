@@ -1862,6 +1862,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		if (joinList != null) {
 			String quote = getQuote();
+			List<Object> pvl = new ArrayList<>();
+			boolean changed = false;
 
 			String sql = null;
 			SQLConfig jc;
@@ -1898,7 +1900,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							+ quote + tn + quote + "." + quote + j.getTargetKey() + quote;
 					jc.setMain(false).setKeyPrefix(true);
 
-					preparedValueList.addAll(jc.getPreparedValueList());
+//					preparedValueList.addAll(jc.getPreparedValueList());
+
+					pvl.addAll(jc.getPreparedValueList());
+					changed = true;
 					break;
 
 				case "":  // FULL JOIN 
@@ -1916,6 +1921,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				joinOns += "  \n  " + sql;
 			}
+
+
+			if (changed) {
+				pvl.addAll(preparedValueList);
+				preparedValueList = pvl;
+			}
+
 		}
 
 		return joinOns;
