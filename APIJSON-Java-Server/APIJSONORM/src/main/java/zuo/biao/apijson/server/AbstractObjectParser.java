@@ -333,20 +333,23 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
 				
 				JSONObject subquery = (JSONObject) value;
-				String range = subquery.getString("range");
-				if (range != null && "ANY".equals(range) == false && "ALL".equals(range) == false) {
-					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 [ANY, ALL] 中的一个！");
+				String range = subquery.getString(JSONRequest.KEY_SUBQUERY_RANGE);
+				if (range != null && JSONRequest.SUBQUERY_RANGE_ALL.equals(range) == false && JSONRequest.SUBQUERY_RANGE_ANY.equals(range) == false) {
+					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 [" + JSONRequest.SUBQUERY_RANGE_ALL + ", " + JSONRequest.SUBQUERY_RANGE_ANY + "] 中的一个！");
 				}
 
 				
 				JSONArray arr = parser.onArrayParse(subquery, AbstractParser.getAbsPath(path, replaceKey), "[]", true);
 				
 				JSONObject obj = arr == null || arr.isEmpty() ? null : arr.getJSONObject(0);
+				if (obj == null) {
+					throw new Exception("服务器内部错误，解析子查询 " + path + "/" + key + ":{ } 为 Subquery 对象失败！");
+				}
 
-				String from = subquery.getString("from");
-				JSONObject arrObj = obj.getJSONObject(from);
+				String from = subquery.getString(JSONRequest.KEY_SUBQUERY_FROM);
+				JSONObject arrObj = from == null ? null : obj.getJSONObject(from);
 				if (arrObj == null) {
-					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ from:value } 中 value 对应的主表对象不存在！");
+					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ from:value } 中 value 对应的主表对象 " + from + ":{} 不存在！");
 				}
 //				
 				SQLConfig cfg = (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
