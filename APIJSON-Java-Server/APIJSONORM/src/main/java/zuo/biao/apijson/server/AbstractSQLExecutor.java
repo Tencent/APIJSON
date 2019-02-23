@@ -163,9 +163,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
 			if (config.getId() != null) {
-				result.put(JSONResponse.KEY_ID, config.getId());
+				result.put(config.getIdKey(), config.getId());
 			} else {
-				result.put(JSONResponse.KEY_ID + "[]", config.getWhere(JSONResponse.KEY_ID_IN, true));
+				result.put(config.getIdKey() + "[]", config.getWhere(config.getIdKey() + "{}", true));
 			}
 			result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
 			return result;
@@ -259,7 +259,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 
-	/**TODO @ APP JOIN 查询副表并缓存到 childMap
+	/**@ APP JOIN 查询副表并缓存到 childMap
 	 * @param config
 	 * @param resultMap
 	 * @param childMap

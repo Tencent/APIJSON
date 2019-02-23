@@ -81,14 +81,6 @@ public interface Verifier<T> {
 	Verifier<T> setVisitor(@NotNull Visitor<T> visitor);
 
 	
-	String getVisitorKey();
-	
-	String getVisitorIdKey();
-	
-	String getVisitorIdKey(String table);
-
-
-
-
+	String getVisitorIdKey(SQLConfig config);
 
 }

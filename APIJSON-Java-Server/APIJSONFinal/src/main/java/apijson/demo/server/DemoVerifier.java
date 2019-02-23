@@ -26,6 +26,7 @@ import zuo.biao.apijson.Log;
 import zuo.biao.apijson.MethodAccess;
 import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.server.AbstractVerifier;
+import zuo.biao.apijson.server.SQLConfig;
 import zuo.biao.apijson.server.Visitor;
 
 
@@ -57,18 +58,13 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 	}
 
 	@Override
-	public String getVisitorKey() {
+	public String getVisitorKey(SQLConfig config) {
 		return Controller.USER_;
 	}
 
 	@Override
-	public String getVisitorIdKey() {
-		return Controller.USER_ID;
-	}
-
-	@Override
-	public String getVisitorIdKey(String table) {
-		return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? Controller.ID : getVisitorIdKey();
+	public String getVisitorIdKey(SQLConfig config) {
+		return Controller.USER_.equals(config.getTable()) || Controller.PRIVACY_.equals(config.getTable()) ? Controller.ID : Controller.USER_ID;
 	}
 
 	/**登录校验

@@ -100,6 +100,12 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 	}
 
 
+	@Override
+	public String getVisitorIdKey(SQLConfig config) {
+		return config.getUserIdKey();
+	}
+
+
 
 	@NotNull
 	protected Visitor<T> visitor;
@@ -150,7 +156,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 
 		//验证角色，假定真实强制匹配<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		String visitorIdkey = getVisitorIdKey(config.getTable());
+		String visitorIdkey = getVisitorIdKey(config);
 
 		Object requestId;
 		switch (role) {

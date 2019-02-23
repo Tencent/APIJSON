@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import static zuo.biao.apijson.JSONObject.KEY_ID;
+import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
+
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
@@ -33,19 +36,42 @@ import zuo.biao.apijson.server.SQLConfig;
  */
 public class DemoSQLConfig extends AbstractSQLConfig {
 
-	
+
+	public static final Callback SIMPLE_CALLBACK;
+
 	//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	static {
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
+
+		SIMPLE_CALLBACK = new SimpleCallback() {
+
+			@Override
+			public DemoSQLConfig getSQLConfig(RequestMethod method, String table) {
+				return new DemoSQLConfig(method, table);
+			}
+
+			//			@Override
+			//			public String getIdKey(String schema, String table) {
+			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...
+			//				//		return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
+			//				//		return StringUtil.toUpperCase(t) + "_ID";  // USER_ID, COMMENT_ID ...
+			//			}
+
+			@Override
+			public String getUserIdKey(String schema, String table) {
+				return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? KEY_ID : KEY_USER_ID; // id / userId
+			}
+
+		};
 	}
-	
+
 	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
-//	@Override
-//	public String getDatabase() {
-//		String db = super.getDatabase();
-//		return db == null ? DATABASE_POSTGRESQL : db;
-//	}
+	//	@Override
+	//	public String getDatabase() {
+	//		String db = super.getDatabase();
+	//		return db == null ? DATABASE_POSTGRESQL : db;
+	//	}
 
 	@Override
 	public String getDBUri() {
@@ -65,6 +91,18 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		String s = super.getSchema();
 		return StringUtil.isEmpty(s, true) ? "sys" : s; //TODO 改成你自己的
 	}
+
+
+	@Override
+	public String getIdKey() {
+		return SIMPLE_CALLBACK.getIdKey(getSchema(), getTable());
+	}
+
+	@Override
+	public String getUserIdKey() {
+		return SIMPLE_CALLBACK.getUserIdKey(getSchema(), getTable());
+	}
+
 
 	public DemoSQLConfig() {
 		this(RequestMethod.GET);
@@ -88,18 +126,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	 * @throws Exception 
 	 */
 	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList) throws Exception {
-		return newSQLConfig(method, table, request, joinList, new Callback() {
-
-			@Override
-			public DemoSQLConfig getSQLConfig(RequestMethod method, String table) {
-				return new DemoSQLConfig(method, table);
-			}
-			
-			@Override
-			public Object newId(RequestMethod method, String table) {
-				return System.currentTimeMillis(); //为 post 请求提供 id， 只能是 Long 或 String
-			}
-		});
+		return newSQLConfig(method, table, request, joinList, SIMPLE_CALLBACK);
 	}
 
 

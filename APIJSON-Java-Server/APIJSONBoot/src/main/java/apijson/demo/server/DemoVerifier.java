@@ -56,21 +56,6 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 		return parser;
 	}
 
-	@Override
-	public String getVisitorKey() {
-		return Controller.USER_;
-	}
-
-	@Override
-	public String getVisitorIdKey() {
-		return Controller.USER_ID;
-	}
-
-	@Override
-	public String getVisitorIdKey(String table) {
-		return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? Controller.ID : getVisitorIdKey();
-	}
-
 	/**登录校验
 	 * @author 
 	 * @modifier Lemon

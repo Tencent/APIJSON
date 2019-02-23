@@ -21,12 +21,10 @@ import static zuo.biao.apijson.JSONObject.KEY_FROM;
 import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
 import static zuo.biao.apijson.JSONObject.KEY_ID;
-import static zuo.biao.apijson.JSONObject.KEY_ID_IN;
 import static zuo.biao.apijson.JSONObject.KEY_ORDER;
 import static zuo.biao.apijson.JSONObject.KEY_ROLE;
 import static zuo.biao.apijson.JSONObject.KEY_SCHEMA;
 import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
-import static zuo.biao.apijson.JSONObject.KEY_USER_ID_IN;
 import static zuo.biao.apijson.RequestMethod.DELETE;
 import static zuo.biao.apijson.RequestMethod.GET;
 import static zuo.biao.apijson.RequestMethod.GETS;
@@ -80,6 +78,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TAG);
 	}
 
+	@NotNull
+	@Override
+	public String getIdKey() {
+		return KEY_ID;
+	}
+	@NotNull
+	@Override
+	public String getUserIdKey() {
+		return KEY_USER_ID;
+	}
 
 
 	private Object id; //Table的id
@@ -914,16 +922,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					andList = new ArrayList<>();
 				}
 				else if (prior && andList.isEmpty() == false) {
-					if (andList.contains(KEY_ID)) {
+					
+					String idKey = getIdKey();
+					String idInKey = idKey + "{}";
+					String userIdKey = getUserIdKey();
+					String userIdInKey = userIdKey + "{}";
+					
+					if (andList.contains(idKey)) {
 						i ++;
 					}
-					if (andList.contains(KEY_ID_IN)) {
+					if (andList.contains(idInKey)) {
 						i ++;
 					}
-					if (andList.contains(KEY_USER_ID)) {
+					if (andList.contains(userIdKey)) {
 						i ++;
 					}
-					if (andList.contains(KEY_USER_ID_IN)) {
+					if (andList.contains(userIdInKey)) {
 						i ++;
 					}
 				}
@@ -1689,9 +1703,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			int keyType = 0;// 0 - =; 1 - +, 2 - -
 			Object value;
 
+			String idKey = getIdKey();
 			for (String key : set) {
 				//避免筛选到全部	value = key == null ? null : content.get(key);
-				if (key == null || KEY_ID.equals(key)) {
+				if (key == null || idKey.equals(key)) {
 					continue;
 				}
 
@@ -1951,21 +1966,28 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
+		
+		String schema = request.getString(KEY_SCHEMA);
+		
+		String idKey = callback.getIdKey(schema, table);
+		String idInKey = idKey + "{}";
+		String userIdKey = callback.getUserIdKey(schema, table);
+		String userIdInKey = userIdKey + "{}";
 
-		Object idIn = request.get(KEY_ID_IN); //可能是 id{}:">0"
+		Object idIn = request.get(idInKey); //可能是 id{}:">0"
 
 		if (method == POST) {
 			if (idIn != null) { //不能在这里确定[]的长度，只能在外面传进来
 				if ((idIn instanceof List == false) || ((List<?>)idIn).isEmpty()) { // id{}:[] 表示同时插入多条记录
 					throw new IllegalArgumentException("POST请求，生成多条记录请用 id{}:[] ！ [] 类型为JSONArray且不能为空！");
 				}
-			} else if (request.get(KEY_ID) == null) {
-				request.put(KEY_ID, callback.newId(method, table));
+			} else if (request.get(idKey) == null) {
+				request.put(idKey, callback.newId(method, table));
 			}
 		}
 
 		//对id和id{}处理，这两个一定会作为条件
-		Object id = request.get(KEY_ID);
+		Object id = request.get(idKey);
 		if (id != null) { //null无效
 			if (id instanceof Number) { 
 				if (((Number) id).longValue() <= 0) { //一定没有值
@@ -1979,7 +2001,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			else if (id instanceof Subquery) {}
 			else {
-				throw new IllegalArgumentException(KEY_ID + ":value 中 value 的类型只能是 Long , String 或 Subquery ！");
+				throw new IllegalArgumentException(idKey + ":value 中 value 的类型只能是 Long , String 或 Subquery ！");
 			}
 
 			if (idIn instanceof List) { //共用idIn场景少性能差
@@ -1992,7 +2014,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String role = request.getString(KEY_ROLE);
 		String database = request.getString(KEY_DATABASE);
-		String schema = request.getString(KEY_SCHEMA);
 		String combine = request.getString(KEY_COMBINE);
 		Subquery from = (Subquery) request.get(KEY_FROM);
 		String column = request.getString(KEY_COLUMN);
@@ -2001,8 +2022,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String order = request.getString(KEY_ORDER);
 
 		//强制作为条件且放在最前面优化性能
-		request.remove(KEY_ID);
-		request.remove(KEY_ID_IN);
+		request.remove(idKey);
+		request.remove(idInKey);
 		//关键词
 		request.remove(KEY_ROLE);
 		request.remove(KEY_DATABASE);
@@ -2043,7 +2064,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new Exception("服务器内部错误:\n" + TAG
 							+ " newSQLConfig  values == null || values.length != columns.length !");
 				}
-				column = KEY_ID + "," + StringUtil.getString(columns); //set已经判断过不为空
+				column = idKey + "," + StringUtil.getString(columns); //set已经判断过不为空
 				final int size = columns.length + 1; //以key数量为准
 
 				List<List<Object>> valuess = new ArrayList<>(idList.size()); // [idList.size()][]
@@ -2072,12 +2093,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			//强制作为条件且放在最前面优化性能
 			if (id != null) {
-				tableWhere.put(KEY_ID, id);
-				andList.add(KEY_ID);
+				tableWhere.put(idKey, id);
+				andList.add(idKey);
 			}
 			if (idIn != null) {
-				tableWhere.put(KEY_ID_IN, idIn);
-				andList.add(KEY_ID_IN);
+				tableWhere.put(idInKey, idIn);
+				andList.add(idInKey);
 			}
 
 			String[] ws = StringUtil.split(combine);
@@ -2119,9 +2140,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
 						}
 						else {
-							if (KEY_ID.equals(w) || KEY_ID_IN.equals(w) || KEY_USER_ID.equals(w) || KEY_USER_ID_IN.equals(w)) {
+							if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
 								throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 不合法！"
-										+ "不允许传 [" + KEY_ID + ", " + KEY_ID_IN + ", " + KEY_USER_ID + ", " + KEY_USER_ID_IN + "] 其中任何一个！");
+										+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
 							}
 						}
 
@@ -2203,8 +2224,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		//后面还可能用到，要还原
 		//id或id{}条件
-		request.put(KEY_ID, id);
-		request.put(KEY_ID_IN, idIn);
+		request.put(idKey, id);
+		request.put(idInKey, idIn);
 		//关键词
 		request.put(KEY_ROLE, role);
 		request.put(KEY_DATABASE, database);
@@ -2385,7 +2406,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
-	public interface Callback {
+	public static interface Callback {
 		/**获取 SQLConfig 的实例
 		 * @param method
 		 * @param table
@@ -2393,12 +2414,47 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 */
 		AbstractSQLConfig getSQLConfig(RequestMethod method, String table);
 
+
 		/**为 post 请求新建 id， 只能是 Long 或 String
 		 * @param method
 		 * @param table
 		 * @return
 		 */
 		Object newId(RequestMethod method, String table);
+		
+		/**获取主键名
+		 * @param schema
+		 * @param table
+		 * @return
+		 */
+		String getIdKey(String schema, String table);
+		
+		/**获取 User 的主键名
+		 * @param schema
+		 * @param table
+		 * @return
+		 */
+		String getUserIdKey(String schema, String table);
+	}
+	
+	public static abstract class SimpleCallback implements Callback {
+
+
+		@Override
+		public Object newId(RequestMethod method, String table) {
+			return System.currentTimeMillis();
+		}
+
+		@Override
+		public String getIdKey(String schema, String table) {
+			return KEY_ID;
+		}
+
+		@Override
+		public String getUserIdKey(String schema, String table) {
+			return KEY_USER_ID;
+		}
+		
 	}
 
 }

@@ -695,6 +695,10 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			query2 = JSONRequest.QUERY_TABLE;
 		}
 		else {
+//			if (isSubquery) {
+//				throw new IllegalArgumentException("子查询内不支持传 " + JSONRequest.KEY_QUERY + "!");
+//			}
+			
 			switch (query) {
 			case "0":
 			case "TABLE":

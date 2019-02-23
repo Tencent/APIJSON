@@ -17,6 +17,7 @@ package zuo.biao.apijson.server;
 import java.util.List;
 import java.util.Map;
 
+import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.RequestRole;
 
@@ -35,6 +36,13 @@ public interface SQLConfig {
 	int TYPE_CHILD = 0;
 	int TYPE_ITEM = 1;
 	int TYPE_ITEM_CHILD_0 = 2;
+	
+
+	@NotNull
+	String getIdKey();
+	@NotNull
+	String getUserIdKey();
+	
 	
 	/**获取数据库地址
 	 * @return
@@ -199,5 +207,6 @@ public interface SQLConfig {
 	
 	
 	String getSubqueryString(Subquery subquery) throws Exception;
+
 
 }
