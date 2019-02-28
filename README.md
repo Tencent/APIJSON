@@ -109,10 +109,10 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 ### 使用登记
 <div style="float:left">
-  <a href="http://www.transsion.com"><img src="http://www.transsion.com/static/images/logo.jpg" ></a>
-  <a href="http://shebaochina.com"><img src="http://shebaochina.com/static/cn/img/index/logo.png" ></a>
-  <a href="http://www.8soo.com"><img src="http://ww1.sinaimg.cn/large/756dd729gw1f9n5ckuq6vj208902it8v.jpg" ></a>
-  <a href="http://juting.vip"><img src="http://i.juting.vip/wp-file/2018/12/logo1-1.png" ></a>
+  <a href="http://www.transsion.com"><img src="http://www.transsion.com/static/images/logo.jpg" height="90"></a>
+  <a href="http://shebaochina.com"><img src="http://shebaochina.com/static/cn/img/index/logo.png" height="90"></a>
+  <a href="http://www.8soo.com"><img src="http://ww1.sinaimg.cn/large/756dd729gw1f9n5ckuq6vj208902it8v.jpg" height="90"></a>
+  <a href="http://juting.vip"><img src="http://i.juting.vip/wp-file/2018/12/logo1-1.png" height="90"></a>
 </div>
 <br />
 
