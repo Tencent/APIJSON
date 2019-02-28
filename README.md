@@ -107,7 +107,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 测试及自动生成代码工具<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
-### APIJSON 用户
+### 使用登记
 <div style="float:left">
   <a href="http://www.transsion.com"><img src="http://www.transsion.com/static/images/logo.jpg" ></a>
   <a href="http://shebaochina.com"><img src="http://shebaochina.com/static/cn/img/index/logo.png" ></a>
