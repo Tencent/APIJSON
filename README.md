@@ -114,7 +114,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 </div>
 <br />
 
-[您在使用APIJSON吗？](https://github.com/TommyLemon/APIJSON/issues/18)
+[您在使用APIJSON吗？](https://github.com/TommyLemon/APIJSON/issues/73)
 
 ### 关于作者
 <div style="float:left">
