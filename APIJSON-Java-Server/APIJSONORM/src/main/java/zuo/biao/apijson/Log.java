@@ -19,7 +19,7 @@ package zuo.biao.apijson;
  */
 public class Log {
 
-	private static final boolean DEBUG = true;
+	public static boolean DEBUG = true;
 	
 	/**
 	 * @param TAG

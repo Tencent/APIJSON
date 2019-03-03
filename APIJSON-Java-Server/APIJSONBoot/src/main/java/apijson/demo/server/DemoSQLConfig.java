@@ -51,6 +51,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 				return new DemoSQLConfig(method, table);
 			}
 
+			//取消注释来实现自定义各个表的主键名
 			//			@Override
 			//			public String getIdKey(String schema, String table) {
 			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...

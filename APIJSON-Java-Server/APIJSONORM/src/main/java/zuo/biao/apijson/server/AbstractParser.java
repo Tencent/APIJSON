@@ -17,6 +17,7 @@ package zuo.biao.apijson.server;
 import static zuo.biao.apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1203,7 +1204,14 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			return sqlObj;//容易丢失信息 JSON.parseObject(config);
 		}
 
-		return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config));
+		try {
+			return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config));
+		} catch (Exception e) {
+			if (Log.DEBUG == false && e instanceof SQLException) {
+				throw new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);
+			}
+			throw e;
+		}
 	}
 
 

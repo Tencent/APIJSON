@@ -24,6 +24,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import zuo.biao.apijson.Log;
+
 
 /**SpringBootApplication
  * 右键这个类 > Run As > Java Application
@@ -36,6 +38,8 @@ public class APIJSONApplication {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(APIJSONApplication.class, args);
 
+		Log.DEBUG = true; //上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
+		
 		System.out.println("\n\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<< APIJSON >>>>>>>>>>>>>>>>>>>>>>>>\n");
 		System.out.println("开始测试:远程函数 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
