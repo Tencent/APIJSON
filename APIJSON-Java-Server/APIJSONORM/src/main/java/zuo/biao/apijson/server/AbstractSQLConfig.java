@@ -67,6 +67,7 @@ import zuo.biao.apijson.server.model.Table;
 public abstract class AbstractSQLConfig implements SQLConfig {
 	private static final String TAG = "AbstractSQLConfig";
 
+	public static String DEFAULT_SCHEMA = "sys";
 
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -211,10 +212,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@Override
 	public String getSchema() {
-		String sqlTable = getSQLTable();
-		if (StringUtil.isEmpty(schema, true) && (Table.TAG.equals(sqlTable) || Column.TAG.equals(sqlTable)) ) {
-			return SCHEMA_INFORMATION;
-		}
 		return schema;
 	}
 	@Override
@@ -252,7 +249,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public String getTablePath() {
 		String q = getQuote();
-		return q + getSchema() + q + "." + q + getSQLTable() + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
+		
+		String sqlTable = getSQLTable();
+		String sch = getSchema();
+		if (StringUtil.isEmpty(sch, true)) {
+			if ((Table.TAG.equals(sqlTable) || Column.TAG.equals(sqlTable)) ) {
+				sch = SCHEMA_INFORMATION;
+			} else {
+				sch = DEFAULT_SCHEMA;
+			}
+		}
+		
+		return q + sch + q + "." + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
 	}
 	@Override
 	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入

@@ -24,7 +24,6 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
 import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.AbstractSQLConfig;
 import zuo.biao.apijson.server.Join;
 import zuo.biao.apijson.server.SQLConfig;
@@ -39,11 +38,16 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	public static final Callback SIMPLE_CALLBACK;
 
-	//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
+	
 	static {
+		//默认模式名
+		DEFAULT_SCHEMA = "sys";
+		
+		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
+		//主键名映射
 		SIMPLE_CALLBACK = new SimpleCallback() {
 
 			@Override
@@ -86,11 +90,6 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	@Override
 	public String getDBPassword() {
 		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "apijson"; //TODO 改成你自己的，TiDB 默认密码为空字符串 ""
-	}
-	@Override
-	public String getSchema() {
-		String s = super.getSchema();
-		return StringUtil.isEmpty(s, true) ? "sys" : s; //TODO 改成你自己的
 	}
 
 
