@@ -214,8 +214,20 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			for (int i = 1; i <= length; i++) {
 
-				if (hasJoin && viceColumnStart > length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
-					viceColumnStart = i;
+				// if (hasJoin && viceColumnStart > length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
+				// 	viceColumnStart = i;
+				// }
+
+				// FIXME bugfix-修复非常规数据库字段，获取表名失败导致输出异常
+				if (hasJoin && viceColumnStart > length) {
+					List<String> column = config.getColumn();
+
+					if (column != null && column.isEmpty() == false) {
+						viceColumnStart = column.size() + 1;
+					}
+					else if (config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
+						viceColumnStart = i;
+					}
 				}
 
 				result = onPutColumn(config, rs, rsmd, index, result, i, hasJoin && i >= viceColumnStart ? childMap : null);
