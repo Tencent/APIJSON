@@ -193,6 +193,8 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 [APIJSONParser](https://github.com/Zerounary/APIJSONParser) 参考 APIJSON 设计标准开发的一款 SQL 编译器框架
 
+[ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 JFinal 和 APIJSON 的 Demo
+
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
 
 [APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
