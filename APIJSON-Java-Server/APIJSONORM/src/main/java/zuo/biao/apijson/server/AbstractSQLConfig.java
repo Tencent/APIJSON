@@ -59,6 +59,8 @@ import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.model.Column;
+import zuo.biao.apijson.server.model.PgAttribute;
+import zuo.biao.apijson.server.model.PgClass;
 import zuo.biao.apijson.server.model.Table;
 
 /**config sql for JSON Request
@@ -75,8 +77,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static final Map<String, String> TABLE_KEY_MAP;
 	static {
 		TABLE_KEY_MAP = new HashMap<String, String>();
-		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TAG);
-		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TAG);
+		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
+		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TABLE_NAME);
+		TABLE_KEY_MAP.put(PgAttribute.class.getSimpleName(), PgAttribute.TABLE_NAME);
+		TABLE_KEY_MAP.put(PgClass.class.getSimpleName(), PgClass.TABLE_NAME);
 	}
 
 	@NotNull
@@ -219,7 +223,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (schema != null) {
 			String quote = getQuote();
 			String s = schema.startsWith(quote) && schema.endsWith(quote) ? schema.substring(1, schema.length() - 1) : schema;
-			if (StringUtil.isName(s) == false) {
+			if (StringUtil.isEmpty(s, true) == false && StringUtil.isName(s) == false) {
 				throw new IllegalArgumentException("@schema:value 中value必须是1个单词！");
 			}
 		}
@@ -252,15 +256,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		
 		String sqlTable = getSQLTable();
 		String sch = getSchema();
-		if (StringUtil.isEmpty(sch, true)) {
-			if ((Table.TAG.equals(sqlTable) || Column.TAG.equals(sqlTable)) ) {
+		if (sch == null) { //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema  StringUtil.isEmpty(sch, true)) {
+			if ((Table.TABLE_NAME.equals(sqlTable) || Column.TABLE_NAME.equals(sqlTable)) ) {
 				sch = SCHEMA_INFORMATION;
-			} else {
+			} 
+			else if ((PgAttribute.TABLE_NAME.equals(sqlTable) || PgClass.TABLE_NAME.equals(sqlTable)) ) {
+				sch = "";
+			}
+			else {
 				sch = DEFAULT_SCHEMA;
 			}
 		}
 		
-		return q + sch + q + "." + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
+		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
 	}
 	@Override
 	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入

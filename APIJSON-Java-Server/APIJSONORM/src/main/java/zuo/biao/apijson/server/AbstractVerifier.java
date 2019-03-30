@@ -47,6 +47,8 @@ import zuo.biao.apijson.server.model.Access;
 import zuo.biao.apijson.server.model.Column;
 import zuo.biao.apijson.server.model.Document;
 import zuo.biao.apijson.server.model.Function;
+import zuo.biao.apijson.server.model.PgAttribute;
+import zuo.biao.apijson.server.model.PgClass;
 import zuo.biao.apijson.server.model.Request;
 import zuo.biao.apijson.server.model.Response;
 import zuo.biao.apijson.server.model.Table;
@@ -70,6 +72,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 		if (Log.DEBUG) {
 			ACCESS_MAP.put(Table.class.getSimpleName(), getAccessMap(Table.class.getAnnotation(MethodAccess.class)));
 			ACCESS_MAP.put(Column.class.getSimpleName(), getAccessMap(Column.class.getAnnotation(MethodAccess.class)));
+			ACCESS_MAP.put(PgAttribute.class.getSimpleName(), getAccessMap(PgAttribute.class.getAnnotation(MethodAccess.class)));
+			ACCESS_MAP.put(PgClass.class.getSimpleName(), getAccessMap(PgClass.class.getAnnotation(MethodAccess.class)));
+			
 			ACCESS_MAP.put(Test.class.getSimpleName(), getAccessMap(Test.class.getAnnotation(MethodAccess.class)));
 			ACCESS_MAP.put(Request.class.getSimpleName(), getAccessMap(Request.class.getAnnotation(MethodAccess.class)));
 			ACCESS_MAP.put(Response.class.getSimpleName(), getAccessMap(Response.class.getAnnotation(MethodAccess.class)));

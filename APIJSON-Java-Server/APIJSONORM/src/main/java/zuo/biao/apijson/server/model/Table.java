@@ -21,6 +21,6 @@ import zuo.biao.apijson.MethodAccess;
  */
 @MethodAccess(POST = {}, PUT = {}, DELETE = {})
 public class Table {
-	public static final String TAG = "tables";
+	public static final String TABLE_NAME = "tables";
 
 }

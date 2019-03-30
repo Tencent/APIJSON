@@ -16,11 +16,11 @@ package zuo.biao.apijson.server.model;
 
 import zuo.biao.apijson.MethodAccess;
 
-/**字段(列名)
+/**评论
  * @author Lemon
  */
-@MethodAccess(POST = {}, PUT = {}, DELETE = {})
-public class Column {
-	public static final String TABLE_NAME = "columns";
-
+@MethodAccess
+public class PgClass {
+	public static final String TABLE_NAME = "pg_class";
+	
 }
