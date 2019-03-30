@@ -502,13 +502,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
 			if (isPrepared() && column != null) {
+				String origin;
+				String alias;
+				int index;
 				for (String c : column) {
-					if (StringUtil.isName(c) == false) {
-						throw new IllegalArgumentException("HEAD请求: @column:value 中 value里面用 , 分割的每一项都必须是1个单词！");
+					index = c.lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
+					origin = index < 0 ? c : c.substring(0, index);
+					alias = index < 0 ? null : c.substring(index + 1);
+					if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
+						throw new IllegalArgumentException("HEAD请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+								+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
 					}
 				}
 			}
-			return SQL.count(column != null && column.size() == 1 ? getKey(column.get(0)) : "*");
+			return SQL.count(column != null && column.size() == 1 ? getKey(Pair.parseEntry(column.get(0), true).getKey()) : "*");
 		case POST:
 			if (column == null || column.isEmpty()) {
 				throw new IllegalArgumentException("POST 请求必须在Table内设置要保存的 key:value ！");

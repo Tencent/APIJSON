@@ -218,7 +218,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				// 	viceColumnStart = i;
 				// }
 
-				// FIXME bugfix-修复非常规数据库字段，获取表名失败导致输出异常
+				// bugfix-修复非常规数据库字段，获取表名失败导致输出异常
 				if (hasJoin && viceColumnStart > length) {
 					List<String> column = config.getColumn();
 
@@ -242,11 +242,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		rs.close();
 
 
-		//TODO @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 		executeAppJoin(config, resultMap, childMap);
 
-		//TODO @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
