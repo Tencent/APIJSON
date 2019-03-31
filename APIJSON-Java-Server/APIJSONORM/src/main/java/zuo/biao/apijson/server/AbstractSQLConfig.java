@@ -253,7 +253,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public String getTablePath() {
 		String q = getQuote();
-		
+
 		String sqlTable = getSQLTable();
 		String sch = getSchema();
 		if (sch == null) { //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema  StringUtil.isEmpty(sch, true)) {
@@ -267,7 +267,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				sch = DEFAULT_SCHEMA;
 			}
 		}
-		
+
 		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
 	}
 	@Override
@@ -536,7 +536,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new IllegalArgumentException("POST请求: 每一个 key:value 中的key都必须是1个单词！");
 				}
 				s += ((pfirst ? "" : ",") + getKey(c));
-				
+
 				pfirst = false;
 			}
 
@@ -546,6 +546,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			boolean isQuery = RequestMethod.isQueryMethod(method);
 			String joinColumn = "";
 			if (isQuery && joinList != null) {
+				SQLConfig ecfg;
 				SQLConfig cfg;
 				String c;
 				boolean first = true;
@@ -554,7 +555,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						continue;
 					}
 
-					cfg = j.getJoinConfig();
+					ecfg = j.getOutterConfig();
+					if (ecfg != null && ecfg.getColumn() != null) { //优先级更高
+						cfg = ecfg;
+					}
+					else {
+						cfg = j.getJoinConfig();
+					}
+
 					cfg.setAlias(cfg.getTable());
 
 					c = ((AbstractSQLConfig) cfg).getColumnString(true);
@@ -945,12 +953,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					andList = new ArrayList<>();
 				}
 				else if (prior && andList.isEmpty() == false) {
-					
+
 					String idKey = getIdKey();
 					String idInKey = idKey + "{}";
 					String userIdKey = getUserIdKey();
 					String userIdInKey = userIdKey + "{}";
-					
+
 					if (andList.contains(idKey)) {
 						i ++;
 					}
@@ -1625,7 +1633,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (childs[i] instanceof JSON) {
 						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
 					}
-					
+
 					if (DATABASE_POSTGRESQL.equals(getDatabase())) {
 						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
 								+ getKey(key) + " @> " + getValue(newJSONArray(childs[i])); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
@@ -1938,7 +1946,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							+ quote + tn + quote + "." + quote + j.getTargetKey() + quote;
 					jc.setMain(false).setKeyPrefix(true);
 
-//					preparedValueList.addAll(jc.getPreparedValueList());
+					//					preparedValueList.addAll(jc.getPreparedValueList());
 
 					pvl.addAll(jc.getPreparedValueList());
 					changed = true;
@@ -1989,9 +1997,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
-		
+
 		String schema = request.getString(KEY_SCHEMA);
-		
+
 		String idKey = callback.getIdKey(schema, table);
 		String idInKey = idKey + "{}";
 		String userIdKey = callback.getUserIdKey(schema, table);
@@ -2295,6 +2303,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				joinConfig.setMain(false).setKeyPrefix(true);
+
+				if ("<".equals(j.getJoinType()) || ">".equals(j.getJoinType())) {
+					SQLConfig outterConfig = newSQLConfig(method, name, j.getOutter(), null, callback);
+					outterConfig.setMain(false).setKeyPrefix(true);
+					j.setOutterConfig(outterConfig);
+				}
 			}
 
 			//解决 query: 1/2 查数量时报错  
@@ -2444,14 +2458,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @return
 		 */
 		Object newId(RequestMethod method, String table);
-		
+
 		/**获取主键名
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
 		String getIdKey(String schema, String table);
-		
+
 		/**获取 User 的主键名
 		 * @param schema
 		 * @param table
@@ -2459,7 +2473,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 */
 		String getUserIdKey(String schema, String table);
 	}
-	
+
 	public static abstract class SimpleCallback implements Callback {
 
 
@@ -2477,7 +2491,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		public String getUserIdKey(String schema, String table) {
 			return KEY_USER_ID;
 		}
-		
+
 	}
 
 }

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
@@ -701,7 +702,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		final String query = request.getString(JSONRequest.KEY_QUERY);
 		final Integer count = request.getInteger(JSONRequest.KEY_COUNT); //TODO 如果不想用默认数量可以改成 getIntValue(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
-		final String join = request.getString(JSONRequest.KEY_JOIN);
+		final Object join = request.get(JSONRequest.KEY_JOIN);
 
 		int query2;
 		if (query == null) {
@@ -829,12 +830,32 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @return 
 	 * @throws Exception 
 	 */
-	private List<Join> onJoinParse(String join, JSONObject request) throws Exception {
-		String[] sArr = request == null || request.isEmpty() ? null : StringUtil.split(join);
-		if (sArr == null || sArr.length <= 0) {
-			Log.e(TAG, "doJoin  sArr == null || sArr.length <= 0 >> return request;");
+	private List<Join> onJoinParse(Object join, JSONObject request) throws Exception {
+		JSONObject joinMap = null;
+
+		if (join instanceof JSONObject) {
+			joinMap = (JSONObject) join;
+		}
+		else if (join instanceof String) {
+			String[] sArr = request == null || request.isEmpty() ? null : StringUtil.split((String) join);
+			if (sArr != null && sArr.length > 0) {
+				joinMap = new JSONObject();
+				for (int i = 0; i < sArr.length; i++) {
+					joinMap.put(sArr[i], new JSONObject());
+				}
+			}
+		}
+		else if (join != null){
+			throw new UnsupportedDataTypeException(TAG + ".onJoinParse  join 只能是 String 或 JSONObject 类型！");
+		}
+
+		Set<Entry<String, Object>> set = joinMap == null ? null : joinMap.entrySet();
+		if (set == null || set.isEmpty()) {
+			Log.e(TAG, "doJoin  set == null || set.isEmpty() >> return null;");
 			return null;
 		}
+
+
 
 		List<Join> joinList = new ArrayList<>();
 
@@ -849,14 +870,19 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		String path;
 
 		//		List<String> onList = new ArrayList<>();
-		for (int i = 0; i < sArr.length; i++) {//User/id@
+		for (Entry<String, Object> e : set) {//User/id@
+			if (e.getValue() instanceof JSONObject == false) {
+				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
+						+ "必须为 &/Table0/key0,</Table1/key1,... 或 { '&/Table0/key0':{}, '</Table1/key1':{},... } 这种形式！");
+			}
+
 			//分割 /Table/key
-			path = "" + sArr[i];
+			path = "" + e.getKey();
 
 			int index = path.indexOf("/");
 			if (index < 0) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
-						+ "必须为 &/Table0/key0,</Table1/key1,... 这种形式！");
+						+ "必须为 &/Table0/key0,</Table1/key1,... 或 { '&/Table0/key0':{}, '</Table1/key1':{},... } 这种形式！");
 			}
 			String joinType = path.substring(0, index); //& | ! < > ( ) <> () *
 			//			if (StringUtil.isEmpty(joinType, true)) {
@@ -911,6 +937,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			j.setTargetKey(targetKey);
 			j.setKeyAndType(key);
 			j.setTable(getJoinObject(table, tableObj, key));
+			j.setOutter((JSONObject) e.getValue());
 
 			joinList.add(j);
 

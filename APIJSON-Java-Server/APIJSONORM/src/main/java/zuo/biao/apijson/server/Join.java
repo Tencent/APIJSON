@@ -36,8 +36,11 @@ public class Join {
 	private String targetName; // Moment
 	private String targetKey; // userId
 
+	private JSONObject outter;
+	
 	private SQLConfig joinConfig;
 	private SQLConfig cacheConfig;
+	private SQLConfig outterConfig;
 
 	public String getPath() {
 		return path;
@@ -103,6 +106,12 @@ public class Join {
 		this.targetKey = targetKey;
 	}
 
+	public JSONObject getOutter() {
+		return outter;
+	}
+	public void setOutter(JSONObject outter) {
+		this.outter = outter;
+	}
 
 	public SQLConfig getJoinConfig() {
 		return joinConfig;
@@ -115,6 +124,13 @@ public class Join {
 	}
 	public void setCacheConfig(SQLConfig cacheConfig) {
 		this.cacheConfig = cacheConfig;
+	}
+	
+	public SQLConfig getOutterConfig() {
+		return outterConfig;
+	}
+	public void setOutterConfig(SQLConfig outterConfig) {
+		this.outterConfig = outterConfig;
 	}
 
 	
@@ -157,6 +173,8 @@ public class Join {
 	public static boolean isAppJoin(Join j) {
 		return j != null && j.isAppJoin();
 	}
+	
+
 
 
 }
