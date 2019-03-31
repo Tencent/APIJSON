@@ -305,16 +305,42 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	@JSONField(serialize = false)
 	public String getGroupString(boolean hasPrefix) {
-		//TODO 加上子表的group
+		//加上子表的 group
+		String joinGroup = "";
+		if (joinList != null) {
+			SQLConfig ecfg;
+			SQLConfig cfg;
+			String c;
+			boolean first = true;
+			for (Join j : joinList) {
+				if (j.isAppJoin()) {
+					continue;
+				}
 
-		group = StringUtil.getTrimedString(group);
-		if (group.isEmpty()) {
-			return "";
+				ecfg = j.getOutterConfig();
+				if (ecfg != null && ecfg.getGroup() != null) { //优先级更高
+					cfg = ecfg;
+				}
+				else {
+					cfg = j.getJoinConfig();
+				}
+
+				cfg.setAlias(cfg.getTable());
+
+				c = ((AbstractSQLConfig) cfg).getGroupString(false);
+				if (StringUtil.isEmpty(c, true) == false) {
+					joinGroup += (first ? "" : ", ") + c;
+					first = false;
+				}
+
+			}
 		}
-
+		
+		
+		group = StringUtil.getTrimedString(group);
 		String[] keys = StringUtil.split(group);
 		if (keys == null || keys.length <= 0) {
-			return "";
+			return StringUtil.isEmpty(joinGroup, true) ? "" : (hasPrefix ? " GROUP BY " : "") + joinGroup;
 		}
 
 		for (int i = 0; i < keys.length; i++) {
@@ -327,7 +353,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			keys[i] = getKey(keys[i]);
 		}
 
-		return " GROUP BY " + StringUtil.getString(keys);
+		return (hasPrefix ? " GROUP BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinGroup, ", ");
 	}
 
 	@Override
@@ -435,7 +461,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	@JSONField(serialize = false)
 	public String getOrderString(boolean hasPrefix) {
-		//加上子表的 Order
+		//加上子表的 order
 		String joinOrder = "";
 		if (joinList != null) {
 			SQLConfig ecfg;
