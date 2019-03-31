@@ -373,14 +373,41 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getHavingString(boolean hasPrefix) {
-		having = StringUtil.getTrimedString(having);
-		if(having.isEmpty()) {
-			return ""; 
-		}
+		//加上子表的 having
+		String joinHaving = "";
+		if (joinList != null) {
+			SQLConfig ecfg;
+			SQLConfig cfg;
+			String c;
+			boolean first = true;
+			for (Join j : joinList) {
+				if (j.isAppJoin()) {
+					continue;
+				}
 
+				ecfg = j.getOutterConfig();
+				if (ecfg != null && ecfg.getHaving() != null) { //优先级更高
+					cfg = ecfg;
+				}
+				else {
+					cfg = j.getJoinConfig();
+				}
+
+				cfg.setAlias(cfg.getTable());
+
+				c = ((AbstractSQLConfig) cfg).getHavingString(false);
+				if (StringUtil.isEmpty(c, true) == false) {
+					joinHaving += (first ? "" : ", ") + c;
+					first = false;
+				}
+
+			}
+		}
+		
+		having = StringUtil.getTrimedString(having);
 		String[] keys = StringUtil.split(having, ";");
 		if (keys == null || keys.length <= 0) {
-			return "";
+			return StringUtil.isEmpty(joinHaving, true) ? "" : (hasPrefix ? " HAVING " : "") + joinHaving;
 		}
 
 		String expression;
@@ -444,7 +471,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			keys[i] = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
 		}
 
-		return " HAVING " + StringUtil.getString(keys, AND); //TODO 支持 OR, NOT 参考 @combine:"&key0,|key1,!key2"
+		//TODO 支持 OR, NOT 参考 @combine:"&key0,|key1,!key2"
+		return (hasPrefix ? " HAVING " : "") + StringUtil.concat(StringUtil.getString(keys, AND), joinHaving, AND);
 	}
 
 	@Override
