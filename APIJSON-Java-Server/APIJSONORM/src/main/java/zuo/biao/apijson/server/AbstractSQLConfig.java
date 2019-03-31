@@ -304,7 +304,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return this;
 	}
 	@JSONField(serialize = false)
-	public String getGroupString() {
+	public String getGroupString(boolean hasPrefix) {
 		//TODO 加上子表的group
 
 		group = StringUtil.getTrimedString(group);
@@ -346,7 +346,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return HAVING conditoin0 AND condition1 OR condition2 ...
 	 */
 	@JSONField(serialize = false)
-	public String getHavingString() {
+	public String getHavingString(boolean hasPrefix) {
 		having = StringUtil.getTrimedString(having);
 		if(having.isEmpty()) {
 			return ""; 
@@ -434,13 +434,40 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return this;
 	}
 	@JSONField(serialize = false)
-	public String getOrderString() {
-		//TODO 加上子表的order
+	public String getOrderString(boolean hasPrefix) {
+		//加上子表的 Order
+		String joinOrder = "";
+		if (joinList != null) {
+			SQLConfig ecfg;
+			SQLConfig cfg;
+			String c;
+			boolean first = true;
+			for (Join j : joinList) {
+				if (j.isAppJoin()) {
+					continue;
+				}
+
+				ecfg = j.getOutterConfig();
+				if (ecfg != null && ecfg.getOrder() != null) { //优先级更高
+					cfg = ecfg;
+				}
+				else {
+					cfg = j.getJoinConfig();
+				}
+
+				cfg.setAlias(cfg.getTable());
+
+				c = ((AbstractSQLConfig) cfg).getOrderString(false);
+				if (StringUtil.isEmpty(c, true) == false) {
+					joinOrder += (first ? "" : ", ") + c;
+					first = false;
+				}
+
+			}
+		}
+
 
 		order = StringUtil.getTrimedString(order);
-		if (order.isEmpty()) {
-			return "";
-		}
 		if (order.contains("+")) {//replace没有包含的replacement会崩溃
 			order = order.replaceAll("\\+", " ASC ");
 		}
@@ -448,10 +475,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			order = order.replaceAll("-", " DESC ");
 		}
 
-		//TODO  column, order, group 都改用 List<String> 存储！！！，并且每个字段都要加 Table. 前缀！
 		String[] keys = StringUtil.split(order);
 		if (keys == null || keys.length <= 0) {
-			return "";
+			return StringUtil.isEmpty(joinOrder, true) ? "" : (hasPrefix ? " ORDER BY " : "") + joinOrder;
 		}
 
 		String origin;
@@ -477,7 +503,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			keys[i] = getKey(origin) + sort;
 		}
 
-		return " ORDER BY " + StringUtil.getString(keys);
+		return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinOrder, ", ");
 	}
 
 
@@ -543,7 +569,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return "(" + s + ")";
 		case GET:
 		case GETS:
-			boolean isQuery = RequestMethod.isQueryMethod(method);
+			boolean isQuery = RequestMethod.isQueryMethod(method); //TODO 这个有啥用？上面应是 getMethod 的值 GET 和 GETS 了。
 			String joinColumn = "";
 			if (isQuery && joinList != null) {
 				SQLConfig ecfg;
@@ -568,10 +594,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					c = ((AbstractSQLConfig) cfg).getColumnString(true);
 					if (StringUtil.isEmpty(c, true) == false) {
 						joinColumn += (first ? "" : ", ") + c;
+						first = false;
 					}
 
 					inSQLJoin = true;
-					first = false;
 				}
 			}
 
@@ -1850,7 +1876,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String condition = table + config.getJoinString() + where + (
 				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
-						"" : config.getGroupString() + config.getHavingString() + config.getOrderString()
+						"" : config.getGroupString(true) + config.getHavingString(true) + config.getOrderString(true)
 				)
 				; //+ config.getLimitString();
 
