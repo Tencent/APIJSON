@@ -3,9 +3,7 @@
   APIJSON
 </h1>
 
-<p align="center">🏆Gitee Most Valuable Project<br />🚀A JSON Transmission Protocol and an ORM Library for auto providing APIs and Documents.<br /><a href="https://github.com/996icu/996.ICU/blob/master/LICENSE">
-    <img alt="996icu" src="https://img.shields.io/badge/license-NPL%20(The%20996%20Prohibited%20License)-blue.svg">
-  </a></p>
+<p align="center">🏆Gitee Most Valuable Project<br />🚀A JSON Transmission Protocol and an ORM Library for auto providing APIs and Documents.</p>
 
 
 <p align="center" >
