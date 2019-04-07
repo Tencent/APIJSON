@@ -77,9 +77,25 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 <br />
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_get.jpg) 
+<p align="center" >
+  <a >多表关联查询、结构自由组合、多个测试账号、一键共享测试用例</a>
+</p>
+
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_code.jpg) 
+<p align="center" >
+  <a >自动生成封装请求JSON的Android与iOS代码、一键下载自动生成的JavaBean</a>
+</p>
+
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_doc.jpg) 
+<p align="center" >
+  <a >自动保存请求记录、自动生成接口文档</a>
+</p>
+
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_test.jpg) 
+<p align="center" >
+  <a >一键自动接口回归测试，不需要写任何代码(注解、注释等全都不要)</a>
+</p>
+
 <br /><br />
 [以下Gif图看起来比较卡，实际在手机上App运行很流畅]
 <br />
