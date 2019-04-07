@@ -192,7 +192,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 [uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite 等
 
-[APIJSONParser](https://github.com/Zerounary/APIJSONParser) 参考 APIJSON 设计标准开发的一款 SQL 编译器框架
+[APIJSONParser](https://github.com/Zerounary/APIJSONParser) Complate JSON to SQL，APIJSON编译器，将JSON动态编译成SQL
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 JFinal 和 APIJSON 的 Demo
 
