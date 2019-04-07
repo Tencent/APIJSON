@@ -22,9 +22,9 @@ import zuo.biao.apijson.NotNull;
  * @author Lemon
  */
 public class Join {
-	
+
 	private String path;
-	
+
 	private String originKey;
 	private String originValue;
 
@@ -37,7 +37,7 @@ public class Join {
 	private String targetKey; // userId
 
 	private JSONObject outter;
-	
+
 	private SQLConfig joinConfig;
 	private SQLConfig cacheConfig;
 	private SQLConfig outterConfig;
@@ -61,7 +61,7 @@ public class Join {
 	public void setOriginValue(String originValue) {
 		this.originValue = originValue;
 	}
-	
+
 	public String getJoinType() {
 		return joinType;
 	}
@@ -125,7 +125,7 @@ public class Join {
 	public void setCacheConfig(SQLConfig cacheConfig) {
 		this.cacheConfig = cacheConfig;
 	}
-	
+
 	public SQLConfig getOutterConfig() {
 		return outterConfig;
 	}
@@ -133,7 +133,7 @@ public class Join {
 		this.outterConfig = outterConfig;
 	}
 
-	
+
 	public void setKeyAndType(@NotNull String originKey) throws Exception { //id, id@, id{}@, contactIdList<>@ ...
 		if (originKey.endsWith("@")) {
 			originKey = originKey.substring(0, originKey.length() - 1);
@@ -141,7 +141,7 @@ public class Join {
 		else { //TODO 暂时只允许 User.id = Moment.userId 字段关联，不允许 User.id = 82001 这种
 			throw new IllegalArgumentException(joinType + "/.../" + name + "/" + originKey + " 不合法！join:'.../refKey'" + " 中 refKey 必须以 @ 结尾！");
 		}
-		
+
 		if (originKey.endsWith("{}")) {
 			setRelateType("{}");
 			setKey(originKey.substring(0, originKey.length() - 2));
@@ -155,25 +155,32 @@ public class Join {
 			setKey(originKey);
 		}
 	}
-	
-	
-	
+
+
+
 	public boolean isSQLJoin() {
 		return ! isAppJoin();
 	}
-	
+
 	public static boolean isSQLJoin(Join j) {
 		return j != null && j.isSQLJoin();
 	}
-	
+
 	public boolean isAppJoin() {
 		return "@".equals(getJoinType());
 	}
-	
+
 	public static boolean isAppJoin(Join j) {
 		return j != null && j.isAppJoin();
 	}
-	
+
+	public boolean isLeftOrRightJoin() {
+		return "<".equals(getJoinType()) || ">".equals(getJoinType());
+	}
+
+	public static boolean isLeftOrRightJoin(Join j) {
+		return j != null && j.isLeftOrRightJoin();
+	}
 
 
 

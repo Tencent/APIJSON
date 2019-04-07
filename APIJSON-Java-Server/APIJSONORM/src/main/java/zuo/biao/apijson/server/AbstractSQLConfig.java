@@ -308,7 +308,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//加上子表的 group
 		String joinGroup = "";
 		if (joinList != null) {
-			SQLConfig ecfg;
 			SQLConfig cfg;
 			String c;
 			boolean first = true;
@@ -317,14 +316,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					continue;
 				}
 
-				ecfg = j.getOutterConfig();
-				if (ecfg != null && ecfg.getGroup() != null) { //优先级更高
-					cfg = ecfg;
-				}
-				else {
-					cfg = j.getJoinConfig();
-				}
-
+				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
 				cfg.setAlias(cfg.getTable());
 
 				c = ((AbstractSQLConfig) cfg).getGroupString(false);
@@ -376,7 +368,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//加上子表的 having
 		String joinHaving = "";
 		if (joinList != null) {
-			SQLConfig ecfg;
 			SQLConfig cfg;
 			String c;
 			boolean first = true;
@@ -385,14 +376,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					continue;
 				}
 
-				ecfg = j.getOutterConfig();
-				if (ecfg != null && ecfg.getHaving() != null) { //优先级更高
-					cfg = ecfg;
-				}
-				else {
-					cfg = j.getJoinConfig();
-				}
-
+				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
 				cfg.setAlias(cfg.getTable());
 
 				c = ((AbstractSQLConfig) cfg).getHavingString(false);
@@ -492,7 +476,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//加上子表的 order
 		String joinOrder = "";
 		if (joinList != null) {
-			SQLConfig ecfg;
 			SQLConfig cfg;
 			String c;
 			boolean first = true;
@@ -501,14 +484,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					continue;
 				}
 
-				ecfg = j.getOutterConfig();
-				if (ecfg != null && ecfg.getOrder() != null) { //优先级更高
-					cfg = ecfg;
-				}
-				else {
-					cfg = j.getJoinConfig();
-				}
-
+				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
 				cfg.setAlias(cfg.getTable());
 
 				c = ((AbstractSQLConfig) cfg).getOrderString(false);
@@ -2384,7 +2360,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				joinConfig.setMain(false).setKeyPrefix(true);
 
-				if ("<".equals(j.getJoinType()) || ">".equals(j.getJoinType())) {
+				if (j.isLeftOrRightJoin()) {
 					SQLConfig outterConfig = newSQLConfig(method, name, j.getOutter(), null, callback);
 					outterConfig.setMain(false).setKeyPrefix(true);
 					j.setOutterConfig(outterConfig);
