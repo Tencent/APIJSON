@@ -32,7 +32,7 @@ public interface Parser<T> {
 	int MAX_SQL_COUNT = 100;
 	int MAX_OBJECT_COUNT = 5;
 	int MAX_ARRAY_COUNT = 5;
-	int MAX_QUERY_DEPTH = 3;
+	int MAX_QUERY_DEPTH = 5;
 	
 	
 	@NotNull
