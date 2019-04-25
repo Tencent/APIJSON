@@ -636,15 +636,16 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			return null;
 		}
 
+		int type = arrayConfig == null ? 0 : arrayConfig.getType();
+
+		String[] arr = StringUtil.split(parentPath, "/");
 		if (arrayConfig == null || arrayConfig.getPosition() == 0) {
+			queryDepth = arr == null ? 0 : arr.length;
 			int maxQueryDepth = getMaxQueryDepth();
 			if (queryDepth > maxQueryDepth) {
 				throw new IllegalArgumentException(parentPath + "/" + name + ":{} 的深度(或者说层级) 为 " + queryDepth + " 已超限，必须在 0-" + maxQueryDepth + " 内 !");
 			}
-			queryDepth ++;
 		}
-
-		int type = arrayConfig == null ? 0 : arrayConfig.getType();
 
 		ObjectParser op = createObjectParser(request, parentPath, name, arrayConfig, isSubquery).parse();
 
