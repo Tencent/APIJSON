@@ -239,6 +239,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		return parseResponse(requestObject);
 	}
 
+	private int depth;
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return requestObject
@@ -297,6 +298,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		Exception error = null;
 		sqlExecutor = createSQLExecutor();
 		try {
+			depth = 0;
 			requestObject = onObjectParse(request, null, null, null, false);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -686,7 +688,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 */
 	@Override
 	public JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception {
-		Log.i(TAG, "\n\n\n getArray parentPath = " + parentPath
+		Log.i(TAG, "\n\n\n onArrayParse parentPath = " + parentPath
 				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
 		if (RequestMethod.isGetMethod(requestMethod, false) == false) {
@@ -1025,16 +1027,32 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		return DEFAULT_QUERY_COUNT;
 	}
 	@Override
-	public int getMaxQueryCount() {
-		return MAX_QUERY_COUNT;
-	}
-	@Override
 	public int getMaxQueryPage() {
 		return MAX_QUERY_PAGE;
 	}
 	@Override
+	public int getMaxQueryCount() {
+		return MAX_QUERY_COUNT;
+	}
+	@Override
 	public int getMaxUpdateCount() {
 		return MAX_UPDATE_COUNT;
+	}
+	@Override
+	public int getMaxSQLCount() {
+		return MAX_SQL_COUNT;
+	}
+	@Override
+	public int getMaxObjectCount() {
+		return MAX_OBJECT_COUNT;
+	}
+	@Override
+	public int getMaxArrayCount() {
+		return MAX_ARRAY_COUNT;
+	}
+	@Override
+	public int getMaxQueryDepth() {
+		return MAX_QUERY_DEPTH;
 	}
 
 

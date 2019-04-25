@@ -99,6 +99,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		this.table = Pair.parseEntry(name, true).getKey();
 		this.isTable = zuo.biao.apijson.JSONObject.isTableKey(table);
 
+		this.objectCount = 0;
+		this.arrayCount = 0;
+		this.sqlCount = 0;
+		
 		boolean isEmpty = request.isEmpty();//empty有效 User:{}
 		if (isEmpty) {
 			this.tri = false;
@@ -216,6 +220,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 */
 	protected Map<String, JSONObject> childMap;
 
+	private int objectCount;
+	private int arrayCount;
+	private int sqlCount;
 	/**解析成员
 	 * response重新赋值
 	 * @return null or this
@@ -266,6 +273,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				String key;
 				Object value;
 				int index = 0;
+				
 				for (Entry<String, Object> entry : set) {
 					if (isBreakParse()) {
 						break;
@@ -278,7 +286,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					key = entry.getKey();
 
 					try {
-						if (value instanceof JSONObject && key.startsWith("@") == false  && key.endsWith("@") == false) {//JSONObject，往下一级提取
+						if (value instanceof JSONObject && key.startsWith("@") == false && key.endsWith("@") == false) {//JSONObject，往下一级提取
 							if (childMap != null) {//添加到childMap，最后再解析
 								childMap.put(key, (JSONObject)value);
 							}
@@ -478,6 +486,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		boolean isEmpty;
 
 		if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
+			arrayCount ++;
+			
+			int maxArrayCount = parser.getMaxArrayCount();
+			if (arrayCount > maxArrayCount) {
+				throw new IllegalArgumentException(path + " 内 key[]: {} 的数量必须在 0-" + maxArrayCount + " 内 !");
+			}
+			
 			if (isMain) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
@@ -487,6 +502,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
 		else {//APIJSON Object
+			objectCount ++;
+
+			int maxObjectCount = parser.getMaxObjectCount();
+			if (objectCount > maxObjectCount) {
+				throw new IllegalArgumentException(path + " 内 key: {} 的数量必须在 0-" + maxObjectCount + " 内 !");
+			}
+			
 			if (type == TYPE_ITEM && JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey()) == false) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
@@ -589,6 +611,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
 		if (sqlConfig == null) {
+			sqlCount ++;
+			int maxSQLCount = parser.getMaxSQLCount();
+			if (sqlCount > maxSQLCount) {
+				throw new IllegalArgumentException(path + " 内生成的 SQL 必须在 0-" + maxSQLCount + " 内 !");
+			}
+			
 			sqlConfig = newSQLConfig();
 		}
 		sqlConfig.setCount(count).setPage(page).setPosition(position);
@@ -598,6 +626,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		return this;
 	}
 
+	
+	
 
 	protected SQLConfig sqlConfig = null;//array item复用
 	/**SQL查询，for array item
