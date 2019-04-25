@@ -239,7 +239,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		return parseResponse(requestObject);
 	}
 
-	private int depth;
+	private int queryDepth;
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return requestObject
@@ -298,7 +298,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		Exception error = null;
 		sqlExecutor = createSQLExecutor();
 		try {
-			depth = 0;
+			queryDepth = 0;
 			requestObject = onObjectParse(request, null, null, null, false);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -626,6 +626,14 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
 		if (request == null) {// Moment:{}   || request.isEmpty()) {//key-value条件
 			return null;
+		}
+
+		if (arrayConfig == null || arrayConfig.getPosition() == 0) {
+			int maxQueryDepth = getMaxQueryDepth();
+			if (queryDepth > maxQueryDepth) {
+				throw new IllegalArgumentException(parentPath + "/" + name + ":{} 的深度(或者说层级) 为 " + queryDepth + " 已超限，必须在 0-" + maxQueryDepth + " 内 !");
+			}
+			queryDepth ++;
 		}
 
 		int type = arrayConfig == null ? 0 : arrayConfig.getType();

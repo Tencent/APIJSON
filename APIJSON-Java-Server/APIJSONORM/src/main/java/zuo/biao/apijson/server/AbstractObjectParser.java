@@ -486,11 +486,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		boolean isEmpty;
 
 		if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
-			arrayCount ++;
-			
 			int maxArrayCount = parser.getMaxArrayCount();
 			if (arrayCount > maxArrayCount) {
-				throw new IllegalArgumentException(path + " 内 key[]: {} 的数量必须在 0-" + maxArrayCount + " 内 !");
+				throw new IllegalArgumentException(path + " 内 key[]:{} 的数量 为 " + arrayCount + " 已超限，必须在 0-" + maxArrayCount + " 内 !");
+			}
+			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
+				arrayCount ++;
 			}
 			
 			if (isMain) {
@@ -502,11 +503,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
 		else {//APIJSON Object
-			objectCount ++;
-
 			int maxObjectCount = parser.getMaxObjectCount();
 			if (objectCount > maxObjectCount) {
-				throw new IllegalArgumentException(path + " 内 key: {} 的数量必须在 0-" + maxObjectCount + " 内 !");
+				throw new IllegalArgumentException(path + " 内 TableKey:{} 的数量 为 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
+			}
+			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
+				arrayCount ++;
 			}
 			
 			if (type == TYPE_ITEM && JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey()) == false) {
@@ -614,7 +616,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			sqlCount ++;
 			int maxSQLCount = parser.getMaxSQLCount();
 			if (sqlCount > maxSQLCount) {
-				throw new IllegalArgumentException(path + " 内生成的 SQL 必须在 0-" + maxSQLCount + " 内 !");
+				throw new IllegalArgumentException(path + " 内生成的 SQL 为 " + sqlCount + " 已超限，必须在 0-" + maxSQLCount + " 内 !");
 			}
 			
 			sqlConfig = newSQLConfig();
