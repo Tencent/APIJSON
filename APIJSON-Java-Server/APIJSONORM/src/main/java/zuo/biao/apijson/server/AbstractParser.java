@@ -329,6 +329,11 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + (endTime - startTime)
 				+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
 
+		if (Log.DEBUG) {
+			requestObject.put("query:depth/max", queryDepth + "/" + getMaxQueryDepth());
+			requestObject.put("sql:count/max", sqlCount + "/" + getMaxSQLCount());
+		}
+
 		return globleFormat && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 	}
 
@@ -1272,7 +1277,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			return sqlObj;//容易丢失信息 JSON.parseObject(config);
 		}
 
-		sqlCount += 1;
+		sqlCount += 1;//config.isMain() ? 1 : 0;
 		int maxSQLCount = getMaxSQLCount();
 		Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n\n 已生成 " + sqlCount + "/" + maxSQLCount + "条 SQL \n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		if (sqlCount > maxSQLCount) {
