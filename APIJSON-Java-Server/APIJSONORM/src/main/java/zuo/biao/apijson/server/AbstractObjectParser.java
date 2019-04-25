@@ -101,8 +101,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 		this.objectCount = 0;
 		this.arrayCount = 0;
-		this.sqlCount = 0;
-		
+
 		boolean isEmpty = request.isEmpty();//empty有效 User:{}
 		if (isEmpty) {
 			this.tri = false;
@@ -222,7 +221,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	private int objectCount;
 	private int arrayCount;
-	private int sqlCount;
 	/**解析成员
 	 * response重新赋值
 	 * @return null or this
@@ -273,7 +271,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				String key;
 				Object value;
 				int index = 0;
-				
+
 				for (Entry<String, Object> entry : set) {
 					if (isBreakParse()) {
 						break;
@@ -336,19 +334,19 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	@Override
 	public boolean onParse(@NotNull String key, @NotNull Object value) throws Exception {
 		if (key.endsWith("@")) {//StringUtil.isPath((String) value)) {
-			
+
 			if (value instanceof JSONObject) { // SQL 子查询对象，JSONObject -> SQLConfig.getSQL
 				String replaceKey = key.substring(0, key.length() - 1);//key{}@ getRealKey
-				
+
 				JSONObject subquery = (JSONObject) value;
 				String range = subquery.getString(JSONRequest.KEY_SUBQUERY_RANGE);
 				if (range != null && JSONRequest.SUBQUERY_RANGE_ALL.equals(range) == false && JSONRequest.SUBQUERY_RANGE_ANY.equals(range) == false) {
 					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 [" + JSONRequest.SUBQUERY_RANGE_ALL + ", " + JSONRequest.SUBQUERY_RANGE_ANY + "] 中的一个！");
 				}
 
-				
+
 				JSONArray arr = parser.onArrayParse(subquery, AbstractParser.getAbsPath(path, replaceKey), "[]", true);
-				
+
 				JSONObject obj = arr == null || arr.isEmpty() ? null : arr.getJSONObject(0);
 				if (obj == null) {
 					throw new Exception("服务器内部错误，解析子查询 " + path + "/" + key + ":{ } 为 Subquery 对象失败！");
@@ -359,12 +357,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				if (arrObj == null) {
 					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ from:value } 中 value 对应的主表对象 " + from + ":{} 不存在！");
 				}
-//				
+				//				
 				SQLConfig cfg = (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
 				if (cfg == null) {
 					throw new NotExistException(TAG + ".onParse  cfg == null");
 				}
-				
+
 				Subquery s = new Subquery();
 				s.setPath(path);
 				s.setOriginKey(key);
@@ -493,7 +491,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
 				arrayCount ++;
 			}
-			
+
 			if (isMain) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
@@ -510,7 +508,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
 				arrayCount ++;
 			}
-			
+
 			if (type == TYPE_ITEM && JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey()) == false) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
@@ -613,12 +611,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
 		if (sqlConfig == null) {
-			sqlCount ++;
-			int maxSQLCount = parser.getMaxSQLCount();
-			if (sqlCount > maxSQLCount) {
-				throw new IllegalArgumentException(path + " 内生成的 SQL 为 " + sqlCount + " 已超限，必须在 0-" + maxSQLCount + " 内 !");
-			}
-			
 			sqlConfig = newSQLConfig();
 		}
 		sqlConfig.setCount(count).setPage(page).setPosition(position);
@@ -628,8 +620,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		return this;
 	}
 
-	
-	
+
+
 
 	protected SQLConfig sqlConfig = null;//array item复用
 	/**SQL查询，for array item

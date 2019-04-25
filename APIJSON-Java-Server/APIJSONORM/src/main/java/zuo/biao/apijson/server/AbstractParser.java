@@ -240,6 +240,8 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 	private int queryDepth;
+	private int sqlCount;
+
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return requestObject
@@ -299,6 +301,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		sqlExecutor = createSQLExecutor();
 		try {
 			queryDepth = 0;
+			sqlCount = 0;
 			requestObject = onObjectParse(request, null, null, null, false);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1267,6 +1270,13 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			JSONObject sqlObj = new JSONObject(true);
 			sqlObj.put(KEY_CONFIG, config);
 			return sqlObj;//容易丢失信息 JSON.parseObject(config);
+		}
+
+		sqlCount += 1;
+		int maxSQLCount = getMaxSQLCount();
+		Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n\n 已生成 " + sqlCount + "/" + maxSQLCount + "条 SQL \n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		if (sqlCount > maxSQLCount) {
+			throw new IllegalArgumentException("已生成 " + sqlCount + "条 SQL，数量已超限，必须在 0-" + maxSQLCount + " 内 !");
 		}
 
 		try {
