@@ -171,7 +171,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/WechatPay.JPG"  width="240" ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/QQPay.JPG"  width="240" >
 
-> 如果希望捐赠之后能获得相关的帮助，可以选择加入下面的付费群来取代普通捐赠，付费群可以获得作者的直接帮助。
+> 如果希望捐赠之后能获得相关的帮助，可以选择加入下面的付费群来取代普通捐赠，可以获得作者的直接帮助。
 
 如果在捐赠留言中备注名称，将会被记录到列表中~ 如果你也是 Github 开源作者，<br />
 捐赠时可以留下 Github 项目地址或者个人主页地址，链接将会被添加到列表中起到互相推广的作用。
