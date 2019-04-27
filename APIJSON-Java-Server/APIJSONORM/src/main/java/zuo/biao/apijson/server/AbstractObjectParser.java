@@ -484,12 +484,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		boolean isEmpty;
 
 		if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
-			int maxArrayCount = parser.getMaxArrayCount();
-			if (arrayCount > maxArrayCount) {
-				throw new IllegalArgumentException(path + " 内 key[]:{} 的数量 为 " + arrayCount + " 已超限，必须在 0-" + maxArrayCount + " 内 !");
-			}
 			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
 				arrayCount ++;
+				int maxArrayCount = parser.getMaxArrayCount();
+				if (arrayCount > maxArrayCount) {
+					throw new IllegalArgumentException(path + " 内截至 " + key + " 时数组对象 key[]:{} 的数量达到 " + arrayCount + " 已超限，必须在 0-" + maxArrayCount + " 内 !");
+				}
 			}
 
 			if (isMain) {
@@ -501,12 +501,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
 		else {//APIJSON Object
-			int maxObjectCount = parser.getMaxObjectCount();
-			if (objectCount > maxObjectCount) {
-				throw new IllegalArgumentException(path + " 内 TableKey:{} 的数量 为 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
-			}
 			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
 				arrayCount ++;
+				int maxObjectCount = parser.getMaxObjectCount();
+				if (objectCount > maxObjectCount) {
+					throw new IllegalArgumentException(path + " 内截至 " + key + " 时表对象 TableKey:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
+				}
 			}
 
 			if (type == TYPE_ITEM && JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey()) == false) {

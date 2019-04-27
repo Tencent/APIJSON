@@ -640,10 +640,13 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		String[] arr = StringUtil.split(parentPath, "/");
 		if (arrayConfig == null || arrayConfig.getPosition() == 0) {
-			queryDepth = arr == null ? 0 : arr.length;
-			int maxQueryDepth = getMaxQueryDepth();
-			if (queryDepth > maxQueryDepth) {
-				throw new IllegalArgumentException(parentPath + "/" + name + ":{} 的深度(或者说层级) 为 " + queryDepth + " 已超限，必须在 0-" + maxQueryDepth + " 内 !");
+			int d = arr == null ? 1 : arr.length + 1;
+			if (queryDepth < d) {
+				queryDepth = d;
+				int maxQueryDepth = getMaxQueryDepth();
+				if (queryDepth > maxQueryDepth) {
+					throw new IllegalArgumentException(parentPath + "/" + name + ":{} 的深度(或者说层级) 为 " + queryDepth + " 已超限，必须在 1-" + maxQueryDepth + " 内 !");
+				}
 			}
 		}
 
@@ -1282,7 +1285,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		int maxSQLCount = getMaxSQLCount();
 		Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n\n 已生成 " + sqlCount + "/" + maxSQLCount + "条 SQL \n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		if (sqlCount > maxSQLCount) {
-			throw new IllegalArgumentException("已生成 " + sqlCount + "条 SQL，数量已超限，必须在 0-" + maxSQLCount + " 内 !");
+			throw new IllegalArgumentException("截至 " + config.getTable() + " 已生成 " + sqlCount + "条 SQL，数量已超限，必须在 0-" + maxSQLCount + " 内 !");
 		}
 
 		try {
