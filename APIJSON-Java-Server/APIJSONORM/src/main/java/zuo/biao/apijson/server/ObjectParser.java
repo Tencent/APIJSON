@@ -119,7 +119,7 @@ public interface ObjectParser {
 	void onChildResponse() throws Exception;
 	
 
-	SQLConfig newSQLConfig() throws Exception;
+	SQLConfig newSQLConfig(boolean isProcedure) throws Exception;
 
 	/**
 	 * response has the final value after parse (and query if isTableKey)

@@ -611,7 +611,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
 		if (sqlConfig == null) {
-			sqlConfig = newSQLConfig();
+			sqlConfig = newSQLConfig(false);
 		}
 		sqlConfig.setCount(count).setPage(page).setPosition(position);
 
@@ -719,7 +719,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public void parseFunction(JSONObject json, String key, String value) throws Exception {
 		Object result;
 		if (key.startsWith("@")) {
-			SQLConfig config = newSQLConfig();
+			SQLConfig config = newSQLConfig(true);
 			config.setProcedure(value);
 
 			SQLExecutor executor = null;

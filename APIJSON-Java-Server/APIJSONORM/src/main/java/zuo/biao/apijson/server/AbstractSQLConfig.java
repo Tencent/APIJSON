@@ -128,7 +128,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	//array item >>>>>>>>>>
 	private boolean test; //测试
 	private boolean cacheStatic; //静态缓存
-	
+
 	private String procedure;
 	public SQLConfig setProcedure(String procedure) {
 		this.procedure = procedure;
@@ -340,8 +340,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			}
 		}
-		
-		
+
+
 		group = StringUtil.getTrimedString(group);
 		String[] keys = StringUtil.split(group);
 		if (keys == null || keys.length <= 0) {
@@ -400,7 +400,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			}
 		}
-		
+
 		having = StringUtil.getTrimedString(having);
 		String[] keys = StringUtil.split(having, ";");
 		if (keys == null || keys.length <= 0) {
@@ -1885,17 +1885,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			Log.i(TAG, "getSQL  config == null >> return null;");
 			return null;
 		}
-		
+
 		//TODO procedure 改为 List<Procedure>  procedureList; behind : true; function: callFunction(); String key; ...
 		// for (...) { Call procedure1();\n SQL \n; Call procedure2(); ... }
 		// 貌似不需要，因为 ObjecParser 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
-		
+
 		String sch = config.getSQLSchema(config.getSQLTable());
 		if (StringUtil.isNotEmpty(config.getProcedure(), true)) {
 			String q = config.getQuote();
 			return "CALL " + q + sch + q + "."+ config.getProcedure();
 		}
-		
+
 		String tablePath = config.getTablePath();
 		if (StringUtil.isNotEmpty(tablePath, true) == false) {
 			Log.i(TAG, "getSQL  StringUtil.isNotEmpty(tablePath, true) == false >> return null;");
@@ -2069,20 +2069,29 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList, Callback callback) throws Exception {
+	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList, boolean isProcedure, Callback callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
 		AbstractSQLConfig config = callback.getSQLConfig(method, table);
 
 		//放后面会导致主表是空对象时 joinList 未解析
-		config = parseJoin(method, config, joinList, callback);
+		if (isProcedure == false) {
+			config = parseJoin(method, config, joinList, callback);
+		}
 
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
 
+		String database = request.getString(KEY_DATABASE);
 		String schema = request.getString(KEY_SCHEMA);
+		config.setDatabase(database); //不删，后面表对象还要用的
+		config.setSchema(schema); //不删，后面表对象还要用的
+
+		if (isProcedure) {
+			return config;
+		}
 
 		String idKey = callback.getIdKey(schema, table);
 		String idInKey = idKey + "{}";
@@ -2128,7 +2137,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String role = request.getString(KEY_ROLE);
-		String database = request.getString(KEY_DATABASE);
 		String combine = request.getString(KEY_COMBINE);
 		Subquery from = (Subquery) request.get(KEY_FROM);
 		String column = request.getString(KEY_COLUMN);
@@ -2329,8 +2337,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//在	tableWhere 第0个		config.setIdIn(idIn);
 
 		config.setRole(role);
-		config.setDatabase(database);
-		config.setSchema(schema);
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
@@ -2378,8 +2384,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		for (Join j : joinList) {
 			name = j.getName();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
-			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, callback);
-			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, callback).setCount(1);
+			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, false, callback);
+			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, false, callback).setCount(1);
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
 				if (isQuery) {
@@ -2389,7 +2395,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.isLeftOrRightJoin()) {
-					SQLConfig outterConfig = newSQLConfig(method, name, j.getOutter(), null, callback);
+					SQLConfig outterConfig = newSQLConfig(method, name, j.getOutter(), null, false, callback);
 					outterConfig.setMain(false).setKeyPrefix(true);
 					j.setOutterConfig(outterConfig);
 				}
