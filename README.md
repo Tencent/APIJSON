@@ -167,7 +167,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
-你也还可以扫描下面的二维码~ 请作者喝一杯咖啡。
+你也还可以扫描下面的二维码，赞助点服务器和域名的购买及维护费用，或者请作者喝一杯咖啡~
 
 <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/WechatPay.JPG"  width="240" ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/QQPay.JPG"  width="240" >
 
