@@ -717,7 +717,25 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	}
 
 	public void parseFunction(JSONObject json, String key, String value) throws Exception {
-		Object result = parser.onFunctionParse(json, value);
+		Object result;
+		if (key.startsWith("@")) {
+			SQLConfig config = newSQLConfig();
+			config.setProcedure(value);
+
+			SQLExecutor executor = null;
+			try {
+				executor = parser.createSQLExecutor();
+				result = executor.execute(config, true);
+			}
+			finally {
+				if (executor != null) {
+					executor.close();
+				}
+			}
+		}
+		else {
+			result = parser.onFunctionParse(json, value);
+		}
 
 		if (result != null) {
 			String k = AbstractSQLConfig.getRealKey(method, key, false, false, "`"); //FIXME PG 是 "

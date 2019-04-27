@@ -68,12 +68,12 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
-		return getStatement(config).executeQuery();
+		return getStatement(config).executeQuery(); //PreparedStatement 不用传 SQL
 	}
 
 	@Override
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
-		return getStatement(config).executeUpdate();
+		return getStatement(config).executeUpdate(); //PreparedStatement 不用传 SQL
 	}
 
 
@@ -85,7 +85,8 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("resource")
-	private PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
+	@Override
+	public PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
 		Connection connection = connectionMap.get(config.getDatabase());
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;

@@ -18,9 +18,9 @@ import static zuo.biao.apijson.JSONObject.KEY_ID;
 import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
 import static zuo.biao.apijson.server.Operation.ADD;
 import static zuo.biao.apijson.server.Operation.DISALLOW;
+import static zuo.biao.apijson.server.Operation.INSERT;
 import static zuo.biao.apijson.server.Operation.NECESSARY;
 import static zuo.biao.apijson.server.Operation.PUT;
-import static zuo.biao.apijson.server.Operation.INSERT;
 import static zuo.biao.apijson.server.Operation.REMOVE;
 import static zuo.biao.apijson.server.Operation.REPLACE;
 import static zuo.biao.apijson.server.Operation.TYPE;
@@ -739,7 +739,7 @@ public class Structure {
 		SQLExecutor executor = creator.createSQLExecutor();
 		JSONObject result = null;
 		try {
-			result = executor.execute(config);
+			result = executor.execute(config, false);
 		} finally {
 			executor.close();
 		}
@@ -784,7 +784,7 @@ public class Structure {
 
 		SQLExecutor executor = creator.createSQLExecutor();
 		try {
-			JSONObject result = executor.execute(config);
+			JSONObject result = executor.execute(config, false);
 			if (result == null) {
 				throw new Exception("服务器内部错误  verifyRepeat  result == null");
 			}

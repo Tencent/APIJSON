@@ -609,7 +609,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
 		try {
-			JSONObject result = executor.execute(config.setCacheStatic(true));
+			JSONObject result = executor.execute(config.setCacheStatic(true), false);
 			return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
 		} finally {
 			executor.close();
@@ -1289,7 +1289,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		}
 
 		try {
-			return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config));
+			return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config, false));
 		} catch (Exception e) {
 			if (Log.DEBUG == false && e instanceof SQLException) {
 				throw new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);

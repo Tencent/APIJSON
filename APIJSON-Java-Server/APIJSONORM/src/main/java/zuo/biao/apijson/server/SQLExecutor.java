@@ -17,7 +17,8 @@ package zuo.biao.apijson.server;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Map;
+import java.sql.Statement;
+import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -33,7 +34,10 @@ public interface SQLExecutor {
 	 * @param map
 	 * @param isStatic
 	 */
-	void putCache(String sql, Map<Integer, JSONObject> map, boolean isStatic);
+	void putCache(String sql, List<JSONObject> list, boolean isStatic);
+	
+	List<JSONObject> getCache(String sql, boolean cacheStatic);
+
 	/**移除缓存
 	 * @param sql
 	 * @param isStatic
@@ -45,7 +49,7 @@ public interface SQLExecutor {
 	 * @param isStatic
 	 * @return
 	 */
-	JSONObject getCache(String sql, int position, boolean isStatic);
+	JSONObject getCacheItem(String sql, int position, boolean isStatic);
 
 
 	/**执行SQL
@@ -53,7 +57,7 @@ public interface SQLExecutor {
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject execute(SQLConfig config) throws Exception;
+	JSONObject execute(@NotNull SQLConfig config, boolean unknowType) throws Exception;
 	
 	//executeQuery和executeUpdate这两个函数因为返回类型不同，所以不好合并
 	/**执行查询
@@ -81,5 +85,13 @@ public interface SQLExecutor {
 	/**关闭连接，释放资源
 	 */
 	void close();
-
+	
+	Statement getStatement(@NotNull SQLConfig config) throws Exception;
+	
+	ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception;
+	
+	int executeUpdate(@NotNull Statement statement, String sql) throws Exception;
+	
+	ResultSet execute(@NotNull Statement statement, String sql) throws Exception;
+	
 }

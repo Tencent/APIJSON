@@ -17,6 +17,7 @@ package zuo.biao.apijson.server;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,24 +50,24 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	/**
 	 * 缓存map
 	 */
-	protected Map<String, Map<Integer, JSONObject>> cacheMap = new HashMap<String, Map<Integer, JSONObject>>();
+	protected Map<String, List<JSONObject>> cacheMap = new HashMap<>();
 
 
 	/**保存缓存
 	 * @param sql
-	 * @param map
+	 * @param list
 	 * @param isStatic
 	 */
 	@Override
-	public synchronized void putCache(String sql, Map<Integer, JSONObject> map, boolean isStatic) {
-		if (sql == null || map == null) { //空map有效，说明查询过sql了  || map.isEmpty()) {
-			Log.i(TAG, "saveList  sql == null || map == null >> return;");
+	public synchronized void putCache(String sql, List<JSONObject> list, boolean isStatic) {
+		if (sql == null || list == null) { //空map有效，说明查询过sql了  || list.isEmpty()) {
+			Log.i(TAG, "saveList  sql == null || list == null >> return;");
 			return;
 		}
 		//		if (isStatic) {
-		//			staticCacheMap.put(sql, map);
+		//			staticCacheMap.put(sql, list);
 		//		} else {
-		cacheMap.put(sql, map);
+		cacheMap.put(sql, list);
 		//		}
 	}
 	/**移除缓存
@@ -86,6 +87,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		//		}
 	}
 
+	@Override
+	public List<JSONObject> getCache(String sql, boolean cacheStatic) {
+		return cacheMap.get(sql);
+	}
+
 	/**获取缓存
 	 * @param sql
 	 * @param position
@@ -93,13 +99,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 * @return
 	 */
 	@Override
-	public JSONObject getCache(String sql, int position, boolean isStatic) {
-		Map<Integer, JSONObject> map = /** isStatic ? staticCacheMap.get(sql) : */ cacheMap.get(sql);
-		//只要map不为null，则如果 map.get(position) == null，则返回 {} ，避免再次SQL查询
-		if (map == null) {
+	public JSONObject getCacheItem(String sql, int position, boolean isStatic) {
+		List<JSONObject> list = /** isStatic ? staticCacheMap.get(sql) : */ getCache(sql, isStatic);
+		//只要map不为null，则如果 list.get(position) == null，则返回 {} ，避免再次SQL查询
+		if (list == null) {
 			return null;
 		} 
-		JSONObject result = map.get(position);
+		JSONObject result = position >= list.size() ? null : list.get(position);
 		return result != null ? result : new JSONObject();
 	}
 
@@ -111,17 +117,31 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		cacheMap = null;
 	}
 
+	@Override
+	public ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception {
+		return statement.executeQuery(sql);
+	}
+	@Override
+	public int executeUpdate(@NotNull Statement statement, String sql) throws Exception {
+		return statement.executeUpdate(sql);
+	}
+	@Override
+	public ResultSet execute(@NotNull Statement statement, String sql) throws Exception {
+		statement.execute(sql);
+		return statement.getResultSet();
+	}
+
 	/**执行SQL
 	 * @param config
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public JSONObject execute(SQLConfig config) throws Exception {
-		if (config == null) {
-			Log.e(TAG, "select  config==null >> return null;");
-			return null;
-		}
+	public JSONObject execute(@NotNull SQLConfig config, boolean unknowType) throws Exception {
+		//		if (config == null) {
+		//			Log.e(TAG, "select  config==null >> return null;");
+		//			return null;
+		//		}
 		boolean prepared = config.isPrepared();
 
 		final String sql = config.getSQL(false);
@@ -132,7 +152,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			Log.e(TAG, "select  StringUtil.isEmpty(sql, true) >> return null;");
 			return null;
 		}
-		JSONObject result = null;
+
+		final int position = config.getPosition();
+		JSONObject result;
 
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -141,58 +163,70 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 		ResultSet rs = null;
-		switch (config.getMethod()) {
-		case HEAD:
-		case HEADS:
-			rs = executeQuery(config);
 
-			result = rs.next() ? AbstractParser.newSuccessResult()
-					: AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
-			result.put(JSONResponse.KEY_COUNT, rs.getLong(1));
+		if (unknowType) {
+			Statement statement = getStatement(config);
+			rs = execute(statement, sql);
 
-			rs.close();
-			return result;
+			result = new JSONObject();
+			int updateCount = statement.getUpdateCount();
+			result.put(JSONResponse.KEY_COUNT, updateCount);
+			result.put("update", updateCount >= 0);
+			//导致后面 rs.getMetaData() 报错 Operation not allowed after ResultSet closed		result.put("moreResults", statement.getMoreResults());
+		}
+		else {
+			switch (config.getMethod()) {
+			case HEAD:
+			case HEADS:
+				rs = executeQuery(config);
 
-		case POST:
-		case PUT:
-		case DELETE:
-			long updateCount = executeUpdate(config);
+				result = rs.next() ? AbstractParser.newSuccessResult()
+						: AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
+				result.put(JSONResponse.KEY_COUNT, rs.getLong(1));
 
-			result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
-					, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "没权限访问或对象不存在！");
+				rs.close();
+				return result;
 
-			//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
-			if (config.getId() != null) {
-				result.put(config.getIdKey(), config.getId());
-			} else {
-				result.put(config.getIdKey() + "[]", config.getWhere(config.getIdKey() + "{}", true));
+			case POST:
+			case PUT:
+			case DELETE:
+				int updateCount = executeUpdate(config);
+
+				result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
+						, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "没权限访问或对象不存在！");
+
+				//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
+				if (config.getId() != null) {
+					result.put(config.getIdKey(), config.getId());
+				} else {
+					result.put(config.getIdKey() + "[]", config.getWhere(config.getIdKey() + "{}", true));
+				}
+				result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
+				return result;
+
+			case GET:
+			case GETS:
+				result = getCacheItem(sql, position, config.isCacheStatic());
+				Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
+				if (result != null) {
+					Log.d(TAG, "\n\n select  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
+					return result;
+				}
+
+				rs = executeQuery(config);
+				break;
+
+			default://OPTIONS, TRACE等
+				Log.e(TAG, "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
+				return null;
 			}
-			result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
-			return result;
-
-		case GET:
-		case GETS:
-			break;
-
-		default://OPTIONS, TRACE等
-			Log.e(TAG, "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
-			return null;
 		}
 
 
-		final int position = config.getPosition();
-		result = getCache(sql, position, config.isCacheStatic());
-		Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
-		if (result != null) {
-			Log.d(TAG, "\n\n select  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
-			return result;
-		}
-
-		rs = executeQuery(config);
 
 		//		final boolean cache = config.getCount() != 1;
-		Map<Integer, JSONObject> resultMap = new HashMap<Integer, JSONObject>();
-		//		Log.d(TAG, "select  cache = " + cache + "; resultMap" + (resultMap == null ? "=" : "!=") + "null");
+		List<JSONObject> resultList = new ArrayList<>();
+		//		Log.d(TAG, "select  cache = " + cache + "; resultList" + (resultList == null ? "=" : "!=") + "null");
 
 		int index = -1;
 
@@ -210,7 +244,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			index ++;
 			Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
 
-			result = new JSONObject(true);
+			JSONObject item = new JSONObject(true);
 
 			for (int i = 1; i <= length; i++) {
 
@@ -230,21 +264,25 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 				}
 
-				result = onPutColumn(config, rs, rsmd, index, result, i, hasJoin && i >= viceColumnStart ? childMap : null);
+				item = onPutColumn(config, rs, rsmd, index, item, i, hasJoin && i >= viceColumnStart ? childMap : null);
 			}
 
-			resultMap = onPutTable(config, rs, rsmd, resultMap, index, result);
+			resultList = onPutTable(config, rs, rsmd, resultList, index, item);
 
-			Log.d(TAG, "\n select  while (rs.next()) { resultMap.put( " + index + ", result); "
+			Log.d(TAG, "\n select  while (rs.next()) { resultList.put( " + index + ", result); "
 					+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 		}
 
 		rs.close();
 
+		if (unknowType) {
+			result.put("list", resultList);
+			return result;
+		}
 
 		// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		executeAppJoin(config, resultMap, childMap);
+		executeAppJoin(config, resultList, childMap);
 
 		// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -255,29 +293,29 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		//<sql, Table>
 		for (Entry<String, JSONObject> entry : set) {
-			Map<Integer, JSONObject> m = new HashMap<Integer, JSONObject>();
-			m.put(0, entry.getValue());
-			putCache(entry.getKey(), m, false);
+			List<JSONObject> l = new ArrayList<>();
+			l.add(entry.getValue());
+			putCache(entry.getKey(), l, false);
 		}
 
 
-		putCache(sql, resultMap, config.isCacheStatic());
-		Log.i(TAG, ">>> select  putCache('" + sql + "', resultMap);  resultMap.size() = " + resultMap.size());
+		putCache(sql, resultList, config.isCacheStatic());
+		Log.i(TAG, ">>> select  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
 		long endTime = System.currentTimeMillis();
 		Log.d(TAG, "\n\n select  endTime = " + endTime + "; duration = " + (endTime - startTime)
-				+ "\n return resultMap.get(" + position + ");"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
-		return resultMap.get(position);
+				+ "\n return resultList.get(" + position + ");"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
+		return position >= resultList.size() ? new JSONObject() : resultList.get(position);
 	}
 
 
 	/**@ APP JOIN 查询副表并缓存到 childMap
 	 * @param config
-	 * @param resultMap
+	 * @param resultList
 	 * @param childMap
 	 * @throws Exception 
 	 */
-	protected void executeAppJoin(SQLConfig config, Map<Integer, JSONObject> resultMap, Map<String, JSONObject> childMap) throws Exception {
+	protected void executeAppJoin(SQLConfig config, List<JSONObject> resultList, Map<String, JSONObject> childMap) throws Exception {
 		List<Join> joinList = config.getJoinList();
 		if (joinList != null) {
 
@@ -298,8 +336,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				JSONObject mainTable;
 				Object targetValue;
 
-				for (int i = 0; i < resultMap.size(); i++) {
-					mainTable = resultMap.get(i);
+				for (int i = 0; i < resultList.size(); i++) {
+					mainTable = resultList.get(i);
 					targetValue = mainTable == null ? null : mainTable.get(j.getTargetKey());
 
 					if (targetValue != null && targetValueList.contains(targetValue) == false) {
@@ -351,7 +389,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					//每个 result 都要用新的 SQL 来存 childResultMap = onPutTable(config, rs, rsmd, childResultMap, index, result);
 
-					Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultMap.put( " + index + ", result); "
+					Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultList.put( " + index + ", result); "
 							+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
 					//缓存到 childMap
@@ -446,26 +484,26 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return table;
 	}
 
-	/**resultMap.put(position, table);
+	/**resultList.put(position, table);
 	 * @param config 
 	 * @param rs
 	 * @param rsmd
-	 * @param resultMap
+	 * @param resultList
 	 * @param position
 	 * @param table
-	 * @return resultMap
+	 * @return resultList
 	 */
-	protected Map<Integer, JSONObject> onPutTable(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, @NotNull Map<Integer, JSONObject> resultMap, int position, @NotNull JSONObject table) {
+	protected List<JSONObject> onPutTable(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, @NotNull List<JSONObject> resultList, int position, @NotNull JSONObject table) {
 
-		resultMap.put(position, table);
-		return resultMap;
+		resultList.add(table);
+		return resultList;
 	}
 
 
 	protected Object getValue(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
 			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
-		
+
 		Object value = rs.getObject(columnIndex);
 		//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
 		//					Log.d(TAG, "lable:" + rsmd.getColumnLabel(i));
@@ -485,7 +523,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		return value;
 	}
-	
+
 
 	/**判断是否为JSON类型
 	 * @param rsmd

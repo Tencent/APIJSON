@@ -128,6 +128,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	//array item >>>>>>>>>>
 	private boolean test; //测试
 	private boolean cacheStatic; //静态缓存
+	
+	private String procedure;
+	public SQLConfig setProcedure(String procedure) {
+		this.procedure = procedure;
+		return this;
+	}
+	public String getProcedure() {
+		return procedure;
+	}
 
 	public AbstractSQLConfig(RequestMethod method) {
 		setMethod(method);
@@ -218,6 +227,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getSchema() {
 		return schema;
 	}
+	public String getSQLSchema(String sqlTable) {
+		String sch = getSchema();
+		if (sch == null) { //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema  StringUtil.isEmpty(sch, true)) {
+			if ((Table.TABLE_NAME.equals(sqlTable) || Column.TABLE_NAME.equals(sqlTable)) ) {
+				sch = SCHEMA_INFORMATION;
+			} 
+			else if ((PgAttribute.TABLE_NAME.equals(sqlTable) || PgClass.TABLE_NAME.equals(sqlTable)) ) {
+				sch = "";
+			}
+			else {
+				sch = DEFAULT_SCHEMA;
+			}
+		}
+		return sch;
+	}
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
 		if (schema != null) {
@@ -255,18 +279,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String q = getQuote();
 
 		String sqlTable = getSQLTable();
-		String sch = getSchema();
-		if (sch == null) { //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema  StringUtil.isEmpty(sch, true)) {
-			if ((Table.TABLE_NAME.equals(sqlTable) || Column.TABLE_NAME.equals(sqlTable)) ) {
-				sch = SCHEMA_INFORMATION;
-			} 
-			else if ((PgAttribute.TABLE_NAME.equals(sqlTable) || PgClass.TABLE_NAME.equals(sqlTable)) ) {
-				sch = "";
-			}
-			else {
-				sch = DEFAULT_SCHEMA;
-			}
-		}
+		String sch = getSQLSchema(sqlTable);
 
 		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
 	}
@@ -1868,7 +1881,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception 
 	 */
 	public static String getSQL(AbstractSQLConfig config) throws Exception {
-		String tablePath = config == null ? null : config.getTablePath();
+		if (config == null) {
+			Log.i(TAG, "getSQL  config == null >> return null;");
+			return null;
+		}
+		
+		//TODO procedure 改为 List<Procedure>  procedureList; behind : true; function: callFunction(); String key; ...
+		// for (...) { Call procedure1();\n SQL \n; Call procedure2(); ... }
+		// 貌似不需要，因为 ObjecParser 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
+		
+		String sch = config.getSQLSchema(config.getSQLTable());
+		if (StringUtil.isNotEmpty(config.getProcedure(), true)) {
+			String q = config.getQuote();
+			return "CALL " + q + sch + q + "."+ config.getProcedure();
+		}
+		
+		String tablePath = config.getTablePath();
 		if (StringUtil.isNotEmpty(tablePath, true) == false) {
 			Log.i(TAG, "getSQL  StringUtil.isNotEmpty(tablePath, true) == false >> return null;");
 			return null;

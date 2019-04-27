@@ -207,6 +207,8 @@ public interface SQLConfig {
 	
 	
 	String getSubqueryString(Subquery subquery) throws Exception;
+	
+	SQLConfig setProcedure(String procedure);
 
 
 }
