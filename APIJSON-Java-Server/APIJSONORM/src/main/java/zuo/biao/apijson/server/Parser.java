@@ -29,7 +29,7 @@ public interface Parser<T> {
 	int MAX_QUERY_PAGE = 100;
 	int MAX_QUERY_COUNT = 100;
 	int MAX_UPDATE_COUNT = 10;
-	int MAX_SQL_COUNT = 1000;
+	int MAX_SQL_COUNT = 200;
 	int MAX_OBJECT_COUNT = 5;
 	int MAX_ARRAY_COUNT = 5;
 	int MAX_QUERY_DEPTH = 5;
@@ -122,5 +122,8 @@ public interface Parser<T> {
 	void onVerifyRole(SQLConfig config) throws Exception;
 	
 	JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception;
+	
+	SQLExecutor getSQLExecutor();
+	Verifier<T> getVerifier();
 
 }

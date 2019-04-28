@@ -41,6 +41,28 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	private static final String TAG = "AbstractSQLExecutor";
 
 
+	private int generatedSQLCount;
+	private int cachedSQLCount;
+	private int executedSQLCount;
+	public AbstractSQLExecutor() {
+		generatedSQLCount = 0;
+		cachedSQLCount = 0;
+		executedSQLCount = 0;
+	}
+	
+	@Override
+	public int getGeneratedSQLCount() {
+		return generatedSQLCount;
+	}
+	@Override
+	public int getCachedSQLCount() {
+		return cachedSQLCount;
+	}
+	@Override
+	public int getExecutedSQLCount() {
+		return executedSQLCount;
+	}
+	
 	//访问一次后丢失，可能因为static导致内存共享，别的地方改变了内部对象的值
 	//	private static final Map<String, Map<Integer, JSONObject>> staticCacheMap;
 	//	static {
@@ -115,18 +137,28 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public void close() {
 		cacheMap.clear();
 		cacheMap = null;
+		
+		generatedSQLCount = 0;
+		cachedSQLCount = 0;
+		executedSQLCount = 0;
 	}
 
 	@Override
 	public ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception {
+		executedSQLCount ++;
+		
 		return statement.executeQuery(sql);
 	}
 	@Override
 	public int executeUpdate(@NotNull Statement statement, String sql) throws Exception {
+		executedSQLCount ++;
+		
 		return statement.executeUpdate(sql);
 	}
 	@Override
 	public ResultSet execute(@NotNull Statement statement, String sql) throws Exception {
+		executedSQLCount ++;
+		
 		statement.execute(sql);
 		return statement.getResultSet();
 	}
@@ -138,10 +170,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 */
 	@Override
 	public JSONObject execute(@NotNull SQLConfig config, boolean unknowType) throws Exception {
-		//		if (config == null) {
-		//			Log.e(TAG, "select  config==null >> return null;");
-		//			return null;
-		//		}
 		boolean prepared = config.isPrepared();
 
 		final String sql = config.getSQL(false);
@@ -156,8 +184,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		final int position = config.getPosition();
 		JSONObject result;
 
+		generatedSQLCount ++;
+		
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+				+ "\n 已生成 " + generatedSQLCount + " 条 SQL"
 				+ "\n select  startTime = " + startTime
 				+ "\n sql = \n " + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
@@ -178,6 +209,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			switch (config.getMethod()) {
 			case HEAD:
 			case HEADS:
+				executedSQLCount ++;
+				
 				rs = executeQuery(config);
 
 				result = rs.next() ? AbstractParser.newSuccessResult()
@@ -190,6 +223,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			case POST:
 			case PUT:
 			case DELETE:
+				executedSQLCount ++;
+				
 				int updateCount = executeUpdate(config);
 
 				result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
@@ -209,10 +244,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				result = getCacheItem(sql, position, config.isCacheStatic());
 				Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
 				if (result != null) {
+					cachedSQLCount ++;
+					
 					Log.d(TAG, "\n\n select  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 					return result;
 				}
 
+				executedSQLCount ++;
+				
 				rs = executeQuery(config);
 				break;
 

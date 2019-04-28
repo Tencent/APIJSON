@@ -129,7 +129,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 
-	protected Verifier<T> verifier;
 	protected RequestRole globleRole;
 	public AbstractParser<T> setGlobleRole(RequestRole globleRole) {
 		this.globleRole = globleRole;
@@ -199,9 +198,18 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 
 	protected SQLExecutor sqlExecutor;
+	protected Verifier<T> verifier;
 	protected Map<String, Object> queryResultMap;//path-result
 
-
+	@Override
+	public SQLExecutor getSQLExecutor() {
+		return sqlExecutor;
+	}
+	@Override
+	public Verifier<T> getVerifier() {
+		return verifier;
+	}
+	
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return
@@ -240,7 +248,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 	private int queryDepth;
-	private int sqlCount;
 
 	/**解析请求json并获取对应结果
 	 * @param request
@@ -301,19 +308,22 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		sqlExecutor = createSQLExecutor();
 		try {
 			queryDepth = 0;
-			sqlCount = 0;
 			requestObject = onObjectParse(request, null, null, null, false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			error = e;
 		}
-		sqlExecutor.close();
-		sqlExecutor = null;
-
 
 		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
 
-
+		if (Log.DEBUG) {
+			requestObject.put("query:depth/max", queryDepth + "/" + getMaxQueryDepth());
+			requestObject.put("sql:generate/cache/execute/maxExecute", sqlExecutor.getGeneratedSQLCount() + "/" + sqlExecutor.getCachedSQLCount() + "/" + sqlExecutor.getExecutedSQLCount() + "/" + getMaxSQLCount());
+		}
+		
+		sqlExecutor.close();
+		sqlExecutor = null;
+		
 		queryResultMap.clear();
 
 		//会不会导致原来的session = null？		session = null;
@@ -328,11 +338,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		long endTime = System.currentTimeMillis();
 		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + (endTime - startTime)
 				+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
-
-		if (Log.DEBUG) {
-			requestObject.put("query:depth/max", queryDepth + "/" + getMaxQueryDepth());
-			requestObject.put("sql:count/max", sqlCount + "/" + getMaxSQLCount());
-		}
 
 		return globleFormat && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 	}
@@ -1274,27 +1279,36 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 * @throws Exception
 	 */
 	@Override
-	public synchronized JSONObject executeSQL(@NotNull SQLConfig config, boolean isSubquery) throws Exception {
+	public JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception {
+		if (config == null) {
+			Log.d(TAG, "executeSQL  config == null >> return null;");
+			return null;
+		}
+		
 		if (isSubquery) {
 			JSONObject sqlObj = new JSONObject(true);
 			sqlObj.put(KEY_CONFIG, config);
 			return sqlObj;//容易丢失信息 JSON.parseObject(config);
 		}
 
-		sqlCount += 1;//config.isMain() ? 1 : 0;
-		int maxSQLCount = getMaxSQLCount();
-		Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n\n 已生成 " + sqlCount + "/" + maxSQLCount + "条 SQL \n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		if (sqlCount > maxSQLCount) {
-			throw new IllegalArgumentException("截至 " + config.getTable() + " 已生成 " + sqlCount + "条 SQL，数量已超限，必须在 0-" + maxSQLCount + " 内 !");
-		}
-
 		try {
 			return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config, false));
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			if (Log.DEBUG == false && e instanceof SQLException) {
 				throw new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);
 			}
 			throw e;
+		}
+		finally {
+			if (config.getPosition() == 0) {
+				int maxSQLCount = getMaxSQLCount();
+				int sqlCount = sqlExecutor.getExecutedSQLCount();
+				Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n\n 已执行 " + sqlCount + "/" + maxSQLCount + " 条 SQL \n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+				if (sqlCount > maxSQLCount) {
+					throw new IllegalArgumentException("截至 " + config.getTable() + " 已执行 " + sqlCount + " 条 SQL，数量已超限，必须在 0-" + maxSQLCount + " 内 !");
+				}
+			}
 		}
 	}
 

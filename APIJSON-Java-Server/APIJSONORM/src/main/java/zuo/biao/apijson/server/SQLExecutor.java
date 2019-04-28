@@ -93,5 +93,12 @@ public interface SQLExecutor {
 	int executeUpdate(@NotNull Statement statement, String sql) throws Exception;
 	
 	ResultSet execute(@NotNull Statement statement, String sql) throws Exception;
+
+	int getGeneratedSQLCount();
+
+	int getCachedSQLCount();
+
+	int getExecutedSQLCount();
+
 	
 }

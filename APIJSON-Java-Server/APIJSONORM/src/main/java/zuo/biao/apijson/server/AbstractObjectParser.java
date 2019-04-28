@@ -611,7 +611,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
 		if (sqlConfig == null) {
-			sqlConfig = newSQLConfig(false);
+			try {
+				sqlConfig = newSQLConfig(false);
+			}
+			catch (NotExistException e) {
+				return this;
+			}
 		}
 		sqlConfig.setCount(count).setPage(page).setPosition(position);
 
@@ -639,18 +644,19 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		} else {
 			try {
 				sqlReponse = onSQLExecute();
-			} catch (Exception e) {
-				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
-				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
-					//						e.printStackTrace();
-					sqlReponse = null;//内部吃掉异常，put到最外层
-					//						requestObject.put(JSONResponse.KEY_MSG
-					//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MSG)
-					//										+ "; query " + path + " cath NotExistException:"
-					//										+ newErrorResult(e).getString(JSONResponse.KEY_MSG)));
-				} else {
-					throw e;
-				}
+			}
+			catch (NotExistException e) {
+				//				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
+				//				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
+				//					//						e.printStackTrace();
+				sqlReponse = null;//内部吃掉异常，put到最外层
+				//						requestObject.put(JSONResponse.KEY_MSG
+				//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MSG)
+				//										+ "; query " + path + " cath NotExistException:"
+				//										+ newErrorResult(e).getString(JSONResponse.KEY_MSG)));
+				//				} else {
+				//					throw e;
+				//				}
 			}
 
 			if (drop) {//丢弃Table，只为了向下提供条件
@@ -724,13 +730,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 			SQLExecutor executor = null;
 			try {
-				executor = parser.createSQLExecutor();
+				executor = parser.getSQLExecutor();
 				result = executor.execute(config, true);
 			}
-			finally {
-				if (executor != null) {
-					executor.close();
-				}
+			catch (NotExistException e) {
+				return;
 			}
 		}
 		else {
