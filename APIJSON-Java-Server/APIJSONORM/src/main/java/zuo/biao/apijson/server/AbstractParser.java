@@ -209,7 +209,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	public Verifier<T> getVerifier() {
 		return verifier;
 	}
-	
+
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return
@@ -316,30 +316,35 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
 
+		JSONObject res = globleFormat && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
+
+		long endTime = System.currentTimeMillis();
+		long duration = endTime - startTime;
+
 		if (Log.DEBUG) {
+			requestObject.put("time:start/duration/end", startTime + "/" + duration + "/" + endTime);
 			requestObject.put("query:depth/max", queryDepth + "/" + getMaxQueryDepth());
 			requestObject.put("sql:generate/cache/execute/maxExecute", sqlExecutor.getGeneratedSQLCount() + "/" + sqlExecutor.getCachedSQLCount() + "/" + sqlExecutor.getExecutedSQLCount() + "/" + getMaxSQLCount());
 		}
-		
+
 		sqlExecutor.close();
 		sqlExecutor = null;
-		
 		queryResultMap.clear();
+		queryResultMap = null;
 
 		//会不会导致原来的session = null？		session = null;
 
+		if (Log.DEBUG) {
+			Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
+					+ requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
 
-		Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
-				+ requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
-
-		Log.d(TAG, "parse  return response = \n" + JSON.toJSONString(requestObject)
-		+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n");
-
-		long endTime = System.currentTimeMillis();
-		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + (endTime - startTime)
+			Log.d(TAG, "parseResponse  return response = \n" + JSON.toJSONString(requestObject)
+			+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n");
+		}
+		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + duration
 				+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
 
-		return globleFormat && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
+		return res;
 	}
 
 
@@ -366,7 +371,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			config.setSchema(globleSchema);
 		}
 
-		Log.i(TAG, "executeSQL  config = " + JSON.toJSONString(config));
+		if (Log.DEBUG) {
+			Log.i(TAG, "onVerifyRole  config = " + JSON.toJSONString(config));
+		}
 
 		if (noVerifyRole == false) {
 			if (config.getRole() == null) {
@@ -635,8 +642,11 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	@Override
 	public JSONObject onObjectParse(final JSONObject request
 			, String parentPath, String name, final SQLConfig arrayConfig, boolean isSubquery) throws Exception {
-		Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
-				+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
+
+		if (Log.DEBUG) {
+			Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
+					+ ";\n name = " + name + "; request = " + JSON.toJSONString(request));
+		}
 		if (request == null) {// Moment:{}   || request.isEmpty()) {//key-value条件
 			return null;
 		}
@@ -713,8 +723,11 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 */
 	@Override
 	public JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception {
-		Log.i(TAG, "\n\n\n onArrayParse parentPath = " + parentPath
-				+ "; name = " + name + "; request = " + JSON.toJSONString(request));
+		if (Log.DEBUG) {
+			Log.i(TAG, "\n\n\n onArrayParse parentPath = " + parentPath
+					+ "; name = " + name + "; request = " + JSON.toJSONString(request));
+		}
+
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
 		if (RequestMethod.isGetMethod(requestMethod, false) == false) {
 			throw new UnsupportedOperationException("key[]:{}只支持GET方法！不允许传 " + name + ":{} ！");
@@ -775,16 +788,16 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
 		request.remove(JSONRequest.KEY_JOIN);
-		Log.d(TAG, "getArray  query = " + query + "; count = " + count + "; page = " + page + "; join = " + join);
+		Log.d(TAG, "onArrayParse  query = " + query + "; count = " + count + "; page = " + page + "; join = " + join);
 
 		if (request.isEmpty()) {//如果条件成立，说明所有的 parentPath/name:request 中request都无效！！！
-			Log.e(TAG, "getArray  request.isEmpty() >> return null;");
+			Log.e(TAG, "onArrayParse  request.isEmpty() >> return null;");
 			return null;
 		}
 
 
 		int size = count2 == 0 ? max : count2;//count为每页数量，size为第page页实际数量，max(size) = count
-		Log.d(TAG, "getArray  size = " + size + "; page = " + page);
+		Log.d(TAG, "onArrayParse  size = " + size + "; page = " + page);
 
 
 		//key[]:{Table:{}}中key equals Table时 提取Table
@@ -847,7 +860,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		request.put(JSONRequest.KEY_PAGE, page);
 		request.put(JSONRequest.KEY_JOIN, join);
 
-		Log.i(TAG, "getArray  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
+		if (Log.DEBUG) {
+			Log.i(TAG, "onArrayParse  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
+		}
 		return response;
 	}
 
@@ -1284,7 +1299,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			Log.d(TAG, "executeSQL  config == null >> return null;");
 			return null;
 		}
-		
+
 		if (isSubquery) {
 			JSONObject sqlObj = new JSONObject(true);
 			sqlObj.put(KEY_CONFIG, config);
