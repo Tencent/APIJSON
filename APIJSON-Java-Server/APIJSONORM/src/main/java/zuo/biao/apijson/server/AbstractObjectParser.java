@@ -484,36 +484,38 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		boolean isEmpty;
 
 		if (zuo.biao.apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
+			if (isMain) {
+				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
+						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
+			}
+		
 			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
 				arrayCount ++;
 				int maxArrayCount = parser.getMaxArrayCount();
 				if (arrayCount > maxArrayCount) {
-					throw new IllegalArgumentException(path + " 内截至 " + key + " 时数组对象 key[]:{} 的数量达到 " + arrayCount + " 已超限，必须在 0-" + maxArrayCount + " 内 !");
+					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时数组对象 key[]:{} 的数量达到 " + arrayCount + " 已超限，必须在 0-" + maxArrayCount + " 内 !");
 				}
-			}
-
-			if (isMain) {
-				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
-						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
 			}
 
 			child = parser.onArrayParse(value, path, key, isSubquery);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
 		else {//APIJSON Object
-			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
-				objectCount ++;
-				int maxObjectCount = parser.getMaxObjectCount();
-				if (objectCount > maxObjectCount) {
-					throw new IllegalArgumentException(path + " 内截至 " + key + " 时表对象 TableKey:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
-				}
-			}
-
-			if (type == TYPE_ITEM && JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey()) == false) {
+			boolean isTableKey = JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey());
+			if (type == TYPE_ITEM && isTableKey == false) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
 			}
 
+			if (//避免使用 "test":{"Test":{}} 绕过限制，实现查询爆炸   isTableKey && 
+					(arrayConfig == null || arrayConfig.getPosition() == 0)) {
+				objectCount ++;
+				int maxObjectCount = parser.getMaxObjectCount();
+				if (objectCount > maxObjectCount) {
+					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时对象 key:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
+				}
+			}
+			
 			child = parser.onObjectParse(value, path, key, isMain ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null, isSubquery);
 
 			isEmpty = child == null || ((JSONObject) child).isEmpty();
