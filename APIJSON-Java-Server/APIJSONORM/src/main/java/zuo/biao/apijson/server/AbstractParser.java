@@ -322,9 +322,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		long duration = endTime - startTime;
 
 		if (Log.DEBUG) {
-			requestObject.put("time:start/duration/end", startTime + "/" + duration + "/" + endTime);
-			requestObject.put("query:depth/max", queryDepth + "/" + getMaxQueryDepth());
 			requestObject.put("sql:generate/cache/execute/maxExecute", sqlExecutor.getGeneratedSQLCount() + "/" + sqlExecutor.getCachedSQLCount() + "/" + sqlExecutor.getExecutedSQLCount() + "/" + getMaxSQLCount());
+			requestObject.put("depth:count/max", queryDepth + "/" + getMaxQueryDepth());
+			requestObject.put("time:start/duration/end", startTime + "/" + duration + "/" + endTime);
 		}
 
 		sqlExecutor.close();

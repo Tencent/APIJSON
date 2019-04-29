@@ -502,7 +502,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 		else {//APIJSON Object
 			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
-				arrayCount ++;
+				objectCount ++;
 				int maxObjectCount = parser.getMaxObjectCount();
 				if (objectCount > maxObjectCount) {
 					throw new IllegalArgumentException(path + " 内截至 " + key + " 时表对象 TableKey:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
