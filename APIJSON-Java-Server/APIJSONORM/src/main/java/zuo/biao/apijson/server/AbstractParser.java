@@ -134,20 +134,36 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		this.globleRole = globleRole;
 		return this;
 	}
+	@Override
+	public RequestRole getGlobleRole() {
+		return globleRole;
+	}
 	protected String globleDatabase;
 	public AbstractParser<T> setGlobleDatabase(String globleDatabase) {
 		this.globleDatabase = globleDatabase;
 		return this;
+	}
+	@Override
+	public String getGlobleDatabase() {
+		return globleDatabase;
 	}
 	protected String globleSchema;
 	public AbstractParser<T> setGlobleSchema(String globleSchema) {
 		this.globleSchema = globleSchema;
 		return this;
 	}
-	protected boolean globleFormat;
+	@Override
+	public String getGlobleSchema() {
+		return globleSchema;
+	}
+	protected Boolean globleFormat;
 	public AbstractParser<T> setGlobleFormat(Boolean globleFormat) {
 		this.globleFormat = globleFormat;
 		return this;
+	}
+	@Override
+	public Boolean getGlobleFormat() {
+		return globleFormat;
 	}
 
 	@Override
@@ -290,7 +306,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		try {
 			setGlobleDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
 			setGlobleSchema(requestObject.getString(JSONRequest.KEY_SCHEMA));
-			setGlobleFormat(requestObject.getBooleanValue(JSONRequest.KEY_FORMAT));
+			setGlobleFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
 
 			requestObject.remove(JSONRequest.KEY_DATABASE);
 			requestObject.remove(JSONRequest.KEY_SCHEMA);
@@ -316,7 +332,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
 
-		JSONObject res = globleFormat && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
+		JSONObject res = (globleFormat != null && globleFormat) && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
@@ -363,14 +379,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 */
 	@Override
 	public void onVerifyRole(@NotNull SQLConfig config) throws Exception {
-		//居然导致 @JSONField(serialize = false) 的方法也被执行了，然后 getTablePath 里 对 sch 赋值了	Log.i(TAG, "executeSQL  config = " + JSON.toJSONString(config));
-		if (config.getDatabase() == null && globleDatabase != null) {
-			config.setDatabase(globleDatabase);
-		}
-		if (config.getSchema() == null && globleSchema != null) {
-			config.setSchema(globleSchema);
-		}
-
 		if (Log.DEBUG) {
 			Log.i(TAG, "onVerifyRole  config = " + JSON.toJSONString(config));
 		}

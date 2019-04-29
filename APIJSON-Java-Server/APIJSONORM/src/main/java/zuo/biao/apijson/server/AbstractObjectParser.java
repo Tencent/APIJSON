@@ -234,6 +234,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			response = new JSONObject(true);//must init
 
 			sqlRequest = new JSONObject(true);//must init
+
 			sqlReponse = null;//must init
 			customMap = null;//must init
 			functionMap = null;//must init
@@ -311,6 +312,15 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				}
 
 				//非Table内的函数会被滞后在onChildParse后调用！ onFunctionResponse("-");
+			}
+
+			if (isTable) {
+				if (sqlRequest.get(JSONRequest.KEY_DATABASE) == null && parser.getGlobleDatabase() != null) {
+					sqlRequest.put(JSONRequest.KEY_DATABASE, parser.getGlobleDatabase());
+				}
+				if (sqlRequest.get(JSONRequest.KEY_SCHEMA) == null && parser.getGlobleSchema() != null) {
+					sqlRequest.put(JSONRequest.KEY_SCHEMA, parser.getGlobleSchema());
+				}
 			}
 		}
 
@@ -488,7 +498,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
 			}
-		
+
 			if (arrayConfig == null || arrayConfig.getPosition() == 0) {
 				arrayCount ++;
 				int maxArrayCount = parser.getMaxArrayCount();
@@ -515,7 +525,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时对象 key:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
 				}
 			}
-			
+
 			child = parser.onObjectParse(value, path, key, isMain ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null, isSubquery);
 
 			isEmpty = child == null || ((JSONObject) child).isEmpty();

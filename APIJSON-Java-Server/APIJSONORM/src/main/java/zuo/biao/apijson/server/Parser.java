@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.RequestRole;
 
 /**解析器
  * @author Lemon
@@ -125,5 +126,11 @@ public interface Parser<T> {
 	
 	SQLExecutor getSQLExecutor();
 	Verifier<T> getVerifier();
+	
+	
+	RequestRole getGlobleRole();
+	String getGlobleDatabase();
+	String getGlobleSchema();
+	Boolean getGlobleFormat();
 
 }

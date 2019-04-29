@@ -2075,6 +2075,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		AbstractSQLConfig config = callback.getSQLConfig(method, table);
 
+		String database = request.getString(KEY_DATABASE);
+		String schema = request.getString(KEY_SCHEMA);
+		config.setDatabase(database); //不删，后面表对象还要用的，必须放在 parseJoin 前
+		config.setSchema(schema); //不删，后面表对象还要用的
+
 		//放后面会导致主表是空对象时 joinList 未解析
 		if (isProcedure == false) {
 			config = parseJoin(method, config, joinList, callback);
@@ -2083,11 +2088,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
-
-		String database = request.getString(KEY_DATABASE);
-		String schema = request.getString(KEY_SCHEMA);
-		config.setDatabase(database); //不删，后面表对象还要用的
-		config.setSchema(schema); //不删，后面表对象还要用的
 
 		if (isProcedure) {
 			return config;
@@ -2388,6 +2388,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, false, callback).setCount(1);
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
+				if (joinConfig.getDatabase() == null) {
+					joinConfig.setDatabase(config.getDatabase()); //解决主表 JOIN 副表，引号不一致
+				}
+				else if (joinConfig.getDatabase().equals(config.getDatabase()) == false) {
+					throw new IllegalArgumentException("主表 " + config.getTable() + " 的 @database:" + config.getDatabase() + " 和它 SQL JOIN 的副表 " + name + " 的 @database:" + joinConfig.getDatabase() + " 不一致！");
+				}
+				if (joinConfig.getSchema() == null) {
+					joinConfig.setSchema(config.getSchema()); //主表 JOIN 副表，默认 schema 一致
+				}
+				cacheConfig.setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
+
+
 				if (isQuery) {
 					config.setKeyPrefix(true);
 				}
@@ -2396,7 +2408,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				if (j.isLeftOrRightJoin()) {
 					SQLConfig outterConfig = newSQLConfig(method, name, j.getOutter(), null, false, callback);
-					outterConfig.setMain(false).setKeyPrefix(true);
+					outterConfig.setMain(false).setKeyPrefix(true).setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 					j.setOutterConfig(outterConfig);
 				}
 			}
