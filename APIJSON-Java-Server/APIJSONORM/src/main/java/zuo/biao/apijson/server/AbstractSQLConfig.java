@@ -228,17 +228,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return schema;
 	}
 	public String getSQLSchema(String sqlTable) {
+		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
+		if ((Table.TABLE_NAME.equals(sqlTable) || Column.TABLE_NAME.equals(sqlTable)) ) {
+			return SCHEMA_INFORMATION;
+		}
+		if ((PgAttribute.TABLE_NAME.equals(sqlTable) || PgClass.TABLE_NAME.equals(sqlTable)) ) {
+			return "";
+		}
+
 		String sch = getSchema();
 		if (sch == null) { //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema  StringUtil.isEmpty(sch, true)) {
-			if ((Table.TABLE_NAME.equals(sqlTable) || Column.TABLE_NAME.equals(sqlTable)) ) {
-				sch = SCHEMA_INFORMATION;
-			} 
-			else if ((PgAttribute.TABLE_NAME.equals(sqlTable) || PgClass.TABLE_NAME.equals(sqlTable)) ) {
-				sch = "";
-			}
-			else {
-				sch = DEFAULT_SCHEMA;
-			}
+			sch = DEFAULT_SCHEMA;
 		}
 		return sch;
 	}
