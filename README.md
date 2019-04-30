@@ -135,8 +135,8 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
   <a href="http://www.8soo.com"><img src="http://ww1.sinaimg.cn/large/756dd729gw1f9n5ckuq6vj208902it8v.jpg" height="90"></a>
   <a href="https://www.kanhanman.com"><img src="http://images.cnblogs.com/cnblogs_com/tommylemon/992090/o_kanhanman.com.jpg" height="90"</a>
   <a href="http://juting.vip"><img src="http://i.juting.vip/wp-file/2018/12/logo1-1.png" height="90"></a>
+  <a href="http://www.aipaipai-inc.com"><img src="http://www.aipaipai-inc.com/uploadfile/upload/2019042913403029.png" height="90"></a>
   <a href="https://www.51it.wang/"><img src="https://www.51it.wang/usr/uploads/2019/02/2420857313.png" height="90"></a>
-</a>
 </div>
 <br />
 
