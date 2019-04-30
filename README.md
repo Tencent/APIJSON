@@ -218,9 +218,9 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 [uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite 等
 
-[APIJSON](https://github.com/crazytaxi824/APIJSON) Go 版 APIJSON，完善中
+[APIJSON](https://github.com/crazytaxi824/APIJSON) Go 版 APIJSON，功能开发中...
 
-[APIJSONKOTLIN](https://github.com/luckyxiaomo/APIJSONKOTLIN) Kotlin 版 APIJSON，基础框架搭建中
+[APIJSONKOTLIN](https://github.com/luckyxiaomo/APIJSONKOTLIN) Kotlin 版 APIJSON，基础框架搭建中...
 
 [APIJSONParser](https://github.com/Zerounary/APIJSONParser) Complate JSON to SQL，APIJSON编译器，将JSON动态编译成SQL
 
