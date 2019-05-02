@@ -124,12 +124,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private int position; //Table在[]中的位置
 	private int query; //JSONRequest.query
 	private int type; //ObjectParser.type
+	private int cache;
+	private boolean explain;
+
 	private List<Join> joinList; //连表 配置列表
 	//array item >>>>>>>>>>
 	private boolean test; //测试
-	private boolean cacheStatic; //静态缓存
 
 	private String procedure;
+
 	public SQLConfig setProcedure(String procedure) {
 		this.procedure = procedure;
 		return this;
@@ -868,6 +871,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.type = type;
 		return this;
 	}
+	
+	@Override
+	public int getCache() {
+		return cache;
+	}
+	@Override
+	public AbstractSQLConfig setCache(int cache) {
+		this.cache = cache;
+		return this;
+	}
+	
+	@Override
+	public boolean isExplain() {
+		return explain;
+	}
+	@Override
+	public AbstractSQLConfig setExplain(boolean explain) {
+		this.explain = explain;
+		return this;
+	}
+	
 	@Override
 	public List<Join> getJoinList() {
 		return joinList;
@@ -892,16 +916,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.test = test;
 		return this;
 	}
-	@Override
-	public boolean isCacheStatic() {
-		return cacheStatic;
-	}
-	@Override
-	public AbstractSQLConfig setCacheStatic(boolean cacheStatic) {
-		this.cacheStatic = cacheStatic;
-		return this;
-	}
-
 
 	/**获取初始位置offset
 	 * @return
@@ -1895,7 +1909,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String sch = config.getSQLSchema(config.getSQLTable());
 		if (StringUtil.isNotEmpty(config.getProcedure(), true)) {
 			String q = config.getQuote();
-			return "CALL " + q + sch + q + "."+ config.getProcedure();
+			return "CALL " + q + sch + q + "."+ config.getProcedure(); // EXPLIAN 不能用于存储过程，和 CALL 语法冲突
 		}
 
 		String tablePath = config.getTablePath();
@@ -1914,7 +1928,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		default:
 			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
-			return "SELECT " + column + " FROM " + getConditionString(column, tablePath, config);
+			return (config.isExplain() ? "EXPLAIN " : "") + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
 		}
 	}
 
@@ -2131,8 +2145,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 
 			if (idIn instanceof List) { //共用idIn场景少性能差
-				if (((List<?>) idIn).contains(id) == false) {//empty有效  BaseModel.isEmpty(idIn) == false) {
-					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && ((JSONArray) idIn).contains(id) == false");
+				boolean contains = false;
+				List<?> ids = ((List<?>) idIn);
+				Object d;
+				for (int i = 0; i < ids.size(); i++) { //不用 idIn.contains(id) 因为 idIn 里存到很可能是 Integer，id 又是 Long！
+					d = ids.get(i);
+					if (d != null && id.toString().equals(d.toString())) {
+						contains = true;
+						break;
+					}
+				}
+				if (contains == false) {//empty有效  BaseModel.isEmpty(idIn) == false) {
+					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && (((List<?>) idIn).contains(id) == false");
 				}
 			}
 		}

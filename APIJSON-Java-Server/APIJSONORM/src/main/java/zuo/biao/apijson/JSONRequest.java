@@ -88,16 +88,31 @@ public class JSONRequest extends JSONObject {
 	public static final int QUERY_TOTAL = 1;
 	public static final int QUERY_ALL = 2;
 
+	public static final String QUERY_TABLE_STRING = "TABLE";
+	public static final String QUERY_TOTAL_STRING = "TOTAL";
+	public static final String QUERY_ALL_STRING = "ALL";
+	
+	public static final int CACHE_ALL = 0;
+	public static final int CACHE_ROM = 1;
+	public static final int CACHE_RAM = 2;
+
+	public static final String CACHE_ALL_STRING = "ALL";
+	public static final String CACHE_ROM_STRING = "ROM";
+	public static final String CACHE_RAM_STRING = "RAM";
+
 	public static final String SUBQUERY_RANGE_ALL = "ALL";
 	public static final String SUBQUERY_RANGE_ANY = "ANY";
 	
-	public static final String KEY_QUERY = "query";
+	public static final String KEY_QUERY = "query"; // 0-
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
 	public static final String KEY_JOIN = "join";
+	public static final String KEY_CACHE = "cache"; // RAM/ROM/ALL ?
+	public static final String KEY_EXPLAIN = "explain"; // true  explain:true/false 为了兼容，就不在 query 里加一个值了
 	public static final String KEY_SUBQUERY_RANGE = "range";
 	public static final String KEY_SUBQUERY_FROM = "from";
-
+	
+	
 	public static final List<String> ARRAY_KEY_LIST;
 	static {
 		ARRAY_KEY_LIST = new ArrayList<String>();
@@ -105,6 +120,8 @@ public class JSONRequest extends JSONObject {
 		ARRAY_KEY_LIST.add(KEY_COUNT);
 		ARRAY_KEY_LIST.add(KEY_PAGE);
 		ARRAY_KEY_LIST.add(KEY_JOIN);
+		ARRAY_KEY_LIST.add(KEY_CACHE);
+		ARRAY_KEY_LIST.add(KEY_EXPLAIN);
 		ARRAY_KEY_LIST.add(KEY_SUBQUERY_RANGE);
 		ARRAY_KEY_LIST.add(KEY_SUBQUERY_FROM);
 	}
@@ -140,6 +157,36 @@ public class JSONRequest extends JSONObject {
 	 */
 	public JSONRequest setJoin(String... joins) {
 		return puts(KEY_JOIN, StringUtil.getString(joins));
+	}
+	
+	/**set cache type
+	 * @param cache
+	 * @return
+	 * @see {@link #CACHE_ALL}
+	 * @see {@link #CACHE_RAM}
+	 * @see {@link #CACHE_ROM}
+	 */
+	public JSONRequest setCache(int cache) {
+		return puts(KEY_CACHE, cache);
+	}
+
+	/**set cache type
+	 * @param cache
+	 * @return
+	 * @see {@link #CACHE_ALL_STRING}
+	 * @see {@link #CACHE_RAM_STRING}
+	 * @see {@link #CACHE_ROM_STRING}
+	 */
+	public JSONRequest setCache(String cache) {
+		return puts(KEY_CACHE, cache);
+	}
+	
+	/**set joins of Main Table and it's Vice Tables in Array layer
+	 * @param joins "@/User/id@", "&/User/id@,>/Comment/momentId@" ...
+	 * @return
+	 */
+	public JSONRequest setExplain(boolean explain) {
+		return puts(KEY_EXPLAIN, explain);
 	}
 	
 	/**set range for Subquery

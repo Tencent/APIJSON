@@ -70,10 +70,6 @@ public interface SQLConfig {
 	boolean isTest();
 	SQLConfig setTest(boolean test);
 
-	boolean isCacheStatic();
-	SQLConfig setCacheStatic(boolean cacheStatic);
-
-
 	int getType();
 	SQLConfig setType(int type);
 	
@@ -89,7 +85,11 @@ public interface SQLConfig {
 	int getPosition();
 	SQLConfig setPosition(int position);
 
-	
+	int getCache();
+	SQLConfig setCache(int cache);
+
+	boolean isExplain();
+	SQLConfig setExplain(boolean explain);
 	
 	
 	RequestMethod getMethod();
@@ -209,6 +209,5 @@ public interface SQLConfig {
 	String getSubqueryString(Subquery subquery) throws Exception;
 	
 	SQLConfig setProcedure(String procedure);
-
-
+	
 }

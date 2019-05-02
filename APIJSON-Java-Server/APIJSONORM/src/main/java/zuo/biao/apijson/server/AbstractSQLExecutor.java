@@ -49,7 +49,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		cachedSQLCount = 0;
 		executedSQLCount = 0;
 	}
-	
+
 	@Override
 	public int getGeneratedSQLCount() {
 		return generatedSQLCount;
@@ -62,12 +62,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public int getExecutedSQLCount() {
 		return executedSQLCount;
 	}
-	
-	//访问一次后丢失，可能因为static导致内存共享，别的地方改变了内部对象的值
-	//	private static final Map<String, Map<Integer, JSONObject>> staticCacheMap;
-	//	static {
-	//		staticCacheMap = new HashMap<String, Map<Integer, JSONObject>>();
-	//	}
 
 	/**
 	 * 缓存map
@@ -81,48 +75,40 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 * @param isStatic
 	 */
 	@Override
-	public synchronized void putCache(String sql, List<JSONObject> list, boolean isStatic) {
+	public synchronized void putCache(String sql, List<JSONObject> list, int type) {
 		if (sql == null || list == null) { //空map有效，说明查询过sql了  || list.isEmpty()) {
 			Log.i(TAG, "saveList  sql == null || list == null >> return;");
 			return;
 		}
-		//		if (isStatic) {
-		//			staticCacheMap.put(sql, list);
-		//		} else {
 		cacheMap.put(sql, list);
-		//		}
 	}
 	/**移除缓存
 	 * @param sql
 	 * @param isStatic
 	 */
 	@Override
-	public synchronized void removeCache(String sql, boolean isStatic) {
+	public synchronized void removeCache(String sql, int type) {
 		if (sql == null) {
 			Log.i(TAG, "removeList  sql == null >> return;");
 			return;
 		}
-		//		if (isStatic) {
-		//			staticCacheMap.remove(sql);
-		//		} else {
 		cacheMap.remove(sql);
-		//		}
 	}
 
 	@Override
-	public List<JSONObject> getCache(String sql, boolean cacheStatic) {
+	public List<JSONObject> getCache(String sql, int type) {
 		return cacheMap.get(sql);
 	}
 
 	/**获取缓存
 	 * @param sql
 	 * @param position
-	 * @param isStatic
+	 * @param type
 	 * @return
 	 */
 	@Override
-	public JSONObject getCacheItem(String sql, int position, boolean isStatic) {
-		List<JSONObject> list = /** isStatic ? staticCacheMap.get(sql) : */ getCache(sql, isStatic);
+	public JSONObject getCacheItem(String sql, int position, int type) {
+		List<JSONObject> list = getCache(sql, type);
 		//只要map不为null，则如果 list.get(position) == null，则返回 {} ，避免再次SQL查询
 		if (list == null) {
 			return null;
@@ -137,7 +123,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public void close() {
 		cacheMap.clear();
 		cacheMap = null;
-		
+
 		generatedSQLCount = 0;
 		cachedSQLCount = 0;
 		executedSQLCount = 0;
@@ -146,19 +132,19 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception {
 		executedSQLCount ++;
-		
+
 		return statement.executeQuery(sql);
 	}
 	@Override
 	public int executeUpdate(@NotNull Statement statement, String sql) throws Exception {
 		executedSQLCount ++;
-		
+
 		return statement.executeUpdate(sql);
 	}
 	@Override
 	public ResultSet execute(@NotNull Statement statement, String sql) throws Exception {
 		executedSQLCount ++;
-		
+
 		statement.execute(sql);
 		return statement.getResultSet();
 	}
@@ -185,7 +171,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		JSONObject result;
 
 		generatedSQLCount ++;
-		
+
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 				+ "\n 已生成 " + generatedSQLCount + " 条 SQL"
@@ -195,11 +181,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		ResultSet rs = null;
 
+		boolean noCache = false; // true;
+
 		if (unknowType) {
 			Statement statement = getStatement(config);
 			rs = execute(statement, sql);
 
-			result = new JSONObject();
+			result = new JSONObject(true);
 			int updateCount = statement.getUpdateCount();
 			result.put(JSONResponse.KEY_COUNT, updateCount);
 			result.put("update", updateCount >= 0);
@@ -210,7 +198,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			case HEAD:
 			case HEADS:
 				executedSQLCount ++;
-				
+
 				rs = executeQuery(config);
 
 				result = rs.next() ? AbstractParser.newSuccessResult()
@@ -224,7 +212,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			case PUT:
 			case DELETE:
 				executedSQLCount ++;
-				
+
 				int updateCount = executeUpdate(config);
 
 				result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
@@ -241,17 +229,19 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			case GET:
 			case GETS:
-				result = getCacheItem(sql, position, config.isCacheStatic());
+//				noCache = config.isExplain() || config.isTest();
+
+				result = noCache ? null : getCacheItem(sql, position, config.getCache());
 				Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
 				if (result != null) {
 					cachedSQLCount ++;
-					
+
 					Log.d(TAG, "\n\n select  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 					return result;
 				}
 
 				executedSQLCount ++;
-				
+
 				rs = executeQuery(config);
 				break;
 
@@ -314,7 +304,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		rs.close();
 
-		if (unknowType) {
+		if (unknowType || config.isExplain()) {
+			if (config.isExplain()) {
+				if (result == null) {
+					result = new JSONObject(true);
+				}
+				result.put("sql", sql);
+			}
 			result.put("list", resultList);
 			return result;
 		}
@@ -325,20 +321,19 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+//		if (noCache == false) {
+			//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
+			Set<Entry<String, JSONObject>> set = childMap.entrySet();
 
+			//<sql, Table>
+			for (Entry<String, JSONObject> entry : set) {
+				List<JSONObject> l = new ArrayList<>();
+				l.add(entry.getValue());
+				putCache(entry.getKey(), l, JSONRequest.CACHE_ROM);
+			}
 
-		//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
-		Set<Entry<String, JSONObject>> set = childMap.entrySet();
-
-		//<sql, Table>
-		for (Entry<String, JSONObject> entry : set) {
-			List<JSONObject> l = new ArrayList<>();
-			l.add(entry.getValue());
-			putCache(entry.getKey(), l, false);
-		}
-
-
-		putCache(sql, resultList, config.isCacheStatic());
+			putCache(sql, resultList, config.getCache());
+//		}
 		Log.i(TAG, ">>> select  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
 		long endTime = System.currentTimeMillis();

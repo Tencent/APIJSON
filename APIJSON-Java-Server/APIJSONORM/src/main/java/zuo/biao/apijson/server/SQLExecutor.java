@@ -32,24 +32,24 @@ public interface SQLExecutor {
 	/**保存缓存
 	 * @param sql
 	 * @param map
-	 * @param isStatic
+	 * @param type
 	 */
-	void putCache(String sql, List<JSONObject> list, boolean isStatic);
+	void putCache(String sql, List<JSONObject> list, int type);;
 	
-	List<JSONObject> getCache(String sql, boolean cacheStatic);
+	List<JSONObject> getCache(String sql, int type);
 
 	/**移除缓存
 	 * @param sql
-	 * @param isStatic
+	 * @param type
 	 */
-	void removeCache(String sql, boolean isStatic);
+	void removeCache(String sql, int type);
 	/**获取缓存
 	 * @param sql
 	 * @param position
-	 * @param isStatic
+	 * @param type
 	 * @return
 	 */
-	JSONObject getCacheItem(String sql, int position, boolean isStatic);
+	JSONObject getCacheItem(String sql, int position, int type);
 
 
 	/**执行SQL

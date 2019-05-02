@@ -629,7 +629,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
 		try {
-			JSONObject result = executor.execute(config.setCacheStatic(true), false);
+			JSONObject result = executor.execute(config, false);
 			return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
 		} finally {
 			executor.close();
@@ -751,31 +751,56 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		final Integer count = request.getInteger(JSONRequest.KEY_COUNT); //TODO 如果不想用默认数量可以改成 getIntValue(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
 		final Object join = request.get(JSONRequest.KEY_JOIN);
+		final String cache = request.getString(JSONRequest.KEY_CACHE);
+		final boolean explain = request.getBooleanValue(JSONRequest.KEY_EXPLAIN);
 
 		int query2;
 		if (query == null) {
 			query2 = JSONRequest.QUERY_TABLE;
 		}
 		else {
-			//			if (isSubquery) {
-			//				throw new IllegalArgumentException("子查询内不支持传 " + JSONRequest.KEY_QUERY + "!");
-			//			}
-
 			switch (query) {
 			case "0":
-			case "TABLE":
+			case JSONRequest.QUERY_TABLE_STRING:
 				query2 = JSONRequest.QUERY_TABLE;
 				break;
 			case "1":
-			case "TOTAL":
+			case JSONRequest.QUERY_TOTAL_STRING:
 				query2 = JSONRequest.QUERY_TOTAL;
 				break;
 			case "2":
-			case "ALL":
+			case JSONRequest.QUERY_ALL_STRING:
 				query2 = JSONRequest.QUERY_ALL;
 				break;
 			default:
 				throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_QUERY + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [TABLE, TOTAL, ALL] 内 !");
+			}
+		}
+
+		int cache2;
+		if (cache == null) {
+			cache2 = JSONRequest.CACHE_ALL;
+		}
+		else {
+			if (isSubquery) {
+				throw new IllegalArgumentException("子查询内不支持传 " + JSONRequest.KEY_CACHE + "!");
+			}
+
+			switch (cache) {
+			case "0":
+			case JSONRequest.CACHE_ALL_STRING:
+				cache2 = JSONRequest.CACHE_ALL;
+				break;
+			case "1":
+			case JSONRequest.CACHE_ROM_STRING:
+				cache2 = JSONRequest.CACHE_ROM;
+				break;
+			case "2":
+			case JSONRequest.CACHE_RAM_STRING:
+				cache2 = JSONRequest.CACHE_RAM;
+				break;
+			default:
+				throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_CACHE + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [ALL, ROM, RAM] 内 !");
 			}
 		}
 
@@ -796,7 +821,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
 		request.remove(JSONRequest.KEY_JOIN);
-		Log.d(TAG, "onArrayParse  query = " + query + "; count = " + count + "; page = " + page + "; join = " + join);
+		request.remove(JSONRequest.KEY_CACHE);
+		request.remove(JSONRequest.KEY_EXPLAIN);
+		Log.d(TAG, "onArrayParse  query = " + query + "; count = " + count + "; page = " + page + "; join = " + join + "; cache = " + cache + "; explain = " + explain);
 
 		if (request.isEmpty()) {//如果条件成立，说明所有的 parentPath/name:request 中request都无效！！！
 			Log.e(TAG, "onArrayParse  request.isEmpty() >> return null;");
@@ -826,11 +853,13 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 				.setCount(size)
 				.setPage(page)
 				.setQuery(query2)
+				.setCache(cache2)
+				.setExplain(explain)
 				.setJoinList(onJoinParse(join, request));
 
+		int len = explain || isSubquery ? 1 : size;
 		JSONObject parent;
-		//生成size个
-		for (int i = 0; i < (isSubquery ? 1 : size); i++) {
+		for (int i = 0; i < len; i++) { //生成len个
 			parent = onObjectParse(request, path, "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
 			if (parent == null || parent.isEmpty()) {
 				break;
@@ -867,6 +896,8 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		request.put(JSONRequest.KEY_COUNT, count);
 		request.put(JSONRequest.KEY_PAGE, page);
 		request.put(JSONRequest.KEY_JOIN, join);
+		request.put(JSONRequest.KEY_CACHE, cache);
+		request.put(JSONRequest.KEY_EXPLAIN, explain);
 
 		if (Log.DEBUG) {
 			Log.i(TAG, "onArrayParse  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");
