@@ -109,21 +109,23 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 			Object v;
 			for (int i = 0; i < valueList.size(); i++) {
 				v = valueList.get(i); //JSON.isBooleanOrNumberOrString(v) 解决 PostgreSQL: Can't infer the SQL type to use for an instance of com.alibaba.fastjson.JSONArray
-				
-				if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) {
-					if (JSON.isBooleanOrNumberOrString(v)) {
-						statement.setObject(i + 1, v); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
-					}
-					else {
+
+				if (JSON.isBooleanOrNumberOrString(v)) {
+					statement.setObject(i + 1, v); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
+				}
+				else {
+					if (DemoSQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) {
+
 						PGobject o = new PGobject();
 						o.setType("jsonb");
 						o.setValue(v == null ? null : v.toString());
 						statement.setObject(i + 1, o); //PostgreSQL 除了基本类型，其它的必须通过 PGobject 设置进去，否则 jsonb = varchar 等报错
 					}
+					else {
+						statement.setString(i + 1, v == null ? null : v.toString()); //MySQL setObject 不支持 JSON 类型
+					}
 				}
-				else {
-					statement.setString(i + 1, v == null ? null : v.toString()); //MySQL setObject 不支持 JSON 类型
-				}
+
 			}
 		}
 		// statement.close();
@@ -135,12 +137,12 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 	protected Object getValue(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
 			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
 		Object value = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
-		
+
 		if (value instanceof Blob) { //FIXME 存的是 abcde，取出来直接就是 [97, 98, 99, 100, 101] 这种 byte[] 类型，没有经过以下处理，但最终序列化后又变成了字符串 YWJjZGU=
 			value = new String(((Blob) value).getBytes(1, (int) ((Blob) value).length()), "UTF-8");
 		}
 		else if (value instanceof Clob) {
-			
+
 			StringBuffer sb = new StringBuffer(); 
 			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream()); 
 			String s = br.readLine();
@@ -166,9 +168,9 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 		if (connectionMap == null) {
 			return;
 		}
-		
+
 		Collection<Connection> connections = connectionMap.values();
-		
+
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
