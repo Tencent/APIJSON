@@ -1724,7 +1724,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								+ getKey(key) + " @> " + getValue(newJSONArray(childs[i])); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
 					} else {
 						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-								+ "json_contains(" + getKey(key) + ", " + getValue(childs[i]) + ")";
+								+ "json_contains(" + getKey(key) + ", " + getValue(childs[i].toString()) + ")";
 					}
 				}
 			}
