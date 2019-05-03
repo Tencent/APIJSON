@@ -291,8 +291,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 							}
 							else {//直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
 								response.put(key, onChildParse(index, key, (JSONObject)value));
-								//导致不返回任何字段								response.put(isTable == false && arrayConfig != null && arrayConfig.isExplain()
-								//								? JSONRequest.KEY_EXPLAIN : key, onChildParse(index, key, (JSONObject)value));
 								index ++;
 							}
 						}
@@ -626,7 +624,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 		if (sqlConfig == null) {
 			try {
-				sqlConfig = newSQLConfig(arrayConfig, false);
+				sqlConfig = newSQLConfig(false);
 			}
 			catch (NotExistException e) {
 				e.printStackTrace();
@@ -740,7 +738,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public void parseFunction(JSONObject json, String key, String value) throws Exception {
 		Object result;
 		if (key.startsWith("@")) {
-			SQLConfig config = newSQLConfig(arrayConfig, true);
+			SQLConfig config = newSQLConfig(true);
 			config.setProcedure(value);
 
 			SQLExecutor executor = null;
@@ -762,14 +760,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			response.put(k, result);
 			parser.putQueryResult(AbstractParser.getAbsPath(path, k), result);
 		}
-	}
-
-	private SQLConfig newSQLConfig(SQLConfig arrayConfig, boolean isProcedure) throws Exception {
-		SQLConfig cfg = newSQLConfig(isProcedure);
-//		if (arrayConfig != null) {
-//			cfg.setCache(arrayConfig.getCache()).setExplain(arrayConfig.isExplain());
-//		}
-		return cfg;
 	}
 
 	@Override

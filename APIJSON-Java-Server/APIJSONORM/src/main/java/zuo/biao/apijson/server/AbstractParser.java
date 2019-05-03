@@ -752,8 +752,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		final Integer count = request.getInteger(JSONRequest.KEY_COUNT); //TODO 如果不想用默认数量可以改成 getIntValue(JSONRequest.KEY_COUNT);
 		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
 		final Object join = request.get(JSONRequest.KEY_JOIN);
-		final String cache = request.getString(JSONRequest.KEY_CACHE);
-		final boolean explain = request.getBooleanValue(JSONRequest.KEY_EXPLAIN);
 
 		int query2;
 		if (query == null) {
@@ -778,33 +776,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			}
 		}
 
-		int cache2;
-		if (cache == null) {
-			cache2 = JSONRequest.CACHE_ALL;
-		}
-		else {
-			if (isSubquery) {
-				throw new IllegalArgumentException("子查询内不支持传 " + JSONRequest.KEY_CACHE + "!");
-			}
-
-			switch (cache) {
-			case "0":
-			case JSONRequest.CACHE_ALL_STRING:
-				cache2 = JSONRequest.CACHE_ALL;
-				break;
-			case "1":
-			case JSONRequest.CACHE_ROM_STRING:
-				cache2 = JSONRequest.CACHE_ROM;
-				break;
-			case "2":
-			case JSONRequest.CACHE_RAM_STRING:
-				cache2 = JSONRequest.CACHE_RAM;
-				break;
-			default:
-				throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_CACHE + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [ALL, ROM, RAM] 内 !");
-			}
-		}
-
 		int maxPage = getMaxQueryPage();
 		if (page < 0 || page > maxPage) {
 			throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_PAGE + ":value 中 value 的值不合法！必须在 0-" + maxPage + " 内 !");
@@ -822,9 +793,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
 		request.remove(JSONRequest.KEY_JOIN);
-		request.remove(JSONRequest.KEY_CACHE);
-		request.remove(JSONRequest.KEY_EXPLAIN);
-		Log.d(TAG, "onArrayParse  query = " + query + "; count = " + count + "; page = " + page + "; join = " + join + "; cache = " + cache + "; explain = " + explain);
+		Log.d(TAG, "onArrayParse  query = " + query + "; count = " + count + "; page = " + page + "; join = " + join);
 
 		if (request.isEmpty()) {//如果条件成立，说明所有的 parentPath/name:request 中request都无效！！！
 			Log.e(TAG, "onArrayParse  request.isEmpty() >> return null;");
@@ -854,19 +823,14 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 				.setCount(size)
 				.setPage(page)
 				.setQuery(query2)
-				.setCache(cache2)
-				.setExplain(explain)
 				.setJoinList(onJoinParse(join, request));
 
-		int len = explain || isSubquery ? 1 : size;
 		JSONObject parent;
-		for (int i = 0; i < len; i++) { //生成len个, config.setType(SQLConfig.TYPE_ITEM) 每次都必要，因为内部会设置成其它值
+		//生成size个
+		for (int i = 0; i < (isSubquery ? 1 : size); i++) {
 			parent = onObjectParse(request, path, "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
 			if (parent == null || parent.isEmpty()) {
 				break;
-			}
-			if (explain) {
-				parent.put(JSONRequest.KEY_EXPLAIN, explain);
 			}
 			//key[]:{Table:{}}中key equals Table时 提取Table
 			response.add(getValue(parent, childKeys)); //null有意义
@@ -900,8 +864,6 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		request.put(JSONRequest.KEY_COUNT, count);
 		request.put(JSONRequest.KEY_PAGE, page);
 		request.put(JSONRequest.KEY_JOIN, join);
-		request.put(JSONRequest.KEY_CACHE, cache);
-		request.put(JSONRequest.KEY_EXPLAIN, explain);
 
 		if (Log.DEBUG) {
 			Log.i(TAG, "onArrayParse  return response = \n" + JSON.toJSONString(response) + "\n>>>>>>>>>>>>>>>\n\n\n");

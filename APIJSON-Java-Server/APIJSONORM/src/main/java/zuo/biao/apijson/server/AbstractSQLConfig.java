@@ -1942,7 +1942,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String sch = config.getSQLSchema(config.getSQLTable());
 		if (StringUtil.isNotEmpty(config.getProcedure(), true)) {
 			String q = config.getQuote();
-			return "CALL " + q + sch + q + "."+ config.getProcedure(); // EXPLIAN 不能用于存储过程，和 CALL 语法冲突
+			return "CALL " + q + sch + q + "."+ config.getProcedure();
 		}
 
 		String tablePath = config.getTablePath();

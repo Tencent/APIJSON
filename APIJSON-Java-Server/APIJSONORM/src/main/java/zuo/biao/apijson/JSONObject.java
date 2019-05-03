@@ -120,6 +120,15 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 	
 	
+	public static final int CACHE_ALL = 0;
+	public static final int CACHE_ROM = 1;
+	public static final int CACHE_RAM = 2;
+
+	public static final String CACHE_ALL_STRING = "ALL";
+	public static final String CACHE_ROM_STRING = "ROM";
+	public static final String CACHE_RAM_STRING = "RAM";
+
+	
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
 	public static final String KEY_TRY = "@try"; //尝试，忽略异常
 	public static final String KEY_DROP = "@drop"; //丢弃，不返回
@@ -196,7 +205,33 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject setDatabase(String database) {
 		return puts(KEY_DATABASE, database);
-		
+	}
+	/**set joins of Main Table and it's Vice Tables in Array layer
+	 * @param joins "@/User/id@", "&/User/id@,>/Comment/momentId@" ...
+	 * @return
+	 */
+	public JSONObject setExplain(boolean explain) {
+		return puts(KEY_EXPLAIN, explain);
+	}
+	/**set cache type
+	 * @param cache
+	 * @return
+	 * @see {@link #CACHE_ALL}
+	 * @see {@link #CACHE_RAM}
+	 * @see {@link #CACHE_ROM}
+	 */
+	public JSONObject setCache(int cache) {
+		return puts(KEY_CACHE, cache);
+	}
+	/**set cache type
+	 * @param cache
+	 * @return
+	 * @see {@link #CACHE_ALL_STRING}
+	 * @see {@link #CACHE_RAM_STRING}
+	 * @see {@link #CACHE_ROM_STRING}
+	 */
+	public JSONObject setCache(String cache) {
+		return puts(KEY_CACHE, cache);
 	}
 	/**set schema where table was puts
 	 * @param schema
