@@ -121,12 +121,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	
 	
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
-	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	public static final String KEY_TRY = "@try"; //尝试，忽略异常
 	public static final String KEY_DROP = "@drop"; //丢弃，不返回
 	public static final String KEY_CORRECT = "@correct"; //字段校正
 	
+	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	public static final String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
+	public static final String KEY_EXPLAIN = "@explain"; //分析 true/false
+	public static final String KEY_CACHE = "@cache"; //缓存 RAM/ROM/ALL
 	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
 	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
 	public static final String KEY_FROM = "@from"; //FROM语句
@@ -140,6 +142,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST = new ArrayList<String>();
 		TABLE_KEY_LIST.add(KEY_ROLE);
 		TABLE_KEY_LIST.add(KEY_DATABASE);
+		TABLE_KEY_LIST.add(KEY_EXPLAIN);
+		TABLE_KEY_LIST.add(KEY_CACHE);
 		TABLE_KEY_LIST.add(KEY_SCHEMA);
 		TABLE_KEY_LIST.add(KEY_COLUMN);
 		TABLE_KEY_LIST.add(KEY_FROM);

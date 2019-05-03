@@ -17,6 +17,8 @@ package zuo.biao.apijson.server;
 import static zuo.biao.apijson.JSONObject.KEY_COLUMN;
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
 import static zuo.biao.apijson.JSONObject.KEY_DATABASE;
+import static zuo.biao.apijson.JSONObject.KEY_EXPLAIN;
+import static zuo.biao.apijson.JSONObject.KEY_CACHE;
 import static zuo.biao.apijson.JSONObject.KEY_FROM;
 import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
@@ -879,6 +881,37 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setCache(int cache) {
 		this.cache = cache;
+		return this;
+	}
+
+	public AbstractSQLConfig setCache(String cache) {
+		int cache2;
+		if (cache == null) {
+			cache2 = JSONRequest.CACHE_ALL;
+		}
+		else {
+//			if (isSubquery) {
+//				throw new IllegalArgumentException("子查询内不支持传 " + JSONRequest.KEY_CACHE + "!");
+//			}
+
+			switch (cache) {
+			case "0":
+			case JSONRequest.CACHE_ALL_STRING:
+				cache2 = JSONRequest.CACHE_ALL;
+				break;
+			case "1":
+			case JSONRequest.CACHE_ROM_STRING:
+				cache2 = JSONRequest.CACHE_ROM;
+				break;
+			case "2":
+			case JSONRequest.CACHE_RAM_STRING:
+				cache2 = JSONRequest.CACHE_RAM;
+				break;
+			default:
+				throw new IllegalArgumentException(getTable() + "/" + JSONRequest.KEY_CACHE + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [ALL, ROM, RAM] 内 !");
+			}
+		}
+		setCache(cache2);
 		return this;
 	}
 	
@@ -2082,6 +2115,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**新建SQL配置
 	 * @param table
 	 * @param request
+	 * @param joinList
+	 * @param isProcedure
+	 * @param callback
 	 * @return
 	 * @throws Exception 
 	 */
@@ -2163,6 +2199,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String role = request.getString(KEY_ROLE);
+		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
+		String cache = request.getString(KEY_CACHE);
 		String combine = request.getString(KEY_COMBINE);
 		Subquery from = (Subquery) request.get(KEY_FROM);
 		String column = request.getString(KEY_COLUMN);
@@ -2175,6 +2213,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.remove(idInKey);
 		//关键词
 		request.remove(KEY_ROLE);
+		request.remove(KEY_EXPLAIN);
+		request.remove(KEY_CACHE);
 		request.remove(KEY_DATABASE);
 		request.remove(KEY_SCHEMA);
 		request.remove(KEY_COMBINE);
@@ -2355,6 +2395,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
+		config.setExplain(explain);
+		config.setCache(cache);
 		config.setFrom(from);
 		config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
 		config.setWhere(tableWhere);					
@@ -2374,8 +2416,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.put(idKey, id);
 		request.put(idInKey, idIn);
 		//关键词
-		request.put(KEY_ROLE, role);
 		request.put(KEY_DATABASE, database);
+		request.put(KEY_ROLE, role);
+		request.put(KEY_EXPLAIN, explain);
+		request.put(KEY_CACHE, cache);
 		request.put(KEY_SCHEMA, schema);
 		request.put(KEY_COMBINE, combine);
 		request.put(KEY_FROM, from);
@@ -2387,7 +2431,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return config;
 	}
 
-
+	
+	
 	/**
 	 * @param method
 	 * @param config

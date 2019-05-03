@@ -766,9 +766,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	private SQLConfig newSQLConfig(SQLConfig arrayConfig, boolean isProcedure) throws Exception {
 		SQLConfig cfg = newSQLConfig(isProcedure);
-		if (arrayConfig != null) {
-			cfg.setCache(arrayConfig.getCache()).setExplain(arrayConfig.isExplain());
-		}
+//		if (arrayConfig != null) {
+//			cfg.setCache(arrayConfig.getCache()).setExplain(arrayConfig.isExplain());
+//		}
 		return cfg;
 	}
 

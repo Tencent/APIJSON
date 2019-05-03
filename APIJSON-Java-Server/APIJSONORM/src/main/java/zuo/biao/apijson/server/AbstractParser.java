@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import static zuo.biao.apijson.JSONObject.KEY_EXPLAIN;
 import static zuo.biao.apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
@@ -1349,7 +1350,29 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		}
 
 		try {
-			return parseCorrectResponse(config.getTable(), sqlExecutor.execute(config, false));
+			boolean explain = config.isExplain();
+			JSONObject result;
+			if (explain) { //如果先执行 explain，则 execute 会死循环，所以只能先执行非 explain
+				config.setExplain(false); //对下面 config.getSQL(false); 生效
+				JSONObject res = sqlExecutor.execute(config, false);
+
+				config.setExplain(explain);
+				JSONObject explainResult = config.isMain() && config.getPosition() != 0 ? null : sqlExecutor.execute(config, false);
+
+				if (explainResult == null) {
+					result = res;
+				}
+				else {
+					result = new JSONObject(true);
+					result.put(KEY_EXPLAIN, explainResult);
+					result.putAll(res);
+				}
+			}
+			else {
+				result = sqlExecutor.execute(config, false);
+			}
+
+			return parseCorrectResponse(config.getTable(), result);
 		}
 		catch (Exception e) {
 			if (Log.DEBUG == false && e instanceof SQLException) {

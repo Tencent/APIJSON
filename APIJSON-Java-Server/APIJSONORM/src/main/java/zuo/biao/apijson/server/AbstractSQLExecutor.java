@@ -174,9 +174,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-				+ "\n 已生成 " + generatedSQLCount + " 条 SQL"
-				+ "\n select  startTime = " + startTime
-				+ "\n sql = \n " + sql
+				+ "\n已生成 " + generatedSQLCount + " 条 SQL"
+				+ "\nselect  startTime = " + startTime
+				+ "\nsql = \n" + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 		ResultSet rs = null;
@@ -229,7 +229,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			case GET:
 			case GETS:
-				noCache = config.isExplain() || config.isTest();
+				noCache = config.isTest() || config.isExplain(); // TODO explain 照样 cache，但下面的 noCache 涉及的地方要改改，尤其是 JOIN
 
 				result = noCache ? null : getCacheItem(sql, position, config.getCache());
 				Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
