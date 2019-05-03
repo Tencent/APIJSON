@@ -305,7 +305,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				if (result == null) {
 					result = new JSONObject(true);
 				}
-				result.put("sql", sql);
+				boolean explain = config.isExplain();
+				config.setExplain(false);
+				result.put("sql", config.getSQL(false));
+				config.setExplain(explain);
+				config.setPrepared(prepared);
 			}
 			result.put("list", resultList);
 			return result;
