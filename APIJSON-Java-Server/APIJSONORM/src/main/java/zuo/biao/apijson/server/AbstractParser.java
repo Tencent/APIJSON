@@ -859,10 +859,13 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		int len = explain || isSubquery ? 1 : size;
 		JSONObject parent;
-		for (int i = 0; i < len; i++) { //生成len个
+		for (int i = 0; i < len; i++) { //生成len个, config.setType(SQLConfig.TYPE_ITEM) 每次都必要，因为内部会设置成其它值
 			parent = onObjectParse(request, path, "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
 			if (parent == null || parent.isEmpty()) {
 				break;
+			}
+			if (explain) {
+				parent.put(JSONRequest.KEY_EXPLAIN, explain);
 			}
 			//key[]:{Table:{}}中key equals Table时 提取Table
 			response.add(getValue(parent, childKeys)); //null有意义

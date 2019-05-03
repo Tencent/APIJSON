@@ -181,7 +181,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		ResultSet rs = null;
 
-		boolean noCache = false; // true;
+		boolean noCache = true;
 
 		if (unknowType) {
 			Statement statement = getStatement(config);
@@ -229,7 +229,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			case GET:
 			case GETS:
-//				noCache = config.isExplain() || config.isTest();
+				noCache = config.isExplain() || config.isTest();
 
 				result = noCache ? null : getCacheItem(sql, position, config.getCache());
 				Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
@@ -282,7 +282,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				// }
 
 				// bugfix-修复非常规数据库字段，获取表名失败导致输出异常
-				if (hasJoin && viceColumnStart > length) {
+				if (noCache == false && hasJoin && viceColumnStart > length) {
 					List<String> column = config.getColumn();
 
 					if (column != null && column.isEmpty() == false) {
@@ -293,7 +293,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 				}
 
-				item = onPutColumn(config, rs, rsmd, index, item, i, hasJoin && i >= viceColumnStart ? childMap : null);
+				item = onPutColumn(config, rs, rsmd, index, item, i, noCache == false && hasJoin && i >= viceColumnStart ? childMap : null);
 			}
 
 			resultList = onPutTable(config, rs, rsmd, resultList, index, item);
@@ -321,7 +321,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-//		if (noCache == false) {
+		if (noCache == false) {
 			//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
 			Set<Entry<String, JSONObject>> set = childMap.entrySet();
 
@@ -333,7 +333,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 
 			putCache(sql, resultList, config.getCache());
-//		}
+		}
 		Log.i(TAG, ">>> select  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
 		long endTime = System.currentTimeMillis();
