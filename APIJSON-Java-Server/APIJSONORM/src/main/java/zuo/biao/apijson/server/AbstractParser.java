@@ -129,7 +129,15 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		return this;
 	}
 
-
+	protected Boolean globleFormat;
+	public AbstractParser<T> setGlobleFormat(Boolean globleFormat) {
+		this.globleFormat = globleFormat;
+		return this;
+	}
+	@Override
+	public Boolean getGlobleFormat() {
+		return globleFormat;
+	}
 	protected RequestRole globleRole;
 	public AbstractParser<T> setGlobleRole(RequestRole globleRole) {
 		this.globleRole = globleRole;
@@ -157,14 +165,23 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	public String getGlobleSchema() {
 		return globleSchema;
 	}
-	protected Boolean globleFormat;
-	public AbstractParser<T> setGlobleFormat(Boolean globleFormat) {
-		this.globleFormat = globleFormat;
+	protected Boolean globleExplain;
+	public AbstractParser<T> setGlobleExplain(Boolean globleExplain) {
+		this.globleExplain = globleExplain;
 		return this;
 	}
 	@Override
-	public Boolean getGlobleFormat() {
-		return globleFormat;
+	public Boolean getGlobleExplain() {
+		return globleExplain;
+	}
+	protected String globleCache;
+	public AbstractParser<T> setGlobleCache(String globleCache) {
+		this.globleCache = globleCache;
+		return this;
+	}
+	@Override
+	public String getGlobleCache() {
+		return globleCache;
 	}
 
 	@Override
@@ -305,13 +322,17 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		}
 
 		try {
+			setGlobleFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
 			setGlobleDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
 			setGlobleSchema(requestObject.getString(JSONRequest.KEY_SCHEMA));
-			setGlobleFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
+			setGlobleExplain(requestObject.getBoolean(JSONRequest.KEY_EXPLAIN));
+			setGlobleCache(requestObject.getString(JSONRequest.KEY_CACHE));
 
+			requestObject.remove(JSONRequest.KEY_FORMAT);
 			requestObject.remove(JSONRequest.KEY_DATABASE);
 			requestObject.remove(JSONRequest.KEY_SCHEMA);
-			requestObject.remove(JSONRequest.KEY_FORMAT);
+			requestObject.remove(JSONRequest.KEY_EXPLAIN);
+			requestObject.remove(JSONRequest.KEY_CACHE);
 		} catch (Exception e) {
 			return extendErrorResult(requestObject, e);
 		}

@@ -181,8 +181,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		ResultSet rs = null;
 
-		boolean noCache = true;
-
 		if (unknowType) {
 			Statement statement = getStatement(config);
 			rs = execute(statement, sql);
@@ -229,9 +227,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			case GET:
 			case GETS:
-				noCache = config.isTest() || config.isExplain(); // TODO explain 照样 cache，但下面的 noCache 涉及的地方要改改，尤其是 JOIN
-
-				result = noCache ? null : getCacheItem(sql, position, config.getCache());
+				result = getCacheItem(sql, position, config.getCache());
 				Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
 				if (result != null) {
 					cachedSQLCount ++;
@@ -282,7 +278,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				// }
 
 				// bugfix-修复非常规数据库字段，获取表名失败导致输出异常
-				if (noCache == false && hasJoin && viceColumnStart > length) {
+				if (config.isExplain() == false && hasJoin && viceColumnStart > length) {
 					List<String> column = config.getColumn();
 
 					if (column != null && column.isEmpty() == false) {
@@ -293,7 +289,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 				}
 
-				item = onPutColumn(config, rs, rsmd, index, item, i, noCache == false && hasJoin && i >= viceColumnStart ? childMap : null);
+				item = onPutColumn(config, rs, rsmd, index, item, i, config.isExplain() == false && hasJoin && i >= viceColumnStart ? childMap : null);
 			}
 
 			resultList = onPutTable(config, rs, rsmd, resultList, index, item);
@@ -321,19 +317,17 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		if (noCache == false) {
-			//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
-			Set<Entry<String, JSONObject>> set = childMap.entrySet();
+		//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
+		Set<Entry<String, JSONObject>> set = childMap.entrySet();
 
-			//<sql, Table>
-			for (Entry<String, JSONObject> entry : set) {
-				List<JSONObject> l = new ArrayList<>();
-				l.add(entry.getValue());
-				putCache(entry.getKey(), l, JSONRequest.CACHE_ROM);
-			}
-
-			putCache(sql, resultList, config.getCache());
+		//<sql, Table>
+		for (Entry<String, JSONObject> entry : set) {
+			List<JSONObject> l = new ArrayList<>();
+			l.add(entry.getValue());
+			putCache(entry.getKey(), l, JSONRequest.CACHE_ROM);
 		}
+
+		putCache(sql, resultList, config.getCache());
 		Log.i(TAG, ">>> select  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
 		long endTime = System.currentTimeMillis();

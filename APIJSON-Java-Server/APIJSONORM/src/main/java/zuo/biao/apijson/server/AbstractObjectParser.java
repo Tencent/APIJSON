@@ -321,6 +321,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				if (sqlRequest.get(JSONRequest.KEY_SCHEMA) == null && parser.getGlobleSchema() != null) {
 					sqlRequest.put(JSONRequest.KEY_SCHEMA, parser.getGlobleSchema());
 				}
+				if (sqlRequest.get(JSONRequest.KEY_EXPLAIN) == null && parser.getGlobleExplain() != null) {
+					sqlRequest.put(JSONRequest.KEY_EXPLAIN, parser.getGlobleExplain());
+				}
+				if (sqlRequest.get(JSONRequest.KEY_CACHE) == null && parser.getGlobleCache() != null) {
+					sqlRequest.put(JSONRequest.KEY_CACHE, parser.getGlobleCache());
+				}
 			}
 		}
 

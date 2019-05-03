@@ -128,9 +128,11 @@ public interface Parser<T> {
 	Verifier<T> getVerifier();
 	
 	
+	Boolean getGlobleFormat();
 	RequestRole getGlobleRole();
 	String getGlobleDatabase();
 	String getGlobleSchema();
-	Boolean getGlobleFormat();
+	Boolean getGlobleExplain();
+	String getGlobleCache();
 
 }
