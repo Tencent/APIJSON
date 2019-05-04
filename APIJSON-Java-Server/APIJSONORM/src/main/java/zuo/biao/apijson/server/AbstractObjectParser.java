@@ -41,6 +41,7 @@ import zuo.biao.apijson.Log;
 import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.RemoteFunction.FunctionBean;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotExistException;
 
@@ -743,9 +744,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	public void parseFunction(JSONObject json, String key, String value) throws Exception {
 		Object result;
-		if (key.startsWith("@")) {
+		if (key.startsWith("@")) { //TODO 以后这种小众功能从 ORM 移出，作为一个 plugin/APIJSONProcedure
+			FunctionBean fb = RemoteFunction.parseFunction(value, json, true);
+			
 			SQLConfig config = newSQLConfig(true);
-			config.setProcedure(value);
+			config.setProcedure(fb.toFunctionCallString(true));
 
 			SQLExecutor executor = null;
 			try {
@@ -753,6 +756,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				result = executor.execute(config, true);
 			}
 			catch (NotExistException e) {
+				e.printStackTrace();
 				return;
 			}
 		}
