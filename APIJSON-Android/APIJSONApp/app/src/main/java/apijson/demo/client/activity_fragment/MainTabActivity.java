@@ -14,14 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.client.activity_fragment;
 
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.library.base.BaseBroadcastReceiver;
-import zuo.biao.library.interfaces.OnBottomDragListener;
-import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
-import zuo.biao.library.ui.EditTextInfoWindow;
-import zuo.biao.library.util.Log;
-import zuo.biao.library.util.SettingUtil;
-import zuo.biao.library.util.StringUtil;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,6 +23,7 @@ import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
 import apijson.demo.client.R;
 import apijson.demo.client.application.APIJSONApplication;
 import apijson.demo.client.base.BaseBottomTabActivity;
@@ -38,6 +31,15 @@ import apijson.demo.client.interfaces.TopBarMenuCallback;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.ActionUtil;
 import apijson.demo.client.util.HttpRequest;
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
+import zuo.biao.library.base.BaseBroadcastReceiver;
+import zuo.biao.library.interfaces.OnBottomDragListener;
+import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
+import zuo.biao.library.ui.EditTextInfoWindow;
+import zuo.biao.library.util.Log;
+import zuo.biao.library.util.SettingUtil;
+import zuo.biao.library.util.StringUtil;
 
 /**应用主页
  * @author Lemon
@@ -77,14 +79,32 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 		initEvent();
 		//功能归类分区方法，必须调用>>>>>>>>>>
 
-		
+
 		BaseBroadcastReceiver.register(context, receiver
 				, new String[]{ACTION_EXIT_APP, ActionUtil.ACTION_RELOAD_CURRENT_USER});
 
-		
+
 		if (SettingUtil.isOnTestMode) {
 			showShortToast("测试服务器\n" + HttpRequest.URL_BASE);
 		}
+
+
+		HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseJava.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+			@Override
+			public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+				TestRequestAndResponseJava.response(resultJson);
+			}
+		});
+
+
+		HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+			@Override
+			public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+				TestRequestAndResponseKt.response(resultJson);
+			}
+		});
+
+
 	}
 
 
@@ -156,7 +176,7 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 			llMainTabRightContainer.addView(right);
 		}
 
-		
+
 		verifyLogin();
 	}
 
@@ -180,12 +200,12 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 	@Override
 	public void initData() {// 必须调用
 		super.initData();
-		
+
 		if (isCurrentUserCorrect() == false) {
 			reloadAll();
 		}
 	}
-	
+
 
 	@Override
 	protected void reloadAll() {
@@ -232,7 +252,7 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 	public void onDragBottom(boolean rightToLeft) {
 		if (fragments[currentPosition] instanceof OnBottomDragListener) {
 			((OnBottomDragListener) fragments[currentPosition]).onDragBottom(rightToLeft);
-		}		
+		}
 	}
 
 
@@ -299,9 +319,9 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 				finish();
 				return;
 			}
-			
+
 			if (ActionUtil.ACTION_RELOAD_CURRENT_USER.equals(action)) {
-				reloadAll();// fragmentManager show remove等都会崩溃		
+				reloadAll();// fragmentManager show remove等都会崩溃
 			}
 		}
 	};
