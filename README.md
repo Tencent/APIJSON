@@ -208,6 +208,7 @@ APIJSON是一种为API而生的JSON网络传输协议。<br />
 
 [3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
+[APIJSON 自动化接口和文档的快速开发神器 （一）](https://blog.csdn.net/qq_41829492/article/details/88670940)
 
 ### 其它项目
 [APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具，自动生成文档与注释、自动生成代码、自动化回归测试、自动静态检查等
