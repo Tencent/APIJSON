@@ -86,24 +86,24 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 
 		if (SettingUtil.isOnTestMode) {
 			showShortToast("测试服务器\n" + HttpRequest.URL_BASE);
+
+			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseJava.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+				@Override
+				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+					TestRequestAndResponseJava.response(resultJson);
+					TestRequestAndResponseJava.smartResponse(resultJson);
+				}
+			});
+
+
+			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+				@Override
+				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+					TestRequestAndResponseKt.response(resultJson);
+					TestRequestAndResponseKt.smartResponse(resultJson);
+				}
+			});
 		}
-
-
-		HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseJava.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
-			@Override
-			public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-				TestRequestAndResponseJava.response(resultJson);
-			}
-		});
-
-
-		HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
-			@Override
-			public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-				TestRequestAndResponseKt.response(resultJson);
-			}
-		});
-
 
 	}
 
@@ -145,14 +145,14 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 	@Override
 	protected Fragment getFragment(int position) {
 		switch (position) {
-		case 1:
-			UserListFragment fragment = UserListFragment.createInstance();
-			fragment.setSearchType(EditTextInfoWindow.TYPE_NAME);
-			return fragment;
-		case 2:
-			return MineFragment.createInstance();
-		default:
-			return MomentListFragment.createInstance();
+			case 1:
+				UserListFragment fragment = UserListFragment.createInstance();
+				fragment.setSearchType(EditTextInfoWindow.TYPE_NAME);
+				return fragment;
+			case 2:
+				return MineFragment.createInstance();
+			default:
+				return MomentListFragment.createInstance();
 		}
 	}
 
@@ -221,8 +221,8 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 					@Override
 					public void run() {
 						sendBroadcast(new Intent(ActionUtil.ACTION_USER_CHANGED)
-						.putExtra(INTENT_ID, APIJSONApplication.getInstance().getCurrentUserId())
-						.putExtra(ActionUtil.INTENT_USER, APIJSONApplication.getInstance().getCurrentUser()));
+								.putExtra(INTENT_ID, APIJSONApplication.getInstance().getCurrentUserId())
+								.putExtra(ActionUtil.INTENT_USER, APIJSONApplication.getInstance().getCurrentUser()));
 					}
 				});
 			}
@@ -263,15 +263,15 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		switch(keyCode){
-		case KeyEvent.KEYCODE_BACK:
-			long secondTime = System.currentTimeMillis();
-			if(secondTime - firstTime > 2000){
-				showShortToast("再按一次退出");
-				firstTime = secondTime;
-			} else {//完全退出
-				sendBroadcast(new Intent(ACTION_EXIT_APP));
-			}
-			return true;
+			case KeyEvent.KEYCODE_BACK:
+				long secondTime = System.currentTimeMillis();
+				if(secondTime - firstTime > 2000){
+					showShortToast("再按一次退出");
+					firstTime = secondTime;
+				} else {//完全退出
+					sendBroadcast(new Intent(ACTION_EXIT_APP));
+				}
+				return true;
 		}
 
 		return super.onKeyUp(keyCode, event);
