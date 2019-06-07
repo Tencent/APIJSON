@@ -49,17 +49,30 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 	static {
 		try { //加载驱动程序
-			Class.forName("com.mysql.jdbc.Driver");
-			Log.d(TAG, "成功加载 MySQL 驱动！");
+			Log.d(TAG, "尝试加载 MySQL 8 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Log.d(TAG, "成功加载 MySQL 8 驱动！>>>>>>>>>>>>>>>>>>>>>");
 		} catch (ClassNotFoundException e) {
+			Log.e(TAG, "加载 MySQL 8 驱动失败，请检查 pom.xml 中 mysql-connector-java 版本是否存在以及可用 ！！！");
 			e.printStackTrace();
+
+			try { //加载驱动程序
+				Log.d(TAG, "尝试加载 MySQL 7 及以下版本的 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+				Class.forName("com.mysql.jdbc.Driver");
+				Log.d(TAG, "成功加载 MySQL 7 及以下版本的 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+			} catch (ClassNotFoundException e2) {
+				Log.e(TAG, "加载 MySQL 7 及以下版本的 驱动失败，请检查 pom.xml 中 mysql-connector-java 版本是否存在以及可用 ！！！");
+				e2.printStackTrace();
+			}
 		}
 
 		try { //加载驱动程序
+			Log.d(TAG, "尝试加载 PostgresSQL 驱动 <<<<<<<<<<<<<<<<<<<<< ");
 			Class.forName("org.postgresql.Driver");
-			Log.d(TAG, "成功加载 PostgresSQL 驱动！");
+			Log.d(TAG, "成功加载 PostgresSQL 驱动！>>>>>>>>>>>>>>>>>>>>> ");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+			Log.e(TAG, "加载 PostgresSQL 驱动失败，请检查 libs 目录中 postgresql.jar 版本是否存在以及可用 ！！！");
 		}
 	}
 
@@ -95,8 +108,23 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
 			}
 			else {
-				connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
-						+ config.getDBAccount() + "&password=" + config.getDBPassword());
+				int v;
+				try {
+					String[] vs = config.getDBVersion().split("[.]");
+					v = Integer.parseInt(vs[0]);
+				} catch (Exception e) {
+					v = 1;
+					Log.e(TAG, "getStatement  try { String[] vs = config.getDBVersion().split([.]); ... >> } catch (Exception e) {\n" + e.getMessage());
+				}
+				
+				if (v >= 8) {
+					connection = DriverManager.getConnection(config.getDBUri() + "?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
+							+ config.getDBAccount() + "&password=" + config.getDBPassword());
+				}
+				else {
+					connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
+							+ config.getDBAccount() + "&password=" + config.getDBPassword());
+				}
 			}
 			connectionMap.put(config.getDatabase(), connection);
 		}

@@ -44,6 +44,12 @@ public interface SQLConfig {
 	String getUserIdKey();
 	
 	
+	/**获取数据库版本号，可通过判断版本号解决一些 JDBC 驱动连接数据库的兼容问题
+	 * MYSQL: 8.0, 5.7, 5.6 等； PostgreSQL: 11, 10, 9.6 等
+	 * @return
+	 */
+	String getDBVersion();
+	
 	/**获取数据库地址
 	 * @return
 	 */

@@ -40,7 +40,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	
 	static {
-		//默认模式名
+		//TODO 默认模式名，改成你自己的
 		DEFAULT_SCHEMA = "sys";
 		
 		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -78,6 +78,11 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	//		return db == null ? DATABASE_POSTGRESQL : db;
 	//	}
 
+	@Override
+	public String getDBVersion() {
+		return "5.7.22"; //"8.0.11"; //MYSQL 8 和 7 使用的 JDBC 配置不一样
+	}
+	
 	@Override
 	public String getDBUri() {
 		//TODO 改成你自己的，TiDB 默认端口为 4000
