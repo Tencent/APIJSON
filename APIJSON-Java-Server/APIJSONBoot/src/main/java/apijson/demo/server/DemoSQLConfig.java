@@ -80,7 +80,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	@Override
 	public String getDBVersion() {
-		return "5.7.22"; //"8.0.11"; //MYSQL 8 和 7 使用的 JDBC 配置不一样
+		return "5.7.22"; //"8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
 	}
 	
 	@Override
