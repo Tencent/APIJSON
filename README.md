@@ -140,6 +140,10 @@ APIJSON是一种为API而生的 JSON网络传输协议 以及 基于这套协议
   <a href="http://www.aipaipai-inc.com"><img src="http://www.aipaipai-inc.com/uploadfile/upload/2019042913403029.png" height="90"></a>
   <a href="https://www.51it.wang"><img src="https://www.51it.wang/usr/uploads/2019/02/2420857313.png" height="90"></a>
 </div>
+  <a href="https://www.shulian8.com"><img src="https://bookstore-prod.oss-cn-hangzhou.aliyuncs.com/%E5%90%8E%E5%8F%B0%E9%A1%B5%E9%9D%A2_03.png" height="90"></a>
+</div>
+  <a href="http://www.hec-bang.com"><img src="http://www.hec-bang.com/assets/images/logo-200x50.png" height="90"></a>
+</div>
 <br />
 
 [您在使用APIJSON吗？](https://github.com/TommyLemon/APIJSON/issues/73)
@@ -189,7 +193,7 @@ APIJSON是一种为API而生的 JSON网络传输协议 以及 基于这套协议
 自开群以来，还是有很多的朋友提出了很多问题，我也解决了很多问题，其中有大半问题是本库的Bug导致，也有些是使用者项目本
 身的环境问题，这花费了我大量的时间，经过我的观察和测试，到目前为止，本库的bug已经越来越少，当然不能说完全没有，但是
 已经能满足很大部分项目的需求。所以从现在起，我做出一个决定：把之前的讨论群改成解决群，并开启付费入群功能，专为解决大
-家在使用本库时遇到的问题，不管是本库bug还是，特殊的项目环境导致（包含项目本身的bug）。
+家在使用本库时遇到的问题，不管是本库bug还是特殊的项目环境导致（包含项目本身的bug）。
 我也有自己的工作和娱乐时间，只有大家理解和支持我，我才能专心的为大家解决问题。不过也不用担心，我已经建立了另一个可以免费
 进入的QQ讨论群。
 
