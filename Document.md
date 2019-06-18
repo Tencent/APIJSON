@@ -1,5 +1,5 @@
 # APIJSON通用文档 
-后端开发者可以先看这个详细的 [图文入门教程](https://github.com/TommyLemon/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md)
+后端开发者可以先看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc)
 
 * ### [1.示例](#1)
 * ### [2.对比传统方式](#2)
