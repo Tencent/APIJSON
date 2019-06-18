@@ -219,7 +219,7 @@ APIJSON是一种为API而生的 JSON网络传输协议 以及 基于这套协议
 ### 其它项目
 [APIJSONAuto](https://github.com/TommyLemon/APIJSONAuto) 自动化接口管理工具，自动生成文档与注释、自动生成代码、自动化回归测试、自动静态检查等
 
-[apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 官方文档工具，提供排版清晰、搜索方便的文档内容展示
+[apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 文档工具，提供排版清晰、搜索方便的文档内容展示
 
 [APIJSON.NET](https://github.com/liaozb/APIJSON.NET) C# 版 APIJSON ，支持 MySQL, PostgreSQL, MS SQL Server, Oracle, SQLite
 
