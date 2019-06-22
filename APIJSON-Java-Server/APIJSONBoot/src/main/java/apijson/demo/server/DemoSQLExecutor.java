@@ -122,7 +122,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 							+ config.getDBAccount() + "&password=" + config.getDBPassword());
 				}
 				else {
-					connection = DriverManager.getConnection(config.getDBUri() + "?useUnicode=true&characterEncoding=UTF-8&user="
+					connection = DriverManager.getConnection(config.getDBUri() + "?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
 							+ config.getDBAccount() + "&password=" + config.getDBPassword());
 				}
 			}
