@@ -1,23 +1,8 @@
 .DS_Store
-APIJSON-Android/APIJSON-ADT/APIJSONApp/APIJSONApp/bin
-APIJSON-Android/APIJSON-ADT/APIJSONApp/APIJSONApp/gen
-APIJSON-Android/APIJSON-ADT/APIJSONApp/QRCodeLibrary/bin
-APIJSON-Android/APIJSON-ADT/APIJSONApp/QRCodeLibrary/gen
-APIJSON-Android/APIJSON-ADT/APIJSONApp/ZBLibrary/bin
-APIJSON-Android/APIJSON-ADT/APIJSONApp/ZBLibrary/gen
-APIJSON-Android/APIJSON-ADT/APIJSONLibrary/bin
-APIJSON-Android/APIJSON-ADT/APIJSONLibrary/gen
-APIJSON-Android/APIJSON-ADT/APIJSONTest/bin
-APIJSON-Android/APIJSON-ADT/APIJSONTest/gen
-APIJSON-Android/APIJSON-AndroidStudio/APIJSONApp/.idea
-APIJSON-JavaScript/.idea
+.idea
+.gradle
+.settings
 
-APIJSON-JavaScript/APIJSON-JS-Vue/yarn.lock
-APIJSON-Java-Server/APIJSONDemo/.settings
-APIJSON-Java-Server/APIJSONLibrary/.settings
+yarn.lock
 *.classpath
 *.project
-APIJSON-Java-Server/APIJSONDemo_oracle/.settings
-APIJSON-Java-Server/APIJSONBoot/.settings
-APIJSON-Java-Server/APIJSONORM/.settings
-APIJSON-Java-Server/APIJSONBootOracle/.settings
