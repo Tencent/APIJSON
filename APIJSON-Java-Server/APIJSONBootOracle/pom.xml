@@ -15,7 +15,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.4.1.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
 	<properties>
@@ -32,17 +32,17 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ojdbc6</groupId>
-			<artifactId>ojdbc6</artifactId>
-			<version>1.0</version>
+			<groupId>com.oracle.jdbc</groupId>
+			<artifactId>com.springsource.oracle.jdbc</artifactId>
+			<version>10.2.0.2</version>
 		</dependency>
 
 
-		<!--<dependency>-->
-			<!--<groupId>mysql</groupId>-->
-			<!--<artifactId>mysql-connector-java</artifactId>-->
-			<!--<version>5.1.40</version>-->
-		<!--</dependency>-->
+		<!--<dependency> -->
+		<!--<groupId>mysql</groupId> -->
+		<!--<artifactId>mysql-connector-java</artifactId> -->
+		<!--<version>5.1.40</version> -->
+		<!--</dependency> -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -88,12 +88,23 @@
 		<repository>
 			<id>spring-snapshots</id>
 			<url>http://repo.spring.io/snapshot</url>
-			<snapshots><enabled>true</enabled></snapshots>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>spring-milestones</id>
 			<url>http://repo.spring.io/milestone</url>
-			<snapshots><enabled>true</enabled></snapshots>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-libs-release</id>
+			<url>https://repo.spring.io/libs-release</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 	<pluginRepositories>
@@ -102,8 +113,12 @@
 			<url>http://repo.spring.io/snapshot</url>
 		</pluginRepository>
 		<pluginRepository>
-			<id>spring-milestones</id>
+			<id>spring-libs-release</id>
 			<url>http://repo.spring.io/milestone</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>spring-milestones</id>
+			<url>https://repo.spring.io/libs-release</url>
 		</pluginRepository>
 	</pluginRepositories>
 
