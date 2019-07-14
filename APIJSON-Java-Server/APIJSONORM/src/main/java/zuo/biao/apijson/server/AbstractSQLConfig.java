@@ -2492,21 +2492,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 
-		String name;
+		String table;
 		String alias;
 		for (Join j : joinList) {
-			name = j.getName();
+			table = j.getTable();
 			alias = j.getAlias();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
-			SQLConfig joinConfig = newSQLConfig(method, name, alias, j.getTable(), null, false, callback);
-			SQLConfig cacheConfig = newSQLConfig(method, name, alias, j.getTable(), null, false, callback).setCount(1);
+			SQLConfig joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
+			SQLConfig cacheConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback).setCount(1);
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
 				if (joinConfig.getDatabase() == null) {
 					joinConfig.setDatabase(config.getDatabase()); //解决主表 JOIN 副表，引号不一致
 				}
 				else if (joinConfig.getDatabase().equals(config.getDatabase()) == false) {
-					throw new IllegalArgumentException("主表 " + config.getTable() + " 的 @database:" + config.getDatabase() + " 和它 SQL JOIN 的副表 " + name + " 的 @database:" + joinConfig.getDatabase() + " 不一致！");
+					throw new IllegalArgumentException("主表 " + config.getTable() + " 的 @database:" + config.getDatabase() + " 和它 SQL JOIN 的副表 " + table + " 的 @database:" + joinConfig.getDatabase() + " 不一致！");
 				}
 				if (joinConfig.getSchema() == null) {
 					joinConfig.setSchema(config.getSchema()); //主表 JOIN 副表，默认 schema 一致
@@ -2521,7 +2521,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.isLeftOrRightJoin()) {
-					SQLConfig outterConfig = newSQLConfig(method, name, alias, j.getOutter(), null, false, callback);
+					SQLConfig outterConfig = newSQLConfig(method, table, alias, j.getOutter(), null, false, callback);
 					outterConfig.setMain(false).setKeyPrefix(true).setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 					j.setOutterConfig(outterConfig);
 				}

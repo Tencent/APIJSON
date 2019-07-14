@@ -1002,12 +1002,12 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			j.setOriginKey(key);
 			j.setOriginValue(targetPath);
 			j.setJoinType(joinType);
-			j.setName(table);
+			j.setTable(table);
 			j.setAlias(alias);
 			j.setTargetName(targetTable);
 			j.setTargetKey(targetKey);
 			j.setKeyAndType(key);
-			j.setTable(getJoinObject(table, tableObj, key));
+			j.setRequest(getJoinObject(table, tableObj, key));
 			j.setOutter((JSONObject) e.getValue());
 
 			joinList.add(j);

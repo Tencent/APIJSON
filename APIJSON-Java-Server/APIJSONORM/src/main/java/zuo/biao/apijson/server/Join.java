@@ -30,8 +30,8 @@ public class Join {
 
 	private String joinType; // "@" - APP, "&" - INNER, "|" - FULL, "!" - OUTTER, "<" - LEFT, ">" - RIGHT, "^" - SIDE, "*" - CROSS
 	private String relateType; // "" - 一对一, "{}" - 一对多, "<>" - 多对一
-	private JSONObject table; // { "id@":"/Moment/userId" }
-	private String name; //User
+	private JSONObject request; // { "id@":"/Moment/userId" }
+	private String table; //User
 	private String alias; //owner
 	private String key; //id
 	private String targetName; // Moment
@@ -76,11 +76,11 @@ public class Join {
 		this.relateType = relateType;
 	}
 
-	public String getName() {
-		return name;
+	public String getTable() {
+		return table;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setTable(String table) {
+		this.table = table;
 	}
 	public String getAlias() {
 		return alias;
@@ -88,11 +88,11 @@ public class Join {
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
-	public JSONObject getTable() {
-		return table;
+	public JSONObject getRequest() {
+		return request;
 	}
-	public void setTable(JSONObject table) {
-		this.table = table;
+	public void setRequest(JSONObject request) {
+		this.request = request;
 	}
 	public String getKey() {
 		return key;
@@ -146,7 +146,7 @@ public class Join {
 			originKey = originKey.substring(0, originKey.length() - 1);
 		}
 		else { //TODO 暂时只允许 User.id = Moment.userId 字段关联，不允许 User.id = 82001 这种
-			throw new IllegalArgumentException(joinType + "/.../" + name + "/" + originKey + " 不合法！join:'.../refKey'" + " 中 refKey 必须以 @ 结尾！");
+			throw new IllegalArgumentException(joinType + "/.../" + table + "/" + originKey + " 不合法！join:'.../refKey'" + " 中 refKey 必须以 @ 结尾！");
 		}
 
 		if (originKey.endsWith("{}")) {
