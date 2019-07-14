@@ -106,6 +106,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
 	 */
 	private RequestRole role; //发送请求的用户的角色
+	private boolean distinct = false;
 	private String database; //表所在的数据库类型
 	private String schema; //表所在的数据库名
 	private String table; //表名
@@ -214,6 +215,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return this;
 	}
 
+	@Override
+	public boolean isDistinct() {
+		return distinct;
+	}
+	@Override
+	public SQLConfig setDistinct(boolean distinct) {
+		this.distinct = distinct;
+		return this;
+	}
+	
 	@Override
 	public String getDatabase() {
 		return database;
@@ -683,7 +694,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					method = expression.substring(0, start);
-					boolean distinct = method.startsWith(PREFFIX_DISTINCT);
+					boolean distinct = i <= 0 && method.startsWith(PREFFIX_DISTINCT);
 					if (StringUtil.isName(distinct ? method.substring(PREFFIX_DISTINCT.length()) : method) == false) {
 						throw new IllegalArgumentException("字符 " + method + " 不合法！"
 								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
@@ -708,7 +719,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						origin = index < 0 ? ckeys[j] : ckeys[j].substring(0, index);
 						alias = index < 0 ? null : ckeys[j].substring(index + 1);
 						
-						distinct = origin.startsWith(PREFFIX_DISTINCT);
+						distinct = j <= 0 && origin.startsWith(PREFFIX_DISTINCT);
 						if (distinct) {
 							origin = origin.substring(PREFFIX_DISTINCT.length());
 						}
@@ -786,9 +797,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 
 			String c = StringUtil.getString(keys);
-
-			return (c.contains(":") == false ? c : c.replaceAll(":", " AS ")) + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
-
+			c = (c.contains(":") == false ? c : c.replaceAll(":", " AS ")) + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
+			return isMain() && isDistinct() ? PREFFIX_DISTINCT + c : c;
 		default:
 			throw new UnsupportedOperationException(
 					"服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(getMethod())
@@ -2071,7 +2081,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				jc = j.getJoinConfig();
 				jc.setPrepared(isPrepared());
 
-				jt = jc.getTable();
+				jt = jc.getTable();//FIXME getAlias 不能加 ``  StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
 				tn = j.getTargetName();
 
 				//如果要强制小写，则可在子类重写这个方法再 toLowerCase
@@ -2391,8 +2401,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			config.setContent(tableContent);
 		}
 
+		boolean distinct = column == null ? false : column.startsWith(PREFFIX_DISTINCT);
+		
 		List<String> cs = new ArrayList<>();
-		String[] fks = StringUtil.split(column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
+		String[] fks = StringUtil.split(distinct ? column.substring(PREFFIX_DISTINCT.length()) : column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
 		if (fks != null) {
 			String[] ks;
 			for (String fk : fks) {
@@ -2411,6 +2423,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setExplain(explain);
 		config.setCache(cache);
 		config.setFrom(from);
+		config.setDistinct(distinct);
 		config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
 		config.setWhere(tableWhere);					
 

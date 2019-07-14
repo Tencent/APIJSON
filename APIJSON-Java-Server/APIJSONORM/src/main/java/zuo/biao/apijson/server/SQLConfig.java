@@ -107,6 +107,9 @@ public interface SQLConfig {
 	RequestRole getRole();
 	SQLConfig setRole(RequestRole role);
 
+	public boolean isDistinct();
+	public SQLConfig setDistinct(boolean distinct);
+	
 	String getDatabase();
 	SQLConfig setDatabase(String database);
 
