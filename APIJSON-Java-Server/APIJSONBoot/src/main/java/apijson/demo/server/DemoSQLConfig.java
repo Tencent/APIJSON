@@ -51,20 +51,20 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		SIMPLE_CALLBACK = new SimpleCallback() {
 
 			@Override
-			public DemoSQLConfig getSQLConfig(RequestMethod method, String table) {
+			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
 			//取消注释来实现自定义各个表的主键名
 			//			@Override
-			//			public String getIdKey(String schema, String table) {
+			//			public String getIdKey(String database, String schema, String table) {
 			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...
 			//				//		return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
 			//				//		return StringUtil.toUpperCase(t) + "_ID";  // USER_ID, COMMENT_ID ...
 			//			}
 
 			@Override
-			public String getUserIdKey(String schema, String table) {
+			public String getUserIdKey(String database, String schema, String table) {
 				return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? KEY_ID : KEY_USER_ID; // id / userId
 			}
 
@@ -100,12 +100,12 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	@Override
 	public String getIdKey() {
-		return SIMPLE_CALLBACK.getIdKey(getSchema(), getTable());
+		return SIMPLE_CALLBACK.getIdKey(getDatabase(), getSchema(), getTable());
 	}
 
 	@Override
 	public String getUserIdKey() {
-		return SIMPLE_CALLBACK.getUserIdKey(getSchema(), getTable());
+		return SIMPLE_CALLBACK.getUserIdKey(getDatabase(), getSchema(), getTable());
 	}
 
 
@@ -126,13 +126,14 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	/**获取SQL配置
 	 * @param table
+	 * @param alias 
 	 * @param request
 	 * @param isProcedure 
 	 * @return
 	 * @throws Exception 
 	 */
-	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		return newSQLConfig(method, table, request, joinList, isProcedure, SIMPLE_CALLBACK);
+	public static SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
+		return newSQLConfig(method, table, alias, request, joinList, isProcedure, SIMPLE_CALLBACK);
 	}
 
 

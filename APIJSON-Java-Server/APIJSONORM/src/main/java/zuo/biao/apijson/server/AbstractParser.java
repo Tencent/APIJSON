@@ -960,7 +960,9 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 			index = path.indexOf("/");
 			String tableKey = index < 0 ? null : path.substring(0, index); //User:owner
-			String table = Pair.parseEntry(tableKey, true).getKey(); //User
+			zuo.biao.apijson.server.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
+			String table = entry.getKey(); //User
+			String alias = entry.getValue(); //owner
 			String key = StringUtil.isEmpty(table, true) ? null : path.substring(index + 1);//id@
 			if (StringUtil.isEmpty(key, true)) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
@@ -1001,6 +1003,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			j.setOriginValue(targetPath);
 			j.setJoinType(joinType);
 			j.setName(table);
+			j.setAlias(alias);
 			j.setTargetName(targetTable);
 			j.setTargetKey(targetKey);
 			j.setKeyAndType(key);

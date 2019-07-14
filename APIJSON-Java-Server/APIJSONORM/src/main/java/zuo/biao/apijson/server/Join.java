@@ -32,6 +32,7 @@ public class Join {
 	private String relateType; // "" - 一对一, "{}" - 一对多, "<>" - 多对一
 	private JSONObject table; // { "id@":"/Moment/userId" }
 	private String name; //User
+	private String alias; //owner
 	private String key; //id
 	private String targetName; // Moment
 	private String targetKey; // userId
@@ -80,6 +81,12 @@ public class Join {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getAlias() {
+		return alias;
+	}
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 	public JSONObject getTable() {
 		return table;

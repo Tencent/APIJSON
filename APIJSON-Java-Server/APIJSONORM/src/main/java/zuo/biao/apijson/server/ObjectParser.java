@@ -140,6 +140,7 @@ public interface ObjectParser {
 	boolean isTable();
 	String getPath();
 	String getTable();
+	String getAlias();
 	SQLConfig getArrayConfig();
 
 	SQLConfig getSQLConfig();

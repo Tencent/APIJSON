@@ -298,27 +298,32 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String sqlTable = getSQLTable();
 		String sch = getSQLSchema(sqlTable);
 
-		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAlias() : "");
+		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAliasWithQuote() : "");
 	}
 	@Override
 	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
 		this.table = table;
 		return this;
 	}
+	
 	@Override
 	public String getAlias() {
-		if (StringUtil.isEmpty(alias, true)) {
-			alias = getTable();
-		}
-		String q = getQuote();
-		//getTable 不能小写，因为Verifier用大小写敏感的名称判断权限		
-		//如果要强制小写，则可在子类重写这个方法再 toLowerCase  return q + (DATABASE_POSTGRESQL.equals(getDatabase()) ? alias.toLowerCase() : alias) + q;
-		return q + alias + q;
+		return alias;
 	}
 	@Override
 	public AbstractSQLConfig setAlias(String alias) {
 		this.alias = alias;
 		return this;
+	}
+	public String getAliasWithQuote() {
+		String a = getAlias();
+		if (StringUtil.isEmpty(a, true)) {
+			a = getTable();
+		}
+		String q = getQuote();
+		//getTable 不能小写，因为Verifier用大小写敏感的名称判断权限		
+		//如果要强制小写，则可在子类重写这个方法再 toLowerCase  return q + (DATABASE_POSTGRESQL.equals(getDatabase()) ? a.toLowerCase() : a) + q;
+		return q + a + q;
 	}
 
 	@Override
@@ -347,7 +352,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
-				cfg.setAlias(cfg.getTable());
+				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					cfg.setAlias(cfg.getTable());
+				}
 
 				c = ((AbstractSQLConfig) cfg).getGroupString(false);
 				if (StringUtil.isEmpty(c, true) == false) {
@@ -407,7 +414,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
-				cfg.setAlias(cfg.getTable());
+				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					cfg.setAlias(cfg.getTable());
+				}
 
 				c = ((AbstractSQLConfig) cfg).getHavingString(false);
 				if (StringUtil.isEmpty(c, true) == false) {
@@ -515,7 +524,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				cfg = j.isLeftOrRightJoin() ? j.getOutterConfig() : j.getJoinConfig();
-				cfg.setAlias(cfg.getTable());
+				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					cfg.setAlias(cfg.getTable());
+				}
 
 				c = ((AbstractSQLConfig) cfg).getOrderString(false);
 				if (StringUtil.isEmpty(c, true) == false) {
@@ -648,8 +659,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					else {
 						cfg = j.getJoinConfig();
 					}
-
-					cfg.setAlias(cfg.getTable());
+					
+					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+						cfg.setAlias(cfg.getTable());
+					}
 
 					c = ((AbstractSQLConfig) cfg).getColumnString(true);
 					if (StringUtil.isEmpty(c, true) == false) {
@@ -661,7 +674,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 
-			String tableAlias = getAlias();
+			String tableAlias = getAliasWithQuote();
 
 			//			String c = StringUtil.getString(column); //id,name;json_length(contactIdList):contactCount;...
 
@@ -1399,7 +1412,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	public String getKey(String key) {
 		String q = getQuote();
-		return (isKeyPrefix() ? getAlias() + "." : "") + q  + key + q;
+		return (isKeyPrefix() ? getAliasWithQuote() + "." : "") + q  + key + q;
 	}
 
 	/**
@@ -2001,7 +2014,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		Subquery from = config.getFrom();
 		if (from != null) {
-			table = config.getSubqueryString(from) + " AS " + config.getAlias() + " "; //TODO Comment:c 转为  AS `Comment:c`
+			table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
 		}
 
 		String condition = table + config.getJoinString() + where + (
@@ -2081,7 +2094,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				jc = j.getJoinConfig();
 				jc.setPrepared(isPrepared());
 
-				jt = jc.getTable();//FIXME getAlias 不能加 ``  StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
+				jt = StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
 				tn = j.getTargetName();
 
 				//如果要强制小写，则可在子类重写这个方法再 toLowerCase
@@ -2144,14 +2157,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList, boolean isProcedure, Callback callback) throws Exception {
+	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure, Callback callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
-		AbstractSQLConfig config = callback.getSQLConfig(method, table);
-
 		String database = request.getString(KEY_DATABASE);
 		String schema = request.getString(KEY_SCHEMA);
+
+		AbstractSQLConfig config = callback.getSQLConfig(method, database, schema, table);
+		config.setAlias(alias);
+
 		config.setDatabase(database); //不删，后面表对象还要用的，必须放在 parseJoin 前
 		config.setSchema(schema); //不删，后面表对象还要用的
 
@@ -2168,9 +2183,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return config;
 		}
 
-		String idKey = callback.getIdKey(schema, table);
+		String idKey = callback.getIdKey(database, schema, table);
 		String idInKey = idKey + "{}";
-		String userIdKey = callback.getUserIdKey(schema, table);
+		String userIdKey = callback.getUserIdKey(database, schema, table);
 		String userIdInKey = userIdKey + "{}";
 
 		Object idIn = request.get(idInKey); //可能是 id{}:">0"
@@ -2181,7 +2196,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new IllegalArgumentException("POST请求，生成多条记录请用 id{}:[] ！ [] 类型为JSONArray且不能为空！");
 				}
 			} else if (request.get(idKey) == null) {
-				request.put(idKey, callback.newId(method, table));
+				request.put(idKey, callback.newId(method, database, schema, table));
 			}
 		}
 
@@ -2478,11 +2493,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String name;
+		String alias;
 		for (Join j : joinList) {
 			name = j.getName();
+			alias = j.getAlias();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
-			SQLConfig joinConfig = newSQLConfig(method, name, j.getTable(), null, false, callback);
-			SQLConfig cacheConfig = newSQLConfig(method, name, j.getTable(), null, false, callback).setCount(1);
+			SQLConfig joinConfig = newSQLConfig(method, name, alias, j.getTable(), null, false, callback);
+			SQLConfig cacheConfig = newSQLConfig(method, name, alias, j.getTable(), null, false, callback).setCount(1);
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
 				if (joinConfig.getDatabase() == null) {
@@ -2504,7 +2521,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.isLeftOrRightJoin()) {
-					SQLConfig outterConfig = newSQLConfig(method, name, j.getOutter(), null, false, callback);
+					SQLConfig outterConfig = newSQLConfig(method, name, alias, j.getOutter(), null, false, callback);
 					outterConfig.setMain(false).setKeyPrefix(true).setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 					j.setOutterConfig(outterConfig);
 				}
@@ -2645,49 +2662,55 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static interface Callback {
 		/**获取 SQLConfig 的实例
 		 * @param method
+		 * @param database
+		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		AbstractSQLConfig getSQLConfig(RequestMethod method, String table);
+		AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
 
 
 		/**为 post 请求新建 id， 只能是 Long 或 String
 		 * @param method
+		 * @param database
+		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		Object newId(RequestMethod method, String table);
+		Object newId(RequestMethod method, String database, String schema, String table);
 
 		/**获取主键名
+		 * @param database
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		String getIdKey(String schema, String table);
+		String getIdKey(String database, String schema, String table);
 
 		/**获取 User 的主键名
+		 * @param database
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		String getUserIdKey(String schema, String table);
+		String getUserIdKey(String database, String schema, String table);
 	}
 
 	public static abstract class SimpleCallback implements Callback {
 
 
 		@Override
-		public Object newId(RequestMethod method, String table) {
+		public Object newId(RequestMethod method, String database, String schema, String table) {
 			return System.currentTimeMillis();
 		}
 
 		@Override
-		public String getIdKey(String schema, String table) {
+		public String getIdKey(String database, String schema, String table) {
 			return KEY_ID;
 		}
 
 		@Override
-		public String getUserIdKey(String schema, String table) {
+		public String getUserIdKey(String database, String schema, String table) {
 			return KEY_USER_ID;
 		}
 

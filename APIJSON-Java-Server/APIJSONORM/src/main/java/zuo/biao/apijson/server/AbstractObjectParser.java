@@ -70,6 +70,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	protected final boolean isTable;
 	protected final String path;
 	protected final String table;
+	protected final String alias;
 
 
 	protected final boolean tri;
@@ -97,7 +98,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		this.type = arrayConfig == null ? 0 : arrayConfig.getType();
 		this.joinList = arrayConfig == null ? null : arrayConfig.getJoinList();
 		this.path = AbstractParser.getAbsPath(parentPath, name);
-		this.table = Pair.parseEntry(name, true).getKey();
+		
+		zuo.biao.apijson.server.Entry<String, String> entry = Pair.parseEntry(name, true);
+		this.table = entry.getKey();
+		this.alias = entry.getValue();
 		this.isTable = zuo.biao.apijson.JSONObject.isTableKey(table);
 
 		this.objectCount = 0;
@@ -882,6 +886,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	@Override
 	public String getTable() {
 		return table;
+	}
+	@Override
+	public String getAlias() {
+		return alias;
 	}
 	@Override
 	public SQLConfig getArrayConfig() {
