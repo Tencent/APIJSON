@@ -72,6 +72,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private static final String TAG = "AbstractSQLConfig";
 
 	public static String DEFAULT_SCHEMA = "sys";
+	public static String PREFFIX_DISTINCT = "DISTINCT ";
 
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -682,8 +683,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					method = expression.substring(0, start);
-
-					if (StringUtil.isName(method) == false) {
+					boolean distinct = method.startsWith(PREFFIX_DISTINCT);
+					if (StringUtil.isName(distinct ? method.substring(PREFFIX_DISTINCT.length()) : method) == false) {
 						throw new IllegalArgumentException("字符 " + method + " 不合法！"
 								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 								+ " 中SQL函数名 function 必须符合正则表达式 ^[0-9a-zA-Z_]+$ ！");
@@ -698,26 +699,34 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				//			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				if (ckeys != null && ckeys.length > 0) {
 
+					boolean distinct;
 					String origin;
 					String alias;
 					int index;
 					for (int j = 0; j < ckeys.length; j++) {
-						index = ckeys[j].lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
+						index = isColumn ? ckeys[j].lastIndexOf(":") : -1; //StringUtil.split返回数组中，子项不会有null
 						origin = index < 0 ? ckeys[j] : ckeys[j].substring(0, index);
 						alias = index < 0 ? null : ckeys[j].substring(index + 1);
+						
+						distinct = origin.startsWith(PREFFIX_DISTINCT);
+						if (distinct) {
+							origin = origin.substring(PREFFIX_DISTINCT.length());
+						}
 
 						if (isPrepared()) {
 							if (isColumn) {
 								if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
-									throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
-											+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
+									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
+											+ "预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+											+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！"
+											+ "DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
 								}
 							}
 							else {
-								if ((StringUtil.isName(ckeys[j]) == false || ckeys[j].startsWith("_"))) {
+								if ((StringUtil.isName(origin) == false || origin.startsWith("_"))) {
 									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
 											+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-											+ " 中所有 arg 都必须是1个不以 _ 开头的单词！并且不要有空格！");
+											+ " 中所有 arg 都必须是1个不以 _ 开头的单词！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
 								}
 							}
 						}
@@ -734,6 +743,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							}
 						} else {
 							ckeys[j] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
+						}
+						
+						if (distinct) {
+							ckeys[j] = PREFFIX_DISTINCT + ckeys[j];
 						}
 					}
 					//				}
