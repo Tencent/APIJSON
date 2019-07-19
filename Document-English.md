@@ -3,7 +3,7 @@
   APIJSON
 </h1>
 
-<p align="center">🏆Gitee Most Valuable Project<br />🚀A JSON Transmission Protocol and an ORM Library for auto providing APIs and Documents.</p>
+<p align="center">🏆Gitee Most Valuable Project<br />🚀A JSON Transmission Protocol and an ORM Library for providing APIs and Documents automatically.</p>
 
 
 <p align="center" >
@@ -25,9 +25,8 @@
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
-  <a href="https://github.com/TommyLemon/APIJSON">中文版</a>
-  <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document-English.md">Document</a>
-  <a href="http://i.youku.com/apijson">Video</a>
+  <a href="https://github.com/TommyLemon/APIJSON">Chinese&nbsp;             </a>
+  <a href="http://i.youku.com/apijson">Video&nbsp;             </a>
   <a href="http://apijson.org">Test</a>
 </p>
 
@@ -64,17 +63,17 @@
 
 ## <h2 id="1">1.About<h2/>
 
-APIJSON is a JSON Transmission Structure Protocol.
+APIJSON is a JSON based application that largely simplify the process of back-end API development. It allows front-end users to get data with self-defined form.
 
-You can set any JSON structure and request your server, and the server will response a JSON with the structure you had set.<br />
-You can get any data by requesting server just once. It's very convenient and flexible, and does not require a special api or multiple requests.<br />
-It provides CRUD(read and write), Fuzzy Search, Remote Function Calls, Rights Management and so on. And you can save duplicate data and improve transmission speed as well!<br />
+### Features:
 
-Now you can realize JSON Transmissions without any api or document anymore!<br />
-Client developers will no longer be suffered from various error in documents, and don't have to communicate with server developers about apis or documents anymore!<br />
-And server developers no longer have to write new apis and documents for compatibility with legacy apps! And they will no longer be endlessly disturbed by client developers at any time!
+You can set any JSON structure and send a request to your server, and the server will respond JSON codes with the structure you just set.<br />
+You can get different types of data by making just one request to the server. It's very convenient and flexible, and dosen't require different APIs with multiple requests.<br />
+It provides CRUD(read and write), Fuzzy Search, Remote Function Calls，etc. You can save duplicate data and improve data transmission speed as well!<br />
 
-
+APIJSON enables server developers to realize JSON transmissions without most api design or document writing anymore!<br />
+Client developers will no longer be suffered from various errors in documents, and don't have to communicate with server developers about APIs or documents anymore!<br />
+Server developers no longer need to worry about compatibility of APIs and documents with legacy apps! APIJSON thus helps developers reducing time in developing APIs.
 
 <br />
 
