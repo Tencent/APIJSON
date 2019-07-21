@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import static apijson.demo.server.Controller.ACCESS_;
+
 import java.rmi.ServerException;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +44,7 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 	private static final String TAG = "DemoVerifier";
 
 
-	//	由底部 init 方法读取数据库 Access 表来替代手动输入配置
+	//	由 init 方法读取数据库 Access 表来替代手动输入配置
 	//	// <TableName, <METHOD, allowRoles>>
 	//	// <User, <GET, [OWNER, ADMIN]>>
 	//	static { //注册权限
@@ -55,9 +57,18 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 	//	}
 
 	/**初始化，加载所有权限配置
+	 * @return 
 	 * @throws ServerException
 	 */
-	public static void init() throws ServerException {
+	public static JSONObject init() throws ServerException {
+		return init(false);
+	}
+	/**初始化，加载所有权限配置
+	 * @param shutdownWhenServerError 
+	 * @return 
+	 * @throws ServerException
+	 */
+	public static JSONObject init(boolean shutdownWhenServerError) throws ServerException {
 		JSONRequest request = new JSONRequest();
 
 		{   //Access[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -65,19 +76,20 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 
 			{   //Access<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				JSONRequest access = new JSONRequest();
-				accessItem.put("Access", access);
+				accessItem.put(ACCESS_, access);
 			}   //Access>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-			request.putAll(accessItem.toArray(0, 0, "Access"));
+			request.putAll(accessItem.toArray(0, 0, ACCESS_));
 		}   //Access[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+		
 		JSONObject response = new DemoParser(RequestMethod.GET, true).parseResponse(request);
 		if (JSONResponse.isSuccess(response) == false) {
 			Log.e(TAG, "\n\n\n\n\n !!!! 查询权限配置异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
-			throw new ServerException("查询权限配置异常 !");
+			onServerError("查询权限配置异常 !", shutdownWhenServerError);
 		}
 
-		JSONArray list = response.getJSONArray("Access[]");
+		JSONArray list = response.getJSONArray(ACCESS_ + "[]");
 		if (list == null || list.isEmpty()) {
 			Log.w(TAG, "init list == null || list.isEmpty()，没有可用的权限配置");
 			throw new NullPointerException("没有可用的权限配置");
@@ -85,6 +97,8 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 
 		Log.d(TAG, "init < for ACCESS_MAP.size() = " + ACCESS_MAP.size() + " <<<<<<<<<<<<<<<<<<<<<<<<");
 		
+		ACCESS_MAP.clear();
+
 		JSONObject item;
 		for (int i = 0; i < list.size(); i++) {
 			item = list.getJSONObject(i);
@@ -101,17 +115,53 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 			map.put(RequestMethod.PUT, JSON.parseObject(item.getString("put"), RequestRole[].class));
 			map.put(RequestMethod.DELETE, JSON.parseObject(item.getString("delete"), RequestRole[].class));
 
+			String name = item.getString("name");
 			String alias = item.getString("alias");
-			ACCESS_MAP.put(StringUtil.isEmpty(alias, true) ? item.getString("name") : alias, map);
+			
+			/**TODO 
+			 * 以下判断写得比较复杂，因为表设计不够好，但为了兼容旧版 APIJSON 服务 和 APIAuto 工具而保留了下来。
+			 * 如果是 name 为接口传参的 表对象 的 key，对应一个可缺省的 tableName，判断就会简单不少。
+			 */
+			
+			if (StringUtil.isEmpty(name, true)) {
+				onServerError("字段 name 的值不能为空！", shutdownWhenServerError);
+			}
+			
+			if (StringUtil.isEmpty(alias, true)) {
+				if (JSONRequest.isTableKey(name) == false) {
+					onServerError("name: " + name + "不合法！字段 alias 的值为空时，name 必须为合法表名！", shutdownWhenServerError);
+				}
+				
+				ACCESS_MAP.put(name, map);
+			}
+			else {
+				if (JSONRequest.isTableKey(alias) == false) {
+					onServerError("alias: " + alias + "不合法！字段 alias 的值只能为 空 或者 合法表名！", shutdownWhenServerError);
+				}
+				
+				ACCESS_MAP.put(alias, map);
+			}
+			
 		}
-		
+
 		Log.d(TAG, "init  for /> ACCESS_MAP.size() = " + ACCESS_MAP.size() + " >>>>>>>>>>>>>>>>>>>>>>>");
 
+		return response;
 	}
 
-	
-	
-	
+
+	private static void onServerError(String msg, boolean shutdown) throws ServerException {
+		Log.e(TAG, "\n权限配置文档测试未通过！\n请修改 Access 表里的记录！\n保证前端看到的权限配置文档是正确的！！！\n\n原因：\n" + msg);
+
+		if (shutdown) {
+			System.exit(1);	
+		} else {
+			throw new ServerException(msg);
+		}
+	}
+
+
+
 	@NotNull
 	@Override
 	public DemoParser createParser() {

@@ -51,6 +51,9 @@ import zuo.biao.apijson.server.exception.ConditionErrorException;
 import zuo.biao.apijson.server.exception.ConflictException;
 import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.exception.OutOfRangeException;
+import zuo.biao.apijson.server.model.Access;
+import zuo.biao.apijson.server.model.Function;
+import zuo.biao.apijson.server.model.Request;
 
 
 /**request controller
@@ -190,50 +193,22 @@ public class Controller {
 
 
 
-	/**生成验证码,修改为post请求
-	 * @param request
-	 * @return
-	 */
-	@PostMapping("reload/access")
-	public JSONObject reloadAccess(@RequestBody String request) {
-		JSONObject requestObject = null;
-		String phone;
-		String verify;
-		try {
-			requestObject = DemoParser.parseRequest(request);
-			phone = requestObject.getString(PHONE);
-			verify = requestObject.getString(VERIFY);
-		} catch (Exception e) {
-			return DemoParser.extendErrorResult(requestObject, e);
-		}
-		
-		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD_ACCESS, phone, verify));
-		response = response.getJSONResponse(VERIFY_);
-		if (JSONResponse.isExist(response) == false) {
-			return DemoParser.extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
-		}
-
-		try {
-			DemoVerifier.init();
-		} catch (ServerException e) {
-			e.printStackTrace();
-			return DemoParser.extendErrorResult(requestObject, e);
-		}
-		
-		return DemoParser.newSuccessResult();
-	}
 
 
 
 
-
-
-
-
+	public static final String FUNCTION_;
+	public static final String REQUEST_;
+	public static final String ACCESS_;
+	
 	public static final String USER_;
 	public static final String PRIVACY_;
 	public static final String VERIFY_; //加下划线后缀是为了避免 Verify 和 verify 都叫VERIFY，分不清
 	static {
+		FUNCTION_ = Function.class.getSimpleName();
+		REQUEST_ = Request.class.getSimpleName();
+		ACCESS_ = Access.class.getSimpleName();
+		
 		USER_ = User.class.getSimpleName();
 		PRIVACY_ = Privacy.class.getSimpleName();
 		VERIFY_ = Verify.class.getSimpleName();
@@ -258,11 +233,84 @@ public class Controller {
 
 	public static final String TYPE = "type";
 
+	
+	
+	/**重新加载配置
+	 * @param request
+	 * @return
+	 * @see
+	 * <pre>
+		{
+			"type": "ALL",  //重载对象，ALL, FUNCTION, REQUEST, ACCESS，非必须
+			"phone": "13000082001",
+			"verify": "1234567" //验证码，对应类型为 Verify.TYPE_RELOAD
+		}
+	 * </pre>
+	 */
+	@PostMapping("reload")
+	public JSONObject reload(@RequestBody String request) {
+		JSONObject requestObject = null;
+		String type;
+		String phone;
+		String verify;
+		try {
+			requestObject = DemoParser.parseRequest(request);
+			type = requestObject.getString(TYPE);
+			phone = requestObject.getString(PHONE);
+			verify = requestObject.getString(VERIFY);
+		} catch (Exception e) {
+			return DemoParser.extendErrorResult(requestObject, e);
+		}
+		
+		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, verify));
+		response = response.getJSONResponse(VERIFY_);
+		if (JSONResponse.isExist(response) == false) {
+			return DemoParser.extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
+		}
 
+		JSONObject result = DemoParser.newSuccessResult();
+		
+		boolean reloadAll = StringUtil.isEmpty(type, true) || "ALL".equals(type);
+		
+		if (reloadAll || "FUNCTION".equals(type)) {
+			try {
+				result.put(FUNCTION_, DemoFunction.init());
+			} catch (ServerException e) {
+				e.printStackTrace();
+				result.put(FUNCTION_, DemoParser.newErrorResult(e));
+			}
+		}
+		
+		if (reloadAll || "REQUEST".equals(type)) {
+			try {
+				result.put(REQUEST_, StructureUtil.init());
+			} catch (ServerException e) {
+				e.printStackTrace();
+				result.put(REQUEST_, DemoParser.newErrorResult(e));
+			}
+		}
+		
+		if (reloadAll || "ACCESS".equals(type)) {
+			try {
+				result.put(ACCESS_, DemoVerifier.init());
+			} catch (ServerException e) {
+				e.printStackTrace();
+				result.put(ACCESS_, DemoParser.newErrorResult(e));
+			}
+		}
+		
+		return result;
+	}
 
 	/**生成验证码,修改为post请求
 	 * @param request
-	 * @return
+	 * @see
+	 * <pre>
+		{
+			"type": 0,  //类型，0,1,2,3,4，非必须
+			"phone": "13000082001"
+		}
+	 * </pre>
 	 */
 	@PostMapping("post/verify")
 	public JSONObject postVerify(@RequestBody String request) {
@@ -302,7 +350,13 @@ public class Controller {
 
 	/**获取验证码
 	 * @param request
-	 * @return
+	 * @see
+	 * <pre>
+		{
+			"type": 0,  //类型，0,1,2,3,4，非必须
+			"phone": "13000082001"
+		}
+	 * </pre>
 	 */
 	@PostMapping("gets/verify")
 	public JSONObject getVerify(@RequestBody String request) {
@@ -321,7 +375,14 @@ public class Controller {
 
 	/**校验验证码
 	 * @param request
-	 * @return
+	 * @see
+	 * <pre>
+		{
+			"type": 0,  //类型，0,1,2,3,4，非必须
+			"phone": "13000082001",
+			"verify": "123456"
+		}
+	 * </pre>
 	 */
 	@PostMapping("heads/verify")
 	public JSONObject headVerify(@RequestBody String request) {
