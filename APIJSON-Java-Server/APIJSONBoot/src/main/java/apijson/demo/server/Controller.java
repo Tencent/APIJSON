@@ -23,6 +23,7 @@ import static zuo.biao.apijson.RequestMethod.POST;
 import static zuo.biao.apijson.RequestMethod.PUT;
 
 import java.net.URLDecoder;
+import java.rmi.ServerException;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
@@ -189,6 +190,38 @@ public class Controller {
 
 
 
+	/**生成验证码,修改为post请求
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("reload/access")
+	public JSONObject reloadAccess(@RequestBody String request) {
+		JSONObject requestObject = null;
+		String phone;
+		String verify;
+		try {
+			requestObject = DemoParser.parseRequest(request);
+			phone = requestObject.getString(PHONE);
+			verify = requestObject.getString(VERIFY);
+		} catch (Exception e) {
+			return DemoParser.extendErrorResult(requestObject, e);
+		}
+		
+		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD_ACCESS, phone, verify));
+		response = response.getJSONResponse(VERIFY_);
+		if (JSONResponse.isExist(response) == false) {
+			return DemoParser.extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
+		}
+
+		try {
+			DemoVerifier.init();
+		} catch (ServerException e) {
+			e.printStackTrace();
+			return DemoParser.extendErrorResult(requestObject, e);
+		}
+		
+		return DemoParser.newSuccessResult();
+	}
 
 
 

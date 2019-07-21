@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.rmi.ServerException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,7 +54,10 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 	//		ACCESS_MAP.put(Login.class.getSimpleName(), getAccessMap(Login.class.getAnnotation(MethodAccess.class)));
 	//	}
 
-	public static void init() {
+	/**初始化，加载所有权限配置
+	 * @throws ServerException
+	 */
+	public static void init() throws ServerException {
 		JSONRequest request = new JSONRequest();
 
 		{   //Access[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -70,13 +74,13 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 		JSONObject response = new DemoParser(RequestMethod.GET, true).parseResponse(request);
 		if (JSONResponse.isSuccess(response) == false) {
 			Log.e(TAG, "\n\n\n\n\n !!!! 查询权限配置异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
-			return;
+			throw new ServerException("查询权限配置异常 !");
 		}
 
 		JSONArray list = response.getJSONArray("Access[]");
 		if (list == null || list.isEmpty()) {
 			Log.w(TAG, "init list == null || list.isEmpty()，没有可用的权限配置");
-			return;
+			throw new NullPointerException("没有可用的权限配置");
 		}
 
 		Log.d(TAG, "init < for ACCESS_MAP.size() = " + ACCESS_MAP.size() + " <<<<<<<<<<<<<<<<<<<<<<<<");
