@@ -58,6 +58,13 @@ public class APIJSONApplication {
 		}
 		System.out.println("\n完成测试:请求校验 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
+		try {
+			DemoVerifier.init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
 		System.out.println("\n\n<<<<<<<<<<<<<<<<<<<<<<<<< APIJSON已启动 >>>>>>>>>>>>>>>>>>>>>>>>\n");
 	}
 

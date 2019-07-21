@@ -14,18 +14,23 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotNull;
 
-import apijson.demo.server.model.Comment;
-import apijson.demo.server.model.Login;
-import apijson.demo.server.model.Moment;
-import apijson.demo.server.model.Privacy;
-import apijson.demo.server.model.User;
-import apijson.demo.server.model.Verify;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
-import zuo.biao.apijson.MethodAccess;
+import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.RequestRole;
+import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.AbstractVerifier;
+import zuo.biao.apijson.server.JSONRequest;
 import zuo.biao.apijson.server.Visitor;
 
 
@@ -36,18 +41,73 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 	private static final String TAG = "DemoVerifier";
 
 
-	// <TableName, <METHOD, allowRoles>>
-	// <User, <GET, [OWNER, ADMIN]>>
-	static { //注册权限
-		ACCESS_MAP.put(User.class.getSimpleName(), getAccessMap(User.class.getAnnotation(MethodAccess.class)));
-		ACCESS_MAP.put(Privacy.class.getSimpleName(), getAccessMap(Privacy.class.getAnnotation(MethodAccess.class)));
-		ACCESS_MAP.put(Moment.class.getSimpleName(), getAccessMap(Moment.class.getAnnotation(MethodAccess.class)));
-		ACCESS_MAP.put(Comment.class.getSimpleName(), getAccessMap(Comment.class.getAnnotation(MethodAccess.class)));
-		ACCESS_MAP.put(Verify.class.getSimpleName(), getAccessMap(Verify.class.getAnnotation(MethodAccess.class)));
-		ACCESS_MAP.put(Login.class.getSimpleName(), getAccessMap(Login.class.getAnnotation(MethodAccess.class)));
+	//	由底部 init 方法读取数据库 Access 表来替代手动输入配置
+	//	// <TableName, <METHOD, allowRoles>>
+	//	// <User, <GET, [OWNER, ADMIN]>>
+	//	static { //注册权限
+	//		ACCESS_MAP.put(User.class.getSimpleName(), getAccessMap(User.class.getAnnotation(MethodAccess.class)));
+	//		ACCESS_MAP.put(Privacy.class.getSimpleName(), getAccessMap(Privacy.class.getAnnotation(MethodAccess.class)));
+	//		ACCESS_MAP.put(Moment.class.getSimpleName(), getAccessMap(Moment.class.getAnnotation(MethodAccess.class)));
+	//		ACCESS_MAP.put(Comment.class.getSimpleName(), getAccessMap(Comment.class.getAnnotation(MethodAccess.class)));
+	//		ACCESS_MAP.put(Verify.class.getSimpleName(), getAccessMap(Verify.class.getAnnotation(MethodAccess.class)));
+	//		ACCESS_MAP.put(Login.class.getSimpleName(), getAccessMap(Login.class.getAnnotation(MethodAccess.class)));
+	//	}
+
+	public static void init() {
+		JSONRequest request = new JSONRequest();
+
+		{   //Access[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			JSONRequest accessItem = new JSONRequest();
+
+			{   //Access<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				JSONRequest access = new JSONRequest();
+				accessItem.put("Access", access);
+			}   //Access>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+			request.putAll(accessItem.toArray(0, 0, "Access"));
+		}   //Access[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+		JSONObject response = new DemoParser(RequestMethod.GET, true).parseResponse(request);
+		if (JSONResponse.isSuccess(response) == false) {
+			Log.e(TAG, "\n\n\n\n\n !!!! 查询权限配置异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
+			return;
+		}
+
+		JSONArray list = response.getJSONArray("Access[]");
+		if (list == null || list.isEmpty()) {
+			Log.w(TAG, "init list == null || list.isEmpty()，没有可用的权限配置");
+			return;
+		}
+
+		Log.d(TAG, "init < for ACCESS_MAP.size() = " + ACCESS_MAP.size() + " <<<<<<<<<<<<<<<<<<<<<<<<");
+		
+		JSONObject item;
+		for (int i = 0; i < list.size(); i++) {
+			item = list.getJSONObject(i);
+			if (item == null) {
+				continue;
+			}
+
+			Map<RequestMethod, RequestRole[]> map = new HashMap<>();
+			map.put(RequestMethod.GET, JSON.parseObject(item.getString("get"), RequestRole[].class));
+			map.put(RequestMethod.HEAD, JSON.parseObject(item.getString("head"), RequestRole[].class));
+			map.put(RequestMethod.GETS, JSON.parseObject(item.getString("gets"), RequestRole[].class));
+			map.put(RequestMethod.HEADS, JSON.parseObject(item.getString("heads"), RequestRole[].class));
+			map.put(RequestMethod.POST, JSON.parseObject(item.getString("post"), RequestRole[].class));
+			map.put(RequestMethod.PUT, JSON.parseObject(item.getString("put"), RequestRole[].class));
+			map.put(RequestMethod.DELETE, JSON.parseObject(item.getString("delete"), RequestRole[].class));
+
+			String alias = item.getString("alias");
+			ACCESS_MAP.put(StringUtil.isEmpty(alias, true) ? item.getString("name") : alias, map);
+		}
+		
+		Log.d(TAG, "init  for /> ACCESS_MAP.size() = " + ACCESS_MAP.size() + " >>>>>>>>>>>>>>>>>>>>>>>");
+
 	}
 
-
+	
+	
+	
 	@NotNull
 	@Override
 	public DemoParser createParser() {
@@ -97,6 +157,8 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 	public static long value(Long v) {
 		return v == null ? 0 : v;
 	}
+
+
 
 
 }
