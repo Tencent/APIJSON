@@ -465,42 +465,63 @@ DELETE: <br > delete data | base_url/delete/ | {<br > &nbsp;&nbsp; TableName:{<b
 <br />
 
 
-## <h2 id="4">4.Usage<h2/>
+## <h2 id="4">4.Getting started<h2/>
+  
+You can use either Eclipse for JavaEE or IntelllJ IDEA Ultimate to make installation. For both, first download the project and save it to a path.
 
-### <h3 id="4.1">4.1 Download and unzip APIJSON project<h3/>
+### <h3 id="4.1">4.1 Using Eclipse to make installation<h3/>
 
-Clone or download > Download ZIP > Unzip to a path and remember it.
+#### <h4 id="4.1.1">4.1.1 prerequisites<h4/>
+  
+Java Development Kit(JDK): 1.8 or above 
+[MAVEN](https://maven.apache.org/download.cgi): 3.0 or above
+Mysql / Oracle
+[Eclipse Java EE IDE](https://www.eclipse.org/downloads/)for Web Developers.Version: Mars.1 Release (4.5.1) 
 
-#### You can skip step 2 and 3, and test server response with my server IP address apijson.cn:8080.<br />
+#### <h4 id="4.1.2">4.1.2 Opening the project with Eclipse<h4/>
+  
+Open Eclipse> *File > Import > Maven > Existing Maven Projects > Next > Browse > Select the path of the project you saved / APIJSON-Java-Server / APIJSONBoot > check pom.xml...apijson-demo > Finish*
+  
+#### <h4 id="4.1.3">4.1.3 Preparing the library used in demo<h4/>
+  
+In the menu at the right, click libs, right click apijson-orm.jar,click add as library. Apply the same to the rest *.jar* files in libs.
+
+#### <h4 id="4.1.4">4.1.4 Configuration<h4/>
+  
+Open the class named apijson.demo.server.DemoSQLConfig , then change return values of `getDBUri`,`getDBAccount`,`getDBPassword`,`getSchema` to your own database.
+
+**Note**: Instead of this step, you can also [import your database](#4.2).
+  
+#### <h4 id="4.1.5">4.1.5 Running the application<h4/>
+
+In Eclipse, in the menu on the top, click *Run>Run As>Java Application>choose APIJSONApplication>OK*
 
 ### <h3 id="4.2">4.2 Import MySQL table files<h3/>
 
-This Server project needs MySQL Server and MySQLWorkbench. And you must ensure that both of them were installed.<br />
-My config is Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 and OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8. The systems and softwares are all 64 bit.
+This Server project needs MySQL Server and MySQLWorkbench. Please ensure that both of them are installed.<br />
+My config is Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 and OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8. Systems and softwares are all 64 bit.
 
-Start MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path of APIJSON-Master/table > Start Import > Refresh SCHEMAS, and you'll see the tables were already added.
+Start *MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path of APIJSON-Master/table > Start Import > Refresh SCHEMAS*, and you'll see the tables were already added.
 
+### <h3 id="4.3">4.3 Using IntellIJ IDEA Ultimate to make the installation<h3/>
+  
+#### <h4 id="4.3.1">4.3.1 Opening the project<h4/>
 
-### <h3 id="4.3">4.3 Run Server project with Eclipse for JavaEE or IntellIJ IDEA Ultimate<h3/>
+*Open > Select the path of the project/APIJSON-Java-Server/APIJSONBoot > OK*
 
-If you haven't installed any editor above, please download and install one before run.<br />
-My config is Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 and OSX EI Capitan + JDK 1.8.0_91 + Eclipse 4.6.1 + IntellIJ 2016.2.5. The systems and softwares are all 64 bit.
+#### <h4 id="4.3.2">4.3.2 Preparing the library used in demo<h4/>  
+  
+In libs, right-click *apijson-orm.jar >Add as Library>OK*. Apply this to all *.jar* files in libs.
 
-#### Eclipse for JavaEE
+#### <h4 id="4.3.3">4.3.3 Running the application<h4/>
+  
+In the menu on the top: *Run > Run > Edit Configurations > + > Application > Configuration*<br />
+In *Main class* , choose *APIJSONApplication*;<br />
+In *Use classpath of module* , choose *apijson-demo*.<br />
+Click *Run* in the bottom.
 
-1.Import<br />
-File > Import > Maven > Existing Maven Projects > Next > Browse > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Eclipse_JEE) > Finish
+**Note**: After running, you should see APIJSON test logs and in the last, it would show ‘APIJSON已启动’. If it shows ‘address already in use’, that means port 8080 has been used . You need tochange the port. See [how to change ports for a Spring Boot Application.](https://stackoverflow.com/questions/21083170/how-to-configure-port-for-a-spring-boot-application)
 
-2.Run<br />
-Run > Run As > Java Application > Select APIJSONApplication > OK
-
-#### IntellIJ IDEA Ultimate
-
-1.Import<br />
-Open > Select the path of APIJSON-Master/APIJSON(Server)/APIJSON(Idea) > OK
-
-2.Run<br />
-Run > Run APIJSONApplication
 
 ### <h3 id="4.4">4.4 Run Client project with ADT Bundle or Android Studio<h3/>
 
