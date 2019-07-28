@@ -34,15 +34,17 @@
   <img src="https://raw.githubusercontent.com/TommyLemon/APIJSON/master/logo.png" />
 </p>
 
-
 <br />
 
-* ### [1.About](#1)
-* ### [2.Server-side deployment](#2)
+* ### [1. About](#1)
+* ### [2. Server-side deployment](#2)
 * [2.1 Installing with Eclipse](#2.1)
 * [2.2 Import MySQL table files](#2.2)
 * [2.3 Installing with IntellIJ IDEA Ultimate](#2.3)
-* ### [3.Client-side deployment with ADT Bundle or Android Studio](#3)
+* ### [3. Client-side deployment](#3)
+* [3.1 For Android](#3.1)
+* [3.2 For iOS](#3.2)
+* [3.3 For Javascript](#3.3)
 
 * ### [5.Extra](#5)
 * [5.1 Recommend](#5.1)
@@ -152,19 +154,15 @@ Response:
 
 <br />
 
-
-
 [Test it online](http://apijson.cn/)
 
 <br />
-<br />
-
 
 ## <h2 id="2">2.Server-side deployment<h2/>
   
 You can use either Eclipse for JavaEE or IntelllJ IDEA Ultimate to make installation. For both, first download the project and save it to a path.
 
-### <h3 id="2.1">2.1 Using Eclipse to make installation<h3/>
+### <h3 id="2.1">2.1 Installing with Eclipse<h3/>
 
 #### <h4 id="2.1.1">2.1.1 prerequisites<h4/>
   
@@ -222,7 +220,7 @@ My config is Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 an
 
 Start *MySQLWorkbench > Enter a connection > Click Server menu > Data Import > Select the path of your .sql file > Start Import > Refresh SCHEMAS*. Now you should see tables are added successfully.
 
-### <h3 id="2.3">2.3 Using IntellIJ IDEA Ultimate to make the installation<h3/>
+### <h3 id="2.3">2.3 Installing with IntellIJ IDEA Ultimate<h3/>
   
 #### <h4 id="2.3.1">2.3.1 Opening the project<h4/>
 
@@ -242,9 +240,11 @@ Click *Run* in the bottom.
 **Note**: After running, you should see APIJSON test logs and in the last, it would show ‘APIJSON已启动’. If it shows ‘address already in use’, that means port 8080 has been used . You need tochange the port. See [how to change ports for a Spring Boot Application.](https://stackoverflow.com/questions/21083170/how-to-configure-port-for-a-spring-boot-application)
 
 
-### <h3 id="3">3.Client-side deployment with [ADT Bundle](https://stuff.mit.edu/afs/sipb/project/android/docs/sdk/installing/bundle.html) or [Android Studio](https://developer.android.com/studio)<h3/>
-
-Make sure you have either one installed.<br />
+## <h2 id="3">3. Client-side deployment<h2/>
+	
+### <h3 id="3.1">3.1 For Android<h3/>
+	
+Make sure you have either [ADT Bundle](https://stuff.mit.edu/afs/sipb/project/android/docs/sdk/installing/bundle.html) or [Android Studio](https://developer.android.com/studio) installed.<br />
 
 My config:  Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + (JDK 1.7.0_71 + ADT Bundle 20140702) + (JDK 1.8.0_91 + Android Studio 2.1.2). All the systems and software are 64 bit.<br />
 
@@ -254,9 +254,22 @@ My config:  Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 
 * 2.Running<br />
 *Run > Run app*
 
-* 3.Testing <br />
+* 3. Testing <br />
 In the browser, send a request to the server. It should return with the result.
 If the default url is not available, change it to an available one, such as an IPV4 address that is running the server of the APIJSON project. Then click the request button again.
+<br />
+
+### <h3 id="3.2">3.2 For iOS<h3/>
+	
+Open xCode, then *APIJSON-Master/APIJSON-iOS/APIJSON-Swift > Open*<br/>
+
+In xCode, *Product > Run* 
+
+### <h3 id="3.3">3.3 For Javascript<h3/>
+
+You can use either an IDE or text editor like sublime, Atom, etc. Webstorm is recommended.<br/>
+While using a text editor, you just open the .html file in the APIJSON-JS folder.<br/>
+You can also open it with Vue javascript framework. Click [here](https://vuejs.org/) to learn more.
 
 <br />
 <br />
