@@ -38,10 +38,11 @@
 <br />
 
 * ### [1.About](#1)
-* ### [2.Getting started](#2)
-* [2.1 Using Eclipse to make installation](#2.1)
+* ### [2.Server-side deployment](#2)
+* [2.1 Installing with Eclipse](#2.1)
 * [2.2 Import MySQL table files](#2.2)
-* [2.3 Using IntellIJ IDEA Ultimate to make the installation](#2.3)
+* [2.3 Installing with IntellIJ IDEA Ultimate](#2.3)
+* ### [3.Client-side deployment with ADT Bundle or Android Studio](#3)
 
 * ### [5.Extra](#5)
 * [5.1 Recommend](#5.1)
@@ -159,7 +160,7 @@ Response:
 <br />
 
 
-## <h2 id="2">2.Getting started<h2/>
+## <h2 id="2">2.Server-side deployment<h2/>
   
 You can use either Eclipse for JavaEE or IntelllJ IDEA Ultimate to make installation. For both, first download the project and save it to a path.
 
@@ -241,33 +242,21 @@ Click *Run* in the bottom.
 **Note**: After running, you should see APIJSON test logs and in the last, it would show ‘APIJSON已启动’. If it shows ‘address already in use’, that means port 8080 has been used . You need tochange the port. See [how to change ports for a Spring Boot Application.](https://stackoverflow.com/questions/21083170/how-to-configure-port-for-a-spring-boot-application)
 
 
-### <h3 id="3">4.4 Run Client project with ADT Bundle or Android Studio<h3/>
+### <h3 id="3">3.Client-side deployment with [ADT Bundle](https://stuff.mit.edu/afs/sipb/project/android/docs/sdk/installing/bundle.html) or [Android Studio](https://developer.android.com/studio)<h3/>
 
-You can skip this step and download the Client App below.
+Make sure you have either one installed.<br />
 
-If you haven't installed any editor above, please download and install one before run.<br />
-My config is Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + (JDK 1.7.0_71 + ADT Bundle 20140702) + (JDK 1.8.0_91 + Android Studio 2.1.2). The systems and softwares are all 64 bit.
+My config:  Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + (JDK 1.7.0_71 + ADT Bundle 20140702) + (JDK 1.8.0_91 + Android Studio 2.1.2). All the systems and software are 64 bit.<br />
 
-#### ADT Bundle
+* 1.Importing<br />
+*Open an existing Android Studio project > Select the path of APIJSON-Master/APIJSON-Android/APIJSONApp(or APIJSONTest） > OK*
 
-1.Import<br />
-File > Import > Android > Existing Android Code Into Workspace > Next > Browse > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(ADT) > Finish
+* 2.Running<br />
+*Run > Run app*
 
-2.Run<br />
-Run > Run As > Android Application
-
-#### Android Studio
-
-1.Import<br />
-Open an existing Android Studio project > Select the path of APIJSON-Master/APIJSON(Android)/APIJSON(AndroidStudio) > OK
-
-2.Run<br />
-Run > Run app
-
-### <h3 id="4.5">4.5 Operate app<h3/>
-
-Select an APIJSON request to send to server and wait. It will show the result received.<br />
-If the default url is not available, change it to an available one, such as an IPV4 address of a computer running APIJSON Server project. Then click the Query button to request again.
+* 3.Testing <br />
+In the browser, send a request to the server. It should return with the result.
+If the default url is not available, change it to an available one, such as an IPV4 address that is running the server of the APIJSON project. Then click the request button again.
 
 <br />
 <br />
