@@ -52,7 +52,7 @@
 
 <br />
 
-<h2 id="1">1. About<h2/>
+<h2 id="1">1. About<h2/><br/>
 
 APIJSON is a JSON based application that largely simplify the process of back-end API development. It allows front-end users to get data with self-defined form.
 
@@ -61,7 +61,7 @@ APIJSON is a JSON based application that largely simplify the process of back-en
 You can get any data by defining the specific information you want and send it to the server.<br />
 You can get different types of data by making just one request to the server. It's very convenient and flexible, and dosen't require different API endpoints with multiple requests.<br />
 It provides CRUD(read and write), Fuzzy Search, Remote Function Calls，etc. You can also save duplicate data and improve data transmission speed as well!<br />
-
+#### For API design:
 APIJSON largely reduces API developers' workload by reducing most api design and document writing!<br />
 With APIJSON, client developers will no longer be suffered from possible errors in documents, and don't have to communicate with server developers about APIs or documents anymore.<br />
 Server developers no longer need to worry about compatibility of APIs and documents with legacy apps.
