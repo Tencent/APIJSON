@@ -50,26 +50,23 @@
 * ### [6.Author](#6)
 * ### [7.Donating](#7)
 
-## <h2 id="1">1.About<h2/>
+<br />
+
+<h2 id="1">1. About<h2/>
 
 APIJSON is a JSON based application that largely simplify the process of back-end API development. It allows front-end users to get data with self-defined form.
 
 ### Features:
+#### For getting data:
+You can get any data by defining the specific information you want and send it to the server.<br />
+You can get different types of data by making just one request to the server. It's very convenient and flexible, and dosen't require different API endpoints with multiple requests.<br />
+It provides CRUD(read and write), Fuzzy Search, Remote Function Calls，etc. You can also save duplicate data and improve data transmission speed as well!<br />
 
-You can set any JSON structure and send a request to your server, and the server will respond JSON codes with the structure you just set.<br />
-You can get different types of data by making just one request to the server. It's very convenient and flexible, and dosen't require different APIs with multiple requests.<br />
-It provides CRUD(read and write), Fuzzy Search, Remote Function Calls，etc. You can save duplicate data and improve data transmission speed as well!<br />
-
-APIJSON enables server developers to realize JSON transmissions without most api design or document writing anymore!<br />
-Client developers will no longer be suffered from various errors in documents, and don't have to communicate with server developers about APIs or documents anymore!<br />
-Server developers no longer need to worry about compatibility of APIs and documents with legacy apps! APIJSON thus helps developers reducing time in developing APIs.
-
-<br />
-
-<br />
+APIJSON largely reduces API developers' workload by reducing most api design and document writing!<br />
+With APIJSON, client developers will no longer be suffered from possible errors in documents, and don't have to communicate with server developers about APIs or documents anymore.<br />
+Server developers no longer need to worry about compatibility of APIs and documents with legacy apps.
 
 ### Examples:
-
 #### Get a User
 Request:
 <pre><code class="language-json">
@@ -104,7 +101,6 @@ Response:
 </code></pre>
 
 <br />
-
 
 #### Get an Array of Users
 Request:
@@ -151,11 +147,15 @@ Response:
 
 <br />
 
-[Test it online](http://apijson.cn/)
+[Test it online](http://apijson.cn/)<br />
 
-<br />
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_get.jpg) 
 
-## <h2 id="2">2.Server-side deployment<h2/>
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_code.jpg) 
+<p align="center" >
+
+
+<h2 id="2">2.Server-side deployment<h2/>
   
 You can use either Eclipse for JavaEE or IntelllJ IDEA Ultimate to make installation. For both, first download the project and save it to a path.
 
@@ -236,8 +236,9 @@ Click *Run* in the bottom.
 
 **Note**: After running, you should see APIJSON test logs and in the last, it would show ‘APIJSON已启动’. If it shows ‘address already in use’, that means port 8080 has been used . You need tochange the port. See [how to change ports for a Spring Boot Application.](https://stackoverflow.com/questions/21083170/how-to-configure-port-for-a-spring-boot-application)
 
+<br />
 
-## <h2 id="3">3. Client-side deployment<h2/>
+<h2 id="3">3. Client-side deployment<h2/>
 	
 ### <h3 id="3.1">3.1 For Android<h3/>
 	
@@ -251,10 +252,9 @@ My config:  Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 
 * 2.Running<br />
 *Run > Run app*
 
-* 3. Testing <br />
+* 3.Testing <br />
 In the browser, send a request to the server. It should return with the result.
 If the default url is not available, change it to an available one, such as an IPV4 address that is running the server of the APIJSON project. Then click the request button again.
-<br />
 
 ### <h3 id="3.2">3.2 For iOS<h3/>
 	
@@ -268,7 +268,7 @@ You can use either an IDE or text editor like sublime, Atom, etc. Webstorm is re
 While using a text editor, you just open the .html file in the APIJSON-JS folder.<br/>
 You can also open it with Vue javascript framework. Click [here](https://vuejs.org/) to learn more.
 
-## <h2 id="4">4. Contributing<h2/>
+<h2 id="4">4. Contributing<h2/>
 	
 We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/APIJSON/APIJSON/issues) before opening a new one .<br />
 
@@ -277,17 +277,21 @@ Fork the project and send a pull request.<br />
 Please also star the project!
 <br />
 
-## <h2 id="5">5. Versioning<h2/>
+<h2 id="5">5. Versioning<h2/>
 	
 See the latest version [here.](https://github.com/TommyLemon/APIJSON/commits/master)
 
-## <h2 id="6">6. Auhtor<h2/>
+<br />
+
+<h2 id="6">6. Auhtor<h2/>
 	
 Check out the author's [github account!](https://github.com/TommyLemon)to see more related projects<br>
 
-If you have any questions or suggestions, you can [create an issue](https://github.com/TommyLemon/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).<br >
+If you have any questions or suggestions, you can [create an issue](https://github.com/TommyLemon/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
 
-## <h2 id="7">7. Donating<h2/>
+<br />
+
+<h2 id="7">7. Donating<h2/>
 	
 If you like this projects and want to donate for maintainance cost, or want to buy me a coffee, you can scan Wechat QR code or QQ QR code below. <br />
 
