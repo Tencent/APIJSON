@@ -45,13 +45,10 @@
 * [3.1 For Android](#3.1)
 * [3.2 For iOS](#3.2)
 * [3.3 For Javascript](#3.3)
-
-* ### [5.Extra](#5)
-* [5.1 Recommend](#5.1)
-* [5.2 Author](#5.2)
-* [5.3 Download](#5.3)
-* [5.4 Update](#5.4)
-* [5.5 Star&Fork](#5.5)
+* ### [4.Contributing](#4)
+* ### [5.Versioning](#5)
+* ### [6.Author](#6)
+* ### [7.Donating](#7)
 
 ## <h2 id="1">1.About<h2/>
 
@@ -271,37 +268,54 @@ You can use either an IDE or text editor like sublime, Atom, etc. Webstorm is re
 While using a text editor, you just open the .html file in the APIJSON-JS folder.<br/>
 You can also open it with Vue javascript framework. Click [here](https://vuejs.org/) to learn more.
 
+## <h2 id="4">4. Contributing<h2/>
+	
+We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/APIJSON/APIJSON/issues) before opening a new one .<br />
+
+Fork the project and send a pull request.<br />
+
+Please also star the project!
 <br />
-<br />
 
-## <h2 id="5">5.Extra<h2/>
+## <h2 id="5">5. Versioning<h2/>
+	
+See the latest version [here.](https://github.com/TommyLemon/APIJSON/commits/master)
 
-### <h3 id="5.1">5.1 Recommend<h3/>
-[APIJSON, 让接口和文档见鬼去吧！](https://my.oschina.net/tommylemon/blog/805459)
-
-[仿QQ空间和微信朋友圈，高解耦高复用高灵活](https://my.oschina.net/tommylemon/blog/885787)
-
-[3步创建APIJSON服务端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
-
-### <h3 id="5.2">5.2 Author<h3/>
-### TommyLemon:[https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
+## <h2 id="6">6. Auhtor<h2/>
+	
+Check out the author's [github account!](https://github.com/TommyLemon)to see more related projects<br>
 
 If you have any questions or suggestions, you can [create an issue](https://github.com/TommyLemon/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).<br >
-If you fixed some bugs or added some functions, I would greatly appreciate it if you [contribute your code](https://github.com/TommyLemon/APIJSON/pulls).
 
+## <h2 id="7">7. Donating<h2/>
+	
+If you like this projects and want to donate for maintainance cost, or want to buy me a coffee, you can scan Wechat QR code or QQ QR code below. <br />
 
-### <h3 id="5.3">5.3 Download<h3/>
+<img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/WechatPay.JPG"  width="240" ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/QQPay.JPG"  width="240" >
+<br />
+<br />
+### Contributers of this project:
 
-App<br />
-[APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
-
-Test<br />
-[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
-
-
-### <h3 id="5.4">5.4 Update<h3/>
-[https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
-
-### <h3 id="5.5">5.5 Star & Fork<h3/>
-
-[https://github.com/TommyLemon/APIJSON](https://github.com/TommyLemon/APIJSON) 
+<div style="float:left">
+  <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/70"><img src="https://avatars1.githubusercontent.com/u/22228201?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/74"><img src="https://avatars0.githubusercontent.com/u/1274536?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/APIJSON/APIJSON/pull/92"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/72"><img src="https://avatars1.githubusercontent.com/u/10663804?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/33"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="75" width="75" ></a>
+  <br />
+  <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://avatars3.githubusercontent.com/u/12622501?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/qq547057827/apijson-php"><img src="https://avatars3.githubusercontent.com/u/1657532?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/TEsTsLA/apijson"><img src="https://avatars2.githubusercontent.com/u/17310639?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://avatars0.githubusercontent.com/u/359281?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/crazytaxi824/APIJSON"><img src="https://avatars3.githubusercontent.com/u/16500384?s=400&v=4"  height="75" width="75" ></a>
+  <a href="https://github.com/luckyxiaomo/APIJSONKOTLIN"><img src="https://avatars2.githubusercontent.com/u/42728605?s=400&v=4"  height="75" width="75" ></a>
+    <a href="https://gitee.com/zhiyuexin/ApiJsonByJFinal"><img src="https://avatar.gitee.com/uploads/90/490_zhiyuexin.jpg!avatar100?1368664499"  height="75" width="75" ></a>
+  <a href="https://github.com/Airforce-1/SpringServer1.2-APIJSON"><img src="https://avatars3.githubusercontent.com/u/6212428?s=400&v=4"  height="75" width="75" ></a>
+</div>
+<br />
+	
