@@ -52,8 +52,8 @@
 
 <br />
 
-## <h2 id= "1">1. About <h2/>
-
+<h2 id= "1">1. About <h2/>
+	
 
 APIJSON is a JSON based application that largely simplify the process of back-end API development. It allows front-end users to get data with self-defined form.
 
@@ -156,7 +156,7 @@ Response:
 <p align="center" >
 
 
-## <h2 id="2">2.Server-side deployment<h2/>
+<h2 id="2">2.Server-side deployment<h2/>
 	
 	
 You can use either Eclipse for JavaEE or IntelllJ IDEA Ultimate to make installation. For both, first download the project and save it to a path.
@@ -240,7 +240,7 @@ Click *Run* in the bottom.
 
 <br />
 
-## <h2 id="3">3. Client-side deployment<h2/> 
+<h2 id="3">3. Client-side deployment<h2/> 
 	
 ### <h3 id="3.1">3.1 For Android<h3/>
 	
@@ -270,7 +270,7 @@ You can use either an IDE or text editor like sublime, Atom, etc. Webstorm is re
 While using a text editor, you just open the .html file in the APIJSON-JS folder.<br/>
 You can also open it with Vue javascript framework. Click [here](https://vuejs.org/) to learn more.
 
-## <h2 id="4">4. Contributing<h2/> 
+<h2 id="4">4. Contributing<h2/> 
 	
 	
 We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/APIJSON/APIJSON/issues) before opening a new one .<br />
@@ -280,14 +280,14 @@ Fork the project and send a pull request.<br />
 Please also star the project!
 <br />
 
-## <h2 id="5">5. Versioning<h2/> 
+<h2 id="5">5. Versioning<h2/> 
 	
 	
 See the latest version [here.](https://github.com/TommyLemon/APIJSON/commits/master)
 
 <br />
 
-## <h2 id="6">6. Auhtor<h2/> 
+<h2 id="6">6. Auhtor<h2/> 
 	
 	
 Check out the author's [github account!](https://github.com/TommyLemon)to see more related projects<br>
@@ -296,7 +296,7 @@ If you have any questions or suggestions, you can [create an issue](https://gith
 
 <br />
 
-## <h2 id="7">7. Donating<h2/> 
+<h2 id="7">7. Donating<h2/> 
 	
 	
 If you like this projects and want to donate for maintainance cost, or want to buy me a coffee, you can scan Wechat QR code or QQ QR code below. <br />
