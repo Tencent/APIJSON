@@ -131,15 +131,19 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 				if (JSONRequest.isTableKey(name) == false) {
 					onServerError("name: " + name + "不合法！字段 alias 的值为空时，name 必须为合法表名！", shutdownWhenServerError);
 				}
-				
-				ACCESS_MAP.put(name, map);
+
+				if (Log.DEBUG || item.getBooleanValue("debug") == false) {
+					ACCESS_MAP.put(name, map);
+				}
 			}
 			else {
 				if (JSONRequest.isTableKey(alias) == false) {
 					onServerError("alias: " + alias + "不合法！字段 alias 的值只能为 空 或者 合法表名！", shutdownWhenServerError);
 				}
-				
-				ACCESS_MAP.put(alias, map);
+
+				if (Log.DEBUG || item.getBooleanValue("debug") == false) {
+					ACCESS_MAP.put(alias, map);
+				}
 			}
 			
 		}

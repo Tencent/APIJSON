@@ -82,7 +82,7 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 			request.putAll(accessItem.toArray(0, 0, ACCESS_));
 		}   //Access[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		
+
 		JSONObject response = new DemoParser(RequestMethod.GET, true).parseResponse(request);
 		if (JSONResponse.isSuccess(response) == false) {
 			Log.e(TAG, "\n\n\n\n\n !!!! 查询权限配置异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
@@ -96,7 +96,7 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 		}
 
 		Log.d(TAG, "init < for ACCESS_MAP.size() = " + ACCESS_MAP.size() + " <<<<<<<<<<<<<<<<<<<<<<<<");
-		
+
 		ACCESS_MAP.clear();
 
 		JSONObject item;
@@ -117,31 +117,35 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 
 			String name = item.getString("name");
 			String alias = item.getString("alias");
-			
+
 			/**TODO 
 			 * 以下判断写得比较复杂，因为表设计不够好，但为了兼容旧版 APIJSON 服务 和 APIAuto 工具而保留了下来。
 			 * 如果是 name 为接口传参的 表对象 的 key，对应一个可缺省的 tableName，判断就会简单不少。
 			 */
-			
+
 			if (StringUtil.isEmpty(name, true)) {
 				onServerError("字段 name 的值不能为空！", shutdownWhenServerError);
 			}
-			
+
 			if (StringUtil.isEmpty(alias, true)) {
 				if (JSONRequest.isTableKey(name) == false) {
 					onServerError("name: " + name + "不合法！字段 alias 的值为空时，name 必须为合法表名！", shutdownWhenServerError);
 				}
-				
-				ACCESS_MAP.put(name, map);
+
+				if (Log.DEBUG || item.getBooleanValue("debug") == false) {
+					ACCESS_MAP.put(name, map);
+				}
 			}
 			else {
 				if (JSONRequest.isTableKey(alias) == false) {
 					onServerError("alias: " + alias + "不合法！字段 alias 的值只能为 空 或者 合法表名！", shutdownWhenServerError);
 				}
-				
-				ACCESS_MAP.put(alias, map);
+
+				if (Log.DEBUG || item.getBooleanValue("debug") == false) {
+					ACCESS_MAP.put(alias, map);
+				}
 			}
-			
+
 		}
 
 		Log.d(TAG, "init  for /> ACCESS_MAP.size() = " + ACCESS_MAP.size() + " >>>>>>>>>>>>>>>>>>>>>>>");
