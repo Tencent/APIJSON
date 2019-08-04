@@ -4,7 +4,7 @@
 	<groupId>htdi.jfinal</groupId>
 	<artifactId>apijson-final</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>3.6.5</version>
 	<name>APIJSON Demo based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.21</version>
+			<version>1.2.58</version>
 		</dependency>
 
 		<!-- dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 

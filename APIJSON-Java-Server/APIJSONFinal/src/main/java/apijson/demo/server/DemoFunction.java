@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import static apijson.demo.server.Controller.FUNCTION_;
+
+import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,68 +84,82 @@ public class DemoFunction extends RemoteFunction {
 		Log.i(TAG, "getFromArray([1,2,4,10], 0) = " + new DemoFunction(null, null).invoke("getFromArray(array,@position)", request));
 		Log.i(TAG, "getFromObject({key:true}, key) = " + new DemoFunction(null, null).invoke("getFromObject(object,key)", request));
 
-		forceUseable();
 	}
 
-	/**测试可用性，不catch，不可用直接抛异常，强制在Function表修改为demo为可用的
+	/**初始化，加载所有远程函数配置，并校验是否已在应用层代码实现
+	 * @return 
+	 * @throws ServerException
 	 */
-	public static void forceUseable() { // throws UnsupportedOperationException {
-		//查出所有的 Function 并校验是否已在应用层代码实现
-
+	public static JSONObject init() throws ServerException {
+		return init(false);
+	}
+	/**初始化，加载所有远程函数配置，并校验是否已在应用层代码实现
+	 * @param shutdownWhenServerError 
+	 * @return 
+	 * @throws ServerException
+	 */
+	public static JSONObject init(boolean shutdownWhenServerError) throws ServerException {
 		JSONObject request = new JSONObject(); 
 
-		//Function[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest functionItem = new JSONRequest();
+		{  //Function[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			JSONRequest functionItem = new JSONRequest();
 
-		//Function<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest function = new JSONRequest();
-		functionItem.put("Function", function);
-		//Function>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			{  //Function<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				JSONRequest function = new JSONRequest();
+				functionItem.put(FUNCTION_, function);
+			}  //Function>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		request.putAll(functionItem.toArray(0, 0, "Function"));
-		//Function[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			request.putAll(functionItem.toArray(0, 0, FUNCTION_));
+		}  //Function[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+		
 		JSONObject response = new DemoParser(RequestMethod.GET, true).parseResponse(request);
 		if (JSONResponse.isSuccess(response) == false) {
-			Log.e(TAG, "\n\n\n\n\n !!!! 查询远程函数异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
-			return;
-		}
-		
-		JSONArray fl = response.getJSONArray("Function[]");
-		if (fl == null || fl.isEmpty()) {
-			Log.d(TAG, "没有可用的远程函数");
-			return;
+			onServerError("\n\n\n\n\n !!!! 查询远程函数异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n", shutdownWhenServerError);
 		}
 
-		JSONObject fi;
-		for (int i = 0; i < fl.size(); i++) {
-			fi = fl.getJSONObject(i);
-			if (fi == null) {
+		JSONArray list = response.getJSONArray(FUNCTION_ + "[]");
+		if (list == null || list.isEmpty()) {
+			Log.w(TAG, "init list == null || list.isEmpty()，没有可用的远程函数");
+			throw new NullPointerException("没有可用的远程函数");
+		}
+
+		JSONObject item;
+		for (int i = 0; i < list.size(); i++) {
+			item = list.getJSONObject(i);
+			if (item == null) {
 				continue;
 			}
 
-			JSONObject demo = JSON.parseObject(fi.getString("demo"));
+			JSONObject demo = JSON.parseObject(item.getString("demo"));
 			if (demo == null) {
-				exitWithError("字段 demo 的值必须为合法且非null的 JSONObejct 字符串！");
+				onServerError("字段 demo 的值必须为合法且非 null 的 JSONObejct 字符串！", shutdownWhenServerError);
 			}
 			if (demo.containsKey("result()") == false) {
-				demo.put("result()", getFunctionCall(fi.getString("name"), fi.getString("arguments")));
+				demo.put("result()", getFunctionCall(item.getString("name"), item.getString("arguments")));
 			}
 			demo.put(JSONRequest.KEY_COLUMN, "id,name,arguments,demo");
 
 			JSONObject r = new DemoParser(RequestMethod.GET, true).parseResponse(demo);
 			if (JSONResponse.isSuccess(r) == false) {
-				//				throw new UnsupportedOperationException("远程函数测试未通过！请修改 Function 表里的 demo！原因：" + JSONResponse.getMsg(r));
-				exitWithError(JSONResponse.getMsg(r));
+				onServerError(JSONResponse.getMsg(r), shutdownWhenServerError);
 			}
+		}
+
+		return response;
+	}
+
+
+	private static void onServerError(String msg, boolean shutdown) throws ServerException {
+		Log.e(TAG, "\n远程函数文档测试未通过！\n请新增 demo 里的函数，或修改 Function 表里的 demo 为已有的函数示例！\n保证前端看到的远程函数文档是正确的！！！\n\n原因：\n" + msg);
+
+		if (shutdown) {
+			System.exit(1);	
+		} else {
+			throw new ServerException(msg);
 		}
 	}
 
-
-	private static void exitWithError(String msg) {
-		Log.e(TAG, "\n远程函数文档测试未通过！\n请新增 demo 里的函数，或修改 Function 表里的 demo 为已有的函数示例！\n保证前端看到的远程函数文档是正确的！！！\n\n原因：\n" + msg);
-		System.exit(1);		
-	}
 
 	/**反射调用
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
@@ -197,8 +214,8 @@ public class DemoFunction extends RemoteFunction {
 		}
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * @param rq
 	 * @param momentId
@@ -209,7 +226,7 @@ public class DemoFunction extends RemoteFunction {
 		if (method != RequestMethod.DELETE) {
 			throw new UnsupportedOperationException("远程函数 deleteCommentOfMoment 只支持 DELETE 方法！");
 		}
-		
+
 		long mid = rq.getLongValue(momentId);
 		if (mid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
@@ -220,7 +237,7 @@ public class DemoFunction extends RemoteFunction {
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONRequest comment = new JSONRequest();
 		comment.put("momentId", mid);
-		
+
 		request.put("Comment", comment);
 		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -229,7 +246,7 @@ public class DemoFunction extends RemoteFunction {
 		JSONObject c = rp.getJSONObject("Comment");
 		return c == null ? 0 : c.getIntValue(JSONResponse.KEY_COUNT);
 	}
-	
+
 
 	/**删除评论的子评论
 	 * @param rq
@@ -240,7 +257,7 @@ public class DemoFunction extends RemoteFunction {
 		if (method != RequestMethod.DELETE) { //TODO 如果这样的判断太多，可以把 DemoFunction 分成对应不同 RequestMethod 的 GetFunciton 等，创建时根据 method 判断用哪个
 			throw new UnsupportedOperationException("远程函数 deleteChildComment 只支持 DELETE 方法！");
 		}
-		
+
 		long tid = rq.getLongValue(toId);
 		if (tid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
@@ -305,11 +322,12 @@ public class DemoFunction extends RemoteFunction {
 	/**获取远程函数的demo，如果没有就自动补全
 	 * @param request
 	 * @return
+	 * @throws ServerException 
 	 */
-	public JSONObject getFunctionDemo(@NotNull JSONObject request) {
+	public JSONObject getFunctionDemo(@NotNull JSONObject request) throws ServerException {
 		JSONObject demo = JSON.parseObject(request.getString("demo"));
 		if (demo == null) {
-			exitWithError("字段 demo 的值必须为合法且非null的 JSONObejct 字符串！");
+			throw new ServerException("服务器内部错误，字段 demo 的值必须为合法且非 null 的 JSONObejct 字符串！");
 		}
 		if (demo.containsKey("result()") == false) {
 			demo.put("result()", getFunctionCall(request.getString("name"), request.getString("arguments")));

@@ -5,7 +5,7 @@
 
 	<groupId>zuo.biao.apijson.server</groupId>
 	<artifactId>apijson-orm</artifactId>
-	<version>3.4.8</version>
+	<version>3.6.5</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.55</version>
+			<version>1.2.58</version>
 		</dependency>
 	</dependencies>
 

@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import static zuo.biao.apijson.JSONObject.KEY_ID;
+import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
+
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
@@ -21,7 +24,6 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
 import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.AbstractSQLConfig;
 import zuo.biao.apijson.server.Join;
 import zuo.biao.apijson.server.SQLConfig;
@@ -33,13 +35,54 @@ import zuo.biao.apijson.server.SQLConfig;
  */
 public class DemoSQLConfig extends AbstractSQLConfig {
 
+
+	public static final Callback SIMPLE_CALLBACK;
+
 	
-	//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	static {
+		//TODO 默认模式名，改成你自己的
+		DEFAULT_SCHEMA = "sys";
+		
+		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
+
+		//主键名映射
+		SIMPLE_CALLBACK = new SimpleCallback() {
+
+			@Override
+			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table) {
+				return new DemoSQLConfig(method, table);
+			}
+
+			//取消注释来实现自定义各个表的主键名
+			//			@Override
+			//			public String getIdKey(String database, String schema, String table) {
+			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...
+			//				//		return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
+			//				//		return StringUtil.toUpperCase(t) + "_ID";  // USER_ID, COMMENT_ID ...
+			//			}
+
+			@Override
+			public String getUserIdKey(String database, String schema, String table) {
+				return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? KEY_ID : KEY_USER_ID; // id / userId
+			}
+
+		};
 	}
 
+	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
+	//	@Override
+	//	public String getDatabase() {
+	//		String db = super.getDatabase();
+	//		return db == null ? DATABASE_POSTGRESQL : db;
+	//	}
+
+	@Override
+	public String getDBVersion() {
+		return "5.7.22"; //"8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
+	}
+	
 	@Override
 	public String getDBUri() {
 		//TODO 改成你自己的，TiDB 默认端口为 4000
@@ -53,11 +96,18 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	public String getDBPassword() {
 		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "apijson"; //TODO 改成你自己的，TiDB 默认密码为空字符串 ""
 	}
+
+
 	@Override
-	public String getSchema() {
-		String s = super.getSchema();
-		return StringUtil.isEmpty(s, true) ? "sys" : s; //TODO 改成你自己的
+	public String getIdKey() {
+		return SIMPLE_CALLBACK.getIdKey(getDatabase(), getSchema(), getTable());
 	}
+
+	@Override
+	public String getUserIdKey() {
+		return SIMPLE_CALLBACK.getUserIdKey(getDatabase(), getSchema(), getTable());
+	}
+
 
 	public DemoSQLConfig() {
 		this(RequestMethod.GET);
@@ -76,23 +126,14 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	/**获取SQL配置
 	 * @param table
+	 * @param alias 
 	 * @param request
+	 * @param isProcedure 
 	 * @return
 	 * @throws Exception 
 	 */
-	public static SQLConfig newSQLConfig(RequestMethod method, String table, JSONObject request, List<Join> joinList) throws Exception {
-		return newSQLConfig(method, table, request, joinList, new Callback() {
-
-			@Override
-			public DemoSQLConfig getSQLConfig(RequestMethod method, String table) {
-				return new DemoSQLConfig(method, table);
-			}
-			
-			@Override
-			public Object newId(RequestMethod method, String table) {
-				return System.currentTimeMillis(); //为 post 请求提供 id， 只能是 Long 或 String
-			}
-		});
+	public static SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
+		return newSQLConfig(method, table, alias, request, joinList, isProcedure, SIMPLE_CALLBACK);
 	}
 
 

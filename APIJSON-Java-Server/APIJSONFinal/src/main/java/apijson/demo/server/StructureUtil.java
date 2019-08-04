@@ -14,22 +14,141 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import static apijson.demo.server.Controller.REQUEST_;
+
+import java.rmi.ServerException;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.JSON;
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.RequestMethod;
+import zuo.biao.apijson.StringUtil;
+import zuo.biao.apijson.server.JSONRequest;
 import zuo.biao.apijson.server.SQLConfig;
 import zuo.biao.apijson.server.SQLCreator;
 import zuo.biao.apijson.server.SQLExecutor;
 import zuo.biao.apijson.server.Structure;
 
 
-/**结构校验
+/**请求结构校验
  * @author Lemon
  */
 public class StructureUtil {
-	private static final String TAG = "Structure";
+	private static final String TAG = "StructureUtil";
+
+	//根据 version 动态从数据库查的  version{}:">=$currentVersion"，所以静态缓存暂时没用   public static final Map<String, JSONObject> REQUEST_MAP;
+
+	static {
+		//		REQUEST_MAP = new HashMap<>();
+	}
+
+	/**初始化，加载所有请求校验配置
+	 * @return 
+	 * @throws ServerException
+	 */
+	public static JSONObject init() throws ServerException {
+		return init(false);
+	}
+	/**初始化，加载所有请求校验配置
+	 * @param shutdownWhenServerError 
+	 * @return 
+	 * @throws ServerException
+	 */
+	public static JSONObject init(boolean shutdownWhenServerError) throws ServerException {
+		JSONRequest request = new JSONRequest();
+
+		{   //Request[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			JSONRequest requestItem = new JSONRequest();
+
+			{   //Request<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				requestItem.put(REQUEST_, new JSONRequest());
+			}   //Request>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+			request.putAll(requestItem.toArray(0, 0, REQUEST_));
+
+		}   //Request[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+		JSONObject response = new DemoParser(RequestMethod.GET, true).parseResponse(request);
+		if (JSONResponse.isSuccess(response) == false) {
+			Log.e(TAG, "\n\n\n\n\n !!!! 查询权限配置异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
+			onServerError("查询权限配置异常 !", shutdownWhenServerError);
+		}
+
+		JSONArray list = response.getJSONArray(REQUEST_ + "[]");
+		if (list == null || list.isEmpty()) {
+			Log.w(TAG, "init list == null || list.isEmpty()，没有可用的权限配置");
+			throw new NullPointerException("没有可用的权限配置");
+		}
+
+		//		Log.d(TAG, "init < for REQUEST_MAP.size() = " + REQUEST_MAP.size() + " <<<<<<<<<<<<<<<<<<<<<<<<");
+
+		//		REQUEST_MAP.clear();
+
+		JSONObject item;
+		for (int i = 0; i < list.size(); i++) {
+			item = list.getJSONObject(i);
+			if (item == null) {
+				continue;
+			}
+
+			String version = item.getString("version");
+			if (StringUtil.isEmpty(version, true)) {
+				Log.e(TAG, "init  for  StringUtil.isEmpty(version, true)，Request 表中的 version 不能为空！");
+				onServerError("服务器内部错误，Request 表中的 version 不能为空！", shutdownWhenServerError);
+			}
+
+			String method = item.getString("method");
+			if (StringUtil.isEmpty(method, true)) {
+				Log.e(TAG, "init  for  StringUtil.isEmpty(method, true)，Request 表中的 method 不能为空！");
+				onServerError("服务器内部错误，Request 表中的 method 不能为空！", shutdownWhenServerError);
+			}
+
+			String tag = item.getString("tag");
+			if (StringUtil.isEmpty(tag, true)) {
+				Log.e(TAG, "init  for  StringUtil.isEmpty(tag, true)，Request 表中的 tag 不能为空！");
+				onServerError("服务器内部错误，Request 表中的 tag 不能为空！", shutdownWhenServerError);
+			}
+
+			JSONObject structure = JSON.parseObject(item.getString("structure"));
+
+
+			JSONObject target = null;
+
+			if (structure != null) {
+				if (zuo.biao.apijson.JSONObject.isTableKey(tag) && structure.containsKey(tag) == false) {//tag是table名
+					target = new JSONObject(true);
+					target.put(tag, structure);
+				} else {
+					target = structure;
+				}
+			}
+
+			if (target == null || target.isEmpty()) {
+				Log.e(TAG, "init  for  target == null || target.isEmpty()");
+				onServerError("服务器内部错误，Request 表中的 version = " + version + ", method = " + method + ", tag = " + tag +  " 对应的 structure 不能为空！", shutdownWhenServerError);
+			}
+
+			//			REQUEST_MAP.put(tag, target);
+		}
+
+		//		Log.d(TAG, "init  for /> REQUEST_MAP.size() = " + REQUEST_MAP.size() + " >>>>>>>>>>>>>>>>>>>>>>>");
+
+		return response;
+	}
+
+	private static void onServerError(String msg, boolean shutdown) throws ServerException {
+		Log.e(TAG, "\n请求校验配置文档测试未通过！\n请修改 Request 表里的记录！\n保证前端看到的请求校验配置文档是正确的！！！\n\n原因：\n" + msg);
+
+		if (shutdown) {
+			System.exit(1);	
+		} else {
+			throw new ServerException(msg);
+		}
+	}
 
 
 	static final String requestString = "{\"Comment\":{\"DISALLOW\": \"id\", \"NECESSARY\": \"userId,momentId,content\"}, \"ADD\":{\"Comment:to\":{}}}";
@@ -39,20 +158,20 @@ public class StructureUtil {
 	 */
 	public static void test() throws Exception {
 		JSONObject request;
-		
+
 		SQLCreator creator = new SQLCreator() {
-			
+
 			@Override
 			public SQLConfig createSQLConfig() {
 				return new apijson.demo.server.DemoSQLConfig();
 			}
-			
+
 			@Override
 			public SQLExecutor createSQLExecutor() {
 				return new apijson.demo.server.DemoSQLExecutor();
 			}
 		};
-		
+
 		try {
 			request = JSON.parseObject("{\"Comment\":{\"userId\":0}}");
 			Log.d(TAG, "test  parseRequest = " + Structure.parseRequest(RequestMethod.POST, "", JSON.parseObject(requestString), request, creator));
@@ -102,6 +221,6 @@ public class StructureUtil {
 	}
 
 
-	
-	
+
+
 }

@@ -42,6 +42,7 @@ public class Verify extends BaseModel {
 	public static final int TYPE_REGISTER = 1; //注册
 	public static final int TYPE_PASSWORD = 2; //登录密码
 	public static final int TYPE_PAY_PASSWORD = 3; //支付密码
+	public static final int TYPE_RELOAD = 4; //重载配置
 	
 	private String phone;	//手机
 	private String verify;	//验证码
