@@ -18,7 +18,9 @@ import static zuo.biao.apijson.JSONObject.KEY_EXPLAIN;
 import static zuo.biao.apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -115,6 +117,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	@Override
 	public AbstractParser<T> setMethod(RequestMethod method) {
 		this.requestMethod = method == null ? GET : method;
+		this.transactionIsolation = RequestMethod.isQueryMethod(method) ? Connection.TRANSACTION_NONE : Connection.TRANSACTION_REPEATABLE_READ;
 		return this;
 	}
 
@@ -344,12 +347,18 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		Exception error = null;
 		sqlExecutor = createSQLExecutor();
+		onBegin();
 		try {
 			queryDepth = 0;
 			requestObject = onObjectParse(request, null, null, null, false);
-		} catch (Exception e) {
+
+			onCommit();
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			error = e;
+
+			onRollback();
 		}
 
 		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
@@ -365,10 +374,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			requestObject.put("time:start/duration/end", startTime + "/" + duration + "/" + endTime);
 		}
 
-		sqlExecutor.close();
-		sqlExecutor = null;
-		queryResultMap.clear();
-		queryResultMap = null;
+		onClose();
 
 		//会不会导致原来的session = null？		session = null;
 
@@ -647,15 +653,13 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		config.setOrder(JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
 		config.setCount(1);
 
-		SQLExecutor executor = createSQLExecutor();
+		if (sqlExecutor == null) {
+			sqlExecutor = createSQLExecutor();
+		}
 
 		//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
-		try {
-			JSONObject result = executor.execute(config, false);
-			return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
-		} finally {
-			executor.close();
-		}
+		JSONObject result = sqlExecutor.execute(config, false);
+		return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
 	}
 
 
@@ -1379,5 +1383,100 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 
+	//事务处理 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	private int transactionIsolation = Connection.TRANSACTION_NONE;
+	@Override
+	public int getTransactionIsolation() {
+		return transactionIsolation;
+	}
+	@Override
+	public void setTransactionIsolation(int transactionIsolation) {
+		this.transactionIsolation = transactionIsolation;
+	}
+
+	@Override
+	public void begin(int transactionIsolation) {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< begin transactionIsolation = " + transactionIsolation + " >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		sqlExecutor.setTransactionIsolation(transactionIsolation); //不知道 connection 什么时候创建，不能在这里准确控制，sqlExecutor.begin(transactionIsolation);
+	}
+	@Override
+	public void rollback() throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< rollback >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		sqlExecutor.rollback();
+	}
+	@Override
+	public void rollback(Savepoint savepoint) throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< rollback savepoint " + (savepoint == null ? "" : "!") + "= null >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		sqlExecutor.rollback(savepoint);
+	}
+	@Override
+	public void commit() throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< commit >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		sqlExecutor.commit();
+	}
+	@Override
+	public void close() {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< close >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		sqlExecutor.close();
+	}
+
+	/**开始事务
+	 */
+	protected void onBegin() {
+		//		Log.d(TAG, "onBegin >>");
+		if (RequestMethod.isQueryMethod(requestMethod)) {
+			return;
+		}
+
+		begin(getTransactionIsolation());
+	}
+	/**提交事务
+	 */
+	protected void onCommit() {
+		//		Log.d(TAG, "onCommit >>");
+		if (RequestMethod.isQueryMethod(requestMethod)) {
+			return;
+		}
+
+		try {
+			commit();
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	/**回滚事务
+	 */
+	protected void onRollback() {
+		//		Log.d(TAG, "onRollback >>");
+		if (RequestMethod.isQueryMethod(requestMethod)) {
+			return;
+		}
+
+		try {
+			rollback();
+		}
+		catch (SQLException e1) {
+			e1.printStackTrace();
+			try {
+				rollback(null);
+			}
+			catch (SQLException e2) {
+				e2.printStackTrace();
+			}
+		}
+	}
+
+	//事务处理 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	protected void onClose() {
+		//		Log.d(TAG, "onClose >>");
+
+		close();
+		sqlExecutor = null;
+		queryResultMap.clear();
+		queryResultMap = null;
+	}
 
 }

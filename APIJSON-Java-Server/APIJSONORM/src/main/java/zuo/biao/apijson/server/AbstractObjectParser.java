@@ -98,7 +98,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		this.type = arrayConfig == null ? 0 : arrayConfig.getType();
 		this.joinList = arrayConfig == null ? null : arrayConfig.getJoinList();
 		this.path = AbstractParser.getAbsPath(parentPath, name);
-		
+
 		zuo.biao.apijson.server.Entry<String, String> entry = Pair.parseEntry(name, true);
 		this.table = entry.getKey();
 		this.alias = entry.getValue();
@@ -581,14 +581,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		JSONObject rq = new JSONObject();
 		rq.put(JSONRequest.KEY_ID, request.get(JSONRequest.KEY_ID));
 		rq.put(JSONRequest.KEY_COLUMN, realKey);
-		JSONObject rp = parseResponse(new JSONRequest(table, rq));
+		JSONObject rp = parseResponse(RequestMethod.GET, table, null, rq, null, false);
 		//GET >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 		//add all 或 remove all <<<<<<<<<<<<<<<<<<<<<<<<<
-		if (rp != null) {
-			rp = rp.getJSONObject(table);
-		}
 		JSONArray targetArray = rp == null ? null : rp.getJSONArray(realKey);
 		if (targetArray == null) {
 			targetArray = new JSONArray();
@@ -616,6 +613,25 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		sqlRequest.put(realKey, targetArray);
 		//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
 
+	}
+
+	@Override
+	public JSONObject parseResponse(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
+		SQLConfig config = newSQLConfig(method, table, alias, request, joinList, isProcedure);
+		return parseResponse(config, isProcedure);
+	}
+	@Override
+	public JSONObject parseResponse(SQLConfig config, boolean isProcedure) throws Exception {
+		if (parser.getSQLExecutor() == null) {
+			parser.createSQLExecutor();
+		}
+		return parser.getSQLExecutor().execute(config, isProcedure);
+	}
+
+
+	@Override
+	public SQLConfig newSQLConfig(boolean isProcedure) throws Exception {
+		return newSQLConfig(method, table, alias, sqlRequest, joinList, isProcedure);
 	}
 
 	/**SQL 配置，for single object
@@ -750,19 +766,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		Object result;
 		if (key.startsWith("@")) { //TODO 以后这种小众功能从 ORM 移出，作为一个 plugin/APIJSONProcedure
 			FunctionBean fb = RemoteFunction.parseFunction(value, json, true);
-			
+
 			SQLConfig config = newSQLConfig(true);
 			config.setProcedure(fb.toFunctionCallString(true));
-
-			SQLExecutor executor = null;
-			try {
-				executor = parser.getSQLExecutor();
-				result = executor.execute(config, true);
-			}
-			catch (NotExistException e) {
-				e.printStackTrace();
-				return;
-			}
+			result = parseResponse(config, true);
 		}
 		else {
 			result = parser.onFunctionParse(json, value);

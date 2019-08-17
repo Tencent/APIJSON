@@ -2161,6 +2161,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
+		
+		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
+		if (explain && Log.DEBUG == false) { //不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
+			throw new UnsupportedOperationException("DEBUG 模式下不允许传 " + KEY_EXPLAIN + " ！");
+		}
+		
 		String database = request.getString(KEY_DATABASE);
 		String schema = request.getString(KEY_SCHEMA);
 
@@ -2170,18 +2176,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setDatabase(database); //不删，后面表对象还要用的，必须放在 parseJoin 前
 		config.setSchema(schema); //不删，后面表对象还要用的
 
-		//放后面会导致主表是空对象时 joinList 未解析
-		if (isProcedure == false) {
-			config = parseJoin(method, config, joinList, callback);
+		if (isProcedure) {
+			return config;
 		}
+		
+		config = parseJoin(method, config, joinList, callback); //放后面会导致主表是空对象时 joinList 未解析
 
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
 
-		if (isProcedure) {
-			return config;
-		}
 
 		String idKey = callback.getIdKey(database, schema, table);
 		String idInKey = idKey + "{}";
@@ -2237,7 +2241,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String role = request.getString(KEY_ROLE);
-		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
 		String cache = request.getString(KEY_CACHE);
 		String combine = request.getString(KEY_COMBINE);
 		Subquery from = (Subquery) request.get(KEY_FROM);

@@ -26,10 +26,10 @@ import java.util.Map;
  */
 public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final String TAG = "JSONObject";
 
-	
+
 	/**ordered
 	 */
 	public JSONObject() {
@@ -83,7 +83,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//JSONObject内关键词 key <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	
+
 	public static String KEY_ID = "id";
 	public static String KEY_ID_IN = KEY_ID + "{}";
 	public static String KEY_USER_ID = "userId";
@@ -118,8 +118,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setUserIdIn(List<Object> list) {
 		return puts(KEY_USER_ID_IN, list);
 	}
-	
-	
+
+
 	public static final int CACHE_ALL = 0;
 	public static final int CACHE_ROM = 1;
 	public static final int CACHE_RAM = 2;
@@ -128,12 +128,15 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String CACHE_ROM_STRING = "ROM";
 	public static final String CACHE_RAM_STRING = "RAM";
 
-	
+
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
 	public static final String KEY_TRY = "@try"; //尝试，忽略异常
-	public static final String KEY_DROP = "@drop"; //丢弃，不返回
-	public static final String KEY_CORRECT = "@correct"; //字段校正
-	
+	public static final String KEY_CATCH = "@catch"; //TODO 捕捉到异常后，处理方式  null-不处理；DEFAULT-返回默认值；ORIGIN-返回请求里的原始值
+	public static final String KEY_DROP = "@drop"; //丢弃，不返回，TODO 应该通过 fastjson 的 ignore 之类的机制来处理，避免导致下面的对象也不返回
+	@Deprecated public static final String KEY_CORRECT = "@correct"; //字段校正，应用场景太少，实现麻烦，而且完全可以用远程函数来替代，最早 3.8.0 去除
+	//	public static final String KEY_KEEP = "@keep"; //一定会返回，为 null 或 空对象时，会使用默认值(非空)，解决其它对象因为不关联的第一个对为空导致也不返回
+	public static final String KEY_DEFULT = "@default"; //TODO 自定义默认值 { "@default":true }，@default 可完全替代 @keep
+
 	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	public static final String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
 	public static final String KEY_EXPLAIN = "@explain"; //分析 true/false
@@ -145,7 +148,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_GROUP = "@group"; //分组方式
 	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_ORDER = "@order"; //排序方式
-	
+
 	public static final List<String> TABLE_KEY_LIST;
 	static {
 		TABLE_KEY_LIST = new ArrayList<String>();
@@ -172,7 +175,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setRole(String role) {
 		return puts(KEY_ROLE, role);
 	}
-	
+
 	/**set try, ignore exceptions
 	 * @param tri
 	 * @return this
@@ -180,7 +183,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setTry(boolean tri) {
 		return puts(KEY_TRY, tri);
 	}
-	
+
 	/**set drop, data dropped will not return
 	 * @param drop
 	 * @return this
@@ -188,7 +191,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setDrop(boolean drop) {
 		return puts(KEY_DROP, drop);
 	}
-	
+
 	/**set correct, correct keys to target ones
 	 * @param correct  Map{originKey, [posibleKeys]}， posibleKey之间用 , 隔开
 	 * @return this
@@ -196,8 +199,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setCorrect(Map<String, String> correct) {
 		return puts(KEY_CORRECT, correct);
 	}
-	
-	
+
+
 
 	/**set database where table was puts
 	 * @param database
@@ -388,7 +391,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//Request >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	
+
 
 	/**puts key-value in object into this
 	 * @param map
@@ -458,5 +461,5 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	}
 
 
-	
+
 }

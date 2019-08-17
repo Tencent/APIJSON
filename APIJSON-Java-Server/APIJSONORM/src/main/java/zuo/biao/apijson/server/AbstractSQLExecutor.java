@@ -14,12 +14,20 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.io.BufferedReader;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,17 +125,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return result != null ? result : new JSONObject();
 	}
 
-	/**关闭连接，释放资源
-	 */
-	@Override
-	public void close() {
-		cacheMap.clear();
-		cacheMap = null;
 
-		generatedSQLCount = 0;
-		cachedSQLCount = 0;
-		executedSQLCount = 0;
-	}
 
 	@Override
 	public ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception {
@@ -170,7 +168,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		final int position = config.getPosition();
 		JSONObject result;
 
-		generatedSQLCount ++;
+		if (config.isExplain() == false) {
+			generatedSQLCount ++;
+		}
 
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -552,6 +552,20 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		else if (value instanceof String && isJSONType(rsmd, columnIndex)) { //json String
 			value = JSON.parse((String) value);
 		}
+		else if (value instanceof Blob) { //FIXME 存的是 abcde，取出来直接就是 [97, 98, 99, 100, 101] 这种 byte[] 类型，没有经过以下处理，但最终序列化后又变成了字符串 YWJjZGU=
+			value = new String(((Blob) value).getBytes(1, (int) ((Blob) value).length()), "UTF-8");
+		}
+		else if (value instanceof Clob) {
+
+			StringBuffer sb = new StringBuffer(); 
+			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream()); 
+			String s = br.readLine();
+			while (s != null) {
+				sb.append(s); 
+				s = br.readLine(); 
+			}
+			value = sb.toString();
+		}
 
 		return value;
 	}
@@ -572,6 +586,177 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+
+
+	/**
+	 * @param config 
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
+		PreparedStatement statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared())); //创建Statement对象
+		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
+
+		if (valueList != null && valueList.isEmpty() == false) {
+			for (int i = 0; i < valueList.size(); i++) {
+				statement = setArgument(config, statement, i, valueList.get(i));
+			}
+		}
+		// statement.close();
+
+		return statement;
+	}
+
+	public PreparedStatement setArgument(@NotNull SQLConfig config, @NotNull PreparedStatement statement, int index, Object value) throws SQLException {
+		//JSON.isBooleanOrNumberOrString(v) 解决 PostgreSQL: Can't infer the SQL type to use for an instance of com.alibaba.fastjson.JSONArray
+		if (zuo.biao.apijson.JSON.isBooleanOrNumberOrString(value)) {
+			statement.setObject(index + 1, value); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
+		}
+		else {
+			statement.setString(index + 1, value == null ? null : value.toString()); //MySQL setObject 不支持 JSON 类型
+		}
+		return statement;
+	}
+
+	//TODO String 改为 enum Database 解决大小写不一致(MySQL, mysql等)导致创建多余的 Connection
+	private Map<String, Connection> connectionMap = new HashMap<>();
+	private Connection connection;
+	@NotNull
+	@Override
+	public Connection getConnection(@NotNull SQLConfig config) throws Exception {
+		connection = connectionMap.get(config.getDatabase());
+		if (connection == null || connection.isClosed()) {
+			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
+
+			if (SQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) { //PostgreSQL 不允许 cross-database
+				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
+			}
+			else {
+				int v;
+				try {
+					String[] vs = config.getDBVersion().split("[.]");
+					v = Integer.parseInt(vs[0]);
+				}
+				catch (Exception e) {
+					v = 1;
+					Log.e(TAG, "getStatement  try { String[] vs = config.getDBVersion().split([.]); ... >> } catch (Exception e) {\n" + e.getMessage());
+				}
+
+				if (v >= 8) {
+					connection = DriverManager.getConnection(config.getDBUri() + "?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
+							+ config.getDBAccount() + "&password=" + config.getDBPassword());
+				}
+				else {
+					connection = DriverManager.getConnection(config.getDBUri() + "?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
+							+ config.getDBAccount() + "&password=" + config.getDBPassword());
+				}
+			}
+			connectionMap.put(config.getDatabase(), connection);
+		}
+
+		int ti = getTransactionIsolation();
+		if (ti != Connection.TRANSACTION_NONE) { //java.sql.SQLException: Transaction isolation level NONE not supported by MySQL
+			begin(ti);
+		}
+
+		return connection;
+	}
+
+	//事务处理 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	private int transactionIsolation;
+	@Override
+	public int getTransactionIsolation() {
+		return transactionIsolation;
+	}
+	@Override
+	public void setTransactionIsolation(int transactionIsolation) {
+		this.transactionIsolation = transactionIsolation;
+	}
+
+	@Override
+	public void begin(int transactionIsolation) throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION begin transactionIsolation = " + transactionIsolation + " >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		//不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
+		//		if (connection == null || connection.isClosed()) {
+		//			return;
+		//		}
+		connection.setTransactionIsolation(transactionIsolation);
+		connection.setAutoCommit(false); //java.sql.SQLException: Can''t call commit when autocommit=true
+	}
+	@Override
+	public void rollback() throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION rollback >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
+		if (connection == null) { // || connection.isClosed()) {
+			return;
+		}
+		connection.rollback();
+	}
+	@Override
+	public void rollback(Savepoint savepoint) throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION rollback savepoint " + (savepoint == null ? "" : "!") + "= null >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
+		if (connection == null) { // || connection.isClosed()) {
+			return;
+		}
+		connection.rollback(savepoint);
+	}
+	@Override
+	public void commit() throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION commit >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
+		if (connection == null) { // || connection.isClosed()) {
+			return;
+		}
+		connection.commit();
+	}
+	//事务处理 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	/**关闭连接，释放资源
+	 */
+	@Override
+	public void close() {
+		cacheMap.clear();
+		cacheMap = null;
+
+		generatedSQLCount = 0;
+		cachedSQLCount = 0;
+		executedSQLCount = 0;
+
+		if (connectionMap == null) {
+			return;
+		}
+
+		Collection<Connection> connections = connectionMap.values();
+
+		if (connections != null) {
+			for (Connection connection : connections) {
+				try {
+					if (connection != null && connection.isClosed() == false) {
+						connection.close();
+					}
+				}
+				catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		connectionMap.clear();
+		connectionMap = null;
+	}
+
+	@Override
+	public ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
+		return getStatement(config).executeQuery(); //PreparedStatement 不用传 SQL
+	}
+
+	@Override
+	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
+		return getStatement(config).executeUpdate(); //PreparedStatement 不用传 SQL
 	}
 
 

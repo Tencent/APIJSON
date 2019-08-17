@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +25,10 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.server.AbstractParser;
 import zuo.biao.apijson.server.JSONRequest;
+import zuo.biao.apijson.server.Join;
 import zuo.biao.apijson.server.SQLConfig;
+import zuo.biao.apijson.server.SQLExecutor;
+import zuo.biao.apijson.server.exception.NotExistException;
 
 
 /**请求解析器
@@ -106,15 +110,7 @@ public class DemoParser extends AbstractParser<Long> {
 		return new DemoObjectParser(session, request, parentPath, name, arrayConfig, isSubquery) {
 
 			//TODO 删除，onPUTArrayParse改用MySQL函数JSON_ADD, JSON_REMOVE等
-			@Override
-			public JSONObject parseResponse(JSONRequest request) throws Exception {
-				DemoParser demoParser = new DemoParser(RequestMethod.GET);
-				demoParser.setSession(session);
-				//						parser.setNoVerifyRequest(noVerifyRequest)
-				demoParser.setNoVerifyLogin(noVerifyLogin);
-				demoParser.setNoVerifyRole(noVerifyRole);
-				return demoParser.parseResponse(request);
-			}
+		
 
 
 			//			@Override

@@ -14,9 +14,11 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
 
@@ -82,11 +84,31 @@ public interface SQLExecutor {
 	 */
 	boolean isJSONType(ResultSetMetaData rsmd, int position);
 
+	
+	Connection getConnection(@NotNull SQLConfig config) throws Exception;
+	Statement getStatement(@NotNull SQLConfig config) throws Exception;
+	
+	int getTransactionIsolation();
+	void setTransactionIsolation(int transactionIsolation);
+	/**开始事务
+	 * @throws SQLException
+	 */
+	void begin(int transactionIsolation) throws SQLException;
+	/**回滚事务
+	 * @throws SQLException
+	 */
+	void rollback() throws SQLException;
+	/**提交事务
+	 * @throws SQLException
+	 */
+	void rollback(Savepoint savepoint) throws SQLException;
+	/**提交事务
+	 * @throws SQLException
+	 */
+	void commit() throws SQLException;
 	/**关闭连接，释放资源
 	 */
 	void close();
-	
-	Statement getStatement(@NotNull SQLConfig config) throws Exception;
 	
 	ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception;
 	

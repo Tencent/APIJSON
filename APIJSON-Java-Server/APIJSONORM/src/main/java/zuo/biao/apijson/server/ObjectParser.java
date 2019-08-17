@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package zuo.biao.apijson.server;
 
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
@@ -42,12 +43,24 @@ public interface ObjectParser {
 	 */
 	ObjectParser parseCorrect() throws Exception;
 	
-	/**
+	/**调用 parser 的 sqlExecutor 来解析结果
+	 * @param method
+	 * @param table
+	 * @param alias
 	 * @param request
+	 * @param joinList
+	 * @param isProcedure
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject parseResponse(@NotNull JSONRequest request) throws Exception;
+	public JSONObject parseResponse(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception;
+	/**调用 parser 的 sqlExecutor 来解析结果
+	 * @param config
+	 * @param isProcedure
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONObject parseResponse(SQLConfig config, boolean isProcedure) throws Exception;
 
 
 
@@ -120,7 +133,8 @@ public interface ObjectParser {
 	
 
 	SQLConfig newSQLConfig(boolean isProcedure) throws Exception;
-
+	SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception;
+	
 	/**
 	 * response has the final value after parse (and query if isTableKey)
 	 */
