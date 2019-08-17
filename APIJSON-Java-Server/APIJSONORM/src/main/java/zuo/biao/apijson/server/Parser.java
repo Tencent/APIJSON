@@ -47,6 +47,12 @@ public interface Parser<T> {
 	RequestMethod getMethod();
 	Parser<T> setMethod(@NotNull RequestMethod method);
 
+	int getVersion();
+	Parser<T> setVersion(int version);
+	
+	String getTag();
+	Parser<T> setTag(String tag);
+
 	JSONObject getRequest();
 	Parser<T> setRequest(JSONObject request);
 

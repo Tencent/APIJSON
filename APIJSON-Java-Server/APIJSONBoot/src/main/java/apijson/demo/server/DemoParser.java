@@ -14,7 +14,6 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,10 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.server.AbstractParser;
 import zuo.biao.apijson.server.JSONRequest;
-import zuo.biao.apijson.server.Join;
 import zuo.biao.apijson.server.SQLConfig;
-import zuo.biao.apijson.server.SQLExecutor;
-import zuo.biao.apijson.server.exception.NotExistException;
 
 
 /**请求解析器
@@ -98,7 +94,7 @@ public class DemoParser extends AbstractParser<Long> {
 	@Override
 	public Object onFunctionParse(JSONObject json, String fun) throws Exception {
 		if (function == null) {
-			function = new DemoFunction(requestMethod, session);
+			function = new DemoFunction(requestMethod, tag, version, session);
 		}
 		return function.invoke(fun, json);
 	}

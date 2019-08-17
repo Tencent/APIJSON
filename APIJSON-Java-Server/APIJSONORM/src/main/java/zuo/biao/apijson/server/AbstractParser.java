@@ -120,6 +120,28 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		this.transactionIsolation = RequestMethod.isQueryMethod(method) ? Connection.TRANSACTION_NONE : Connection.TRANSACTION_REPEATABLE_READ;
 		return this;
 	}
+	
+	protected int version;
+	@Override
+	public int getVersion() {
+		return version;
+	}
+	@Override
+	public AbstractParser<T> setVersion(int version) {
+		this.version = version;
+		return this;
+	}
+	
+	protected String tag;
+	@Override
+	public String getTag() {
+		return tag;
+	}
+	@Override
+	public AbstractParser<T> setTag(String tag) {
+		this.tag = tag;
+		return this;
+	}
 
 	protected JSONObject requestObject;
 	@Override
@@ -571,6 +593,8 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		if (StringUtil.isNotEmpty(tag, true) == false) {
 			throw new IllegalArgumentException("请在最外层设置tag！一般是Table名，例如 \"tag\": \"User\" ");
 		}
+		setTag(tag);
+
 		int version = requestObject.getIntValue(JSONRequest.KEY_VERSION);
 
 		JSONObject object = null;

@@ -15,6 +15,10 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.activation.UnsupportedDataTypeException;
 
@@ -22,6 +26,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import zuo.biao.apijson.NotNull;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
 /**可远程调用的函数类
@@ -30,6 +35,32 @@ import zuo.biao.apijson.StringUtil;
 public class RemoteFunction {
 	//	private static final String TAG = "RemoteFunction";
 
+	// <methodName, JSONObject>
+	// <isContain, <arguments:"array,key", tag:null, methods:null>>
+	public static final Map<String, JSONObject> FUNCTION_MAP;
+	static {
+		FUNCTION_MAP = new HashMap<>();
+	}
+	
+	private final RequestMethod method;
+	private final String tag;
+	private final int version;
+	public RemoteFunction(RequestMethod method, String tag, int version) {
+		this.method = method == null ? RequestMethod.GET : method;
+		this.tag = tag;
+		this.version = version;
+	}
+
+	public RequestMethod getMethod() {
+		return method;
+	}
+	public String getTag() {
+		return tag;
+	}
+	public int getVersion() {
+		return version;
+	}
+	
 	/**反射调用
 	 * @param fun
 	 * @param request
@@ -39,6 +70,25 @@ public class RemoteFunction {
 	public static Object invoke(@NotNull RemoteFunction fun, @NotNull JSONObject request, @NotNull String function) throws Exception {
 
 		FunctionBean fb = parseFunction(function, request, false);
+		
+		JSONObject row = FUNCTION_MAP.get(fb.getMethod());
+		if (row == null) {
+			throw new UnsupportedOperationException("不允许调用远程函数 " + fb.getMethod() + " !");
+		}
+		
+		int v = row.getIntValue("version");
+		if (v < fun.getVersion()) {
+			throw new UnsupportedOperationException("不允许 version = " + fun.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + v + " !");
+		}
+		String t = row.getString("tag");
+		if (t != null && t.equals(fun.getTag()) == false) {
+			throw new UnsupportedOperationException("不允许 tag = " + fun.getTag() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 tag = " + t + " !");
+		}
+		String[] methods = StringUtil.split(row.getString("methods"));
+		List<String> ml = methods == null || methods.length <= 0 ? null : Arrays.asList(methods);
+		if (ml != null && ml.contains(fun.getMethod().toString()) == false) {
+			throw new UnsupportedOperationException("不允许 method = " + fun.getMethod() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 method 在 " + methods + "内 !");
+		}
 
 		try {
 			return invoke(fun, fb.getMethod(), fb.getTypes(), fb.getValues()); 
