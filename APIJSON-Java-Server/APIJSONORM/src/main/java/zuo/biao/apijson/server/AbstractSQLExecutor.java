@@ -195,9 +195,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			switch (config.getMethod()) {
 			case HEAD:
 			case HEADS:
-				executedSQLCount ++;
-
 				rs = executeQuery(config);
+				
+				executedSQLCount ++;
 
 				result = rs.next() ? AbstractParser.newSuccessResult()
 						: AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
@@ -236,9 +236,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					return result;
 				}
 
-				executedSQLCount ++;
-
 				rs = executeQuery(config);
+				
+				if (config.isExplain() == false) { //只有 SELECT 才能 EXPLAIN
+					executedSQLCount ++;
+				}
 				break;
 
 			default://OPTIONS, TRACE等

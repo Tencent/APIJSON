@@ -149,7 +149,7 @@ public class DemoFunction extends RemoteFunction {
 							, true
 					)
 					.setTag(item.getString(JSONRequest.KEY_TAG))
-					.setVersion(item.getInteger(JSONRequest.KEY_VERSION))
+					.setVersion(item.getIntValue(JSONRequest.KEY_VERSION))
 					.parseResponse(demo);
 
 			if (JSONResponse.isSuccess(r) == false) {
@@ -328,10 +328,10 @@ public class DemoFunction extends RemoteFunction {
 	 * @return
 	 * @throws ServerException 
 	 */
-	public JSONObject getFunctionDemo(@NotNull JSONObject request) throws ServerException {
+	public JSONObject getFunctionDemo(@NotNull JSONObject request) {
 		JSONObject demo = JSON.parseObject(request.getString("demo"));
 		if (demo == null) {
-			throw new ServerException("服务器内部错误，字段 demo 的值必须为合法且非 null 的 JSONObejct 字符串！");
+			demo = new JSONObject();
 		}
 		if (demo.containsKey("result()") == false) {
 			demo.put("result()", getFunctionCall(request.getString("name"), request.getString("arguments")));
@@ -353,7 +353,7 @@ public class DemoFunction extends RemoteFunction {
 	 * @return
 	 */
 	private static String getFunctionCall(String name, String arguments) {
-		return name + "(" + arguments + ")";
+		return name + "(" + StringUtil.getTrimedString(arguments) + ")";
 	}
 
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
@@ -361,7 +361,7 @@ public class DemoFunction extends RemoteFunction {
 	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
 	 * @throws Exception
 	 */
-	public JSONArray getIdList(@NotNull JSONObject request) throws Exception {
+	public JSONArray getIdList(@NotNull JSONObject request) {
 		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
 	}
 
