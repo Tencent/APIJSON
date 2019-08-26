@@ -25,7 +25,7 @@
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
-  <a href="https://github.com/APIJSON/APIJSON">中文版&nbsp;             </a>
+  <a href="https://github.com/APIJSON/APIJSON/blob/master/README.md">中文版&nbsp;             </a>
   <a href="https://github.com/APIJSON/APIJSON/blob/master/documentation_eng.md">Document&nbsp;             </a>
   <a href="http://i.youku.com/apijson">Video&nbsp;             </a>
   <a href="http://apijson.org/auto">Test</a>
