@@ -26,6 +26,7 @@
 </p>
 <p align="center" >
   <a href="http://apijson.org/">Chinese&nbsp;             </a>
+  <a href="https://github.com/APIJSON/APIJSON/blob/master/documentation_eng.md">Document&nbsp;             </a>
   <a href="http://i.youku.com/apijson">Video&nbsp;             </a>
   <a href="http://apijson.cn/">Test</a>
 </p>
