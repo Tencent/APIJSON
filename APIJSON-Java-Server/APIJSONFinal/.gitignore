@@ -27,8 +27,6 @@ plan.txt
 
 *.class
 
-# Package Files #
-*.jar
 
 
 *.bak

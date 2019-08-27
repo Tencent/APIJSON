@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSONObject;
@@ -22,6 +24,7 @@ import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.AbstractObjectParser;
+import zuo.biao.apijson.server.Join;
 import zuo.biao.apijson.server.Parser;
 import zuo.biao.apijson.server.SQLConfig;
 
@@ -29,7 +32,7 @@ import zuo.biao.apijson.server.SQLConfig;
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public abstract class DemoObjectParser extends AbstractObjectParser {
+public class DemoObjectParser extends AbstractObjectParser {
 
 	static {
 		COMPILE_MAP.put("phone", StringUtil.PATTERN_PHONE);
@@ -38,7 +41,7 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	}
 
 
-	
+
 	/**for single object
 	 * @param parentPath
 	 * @param request
@@ -48,7 +51,7 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception {
 		super(request, parentPath, name, arrayConfig, isSubquery);
 	}
-	
+
 	@Override
 	public DemoObjectParser setMethod(RequestMethod method) {
 		super.setMethod(method);
@@ -61,9 +64,10 @@ public abstract class DemoObjectParser extends AbstractObjectParser {
 		return this;
 	}
 
+
 	@Override
-	public SQLConfig newSQLConfig(boolean isProcedure) throws Exception {
-		return DemoSQLConfig.newSQLConfig(method, table, alias, sqlRequest, joinList, isProcedure);
+	public SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
+		return DemoSQLConfig.newSQLConfig(method, table, alias, request, joinList, isProcedure);
 	}
 
 

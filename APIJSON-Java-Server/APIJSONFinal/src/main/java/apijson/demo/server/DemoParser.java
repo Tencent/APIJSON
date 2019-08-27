@@ -94,7 +94,7 @@ public class DemoParser extends AbstractParser<Long> {
 	@Override
 	public Object onFunctionParse(JSONObject json, String fun) throws Exception {
 		if (function == null) {
-			function = new DemoFunction(requestMethod, session);
+			function = new DemoFunction(requestMethod, tag, version, session);
 		}
 		return function.invoke(fun, json);
 	}
@@ -106,15 +106,7 @@ public class DemoParser extends AbstractParser<Long> {
 		return new DemoObjectParser(session, request, parentPath, name, arrayConfig, isSubquery) {
 
 			//TODO 删除，onPUTArrayParse改用MySQL函数JSON_ADD, JSON_REMOVE等
-			@Override
-			public JSONObject parseResponse(JSONRequest request) throws Exception {
-				DemoParser demoParser = new DemoParser(RequestMethod.GET);
-				demoParser.setSession(session);
-				//						parser.setNoVerifyRequest(noVerifyRequest)
-				demoParser.setNoVerifyLogin(noVerifyLogin);
-				demoParser.setNoVerifyRole(noVerifyRole);
-				return demoParser.parseResponse(request);
-			}
+		
 
 
 			//			@Override
