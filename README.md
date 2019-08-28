@@ -242,7 +242,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
 
-[AbsGrade](https://github.com/APIJSON/AbsGrade) 抽象列表分级工具，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等。
+[AbsGrade](https://github.com/APIJSON/AbsGrade) 抽象列表分级工具，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
 
 [APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
 
