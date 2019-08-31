@@ -351,9 +351,16 @@ public class Structure {
 				real.remove(rk);
 				continue;
 			}
+			
+			Object rv = real.get(rk);
+
+			//不允许传远程函数，只能后端配置
+			if (rk.endsWith("()") && rv instanceof String) {
+				throw new UnsupportedOperationException(rk + " 不合法！非开放请求不允许传远程函数 key():\"fun()\" ！");
+			}
 
 			//不在target内的 key:{}
-			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false && real.get(rk) instanceof JSONObject) {
+			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false && rv instanceof JSONObject) {
 				throw new UnsupportedOperationException(name + " 里面不允许传 " + rk + ":{} ！");
 			}
 		}

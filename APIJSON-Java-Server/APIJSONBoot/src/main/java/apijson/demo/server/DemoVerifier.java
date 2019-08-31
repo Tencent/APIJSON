@@ -146,6 +146,7 @@ public class DemoVerifier extends AbstractVerifier<Long> {
 				}
 			}
 
+			DemoSQLConfig.TABLE_KEY_MAP.put(alias, name);
 		}
 
 		Log.d(TAG, "init  for /> ACCESS_MAP.size() = " + ACCESS_MAP.size() + " >>>>>>>>>>>>>>>>>>>>>>>");

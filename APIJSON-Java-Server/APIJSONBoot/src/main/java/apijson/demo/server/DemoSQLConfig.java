@@ -21,8 +21,6 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
-import apijson.demo.server.model.Privacy;
-import apijson.demo.server.model.User;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.server.AbstractSQLConfig;
 import zuo.biao.apijson.server.Join;
@@ -38,14 +36,15 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	public static final Callback SIMPLE_CALLBACK;
 
-	
+
 	static {
 		//TODO 默认模式名，改成你自己的
 		DEFAULT_SCHEMA = "sys";
-		
-		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
-		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
-		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
+
+		//  由 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置
+		//		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
+		//		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
+		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
 		//主键名映射
 		SIMPLE_CALLBACK = new SimpleCallback() {
@@ -82,7 +81,7 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	public String getDBVersion() {
 		return "5.7.22"; //"8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
 	}
-	
+
 	@Override
 	public String getDBUri() {
 		//TODO 改成你自己的，TiDB 默认端口为 4000

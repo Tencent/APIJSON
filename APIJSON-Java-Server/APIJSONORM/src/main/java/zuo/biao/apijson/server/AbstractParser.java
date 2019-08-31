@@ -591,7 +591,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 		String tag = requestObject.getString(JSONRequest.KEY_TAG);
 		if (StringUtil.isNotEmpty(tag, true) == false) {
-			throw new IllegalArgumentException("请在最外层设置tag！一般是Table名，例如 \"tag\": \"User\" ");
+			throw new IllegalArgumentException("请在最外层设置 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
 		}
 		setTag(tag);
 
@@ -605,7 +605,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			error = e.getMessage();
 		}
 		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
-			throw new UnsupportedOperationException("非开放请求必须是Request表中校验规则允许的操作！\n " + error);
+			throw new UnsupportedOperationException("非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error);
 		}
 
 		JSONObject target = null;

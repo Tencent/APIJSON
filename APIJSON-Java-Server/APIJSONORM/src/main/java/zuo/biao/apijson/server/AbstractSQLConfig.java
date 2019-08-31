@@ -2603,7 +2603,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		else if (key.endsWith("<>")) {//包含 json_contains，或者说value处于key对应值的范围内。查询时处理
 			key = key.substring(0, key.length() - 2);
 		} 
-		else if (key.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存？
+		else if (key.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存
 			key = key.substring(0, key.length() - 2);
 		} 
 		else if (key.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用

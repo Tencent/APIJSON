@@ -125,7 +125,7 @@ public class RemoteFunction {
 
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
-		String method = end != function.length() - 1 ? null : function.substring(0, start);
+		String method = (start <= 0 || end != function.length() - 1) ? null : function.substring(0, start);
 		if (StringUtil.isEmpty(method, true)) {
 			throw new IllegalArgumentException("字符 " + function + " 不合法！函数的名称 function 不能为空，"
 					+ "且必须为 function(key0,key1,...) 这种单函数格式！"
