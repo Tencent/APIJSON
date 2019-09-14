@@ -1,4 +1,4 @@
-## API design rules
+## API Design Rules
 
 ### 1. Methods and API endpoints
 
