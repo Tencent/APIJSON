@@ -28,7 +28,7 @@
   <a href="https://github.com/TommyLemon/APIJSON/blob/master/README-English.md">English</a>
   <a href="https://github.com/TommyLemon/APIJSON/blob/master/Document.md">通用文档</a>
   <a href="http://i.youku.com/apijson">视频教程</a>
-  <a href="http://apijson.org/auto">在线工具</a>
+  <a href="http://apijson.cn">在线工具</a>
 </p>
 
 <p align="center" >
