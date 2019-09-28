@@ -58,6 +58,7 @@
 			<artifactId>jtds</artifactId>
 			<version>1.3.1</version>
 		</dependency>
+		<!-- 没找到合适且稳定的 Oracle 和 PostgreSQL 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
 		
 	</dependencies>
 
