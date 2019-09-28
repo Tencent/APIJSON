@@ -390,10 +390,10 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 
-		if (Log.DEBUG) {
-			requestObject.put("sql:generate/cache/execute/maxExecute", sqlExecutor.getGeneratedSQLCount() + "/" + sqlExecutor.getCachedSQLCount() + "/" + sqlExecutor.getExecutedSQLCount() + "/" + getMaxSQLCount());
-			requestObject.put("depth:count/max", queryDepth + "/" + getMaxQueryDepth());
-			requestObject.put("time:start/duration/end", startTime + "/" + duration + "/" + endTime);
+		if (Log.DEBUG) { //用 | 替代 /，避免 APIJSON ORM，APIAuto 等解析路径错误
+			requestObject.put("sql:generate|cache|execute|maxExecute", sqlExecutor.getGeneratedSQLCount() + "|" + sqlExecutor.getCachedSQLCount() + "|" + sqlExecutor.getExecutedSQLCount() + "|" + getMaxSQLCount());
+			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
+			requestObject.put("time:start|duration|end", startTime + "|" + duration + "|" + endTime);
 		}
 
 		onClose();
