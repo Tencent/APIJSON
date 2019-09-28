@@ -28,6 +28,8 @@ public interface SQLConfig {
 
 	String DATABASE_MYSQL = "MYSQL";
 	String DATABASE_POSTGRESQL = "POSTGRESQL";
+	String DATABASE_SQLSERVER = "SQLSERVER";
+	String DATABASE_ORACLE = "ORACLE";
 	
 	String SCHEMA_INFORMATION = "information_schema";
 	String TABLE_SCHEMA = "table_schema";

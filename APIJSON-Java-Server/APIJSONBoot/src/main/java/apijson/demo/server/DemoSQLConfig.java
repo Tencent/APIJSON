@@ -84,16 +84,59 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 	@Override
 	public String getDBUri() {
-		//TODO 改成你自己的，TiDB 默认端口为 4000
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432/postgres" : "jdbc:mysql://localhost:3306";
+		String db = getDatabase();
+		if (db == null) {
+			db = "";
+		}
+		switch (db) {
+		case DATABASE_POSTGRESQL:
+			return "jdbc:postgresql://localhost:5432/postgres"; //TODO 改成你自己的
+		case DATABASE_SQLSERVER:
+			return "jdbc:jtds:sqlserver://localhost:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
+		case DATABASE_ORACLE:
+			return "jdbc:oracle:thin:@localhost:1521:orcl"; //TODO 改成你自己的
+		case DATABASE_MYSQL:
+		default:
+			return "jdbc:mysql://localhost:3306"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+		}
 	}
+
+
 	@Override
 	public String getDBAccount() {
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "postgres" : "root"; //TODO 改成你自己的
+		String db = getDatabase();
+		if (db == null) {
+			db = "";
+		}
+		switch (db) {
+		case DATABASE_POSTGRESQL:
+			return "postgres";  //TODO 改成你自己的
+		case DATABASE_SQLSERVER:
+			return "sa";  //TODO 改成你自己的
+		case DATABASE_ORACLE:
+			return "scott";  //TODO 改成你自己的
+		case DATABASE_MYSQL:
+		default:
+			return "root";  //TODO 改成你自己的
+		}
 	}
 	@Override
 	public String getDBPassword() {
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "apijson"; //TODO 改成你自己的，TiDB 默认密码为空字符串 ""
+		String db = getDatabase();
+		if (db == null) {
+			db = "";
+		}
+		switch (db) {
+		case DATABASE_POSTGRESQL:
+			return null;  //TODO 改成你自己的
+		case DATABASE_SQLSERVER:
+			return "apijson@123";  //TODO 改成你自己的
+		case DATABASE_ORACLE:
+			return "tiger";  //TODO 改成你自己的
+		case DATABASE_MYSQL:
+		default:
+			return "apijson";  //TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
+		}
 	}
 
 

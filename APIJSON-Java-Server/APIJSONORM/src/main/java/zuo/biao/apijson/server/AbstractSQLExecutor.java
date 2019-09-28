@@ -633,10 +633,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
-			if (SQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase())) { //PostgreSQL 不允许 cross-database
-				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
-			}
-			else {
+			if (SQLConfig.DATABASE_MYSQL.equals(config.getDatabase())) {
 				int v;
 				try {
 					String[] vs = config.getDBVersion().split("[.]");
@@ -646,7 +643,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					v = 1;
 					Log.e(TAG, "getStatement  try { String[] vs = config.getDBVersion().split([.]); ... >> } catch (Exception e) {\n" + e.getMessage());
 				}
-
+				
 				if (v >= 8) {
 					connection = DriverManager.getConnection(config.getDBUri() + "?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
 							+ config.getDBAccount() + "&password=" + config.getDBPassword());
@@ -655,6 +652,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					connection = DriverManager.getConnection(config.getDBUri() + "?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
 							+ config.getDBAccount() + "&password=" + config.getDBPassword());
 				}
+			}
+			else { //PostgreSQL 不允许 cross-database
+				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
 			}
 			connectionMap.put(config.getDatabase(), connection);
 		}

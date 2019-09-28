@@ -48,6 +48,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.activation.UnsupportedDataTypeException;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -78,12 +80,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
 	public static final Map<String, String> TABLE_KEY_MAP;
+	public static final List<String> DATABASE_LIST;
 	static {
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
 		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TABLE_NAME);
 		TABLE_KEY_MAP.put(PgAttribute.class.getSimpleName(), PgAttribute.TABLE_NAME);
 		TABLE_KEY_MAP.put(PgClass.class.getSimpleName(), PgClass.TABLE_NAME);
+		
+		DATABASE_LIST = new ArrayList<>();
+		DATABASE_LIST.add(DATABASE_MYSQL);
+		DATABASE_LIST.add(DATABASE_POSTGRESQL);
+		DATABASE_LIST.add(DATABASE_SQLSERVER);
+		DATABASE_LIST.add(DATABASE_ORACLE);
 	}
 
 	@NotNull
@@ -224,7 +233,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.distinct = distinct;
 		return this;
 	}
-	
+
 	@Override
 	public String getDatabase() {
 		return database;
@@ -237,7 +246,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@Override
 	public String getQuote() {
-		return DATABASE_POSTGRESQL.equals(getDatabase()) ? "\"" : "`";
+		String db = getDatabase();
+		return StringUtil.isEmpty(db, true) || DATABASE_MYSQL.equals(db) ? "`" : "\"";
 	}
 
 	@Override
@@ -305,7 +315,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.table = table;
 		return this;
 	}
-	
+
 	@Override
 	public String getAlias() {
 		return alias;
@@ -538,7 +548,40 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 
-		order = StringUtil.getTrimedString(order);
+		String order = StringUtil.getTrimedString(getOrder());
+		String db = getDatabase();
+
+		if (DATABASE_ORACLE.equals(db) || DATABASE_SQLSERVER.equals(db)) { // Oracle 和 SQL Server 的 OFFSET 必须加 ORDER BY
+
+			//			String[] ss = StringUtil.split(order);
+			if (StringUtil.isEmpty(order, true)) {
+				String idKey = getIdKey();
+				if (StringUtil.isEmpty(idKey, true)) {
+					idKey = "id";
+				}
+				order = idKey; //让数据库调控默认升序还是降序  + "+";
+			}
+
+			//不用这么全面，毕竟没有语法问题还浪费性能，如果有其它问题，让前端传的 JSON 直接加上 @order 来解决
+			//			boolean contains = false;
+			//			if (ss != null) {
+			//				for (String s : ss) {
+			//					if (s != null && s.startsWith(idKey)) {
+			//						s = s.substring(idKey.length());
+			//						if ("+".equals(s) || "-".equals(s)) {// || " ASC ".equals(s) || " DESC ".equals(s)) {
+			//							contains = true;
+			//							break;
+			//						}
+			//					}
+			//				}
+			//			}
+
+			//			if (contains == false) {
+			//				order = (ss == null || ss.length <= 0 ? "" : order + ",") + idKey + "+";
+			//			}
+		}
+
+
 		if (order.contains("+")) {//replace没有包含的replacement会崩溃
 			order = order.replaceAll("\\+", " ASC ");
 		}
@@ -659,7 +702,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					else {
 						cfg = j.getJoinConfig();
 					}
-					
+
 					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
 						cfg.setAlias(cfg.getTable());
 					}
@@ -731,7 +774,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						index = isColumn ? ckeys[j].lastIndexOf(":") : -1; //StringUtil.split返回数组中，子项不会有null
 						origin = index < 0 ? ckeys[j] : ckeys[j].substring(0, index);
 						alias = index < 0 ? null : ckeys[j].substring(index + 1);
-						
+
 						distinct = j <= 0 && origin.startsWith(PREFFIX_DISTINCT);
 						if (distinct) {
 							origin = origin.substring(PREFFIX_DISTINCT.length());
@@ -768,7 +811,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						} else {
 							ckeys[j] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
 						}
-						
+
 						if (distinct) {
 							ckeys[j] = PREFFIX_DISTINCT + ckeys[j];
 						}
@@ -909,7 +952,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.type = type;
 		return this;
 	}
-	
+
 	@Override
 	public int getCache() {
 		return cache;
@@ -926,9 +969,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			cache2 = JSONRequest.CACHE_ALL;
 		}
 		else {
-//			if (isSubquery) {
-//				throw new IllegalArgumentException("子查询内不支持传 " + JSONRequest.KEY_CACHE + "!");
-//			}
+			//			if (isSubquery) {
+			//				throw new IllegalArgumentException("子查询内不支持传 " + JSONRequest.KEY_CACHE + "!");
+			//			}
 
 			switch (cache) {
 			case "0":
@@ -950,7 +993,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		setCache(cache2);
 		return this;
 	}
-	
+
 	@Override
 	public boolean isExplain() {
 		return explain;
@@ -960,7 +1003,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.explain = explain;
 		return this;
 	}
-	
+
 	@Override
 	public List<Join> getJoinList() {
 		return joinList;
@@ -1006,14 +1049,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getLimitString() {
-		return getLimitString(getPage(), getCount());// + 1);
+		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
+			return "";
+		}
+		return getLimitString(getPage(), getCount(), getDatabase());
 	}
 	/**获取限制数量
 	 * @param limit
 	 * @return
 	 */
-	public static String getLimitString(int page, int count) {
-		return count <= 0 ? "" : " LIMIT " + count + " OFFSET " + getOffset(page, count);
+	public static String getLimitString(int page, int count, String db) {
+		int offset = getOffset(page, count);
+
+		if (DATABASE_ORACLE.equals(db) || DATABASE_SQLSERVER.equals(db)) {
+			return " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
+		}
+
+		return " LIMIT " + count + " OFFSET " + offset;
 	}
 
 	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -1424,10 +1476,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			preparedValueList.add(value);
 			return "?";
 		}
-//		return (value instanceof Number || value instanceof Boolean) && DATABASE_POSTGRESQL.equals(getDatabase()) ? value :  "'" + value + "'";
+		//		return (value instanceof Number || value instanceof Boolean) && DATABASE_POSTGRESQL.equals(getDatabase()) ? value :  "'" + value + "'";
 		return (value instanceof Number || value instanceof Boolean) ? value :  "'" + value + "'"; //MySQL 隐式转换用不了索引
 	}
-	
+
 	@Override
 	public List<Object> getPreparedValueList() {
 		return preparedValueList;
@@ -2161,13 +2213,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
-		
+
 		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
 		if (explain && Log.DEBUG == false) { //不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
 			throw new UnsupportedOperationException("DEBUG 模式下不允许传 " + KEY_EXPLAIN + " ！");
 		}
-		
+
 		String database = request.getString(KEY_DATABASE);
+		if (StringUtil.isEmpty(database, false) == false && DATABASE_LIST.contains(database) == false) {
+			throw new UnsupportedDataTypeException("@database:value 中 value 错误，只能是 [" + StringUtil.getString(DATABASE_LIST.toArray()) + "] 中的一种！");
+		}
+		
 		String schema = request.getString(KEY_SCHEMA);
 
 		AbstractSQLConfig config = callback.getSQLConfig(method, database, schema, table);
@@ -2179,7 +2235,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (isProcedure) {
 			return config;
 		}
-		
+
 		config = parseJoin(method, config, joinList, callback); //放后面会导致主表是空对象时 joinList 未解析
 
 		if (request.isEmpty()) { // User:{} 这种空内容在查询时也有效
@@ -2420,7 +2476,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		boolean distinct = column == null ? false : column.startsWith(PREFFIX_DISTINCT);
-		
+
 		List<String> cs = new ArrayList<>();
 		String[] fks = StringUtil.split(distinct ? column.substring(PREFFIX_DISTINCT.length()) : column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
 		if (fks != null) {
@@ -2475,8 +2531,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return config;
 	}
 
-	
-	
+
+
 	/**
 	 * @param method
 	 * @param config
