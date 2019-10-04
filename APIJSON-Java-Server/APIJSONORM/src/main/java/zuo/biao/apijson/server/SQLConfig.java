@@ -30,38 +30,47 @@ public interface SQLConfig {
 	String DATABASE_POSTGRESQL = "POSTGRESQL";
 	String DATABASE_SQLSERVER = "SQLSERVER";
 	String DATABASE_ORACLE = "ORACLE";
-	
-	String SCHEMA_INFORMATION = "information_schema";
+
+	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
+	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
 	String TABLE_SCHEMA = "table_schema";
 	String TABLE_NAME = "table_name";
-	
+
 	int TYPE_CHILD = 0;
 	int TYPE_ITEM = 1;
 	int TYPE_ITEM_CHILD_0 = 2;
-	
+
+	boolean isMySQL();
+	boolean isPostgreSQL();
+	boolean isSQLServer();
+	boolean isOracle();
+	//暂时只兼容以上 4 种
+	//	boolean isSQL();
+	//	boolean isPLSQL();
+	//	boolean isTransactSQL();
 
 	@NotNull
 	String getIdKey();
 	@NotNull
 	String getUserIdKey();
-	
-	
+
+
 	/**获取数据库版本号，可通过判断版本号解决一些 JDBC 驱动连接数据库的兼容问题
 	 * MYSQL: 8.0, 5.7, 5.6 等； PostgreSQL: 11, 10, 9.6 等
 	 * @return
 	 */
 	String getDBVersion();
-	
+
 	/**获取数据库地址
 	 * @return
 	 */
 	String getDBUri();
-	
+
 	/**获取数据库账号
 	 * @return
 	 */
 	String getDBAccount();
-	
+
 	/**获取数据库密码
 	 * @return
 	 */
@@ -74,19 +83,19 @@ public interface SQLConfig {
 	String getSQL(boolean prepared) throws Exception;
 
 
-	
+
 	boolean isTest();
 	SQLConfig setTest(boolean test);
 
 	int getType();
 	SQLConfig setType(int type);
-	
+
 	int getCount();
 	SQLConfig setCount(int count);
-	
+
 	int getPage();
 	SQLConfig setPage(int page);
-	
+
 	int getQuery();
 	SQLConfig setQuery(int query);
 
@@ -98,11 +107,11 @@ public interface SQLConfig {
 
 	boolean isExplain();
 	SQLConfig setExplain(boolean explain);
-	
-	
+
+
 	RequestMethod getMethod();
 	SQLConfig setMethod(RequestMethod method);
-	
+
 	Object getId();
 	SQLConfig setId(Object id);
 
@@ -111,15 +120,15 @@ public interface SQLConfig {
 
 	public boolean isDistinct();
 	public SQLConfig setDistinct(boolean distinct);
-	
+
 	String getDatabase();
 	SQLConfig setDatabase(String database);
 
 	String getQuote();
-	
+
 	String getSchema();
 	SQLConfig setSchema(String schema);
-	
+
 	/**请求传进来的Table名
 	 * @return
 	 * @see {@link #getSQLTable()}
@@ -130,9 +139,9 @@ public interface SQLConfig {
 	 * @return
 	 */
 	String getSQLTable();
-	
+
 	String getTablePath();
-	
+
 	SQLConfig setTable(String table);
 
 	String getGroup();
@@ -140,13 +149,13 @@ public interface SQLConfig {
 
 	String getHaving();
 	SQLConfig setHaving(String having);
-	
+
 	String getOrder();
 	SQLConfig setOrder(String order);
 
 	Subquery getFrom();
 	SQLConfig setFrom(Subquery from);
-	
+
 	List<String> getColumn();
 	SQLConfig setColumn(List<String> column);
 
@@ -160,12 +169,12 @@ public interface SQLConfig {
 
 	Map<String, Object> getWhere();
 	SQLConfig setWhere(Map<String, Object> where);
-	
+
 	Map<String, List<String>> getCombine();
 	SQLConfig setCombine(Map<String, List<String>> combine);
-	
 
-	
+
+
 	/**
 	 * exactMatch = false
 	 * @param key
@@ -184,21 +193,21 @@ public interface SQLConfig {
 	 * @return
 	 */
 	SQLConfig putWhere(String key, Object value, boolean prior);
-	
-	
+
+
 	boolean isPrepared();
-	
+
 	SQLConfig setPrepared(boolean prepared);
-	
+
 	boolean isMain();
 
 	SQLConfig setMain(boolean main);
 
-	
+
 	List<Object> getPreparedValueList();
 	SQLConfig setPreparedValueList(List<Object> preparedValueList);
 
-	
+
 	String getAlias();
 
 	SQLConfig setAlias(String alias);
@@ -209,16 +218,16 @@ public interface SQLConfig {
 
 	SQLConfig setKeyPrefix(boolean keyPrefix);
 
-	
+
 	List<Join> getJoinList();
 
 	SQLConfig setJoinList(List<Join> joinList);
 
 	boolean hasJoin();
-	
-	
+
+
 	String getSubqueryString(Subquery subquery) throws Exception;
-	
+
 	SQLConfig setProcedure(String procedure);
-	
+
 }

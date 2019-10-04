@@ -16,12 +16,12 @@ package zuo.biao.apijson.server.model;
 
 import zuo.biao.apijson.MethodAccess;
 
-/**字段(列名)属性
+/**SQL Server 表属性
  * @author Lemon
  */
 @MethodAccess(POST = {}, PUT = {}, DELETE = {})
-public class Column {
-	public static final String TAG = "Column";
-	public static final String TABLE_NAME = "columns";
+public class SysTable {
+	public static final String TAG = "SysTable";
+	public static final String TABLE_NAME = "tables";
 
 }

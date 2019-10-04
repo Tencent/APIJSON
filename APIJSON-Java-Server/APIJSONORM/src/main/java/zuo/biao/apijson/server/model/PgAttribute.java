@@ -16,11 +16,12 @@ package zuo.biao.apijson.server.model;
 
 import zuo.biao.apijson.MethodAccess;
 
-/**评论
+/**PostgreSQL 字段属性
  * @author Lemon
  */
 @MethodAccess
 public class PgAttribute {
+	public static final String TAG = "PgAttribute";
 	public static final String TABLE_NAME = "pg_attribute";
 	
 }

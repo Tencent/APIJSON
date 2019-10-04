@@ -63,8 +63,11 @@ import zuo.biao.apijson.SQL;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.exception.NotExistException;
 import zuo.biao.apijson.server.model.Column;
+import zuo.biao.apijson.server.model.ExtendedProperty;
 import zuo.biao.apijson.server.model.PgAttribute;
 import zuo.biao.apijson.server.model.PgClass;
+import zuo.biao.apijson.server.model.SysColumn;
+import zuo.biao.apijson.server.model.SysTable;
 import zuo.biao.apijson.server.model.Table;
 
 /**config sql for JSON Request
@@ -73,6 +76,7 @@ import zuo.biao.apijson.server.model.Table;
 public abstract class AbstractSQLConfig implements SQLConfig {
 	private static final String TAG = "AbstractSQLConfig";
 
+	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
 	public static String DEFAULT_SCHEMA = "sys";
 	public static String PREFFIX_DISTINCT = "DISTINCT ";
 
@@ -85,8 +89,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
 		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TABLE_NAME);
-		TABLE_KEY_MAP.put(PgAttribute.class.getSimpleName(), PgAttribute.TABLE_NAME);
 		TABLE_KEY_MAP.put(PgClass.class.getSimpleName(), PgClass.TABLE_NAME);
+		TABLE_KEY_MAP.put(PgAttribute.class.getSimpleName(), PgAttribute.TABLE_NAME);
+		TABLE_KEY_MAP.put(SysTable.class.getSimpleName(), SysTable.TABLE_NAME);
+		TABLE_KEY_MAP.put(SysColumn.class.getSimpleName(), SysColumn.TABLE_NAME);
+		TABLE_KEY_MAP.put(ExtendedProperty.class.getSimpleName(), ExtendedProperty.TABLE_NAME);
 		
 		DATABASE_LIST = new ArrayList<>();
 		DATABASE_LIST.add(DATABASE_MYSQL);
@@ -94,7 +101,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
 	}
-
+	
+	
 	@NotNull
 	@Override
 	public String getIdKey() {
@@ -243,30 +251,75 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.database = database;
 		return this;
 	}
-
+	/**
+	 * @return db == null ? DEFAULT_DATABASE : db
+	 */
+	@NotNull
+	public String getSQLDatabase() {
+		String db = getDatabase();
+		return db == null ? DEFAULT_DATABASE : db;  // "" 表示已设置，不需要用全局默认的 StringUtil.isEmpty(db, false)) {
+	}
+	
+	@Override
+	public boolean isMySQL() {
+		return isMySQL(getSQLDatabase());
+	}
+	public static boolean isMySQL(String db) {
+		return DATABASE_MYSQL.equals(db);
+	}
+	@Override
+	public boolean isPostgreSQL() {
+		return isPostgreSQL(getSQLDatabase());
+	}
+	public static boolean isPostgreSQL(String db) {
+		return DATABASE_POSTGRESQL.equals(db);
+	}
+	@Override
+	public boolean isSQLServer() {
+		return isSQLServer(getSQLDatabase());
+	}
+	public static boolean isSQLServer(String db) {
+		return DATABASE_SQLSERVER.equals(db);
+	}
+	@Override
+	public boolean isOracle() {
+		return isOracle(getSQLDatabase());
+	}
+	public static boolean isOracle(String db) {
+		return DATABASE_ORACLE.equals(db);
+	}
+	
 	@Override
 	public String getQuote() {
-		String db = getDatabase();
-		return StringUtil.isEmpty(db, true) || DATABASE_MYSQL.equals(db) ? "`" : "\"";
+		return isMySQL() ? "`" : "\"";
 	}
 
 	@Override
 	public String getSchema() {
 		return schema;
 	}
-	public String getSQLSchema(String sqlTable) {
-		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
-		if ((Table.TABLE_NAME.equals(sqlTable) || Column.TABLE_NAME.equals(sqlTable)) ) {
-			return SCHEMA_INFORMATION;
-		}
-		if ((PgAttribute.TABLE_NAME.equals(sqlTable) || PgClass.TABLE_NAME.equals(sqlTable)) ) {
-			return "";
-		}
-
+	/**
+	 * @param sqlTable
+	 * @return
+	 */
+	@NotNull
+	public String getSQLSchema(String table) {
 		String sch = getSchema();
 		if (sch == null) { //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema  StringUtil.isEmpty(sch, true)) {
-			sch = DEFAULT_SCHEMA;
+			//不能强制，SQL Server 在 information_schema 和 sys 中都有 tables 和 columns //强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
+			if (Table.TAG.equals(table) || Column.TAG.equals(table)) {
+				return SCHEMA_INFORMATION; //MySQL, PostgreSQL, SQL Server 都有的
+			}
+			if (SysTable.TAG.equals(table) || SysColumn.TAG.equals(table)) {
+				return SCHEMA_SYS; //SQL Server 在 sys 中的属性比 information_schema 中的要全，能拿到注释
+			}
+			if ((PgAttribute.TAG.equals(table) || PgClass.TAG.equals(table)) ) {
+				return ""; //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema
+			}
+			
+			return DEFAULT_SCHEMA;
 		}
+		
 		return sch;
 	}
 	@Override
@@ -549,15 +602,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String order = StringUtil.getTrimedString(getOrder());
-		String db = getDatabase();
 
-		if (DATABASE_ORACLE.equals(db) || DATABASE_SQLSERVER.equals(db)) { // Oracle 和 SQL Server 的 OFFSET 必须加 ORDER BY
+		if (isOracle() || isSQLServer()) { // Oracle 和 SQL Server 的 OFFSET 必须加 ORDER BY
 
 			//			String[] ss = StringUtil.split(order);
 			if (StringUtil.isEmpty(order, true)) {
 				String idKey = getIdKey();
 				if (StringUtil.isEmpty(idKey, true)) {
-					idKey = "id";
+					idKey = "id"; //ORDER BY NULL 不行，SQL Server 会报错，必须要有排序，才能使用 OFFSET FETCH，如果没有 idKey，请求中指定 @order 即可
 				}
 				order = idKey; //让数据库调控默认升序还是降序  + "+";
 			}
@@ -1052,16 +1104,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
 			return "";
 		}
-		return getLimitString(getPage(), getCount(), getDatabase());
+		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer());
 	}
 	/**获取限制数量
 	 * @param limit
 	 * @return
 	 */
-	public static String getLimitString(int page, int count, String db) {
+	public static String getLimitString(int page, int count, boolean isTSQL) {
 		int offset = getOffset(page, count);
 
-		if (DATABASE_ORACLE.equals(db) || DATABASE_SQLSERVER.equals(db)) {
+		if (isTSQL) {
 			return " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
 		}
 
@@ -1605,7 +1657,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getRegExpString(String key, String value, boolean ignoreCase) {
-		if (DATABASE_POSTGRESQL.equals(getDatabase())) {
+		if (isPostgreSQL()) {
 			return getKey(key) + " ~" + (ignoreCase ? "* " : " ") + getValue(value);
 		}
 		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
@@ -1840,7 +1892,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
 					}
 
-					if (DATABASE_POSTGRESQL.equals(getDatabase())) {
+					if (isPostgreSQL()) {
 						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
 								+ getKey(key) + " @> " + getValue(newJSONArray(childs[i])); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
 					} else {

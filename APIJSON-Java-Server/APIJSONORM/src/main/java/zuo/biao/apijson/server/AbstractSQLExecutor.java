@@ -176,7 +176,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 				+ "\n已生成 " + generatedSQLCount + " 条 SQL"
 				+ "\nselect  startTime = " + startTime
-				+ "\nsql = \n" + sql
+				+ "\n database = " + StringUtil.getString(config.getDatabase())
+				+ "; schema = " + StringUtil.getString(config.getSchema())
+				+ "; sql = \n" + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 		ResultSet rs = null;
@@ -633,7 +635,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 
-			if (SQLConfig.DATABASE_MYSQL.equals(config.getDatabase())) {
+			if (config.isMySQL()) {
 				int v;
 				try {
 					String[] vs = config.getDBVersion().split("[.]");
@@ -656,6 +658,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			else { //PostgreSQL 不允许 cross-database
 				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
 			}
+			
 			connectionMap.put(config.getDatabase(), connection);
 		}
 

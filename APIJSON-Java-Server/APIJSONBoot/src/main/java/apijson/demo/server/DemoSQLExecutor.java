@@ -96,7 +96,7 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 	@Override
 	public PreparedStatement setArgument(@NotNull SQLConfig config, @NotNull PreparedStatement statement, int index, Object value) throws SQLException {
-		if (SQLConfig.DATABASE_POSTGRESQL.equals(config.getDatabase()) && JSON.isBooleanOrNumberOrString(value) == false) {
+		if (config.isPostgreSQL() && JSON.isBooleanOrNumberOrString(value) == false) {
 			PGobject o = new PGobject();
 			o.setType("jsonb");
 			o.setValue(value == null ? null : value.toString());
