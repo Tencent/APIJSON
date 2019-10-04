@@ -94,15 +94,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		TABLE_KEY_MAP.put(SysTable.class.getSimpleName(), SysTable.TABLE_NAME);
 		TABLE_KEY_MAP.put(SysColumn.class.getSimpleName(), SysColumn.TABLE_NAME);
 		TABLE_KEY_MAP.put(ExtendedProperty.class.getSimpleName(), ExtendedProperty.TABLE_NAME);
-		
+
 		DATABASE_LIST = new ArrayList<>();
 		DATABASE_LIST.add(DATABASE_MYSQL);
 		DATABASE_LIST.add(DATABASE_POSTGRESQL);
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
 	}
-	
-	
+
+
 	@NotNull
 	@Override
 	public String getIdKey() {
@@ -259,7 +259,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String db = getDatabase();
 		return db == null ? DEFAULT_DATABASE : db;  // "" 表示已设置，不需要用全局默认的 StringUtil.isEmpty(db, false)) {
 	}
-	
+
 	@Override
 	public boolean isMySQL() {
 		return isMySQL(getSQLDatabase());
@@ -288,7 +288,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isOracle(String db) {
 		return DATABASE_ORACLE.equals(db);
 	}
-	
+
 	@Override
 	public String getQuote() {
 		return isMySQL() ? "`" : "\"";
@@ -303,24 +303,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 */
 	@NotNull
-	public String getSQLSchema(String table) {
-		String sch = getSchema();
-		if (sch == null) { //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema  StringUtil.isEmpty(sch, true)) {
-			//不能强制，SQL Server 在 information_schema 和 sys 中都有 tables 和 columns //强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
-			if (Table.TAG.equals(table) || Column.TAG.equals(table)) {
-				return SCHEMA_INFORMATION; //MySQL, PostgreSQL, SQL Server 都有的
-			}
-			if (SysTable.TAG.equals(table) || SysColumn.TAG.equals(table)) {
-				return SCHEMA_SYS; //SQL Server 在 sys 中的属性比 information_schema 中的要全，能拿到注释
-			}
-			if ((PgAttribute.TAG.equals(table) || PgClass.TAG.equals(table)) ) {
-				return ""; //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema
-			}
-			
-			return DEFAULT_SCHEMA;
+	public String getSQLSchema() {
+		String table = getTable();
+		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
+		if (Table.TAG.equals(table) || Column.TAG.equals(table)) {
+			return SCHEMA_INFORMATION; //MySQL, PostgreSQL, SQL Server 都有的
 		}
-		
-		return sch;
+		if (PgClass.TAG.equals(table) || PgAttribute.TAG.equals(table)) {
+			return ""; //PostgreSQL 的 pg_class 和 pg_attribute 表好像不属于任何 Schema
+		}
+		if (SysTable.TAG.equals(table) || SysColumn.TAG.equals(table) || ExtendedProperty.TAG.equals(table)) {
+			return SCHEMA_SYS; //SQL Server 在 sys 中的属性比 information_schema 中的要全，能拿到注释
+		}
+
+		String sch = getSchema();
+		return sch == null ? DEFAULT_SCHEMA : sch;
 	}
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
@@ -358,8 +355,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getTablePath() {
 		String q = getQuote();
 
+		String sch = getSQLSchema();
 		String sqlTable = getSQLTable();
-		String sch = getSQLSchema(sqlTable);
 
 		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q + ( isKeyPrefix() ? " AS " + getAliasWithQuote() : "");
 	}
@@ -2079,7 +2076,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		// for (...) { Call procedure1();\n SQL \n; Call procedure2(); ... }
 		// 貌似不需要，因为 ObjecParser 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
 
-		String sch = config.getSQLSchema(config.getSQLTable());
+		String sch = config.getSQLSchema();
 		if (StringUtil.isNotEmpty(config.getProcedure(), true)) {
 			String q = config.getQuote();
 			return "CALL " + q + sch + q + "."+ config.getProcedure();
@@ -2275,7 +2272,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (StringUtil.isEmpty(database, false) == false && DATABASE_LIST.contains(database) == false) {
 			throw new UnsupportedDataTypeException("@database:value 中 value 错误，只能是 [" + StringUtil.getString(DATABASE_LIST.toArray()) + "] 中的一种！");
 		}
-		
+
 		String schema = request.getString(KEY_SCHEMA);
 
 		AbstractSQLConfig config = callback.getSQLConfig(method, database, schema, table);
