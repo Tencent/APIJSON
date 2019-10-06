@@ -176,7 +176,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 				+ "\n已生成 " + generatedSQLCount + " 条 SQL"
 				+ "\nselect  startTime = " + startTime
-				+ "\n database = " + StringUtil.getString(config.getDatabase())
+				+ "\ndatabase = " + StringUtil.getString(config.getDatabase())
 				+ "; schema = " + StringUtil.getString(config.getSchema())
 				+ "; sql = \n" + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");

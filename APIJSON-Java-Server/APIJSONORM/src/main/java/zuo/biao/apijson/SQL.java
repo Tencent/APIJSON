@@ -179,30 +179,39 @@ public class SQL {
 
 	/**
 	 * @param s
-	 * @param c -> 'c'
-	 * @return "instr(" + s + ", '" + c + "')"
+	 * @param c
+	 * @return "instr(" + s + ", " + c + ")"
 	 */
 	public static String indexOf(String s, String c) {
-		return "instr(" + s + ", '" + c + "')";
+		return "instr(" + s + ", " + c + ")";
 	}
 
 	/**
 	 * @param s
-	 * @param c1 -> 'c1'
-	 * @param c2 -> 'c2'
-	 * @return "replace(" + s + ", '" + c1 + "', '" + c2 + "')"
+	 * @param c1
+	 * @param c2
+	 * @return "replace(" + s + ", " + c1 + ", " + c2 + ")"
 	 */
 	public static String replace(String s, String c1, String c2) {
-		return "replace(" + s + ", '" + c1 + "', '" + c2 + "')";
+		return "replace(" + s + ", " + c1 + ", " + c2 + ")";
+	}
+	
+	/**
+	 * @param s1
+	 * @param s2
+	 * @return "concat(" + s1 + ", " + s2 + ")"
+	 */
+	public static String concat(String s1, String s2) {
+		return "concat(" + s1 + ", " + s2 + ")";
 	}
 
 	/**
 	 * @param s1
-	 * @param s2 -> 's2'
-	 * @return "strcmp(" + s1 + ", '" + s2 + "')"
+	 * @param s2
+	 * @return "strcmp(" + s1 + ", " + s2 + ")"
 	 */
 	public static String equals(String s1, String s2) {
-		return "strcmp(" + s1 + ", '" + s2 + "')";
+		return "strcmp(" + s1 + ", " + s2 + ")";
 	}
 
 	/**

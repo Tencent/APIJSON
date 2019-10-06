@@ -600,10 +600,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String order = StringUtil.getTrimedString(getOrder());
 
-		if (isOracle() || isSQLServer()) { // Oracle 和 SQL Server 的 OFFSET 必须加 ORDER BY
+		if (getCount() > 0 && (isOracle() || isSQLServer())) { // Oracle 和 SQL Server 的 OFFSET 必须加 ORDER BY
 
 			//			String[] ss = StringUtil.split(order);
-			if (StringUtil.isEmpty(order, true)) {
+			if (StringUtil.isEmpty(order, true)) {  //SQL Server 子查询内必须指定 OFFSET 才能用 ORDER BY
 				String idKey = getIdKey();
 				if (StringUtil.isEmpty(idKey, true)) {
 					idKey = "id"; //ORDER BY NULL 不行，SQL Server 会报错，必须要有排序，才能使用 OFFSET FETCH，如果没有 idKey，请求中指定 @order 即可
@@ -1657,6 +1657,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (isPostgreSQL()) {
 			return getKey(key) + " ~" + (ignoreCase ? "* " : " ") + getValue(value);
 		}
+		if (isOracle()) {
+			return "regexp_like(" + getKey(key) + ", " + getValue(value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
+		}
 		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
 	}
 	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1889,12 +1892,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
 					}
 
+					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
 					if (isPostgreSQL()) {
-						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-								+ getKey(key) + " @> " + getValue(newJSONArray(childs[i])); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
-					} else {
-						condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR))
-								+ "json_contains(" + getKey(key) + ", " + getValue(childs[i].toString()) + ")";
+						condition += (getKey(key) + " @> " + getValue(newJSONArray(childs[i]))); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
+					}
+					else if (isOracle()) {
+						condition += ("json_textcontains(" + getKey(key) + ", '$', " + getValue(childs[i].toString()) + ")");
+					}
+					else {
+						condition += ("json_contains(" + getKey(key) + ", " + getValue(childs[i].toString()) + ")");
 					}
 				}
 			}
@@ -2004,7 +2010,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				value = content.get(key);
 				key = getRealKey(method, key, false, true, verifyName, quote);
 
-				setString += (isFirst ? "" : ", ") + (getKey(key) + "=" + (keyType == 1 ? getAddString(key, value) : (keyType == 2
+				setString += (isFirst ? "" : ", ") + (getKey(key) + " = " + (keyType == 1 ? getAddString(key, value) : (keyType == 2
 						? getRemoveString(key, value) : getValue(value)) ) );
 
 				isFirst = false;
@@ -2017,10 +2023,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return " SET " + setString;
 	}
 
-	/**SET key = CONCAT (key, 'value')
+	/**SET key = concat(key, 'value')
 	 * @param key
 	 * @param value
-	 * @return CONCAT (key, 'value')
+	 * @return concat(key, 'value')
 	 * @throws IllegalArgumentException
 	 */
 	@JSONField(serialize = false)
@@ -2029,7 +2035,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getKey(key) + " + " + value;
 		}
 		if (value instanceof String) {
-			return " CONCAT (" + getKey(key) + ", " + getValue(value) + ") ";
+			return SQL.concat(getKey(key), (String) getValue(value));
 		}
 		throw new IllegalArgumentException(key + "+ 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
 	}
@@ -2045,7 +2051,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getKey(key) + " - " + value;
 		}
 		if (value instanceof String) {
-			return SQL.replace(getKey(key), (String) getValue(value), "");// " replace(" + key + ", '" + value + "', '') ";
+			return SQL.replace(getKey(key), (String) getValue(value), "''");// " replace(" + key + ", '" + value + "', '') ";
 		}
 		throw new IllegalArgumentException(key + "- 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
 	}
