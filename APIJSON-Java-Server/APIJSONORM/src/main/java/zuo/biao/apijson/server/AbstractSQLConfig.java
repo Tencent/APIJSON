@@ -2104,7 +2104,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		default:
 			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
-			return (config.isExplain() ? "EXPLAIN " : "") + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
+			return (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON;\n" : "EXPLAIN ") : "") + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
 		}
 	}
 
