@@ -1301,7 +1301,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				isItemFirst = false;
 			}
-
+			
+			if (StringUtil.isEmpty(cs, true)) {//避免SQL条件连接错误
+				continue;
+			}
 
 			whereString += (isCombineFirst ? "" : AND) + (Logic.isNot(logic) ? NOT : "") + " (  " + cs + "  ) ";
 			isCombineFirst = false;
@@ -1768,29 +1771,42 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		Logic logic = new Logic(key);
-		key = logic.getKey();
-		Log.i(TAG, "getRangeString key = " + key);
+		String k = logic.getKey();
+		Log.i(TAG, "getRangeString k = " + k);
 
 		if (range instanceof List) {
 			if (logic.isOr() || logic.isNot()) {
-				return getKey(key) + getInString(key, ((List<?>) range).toArray(), logic.isNot());
+				List<?> l = (List<?>) range;
+				if (logic.isNot() && l.isEmpty()) {
+					return ""; // key!{}: [] 这个条件无效，加到 SQL 语句中 key IN() 会报错，getInString 里不好处理
+				}
+				return getKey(k) + getInString(k, l.toArray(), logic.isNot());
 			}
-			throw new IllegalArgumentException(key + "{}\":[] 中key末尾的逻辑运算符只能用'|','!'中的一种 ！");
+			throw new IllegalArgumentException(key + "{}\":[] 中 {} 前面的逻辑运算符错误！只能用'|','!'中的一种 ！");
 		}
 		else if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
-			if (isPrepared() && PATTERN_RANGE.matcher((String) range).matches() == false) {
-				throw new UnsupportedOperationException("字符串 " + range + " 不合法！预编译模式下 key{}:\"condition\" 中 condition 必须符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
-			}
-
-			String[] conditions = StringUtil.split((String) range);
+			String[] cs = StringUtil.split((String) range);
 			String condition = "";
-			if (conditions != null) {
+			if (cs != null) {
+				String c;
 				int index;
-				for (int i = 0; i < conditions.length; i++) {//对函数条件length(key)<=5这种不再在开头加key
-					index = conditions[i] == null ? -1 : conditions[i].indexOf("(");
+				for (int i = 0; i < cs.length; i++) {//对函数条件length(key)<=5这种不再在开头加key
+					c = cs[i];
+					if ("=null".equals(c)) {
+						c = SQL.isNull();
+					}
+					else if ("!=null".equals(c)) {
+						c = SQL.isNull(false);
+					}
+					else if (isPrepared() && PATTERN_RANGE.matcher(c).matches() == false) {
+						throw new UnsupportedOperationException(key + "{}:value 的 value 中 " + c + " 不合法！"
+								+ "预编译模式下 key{}:\"condition\" 中 condition 必须 为 =null 或 !=null 或 符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
+					}
+
+					index = c == null ? -1 : c.indexOf("(");
 					condition += ((i <= 0 ? "" : (logic.isAnd() ? AND : OR))//连接方式
-							+ (index >= 0 && index < conditions[i].indexOf(")") ? "" : getKey(key) + " ")//函数和非函数条件
-							+ conditions[i]);//单个条件
+							+ (index >= 0 && index < c.indexOf(")") ? "" : getKey(k) + " ")//函数和非函数条件
+							+ c);//单个条件
 				}
 			}
 			if (condition.isEmpty()) {
@@ -1800,7 +1816,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getCondition(logic.isNot(), condition);
 		}
 		else if (range instanceof Subquery) { //如果在 Parser 解析成 SQL 字符串再引用，没法保证安全性，毕竟可以再通过远程函数等方式来拼接再替代，最后引用的字符串就能注入
-			return getKey(key) + (logic.isNot() ? NOT : "") + " IN " + getSubqueryString((Subquery) range);
+			return getKey(k) + (logic.isNot() ? NOT : "") + " IN " + getSubqueryString((Subquery) range);
 		}
 
 		throw new IllegalArgumentException(key + "{}:range 类型为" + range.getClass().getSimpleName()
