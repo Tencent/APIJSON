@@ -39,9 +39,9 @@ public class APIJSONApplication {
 		SpringApplication.run(APIJSONApplication.class, args);
 
 		Log.DEBUG = true; //上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-		
+
 		System.out.println("\n\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<< APIJSON 开始启动 >>>>>>>>>>>>>>>>>>>>>>>>\n");
-		
+
 		System.out.println("\n\n\n开始初始化:远程函数配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
 			DemoFunction.init(true);
@@ -50,7 +50,7 @@ public class APIJSONApplication {
 			e.printStackTrace();
 		}
 		System.out.println("\n完成初始化:远程函数配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		
+
 		System.out.println("开始测试:远程函数 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
 			DemoFunction.test();
@@ -60,8 +60,8 @@ public class APIJSONApplication {
 		}
 		System.out.println("\n完成测试:远程函数 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
-		
-		
+
+
 		System.out.println("\n\n\n开始初始化:请求校验配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
 			StructureUtil.init(true);
@@ -79,9 +79,9 @@ public class APIJSONApplication {
 			e.printStackTrace();
 		}
 		System.out.println("\n完成测试:请求校验 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		
-		
-		
+
+
+
 		System.out.println("\n\n\n开始初始化:权限校验配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 		try {
 			DemoVerifier.init(true);
@@ -91,11 +91,16 @@ public class APIJSONApplication {
 		}
 		System.out.println("\n完成初始化:权限校验配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
-		
+
 		System.out.println("\n\n<<<<<<<<<<<<<<<<<<<<<<<<< APIJSON 启动完成，试试调用自动化 API 吧 ^_^ >>>>>>>>>>>>>>>>>>>>>>>>\n");
 	}
 
-
+	//SpringBoot 2.x 自定义端口方式
+	//	@Bean
+	//	public TomcatServletWebServerFactory servletContainer(){
+	//		return new TomcatServletWebServerFactory(8081) ;
+	//	}
+	//SpringBoot 1.x 自定义端口方式，配置文件加 server.port=80 无效(MacOS 10.10.?)
 	@Bean
 	public EmbeddedServletContainerCustomizer containerCustomizer() {
 		return new EmbeddedServletContainerCustomizer() {
@@ -106,6 +111,7 @@ public class APIJSONApplication {
 			}
 		};
 	}
+
 
 	//支持JavaScript跨域请求<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/** 

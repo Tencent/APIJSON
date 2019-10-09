@@ -38,8 +38,8 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 
 	static {
-		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的
-		DEFAULT_SCHEMA = "sys";  //TODO 默认模式名，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
+		DEFAULT_DATABASE = DATABASE_SQLSERVER;  //TODO 默认数据库类型，改成你自己的
+		DEFAULT_SCHEMA = "dbo";  //TODO 默认模式名，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
 
 		//  由 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置
 		//		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -89,13 +89,13 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	@Override
 	public String getDBUri() {
 		if (isMySQL()) {
-			return "jdbc:mysql://localhost:3306"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+			return "jdbc:mysql://apijson.cn:3306"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) {
 			return "jdbc:postgresql://localhost:5432/postgres"; //TODO 改成你自己的
 		}
 		if (isSQLServer()) {
-			return "jdbc:jtds:sqlserver://localhost:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
+			return "jdbc:jtds:sqlserver://apijson.org:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
 		}
 		if (isOracle()) {
 			return "jdbc:oracle:thin:@localhost:1521:orcl"; //TODO 改成你自己的

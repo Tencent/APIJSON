@@ -22,6 +22,7 @@ import static zuo.biao.apijson.JSONObject.KEY_CACHE;
 import static zuo.biao.apijson.JSONObject.KEY_FROM;
 import static zuo.biao.apijson.JSONObject.KEY_GROUP;
 import static zuo.biao.apijson.JSONObject.KEY_HAVING;
+import static zuo.biao.apijson.JSONObject.KEY_JSON;
 import static zuo.biao.apijson.JSONObject.KEY_ID;
 import static zuo.biao.apijson.JSONObject.KEY_ORDER;
 import static zuo.biao.apijson.JSONObject.KEY_ROLE;
@@ -102,6 +103,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_ORACLE);
 	}
 
+	@Override
+	public boolean limitSQLCount() {
+		return Log.DEBUG == false || AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
+	}
 
 	@NotNull
 	@Override
@@ -131,6 +136,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private String group; //分组方式的字符串数组，','分隔
 	private String having; //聚合函数的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
+	private List<String> json; //需要转为 JSON 的字段，','分隔
 	private Subquery from; //子查询临时表
 	private List<String> column; //表内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
 	private List<List<Object>> values; //对应表内字段的值的字符串数组，','分隔
@@ -670,6 +676,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
+	@Override
+	public List<String> getJson() {
+		return json;
+	}
+	@Override
+	public AbstractSQLConfig setJson(List<String> json) {
+		this.json = json;
+		return this;
+	}
+	
+	
 	@Override
 	public Subquery getFrom() {
 		return from;
@@ -2375,6 +2392,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String group = request.getString(KEY_GROUP);
 		String having = request.getString(KEY_HAVING);
 		String order = request.getString(KEY_ORDER);
+		String json = request.getString(KEY_JSON);
 
 		//强制作为条件且放在最前面优化性能
 		request.remove(idKey);
@@ -2391,6 +2409,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.remove(KEY_GROUP);
 		request.remove(KEY_HAVING);
 		request.remove(KEY_ORDER);
+		request.remove(KEY_JSON);
 
 
 		Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
@@ -2579,6 +2598,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
+		
+		String[] jsonArr = StringUtil.split(json);
+		config.setJson(jsonArr == null || jsonArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(jsonArr)));
 
 		//TODO 解析JOIN，包括 @column，@group 等要合并
 
@@ -2598,6 +2620,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		request.put(KEY_GROUP, group);
 		request.put(KEY_HAVING, having);
 		request.put(KEY_ORDER, order);
+		request.put(KEY_JSON, json);
 
 		return config;
 	}

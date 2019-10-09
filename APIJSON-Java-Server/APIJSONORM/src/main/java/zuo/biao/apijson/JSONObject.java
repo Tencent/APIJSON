@@ -148,6 +148,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_GROUP = "@group"; //分组方式
 	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_ORDER = "@order"; //排序方式
+	public static final String KEY_JSON = "@json"; //SQL Server 把字段转为 JSON 输出
 
 	public static final List<String> TABLE_KEY_LIST;
 	static {
@@ -163,6 +164,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_GROUP);
 		TABLE_KEY_LIST.add(KEY_HAVING);
 		TABLE_KEY_LIST.add(KEY_ORDER);
+		TABLE_KEY_LIST.add(KEY_JSON);
 	}
 
 	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>

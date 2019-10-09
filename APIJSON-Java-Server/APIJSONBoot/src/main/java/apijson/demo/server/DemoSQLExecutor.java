@@ -110,9 +110,9 @@ public class DemoSQLExecutor extends AbstractSQLExecutor {
 
 	@Override
 	protected Object getValue(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
-			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+			JSONObject table, int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
 		
-		Object value = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
+		Object value = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
 
 		return value instanceof PGobject ? JSON.parse(((PGobject) value).getValue()) : value;
 	}

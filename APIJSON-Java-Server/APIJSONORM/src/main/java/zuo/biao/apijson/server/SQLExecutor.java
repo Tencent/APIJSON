@@ -82,7 +82,7 @@ public interface SQLExecutor {
 	 * @param position
 	 * @return
 	 */
-	boolean isJSONType(ResultSetMetaData rsmd, int position);
+	boolean isJSONType(@NotNull SQLConfig config, ResultSetMetaData rsmd, int position, String lable);
 
 	
 	Connection getConnection(@NotNull SQLConfig config) throws Exception;

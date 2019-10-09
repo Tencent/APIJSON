@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +26,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -198,7 +200,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			case HEAD:
 			case HEADS:
 				rs = executeQuery(config);
-				
+
 				executedSQLCount ++;
 
 				result = rs.next() ? AbstractParser.newSuccessResult()
@@ -239,7 +241,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				}
 
 				rs = executeQuery(config);
-				
+
 				if (config.isExplain() == false) { //只有 SELECT 才能 EXPLAIN
 					executedSQLCount ++;
 				}
@@ -515,7 +517,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 		}
 
-		finalTable.put(lable, getValue(config, rs, rsmd, tablePosition, table, columnIndex, childMap));
+		finalTable.put(lable, getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap));
 
 		return table;
 	}
@@ -538,7 +540,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 	protected Object getValue(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
 
 		Object value = rs.getObject(columnIndex);
 		//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
@@ -549,18 +551,31 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		//				Log.i(TAG, "select  while (rs.next()) { >> for (int i = 0; i < length; i++) {"
 		//						+ "\n  >>> value = " + value);
 
+		boolean castToJson = false;
+
 		//数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
-		if (value instanceof Timestamp) {
+		if (value instanceof Boolean || value instanceof Number) {
+			//加快判断速度
+		}
+		else if (value instanceof Timestamp) {
 			value = ((Timestamp) value).toString();
 		}
-		else if (value instanceof String && isJSONType(rsmd, columnIndex)) { //json String
-			value = JSON.parse((String) value);
+		else if (value instanceof Date) {
+			value = ((Date) value).toString();
+		}
+		else if (value instanceof Time) {
+			value = ((Time) value).toString();
+		}
+		else if (value instanceof String && isJSONType(config, rsmd, columnIndex, lable)) { //json String
+			castToJson = true;
 		}
 		else if (value instanceof Blob) { //FIXME 存的是 abcde，取出来直接就是 [97, 98, 99, 100, 101] 这种 byte[] 类型，没有经过以下处理，但最终序列化后又变成了字符串 YWJjZGU=
+			castToJson = true;
 			value = new String(((Blob) value).getBytes(1, (int) ((Blob) value).length()), "UTF-8");
 		}
-		else if (value instanceof Clob) {
-
+		else if (value instanceof Clob) { //SQL Server TEXT 类型 居然走这个
+			castToJson = true;
+			
 			StringBuffer sb = new StringBuffer(); 
 			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream()); 
 			String s = br.readLine();
@@ -571,24 +586,44 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			value = sb.toString();
 		}
 
+		if (castToJson == false) {
+			List<String> json = config.getJson();
+			castToJson = json != null && json.contains(lable);
+		}
+		if (castToJson) {
+			try {
+				value = JSON.parse((String) value);
+			} catch (Exception e) {
+				Log.e(TAG, "getValue  try { value = JSON.parse((String) value); } catch (Exception e) { \n" + e.getMessage());
+			}
+		}
+
 		return value;
 	}
 
 
 	/**判断是否为JSON类型
+	 * @param config 
+	 * @param lable 
 	 * @param rsmd
 	 * @param position
 	 * @return
 	 */
 	@Override
-	public boolean isJSONType(ResultSetMetaData rsmd, int position) {
+	public boolean isJSONType(@NotNull SQLConfig config, ResultSetMetaData rsmd, int position, String lable) {
 		try {
+			String column = rsmd.getColumnTypeName(position);
 			//TODO CHAR和JSON类型的字段，getColumnType返回值都是1	，如果不用CHAR，改用VARCHAR，则可以用上面这行来提高性能。
 			//return rsmd.getColumnType(position) == 1;
-			return rsmd.getColumnTypeName(position).toLowerCase().contains("json");
+
+			if (column.toLowerCase().contains("json")) {
+				return true;
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		//		List<String> json = config.getJson();
+		//		return json != null && json.contains(lable);
 		return false;
 	}
 
@@ -645,7 +680,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					v = 1;
 					Log.e(TAG, "getStatement  try { String[] vs = config.getDBVersion().split([.]); ... >> } catch (Exception e) {\n" + e.getMessage());
 				}
-				
+
 				if (v >= 8) {
 					connection = DriverManager.getConnection(config.getDBUri() + "?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
 							+ config.getDBAccount() + "&password=" + config.getDBPassword());
@@ -658,7 +693,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			else { //PostgreSQL 不允许 cross-database
 				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
 			}
-			
+
 			connectionMap.put(config.getDatabase(), connection);
 		}
 

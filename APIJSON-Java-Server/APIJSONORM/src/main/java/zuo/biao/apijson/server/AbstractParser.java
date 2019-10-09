@@ -1395,7 +1395,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 			throw e;
 		}
 		finally {
-			if (config.getPosition() == 0) {
+			if (config.getPosition() == 0 && config.limitSQLCount()) {
 				int maxSQLCount = getMaxSQLCount();
 				int sqlCount = sqlExecutor.getExecutedSQLCount();
 				Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n\n 已执行 " + sqlCount + "/" + maxSQLCount + " 条 SQL \n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
