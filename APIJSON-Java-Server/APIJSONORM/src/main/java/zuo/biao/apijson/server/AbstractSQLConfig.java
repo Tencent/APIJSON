@@ -856,16 +856,26 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								}
 							}
 							else {
-								if ((StringUtil.isName(origin) == false || origin.startsWith("_"))) {
+//								if ((StringUtil.isName(origin) == false || origin.startsWith("_"))) {
+								if (origin.startsWith("_") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
 									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
 											+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-											+ " 中所有 arg 都必须是1个不以 _ 开头的单词！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
+											+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
 								}
 							}
 						}
 
 						//JOIN 副表不再在外层加副表名前缀 userId AS `Commet.userId`， 而是直接 userId AS `userId`
-						origin = quote + origin + quote;
+						if (StringUtil.isNumer(origin)) {
+							//do nothing
+						}
+						else if (StringUtil.isName(origin)) {
+							origin = quote + origin + quote;
+						} 
+						else {
+							origin = getValue(origin).toString();
+						}
+						
 						if (isKeyPrefix()) {
 							ckeys[j] = tableAlias + "." + origin;
 							//							if (isColumn) {
@@ -1764,10 +1774,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static final Pattern PATTERN_RANGE;
+	private static final Pattern PATTERN_FUNCTION;
 	private static final Pattern PATTERN_HAVING;
 	private static final Pattern PATTERN_HAVING_SUFFIX;
 	static {
 		PATTERN_RANGE = Pattern.compile("^[0-9%!=<>,]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
+		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%-_:!=<> ]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
 		PATTERN_HAVING = Pattern.compile("^[A-Za-z0-9%!=<>]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
 		PATTERN_HAVING_SUFFIX = Pattern.compile("^[0-9%!=<>]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
 	}
@@ -2137,7 +2149,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		default:
 			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
-			return (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON;\n" : "EXPLAIN ") : "") + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
+			return (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "") + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
 		}
 	}
 

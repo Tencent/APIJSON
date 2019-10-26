@@ -240,7 +240,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					return result;
 				}
 
-				rs = executeQuery(config);
+				rs = executeQuery(config);  //FIXME SQL Server 是一次返回两个结果集，包括查询结果和执行计划，需要 moreResults 
 
 				if (config.isExplain() == false) { //只有 SELECT 才能 EXPLAIN
 					executedSQLCount ++;
@@ -660,9 +660,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return statement;
 	}
 
-	//TODO String 改为 enum Database 解决大小写不一致(MySQL, mysql等)导致创建多余的 Connection
-	private Map<String, Connection> connectionMap = new HashMap<>();
-	private Connection connection;
+	protected Map<String, Connection> connectionMap = new HashMap<>();
+	protected Connection connection;
 	@NotNull
 	@Override
 	public Connection getConnection(@NotNull SQLConfig config) throws Exception {
