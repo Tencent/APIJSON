@@ -15,7 +15,6 @@ limitations under the License.*/
 package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
-import static zuo.biao.apijson.JSONObject.KEY_CORRECT;
 import static zuo.biao.apijson.JSONObject.KEY_DROP;
 import static zuo.biao.apijson.JSONObject.KEY_TRY;
 import static zuo.biao.apijson.RequestMethod.PUT;
@@ -24,7 +23,6 @@ import static zuo.biao.apijson.server.SQLConfig.TYPE_ITEM;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,7 +76,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 * TODO Parser内要不因为 非 TYPE_ITEM_CHILD_0 的Table 为空导致后续中断。
 	 */
 	protected final boolean drop;
-	protected final JSONObject correct;
 
 	/**for single object
 	 * @param parentPath
@@ -111,25 +108,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		if (isEmpty) {
 			this.tri = false;
 			this.drop = false;
-			this.correct = null;
 		}
 		else {
 			this.tri = request.getBooleanValue(KEY_TRY);
 			this.drop = request.getBooleanValue(KEY_DROP);
-			this.correct = request.getJSONObject(KEY_CORRECT);
 
 			request.remove(KEY_TRY);
 			request.remove(KEY_DROP);
-			request.remove(KEY_CORRECT);
-
-			try {
-				parseCorrect();
-			} catch (Exception e) {
-				if (tri == false) {
-					throw e;
-				}
-				invalidate();
-			}
 		}
 
 
@@ -140,49 +125,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public static final Map<String, Pattern> COMPILE_MAP;
 	static {
 		COMPILE_MAP = new HashMap<String, Pattern>();
-	}
-
-	protected Map<String, String> corrected;
-	/**解析 @correct 校正
-	 * @throws Exception 
-	 */
-	@Override
-	public AbstractObjectParser parseCorrect() throws Exception {
-		Set<String> set = correct == null ? null : new HashSet<>(correct.keySet());
-
-		if (set != null && set.isEmpty() == false) {//对每个需要校正的key进行正则表达式匹配校正
-			corrected = new HashMap<>();//TODO 返回全部correct内的内容，包括未校正的?  correct);
-
-			String value; //13000082001
-			String v; // phone,email,idCard
-			String[] posibleKeys; //[phone,email,idCard]
-
-			for (String k : set) {// k = cert
-				v = k == null ? null : correct.getString(k);
-				value = v == null ? null : request.getString(k);
-				posibleKeys = value == null ? null : StringUtil.split(v);
-
-				if (posibleKeys != null && posibleKeys.length > 0) {
-					String rk = null;
-					Pattern p;
-					for (String pk : posibleKeys) {
-						p = pk == null ? null : COMPILE_MAP.get(pk);
-						if (p != null && p.matcher(value).matches()) {
-							rk = pk;
-							break;
-						}
-					}
-
-					if (rk == null) {
-						throw new IllegalArgumentException("格式错误！找不到 " + k + ":" + value + " 对应[" + v + "]内的任何一项！");
-					}
-					request.put(rk, request.remove(k));
-					corrected.put(k, rk);
-				}
-			}
-		}
-
-		return this;
 	}
 
 
@@ -722,11 +664,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
 
-		//把已校正的字段键值对corrected<originKey, correctedKey>添加进来，还是correct直接改？
-		if (corrected != null) {
-			response.put(KEY_CORRECT, corrected);
-		}
-
 		//把isTable时取出去的custom重新添加回来
 		if (customMap != null) {
 			response.putAll(customMap);
@@ -834,12 +771,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		if (drop) {
 			request.put(KEY_DROP, drop);
 		}
-		if (correct != null) {
-			request.put(KEY_CORRECT, correct);
-		}
 
 
-		corrected = null;
 		method = null;
 		parentPath = null;
 		arrayConfig = null;

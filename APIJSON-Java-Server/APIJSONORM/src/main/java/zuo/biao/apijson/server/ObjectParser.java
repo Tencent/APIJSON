@@ -38,11 +38,6 @@ public interface ObjectParser {
 	 */
 	ObjectParser parse() throws Exception;
 
-	/**解析 @correct 校正
-	 * @throws Exception 
-	 */
-	ObjectParser parseCorrect() throws Exception;
-	
 	/**调用 parser 的 sqlExecutor 来解析结果
 	 * @param method
 	 * @param table

@@ -133,7 +133,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_TRY = "@try"; //尝试，忽略异常
 	public static final String KEY_CATCH = "@catch"; //TODO 捕捉到异常后，处理方式  null-不处理；DEFAULT-返回默认值；ORIGIN-返回请求里的原始值
 	public static final String KEY_DROP = "@drop"; //丢弃，不返回，TODO 应该通过 fastjson 的 ignore 之类的机制来处理，避免导致下面的对象也不返回
-	@Deprecated public static final String KEY_CORRECT = "@correct"; //字段校正，应用场景太少，实现麻烦，而且完全可以用远程函数来替代，最早 3.8.0 去除
 	//	public static final String KEY_KEEP = "@keep"; //一定会返回，为 null 或 空对象时，会使用默认值(非空)，解决其它对象因为不关联的第一个对为空导致也不返回
 	public static final String KEY_DEFULT = "@default"; //TODO 自定义默认值 { "@default":true }，@default 可完全替代 @keep
 
@@ -170,6 +169,38 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>
 
 
+	/**set try, ignore exceptions
+	 * @param tri
+	 * @return this
+	 */
+	public JSONObject setTry(Boolean tri) {
+		return puts(KEY_TRY, tri);
+	}
+
+	/**set catch
+	 * @param isCatch
+	 * @return this
+	 */
+	public JSONObject setCatch(String isCatch) {
+		return puts(KEY_CATCH, isCatch);
+	}
+	/**set drop, data dropped will not return
+	 * @param drop
+	 * @return this
+	 */
+	public JSONObject setDrop(Boolean drop) {
+		return puts(KEY_DROP, drop);
+	}
+
+	/**set if has default
+	 * @param hasDefault
+	 * @return this
+	 */
+	public JSONObject setDefault(Boolean hasDefault) {
+		return puts(KEY_DEFULT, hasDefault);
+	}
+
+
 	/**set role of request sender
 	 * @param role
 	 * @return this
@@ -177,33 +208,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setRole(String role) {
 		return puts(KEY_ROLE, role);
 	}
-
-	/**set try, ignore exceptions
-	 * @param tri
-	 * @return this
-	 */
-	public JSONObject setTry(boolean tri) {
-		return puts(KEY_TRY, tri);
-	}
-
-	/**set drop, data dropped will not return
-	 * @param drop
-	 * @return this
-	 */
-	public JSONObject setDrop(boolean drop) {
-		return puts(KEY_DROP, drop);
-	}
-
-	/**set correct, correct keys to target ones
-	 * @param correct  Map{originKey, [posibleKeys]}， posibleKey之间用 , 隔开
-	 * @return this
-	 */
-	public JSONObject setCorrect(Map<String, String> correct) {
-		return puts(KEY_CORRECT, correct);
-	}
-
-
-
 	/**set database where table was puts
 	 * @param database
 	 * @return this
@@ -211,11 +215,11 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setDatabase(String database) {
 		return puts(KEY_DATABASE, database);
 	}
-	/**set joins of Main Table and it's Vice Tables in Array layer
-	 * @param joins "@/User/id@", "&/User/id@,>/Comment/momentId@" ...
+	/**set if return explain informations
+	 * @param explain
 	 * @return
 	 */
-	public JSONObject setExplain(boolean explain) {
+	public JSONObject setExplain(Boolean explain) {
 		return puts(KEY_EXPLAIN, explain);
 	}
 	/**set cache type
@@ -225,7 +229,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @see {@link #CACHE_RAM}
 	 * @see {@link #CACHE_ROM}
 	 */
-	public JSONObject setCache(int cache) {
+	public JSONObject setCache(Integer cache) {
 		return puts(KEY_CACHE, cache);
 	}
 	/**set cache type
@@ -321,6 +325,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return puts(KEY_ORDER, keys);
 	}
 
+	/**set keys to cast to json
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setJSON(String keys) {
+		return puts(KEY_JSON, keys);
+	}
+	
 
 	//JSONObject内关键词 key >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
