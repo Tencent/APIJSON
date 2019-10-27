@@ -929,7 +929,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 
 			String c = StringUtil.getString(keys);
-			c = (c.contains(":") == false ? c : c.replaceAll(":", " AS ")) + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
+			c = c + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
 			return isMain() && isDistinct() ? PREFFIX_DISTINCT + c : c;
 		default:
 			throw new UnsupportedOperationException(

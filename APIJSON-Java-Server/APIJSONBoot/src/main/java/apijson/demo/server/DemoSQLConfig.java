@@ -89,13 +89,13 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	@Override
 	public String getDBUri() {
 		if (isMySQL()) {
-			return "jdbc:mysql://apijson.cn:3306"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+			return "jdbc:mysql://localhost:3306"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) {
 			return "jdbc:postgresql://localhost:5432/postgres"; //TODO 改成你自己的
 		}
 		if (isSQLServer()) {
-			return "jdbc:jtds:sqlserver://apijson.org:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
+			return "jdbc:jtds:sqlserver://localhost:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
 		}
 		if (isOracle()) {
 			return "jdbc:oracle:thin:@localhost:1521:orcl"; //TODO 改成你自己的
