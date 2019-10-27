@@ -866,17 +866,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						}
 
 						//JOIN 副表不再在外层加副表名前缀 userId AS `Commet.userId`， 而是直接 userId AS `userId`
+						boolean isName = false;
 						if (StringUtil.isNumer(origin)) {
 							//do nothing
 						}
 						else if (StringUtil.isName(origin)) {
 							origin = quote + origin + quote;
+							isName = true;
 						} 
 						else {
 							origin = getValue(origin).toString();
 						}
 						
-						if (isKeyPrefix()) {
+						if (isName && isKeyPrefix()) {
 							ckeys[j] = tableAlias + "." + origin;
 							//							if (isColumn) {
 							//								ckeys[j] += " AS " + quote + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + quote;
