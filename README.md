@@ -98,7 +98,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
   <a >一键自动接口回归测试，不需要写任何代码(注解、注释等全都不要)</a>
 </p>
 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_function_reduce_in_APIAuto.jpg) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_summary.jpg) 
 <p align="center" >
   <a >一图胜前言 - 部分基础功能概览</a>
 </p>
