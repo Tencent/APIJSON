@@ -37,6 +37,8 @@
 
 <br />
 
+#### A better online document is available at https://apijsondocs.readthedocs.io/
+
 * ### [1. About](#1)
 * ### [2. Server-side deployment](#2)
 * [2.1 Installing with Eclipse](#2.1)
