@@ -34,9 +34,7 @@
 <p align="center" >
   <img src="https://raw.githubusercontent.com/TommyLemon/APIJSON/master/logo.png" />
 </p>
-
 <br />
-
 #### A better online document is available at https://apijsondocs.readthedocs.io/
 
 * ### [1. About](#1)
