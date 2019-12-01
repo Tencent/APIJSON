@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.17, for macos10.12 (x86_64)
 --
--- Host: 47.98.196.224    Database: sys
+-- Host: apijson.cn    Database: sys
 -- ------------------------------------------------------
 -- Server version	5.7.19-log
 
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-09-28 21:43:38
+-- Dump completed on 2019-12-01 23:16:21
