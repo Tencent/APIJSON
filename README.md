@@ -50,7 +50,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 后端再也不用为了兼容旧接口写新版接口和文档了！再也不会被前端随时随地没完没了地烦了！
 
 <p align="center" >
-  <a ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSONisOneOfTheGVPsIn2019-small.jpg"></a>
+  <a ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSONisOneOfTheGVPsIn2019-small.jpg"></a>
 </p>
 
 ### 特点功能
