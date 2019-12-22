@@ -787,7 +787,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		}
 
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
-		if (RequestMethod.isGetMethod(requestMethod, false) == false) {
+		if (isSubquery == false && RequestMethod.isGetMethod(requestMethod, false) == false) {
 			throw new UnsupportedOperationException("key[]:{}只支持GET方法！不允许传 " + name + ":{} ！");
 		}
 		if (request == null || request.isEmpty()) {//jsonKey-jsonValue条件
@@ -855,7 +855,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 
 
 		//key[]:{Table:{}}中key equals Table时 提取Table
-		int index = name == null ? -1 : name.lastIndexOf("[]");
+		int index = isSubquery || name == null ? -1 : name.lastIndexOf("[]");
 		String childPath = index <= 0 ? null : Pair.parseEntry(name.substring(0, index), true).getKey(); // Table-key1-key2...
 
 		//判断第一个key，即Table是否存在，如果存在就提取
@@ -877,7 +877,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		JSONObject parent;
 		//生成size个
 		for (int i = 0; i < (isSubquery ? 1 : size); i++) {
-			parent = onObjectParse(request, path, "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
+			parent = onObjectParse(request, isSubquery ? parentPath : path, isSubquery ? name : "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
 			if (parent == null || parent.isEmpty()) {
 				break;
 			}

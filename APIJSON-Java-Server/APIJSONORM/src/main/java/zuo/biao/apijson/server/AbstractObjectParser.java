@@ -308,7 +308,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				}
 
 
-				JSONArray arr = parser.onArrayParse(subquery, AbstractParser.getAbsPath(path, replaceKey), "[]", true);
+				JSONArray arr = parser.onArrayParse(subquery, path, key, true);
 
 				JSONObject obj = arr == null || arr.isEmpty() ? null : arr.getJSONObject(0);
 				if (obj == null) {
