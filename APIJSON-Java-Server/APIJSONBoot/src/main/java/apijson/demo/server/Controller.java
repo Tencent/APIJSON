@@ -24,17 +24,33 @@ import static zuo.biao.apijson.RequestMethod.PUT;
 
 import java.net.URLDecoder;
 import java.rmi.ServerException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
@@ -63,6 +79,7 @@ import zuo.biao.apijson.server.model.Request;
  * <br > 3.调试方便 - 建议使用 APIJSON在线测试工具 或 Postman
  * @author Lemon
  */
+@Service
 @RestController
 @RequestMapping("")
 public class Controller {
@@ -200,7 +217,7 @@ public class Controller {
 	public static final String FUNCTION_;
 	public static final String REQUEST_;
 	public static final String ACCESS_;
-	
+
 	public static final String USER_;
 	public static final String PRIVACY_;
 	public static final String VERIFY_; //加下划线后缀是为了避免 Verify 和 verify 都叫VERIFY，分不清
@@ -208,7 +225,7 @@ public class Controller {
 		FUNCTION_ = Function.class.getSimpleName();
 		REQUEST_ = Request.class.getSimpleName();
 		ACCESS_ = Access.class.getSimpleName();
-		
+
 		USER_ = User.class.getSimpleName();
 		PRIVACY_ = Privacy.class.getSimpleName();
 		VERIFY_ = Verify.class.getSimpleName();
@@ -233,8 +250,8 @@ public class Controller {
 
 	public static final String TYPE = "type";
 
-	
-	
+
+
 	/**重新加载配置
 	 * @param request
 	 * @return
@@ -261,7 +278,7 @@ public class Controller {
 		} catch (Exception e) {
 			return DemoParser.extendErrorResult(requestObject, e);
 		}
-		
+
 		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, verify));
 		response = response.getJSONResponse(VERIFY_);
 		if (JSONResponse.isExist(response) == false) {
@@ -269,9 +286,9 @@ public class Controller {
 		}
 
 		JSONObject result = DemoParser.newSuccessResult();
-		
+
 		boolean reloadAll = StringUtil.isEmpty(type, true) || "ALL".equals(type);
-		
+
 		if (reloadAll || "FUNCTION".equals(type)) {
 			try {
 				result.put(FUNCTION_, DemoFunction.init());
@@ -280,7 +297,7 @@ public class Controller {
 				result.put(FUNCTION_, DemoParser.newErrorResult(e));
 			}
 		}
-		
+
 		if (reloadAll || "REQUEST".equals(type)) {
 			try {
 				result.put(REQUEST_, StructureUtil.init());
@@ -289,7 +306,7 @@ public class Controller {
 				result.put(REQUEST_, DemoParser.newErrorResult(e));
 			}
 		}
-		
+
 		if (reloadAll || "ACCESS".equals(type)) {
 			try {
 				result.put(ACCESS_, DemoVerifier.init());
@@ -298,7 +315,7 @@ public class Controller {
 				result.put(ACCESS_, DemoParser.newErrorResult(e));
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -951,5 +968,60 @@ public class Controller {
 		return new DemoParser(PUT).setSession(session).parseResponse(requestObject);
 	}
 
+
+	@Autowired
+	HttpServletRequest request;
+	@Autowired
+	HttpServletResponse response;
+
+	@RequestMapping(value = "/delegate")
+//	@ResponseBody
+	public String delegate(@RequestParam("$_delegate_url") String url, @RequestBody String body, HttpMethod method, HttpSession session){
+		Enumeration<String> names = request.getHeaderNames();
+		HttpHeaders headers = null;
+		String name;
+		if (names != null) {
+			headers = new HttpHeaders();
+			while (names.hasMoreElements()) {
+				name = names.nextElement();
+				headers.add(name, request.getHeader(name));
+			}
+			
+			List<String> cookie = session == null ? null : (List<String>) session.getAttribute("Cookie");
+			if (cookie != null && cookie.isEmpty() == false) {
+				List<String> c = headers.get("Cookie");
+				if (c == null) {
+					c = new ArrayList<>();
+				}
+				c.addAll(cookie);
+				headers.put("Cookie", c);
+			}
+		}
+		try {
+			request.getParameterMap().remove("$_delegate_url");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+		RestTemplate client = new RestTemplate();
+		//  请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
+		HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? JSON.toJSONString(request.getParameterMap()) : body, headers);
+		//  执行HTTP请求
+		ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
+		
+		HttpHeaders hs = entity.getHeaders();
+		if (session != null && hs != null) {
+			List<String> cookie = hs.get("Set-Cookie");
+			if (cookie != null && cookie.isEmpty() == false) {
+				session.setAttribute("Cookie", cookie);
+			}
+		}
+		return entity.getBody();
+	}
+
+	@GetMapping("v2/api-docs")
+	public JSONObject swaggerAPIDocs() {
+		return new DemoParser().parseResponse(new JSONRequest("Swagger", new JSONRequest())).getJSONObject("Swagger");
+	}
 
 }
