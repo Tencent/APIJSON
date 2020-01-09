@@ -8,7 +8,7 @@
 <p align="center" >
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/TommyLemon/APIJSON/tree/master/SQLServer"><img src="https://img.shields.io/badge/SQLServer-2016%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/TommyLemon/APIJSON/tree/master/SQLServer"><img src="https://img.shields.io/badge/SQLServer-2012%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-11%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/TommyLemon/APIJSON/tree/master/MySQL"><img src="https://img.shields.io/badge/TiDB-2.1%2B-brightgreen.svg?style=flat"></a>
 </p>
