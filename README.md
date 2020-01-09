@@ -229,7 +229,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 
 ### 生态项目
-[APIAuto](https://github.com/TommyLemon/APIAuto) 自动化接口管理工具，自动生成文档与注释、自动生成代码、自动化回归测试、自动静态检查等
+[APIAuto](https://github.com/TommyLemon/APIAuto) 机器学习测试、自动生成代码、自动静态检查、自动生成文档与注释等，做最先进的接口管理工具
 
 [apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 官方文档，提供排版清晰、搜索方便的文档内容展示，包括设计规范、图文教程等
 
