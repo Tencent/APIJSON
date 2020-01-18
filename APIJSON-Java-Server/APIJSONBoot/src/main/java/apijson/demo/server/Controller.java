@@ -46,11 +46,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.demo.server.model.BaseModel;
@@ -987,6 +985,7 @@ public class Controller {
 				headers.add(name, request.getHeader(name));
 			}
 			
+			@SuppressWarnings("unchecked")
 			List<String> cookie = session == null ? null : (List<String>) session.getAttribute("Cookie");
 			if (cookie != null && cookie.isEmpty() == false) {
 				List<String> c = headers.get("Cookie");
@@ -1019,9 +1018,71 @@ public class Controller {
 		return entity.getBody();
 	}
 
+	
+	/**Swagger 文档 Demo，供 APIAuto 测试导入 Swagger 文档到数据库用
+	 * @return
+	 */
 	@GetMapping("v2/api-docs")
-	public JSONObject swaggerAPIDocs() {
-		return new DemoParser().parseResponse(new JSONRequest("Swagger", new JSONRequest())).getJSONObject("Swagger");
+	public String swaggerAPIDocs() {
+		return 	"{\n"+
+				"    \"paths\": {\n"+
+				"        \"/user/list\": {\n"+
+				"            \"get\": {\n"+
+				"                \"summary\": \"用户列表\",\n"+
+				"                \"parameters\": [\n"+
+				"                    {\n"+
+				"                        \"name\": \"pageSize\",\n"+
+				"                        \"description\": \"每页数量\",\n"+
+				"                        \"default\": 10\n"+
+				"                    },\n"+
+				"                    {\n"+
+				"                        \"name\": \"page\",\n"+
+				"                        \"default\": 1\n"+
+				"                    },\n"+
+				"                    {\n"+
+				"                        \"name\": \"searchKey\",\n"+
+				"                        \"description\": \"搜索关键词\",\n"+
+				"                        \"default\": \"a\"\n"+
+				"                    }\n"+
+				"                ]\n"+
+				"            }\n"+
+				"        },\n"+
+				"        \"/user\": {\n"+
+				"            \"get\": {\n"+
+				"                \"summary\": \"用户详情\",\n"+
+				"                \"parameters\": [\n"+
+				"                    {\n"+
+				"                        \"name\": \"id\",\n"+
+				"                        \"description\": \"主键\",\n"+
+				"                        \"default\": 82001\n"+
+				"                    }\n"+
+				"                ]\n"+
+				"            }\n"+
+				"        },\n"+
+				"        \"/comment/post\": {\n"+
+				"            \"post\": {\n"+
+				"                \"summary\": \"新增评论\",\n"+
+				"                \"parameters\": [\n"+
+				"                    {\n"+
+				"                        \"name\": \"userId\",\n"+
+				"                        \"description\": \"用户id\",\n"+
+				"                        \"default\": 82001\n"+
+				"                    },\n"+
+				"                    {\n"+
+				"                        \"name\": \"momentId\",\n"+
+				"                        \"description\": \"动态id\",\n"+
+				"                        \"default\": 15\n"+
+				"                    },\n"+
+				"                    {\n"+
+				"                        \"name\": \"conent\",\n"+
+				"                        \"description\": \"内容\",\n"+
+				"                        \"default\": \"测试评论\"\n"+
+				"                    }\n"+
+				"                ]\n"+
+				"            }\n"+
+				"        }\n"+
+				"    }\n"+
+				"}";
 	}
 
 }
