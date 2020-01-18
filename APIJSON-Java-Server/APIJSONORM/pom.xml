@@ -5,7 +5,7 @@
 
 	<groupId>zuo.biao.apijson.server</groupId>
 	<artifactId>apijson-orm</artifactId>
-	<version>3.7.0</version>
+	<version>3.9.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>

@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo.server</groupId>
 	<artifactId>apijson-boot</artifactId>
-	<version>3.7.0</version>
+	<version>3.9.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONBoot</name>
