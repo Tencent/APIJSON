@@ -250,7 +250,7 @@
 
 <br />
 
-[在线测试](http://apijson.cn)
+[在线测试](http://apijson.org/auto)
 
 <br />
 <br />
