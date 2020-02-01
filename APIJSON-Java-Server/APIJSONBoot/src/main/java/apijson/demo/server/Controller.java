@@ -968,6 +968,7 @@ public class Controller {
 	}
 
 
+	public static final String COOKIE = "Cookie";
 	public static final List<String> EXCEPT_HEADER_LIST;
 	static {
 		EXCEPT_HEADER_LIST = Arrays.asList(  //accept-encoding 在某些情况下导致乱码，origin 和 sec-fetch-mode 等 CORS 信息导致服务器代理失败
@@ -981,29 +982,47 @@ public class Controller {
 	@Autowired
 	HttpServletResponse response;
 
+	/**代理接口，解决前端（APIAuto等）跨域问题
+	 * @param exceptHeaders 排除请求头，必须放在最前面，放后面可能被当成 $_delegate_url 的一部分
+	 * @param url 被代理的 url
+	 * @param body POST Body
+	 * @param method HTTP Method
+	 * @param session HTTP session
+	 * @return
+	 */
 	@RequestMapping(value = "/delegate")
-	public String delegate(@RequestParam("$_delegate_url") String url, @RequestBody String body, HttpMethod method, HttpSession session){
+	public String delegate(
+			@RequestParam(value = "$_except_headers", required = false) String exceptHeaders,
+			@RequestParam("$_delegate_url") String url, 
+			@RequestBody(required = false) String body, 
+			HttpMethod method, HttpSession session
+			) {
+
 		Enumeration<String> names = request.getHeaderNames();
 		HttpHeaders headers = null;
 		String name;
 		if (names != null) {
 			headers = new HttpHeaders();
+			//Arrays.asList(null) 抛异常，可以排除不存在的头来替代  exceptHeaders == null //空字符串表示不排除任何头
+			List<String> exceptHeaderList = StringUtil.isEmpty(exceptHeaders, true) 
+					? EXCEPT_HEADER_LIST : Arrays.asList(StringUtil.split(exceptHeaders));
+
 			while (names.hasMoreElements()) {
 				name = names.nextElement();
-				if (name != null && EXCEPT_HEADER_LIST.contains(name.toLowerCase()) == false) {
+				if (name != null && exceptHeaderList.contains(name.toLowerCase()) == false) {
 					headers.add(name, request.getHeader(name));
 				}
 			}
 
 			@SuppressWarnings("unchecked")
-			List<String> cookie = session == null ? null : (List<String>) session.getAttribute("Cookie");
+			List<String> cookie = session == null ? null : (List<String>) session.getAttribute(COOKIE);
 			if (cookie != null && cookie.isEmpty() == false) {
-				List<String> c = headers.get("Cookie");
+				List<String> c = headers.get(COOKIE);
 				if (c == null) {
 					c = new ArrayList<>();
 				}
 				c.addAll(cookie);
-				headers.put("Cookie", c);
+				headers.put(COOKIE, c);
 			}
 		}
 		try {
@@ -1022,7 +1041,7 @@ public class Controller {
 		if (session != null && hs != null) {
 			List<String> cookie = hs.get("Set-Cookie");
 			if (cookie != null && cookie.isEmpty() == false) {
-				session.setAttribute("Cookie", cookie);
+				session.setAttribute(COOKIE, cookie);
 			}
 		}
 		return entity.getBody();
