@@ -25,6 +25,7 @@ import static zuo.biao.apijson.RequestMethod.PUT;
 import java.net.URLDecoder;
 import java.rmi.ServerException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
@@ -967,13 +968,20 @@ public class Controller {
 	}
 
 
+	public static final List<String> EXCEPT_HEADER_LIST;
+	static {
+		EXCEPT_HEADER_LIST = Arrays.asList(  //accept-encoding 在某些情况下导致乱码，origin 和 sec-fetch-mode 等 CORS 信息导致服务器代理失败
+				"accept-encoding", "accept-language", // "accept", "connection"
+				"host", "origin", "referer", "user-agent", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-dest", "sec-fetch-user"
+				);
+	}
+
 	@Autowired
 	HttpServletRequest request;
 	@Autowired
 	HttpServletResponse response;
 
 	@RequestMapping(value = "/delegate")
-//	@ResponseBody
 	public String delegate(@RequestParam("$_delegate_url") String url, @RequestBody String body, HttpMethod method, HttpSession session){
 		Enumeration<String> names = request.getHeaderNames();
 		HttpHeaders headers = null;
@@ -982,9 +990,11 @@ public class Controller {
 			headers = new HttpHeaders();
 			while (names.hasMoreElements()) {
 				name = names.nextElement();
-				headers.add(name, request.getHeader(name));
+				if (name != null && EXCEPT_HEADER_LIST.contains(name.toLowerCase()) == false) {
+					headers.add(name, request.getHeader(name));
+				}
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			List<String> cookie = session == null ? null : (List<String>) session.getAttribute("Cookie");
 			if (cookie != null && cookie.isEmpty() == false) {
@@ -1007,7 +1017,7 @@ public class Controller {
 		HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? JSON.toJSONString(request.getParameterMap()) : body, headers);
 		//  执行HTTP请求
 		ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
-		
+
 		HttpHeaders hs = entity.getHeaders();
 		if (session != null && hs != null) {
 			List<String> cookie = hs.get("Set-Cookie");
@@ -1018,7 +1028,7 @@ public class Controller {
 		return entity.getBody();
 	}
 
-	
+
 	/**Swagger 文档 Demo，供 APIAuto 测试导入 Swagger 文档到数据库用
 	 * @return
 	 */
