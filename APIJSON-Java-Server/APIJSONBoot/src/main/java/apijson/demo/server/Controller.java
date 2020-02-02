@@ -27,8 +27,12 @@ import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1025,16 +1029,40 @@ public class Controller {
 				headers.put(COOKIE, c);
 			}
 		}
-		try {
-			request.getParameterMap().remove("$_delegate_url");
-		} catch (Exception e) {
-			// TODO: handle exception
+
+		//可能是 HTTP POST FORM，即便是 HTTP POST JSON，URL 的参数也要拼接，尽可能保持原样  if (method == HttpMethod.GET) {
+		Map<String, String[]> map = request.getParameterMap();
+
+		if (map != null) {
+			map = new HashMap<>(map);  //解决 throw exception: Unmodified Map
+			map.remove("$_except_headers");
+			map.remove("$_delegate_url");
+
+			Set<Entry<String, String[]>> set = map == null ? null : map.entrySet();
+
+			if (set != null && set.isEmpty() == false) {
+
+				if (url.contains("?") == false) {
+					url += "?";
+				}
+				boolean first = url.endsWith("?");
+
+				for (Entry<String, String[]> e : set) {
+					if (e != null) {
+						url += ((first ? "" : "&") + e.getKey() + "=" + ( e.getValue() == null || e.getValue().length <= 0 ? "" : StringUtil.getString(e.getValue()[0]) ));
+						first = false;
+					}
+				}
+			}
 		}
+		// }
 
 		RestTemplate client = new RestTemplate();
-		//  请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
-		HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? JSON.toJSONString(request.getParameterMap()) : body, headers);
-		//  执行HTTP请求
+		// 请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
+		HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
+		// 执行HTTP请求，这里可能抛异常，不要包装，直接让它抛，能够在浏览器 Console/XHR/{i}/Preview
+		// 看到 error: "Internal Server Error" message: "405 null" 之类的包括信息，
+		// 包装后反而容易混淆，并且会因为 JSON 结构不一致导致解析问题
 		ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
 
 		HttpHeaders hs = entity.getHeaders();
