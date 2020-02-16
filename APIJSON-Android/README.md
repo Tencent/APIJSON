@@ -8,7 +8,6 @@
 
 ### 2.用Android Studio运行Android工程<h3/>
 
-
 如果IDE没安装，运行前先下载安装。<br />
 我的配置是Windows 7 + JDK 1.7.0_71 + Android Studio 2.2 和 OSX EI Capitan + JDK 1.8.0_91 + Android Studio 3.0，其中系统和软件都是64位的。
 
