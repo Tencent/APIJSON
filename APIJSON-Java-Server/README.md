@@ -28,7 +28,8 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 
 <h5>2)Demo依赖Library</h5>
 右键libs里面的 apijson-orm.jar > Build Path > Add to Build Path <br />
-同样按照以上步骤来依赖 postgresql.jar 等libs目录内的其它所有jar包
+同样按照以上步骤来依赖 postgresql.jar 等libs目录内的其它所有jar包。 <br />
+其中 apijson-orm 可使用 Maven 或 Gradle 来远程依赖，具体见 https://github.com/APIJSON/apijson-orm
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
@@ -44,7 +45,8 @@ Open > 选择刚才解压路径下的APIJSON-Master/APIJSON-Java-Server/APIJSONB
 
 <h5>2)Demo依赖Library</h5>
 右键libs里面的 apijson-orm.jar > Add as Library > OK <br />
-同样按照以上步骤来依赖 postgresql.jar 等libs目录内的其它所有jar包
+同样按照以上步骤来依赖 postgresql.jar 等libs目录内的其它所有jar包。 <br />
+其中 apijson-orm 可使用 Maven 或 Gradle 来远程依赖，具体见 https://github.com/APIJSON/apijson-orm
 
 <h5>3)配置(如果完成下方步骤4，导入APIJSON的表，则可跳过)</h5>
 打开 apijson.demo.server.DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
