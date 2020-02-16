@@ -245,8 +245,6 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 [apijson-node](https://github.com/kevinaskin/apijson-node) Node.ts 版 APIJSON，提供 nestjs 和 typeorm 的 Demo，支持 MySQL, PostgreSQL, SQL Server, Oracle
 
-[apijson](https://github.com/TEsTsLA/apijson) Node.ts 版 APIJSON，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite, MariaDB, WebSQL
-
 [uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite 等
 
 [APIJSON](https://github.com/crazytaxi824/APIJSON) Go 版 APIJSON，功能开发中...([不可用且长期未更新，期待热心开发者帮助完善或新增项目](https://github.com/APIJSON/APIJSON/issues/111))
@@ -259,7 +257,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
 
-[AbsGrade](https://github.com/APIJSON/AbsGrade) 抽象列表分级工具，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
+[AbsGrade](https://github.com/APIJSON/AbsGrade) 抽象列表分级算法，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
 
 [APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
 
