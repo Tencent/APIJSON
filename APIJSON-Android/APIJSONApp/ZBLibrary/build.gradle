@@ -27,6 +27,5 @@ dependencies {
     compile files('libs/okhttp-2.1.0.jar')
     compile files('libs/okio-1.0.0.jar')
     compile files('libs/universal-image-loader-1.9.4.jar')
-    compile project(':APIJSONLibrary')
-//    compile 'com.github.APIJSON:apijson-orm:3.9.0'
+    compile 'com.github.APIJSON:apijson-orm:3.9.0'  //    compile project(':APIJSONLibrary')
 }

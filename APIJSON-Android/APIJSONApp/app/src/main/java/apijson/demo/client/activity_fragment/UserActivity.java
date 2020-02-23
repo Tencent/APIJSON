@@ -226,7 +226,7 @@ public class UserActivity extends BaseActivity implements OnClickListener, OnBot
 
 	private Privacy privacy;
 	/**显示用户隐私信息
-	 * @param privacy
+	 * @param privacy_
 	 */
 	private void setPrivacy(Privacy privacy_) {
 		if (privacy_ == null) {
