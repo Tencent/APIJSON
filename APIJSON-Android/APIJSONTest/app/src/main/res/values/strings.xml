@@ -10,7 +10,7 @@
     <string name="get">查</string>
     <string name="single">单个Object</string>
     <string name="columns">指定字段</string>
-    <string name="rely">向上依赖</string>
+    <string name="rely">引用赋值</string>
     <string name="array">Object数组</string>
     <string name="complex">复杂结构</string>
     <string name="access_error">没有访问权限</string>

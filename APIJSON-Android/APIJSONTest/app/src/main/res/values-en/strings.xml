@@ -8,7 +8,7 @@
     <string name="get">GET</string>
     <string name="single">Single</string>
     <string name="columns">Columns</string>
-    <string name="rely">Rely</string>
+    <string name="rely">Reference</string>
     <string name="array">Array</string>
     <string name="complex">Complex</string>
     <string name="access_error">Access Error</string>
