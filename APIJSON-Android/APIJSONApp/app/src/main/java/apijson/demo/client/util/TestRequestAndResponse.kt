@@ -1,4 +1,4 @@
-package apijson.demo.client.activity_fragment
+package apijson.demo.client.util
 
 import apijson.demo.client.model.Comment
 import apijson.demo.client.model.CommentItem

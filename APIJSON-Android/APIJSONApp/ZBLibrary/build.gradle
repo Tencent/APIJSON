@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 29
+    buildToolsVersion '29.0.0'
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 20
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -28,4 +28,5 @@ dependencies {
     compile files('libs/okio-1.0.0.jar')
     compile files('libs/universal-image-loader-1.9.4.jar')
     compile project(':APIJSONLibrary')
+//    compile 'com.github.APIJSON:apijson-orm:3.9.0'
 }

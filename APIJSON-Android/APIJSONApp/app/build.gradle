@@ -5,14 +5,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.0'
     defaultConfig {
-        applicationId "apijson.demo.client"
-        minSdkVersion 15
-        targetSdkVersion 23
+        minSdkVersion 20
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        applicationId "apijson.demo.client"
     }
     buildTypes {
         release {

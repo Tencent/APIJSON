@@ -1,4 +1,4 @@
-package apijson.demo.client.activity_fragment;
+package apijson.demo.client.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

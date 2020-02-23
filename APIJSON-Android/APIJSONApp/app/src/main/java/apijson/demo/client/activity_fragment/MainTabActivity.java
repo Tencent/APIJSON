@@ -31,6 +31,8 @@ import apijson.demo.client.interfaces.TopBarMenuCallback;
 import apijson.demo.client.model.User;
 import apijson.demo.client.util.ActionUtil;
 import apijson.demo.client.util.HttpRequest;
+import apijson.demo.client.util.TestRequestAndResponseJava;
+import apijson.demo.client.util.TestRequestAndResponseKt;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseBroadcastReceiver;
