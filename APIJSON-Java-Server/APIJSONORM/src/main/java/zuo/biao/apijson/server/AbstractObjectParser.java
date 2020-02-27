@@ -17,6 +17,7 @@ package zuo.biao.apijson.server;
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
 import static zuo.biao.apijson.JSONObject.KEY_DROP;
 import static zuo.biao.apijson.JSONObject.KEY_TRY;
+import static zuo.biao.apijson.RequestMethod.POST;
 import static zuo.biao.apijson.RequestMethod.PUT;
 import static zuo.biao.apijson.server.SQLConfig.TYPE_ITEM;
 
@@ -240,8 +241,33 @@ public abstract class AbstractObjectParser implements ObjectParser {
 								response.put(key, onChildParse(index, key, (JSONObject)value));
 								index ++;
 							}
-						}
-						else if (method == PUT && value instanceof JSONArray
+						} else if (value instanceof JSONArray && method == POST &&
+										key.startsWith("@") == false && key.endsWith("@") == false) {//JSONArray，批量新增，往下一级提取
+							JSONArray valueArray = (JSONArray)value;
+
+							for (int i = 0; i < valueArray.size(); i++) {
+								if (childMap != null) {//添加到childMap，最后再解析
+									childMap.put(key, valueArray.getJSONObject(i));
+								}
+								else {//直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
+									JSONObject result = (JSONObject)onChildParse(index, key, valueArray.getJSONObject(i));
+									//合并结果
+									JSONObject before = (JSONObject)response.get(key);
+									if(result.get("code").equals(200)){
+										if(before!=null){
+											before.put("count",before.getInteger("count")+result.getInteger("count"));
+											response.put(key, before);
+										}else{
+											response.put(key, result);
+										}
+									} else {
+										//只要有一条失败，则抛出异常，全部失败
+										throw new RuntimeException(key + "," + valueArray.getJSONObject(i) +",新增失败!");
+									}
+								}
+							}
+							index ++;
+						} else if (method == PUT && value instanceof JSONArray
 								&& (whereList == null || whereList.contains(key) == false)) {//PUT JSONArray
 							onPUTArrayParse(key, (JSONArray) value);
 						}
