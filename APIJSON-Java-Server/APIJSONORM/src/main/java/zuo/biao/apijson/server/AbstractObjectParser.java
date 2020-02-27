@@ -17,6 +17,7 @@ package zuo.biao.apijson.server;
 import static zuo.biao.apijson.JSONObject.KEY_COMBINE;
 import static zuo.biao.apijson.JSONObject.KEY_DROP;
 import static zuo.biao.apijson.JSONObject.KEY_TRY;
+import static zuo.biao.apijson.RequestMethod.POST;
 import static zuo.biao.apijson.RequestMethod.PUT;
 import static zuo.biao.apijson.server.SQLConfig.TYPE_ITEM;
 
