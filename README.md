@@ -42,7 +42,7 @@
 APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协议实现的ORM库。<br />
 为 简单的增删改查、复杂的查询、简单的事务操作 提供了完全自动化的API。<br />
 能大幅降低开发和沟通成本，简化开发流程，缩短开发周期。<br />
-适合中小型前后端分离的项目，尤其是互联网创业项目和企业自用项目。<br />
+适合中小型前后端分离的项目，尤其是 BaaS、Serverless、互联网创业项目和企业自用项目。<br />
 
 通过自动化API，前端可以定制任何数据、任何结构！<br />
 大部分HTTP请求后端再也不用写接口了，更不用写文档了！<br />
@@ -117,7 +117,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 ### 常见问题
 #### 1.如何定制业务逻辑？
-在后端编写 远程函数，可以拿到 session, version, 当前 JSONObject, 参数名称 等，然后对查到的数据自定义处理 <br />
+在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 <br />
 https://github.com/APIJSON/APIJSON/issues/101
 
 #### 2.如何校验权限？
@@ -125,11 +125,11 @@ https://github.com/APIJSON/APIJSON/issues/101
 https://github.com/APIJSON/APIJSON/issues/12
 
 #### 3.如何校验参数？
-在 Request 表配置校验规则 structure，提供 NECESSARY, TYPE, VERIFY 通用校验方法，还通过 远程函数 来完全自定义 <br />
+在 Request 表配置校验规则 structure，提供 NECESSARY、TYPE、VERIFY 通用校验方法，还通过 远程函数 来完全自定义 <br />
 https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
 <br />
-其它问题见 closed issues <br />
+其它问题见 Closed Issues <br />
 https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 ### 快速上手
