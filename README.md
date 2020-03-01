@@ -117,10 +117,12 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 ### 常见问题
 #### 1.如何定制业务逻辑？
-远程函数 https://github.com/APIJSON/APIJSON/issues/101
+在后端编写 远程函数，可以拿到 session, version, 当前 JSONObject，参数名称 等值，然后对查到的数据自定义处理
+https://github.com/APIJSON/APIJSON/issues/101
 
 #### 2.如何校验参数？
-Request 表配置 structure
+Request 表配置校验规则 structure，提供通用校验方法，还支持调用 远程函数 来完全自定义
+https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
 ### 快速上手
 
