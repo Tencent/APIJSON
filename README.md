@@ -125,7 +125,7 @@ https://github.com/APIJSON/APIJSON/issues/101
 https://github.com/APIJSON/APIJSON/issues/12
 
 #### 3.如何校验参数？
-在 Request 表配置校验规则 structure，提供 NECESSARY、TYPE、VERIFY 通用校验方法，还通过 远程函数 来完全自定义 <br />
+在 Request 表配置校验规则 structure，提供 NECESSARY、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 <br />
 https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
 <br />
