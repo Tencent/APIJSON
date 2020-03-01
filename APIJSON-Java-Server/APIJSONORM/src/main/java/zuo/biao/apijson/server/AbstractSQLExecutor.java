@@ -42,6 +42,7 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.NotNull;
+import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 
 /**executor for query(read) or update(write) MySQL database
@@ -575,7 +576,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 		else if (value instanceof Clob) { //SQL Server TEXT 类型 居然走这个
 			castToJson = true;
-			
+
 			StringBuffer sb = new StringBuffer(); 
 			BufferedReader br = new BufferedReader(((Clob) value).getCharacterStream()); 
 			String s = br.readLine();
@@ -636,7 +637,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 */
 	@Override
 	public PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
-		PreparedStatement statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared())); //创建Statement对象
+		PreparedStatement statement; //创建Statement对象
+		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
+			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()), Statement.RETURN_GENERATED_KEYS);
+		}
+		else {
+			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()));
+		}
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
 
 		if (valueList != null && valueList.isEmpty() == false) {
@@ -795,7 +802,17 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
-		return getStatement(config).executeUpdate(); //PreparedStatement 不用传 SQL
+		PreparedStatement s = getStatement(config);
+		int count = s.executeUpdate(); //PreparedStatement 不用传 SQL
+		
+		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
+			ResultSet rs = s.getGeneratedKeys();
+			if (rs != null && rs.next()) {
+				config.setId(rs.getLong(1));//返回插入的主键id
+			}
+		}
+		
+		return count;
 	}
 
 

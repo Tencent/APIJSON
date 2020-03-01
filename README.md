@@ -42,7 +42,7 @@
 APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协议实现的ORM库。<br />
 为 简单的增删改查、复杂的查询、简单的事务操作 提供了完全自动化的API。<br />
 能大幅降低开发和沟通成本，简化开发流程，缩短开发周期。<br />
-适合中小型前后端分离的项目，尤其是互联网创业项目和企业自用项目。<br />
+适合中小型前后端分离的项目，尤其是 BaaS、Serverless、互联网创业项目和企业自用项目。<br />
 
 通过自动化API，前端可以定制任何数据、任何结构！<br />
 大部分HTTP请求后端再也不用写接口了，更不用写文档了！<br />
@@ -115,6 +115,23 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 ### 为什么要用APIJSON？
 [前后端 关于接口的 开发、文档、联调 等 10 大痛点解析](https://github.com/TommyLemon/APIJSON/wiki)
 
+### 常见问题
+#### 1.如何定制业务逻辑？
+在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 <br />
+https://github.com/APIJSON/APIJSON/issues/101
+
+#### 2.如何校验权限？
+在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度细分到 Row 级 <br />
+https://github.com/APIJSON/APIJSON/issues/12
+
+#### 3.如何校验参数？
+在 Request 表配置校验规则 structure，提供 NECESSARY、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 <br />
+https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
+
+<br />
+其它问题见 Closed Issues <br />
+https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
+
 ### 快速上手
 
 #### 1.后端部署
@@ -152,32 +169,33 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 ### 贡献者们
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
- height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/70"><img src="https://avatars1.githubusercontent.com/u/22228201?s=400&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/74"><img src="https://avatars0.githubusercontent.com/u/1274536?s=400&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/92"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/103"><img src="https://avatars0.githubusercontent.com/u/25990237?s=400&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/72"><img src="https://avatars1.githubusercontent.com/u/10663804?s=400&v=4"  height="72" width="72" ></a>
-  <a href="https://github.com/TommyLemon/APIJSON/pull/33"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="72" width="72" ></a>
+ height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/70"><img src="https://avatars1.githubusercontent.com/u/22228201?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/74"><img src="https://avatars0.githubusercontent.com/u/1274536?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/APIJSON/APIJSON/pull/119"><img src="https://avatars1.githubusercontent.com/u/25604004?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/APIJSON/APIJSON/pull/92"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/APIJSON/APIJSON/pull/103"><img src="https://avatars0.githubusercontent.com/u/25990237?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/72"><img src="https://avatars1.githubusercontent.com/u/10663804?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/TommyLemon/APIJSON/pull/33"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="68" width="68" ></a>
   <br />
   <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://avatars3.githubusercontent.com/u/12622501?s=400&v=4"  
- height="72" width="72" ></a>
-  <a href="https://github.com/qq547057827/apijson-php"><img src="https://avatars3.githubusercontent.com/u/1657532?s=400&v=4"  height="72" width="72" ></a>
+ height="68" width="68" ></a>
+  <a href="https://github.com/qq547057827/apijson-php"><img src="https://avatars3.githubusercontent.com/u/1657532?s=400&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/kevinaskin/apijson-node"><img src="https://avatars3.githubusercontent.com/u/20034891?s=400&v=4"
- height="72" width="72" ></a>
+ height="68" width="68" ></a>
   <a href="https://github.com/TEsTsLA/apijson"><img src="https://avatars2.githubusercontent.com/u/17310639?s=400&v=4"
- height="72" width="72" ></a>
-  <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://avatars0.githubusercontent.com/u/359281?s=400&v=4"  height="72" width="72" ></a>
+ height="68" width="68" ></a>
+  <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://avatars0.githubusercontent.com/u/359281?s=400&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/crazytaxi824/APIJSON"><img src="https://avatars3.githubusercontent.com/u/16500384?s=400&v=4" 
- height="72" width="72" ></a>
-  <a href="https://github.com/luckyxiaomo/APIJSONKOTLIN"><img src="https://avatars2.githubusercontent.com/u/42728605?s=400&v=4"  height="72" width="72" ></a>
+ height="68" width="68" ></a>
+  <a href="https://github.com/luckyxiaomo/APIJSONKOTLIN"><img src="https://avatars2.githubusercontent.com/u/42728605?s=400&v=4"  height="68" width="68" ></a>
   <a href="https://gitee.com/zhiyuexin/ApiJsonByJFinal"><img src="https://avatar.gitee.com/uploads/90/490_zhiyuexin.jpg!avatar100?1368664499"  
- height="72" width="72" ></a>
-  <a href="https://github.com/Airforce-1/SpringServer1.2-APIJSON"><img src="https://avatars3.githubusercontent.com/u/6212428?s=400&v=4"  height="72" width="72" ></a>
+ height="68" width="68" ></a>
+  <a href="https://github.com/Airforce-1/SpringServer1.2-APIJSON"><img src="https://avatars3.githubusercontent.com/u/6212428?s=400&v=4"  height="68" width="68" ></a>
 </div>
 <br />
 感谢大家的贡献。

@@ -685,8 +685,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.json = json;
 		return this;
 	}
-	
-	
+
+
 	@Override
 	public Subquery getFrom() {
 		return from;
@@ -856,7 +856,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								}
 							}
 							else {
-//								if ((StringUtil.isName(origin) == false || origin.startsWith("_"))) {
+								//								if ((StringUtil.isName(origin) == false || origin.startsWith("_"))) {
 								if (origin.startsWith("_") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
 									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
 											+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
@@ -877,7 +877,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						else {
 							origin = getValue(origin).toString();
 						}
-						
+
 						if (isName && isKeyPrefix()) {
 							ckeys[j] = tableAlias + "." + origin;
 							//							if (isColumn) {
@@ -1330,7 +1330,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				isItemFirst = false;
 			}
-			
+
 			if (StringUtil.isEmpty(cs, true)) {//避免SQL条件连接错误
 				continue;
 			}
@@ -2352,13 +2352,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		Object idIn = request.get(idInKey); //可能是 id{}:">0"
 
-		if (method == POST) {
-			if (idIn != null) { //不能在这里确定[]的长度，只能在外面传进来
-				if ((idIn instanceof List == false) || ((List<?>)idIn).isEmpty()) { // id{}:[] 表示同时插入多条记录
-					throw new IllegalArgumentException("POST请求，生成多条记录请用 id{}:[] ！ [] 类型为JSONArray且不能为空！");
-				}
-			} else if (request.get(idKey) == null) {
-				request.put(idKey, callback.newId(method, database, schema, table));
+		if (method == POST && request.get(idKey) == null) {
+			Object newId = callback.newId(method, database, schema, table); // null 表示数据库自增 id
+			if (newId != null) { 
+				request.put(idKey, newId);
 			}
 		}
 
@@ -2430,21 +2427,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		//已经remove了id和id{}，以及@key
 		Set<String> set = request.keySet(); //前面已经判断request是否为空
-		if (method == POST) {//POST操作
+		if (method == POST) { //POST操作
+			if (idIn != null) {
+				throw new IllegalArgumentException("POST 请求中不允许传 " + idInKey + " !");
+			}
+
 			if (set != null && set.isEmpty() == false) { //不能直接return，要走完下面的流程
-				List<Object> idList;
-				if (id != null) { //单条记录
-					if (idIn != null) {
-						throw new IllegalArgumentException("POST请求中 id 和 id{} 不能同时存在!");
-					}
-
-					idList = new ArrayList<Object>(1);
-					idList.add(id);
-				} else { //多条记录
-					idList = new ArrayList<Object>((JSONArray) idIn);
-				}
-
-				//idIn不为空时，valuesString有多条，唯一的区别就是id
 				String[] columns = set.toArray(new String[]{});
 
 				Collection<Object> valueCollection = request.values();
@@ -2454,19 +2442,25 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new Exception("服务器内部错误:\n" + TAG
 							+ " newSQLConfig  values == null || values.length != columns.length !");
 				}
-				column = idKey + "," + StringUtil.getString(columns); //set已经判断过不为空
-				final int size = columns.length + 1; //以key数量为准
+				column = (id == null ? "" : idKey + ",") + StringUtil.getString(columns); //set已经判断过不为空
 
-				List<List<Object>> valuess = new ArrayList<>(idList.size()); // [idList.size()][]
+				List<List<Object>> valuess = new ArrayList<>(1);
 				List<Object> items; //(item0, item1, ...)
-				for (int i = 0; i < idList.size(); i++) {
+				if (id == null) { //数据库自增 id
+					items = Arrays.asList(values); //FIXME 是否还需要进行 add 或 remove 操作？Arrays.ArrayList 不允许修改，会抛异常
+				}
+				else {
+					int size = columns.length + (id == null ? 0 : 1); //以key数量为准
+					
 					items = new ArrayList<>(size);
-					items.add(idList.get(i)); //第0个就是id
+					items.add(id); //idList.get(i)); //第0个就是id
+					
 					for (int j = 1; j < size; j++) {
 						items.add(values[j-1]); //从第1个开始，允许"null"
 					}
-					valuess.add(items);
 				}
+				
+				valuess.add(items);
 				config.setValues(valuess);
 			}
 		} 
@@ -2612,7 +2606,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
-		
+
 		String[] jsonArr = StringUtil.split(json);
 		config.setJson(jsonArr == null || jsonArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(jsonArr)));
 

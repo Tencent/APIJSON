@@ -67,6 +67,11 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 				return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? KEY_ID : KEY_USER_ID; // id / userId
 			}
 
+			//return null 则不生成 id，一般用于数据库自增 id
+			//			@Override
+			//			public Object newId(RequestMethod method, String database, String schema, String table) {
+			//				return null;
+			//			}
 		};
 	}
 
