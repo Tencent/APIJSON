@@ -47,7 +47,7 @@
 		<dependency>
 		    <groupId>com.github.APIJSON</groupId>
 		    <artifactId>apijson-orm</artifactId>
-		    <version>4.0.0</version>
+		    <version>LATEST</version>
 		</dependency>
 		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
 
