@@ -16,11 +16,9 @@ package zuo.biao.apijson.server;
 
 import static zuo.biao.apijson.JSONObject.KEY_ID;
 import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
-import static zuo.biao.apijson.server.Operation.ADD;
 import static zuo.biao.apijson.server.Operation.DISALLOW;
 import static zuo.biao.apijson.server.Operation.INSERT;
 import static zuo.biao.apijson.server.Operation.NECESSARY;
-import static zuo.biao.apijson.server.Operation.PUT;
 import static zuo.biao.apijson.server.Operation.REMOVE;
 import static zuo.biao.apijson.server.Operation.REPLACE;
 import static zuo.biao.apijson.server.Operation.TYPE;
@@ -230,9 +228,7 @@ public class Structure {
 		JSONObject type = target.getJSONObject(TYPE.name());
 		JSONObject verify = target.getJSONObject(VERIFY.name());
 		JSONObject insert = target.getJSONObject(INSERT.name());
-		JSONObject add = target.getJSONObject(ADD.name());
 		JSONObject update = target.getJSONObject(UPDATE.name());
-		JSONObject put = target.getJSONObject(PUT.name());
 		JSONObject replace = target.getJSONObject(REPLACE.name());
 
 		String unique = StringUtil.getNoBlankString(target.getString(UNIQUE.name()));
@@ -240,20 +236,16 @@ public class Structure {
 		String necessary = StringUtil.getNoBlankString(target.getString(NECESSARY.name()));
 		String disallow = StringUtil.getNoBlankString(target.getString(DISALLOW.name()));
 
-		//不还原，传进来的target不应该是原来的
 		target.remove(TYPE.name());
 		target.remove(VERIFY.name());
 		target.remove(INSERT.name());
-		target.remove(ADD.name());
 		target.remove(UPDATE.name());
-		target.remove(PUT.name());
 		target.remove(REPLACE.name());
 
 		target.remove(UNIQUE.name());
 		target.remove(REMOVE.name());
 		target.remove(NECESSARY.name());
 		target.remove(DISALLOW.name());
-		//获取配置>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
@@ -373,9 +365,7 @@ public class Structure {
 		real = operate(TYPE, type, real, creator);
 		real = operate(VERIFY, verify, real, creator);
 		real = operate(INSERT, insert, real, creator);
-		real = operate(ADD, add, real, creator);
 		real = operate(UPDATE, update, real, creator);
-		real = operate(PUT, put, real, creator);
 		real = operate(REPLACE, replace, real, creator);
 		//校验与修改Request>>>>>>>>>>>>>>>>>
 
@@ -390,6 +380,20 @@ public class Structure {
 		}
 		//校验重复>>>>>>>>>>>>>>>>>>>
 
+		
+		//还原 <<<<<<<<<<
+		target.put(TYPE.name(), type);
+		target.put(VERIFY.name(), verify);
+		target.put(INSERT.name(), insert);
+		target.put(UPDATE.name(), update);
+		target.put(REPLACE.name(), replace);
+
+		target.put(UNIQUE.name(), unique);
+		target.put(REMOVE.name(), remove);
+		target.put(NECESSARY.name(), necessary);
+		target.put(DISALLOW.name(), disallow);
+		//还原 >>>>>>>>>>
+		
 		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
 		return real;
 	}
@@ -433,9 +437,6 @@ public class Structure {
 			else if (opt == UPDATE) {
 				real.put(tk, tv);
 			}
-			else if (opt == PUT) {
-				real.put(tk, tv);
-			}
 			else {
 				if (real.containsKey(tk)) {
 					if (opt == REPLACE) {
@@ -444,9 +445,6 @@ public class Structure {
 				}
 				else {
 					if (opt == INSERT) {
-						real.put(tk, tv);
-					}
-					if (opt == ADD) {
 						real.put(tk, tv);
 					}
 				}

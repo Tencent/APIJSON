@@ -77,7 +77,7 @@ public class RemoteFunction {
 		}
 		
 		int v = row.getIntValue("version");
-		if (v < fun.getVersion()) {
+		if (fun.getVersion() < v) {
 			throw new UnsupportedOperationException("不允许 version = " + fun.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + v + " !");
 		}
 		String t = row.getString("tag");

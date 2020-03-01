@@ -24,8 +24,8 @@ import com.alibaba.fastjson.JSONObject;
 import zuo.biao.apijson.RequestMethod;
 import zuo.biao.apijson.StringUtil;
 import zuo.biao.apijson.server.AbstractObjectParser;
+import zuo.biao.apijson.server.AbstractParser;
 import zuo.biao.apijson.server.Join;
-import zuo.biao.apijson.server.Parser;
 import zuo.biao.apijson.server.SQLConfig;
 
 
@@ -59,7 +59,7 @@ public class DemoObjectParser extends AbstractObjectParser {
 	}
 
 	@Override
-	public DemoObjectParser setParser(Parser<?> parser) {
+	public DemoObjectParser setParser(AbstractParser<?> parser) {
 		super.setParser(parser);
 		return this;
 	}

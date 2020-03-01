@@ -21,6 +21,7 @@ import static zuo.biao.apijson.RequestMethod.POST;
 import static zuo.biao.apijson.RequestMethod.PUT;
 import static zuo.biao.apijson.server.SQLConfig.TYPE_ITEM;
 
+import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import zuo.biao.apijson.JSONResponse;
 import zuo.biao.apijson.Log;
 import zuo.biao.apijson.NotNull;
 import zuo.biao.apijson.RequestMethod;
@@ -52,8 +54,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	private static final String TAG = "AbstractObjectParser";
 
 	@NotNull
-	protected Parser<?> parser;
-	public AbstractObjectParser setParser(Parser<?> parser) {
+	protected AbstractParser<?> parser;
+	public AbstractObjectParser setParser(AbstractParser<?> parser) {
 		this.parser = parser;
 		return this;
 	}
@@ -233,43 +235,53 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					key = entry.getKey();
 
 					try {
-						if (value instanceof JSONObject && key.startsWith("@") == false && key.endsWith("@") == false) {//JSONObject，往下一级提取
+						if (value instanceof JSONObject && key.startsWith("@") == false && key.endsWith("@") == false) { //JSONObject，往下一级提取
 							if (childMap != null) {//添加到childMap，最后再解析
 								childMap.put(key, (JSONObject)value);
 							}
-							else {//直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
+							else { //直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
 								response.put(key, onChildParse(index, key, (JSONObject)value));
 								index ++;
 							}
-						} else if (value instanceof JSONArray && method == POST &&
-										key.startsWith("@") == false && key.endsWith("@") == false) {//JSONArray，批量新增，往下一级提取
-							JSONArray valueArray = (JSONArray)value;
-
-							for (int i = 0; i < valueArray.size(); i++) {
-								if (childMap != null) {//添加到childMap，最后再解析
-									childMap.put(key, valueArray.getJSONObject(i));
-								}
-								else {//直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
-									JSONObject result = (JSONObject)onChildParse(index, key, valueArray.getJSONObject(i));
-									//合并结果
-									JSONObject before = (JSONObject)response.get(key);
-									if(result.get("code").equals(200)){
-										if(before!=null){
-											before.put("count",before.getInteger("count")+result.getInteger("count"));
-											response.put(key, before);
-										}else{
-											response.put(key, result);
-										}
-									} else {
-										//只要有一条失败，则抛出异常，全部失败
-										throw new RuntimeException(key + "," + valueArray.getJSONObject(i) +",新增失败!");
-									}
-								}
-							}
-							index ++;
-						} else if (method == PUT && value instanceof JSONArray
-								&& (whereList == null || whereList.contains(key) == false)) {//PUT JSONArray
+						}
+						else if (method == PUT && value instanceof JSONArray
+								&& (whereList == null || whereList.contains(key) == false)) { //PUT JSONArray
 							onPUTArrayParse(key, (JSONArray) value);
+						}
+						else if (method == POST && value instanceof JSONArray && key.endsWith("[]") && JSONRequest.isTableKey(key.substring(0, key.length() - 2))) { //JSONArray，批量新增，往下一级提取
+							String childKey = key.substring(0, key.length() - 2);
+							JSONArray valueArray = (JSONArray) value;
+
+							int allCount = 0;
+							JSONArray ids = new JSONArray();
+							
+							int version = parser.getVersion();
+							int maxUpdateCount = parser.getMaxUpdateCount();
+
+							for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
+								//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
+								JSONRequest req = new JSONRequest(childKey, valueArray.getJSONObject(i));
+
+								//parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
+								JSONObject result = (JSONObject) onChildParse(0, "" + i, parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser));
+								result = result.getJSONObject(childKey);
+//
+								boolean success = JSONResponse.isSuccess(result);
+								int count = result == null ? null : result.getIntValue(JSONResponse.KEY_COUNT);
+
+								if (success == false || count != 1) { //如果 code = 200 但 count != 1，不能算成功，掩盖了错误为不好排查问题
+									throw new ServerException("批量新增失败！" + key + "/" +  i + "：" + (success ? "成功但 count != 1 ！" : (result == null ? "null" : result.getString(JSONResponse.KEY_MSG))));
+								}
+								
+								allCount += count;
+								ids.add(result.get(JSONResponse.KEY_ID));
+							}
+
+							JSONObject allResult = AbstractParser.newSuccessResult();
+							allResult.put(JSONResponse.KEY_ID_IN, ids);
+							allResult.put(JSONResponse.KEY_COUNT, allCount);
+
+							response.put(key, allResult); //不按原样返回，避免数据量过大
 						}
 						else {//JSONArray或其它Object，直接填充
 							if (onParse(key, value) == false) {

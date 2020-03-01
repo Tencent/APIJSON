@@ -120,7 +120,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		this.transactionIsolation = RequestMethod.isQueryMethod(method) ? Connection.TRANSACTION_NONE : Connection.TRANSACTION_REPEATABLE_READ;
 		return this;
 	}
-	
+
 	protected int version;
 	@Override
 	public int getVersion() {
@@ -131,7 +131,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		this.version = version;
 		return this;
 	}
-	
+
 	protected String tag;
 	@Override
 	public String getTag() {
@@ -462,8 +462,40 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	}
 
 	@Override
-	public JSONObject parseCorrectRequest(JSONObject target) throws Exception {
-		return Structure.parseRequest(requestMethod, "", target, requestObject, getMaxUpdateCount(), this);
+	public JSONObject parseCorrectRequest(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request
+			, int maxUpdateCount, SQLCreator creator) throws Exception {
+		
+		if (RequestMethod.isPublicMethod(method)) {
+			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
+		}
+
+		if (StringUtil.isEmpty(tag, true)) {
+			throw new IllegalArgumentException("请在最外层设置 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
+		}
+
+		//获取指定的JSON结构 <<<<<<<<<<<<
+		JSONObject object = null;
+		String error = "";
+		try {
+			object = getStructure("Request", JSONRequest.KEY_TAG, tag, version);
+		} catch (Exception e) {
+			error = e.getMessage();
+		}
+		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
+			throw new UnsupportedOperationException("非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error);
+		}
+
+		JSONObject target = null;
+		if (zuo.biao.apijson.JSONObject.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
+			target = new JSONObject(true);
+			target.put(tag, object);
+		} else {
+			target = object;
+		}
+		//获取指定的JSON结构 >>>>>>>>>>>>>>
+
+		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
+		return Structure.parseRequest(method, name, target, request, maxUpdateCount, creator);
 	}
 
 
@@ -585,41 +617,11 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 	 */
 	@Override
 	public JSONObject parseCorrectRequest() throws Exception {
-		if (RequestMethod.isPublicMethod(requestMethod)) {
-			return requestObject;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
-		}
-
-		String tag = requestObject.getString(JSONRequest.KEY_TAG);
-		if (StringUtil.isNotEmpty(tag, true) == false) {
-			throw new IllegalArgumentException("请在最外层设置 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
-		}
-		setTag(tag);
-
-		int version = requestObject.getIntValue(JSONRequest.KEY_VERSION);
-
-		JSONObject object = null;
-		String error = "";
-		try {
-			object = getStructure("Request", JSONRequest.KEY_TAG, tag, version);
-		} catch (Exception e) {
-			error = e.getMessage();
-		}
-		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
-			throw new UnsupportedOperationException("非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error);
-		}
-
-		JSONObject target = null;
-		if (zuo.biao.apijson.JSONObject.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
-			target = new JSONObject(true);
-			target.put(tag, object);
-		} else {
-			target = object;
-		}
-		//获取指定的JSON结构 >>>>>>>>>>>>>>
-
+		setTag(requestObject.getString(JSONRequest.KEY_TAG));
+		setVersion(requestObject.getIntValue(JSONRequest.KEY_VERSION));
 		requestObject.remove(JSONRequest.KEY_TAG);
 		requestObject.remove(JSONRequest.KEY_VERSION);
-		return parseCorrectRequest((JSONObject) target.clone());
+		return parseCorrectRequest(requestMethod, tag, version, "", requestObject, getMaxUpdateCount(), this);
 	}
 
 

@@ -90,8 +90,9 @@ public interface Parser<T> {
 
 	JSONObject parseCorrectRequest() throws Exception;
 	
-	JSONObject parseCorrectRequest(JSONObject target) throws Exception;
-
+	JSONObject parseCorrectRequest(RequestMethod method, String tag, int version, String name, JSONObject request,
+			int maxUpdateCount, SQLCreator creator) throws Exception;
+	
 	JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception;
 
 	JSONObject getStructure(String table, String key, String value, int version) throws Exception;
@@ -153,4 +154,5 @@ public interface Parser<T> {
 	void rollback(Savepoint savepoint) throws SQLException;
 	void commit() throws SQLException;
 	void close();
+
 }
