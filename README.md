@@ -122,7 +122,7 @@ https://github.com/APIJSON/APIJSON/issues/101
 
 #### 2.如何校验权限？
 在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度可细分到 Row 级别
-https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
+https://github.com/APIJSON/APIJSON/issues/12
 
 #### 3.如何校验参数？
 在 Request 表配置校验规则 structure，提供 NECESSARY, TYPE, VERIFY 通用校验方法，还通过 远程函数 来完全自定义
