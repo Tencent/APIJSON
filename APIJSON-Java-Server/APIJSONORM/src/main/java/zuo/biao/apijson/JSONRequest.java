@@ -69,7 +69,7 @@ public class JSONRequest extends JSONObject {
 	 * @param version
 	 * @return
 	 */
-	public JSONRequest setVersion(String version) {
+	public JSONRequest setVersion(Integer version) {
 		return puts(KEY_VERSION, version);
 	}
 	/**set "format":format in outermost layer
