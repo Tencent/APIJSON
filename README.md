@@ -115,6 +115,13 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 ### 为什么要用APIJSON？
 [前后端 关于接口的 开发、文档、联调 等 10 大痛点解析](https://github.com/TommyLemon/APIJSON/wiki)
 
+### 常见问题
+#### 1.如何定制业务逻辑？
+远程函数 https://github.com/APIJSON/APIJSON/issues/101
+
+#### 2.如何校验参数？
+Request 表配置 structure
+
 ### 快速上手
 
 #### 1.后端部署
