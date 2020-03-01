@@ -124,6 +124,10 @@ https://github.com/APIJSON/APIJSON/issues/101
 Request 表配置校验规则 structure，提供 NECESSARY, TYPE, VERIFY 通用校验方法，还通过 远程函数 来完全自定义
 https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
+<br />
+其它问题见 closed issues
+https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
+
 ### 快速上手
 
 #### 1.后端部署
