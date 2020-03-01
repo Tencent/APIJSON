@@ -4,7 +4,7 @@
 	<groupId>htdi.jfinal</groupId>
 	<artifactId>apijson-final</artifactId>
 	<packaging>jar</packaging>
-	<version>3.6.5</version>
+	<version>4.0.0</version>
 	<name>APIJSON Demo based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>

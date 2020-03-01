@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
-import zuo.biao.apijson.MethodAccess;
+import apijson.MethodAccess;
 
 /**评论
  * @author Lemon

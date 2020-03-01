@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>zuo.biao.apijson.server</groupId>
+	<groupId>apijson.server</groupId>
 	<artifactId>apijson-orm</artifactId>
-	<version>3.9.0</version>
+	<version>4.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>

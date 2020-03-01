@@ -14,11 +14,11 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
-import static zuo.biao.apijson.RequestRole.ADMIN;
-import static zuo.biao.apijson.RequestRole.OWNER;
-import static zuo.biao.apijson.RequestRole.UNKNOWN;
+import static apijson.RequestRole.ADMIN;
+import static apijson.RequestRole.OWNER;
+import static apijson.RequestRole.UNKNOWN;
 
-import zuo.biao.apijson.MethodAccess;
+import apijson.MethodAccess;
 
 /**
  * TODO 漏洞：如果GETS允许CONTACT，则CONTACT能看到自己的余额，tag可以不是Privacy-circle。

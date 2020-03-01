@@ -23,7 +23,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
-import zuo.biao.apijson.StringUtil;
+import apijson.StringUtil;
 
 /**base model for reduce model codes
  * @author Lemon

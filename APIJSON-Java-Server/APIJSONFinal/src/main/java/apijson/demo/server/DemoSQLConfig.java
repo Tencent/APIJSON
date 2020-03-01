@@ -14,17 +14,17 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
-import static zuo.biao.apijson.JSONObject.KEY_ID;
-import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
+import static apijson.JSONObject.KEY_ID;
+import static apijson.JSONObject.KEY_USER_ID;
 
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.server.AbstractSQLConfig;
-import zuo.biao.apijson.server.Join;
-import zuo.biao.apijson.server.SQLConfig;
+import apijson.RequestMethod;
+import apijson.server.AbstractSQLConfig;
+import apijson.server.Join;
+import apijson.server.SQLConfig;
 
 
 /**SQL配置

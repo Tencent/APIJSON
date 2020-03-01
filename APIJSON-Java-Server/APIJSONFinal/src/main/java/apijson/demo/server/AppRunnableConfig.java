@@ -11,7 +11,7 @@ import com.jfinal.config.Routes;
 import com.jfinal.server.undertow.UndertowServer;
 import com.jfinal.template.Engine;
 
-import zuo.biao.apijson.Log;
+import apijson.Log;
 
 /**JFinalConfig
  * 右键这个类 > Run As > Java Application

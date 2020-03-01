@@ -14,13 +14,13 @@ limitations under the License.*/
 
 package apijson.demo.server.model;
 
-import static zuo.biao.apijson.RequestRole.ADMIN;
-import static zuo.biao.apijson.RequestRole.UNKNOWN;
+import static apijson.RequestRole.ADMIN;
+import static apijson.RequestRole.UNKNOWN;
 
 import java.util.List;
 
-import zuo.biao.apijson.MethodAccess;
-import zuo.biao.apijson.server.Visitor;
+import apijson.MethodAccess;
+import apijson.server.Visitor;
 
 /**用户开放信息
  * @author Lemon

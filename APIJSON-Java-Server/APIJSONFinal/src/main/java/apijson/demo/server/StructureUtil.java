@@ -21,16 +21,16 @@ import java.rmi.ServerException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.Log;
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.JSONRequest;
-import zuo.biao.apijson.server.SQLConfig;
-import zuo.biao.apijson.server.SQLCreator;
-import zuo.biao.apijson.server.SQLExecutor;
-import zuo.biao.apijson.server.Structure;
+import apijson.JSON;
+import apijson.JSONResponse;
+import apijson.Log;
+import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.server.JSONRequest;
+import apijson.server.SQLConfig;
+import apijson.server.SQLCreator;
+import apijson.server.SQLExecutor;
+import apijson.server.Structure;
 
 
 /**请求结构校验
@@ -119,7 +119,7 @@ public class StructureUtil {
 			JSONObject target = null;
 
 			if (structure != null) {
-				if (zuo.biao.apijson.JSONObject.isTableKey(tag) && structure.containsKey(tag) == false) {//tag是table名
+				if (apijson.JSONObject.isTableKey(tag) && structure.containsKey(tag) == false) {//tag是table名
 					target = new JSONObject(true);
 					target.put(tag, structure);
 				} else {

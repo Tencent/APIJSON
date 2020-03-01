@@ -27,16 +27,16 @@ import javax.servlet.http.HttpSession;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.JSON;
+import apijson.JSONResponse;
+import apijson.Log;
+import apijson.NotNull;
+import apijson.RequestMethod;
+import apijson.RequestRole;
+import apijson.StringUtil;
 import apijson.demo.server.model.BaseModel;
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.Log;
-import zuo.biao.apijson.NotNull;
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.RequestRole;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.JSONRequest;
-import zuo.biao.apijson.server.RemoteFunction;
+import apijson.server.JSONRequest;
+import apijson.server.RemoteFunction;
 
 
 /**可远程调用的函数类
@@ -372,8 +372,8 @@ public class DemoFunction extends RemoteFunction {
 	 * @throws Exception
 	 */
 	public Object verifyAccess(@NotNull JSONObject request) throws Exception {
-		long userId = request.getLongValue(zuo.biao.apijson.JSONObject.KEY_USER_ID);
-		RequestRole role = RequestRole.get(request.getString(zuo.biao.apijson.JSONObject.KEY_ROLE));
+		long userId = request.getLongValue(apijson.JSONObject.KEY_USER_ID);
+		RequestRole role = RequestRole.get(request.getString(apijson.JSONObject.KEY_ROLE));
 		if (role == RequestRole.OWNER && userId != DemoVerifier.getVisitorId(session)) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}

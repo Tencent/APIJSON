@@ -21,12 +21,12 @@ import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.AbstractObjectParser;
-import zuo.biao.apijson.server.AbstractParser;
-import zuo.biao.apijson.server.Join;
-import zuo.biao.apijson.server.SQLConfig;
+import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.server.AbstractObjectParser;
+import apijson.server.AbstractParser;
+import apijson.server.Join;
+import apijson.server.SQLConfig;
 
 
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
