@@ -27,6 +27,9 @@ import static apijson.server.Operation.UPDATE;
 import static apijson.server.Operation.VERIFY;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -104,7 +107,7 @@ public class Structure {
 		//		}
 
 		//解析
-		return parse(name, target, request, creator, new OnParseCallback() {
+		return parse(method, name, target, request, creator, new OnParseCallback() {
 
 			@Override
 			public JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
@@ -127,6 +130,20 @@ public class Structure {
 				} 
 
 				return parseRequest(method, key, tobj, robj, maxUpdateCount, creator);
+			}
+
+			@Override
+			protected JSONArray onParseJSONArray(String key, JSONArray tarray, JSONArray rarray) throws Exception {
+				if (method == RequestMethod.POST && JSONRequest.isArrayKey(key)) {
+					if (rarray == null || rarray.isEmpty()) {
+						throw new IllegalArgumentException(method.name() + "请求，请在 " + name + " 内传 " + key + ":[{}] ，批量新增 Table[]:value 中 value 必须是包含表对象的非空数组！");
+					}
+					if (rarray.size() > maxUpdateCount) {
+						throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+								+ " 里面的 " + key + ":[{}] 中[]的长度不能超过 " + maxUpdateCount + " ！");
+					}
+				}
+				return super.onParseJSONArray(key, tarray, rarray);
 			}
 		});
 
@@ -205,7 +222,7 @@ public class Structure {
 		}
 
 		//解析
-		return parse(name, target, response, creator, callback != null ? callback : new OnParseCallback() {});
+		return parse(method, name, target, response, creator, callback != null ? callback : new OnParseCallback() {});
 	}
 
 
@@ -217,7 +234,7 @@ public class Structure {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JSONObject parse(String name, JSONObject target, JSONObject real
+	public static JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
 			, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		if (target == null) {
 			return null;
@@ -297,6 +314,9 @@ public class Structure {
 					objKeySet.add(key);
 				} else if (tvalue instanceof JSONArray) {//JSONArray
 					tvalue = callback.onParseJSONArray(key, (JSONArray) tvalue, (JSONArray) rvalue);
+					if (method == RequestMethod.POST && JSONRequest.isArrayKey(key)) {
+						objKeySet.add(key);
+					}
 				} else {//其它Object
 					tvalue = callback.onParseObject(key, tvalue, rvalue);
 				}
@@ -343,7 +363,7 @@ public class Structure {
 				real.remove(rk);
 				continue;
 			}
-			
+
 			Object rv = real.get(rk);
 
 			//不允许传远程函数，只能后端配置
@@ -352,8 +372,13 @@ public class Structure {
 			}
 
 			//不在target内的 key:{}
-			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false && rv instanceof JSONObject) {
-				throw new UnsupportedOperationException(name + " 里面不允许传 " + rk + ":{} ！");
+			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false) {
+				if (rv instanceof JSONObject) {
+					throw new UnsupportedOperationException(name + " 里面不允许传 " + rk + ":{} ！");
+				}
+				if (method == RequestMethod.POST && rv instanceof JSONArray && JSONRequest.isArrayKey(rk)) {
+					throw new UnsupportedOperationException("POST 请求，" + name + " 里面不允许 " + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
+				}
 			}
 		}
 		//判断不允许传的key>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -380,7 +405,7 @@ public class Structure {
 		}
 		//校验重复>>>>>>>>>>>>>>>>>>>
 
-		
+
 		//还原 <<<<<<<<<<
 		target.put(TYPE.name(), type);
 		target.put(VERIFY.name(), verify);
@@ -393,7 +418,7 @@ public class Structure {
 		target.put(NECESSARY.name(), necessary);
 		target.put(DISALLOW.name(), disallow);
 		//还原 >>>>>>>>>>
-		
+
 		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
 		return real;
 	}
@@ -475,25 +500,21 @@ public class Structure {
 		if (rv == null) {
 			return;
 		}
-		
+
 		switch (tv) {
-		case "BOOLEAN":
-		case "Boolean": // @Deprecated，用 BOOLEAN 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Boolean
-			//Boolean.parseBoolean(real.getString(tk)); 只会判断null和true  
+		case "BOOLEAN": //Boolean.parseBoolean(real.getString(tk)); 只会判断null和true  
 			if (rv instanceof Boolean == false) { //JSONObject.getBoolean 可转换Number类型 
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 BOOLEAN !");
 			}
 			break;
-		case "NUMBER": // 整数
-		case "Long": // @Deprecated，用 Number 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Long
+		case "NUMBER": //整数
 			try {
 				Long.parseLong(rv.toString()); //1.23会转换为1  real.getLong(tk); 
 			} catch (Exception e) {
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 NUMBER !");
 			}
 			break;
-		case "DECIMAL": // 小数
-		case "Double": // @Deprecated，用 Decimal 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Double
+		case "DECIMAL": //小数
 			try {
 				Double.parseDouble(rv.toString());
 			} catch (Exception e) {
@@ -501,8 +522,10 @@ public class Structure {
 			}
 			break;
 		case "STRING":
-		case "String": // @Deprecated，用 STRING 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 String
 		case "URL":
+		case "DATE":
+		case "TIME":
+		case "DATETIME":
 			if (rv instanceof String == false) { //JSONObject.getString 可转换任何类型 
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 STRING !");
 			}
@@ -513,9 +536,29 @@ public class Structure {
 					throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 URL !");
 				}
 			}
+			else if (tv.equals("DATE")) {
+				try {
+					LocalDate.parse((String) rv);
+				} catch (Exception e) {
+					throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是格式为 YYYY-MM-DD（例如 2020-02-20）的 DATE !");
+				}
+			}
+			else if (tv.equals("TIME")) {
+				try {
+					LocalTime.parse((String) rv);
+				} catch (Exception e) {
+					throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是格式为 HH:mm:ss（例如 12:01:30）的 TIME !");
+				}
+			}
+			else if (tv.equals("DATETIME")) {
+				try {
+					LocalDateTime.parse((String) rv);
+				} catch (Exception e) {
+					throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是格式为 YYYY-MM-DDTHH:mm:ss（例如 2020-02-20T12:01:30）的 DATETIME !");
+				}
+			}
 			break;
 		case "OBJECT":
-		case "Object": // @Deprecated，用 OBJECT 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Object
 			if (rv instanceof Map == false) { //JSONObject.getJSONObject 可转换String类型 
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 OBJECT !");
 			}
@@ -523,7 +566,6 @@ public class Structure {
 		default:
 			switch (tv) {
 			case "ARRAY":
-			case "Array": // @Deprecated，用 ARRAY 替代，最快在 4.0.0 移除，请尽快修改 Request 表 structure 字段对应值里的 Array
 				if (rv instanceof Collection == false) { //JSONObject.getJSONArray 可转换String类型 
 					throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 ARRAY !");
 				}
@@ -578,6 +620,36 @@ public class Structure {
 					}
 				}
 				break;
+			case "DATE[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "DATE", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 DATE[] !");
+					}
+				}
+				break;
+			case "TIME[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "TIME", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 TIME[] !");
+					}
+				}
+				break;
+			case "DATETIME[]":
+				type(tk, "ARRAY", rv);
+				for (Object o : (Collection<?>) rv) {
+					try {
+						type(tk, "DATETIME", o);
+					} catch (UnsupportedDataTypeException e) {
+						throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 DATETIME[] !");
+					}
+				}
+				break;
 				//目前在业务表中还用不上，单一的类型校验已经够用
 				//		case "JSON":
 				//			try {
@@ -591,11 +663,11 @@ public class Structure {
 			default:
 				throw new UnsupportedDataTypeException(
 						"服务器内部错误，类型 " + tv + " 不合法！Request表校验规则中 TYPE:{ key:value } 中的 value 必须是"
-						+ " [ BOOLEAN, NUMBER, DECIMAL, STRING, URL, OBJECT, ARRAY, BOOLEAN[], NUMBER[], DECIMAL[], STRING[], URL[] ] 中的一个!");
+								+ " [ BOOLEAN, NUMBER, DECIMAL, STRING, URL, OBJECT, ARRAY, BOOLEAN[], NUMBER[], DECIMAL[], STRING[], URL[] ] 中的一个!");
 			}
-			
+
 		}
-		
+
 	}
 
 
