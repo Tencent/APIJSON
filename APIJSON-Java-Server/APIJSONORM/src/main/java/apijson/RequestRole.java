@@ -60,7 +60,7 @@ public enum RequestRole {
 			return null;
 		}
 		try { //Enum.valueOf只要找不到对应的值就会抛异常
-			return RequestRole.valueOf(StringUtil.toUpperCase(name));
+			return RequestRole.valueOf(name);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("角色 " + name + " 不存在！只能是[" + StringUtil.getString(NAMES) + "]中的一种！", e);
 		}

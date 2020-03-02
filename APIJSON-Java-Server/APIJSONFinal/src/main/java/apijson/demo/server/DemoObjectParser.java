@@ -35,9 +35,9 @@ import apijson.server.SQLConfig;
 public class DemoObjectParser extends AbstractObjectParser {
 
 	static {
-		COMPILE_MAP.put("phone", StringUtil.PATTERN_PHONE);
-		COMPILE_MAP.put("email", StringUtil.PATTERN_EMAIL);
-		COMPILE_MAP.put("idCard", StringUtil.PATTERN_ID_CARD);
+		COMPILE_MAP.put("PHONE", StringUtil.PATTERN_PHONE);
+		COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
+		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 	}
 
 

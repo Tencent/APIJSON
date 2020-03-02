@@ -33,6 +33,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.activation.UnsupportedDataTypeException;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -244,44 +246,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 								index ++;
 							}
 						}
+						else if ((method == POST || method == PUT) && value instanceof JSONArray && JSONRequest.isTableArray(key)) { //JSONArray，批量新增或修改，往下一级提取
+							onTableArrayParse(key, (JSONArray) value);
+						}
 						else if (method == PUT && value instanceof JSONArray
 								&& (whereList == null || whereList.contains(key) == false)) { //PUT JSONArray
 							onPUTArrayParse(key, (JSONArray) value);
-						}
-						else if (method == POST && value instanceof JSONArray && key.endsWith("[]") && JSONRequest.isTableKey(key.substring(0, key.length() - 2))) { //JSONArray，批量新增，往下一级提取
-							String childKey = key.substring(0, key.length() - 2);
-							JSONArray valueArray = (JSONArray) value;
-
-							int allCount = 0;
-							JSONArray ids = new JSONArray();
-							
-							int version = parser.getVersion();
-							int maxUpdateCount = parser.getMaxUpdateCount();
-
-							for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
-								//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
-								JSONRequest req = new JSONRequest(childKey, valueArray.getJSONObject(i));
-
-								//parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
-								JSONObject result = (JSONObject) onChildParse(0, "" + i, parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser));
-								result = result.getJSONObject(childKey);
-//
-								boolean success = JSONResponse.isSuccess(result);
-								int count = result == null ? null : result.getIntValue(JSONResponse.KEY_COUNT);
-
-								if (success == false || count != 1) { //如果 code = 200 但 count != 1，不能算成功，掩盖了错误为不好排查问题
-									throw new ServerException("批量新增失败！" + key + "/" +  i + "：" + (success ? "成功但 count != 1 ！" : (result == null ? "null" : result.getString(JSONResponse.KEY_MSG))));
-								}
-								
-								allCount += count;
-								ids.add(result.get(JSONResponse.KEY_ID));
-							}
-
-							JSONObject allResult = AbstractParser.newSuccessResult();
-							allResult.put(JSONResponse.KEY_ID_IN, ids);
-							allResult.put(JSONResponse.KEY_COUNT, allCount);
-
-							response.put(key, allResult); //不按原样返回，避免数据量过大
 						}
 						else {//JSONArray或其它Object，直接填充
 							if (onParse(key, value) == false) {
@@ -596,6 +566,52 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
 
 	}
+
+
+	@Override
+	public void onTableArrayParse(String key, JSONArray value) throws Exception {
+		String childKey = key.substring(0, key.length() - JSONRequest.KEY_ARRAY.length());
+		JSONArray valueArray = (JSONArray) value;
+
+		int allCount = 0;
+		JSONArray ids = new JSONArray();
+
+		int version = parser.getVersion();
+		int maxUpdateCount = parser.getMaxUpdateCount();
+
+		for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
+			//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
+			JSONObject item;
+			try {
+				item = valueArray.getJSONObject(i);
+			}
+			catch (Exception e) {
+				throw new UnsupportedDataTypeException("批量新增/修改失败！" + key + "/" + i + ":value 中value不合法！类型必须是 OBJECT ，结构为 {} !");
+			}
+			JSONRequest req = new JSONRequest(childKey, item);
+
+			//parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
+			JSONObject result = (JSONObject) onChildParse(0, "" + i, parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser));
+			result = result.getJSONObject(childKey);
+			//
+			boolean success = JSONResponse.isSuccess(result);
+			int count = result == null ? null : result.getIntValue(JSONResponse.KEY_COUNT);
+
+			if (success == false || count != 1) { //如果 code = 200 但 count != 1，不能算成功，掩盖了错误为不好排查问题
+				throw new ServerException("批量新增/修改失败！" + key + "/" +  i + "：" + (success ? "成功但 count != 1 ！" : (result == null ? "null" : result.getString(JSONResponse.KEY_MSG))));
+			}
+
+			allCount += count;
+			ids.add(result.get(JSONResponse.KEY_ID));
+		}
+
+		JSONObject allResult = AbstractParser.newSuccessResult();
+		allResult.put(JSONResponse.KEY_ID_IN, ids);
+		allResult.put(JSONResponse.KEY_COUNT, allCount);
+
+		response.put(key, allResult); //不按原样返回，避免数据量过大
+	}
+
 
 	@Override
 	public JSONObject parseResponse(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {

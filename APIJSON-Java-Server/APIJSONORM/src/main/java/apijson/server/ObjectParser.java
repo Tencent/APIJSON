@@ -82,12 +82,19 @@ public interface ObjectParser {
 	Object onReferenceParse(@NotNull String path);
 
 	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！ 
-	/**PUT key:[]
+	/**修改数组 PUT key:[]
 	 * @param key
 	 * @param array
 	 * @throws Exception
 	 */
 	void onPUTArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception;
+
+	/**批量新增或修改 POST or PUT  Table[]:[{}]
+	 * @param key
+	 * @param array
+	 * @throws Exception
+	 */
+	void onTableArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception;
 
 	/**SQL 配置，for single object
 	 * @return {@link #setSQLConfig(int, int, int)}
@@ -160,6 +167,5 @@ public interface ObjectParser {
 	Map<String, Object> getCustomMap();
 	Map<String, Map<String, String>> getFunctionMap();
 	Map<String, JSONObject> getChildMap();
-
 
 }
