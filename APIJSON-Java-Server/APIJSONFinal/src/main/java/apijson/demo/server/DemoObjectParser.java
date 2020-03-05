@@ -20,13 +20,13 @@ import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.NotNull;
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.AbstractObjectParser;
-import zuo.biao.apijson.server.Join;
-import zuo.biao.apijson.server.Parser;
-import zuo.biao.apijson.server.SQLConfig;
+import apijson.NotNull;
+import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.server.AbstractObjectParser;
+import apijson.server.AbstractParser;
+import apijson.server.Join;
+import apijson.server.SQLConfig;
 
 
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
@@ -35,9 +35,9 @@ import zuo.biao.apijson.server.SQLConfig;
 public class DemoObjectParser extends AbstractObjectParser {
 
 	static {
-		COMPILE_MAP.put("phone", StringUtil.PATTERN_PHONE);
-		COMPILE_MAP.put("email", StringUtil.PATTERN_EMAIL);
-		COMPILE_MAP.put("idCard", StringUtil.PATTERN_ID_CARD);
+		COMPILE_MAP.put("PHONE", StringUtil.PATTERN_PHONE);
+		COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
+		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 	}
 
 
@@ -59,7 +59,7 @@ public class DemoObjectParser extends AbstractObjectParser {
 	}
 
 	@Override
-	public DemoObjectParser setParser(Parser<?> parser) {
+	public DemoObjectParser setParser(AbstractParser<?> parser) {
 		super.setParser(parser);
 		return this;
 	}

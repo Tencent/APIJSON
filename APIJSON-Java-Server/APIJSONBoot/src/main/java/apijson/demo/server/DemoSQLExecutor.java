@@ -26,10 +26,10 @@ import org.postgresql.util.PGobject;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.Log;
-import zuo.biao.apijson.server.AbstractSQLExecutor;
-import zuo.biao.apijson.server.SQLConfig;
+import apijson.JSON;
+import apijson.Log;
+import apijson.server.AbstractSQLExecutor;
+import apijson.server.SQLConfig;
 
 
 /**executor for query(read) or update(write) MySQL database

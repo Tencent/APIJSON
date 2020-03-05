@@ -4,7 +4,7 @@
 	<groupId>htdi.jfinal</groupId>
 	<artifactId>apijson-final</artifactId>
 	<packaging>jar</packaging>
-	<version>3.6.5</version>
+	<version>4.0.0</version>
 	<name>APIJSON Demo based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -43,6 +43,11 @@
 			<groupId>net.sourceforge.jtds</groupId>
 			<artifactId>jtds</artifactId>
 			<version>1.3.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.github.APIJSON</groupId>
+		    <artifactId>apijson-orm</artifactId>
+		    <version>LATEST</version>
 		</dependency>
 		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
 

@@ -14,13 +14,13 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
-import static zuo.biao.apijson.RequestMethod.DELETE;
-import static zuo.biao.apijson.RequestMethod.GET;
-import static zuo.biao.apijson.RequestMethod.GETS;
-import static zuo.biao.apijson.RequestMethod.HEAD;
-import static zuo.biao.apijson.RequestMethod.HEADS;
-import static zuo.biao.apijson.RequestMethod.POST;
-import static zuo.biao.apijson.RequestMethod.PUT;
+import static apijson.RequestMethod.DELETE;
+import static apijson.RequestMethod.GET;
+import static apijson.RequestMethod.GETS;
+import static apijson.RequestMethod.HEAD;
+import static apijson.RequestMethod.HEADS;
+import static apijson.RequestMethod.POST;
+import static apijson.RequestMethod.PUT;
 
 import java.net.URLDecoder;
 import java.rmi.ServerException;
@@ -56,23 +56,23 @@ import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.JSON;
+import apijson.JSONResponse;
+import apijson.Log;
+import apijson.RequestMethod;
+import apijson.StringUtil;
 import apijson.demo.server.model.BaseModel;
 import apijson.demo.server.model.Privacy;
 import apijson.demo.server.model.User;
 import apijson.demo.server.model.Verify;
-import zuo.biao.apijson.JSON;
-import zuo.biao.apijson.JSONResponse;
-import zuo.biao.apijson.Log;
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.StringUtil;
-import zuo.biao.apijson.server.JSONRequest;
-import zuo.biao.apijson.server.exception.ConditionErrorException;
-import zuo.biao.apijson.server.exception.ConflictException;
-import zuo.biao.apijson.server.exception.NotExistException;
-import zuo.biao.apijson.server.exception.OutOfRangeException;
-import zuo.biao.apijson.server.model.Access;
-import zuo.biao.apijson.server.model.Function;
-import zuo.biao.apijson.server.model.Request;
+import apijson.server.JSONRequest;
+import apijson.server.exception.ConditionErrorException;
+import apijson.server.exception.ConflictException;
+import apijson.server.exception.NotExistException;
+import apijson.server.exception.OutOfRangeException;
+import apijson.server.model.Access;
+import apijson.server.model.Function;
+import apijson.server.model.Request;
 
 
 /**request controller
@@ -467,7 +467,7 @@ public class Controller {
 	 * @param verify
 	 * @return
 	 */
-	private zuo.biao.apijson.JSONRequest newVerifyRequest(int type, String phone, String verify) {
+	private apijson.JSONRequest newVerifyRequest(int type, String phone, String verify) {
 		return new JSONRequest(new Verify(type, phone).setVerify(verify)).setTag(VERIFY_).setFormat(true);
 	}
 

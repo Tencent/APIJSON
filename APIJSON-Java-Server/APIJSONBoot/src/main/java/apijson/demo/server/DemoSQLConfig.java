@@ -14,17 +14,17 @@ limitations under the License.*/
 
 package apijson.demo.server;
 
-import static zuo.biao.apijson.JSONObject.KEY_ID;
-import static zuo.biao.apijson.JSONObject.KEY_USER_ID;
+import static apijson.JSONObject.KEY_ID;
+import static apijson.JSONObject.KEY_USER_ID;
 
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
-import zuo.biao.apijson.RequestMethod;
-import zuo.biao.apijson.server.AbstractSQLConfig;
-import zuo.biao.apijson.server.Join;
-import zuo.biao.apijson.server.SQLConfig;
+import apijson.RequestMethod;
+import apijson.server.AbstractSQLConfig;
+import apijson.server.Join;
+import apijson.server.SQLConfig;
 
 
 /**SQL配置
@@ -67,10 +67,10 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 				return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? KEY_ID : KEY_USER_ID; // id / userId
 			}
 
-			//return null 则不生成 id，一般用于数据库自增 id
+			//取消注释来实现数据库自增 id
 			//			@Override
 			//			public Object newId(RequestMethod method, String database, String schema, String table) {
-			//				return null;
+			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
 		};
 	}
