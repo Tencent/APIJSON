@@ -937,7 +937,7 @@ public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
 		else if (join instanceof String) {
 			String[] sArr = request == null || request.isEmpty() ? null : StringUtil.split((String) join);
 			if (sArr != null && sArr.length > 0) {
-				joinMap = new JSONObject();
+				joinMap = new JSONObject(true); //注意：这里必须要保证join连接顺序，保证后边遍历是按照join参数的顺序生成的SQL
 				for (int i = 0; i < sArr.length; i++) {
 					joinMap.put(sArr[i], new JSONObject());
 				}
