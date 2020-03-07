@@ -70,6 +70,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	protected final List<Join> joinList;
 	protected final boolean isTable;
 	protected final String path;
+	protected final String name;
 	protected final String table;
 	protected final String alias;
 
@@ -97,6 +98,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 		this.type = arrayConfig == null ? 0 : arrayConfig.getType();
 		this.joinList = arrayConfig == null ? null : arrayConfig.getJoinList();
+		this.name = name;
 		this.path = AbstractParser.getAbsPath(parentPath, name);
 
 		apijson.orm.Entry<String, String> entry = Pair.parseEntry(name, true);
@@ -400,7 +402,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				type = "-";
 				k = k.substring(0, k.length() - 1);
 
-				parseFunction(request, k, (String) value);
+				parseFunction(k, (String) value, parentPath, name, request);
 			}
 			else {
 				if (k.endsWith("+")) {
@@ -742,22 +744,22 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			for (Entry<String, String> entry : functionSet) {
 
 				//				parseFunction(json, entry.getKey(), entry.getValue());
-				parseFunction(response, entry.getKey(), entry.getValue());
+				parseFunction(entry.getKey(), entry.getValue(), parentPath, name, response);
 			}
 		}
 	}
 
-	public void parseFunction(JSONObject json, String key, String value) throws Exception {
+	public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject) throws Exception {
 		Object result;
 		if (key.startsWith("@")) { //TODO 以后这种小众功能从 ORM 移出，作为一个 plugin/APIJSONProcedure
-			FunctionBean fb = AbstractFunctionParser.parseFunction(value, json, true);
+			FunctionBean fb = AbstractFunctionParser.parseFunction(value, currentObject, true);
 
 			SQLConfig config = newSQLConfig(true);
 			config.setProcedure(fb.toFunctionCallString(true));
 			result = parseResponse(config, true);
 		}
 		else {
-			result = parser.onFunctionParse(json, value);
+			result = parser.onFunctionParse(key, value, parentPath, currentName, currentObject);
 		}
 
 		if (result != null) {

@@ -112,17 +112,24 @@ public class APIJSONParser extends AbstractParser<Long> {
 		return functionParser;
 	}
 	@Override
-	public Object onFunctionParse(JSONObject json, String fun) throws Exception {
+	public Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject) throws Exception {
 		if (functionParser == null) {
 			functionParser = createFunctionParser();
 			functionParser.setMethod(getMethod());
 			functionParser.setTag(getTag());
 			functionParser.setVersion(getVersion());
+			functionParser.setRequest(requestObject);
+			
 			if (functionParser instanceof APIJSONFunctionParser) {
 				((APIJSONFunctionParser) functionParser).setSession(getSession());
 			}
 		}
-		return functionParser.invoke(fun, json);
+		functionParser.setKey(key);
+		functionParser.setParentPath(parentPath);
+		functionParser.setCurrentName(currentName);
+		functionParser.setCurrentObject(currentObject);
+		
+		return functionParser.invoke(function, currentObject);
 	}
 
 

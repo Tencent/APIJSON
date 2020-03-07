@@ -49,10 +49,10 @@ public class APIJSONFunctionParser extends AbstractFunctionParser {
 		this(null);
 	}
 	public APIJSONFunctionParser(HttpSession session) {
-		this(null, null, 0, session);
+		this(null, null, 0, null, session);
 	}
-	public APIJSONFunctionParser(RequestMethod method, String tag, int version, HttpSession session) {
-		super(method, tag, version);
+	public APIJSONFunctionParser(RequestMethod method, String tag, int version, JSONObject request, HttpSession session) {
+		super(method, tag, version, request);
 		setSession(session);
 	}
 	public HttpSession getSession() {
@@ -216,7 +216,7 @@ public class APIJSONFunctionParser extends AbstractFunctionParser {
 		request.put("object", object);
 
 		if (function == null) {
-			function = new APIJSONFunctionParser(null, null, 1, null);
+			function = new APIJSONFunctionParser(null, null, 1, null, null);
 		}
 
 		Log.i(TAG, "plus(1,-2) = " + function.invoke("plus(i0,i1)", request));

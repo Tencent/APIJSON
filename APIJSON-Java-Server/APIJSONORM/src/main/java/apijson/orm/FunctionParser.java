@@ -16,21 +16,44 @@ package apijson.orm;
 
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.NotNull;
 import apijson.RequestMethod;
 
-/**解析器
+
+/**远程函数解析器
  * @author Lemon
  */
 public interface FunctionParser {
 
+	Object invoke(@NotNull String function, @NotNull JSONObject currentObject) throws Exception;
+	
 	RequestMethod getMethod();
-	String getTag();
-	int getVersion();
-
 	FunctionParser setMethod(RequestMethod method);
+
+	String getTag();
 	FunctionParser setTag(String tag);
+
+	int getVersion();
 	AbstractFunctionParser setVersion(int version);
 
-	Object invoke(String function, JSONObject currentObject) throws Exception;
+	@NotNull 
+	JSONObject getRequest();
+	FunctionParser setRequest(@NotNull JSONObject request);
+
+
+	String getKey();
+	FunctionParser setKey(String key);
+	
+	String getParentPath();
+	FunctionParser setParentPath(String parentPath);
+
+	String getCurrentName();
+	FunctionParser setCurrentName(String currentName);
+
+	@NotNull
+	JSONObject getCurrentObject();
+	FunctionParser setCurrentObject(@NotNull JSONObject currentObject);
+
+
 
 }

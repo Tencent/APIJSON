@@ -45,13 +45,15 @@ public class AbstractFunctionParser implements FunctionParser {
 	private RequestMethod method;
 	private String tag;
 	private int version;
+	private JSONObject request;
 	public AbstractFunctionParser() {
-		this(null, null, 0);
+		this(null, null, 0, null);
 	}
-	public AbstractFunctionParser(RequestMethod method, String tag, int version) {
+	public AbstractFunctionParser(RequestMethod method, String tag, int version, @NotNull JSONObject request) {
 		setMethod(method == null ? RequestMethod.GET : method);
 		setTag(tag);
 		setVersion(version);
+		setRequest(request);
 	}
 
 	@Override
@@ -81,6 +83,62 @@ public class AbstractFunctionParser implements FunctionParser {
 		this.version = version;
 		return this;
 	}
+	
+	private String key;
+	@Override
+	public String getKey() {
+		return key;
+	}
+	@Override
+	public AbstractFunctionParser setKey(String key) {
+		this.key = key;
+		return this;
+	}
+	
+	private String parentPath;
+	@Override
+	public String getParentPath() {
+		return parentPath;
+	}
+	@Override
+	public AbstractFunctionParser setParentPath(String parentPath) {
+		this.parentPath = parentPath;
+		return this;
+	}
+	private String currentName;
+	@Override
+	public String getCurrentName() {
+		return currentName;
+	}
+	@Override
+	public AbstractFunctionParser setCurrentName(String currentName) {
+		this.currentName = currentName;
+		return this;
+	}
+	
+	@NotNull
+	@Override
+	public JSONObject getRequest() {
+		return request;
+	}
+	@Override
+	public AbstractFunctionParser setRequest(@NotNull JSONObject request) {
+		this.request = request;
+		return this;
+	}
+	
+	private JSONObject currentObject;
+	@NotNull 
+	@Override
+	public JSONObject getCurrentObject() {
+		return currentObject;
+	}
+	@Override
+	public AbstractFunctionParser setCurrentObject(@NotNull JSONObject currentObject) {
+		this.currentObject = currentObject;
+		return this;
+	}
+
 
 	/**反射调用
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
@@ -93,12 +151,12 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 	
 	/**反射调用
-	 * @param fun
+	 * @param parser
 	 * @param request
 	 * @param function 例如get(Map:map,key)，参数只允许引用，不能直接传值
 	 * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
 	 */
-	public static Object invoke(@NotNull AbstractFunctionParser fun, @NotNull String function, @NotNull JSONObject currentObject) throws Exception {
+	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String function, @NotNull JSONObject currentObject) throws Exception {
 
 		FunctionBean fb = parseFunction(function, currentObject, false);
 
@@ -108,21 +166,21 @@ public class AbstractFunctionParser implements FunctionParser {
 		}
 
 		int v = row.getIntValue("version");
-		if (fun.getVersion() < v) {
-			throw new UnsupportedOperationException("不允许 version = " + fun.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + v + " !");
+		if (parser.getVersion() < v) {
+			throw new UnsupportedOperationException("不允许 version = " + parser.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + v + " !");
 		}
 		String t = row.getString("tag");
-		if (t != null && t.equals(fun.getTag()) == false) {
-			throw new UnsupportedOperationException("不允许 tag = " + fun.getTag() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 tag = " + t + " !");
+		if (t != null && t.equals(parser.getTag()) == false) {
+			throw new UnsupportedOperationException("不允许 tag = " + parser.getTag() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 tag = " + t + " !");
 		}
 		String[] methods = StringUtil.split(row.getString("methods"));
 		List<String> ml = methods == null || methods.length <= 0 ? null : Arrays.asList(methods);
-		if (ml != null && ml.contains(fun.getMethod().toString()) == false) {
-			throw new UnsupportedOperationException("不允许 method = " + fun.getMethod() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 method 在 " + methods + "内 !");
+		if (ml != null && ml.contains(parser.getMethod().toString()) == false) {
+			throw new UnsupportedOperationException("不允许 method = " + parser.getMethod() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 method 在 " + methods + "内 !");
 		}
 
 		try {
-			return invoke(fun, fb.getMethod(), fb.getTypes(), fb.getValues()); 
+			return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues()); 
 		} catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
 				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 不在后端工程的DemoFunction内！"
@@ -142,6 +200,16 @@ public class AbstractFunctionParser implements FunctionParser {
 			throw e;
 		}
 
+	}
+	
+	/**反射调用
+	 * @param methodName
+	 * @param parameterTypes
+	 * @param args
+	 * @return
+	 */
+	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName, @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
+		return parser.getClass().getMethod(methodName, parameterTypes).invoke(parser, args);
 	}
 
 	/**解析函数
@@ -230,16 +298,6 @@ public class AbstractFunctionParser implements FunctionParser {
 		return fb;
 	}
 
-
-	/**反射调用
-	 * @param methodName
-	 * @param parameterTypes
-	 * @param args
-	 * @return
-	 */
-	public static Object invoke(@NotNull AbstractFunctionParser fun, @NotNull String methodName, @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
-		return fun.getClass().getMethod(methodName, parameterTypes).invoke(fun, args);
-	}
 
 	/**
 	 * @param method

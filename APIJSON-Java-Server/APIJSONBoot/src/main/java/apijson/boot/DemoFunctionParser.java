@@ -39,19 +39,19 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	public static final String TAG = "DemoFunctionParser";
 
 	public DemoFunctionParser() {
-		this(null, null, 0, null);
+		this(null, null, 0, null, null);
 	}
-	public DemoFunctionParser(RequestMethod method, String tag, int version, HttpSession session) {
-		super(method, tag, version, session);
+	public DemoFunctionParser(RequestMethod method, String tag, int version, JSONObject request, HttpSession session) {
+		super(method, tag, version, request, session);
 	}
 
 	/**
-	 * @param request
+	 * @param current
 	 * @return
 	 * @throws Exception
 	 */
-	public Object verifyIdList(@NotNull JSONObject request, @NotNull String idList) throws Exception {
-		Object obj = request.get(idList);
+	public Object verifyIdList(@NotNull JSONObject current, @NotNull String idList) throws Exception {
+		Object obj = current.get(idList);
 		if (obj instanceof Collection == false) {
 			throw new IllegalArgumentException(idList + " 不符合 Array 类型! 结构必须是 [] ！");
 		}
@@ -72,8 +72,8 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object verifyURLList(@NotNull JSONObject request, @NotNull String urlList) throws Exception {
-		Object obj = request.get(urlList);
+	public Object verifyURLList(@NotNull JSONObject current, @NotNull String urlList) throws Exception {
+		Object obj = current.get(urlList);
 		if (obj instanceof Collection == false) {
 			throw new IllegalArgumentException(urlList + " 不符合 Array 类型! 结构必须是 [] ！");
 		}
@@ -95,9 +95,9 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public int deleteCommentOfMoment(@NotNull JSONObject rq, @NotNull String momentId) throws Exception {
-		long mid = rq.getLongValue(momentId);
-		if (mid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+	public int deleteCommentOfMoment(@NotNull JSONObject current, @NotNull String momentId) throws Exception {
+		long mid = current.getLongValue(momentId);
+		if (mid <= 0 || current.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
 
@@ -122,9 +122,9 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @param toId
 	 * @return
 	 */
-	public int deleteChildComment(@NotNull JSONObject rq, @NotNull String toId) throws Exception {
-		long tid = rq.getLongValue(toId);
-		if (tid <= 0 || rq.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+	public int deleteChildComment(@NotNull JSONObject current, @NotNull String toId) throws Exception {
+		long tid = current.getLongValue(toId);
+		if (tid <= 0 || current.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
 
@@ -190,7 +190,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
 	 * @throws Exception
 	 */
-	public JSONArray getIdList(@NotNull JSONObject request) {
+	public JSONArray getIdList(@NotNull JSONObject current) {
 		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
 	}
 
@@ -200,9 +200,9 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object verifyAccess(@NotNull JSONObject request) throws Exception {
-		long userId = request.getLongValue(JSONRequest.KEY_USER_ID);
-		RequestRole role = RequestRole.get(request.getString(JSONRequest.KEY_ROLE));
+	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
+		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
+		RequestRole role = RequestRole.get(current.getString(JSONRequest.KEY_ROLE));
 		if (role == RequestRole.OWNER && userId != DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}

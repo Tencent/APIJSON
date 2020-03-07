@@ -92,12 +92,15 @@ public interface Parser<T> {
 	JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception;
 
 	/**解析远程函数
-	 * @param object
+	 * @param key
 	 * @param function
+	 * @param parentPath
+	 * @param currentName
+	 * @param currentObject
 	 * @return
 	 * @throws Exception
 	 */
-	Object onFunctionParse(JSONObject object, String function) throws Exception;
+	Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject) throws Exception;
 	
 	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;
 
@@ -142,5 +145,6 @@ public interface Parser<T> {
 	void rollback(Savepoint savepoint) throws SQLException;
 	void commit() throws SQLException;
 	void close();
+
 
 }
