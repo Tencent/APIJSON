@@ -46,6 +46,10 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		//		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
+		// 自定义where条件拼接
+		RAW_MAP.put("commentWhereItem1","`Comment`.`userId` = 38710 and `Comment`.`momentId` = 470");
+		RAW_MAP.put("commentWhereItem2","`Comment`.`toId` = 0");
+
 		//主键名映射
 		SIMPLE_CALLBACK = new SimpleCallback() {
 

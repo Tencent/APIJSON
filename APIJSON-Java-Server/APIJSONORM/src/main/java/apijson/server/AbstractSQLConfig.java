@@ -86,6 +86,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	public static final Map<String, String> TABLE_KEY_MAP;
 	public static final List<String> DATABASE_LIST;
+	// 自定义where条件拼接
+	public static final Map<String, String> RAW_MAP;
 	static {
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
@@ -101,6 +103,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_POSTGRESQL);
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
+
+		RAW_MAP = new HashMap<>();
 	}
 
 	@Override
@@ -305,7 +309,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return schema;
 	}
 	/**
-	 * @param sqlTable
 	 * @return
 	 */
 	@NotNull
@@ -1132,8 +1135,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer());
 	}
-	/**获取限制数量
-	 * @param limit
+
+	/**
+	 * 获取限制数量
+	 * @param page
+	 * @param count
+	 * @param isTSQL
 	 * @return
 	 */
 	public static String getLimitString(int page, int count, boolean isTSQL) {
@@ -1436,15 +1443,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	private String getWhereItem(String key, Object value
+	public String getWhereItem(String key, Object value
 			, RequestMethod method, boolean verifyName) throws Exception {
 		Log.d(TAG, "getWhereItem  key = " + key);
 		//避免筛选到全部	value = key == null ? null : where.get(key);
-		if (key == null || value == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
+		if(key.equals("@raw")){
+			Log.d(TAG, "getWhereItem  key startsWith @ = @raw ");
+			// 自定义where条件拼接，直接通过，放行
+		}else if (key == null || value == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
 			Log.d(TAG, "getWhereItem  key == null || value == null"
 					+ " || key.startsWith(@) || key.endsWith(()) >> continue;");
 			return null;
 		}
+
 		if (key.endsWith("@")) {//引用
 			//	key = key.substring(0, key.lastIndexOf("@"));
 			throw new IllegalArgumentException(TAG + ".getWhereItem: 字符 " + key + " 不合法！");
@@ -1453,8 +1464,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		int keyType;
 		if (key.endsWith("$")) {
 			keyType = 1;
-		} 
-		else if (key.endsWith("~") || key.endsWith("?")) { //TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法 
+		}
+		else if (key.endsWith("~") || key.endsWith("?")) { //TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法
 			keyType = key.charAt(key.length() - 2) == '*' ? -2 : 2;  //FIXME StringIndexOutOfBoundsException
 		}
 		else if (key.endsWith("%")) {
@@ -1481,36 +1492,59 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		else if (key.endsWith("<")) {
 			keyType = 10;
 		}
-		else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
+		else if (key.startsWith("@")) {
+			keyType = 11;
+		} else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
 			keyType = 0;
 		}
 		key = getRealKey(method, key, false, true, verifyName, getQuote());
 
 		switch (keyType) {
-		case 1:
-			return getSearchString(key, value);
-		case -2:
-		case 2:
-			return getRegExpString(key, value, keyType < 0);
-		case 3:
-			return getBetweenString(key, value);
-		case 4:
-			return getRangeString(key, value);
-		case 5:
-			return getExistsString(key, value);
-		case 6:
-			return getContainString(key, value);
-		case 7:
-			return getCompareString(key, value, ">=");
-		case 8:
-			return getCompareString(key, value, "<=");
-		case 9:
-			return getCompareString(key, value, ">");
-		case 10:
-			return getCompareString(key, value, "<");
-		default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
-			return getEqualString(key, value);
+			case 1:
+				return getSearchString(key, value);
+			case -2:
+			case 2:
+				return getRegExpString(key, value, keyType < 0);
+			case 3:
+				return getBetweenString(key, value);
+			case 4:
+				return getRangeString(key, value);
+			case 5:
+				return getExistsString(key, value);
+			case 6:
+				return getContainString(key, value);
+			case 7:
+				return getCompareString(key, value, ">=");
+			case 8:
+				return getCompareString(key, value, "<=");
+			case 9:
+				return getCompareString(key, value, ">");
+			case 10:
+				return getCompareString(key, value, "<");
+			case 11:
+				return getRaw(key,value);
+			default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
+				return getEqualString(key, value);
 		}
+	}
+
+	@JSONField(serialize = false)
+	public String getRaw(String key, Object value) throws Exception {
+		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
+			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
+		}
+
+		String[] rawList = ((String)value).split(",");
+		String whereItem = "";
+		for (int i = 0; i < rawList.length; i++) {
+			if(rawList.length>1&& i!=0){
+				whereItem += " and " + RAW_MAP.get(rawList[i]);
+			}else{
+				whereItem += RAW_MAP.get(rawList[i]);
+			}
+		}
+
+		return whereItem;
 	}
 
 
@@ -1572,10 +1606,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	/**search key match value
-	 * @param in
+
+	/**
+	 * search key match value
+	 * @param key
+	 * @param value
 	 * @return {@link #getSearchString(String, Object[], int)}
-	 * @throws IllegalArgumentException 
+	 * @throws IllegalArgumentException
 	 */
 	@JSONField(serialize = false)
 	public String getSearchString(String key, Object value) throws IllegalArgumentException {
@@ -1593,10 +1630,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		return getSearchString(key, arr.toArray(), logic.getType());
 	}
-	/**search key match values
-	 * @param in
+
+	/**
+	 * search key match values
+	 * @param key
+	 * @param values
+	 * @param type
 	 * @return LOGIC [  key LIKE 'values[i]' ]
-	 * @throws IllegalArgumentException 
+	 * @throws IllegalArgumentException
 	 */
 	@JSONField(serialize = false)
 	public String getSearchString(String key, Object[] values, int type) throws IllegalArgumentException {
