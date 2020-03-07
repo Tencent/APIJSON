@@ -24,12 +24,16 @@
 			<version>1.2.61</version>
 		</dependency>
 		<dependency>
+			<groupId>com.github.APIJSON</groupId>
+			<artifactId>apijson-orm</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>4.0.1</version>
 		</dependency>
-		<!-- <dependency> <groupId>com.github.APIJSON</groupId> <artifactId>apijson-orm</artifactId> 
-			<version>4.0.0</version> </dependency> -->
+
 
 		<!-- 数据库 JDBC 驱动 <<<<<<<<<<< -->
 		<dependency>
@@ -66,8 +70,8 @@
 
 	<repositories>
 		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
 		</repository>
 	</repositories>
 
