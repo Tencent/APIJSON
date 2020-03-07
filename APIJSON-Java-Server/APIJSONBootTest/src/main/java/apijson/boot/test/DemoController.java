@@ -36,10 +36,11 @@ public class DemoController extends APIJSONController {
 	
 	@Override
 	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
-		return super.newParser(session, method).setNoVerify(true);
+		return super.newParser(session, method).setNeedVerify(false); //TODO 这里关闭校验，方便新手快速测试，实际线上项目建议开启
 	}
 	
 	@PostMapping(value = "get")
+	@Override
 	public String get(@RequestBody String request, HttpSession session) {
 		return super.get(request, session);
 	}

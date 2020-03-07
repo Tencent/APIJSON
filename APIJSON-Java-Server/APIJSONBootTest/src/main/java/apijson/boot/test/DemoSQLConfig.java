@@ -26,6 +26,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的
 		DEFAULT_SCHEMA = "sys";  //TODO 默认模式名，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
+	
+		//表名和数据库不一致的，需要配置映射关系
+		TABLE_KEY_MAP.put("User", "apijson_user");
+		TABLE_KEY_MAP.put("Privacy", "apijson_privacy");
 	}
 
 	@Override

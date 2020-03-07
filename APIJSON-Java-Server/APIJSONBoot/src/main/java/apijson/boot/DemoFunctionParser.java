@@ -110,7 +110,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 		request.put("Comment", comment);
 		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		JSONObject rp = new DemoParser(RequestMethod.DELETE).setNoVerify(true).parseResponse(request);
+		JSONObject rp = new DemoParser(RequestMethod.DELETE).setNeedVerify(false).parseResponse(request);
 
 		JSONObject c = rp.getJSONObject("Comment");
 		return c == null ? 0 : c.getIntValue(JSONResponse.KEY_COUNT);
@@ -139,7 +139,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 		request.put("Comment", comment);
 		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		JSONObject rp = new DemoParser(RequestMethod.DELETE).setNoVerify(true).parseResponse(request);
+		JSONObject rp = new DemoParser(RequestMethod.DELETE).setNeedVerify(false).parseResponse(request);
 
 		JSONObject c = rp.getJSONObject("Comment");
 		return c == null ? 0 : c.getIntValue(JSONResponse.KEY_COUNT);
@@ -165,7 +165,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 		request.putAll(idItem.toArray(0, 0, "Comment-id"));
 		//Comment-id[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		JSONObject rp = new DemoParser().setNoVerify(true).parseResponse(request);
+		JSONObject rp = new DemoParser().setNeedVerify(false).parseResponse(request);
 
 		JSONArray a = rp.getJSONArray("Comment-id[]");
 		if (a != null) {

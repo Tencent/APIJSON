@@ -371,7 +371,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T> {
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
 			request.put(JSONRequest.KEY_ID + "!", exceptId);
 		}
-		JSONObject repeat = createParser().setMethod(HEAD).setNoVerify(true).parseResponse(
+		JSONObject repeat = createParser().setMethod(HEAD).setNeedVerify(true).parseResponse(
 				new JSONRequest(table, request)
 				);
 		repeat = repeat == null ? null : repeat.getJSONObject(table);

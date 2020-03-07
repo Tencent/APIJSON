@@ -56,17 +56,16 @@ public interface Parser<T> {
 	JSONObject getRequest();
 	Parser<T> setRequest(JSONObject request);
 
-	boolean isNoVerify();
-	Parser<T> setNoVerify(boolean noVerify);
+	Parser<T> setNeedVerify(boolean needVerify);
+	
+	boolean isNeedVerifyLogin();
+	Parser<T> setNeedVerifyLogin(boolean needVerifyLogin);
 
-	boolean isNoVerifyLogin();
-	Parser<T> setNoVerifyLogin(boolean noVerifyLogin);
+	boolean isNeedVerifyRole();
+	Parser<T> setNeedVerifyRole(boolean needVerifyRole);
 
-	boolean isNoVerifyRole();
-	Parser<T> setNoVerifyRole(boolean noVerifyRole);
-
-	boolean isNoVerifyContent();
-	Parser<T> setNoVerifyContent(boolean noVerifyContent);
+	boolean isNeedVerifyContent();
+	Parser<T> setNeedVerifyContent(boolean needVerifyContent);
 
 	
 	String parse(String request);

@@ -46,8 +46,8 @@ public class APIJSONParser extends AbstractParser<Long> {
 	public APIJSONParser(RequestMethod method) {
 		super(method);
 	}
-	public APIJSONParser(RequestMethod method, boolean noVerify) {
-		super(method, noVerify);
+	public APIJSONParser(RequestMethod method, boolean needVerify) {
+		super(method, needVerify);
 	}
 
 	private HttpSession session;

@@ -104,7 +104,7 @@ public class APIJSONVerifier extends AbstractVerifier<Long> {
 			creator = APIJSONApplication.DEFAULT_APIJSON_CREATOR;
 		}
 
-		JSONObject response = creator.createParser().setMethod(RequestMethod.GET).setNoVerify(true).parseResponse(request);
+		JSONObject response = creator.createParser().setMethod(RequestMethod.GET).setNeedVerify(false).parseResponse(request);
 		if (JSONResponse.isSuccess(response) == false) {
 			Log.e(TAG, "\n\n\n\n\n !!!! 查询权限配置异常 !!!\n" + response.getString(JSONResponse.KEY_MSG) + "\n\n\n\n\n");
 			onServerError("查询权限配置异常 !", shutdownWhenServerError);

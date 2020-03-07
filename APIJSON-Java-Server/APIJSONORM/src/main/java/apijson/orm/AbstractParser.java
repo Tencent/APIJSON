@@ -57,27 +57,25 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 
 	/**
-	 * GET
+	 * method = null
 	 */
 	public AbstractParser() {
 		this(null);
 	}
-	/**
+	/**needVerify = true
 	 * @param requestMethod null ? requestMethod = GET
 	 */
 	public AbstractParser(RequestMethod method) {
-		this(method, false);
+		this(method, true);
 	}
-
-
 	/**
 	 * @param requestMethod null ? requestMethod = GET
-	 * @param noVerify 仅限于为服务端提供方法免验证特权，普通请求不要设置为true！ 如果对应Table有权限也建议用默认值false，保持和客户端权限一致
+	 * @param needVerify 仅限于为服务端提供方法免验证特权，普通请求不要设置为 false ！ 如果对应Table有权限也建议用默认值 true，保持和客户端权限一致
 	 */
-	public AbstractParser(RequestMethod method, boolean noVerify) {
+	public AbstractParser(RequestMethod method, boolean needVerify) {
 		super();
 		setMethod(method);
-		setNoVerify(noVerify);
+		setNeedVerify(needVerify);
 	}
 
 	@NotNull
@@ -210,45 +208,41 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	}
 
 	@Override
-	public boolean isNoVerify() {
-		return noVerifyLogin && noVerifyRole && noVerifyContent;
-	}
-	@Override
-	public AbstractParser<T> setNoVerify(boolean noVerify) {
-		setNoVerifyLogin(noVerify);
-		setNoVerifyRole(noVerify);
-		setNoVerifyContent(noVerify);
+	public AbstractParser<T> setNeedVerify(boolean needVerify) {
+		setNeedVerifyLogin(needVerify);
+		setNeedVerifyRole(needVerify);
+		setNeedVerifyContent(needVerify);
 		return this;
 	}
 
-	protected boolean noVerifyLogin;
+	protected boolean needVerifyLogin;
 	@Override
-	public boolean isNoVerifyLogin() {
-		return noVerifyLogin;
+	public boolean isNeedVerifyLogin() {
+		return needVerifyLogin;
 	}
 	@Override
-	public AbstractParser<T> setNoVerifyLogin(boolean noVerifyLogin) {
-		this.noVerifyLogin = noVerifyLogin;
+	public AbstractParser<T> setNeedVerifyLogin(boolean needVerifyLogin) {
+		this.needVerifyLogin = needVerifyLogin;
 		return this;
 	}
-	protected boolean noVerifyRole;
+	protected boolean needVerifyRole;
 	@Override
-	public boolean isNoVerifyRole() {
-		return noVerifyRole;
+	public boolean isNeedVerifyRole() {
+		return needVerifyRole;
 	}
 	@Override
-	public AbstractParser<T> setNoVerifyRole(boolean noVerifyRole) {
-		this.noVerifyRole = noVerifyRole;
+	public AbstractParser<T> setNeedVerifyRole(boolean needVerifyRole) {
+		this.needVerifyRole = needVerifyRole;
 		return this;
 	}
-	protected boolean noVerifyContent;
+	protected boolean needVerifyContent;
 	@Override
-	public boolean isNoVerifyContent() {
-		return noVerifyContent;
+	public boolean isNeedVerifyContent() {
+		return needVerifyContent;
 	}
 	@Override
-	public AbstractParser<T> setNoVerifyContent(boolean noVerifyContent) {
-		this.noVerifyContent = noVerifyContent;
+	public AbstractParser<T> setNeedVerifyContent(boolean needVerifyContent) {
+		this.needVerifyContent = needVerifyContent;
 		return this;
 	}
 
@@ -325,10 +319,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		if (RequestMethod.isPublicMethod(requestMethod) == false) {
 			try {
-				if (noVerifyLogin == false) {
+				if (isNeedVerifyLogin()) {
 					onVerifyLogin();
 				}
-				if (noVerifyContent == false) {
+				if (isNeedVerifyContent()) {
 					onVerifyContent();
 				}
 			} catch (Exception e) {
@@ -337,7 +331,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		//必须在parseCorrectRequest后面，因为parseCorrectRequest可能会添加 @role
-		if (noVerifyRole == false && globleRole == null) {
+		if (isNeedVerifyRole() && globleRole == null) {
 			try {
 				setGlobleRole(RequestRole.get(requestObject.getString(JSONRequest.KEY_ROLE)));
 				requestObject.remove(JSONRequest.KEY_ROLE);
@@ -433,7 +427,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			Log.i(TAG, "onVerifyRole  config = " + JSON.toJSONString(config));
 		}
 
-		if (noVerifyRole == false) {
+		if (isNeedVerifyRole()) {
 			if (config.getRole() == null) {
 				if (globleRole != null) {
 					config.setRole(globleRole);

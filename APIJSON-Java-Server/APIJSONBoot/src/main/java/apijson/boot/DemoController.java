@@ -105,8 +105,9 @@ public class DemoController extends APIJSONController {
 	 * @see {@link RequestMethod#GET}
 	 */
 	@PostMapping(value = "get")
+	@Override
 	public String get(@RequestBody String request, HttpSession session) {
-		return new DemoParser(GET).setSession(session).parse(request);
+		return super.get(request, session);
 	}
 
 	/**计数
@@ -116,8 +117,9 @@ public class DemoController extends APIJSONController {
 	 * @see {@link RequestMethod#HEAD}
 	 */
 	@PostMapping("head")
+	@Override
 	public String head(@RequestBody String request, HttpSession session) {
-		return new DemoParser(HEAD).setSession(session).parse(request);
+		return super.head(request, session);
 	}
 
 	/**限制性GET，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
@@ -127,8 +129,9 @@ public class DemoController extends APIJSONController {
 	 * @see {@link RequestMethod#GETS}
 	 */
 	@PostMapping("gets")
+	@Override
 	public String gets(@RequestBody String request, HttpSession session) {
-		return new DemoParser(GETS).setSession(session).parse(request);
+		return super.gets(request, session);
 	}
 
 	/**限制性HEAD，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
@@ -138,8 +141,9 @@ public class DemoController extends APIJSONController {
 	 * @see {@link RequestMethod#HEADS}
 	 */
 	@PostMapping("heads")
+	@Override
 	public String heads(@RequestBody String request, HttpSession session) {
-		return new DemoParser(HEADS).setSession(session).parse(request);
+		return super.heads(request, session);
 	}
 
 	/**新增
@@ -149,8 +153,9 @@ public class DemoController extends APIJSONController {
 	 * @see {@link RequestMethod#POST}
 	 */
 	@PostMapping("post")
+	@Override
 	public String post(@RequestBody String request, HttpSession session) {
-		return new DemoParser(POST).setSession(session).parse(request);
+		return super.post(request, session);
 	}
 
 	/**修改
@@ -160,8 +165,9 @@ public class DemoController extends APIJSONController {
 	 * @see {@link RequestMethod#PUT}
 	 */
 	@PostMapping("put")
+	@Override
 	public String put(@RequestBody String request, HttpSession session) {
-		return new DemoParser(PUT).setSession(session).parse(request);
+		return super.put(request, session);
 	}
 
 	/**删除
@@ -171,8 +177,9 @@ public class DemoController extends APIJSONController {
 	 * @see {@link RequestMethod#DELETE}
 	 */
 	@PostMapping("delete")
+	@Override
 	public String delete(@RequestBody String request, HttpSession session) {
-		return new DemoParser(DELETE).setSession(session).parse(request);
+		return super.delete(request, session);
 	}
 
 
@@ -340,9 +347,9 @@ public class DemoController extends APIJSONController {
 			return DemoParser.extendErrorResult(requestObject, e);
 		}
 
-		new DemoParser(DELETE, true).parse(newVerifyRequest(type, phone, null));
+		new DemoParser(DELETE, false).parse(newVerifyRequest(type, phone, null));
 
-		JSONObject response = new DemoParser(POST, true).parseResponse(
+		JSONObject response = new DemoParser(POST, false).parseResponse(
 				newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000))
 				);
 
@@ -352,7 +359,7 @@ public class DemoController extends APIJSONController {
 		} catch (Exception e) {}
 
 		if (verify == null || JSONResponse.isSuccess(verify.getIntValue(JSONResponse.KEY_CODE)) == false) {
-			new DemoParser(DELETE, true).parseResponse(new JSONRequest(new Verify(type, phone)));
+			new DemoParser(DELETE, false).parseResponse(new JSONRequest(new Verify(type, phone)));
 			return response;
 		}
 
@@ -385,7 +392,7 @@ public class DemoController extends APIJSONController {
 		} catch (Exception e) {
 			return DemoParser.extendErrorResult(requestObject, e);
 		}
-		return new DemoParser(GETS, true).parseResponse(newVerifyRequest(type, phone, null));
+		return new DemoParser(GETS, false).parseResponse(newVerifyRequest(type, phone, null));
 	}
 
 	/**校验验证码
@@ -425,7 +432,7 @@ public class DemoController extends APIJSONController {
 	 */
 	public JSONObject headVerify(int type, String phone, String code) {
 		JSONResponse response = new JSONResponse(
-				new DemoParser(GETS, true).parseResponse(
+				new DemoParser(GETS, false).parseResponse(
 						new JSONRequest(
 								new Verify(type, phone)
 								.setVerify(code)
@@ -442,14 +449,14 @@ public class DemoController extends APIJSONController {
 		long time = BaseModel.getTimeMillis(verify.getDate());
 		long now = System.currentTimeMillis();
 		if (now > 60*1000 + time) {
-			new DemoParser(DELETE, true).parseResponse(
+			new DemoParser(DELETE, false).parseResponse(
 					new JSONRequest(new Verify(type, phone)).setTag(VERIFY_)
 					);
 			return DemoParser.newErrorResult(new TimeoutException("验证码已过期！"));
 		}
 
 		return new JSONResponse(
-				new DemoParser(HEADS, true).parseResponse(
+				new DemoParser(HEADS, false).parseResponse(
 						new JSONRequest(new Verify(type, phone).setVerify(code)).setFormat(true)
 						)
 				);
@@ -532,7 +539,7 @@ public class DemoController extends APIJSONController {
 
 
 		//手机号是否已注册
-		JSONObject phoneResponse = new DemoParser(HEADS, true).parseResponse(
+		JSONObject phoneResponse = new DemoParser(HEADS, false).parseResponse(
 				new JSONRequest(
 						new Privacy().setPhone(phone)
 						)
@@ -546,7 +553,7 @@ public class DemoController extends APIJSONController {
 		}
 
 		//根据phone获取User
-		JSONObject privacyResponse = new DemoParser(GETS, true).parseResponse(
+		JSONObject privacyResponse = new DemoParser(GETS, false).parseResponse(
 				new JSONRequest(
 						new Privacy().setPhone(phone)
 						).setFormat(true)
@@ -562,7 +569,7 @@ public class DemoController extends APIJSONController {
 		//校验凭证 
 		if (isPassword) {//password密码登录
 			response = new JSONResponse(
-					new DemoParser(HEADS, true).parseResponse(
+					new DemoParser(HEADS, false).parseResponse(
 							new JSONRequest(new Privacy(userId).setPassword(password))
 							)
 					);
@@ -578,7 +585,7 @@ public class DemoController extends APIJSONController {
 		}
 
 		response = new JSONResponse(
-				new DemoParser(GETS, true).parseResponse(
+				new DemoParser(GETS, false).parseResponse(
 						new JSONRequest(new User(userId)).setFormat(true)
 						)
 				);
@@ -693,7 +700,7 @@ public class DemoController extends APIJSONController {
 		}
 		requestObject.put(JSONRequest.KEY_FORMAT, true);
 		response = new JSONResponse( 
-				new DemoParser(POST).setNoVerifyLogin(true).parseResponse(requestObject)
+				new DemoParser(POST).setNeedVerifyLogin(false).parseResponse(requestObject)
 				);
 
 		//验证User和Privacy
@@ -707,10 +714,10 @@ public class DemoController extends APIJSONController {
 		}
 
 		if (e != null) { //出现错误，回退
-			new DemoParser(DELETE, true).parseResponse(
+			new DemoParser(DELETE, false).parseResponse(
 					new JSONRequest(new User(userId))
 					);
-			new DemoParser(DELETE, true).parseResponse(
+			new DemoParser(DELETE, false).parseResponse(
 					new JSONRequest(new Privacy(userId2))
 					);
 		}
@@ -822,7 +829,7 @@ public class DemoController extends APIJSONController {
 				privacy.setPayPassword(oldPassword);
 			}
 			JSONResponse response = new JSONResponse( 
-					new DemoParser(HEAD, true).parseResponse(
+					new DemoParser(HEAD, false).parseResponse(
 							new JSONRequest(privacy).setFormat(true)
 							)
 					);
@@ -839,7 +846,7 @@ public class DemoController extends APIJSONController {
 				return DemoParser.extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
 			}
 			response = new JSONResponse(
-					new DemoParser(GET, true).parseResponse(
+					new DemoParser(GET, false).parseResponse(
 							new JSONRequest(
 									new Privacy().setPhone(phone)
 									)
@@ -860,7 +867,7 @@ public class DemoController extends APIJSONController {
 		//		requestObject.put(JSONRequest.KEY_TAG, "Password");
 		requestObject.put(JSONRequest.KEY_FORMAT, true);
 		//修改密码
-		return new DemoParser(PUT, true).parseResponse(requestObject);
+		return new DemoParser(PUT, false).parseResponse(requestObject);
 	}
 
 
@@ -913,7 +920,7 @@ public class DemoController extends APIJSONController {
 
 		privacyObj.remove("balance+");
 		JSONResponse response = new JSONResponse(
-				new DemoParser(HEADS, true).setSession(session).parseResponse(
+				new DemoParser(HEADS, false).setSession(session).parseResponse(
 						new JSONRequest(PRIVACY_, privacyObj)
 						)
 				);
@@ -938,7 +945,7 @@ public class DemoController extends APIJSONController {
 
 		if (change < 0) {//提现
 			response = new JSONResponse(
-					new DemoParser(GETS, true).parseResponse(
+					new DemoParser(GETS, false).parseResponse(
 							new JSONRequest(
 									new Privacy(userId)
 									)

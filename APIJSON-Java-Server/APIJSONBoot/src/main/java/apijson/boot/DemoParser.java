@@ -29,8 +29,8 @@ public class DemoParser extends APIJSONParser {
 	public DemoParser(RequestMethod method) {
 		super(method);
 	}
-	public DemoParser(RequestMethod method, boolean noVerify) {
-		super(method, noVerify);
+	public DemoParser(RequestMethod method, boolean needVerify) {
+		super(method, needVerify);
 	}
 
 	//	//可重写来设置最大查询数量
