@@ -1,22 +1,22 @@
 package apijson.framework;
 
 import apijson.JSONResponse;
-import apijson.server.JSONRequest;
-import apijson.server.Visitor;
-import apijson.server.model.Access;
-import apijson.server.model.Column;
-import apijson.server.model.Document;
-import apijson.server.model.ExtendedProperty;
-import apijson.server.model.Function;
-import apijson.server.model.PgAttribute;
-import apijson.server.model.PgClass;
-import apijson.server.model.Request;
-import apijson.server.model.Response;
-import apijson.server.model.SysColumn;
-import apijson.server.model.SysTable;
-import apijson.server.model.Table;
-import apijson.server.model.Test;
-import apijson.server.model.TestRecord;
+import apijson.orm.JSONRequest;
+import apijson.orm.Visitor;
+import apijson.orm.model.Access;
+import apijson.orm.model.Column;
+import apijson.orm.model.Document;
+import apijson.orm.model.ExtendedProperty;
+import apijson.orm.model.Function;
+import apijson.orm.model.PgAttribute;
+import apijson.orm.model.PgClass;
+import apijson.orm.model.Request;
+import apijson.orm.model.Response;
+import apijson.orm.model.SysColumn;
+import apijson.orm.model.SysTable;
+import apijson.orm.model.Table;
+import apijson.orm.model.Test;
+import apijson.orm.model.TestRecord;
 
 public class APIJSONConstant {
 

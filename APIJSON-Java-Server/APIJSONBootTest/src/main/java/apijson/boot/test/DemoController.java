@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.framework.APIJSONController;
-import apijson.server.Parser;
+import apijson.orm.Parser;
 
 
 @RestController

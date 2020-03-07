@@ -29,7 +29,7 @@ import apijson.RequestMethod;
 import apijson.RequestRole;
 import apijson.StringUtil;
 import apijson.framework.APIJSONFunctionParser;
-import apijson.server.JSONRequest;
+import apijson.orm.JSONRequest;
 
 
 /**可远程调用的函数类

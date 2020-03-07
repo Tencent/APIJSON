@@ -33,9 +33,9 @@ import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.RequestRole;
 import apijson.StringUtil;
-import apijson.server.AbstractFunctionParser;
-import apijson.server.JSONRequest;
-import apijson.server.ParserCreator;
+import apijson.orm.AbstractFunctionParser;
+import apijson.orm.JSONRequest;
+import apijson.orm.ParserCreator;
 
 
 /**可远程调用的函数类

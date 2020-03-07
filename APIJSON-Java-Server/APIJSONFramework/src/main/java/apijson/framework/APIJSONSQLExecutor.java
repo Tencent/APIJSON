@@ -27,8 +27,8 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.JSON;
 import apijson.Log;
 import apijson.NotNull;
-import apijson.server.AbstractSQLExecutor;
-import apijson.server.SQLConfig;
+import apijson.orm.AbstractSQLExecutor;
+import apijson.orm.SQLConfig;
 
 
 /**executor for query(read) or update(write) MySQL database

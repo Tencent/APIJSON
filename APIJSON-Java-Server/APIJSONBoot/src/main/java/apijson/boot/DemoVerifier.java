@@ -16,7 +16,7 @@ package apijson.boot;
 
 
 import apijson.framework.APIJSONVerifier;
-import apijson.server.SQLConfig;
+import apijson.orm.SQLConfig;
 
 
 /**权限验证器

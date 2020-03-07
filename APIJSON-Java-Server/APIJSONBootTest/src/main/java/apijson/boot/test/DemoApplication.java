@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 
 import apijson.framework.APIJSONApplication;
 import apijson.framework.APIJSONCreator;
-import apijson.server.SQLConfig;
+import apijson.orm.SQLConfig;
 
 
 /**SpringBootApplication

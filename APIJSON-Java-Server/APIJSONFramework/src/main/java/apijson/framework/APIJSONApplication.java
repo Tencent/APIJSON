@@ -15,8 +15,8 @@ limitations under the License.*/
 package apijson.framework;
 
 import apijson.NotNull;
-import apijson.server.ParserCreator;
-import apijson.server.SQLCreator;
+import apijson.orm.ParserCreator;
+import apijson.orm.SQLCreator;
 
 
 /**SpringBootApplication

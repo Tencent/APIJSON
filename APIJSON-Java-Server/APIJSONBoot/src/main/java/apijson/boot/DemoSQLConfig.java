@@ -21,7 +21,7 @@ import static apijson.framework.APIJSONConstant.USER_ID;
 
 import apijson.RequestMethod;
 import apijson.framework.APIJSONSQLConfig;
-import apijson.server.AbstractSQLConfig;
+import apijson.orm.AbstractSQLConfig;
 
 
 /**SQL配置

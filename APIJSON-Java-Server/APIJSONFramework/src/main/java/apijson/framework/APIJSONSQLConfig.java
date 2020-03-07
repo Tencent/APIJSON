@@ -24,9 +24,9 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.RequestMethod;
-import apijson.server.AbstractSQLConfig;
-import apijson.server.Join;
-import apijson.server.SQLConfig;
+import apijson.orm.AbstractSQLConfig;
+import apijson.orm.Join;
+import apijson.orm.SQLConfig;
 
 
 /**SQL配置

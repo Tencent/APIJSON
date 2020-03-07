@@ -22,10 +22,10 @@ import javax.validation.constraints.NotNull;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.RequestMethod;
-import apijson.server.AbstractObjectParser;
-import apijson.server.AbstractParser;
-import apijson.server.Join;
-import apijson.server.SQLConfig;
+import apijson.orm.AbstractObjectParser;
+import apijson.orm.AbstractParser;
+import apijson.orm.Join;
+import apijson.orm.SQLConfig;
 
 
 /**简化Parser，getObject和getArray(getArrayConfig)都能用

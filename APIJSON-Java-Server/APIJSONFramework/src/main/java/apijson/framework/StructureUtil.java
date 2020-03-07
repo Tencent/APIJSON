@@ -26,10 +26,10 @@ import apijson.JSONResponse;
 import apijson.Log;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.server.JSONRequest;
-import apijson.server.ParserCreator;
-import apijson.server.SQLCreator;
-import apijson.server.Structure;
+import apijson.orm.JSONRequest;
+import apijson.orm.ParserCreator;
+import apijson.orm.SQLCreator;
+import apijson.orm.Structure;
 
 
 /**请求结构校验

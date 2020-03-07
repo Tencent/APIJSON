@@ -21,7 +21,7 @@ import java.util.List;
 
 import apijson.MethodAccess;
 import apijson.framework.BaseModel;
-import apijson.server.Visitor;
+import apijson.orm.Visitor;
 
 /**用户开放信息
  * @author Lemon
