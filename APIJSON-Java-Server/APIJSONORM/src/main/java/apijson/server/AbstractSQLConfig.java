@@ -1042,6 +1042,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	public AbstractSQLConfig setCache(String cache) {
+		return setCache(getCache(cache));
+	}
+	public static int getCache(String cache) {
 		int cache2;
 		if (cache == null) {
 			cache2 = JSONRequest.CACHE_ALL;
@@ -1065,11 +1068,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				cache2 = JSONRequest.CACHE_RAM;
 				break;
 			default:
-				throw new IllegalArgumentException(getTable() + "/" + JSONRequest.KEY_CACHE + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [ALL, ROM, RAM] 内 !");
+				throw new IllegalArgumentException(JSONRequest.KEY_CACHE + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [ALL, ROM, RAM] 内 !");
 			}
 		}
-		setCache(cache2);
-		return this;
+		return cache2;
 	}
 
 	@Override
@@ -2311,7 +2313,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static AbstractSQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure, Callback callback) throws Exception {
+	public static SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure, Callback callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
@@ -2328,7 +2330,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String schema = request.getString(KEY_SCHEMA);
 
-		AbstractSQLConfig config = callback.getSQLConfig(method, database, schema, table);
+		SQLConfig config = callback.getSQLConfig(method, database, schema, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); //不删，后面表对象还要用的，必须放在 parseJoin 前
@@ -2451,15 +2453,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 				else {
 					int size = columns.length + (id == null ? 0 : 1); //以key数量为准
-					
+
 					items = new ArrayList<>(size);
 					items.add(id); //idList.get(i)); //第0个就是id
-					
+
 					for (int j = 1; j < size; j++) {
 						items.add(values[j-1]); //从第1个开始，允许"null"
 					}
 				}
-				
+
 				valuess.add(items);
 				config.setValues(valuess);
 			}
@@ -2593,7 +2595,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		config.setExplain(explain);
-		config.setCache(cache);
+		config.setCache(getCache(cache));
 		config.setFrom(from);
 		config.setDistinct(distinct);
 		config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
@@ -2602,7 +2604,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		config.setId(id);
 		//在	tableWhere 第0个		config.setIdIn(idIn);
 
-		config.setRole(role);
+		config.setRole(RequestRole.get(role));
 		config.setGroup(group);
 		config.setHaving(having);
 		config.setOrder(order);
@@ -2643,7 +2645,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	public static AbstractSQLConfig parseJoin(RequestMethod method, AbstractSQLConfig config, List<Join> joinList, Callback callback) throws Exception {
+	public static SQLConfig parseJoin(RequestMethod method, SQLConfig config, List<Join> joinList, Callback callback) throws Exception {
 		boolean isQuery = RequestMethod.isQueryMethod(method);
 		config.setKeyPrefix(isQuery && config.isMain() == false);
 
@@ -2828,7 +2830,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @param table
 		 * @return
 		 */
-		AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
+		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
 
 
 		/**为 post 请求新建 id， 只能是 Long 或 String

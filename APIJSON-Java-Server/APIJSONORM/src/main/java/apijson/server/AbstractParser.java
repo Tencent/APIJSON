@@ -52,7 +52,7 @@ import apijson.server.exception.OutOfRangeException;
 /**parser for parsing request to JSONObject
  * @author Lemon
  */
-public abstract class AbstractParser<T> implements Parser<T>, SQLCreator {
+public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
 
 

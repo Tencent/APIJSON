@@ -24,14 +24,12 @@ import static apijson.server.SQLConfig.TYPE_ITEM;
 import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import javax.activation.UnsupportedDataTypeException;
 
@@ -44,7 +42,7 @@ import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.server.RemoteFunction.FunctionBean;
+import apijson.server.AbstractFunctionParser.FunctionBean;
 import apijson.server.exception.ConflictException;
 import apijson.server.exception.NotExistException;
 
@@ -126,12 +124,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		Log.d(TAG, "AbstractObjectParser  table = " + table + "; isTable = " + isTable);
 		Log.d(TAG, "AbstractObjectParser  isEmpty = " + isEmpty + "; tri = " + tri + "; drop = " + drop);
 	}
-
-	public static final Map<String, Pattern> COMPILE_MAP;
-	static {
-		COMPILE_MAP = new HashMap<String, Pattern>();
-	}
-
 
 
 	private boolean invalidate = false;
@@ -758,7 +750,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public void parseFunction(JSONObject json, String key, String value) throws Exception {
 		Object result;
 		if (key.startsWith("@")) { //TODO 以后这种小众功能从 ORM 移出，作为一个 plugin/APIJSONProcedure
-			FunctionBean fb = RemoteFunction.parseFunction(value, json, true);
+			FunctionBean fb = AbstractFunctionParser.parseFunction(value, json, true);
 
 			SQLConfig config = newSQLConfig(true);
 			config.setProcedure(fb.toFunctionCallString(true));

@@ -33,6 +33,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,8 +63,14 @@ import apijson.server.model.Test;
  * @author Lemon
  */
 public class Structure {
-	private static final String TAG = "Structure";
+	public static final String TAG = "Structure";
 
+	public static final Map<String, Pattern> COMPILE_MAP;
+	static {
+		COMPILE_MAP = new HashMap<String, Pattern>();
+	}
+
+	
 	private Structure() {}
 
 
@@ -651,7 +658,7 @@ public class Structure {
 				if (r instanceof String == false) {
 					throw new UnsupportedDataTypeException(rk + ":" + rv + " 中value只支持 String 或 [String] 类型！");
 				}
-				reg = AbstractObjectParser.COMPILE_MAP.get(r);
+				reg = COMPILE_MAP.get(r);
 				if (reg == null) {
 					reg = Pattern.compile((String) r);
 				}

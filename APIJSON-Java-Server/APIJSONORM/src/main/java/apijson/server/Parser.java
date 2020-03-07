@@ -69,22 +69,11 @@ public interface Parser<T> {
 	Parser<T> setNoVerifyContent(boolean noVerifyContent);
 
 	
-	@NotNull
-	Verifier<T> createVerifier();
-
-	@NotNull
-	SQLConfig createSQLConfig();
-
-	@NotNull
-	SQLExecutor createSQLExecutor();
-
-
 	String parse(String request);
 	String parse(JSONObject request);
 
 	JSONObject parseResponse(String request);
 	JSONObject parseResponse(JSONObject request);
-
 
 
 

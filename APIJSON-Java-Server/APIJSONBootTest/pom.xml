@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>apijson.boot</groupId>
-	<artifactId>apijson-boot</artifactId>
+	<groupId>apijson.boot.test</groupId>
+	<artifactId>apijson-boot-test</artifactId>
 	<version>4.0.0</version>
 	<packaging>jar</packaging>
 
-	<name>APIJSONBoot</name>
-	<description>Demo project for APIJSON Server based on SpringBoot</description>
+	<name>APIJSONBootTest</name>
+	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.58</version>
+			<version>1.2.61</version>
 		</dependency>
 
 		<!-- APIJSONBoot 需要用的 Spring 框架，1.4.1 以上 -->
@@ -63,11 +63,11 @@
 			<artifactId>jtds</artifactId>
 			<version>1.3.1</version>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 		    <groupId>com.github.APIJSON</groupId>
 		    <artifactId>apijson-orm</artifactId>
 		    <version>LATEST</version>
-		</dependency> -->
+		</dependency>
 		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
 
 	</dependencies>

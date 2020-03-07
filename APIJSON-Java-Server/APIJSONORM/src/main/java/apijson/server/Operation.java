@@ -63,7 +63,7 @@ public enum Operation {
 	 * }
 	 * 例如
 	 * {
-	 * 	 "phone~": "PHONE",  //phone 必须满足 PHONE 的格式
+	 *   "phone~": "PHONE",  //phone 必须满足 PHONE 的格式
 	 *   "status{}": [1,2,3],  //status 必须在给出的范围内
 	 *   "balance&{}":">0,<=10000"  //必须满足 balance>0 & balance<=10000
 	 * }

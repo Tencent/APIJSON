@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import apijson.server.JSONRequest;
-
 /**use this class instead of com.alibaba.fastjson.JSONObject
  * @author Lemon
  * @see #put
