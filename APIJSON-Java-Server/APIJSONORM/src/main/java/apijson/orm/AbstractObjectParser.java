@@ -361,7 +361,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					return true;
 				}
 				if (target instanceof Map) { //target可能是从requestObject里取出的 {}
-					if (isTable || targetPath.endsWith("[]/" + JSONResponse.KEY_PAGE) == false) {
+					if (isTable || targetPath.endsWith("[]/" + JSONResponse.KEY_INFO) == false) {
 						Log.d(TAG, "onParse  target instanceof Map  >>  return false;");
 						return false; //FIXME 这个判断现在来看是否还有必要？为啥不允许为 JSONObject ？以前可能因为防止二次遍历再解析，现在只有一次遍历
 					}

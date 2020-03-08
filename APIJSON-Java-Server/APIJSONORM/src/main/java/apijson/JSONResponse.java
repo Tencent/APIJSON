@@ -70,7 +70,7 @@ public class JSONResponse extends apijson.JSONObject {
 	public static final String KEY_MSG = "msg";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_TOTAL = "total";
-	public static final String KEY_PAGE = "page"; //详细的分页信息
+	public static final String KEY_INFO = "info"; //详细的分页信息
 	public static final String KEY_FIRST = "first"; //是否为首页
 	public static final String KEY_LAST = "last"; //是否为尾页
 	public static final String KEY_MAX = "max"; //最大页码

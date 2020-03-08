@@ -757,12 +757,12 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 							JSONObject pagination = new JSONObject(true);
 							pagination.put(JSONResponse.KEY_TOTAL, total);
 							pagination.put(JSONResponse.KEY_COUNT, count);
-							pagination.put(JSONResponse.KEY_PAGE, page);
+							pagination.put(JSONResponse.KEY_INFO, page);
 							pagination.put(JSONResponse.KEY_MAX, max);
 							pagination.put(JSONResponse.KEY_MORE, page < max);
 							pagination.put(JSONResponse.KEY_FIRST, page == 0);
 							pagination.put(JSONResponse.KEY_LAST, page == max);
-							putQueryResult(pathPrefix + JSONResponse.KEY_PAGE, pagination);
+							putQueryResult(pathPrefix + JSONResponse.KEY_INFO, pagination);
 
 							if (total <= count*page) {
 								query = JSONRequest.QUERY_TOTAL;//数量不够了，不再往后查询
