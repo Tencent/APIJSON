@@ -28,7 +28,7 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 
 <h5>2)配置依赖库 </h5>
 其中 apijson-orm, apijson-framework 默认使用 Maven 远程依赖仓库， <br />
-具体见 https://github.com/APIJSON/apijson-orm 和 https://github.com/APIJSON/apijson-framework
+具体见 https://github.com/APIJSON/apijson-orm 和 https://github.com/APIJSON/apijson-framework <br />
 如果依赖下载不了，注释掉报错的 apijson-orm, apijson-framework 依赖代码， <br />
 然后右键 libs (APIJSONBoot 内，其它项目需要拷贝过去)里面的 apijson-orm.jar > Build Path > Add to Build Path <br />
 同样按照以上步骤来依赖 libs 目录内的其它所有 jar 包。 <br />
@@ -47,7 +47,7 @@ Open > 选择刚才解压路径下的 APIJSON-Master/APIJSON-Java-Server 里面�
 
 <h5>2)配置依赖库 </h5>
 其中 apijson-orm, apijson-framework 默认使用 Maven 远程依赖仓库， <br />
-具体见 https://github.com/APIJSON/apijson-orm 和 https://github.com/APIJSON/apijson-framework
+具体见 https://github.com/APIJSON/apijson-orm 和 https://github.com/APIJSON/apijson-framework <br />
 如果依赖下载不了，注释掉报错的 apijson-orm, apijson-framework 依赖代码， <br />
 然后右键 libs (APIJSONBoot 内，其它项目需要拷贝过去)里面的 apijson-orm.jar > Add as Library > OK <br />
 同样按照以上步骤来依赖 libs 目录内的其它所有 jar 包。 <br />
