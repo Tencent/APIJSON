@@ -65,10 +65,16 @@ public class JSONResponse extends apijson.JSONObject {
 	public static final String MSG_SERVER_ERROR = "Internal Server Error!"; //服务器内部错误
 
 
+	public static final String KEY_OK = "ok";
 	public static final String KEY_CODE = "code";
 	public static final String KEY_MSG = "msg";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_TOTAL = "total";
+	public static final String KEY_PAGE = "page"; //详细的分页信息
+	public static final String KEY_FIRST = "first"; //是否为首页
+	public static final String KEY_LAST = "last"; //是否为尾页
+	public static final String KEY_MAX = "max"; //最大页码
+	public static final String KEY_MORE = "more"; //是否有更多
 
 	/**获取状态
 	 * @return

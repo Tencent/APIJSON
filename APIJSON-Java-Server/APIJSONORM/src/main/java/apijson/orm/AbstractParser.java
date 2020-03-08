@@ -511,9 +511,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		if (object == null) {
 			object = new JSONObject(true);
 		}
+		if (object.containsKey(JSONResponse.KEY_OK) == false) {
+			object.put(JSONResponse.KEY_OK, JSONResponse.isSuccess(code));
+		}
 		if (object.containsKey(JSONResponse.KEY_CODE) == false) {
 			object.put(JSONResponse.KEY_CODE, code);
 		}
+		
 		String m = StringUtil.getString(object.getString(JSONResponse.KEY_MSG));
 		if (m.isEmpty() == false) {
 			msg = m + " ;\n " + StringUtil.getString(msg);
@@ -738,9 +742,29 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 						int index = parentPath.lastIndexOf("]/");
 						if (index >= 0) {
 							int total = rp.getIntValue(JSONResponse.KEY_COUNT);
-							putQueryResult(parentPath.substring(0, index) + "]/" + JSONResponse.KEY_TOTAL, total);
+							
+							String pathPrefix = parentPath.substring(0, index) + "]/";
+							putQueryResult(pathPrefix + JSONResponse.KEY_TOTAL, total);
+							
+							//详细的分页信息，主要为 PC 端提供
+							int count = arrayConfig.getCount();
+							int page = arrayConfig.getPage();
+							int max = (int) ((total - 1)/count);
+							if (max < 0) {
+								max = 0;
+							}
+							
+							JSONObject pagination = new JSONObject(true);
+							pagination.put(JSONResponse.KEY_TOTAL, total);
+							pagination.put(JSONResponse.KEY_COUNT, count);
+							pagination.put(JSONResponse.KEY_PAGE, page);
+							pagination.put(JSONResponse.KEY_MAX, max);
+							pagination.put(JSONResponse.KEY_MORE, page < max);
+							pagination.put(JSONResponse.KEY_FIRST, page == 0);
+							pagination.put(JSONResponse.KEY_LAST, page == max);
+							putQueryResult(pathPrefix + JSONResponse.KEY_PAGE, pagination);
 
-							if (total <= arrayConfig.getCount()*arrayConfig.getPage()) {
+							if (total <= count*page) {
 								query = JSONRequest.QUERY_TOTAL;//数量不够了，不再往后查询
 							}
 						}

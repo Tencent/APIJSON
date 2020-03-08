@@ -357,12 +357,14 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				Log.i(TAG, "onParse targetPath = " + targetPath + "; target = " + target);
 
 				if (target == null) {//String#equals(null)会出错
-					Log.d(TAG, "onParse  target == null  >>  continue;");
+					Log.d(TAG, "onParse  target == null  >>  return true;");
 					return true;
 				}
 				if (target instanceof Map) { //target可能是从requestObject里取出的 {}
-					Log.d(TAG, "onParse  target instanceof Map  >>  continue;");
-					return false;
+					if (isTable || targetPath.endsWith("[]/" + JSONResponse.KEY_PAGE) == false) {
+						Log.d(TAG, "onParse  target instanceof Map  >>  return false;");
+						return false; //FIXME 这个判断现在来看是否还有必要？为啥不允许为 JSONObject ？以前可能因为防止二次遍历再解析，现在只有一次遍历
+					}
 				}
 				if (targetPath.equals(target)) {//必须valuePath和保证getValueByPath传进去的一致！
 					Log.d(TAG, "onParse  targetPath.equals(target)  >>");
@@ -373,7 +375,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 								+ " || JSONRequest.TABLE_KEY_LIST.contains(key)) >>  return null;");
 						return false;//获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 					} else {
-						Log.d(TAG, "onParse  isTable(table) == false >> continue;");
+						Log.d(TAG, "onParse  isTable(table) == false >> return true;");
 						return true;//舍去，对Table无影响
 					}
 				} 
