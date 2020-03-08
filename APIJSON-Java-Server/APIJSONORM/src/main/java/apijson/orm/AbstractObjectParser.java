@@ -573,6 +573,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		int version = parser.getVersion();
 		int maxUpdateCount = parser.getMaxUpdateCount();
 
+		String idKey = parser.createSQLConfig().getIdKey(); //Table[]: [{}] arrayConfig 为 null
 		for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
 			//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
 			JSONObject item;
@@ -596,12 +597,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			}
 
 			allCount += count;
-			ids.add(result.get(JSONResponse.KEY_ID));
+			ids.add(result.get(idKey));
 		}
 
 		JSONObject allResult = AbstractParser.newSuccessResult();
-		allResult.put(JSONResponse.KEY_ID_IN, ids);
 		allResult.put(JSONResponse.KEY_COUNT, allCount);
+		allResult.put(idKey + "[]", ids);
 
 		response.put(key, allResult); //不按原样返回，避免数据量过大
 	}

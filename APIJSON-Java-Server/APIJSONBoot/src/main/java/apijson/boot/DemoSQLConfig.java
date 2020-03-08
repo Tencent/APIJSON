@@ -30,6 +30,13 @@ import apijson.orm.AbstractSQLConfig;
  */
 public class DemoSQLConfig extends APIJSONSQLConfig {
 
+	public DemoSQLConfig() {
+		super();
+	}
+	public DemoSQLConfig(RequestMethod method, String table) {
+		super(method, table);
+	}
+
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的
 		DEFAULT_SCHEMA = "sys";  //TODO 默认模式名，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
@@ -44,7 +51,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 			@Override
 			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table) {
-				return new APIJSONSQLConfig(method, table);
+				return new DemoSQLConfig(method, table);
 			}
 
 			//取消注释来实现自定义各个表的主键名
@@ -67,6 +74,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//			}
 		};
 	}
+
 
 	@Override
 	public String getDBVersion() {

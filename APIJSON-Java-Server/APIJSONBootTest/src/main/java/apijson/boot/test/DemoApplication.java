@@ -42,6 +42,7 @@ public class DemoApplication {
 	
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(DemoApplication.class, args);
+        System.out.println("\n\n<<<<<<<<<<<<<<<<<<<<<<<<< APIJSON 启动完成，试试调用自动化 API 吧 ^_^ >>>>>>>>>>>>>>>>>>>>>>>>\n");
 	}
 
 }
