@@ -34,6 +34,12 @@ http://apijson.org:8000/auto/ <br />
 执行后居然是 SELECT 查到的放在默认的 ResultSet，性能分析放在 moreResult，<br />
 因为这个问题目前以上两个数据库的性能分析 @explain 实际并不可用，需要改用其它方式或解决现有方式的 bug。<br />
 
+#### 新增支持 page 从 1 开始
+目前只能从 0 开始，实际使用 1 更广泛，而且这方面用户习惯很强，支持它成本也不高。 <br />
+[Parser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/Parser.java) 新增 DEFAULT_QUERY_PAGE 和 getDefaultQueryPage， <br />
+与 DEFAULT_QUERY_COUNT 和 getDefaultQueryPage 统一， <br />
+方便前端直接用页码的值传参，以及 info.page 的值来渲染页码。 <br />
+建议在 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java)，[AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 用到 page 的地方判断 getDefaultQueryPage，做兼容处理。 <br />
 
 #### 新增支持分布式
 
