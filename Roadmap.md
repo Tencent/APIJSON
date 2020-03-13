@@ -201,7 +201,7 @@ https://github.com/APIJSON/APIJSON/issues/48 <br />
 #### 减少 Bug
 
 ##### [APIAuto](https://github.com/TommyLemon/APIAuto) 上统计的 bug
-账号 13000002000 密码 123456
+账号 13000002000 密码 123456 <br />
 http://apijson.org:8000/auto/
 
 ##### 其它发现的 Bug
