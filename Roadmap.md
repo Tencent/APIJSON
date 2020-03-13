@@ -9,30 +9,34 @@
 账号 13000002020 密码 123456
 http://apijson.org:8000/auto/
 
-* 新增支持 Case
+<h4 /> 新增支持 Case
+
 实现远程函数也不方便的 SQL 内字段转换 CASE WHEN THEN ，<br />
 暂时还没有想好如何设计。如果是 SQL 原来的写法，则有点繁琐。<br />
 
-* 新增支持 @having& 
+<h4 /> 新增支持 @having& 
+
 来实现内部条件 AND 连接，原来的 @having 由 AND 连接变为 OR 连接，保持 横或纵与 的统一规则。<br />
 @having! 必须性不大，可通过反转内部条件来实现，但如果实现简单、且不影响原来的功能，则可以顺便加上。<br />
 
-* 新增支持 @column!
+<h4 /> 新增支持 @column!
+
 这个只在 APIJSONFramework 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
 可新增一个 VersionedColumn 表记录来代替 HashMap 代码配置。<br />
 需要注意的是，可能前端传参里既有 @column 又有 @column! ，碰到这种情况：<br />
 如果没有重合字段就忽略 @column! ，只让 @column 生效；<br />
 如果有有重合字段，则抛异常，转为错误码和错误信息返回。<br />
 
-* 新增支持 TSQL 的 @explain
+<h4 /> 新增支持 TSQL 的 @explain
+
 目前 APIJSON 支持 [Oracle](https://github.com/APIJSON/APIJSON/tree/master/Oracle) 和 [SQL Server](https://github.com/APIJSON/APIJSON/tree/master/SQLServer) 这两种 TSQL 数据库（群友测试 IBM DB2 也行）。<br />
 但是 "@explain": true 使用的是 SET STATISTICS PROFILE ON(具体见 AbstrctSQLConfig 和 AbstrctSQLExecutor)  <br />
 执行后居然是 SELECT 查到的放在默认的 ResultSet，性能分析放在 moreResult，<br />
 因为这个问题目前以上两个数据库的性能分析 @explain 实际并不可用，需要改用其它方式或解决现有方式的 bug。<br />
 
 
+<h4 /> 新增支持分布式
 
-* 新增支持分布式
  "@url": "http://apijson.cn:8080/get"
 ```js
 {
@@ -51,7 +55,8 @@ http://apijson.org:8000/auto/
 或许可以加一个 ~ 前缀表示异步？例如 "@url": "\~http://apijson.cn:8080/get"，由调用方保证没有被下方对象依赖。<br />
 
 
-* 新增支持 Union
+<h4 /> 新增支持 Union
+
 虽然可以通过 INNER JOIN + 条件 OR 连接来替代它的功能，但没法达到它能用索引的性能。<br />
 支持 UNION 很有必要，但 UNION ALL 几乎没有需求，如果实现简单、且不影响原来的功能，则可以顺便加上。
 
@@ -82,7 +87,8 @@ LIMIT 10 OFFSET 0
 ```
 
 
-* 新增支持 With
+<h4 /> 新增支持 With
+
 可以减少子查询执行次数，提高性能。
 ```js
 {   //看看关注的人最近有什么动态（分享、评论）
@@ -135,37 +141,45 @@ SELECT * FROM `sys`.`Comment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DES
 APIJSON 提供了各种安全机制，可在目前的新增或改进。
 
 
-* 防越权操作
+<h4 /> 防越权操作
+
 目前有 RBAC 自动化权限管理。<br />
 APIJSONORM 提供 [@MethodAccess](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/MethodAccess.java) 注解来配置 <br />
 APIJSONFramework 则使用 [Access 表](https://github.com/APIJSON/APIJSON/blob/master/MySQL/single/sys_Access.sql) 记录来配置 <br />
 在 [AbstractVerifier](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java) 中，假定真实、强制匹配。 <br />
 
 
-* 防 SQL 注入
+<h4 /> 防 SQL 注入
+
 目前有 预编译 + 白名单 校验机制。具体见 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java)  和 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 。
 
-* 防恶意复杂请求
+<h4 /> 防恶意复杂请求
+
 目前有限流机制，getMaxQueryCount, getMaxUpdateCount, getMaxObjectCount, getMaxSQLCount, getMaxQueryDepth 等。 <br />
 https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/Parser.java
 
 
 ### 优化性能
-* 解析 JSON
+
+<h4 /> 解析 JSON
+
 优化 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 和 [AbstractObjectParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractObjectParser.java) 解析 JSON 性能。
 
-* 封装 JSON
+<h4 /> 封装 JSON
+
 优化 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 封装 JSON 性能。
 
-* 拼接 SQL
-优化 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 拼接 SQL 性能。<br />
-#完善功能 中 Union 和 With 也是优化 SQL 性能的方式。
+<h4 /> 拼接 SQL
 
-* 读写缓存
+优化 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 拼接 SQL 性能。<br />
+[完善功能](https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md#%E5%AE%8C%E5%96%84%E5%8A%9F%E8%83%BD) 中 Union 和 With 也是优化 SQL 性能的方式。
+
+<h4 /> 读写缓存
+
 在 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 使用了 HashMap<String, JSONObject> queryResultMap 存已解析的对象、总数等数据。<br />
 在 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 使用了 HashMap<String, JSONObject> cacheMap 存已通过 SQL 查出的结果集。<br />
 
-* ...  //欢迎补充
+<h4 /> ...  //欢迎补充
 
 
 
@@ -174,7 +188,8 @@ APIJSON 代码经过商业分析软件 [源伞Pinpoint](https://www.sourcebrella
 https://github.com/APIJSON/APIJSON/issues/48 <br />
 但我们需要再接再厉，尽可能做到 99.999% 可靠度，降低使用风险，让用户放心和安心。
 
-* 减少 Bug
+<h4 /> 减少 Bug
+
 #### 1.[APIAuto](https://github.com/TommyLemon/APIAuto) 上统计的 bug
 账号 13000002000 密码 123456
 http://apijson.org:8000/auto/
@@ -182,7 +197,8 @@ http://apijson.org:8000/auto/
 #### 2.其它发现的 Bug
 https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug
 
-* 完善测试
+<h4 /> 完善测试
+
 1.在 [APIAuto](https://github.com/TommyLemon/APIAuto)-机器学习自动化接口管理平台 上传更多、更全面、更细致的测试用例、动态参数等
 http://apijson.org:8000/auto/
 
@@ -191,7 +207,7 @@ https://gitee.com/TommyLemon/UnitAuto
 
 
 ### 完善文档
-* 中文文档
+<h4 /> 中文文档
 
 #### 1.通用文档
 https://github.com/APIJSON/APIJSON/blob/master/Document.md
@@ -202,7 +218,8 @@ https://github.com/APIJSON/APIJSON/tree/master/APIJSON-Java-Server
 #### ...  //欢迎补充
 
 
-* English Document
+<h4 /> English Document
+
 Translation for Chinese document.
 https://github.com/APIJSON/APIJSON/blob/master/README-English.md
 https://github.com/APIJSON/APIJSON/blob/master/Document-English.md
@@ -211,17 +228,19 @@ https://github.com/ruoranw/APIJSONdocs
 
 
 ### 丰富周边
-* 新增或完善各种语言 ORM 库
+<h4 /> 新增或完善各种语言 ORM 库
+
 Go, Kotlin, Ruby 等。<br />
 https://github.com/APIJSON/APIJSON#%E7%94%9F%E6%80%81%E9%A1%B9%E7%9B%AE <br />
 
-* 新增或完善 Demo
+<h4 /> 新增或完善 Demo
+
 JavaScript 前端，TypeScript 前端，微信等小程序，<br />
 Android 客户端，iOS 客户端，C# 游戏客户端等。<br />
 Java, C#, Node, Python 等后端 Demo 及数据。<br />
 https://github.com/APIJSON/APIJSON
 
-* 新增扩展
+<h4 /> 新增扩展
 
 #### 1.基于或整合 APIJSONORM 或 APIJSONFramework 来实现的库/框架
 
@@ -237,15 +256,17 @@ https://github.com/APIJSON/APIJSON
 
 
 ### 推广使用
-* 为 APIJSON 编写/发表 博客/文章/资讯 等
+<h4 /> 为 APIJSON 编写/发表 博客/文章/资讯 等
+
 https://github.com/APIJSON/APIJSON#%E7%9B%B8%E5%85%B3%E6%8E%A8%E8%8D%90
 
 
-* 登记正在使用 APIJSON 的公司或项目
+<h4 /> 登记正在使用 APIJSON 的公司或项目
+
 https://github.com/TommyLemon/APIJSON/issues/73
 
-* 在社交技术群、论坛等聊天或评论时推荐 APIJSON
+<h4 /> 在社交技术群、论坛等聊天或评论时推荐 APIJSON
 
-* ...  //欢迎补充
+<h4 /> ...  //欢迎补充
 
 
