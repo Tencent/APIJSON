@@ -21,7 +21,7 @@ http://apijson.org:8000/auto/ <br />
 
 #### 新增支持 @column!
 
-这个只在 APIJSONFramework 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
+这个只在 [APIJSONFramework](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONFramework) 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
 可新增一个 VersionedColumn 表记录来代替 HashMap 代码配置。<br />
 需要注意的是，可能前端传参里既有 @column 又有 @column! ，碰到这种情况：<br />
 如果没有重合字段就忽略 @column! ，只让 @column 生效；<br />
@@ -30,7 +30,7 @@ http://apijson.org:8000/auto/ <br />
 #### 新增支持 TSQL 的 @explain
 
 目前 APIJSON 支持 [Oracle](https://github.com/APIJSON/APIJSON/tree/master/Oracle) 和 [SQL Server](https://github.com/APIJSON/APIJSON/tree/master/SQLServer) 这两种 TSQL 数据库（群友测试 IBM DB2 也行）。<br />
-但是 "@explain": true 使用的是 SET STATISTICS PROFILE ON(具体见 AbstrctSQLConfig 和 AbstrctSQLExecutor)  <br />
+但是 "@explain": true 使用的是 SET STATISTICS PROFILE ON(具体见 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 和 [AbstrctSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstrctSQLExecutor.java))  <br />
 执行后居然是 SELECT 查到的放在默认的 ResultSet，性能分析放在 moreResult，<br />
 因为这个问题目前以上两个数据库的性能分析 @explain 实际并不可用，需要改用其它方式或解决现有方式的 bug。<br />
 
@@ -155,7 +155,7 @@ APIJSONFramework 则使用 [Access 表](https://github.com/APIJSON/APIJSON/blob/
 
 目前有 预编译 + 白名单 校验机制。具体见 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java)  和 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 。
 
-#### 防恶意复杂请求
+#### 防恶意请求
 
 目前有限流机制，getMaxQueryCount, getMaxUpdateCount, getMaxObjectCount, getMaxSQLCount, getMaxQueryDepth 等。 <br />
 https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/Parser.java
@@ -246,16 +246,16 @@ https://github.com/APIJSON/APIJSON
 
 #### 新增扩展
 
-##### 1.基于或整合 APIJSONORM 或 APIJSONFramework 来实现的库/框架
+##### 1.基于或整合 [APIJSONORM](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM) 或 [APIJSONFramework](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONFramework) 来实现的库/框架
 
-##### 2.扩展 APIJSONORM 或 APIJSONFramework 功能的插件
+##### 2.扩展 [APIJSONORM](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM) 或 [APIJSONFramework](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONFramework) 功能的插件
 可以通过扩展对象关键词 @key，数组关键词 key，远程函数，重写部分方法等来实现。<br />
 
 ##### 3.前端/客户端 封装/解析 APIJSON 的库/框架
 因为 APIJSON 基于 JSON，大部分情况下都可以直接用 fastjson 等 JSON 封装/解析库或其它工具等，<br />
 只是 APIJSON 有部分功能需要在 key 里放 [], @ 等特殊符号，返回 [] 在某些情况下不方便解析，<br />
 目前可使用 "format": true 让后端格式化后返回，但也会对服务器性能有一些损耗，<br />
-如果 前端/客户端 有对应的格式化工具等（例如 APIJSONORM 可供 Android 使用 format），选择就会更多一些。<br />
+如果 前端/客户端 有对应的格式化工具等（例如 [apijson-orm](https://github.com/APIJSON/apijson-orm) 可供 Android 使用 format），选择就会更多一些。<br />
 
 ##### ...  //欢迎补充
 
