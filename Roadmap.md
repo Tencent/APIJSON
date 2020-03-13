@@ -37,7 +37,7 @@ http://apijson.org:8000/auto/ <br />
 #### 新增支持 page 从 1 开始
 目前只能从 0 开始，实际使用 1 更广泛，而且这方面用户习惯很强，支持它成本也不高。 <br />
 [Parser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/Parser.java) 新增 DEFAULT_QUERY_PAGE 和 getDefaultQueryPage， <br />
-与 DEFAULT_QUERY_COUNT 和 getDefaultQueryPage 统一， <br />
+与 DEFAULT_QUERY_COUNT 和 getDefaultQueryCount 统一， <br />
 方便前端直接用页码的值传参，以及 info.page 的值来渲染页码。 <br />
 建议在 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java)，[AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 用到 page 的地方判断 getDefaultQueryPage，做兼容处理。 <br />
 
@@ -148,7 +148,6 @@ SELECT * FROM `sys`.`Comment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DES
 ### 保障安全
 APIJSON 提供了各种安全机制，可在目前的基础上新增或改进。
 
-
 #### 防越权操作
 
 目前有 RBAC 自动化权限管理。<br />
@@ -159,12 +158,12 @@ APIJSONFramework 则使用 [Access 表](https://github.com/APIJSON/APIJSON/blob/
 
 #### 防 SQL 注入
 
-目前有 预编译 + 白名单 校验机制。具体见 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java)  和 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 。
+目前有 预编译 + 白名单 校验机制。具体见 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java)  和 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 。 <br />
 
 #### 防恶意请求
 
 目前有限流机制，getMaxQueryCount, getMaxUpdateCount, getMaxObjectCount, getMaxSQLCount, getMaxQueryDepth 等。 <br />
-https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/Parser.java
+https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/Parser.java <br />
 
 #### ...  //欢迎补充
 
@@ -173,11 +172,11 @@ https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/sr
 
 #### 解析 JSON
 
-优化 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 和 [AbstractObjectParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractObjectParser.java) 解析 JSON 性能。
+优化 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 和 [AbstractObjectParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractObjectParser.java) 解析 JSON 性能。 <br />
 
 #### 封装 JSON
 
-优化 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 封装 JSON 性能。
+优化 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 封装 JSON 性能。 <br />
 
 #### 拼接 SQL
 
@@ -202,28 +201,28 @@ https://github.com/APIJSON/APIJSON/issues/48 <br />
 
 ##### [APIAuto](https://github.com/TommyLemon/APIAuto) 上统计的 bug
 账号 13000002000 密码 123456 <br />
-http://apijson.org:8000/auto/
+http://apijson.org:8000/auto/ <br />
 
 ##### 其它发现的 Bug
-https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug
+https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug <br />
 
 #### 完善测试
 
 ##### 在 APIAuto-机器学习自动化接口管理平台 上传更多、更全面、更细致的测试用例、动态参数等
-http://apijson.org:8000/auto/
+http://apijson.org:8000/auto/ <br />
 
 ##### 接入 UnitAuto-机器学习自动化单元测试平台，每次启动都自动测试所有可测方法并输出报告
-https://gitee.com/TommyLemon/UnitAuto
+https://gitee.com/TommyLemon/UnitAuto <br />
 
 
 ### 完善文档
 #### 中文文档
 
 ##### 通用文档
-https://github.com/APIJSON/APIJSON/blob/master/Document.md
+https://github.com/APIJSON/APIJSON/blob/master/Document.md <br />
 
 ##### 配置与部署
-https://github.com/APIJSON/APIJSON/tree/master/APIJSON-Java-Server
+https://github.com/APIJSON/APIJSON/tree/master/APIJSON-Java-Server <br />
 
 ##### ...  //欢迎补充
 
@@ -248,7 +247,7 @@ https://github.com/APIJSON/APIJSON#%E7%94%9F%E6%80%81%E9%A1%B9%E7%9B%AE <br />
 JavaScript 前端，TypeScript 前端，微信等小程序，<br />
 Android 客户端，iOS 客户端，C# 游戏客户端等。<br />
 Java, C#, Node, Python 等后端 Demo 及数据。<br />
-https://github.com/APIJSON/APIJSON
+https://github.com/APIJSON/APIJSON <br />
 
 #### 新增扩展
 
