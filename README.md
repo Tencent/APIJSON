@@ -53,6 +53,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
   <a ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSONisOneOfTheGVPsIn2019-small.jpg"></a>
 </p>
 
+
 ### 特点功能
 
 #### 在线解析
@@ -112,8 +113,10 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 <br />
 
+
 ### 为什么要用APIJSON？
 [前后端 关于接口的 开发、文档、联调 等 10 大痛点解析](https://github.com/TommyLemon/APIJSON/wiki)
+
 
 ### 常见问题
 #### 1.如何定制业务逻辑？
@@ -132,6 +135,7 @@ https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 其它问题见 Closed Issues <br />
 https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
+
 ### 快速上手
 
 #### 1.后端部署
@@ -142,6 +146,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 可以跳过这个步骤，直接使用 [APIAuto-自动化接口管理工具](https://github.com/TommyLemon/APIAuto) 或 下载客户端App。<br />
 见&nbsp; [Android](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-Android) &nbsp;或&nbsp; [iOS](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-iOS) &nbsp;或&nbsp; [JavaScript](https://github.com/TommyLemon/APIJSON/tree/master/APIJSON-JavaScript)<br />
 
+
 ### 下载客户端App
 
 仿微信朋友圈动态实战项目<br />
@@ -149,6 +154,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 测试及自动生成代码工具<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
+
 
 ### 使用登记
 <div style="float:left">
@@ -165,6 +171,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 <br />
 
 [更多 APIJSON 使用者](https://github.com/TommyLemon/APIJSON/issues/73)
+
 
 ### 贡献者们
 <div style="float:left">
@@ -200,6 +207,11 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 <br />
 感谢大家的贡献。
 
+
+### 规划及路线图
+https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
+
+
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
 你也还可以扫描下面的二维码，赞助点服务器和域名的购买及维护费用，或者请作者喝一杯咖啡~
@@ -211,8 +223,8 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 如果在捐赠留言中备注名称，将会被记录到列表中~ 如果你也是 Github 开源作者，<br />
 捐赠时可以留下 Github 项目地址或者个人主页地址，链接将会被添加到列表中起到互相推广的作用。
 
-### 技术交流
 
+### 技术交流
 如果有什么问题或建议可以 [提ISSUE](https://github.com/TommyLemon/APIJSON/issues) 或 加群，交流技术，分享经验。<br >
 如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/TommyLemon/APIJSON/pulls)，感激不尽~
 
@@ -283,6 +295,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
+
 
 ### 持续更新
 [https://github.com/TommyLemon/APIJSON/commits/master](https://github.com/TommyLemon/APIJSON/commits/master)
