@@ -5,9 +5,9 @@
 
 
 ### 完善功能
-部分功能描述可在 [APIAuto](https://github.com/TommyLemon/APIAuto) 上查看
-账号 13000002020 密码 123456
-http://apijson.org:8000/auto/
+部分功能描述可在 [APIAuto](https://github.com/TommyLemon/APIAuto) 上查看 <br />
+账号 13000002020 密码 123456 <br />
+http://apijson.org:8000/auto/ <br />
 
 #### 新增支持 Case
 
@@ -58,7 +58,7 @@ http://apijson.org:8000/auto/
 #### 新增支持 Union
 
 虽然可以通过 INNER JOIN + 条件 OR 连接来替代它的功能，但没法达到它能用索引的性能。<br />
-支持 UNION 很有必要，但 UNION ALL 几乎没有需求，如果实现简单、且不影响原来的功能，则可以顺便加上。
+支持 UNION 很有必要，但 UNION ALL 几乎没有需求，如果实现简单、且不影响原来的功能，则可以顺便加上。 <br />
 
 "@union": Integer  // 0 - 不使用，1 - UNION，2 - UNION ALL
 ```js
@@ -135,10 +135,12 @@ WITH (SELECT `id` FROM `sys`.`User` WHERE `id` IN($contactIdList)) AS `sql`
 SELECT * FROM `sys`.`Comment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DESC LIMIT 10 OFFSET 0
 ```
 
+#### ...  //欢迎补充
+
 
 
 ### 保障安全
-APIJSON 提供了各种安全机制，可在目前的新增或改进。
+APIJSON 提供了各种安全机制，可在目前的基础上新增或改进。
 
 
 #### 防越权操作
@@ -158,6 +160,8 @@ APIJSONFramework 则使用 [Access 表](https://github.com/APIJSON/APIJSON/blob/
 目前有限流机制，getMaxQueryCount, getMaxUpdateCount, getMaxObjectCount, getMaxSQLCount, getMaxQueryDepth 等。 <br />
 https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/Parser.java
 
+#### ...  //欢迎补充
+
 
 ### 优化性能
 
@@ -171,12 +175,12 @@ https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/sr
 
 #### 拼接 SQL
 
-优化 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 拼接 SQL 性能。<br />
-[完善功能](https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md#%E5%AE%8C%E5%96%84%E5%8A%9F%E8%83%BD) 中 Union 和 With 也是优化 SQL 性能的方式。
+优化 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 拼接 SQL 性能。<br />
+[完善功能](https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md#%E5%AE%8C%E5%96%84%E5%8A%9F%E8%83%BD) 中 Union 和 With 也是优化 SQL 性能的方式。 <br />
 
 #### 读写缓存
 
-在 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 使用了 HashMap<String, JSONObject> queryResultMap 存已解析的对象、总数等数据。<br />
+在 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 使用了 HashMap<String, JSONObject> queryResultMap 存已解析的对象、总数等数据。<br />
 在 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 使用了 HashMap<String, JSONObject> cacheMap 存已通过 SQL 查出的结果集。<br />
 
 #### ...  //欢迎补充
@@ -186,33 +190,33 @@ https://github.com/APIJSON/APIJSON/blob/master/APIJSON-Java-Server/APIJSONORM/sr
 ### 增强稳定
 APIJSON 代码经过商业分析软件 [源伞Pinpoint](https://www.sourcebrella.com/) 的质检，报告说明 APIJSON 非常可靠。<br />
 https://github.com/APIJSON/APIJSON/issues/48 <br />
-但我们需要再接再厉，尽可能做到 99.999% 可靠度，降低使用风险，让用户放心和安心。
+但我们需要再接再厉，尽可能做到 99.999% 可靠度，降低使用风险，让用户放心和安心。 <br />
 
 #### 减少 Bug
 
-##### 1.[APIAuto](https://github.com/TommyLemon/APIAuto) 上统计的 bug
+##### [APIAuto](https://github.com/TommyLemon/APIAuto) 上统计的 bug
 账号 13000002000 密码 123456
 http://apijson.org:8000/auto/
 
-##### 2.其它发现的 Bug
+##### 其它发现的 Bug
 https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug
 
 #### 完善测试
 
-1.在 [APIAuto](https://github.com/TommyLemon/APIAuto)-机器学习自动化接口管理平台 上传更多、更全面、更细致的测试用例、动态参数等
+##### 在 APIAuto-机器学习自动化接口管理平台 上传更多、更全面、更细致的测试用例、动态参数等
 http://apijson.org:8000/auto/
 
-2.接入 UnitAuto-机器学习自动化单元测试平台，每次启动都自动测试所有可测方法并输出报告
+##### 接入 UnitAuto-机器学习自动化单元测试平台，每次启动都自动测试所有可测方法并输出报告
 https://gitee.com/TommyLemon/UnitAuto
 
 
 ### 完善文档
 #### 中文文档
 
-##### 1.通用文档
+##### 通用文档
 https://github.com/APIJSON/APIJSON/blob/master/Document.md
 
-##### 2.配置与部署
+##### 配置与部署
 https://github.com/APIJSON/APIJSON/tree/master/APIJSON-Java-Server
 
 ##### ...  //欢迎补充
@@ -220,10 +224,10 @@ https://github.com/APIJSON/APIJSON/tree/master/APIJSON-Java-Server
 
 #### English Document
 
-Translation for Chinese document.
-https://github.com/APIJSON/APIJSON/blob/master/README-English.md
-https://github.com/APIJSON/APIJSON/blob/master/Document-English.md
-https://github.com/ruoranw/APIJSONdocs
+Translation for Chinese document. <br />
+https://github.com/APIJSON/APIJSON/blob/master/README-English.md <br />
+https://github.com/APIJSON/APIJSON/blob/master/Document-English.md <br />
+https://github.com/ruoranw/APIJSONdocs <br />
 
 
 
@@ -253,7 +257,7 @@ https://github.com/APIJSON/APIJSON
 目前可使用 "format": true 让后端格式化后返回，但也会对服务器性能有一些损耗，<br />
 如果 前端/客户端 有对应的格式化工具等（例如 APIJSONORM 可供 Android 使用 format），选择就会更多一些。<br />
 
-
+##### ...  //欢迎补充
 
 ### 推广使用
 #### 为 APIJSON 编写/发表 博客/文章/资讯 等
