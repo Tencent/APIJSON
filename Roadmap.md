@@ -9,10 +9,14 @@
 账号 13000002020 密码 123456 <br />
 http://apijson.org:8000/auto/ <br />
 
-#### 新增支持 Case
-
-实现远程函数也不方便的 SQL 内字段转换 CASE WHEN THEN ，<br />
-暂时还没有想好如何设计。如果是 SQL 原来的写法，则有点繁琐。<br />
+#### 新增支持假删除
+一般对于互联网项目，数据非常重要，基本不会物理删除，只是用 is_deleted 等字段来标记已删除，然后 CRUD 时默认过滤已标记的记录。 <br />
+这个功能非常必要，可以通过重写 SQLConfig.isFakeDelete() 来标记，然后如果 true，则把 DELETE 改为 PUT 并且通过重写 <br />
+SQLConfig.putFakeDelete(Map<String, Object> map) 来新增条件： <br />
+GET: map.put("deleted", 0) <br />
+PUT:  map.put("deleted", 0) <br />
+DELETE:  map.put("deleted", 1) <br />
+当然也可以再加一个删除时间 deletedTime 之类的。(POST 用不上)
 
 #### 新增支持 @having& 
 
@@ -140,6 +144,13 @@ SELECT * FROM `sys`.`Moment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DESC
 WITH (SELECT `id` FROM `sys`.`User` WHERE `id` IN($contactIdList)) AS `sql`
 SELECT * FROM `sys`.`Comment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DESC LIMIT 10 OFFSET 0
 ```
+
+
+#### 新增支持 Case
+【更新：不用实现了，直接按 SQL 的语法写 CASE WHEN，然后用 @raw】
+实现远程函数也不方便的 SQL 内字段转换 CASE WHEN THEN ，<br />
+暂时还没有想好如何设计。如果是 SQL 原来的写法，则有点繁琐。<br />
+
 
 #### ...  //欢迎补充
 
