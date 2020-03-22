@@ -14,7 +14,7 @@ http://apijson.org:8000/auto/ <br />
 只是用 is_deleted 等字段来标记已删除，然后 CRUD 时默认过滤已标记的记录。 <br />
 这个功能非常必要，可以通过重写 SQLConfig.isFakeDelete() 来标记， <br />
 然后如果 true，则把 DELETE 改为 PUT 并且通过重写 <br />
-SQLConfig.putFakeDelete(Map<String, Object> map) 来新增条件： <br />
+SQLConfig.onFakeDelete(Map<String, Object> map) 来新增条件： <br />
 GET: map.put("deleted", 0) <br />
 PUT:  map.put("deleted", 0) <br />
 DELETE:  map.put("deleted", 1) <br />
