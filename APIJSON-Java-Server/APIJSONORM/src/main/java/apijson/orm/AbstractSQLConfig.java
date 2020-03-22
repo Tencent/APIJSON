@@ -2041,7 +2041,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String quote = getQuote();
 
 			boolean isFirst = true;
-			int keyType = 0;// 0 - =; 1 - +, 2 - -
+			int keyType;// 0 - =; 1 - +, 2 - -
 			Object value;
 
 			String idKey = getIdKey();
@@ -2055,6 +2055,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					keyType = 1;
 				} else if (key.endsWith("-")) {
 					keyType = 2;
+				} else {
+					keyType = 0; //注意重置类型，不然不该加减的字段会跟着加减
 				}
 				value = content.get(key);
 				key = getRealKey(method, key, false, true, verifyName, quote);
