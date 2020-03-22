@@ -26,6 +26,7 @@ import static apijson.JSONObject.KEY_ID;
 import static apijson.JSONObject.KEY_JSON;
 import static apijson.JSONObject.KEY_ORDER;
 import static apijson.JSONObject.KEY_ROLE;
+import static apijson.JSONObject.KEY_RAW;
 import static apijson.JSONObject.KEY_SCHEMA;
 import static apijson.JSONObject.KEY_USER_ID;
 import static apijson.RequestMethod.DELETE;
@@ -1446,10 +1447,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			, RequestMethod method, boolean verifyName) throws Exception {
 		Log.d(TAG, "getWhereItem  key = " + key);
 		//避免筛选到全部	value = key == null ? null : where.get(key);
-		if(key.equals("@raw")){
-			Log.d(TAG, "getWhereItem  key startsWith @ = @raw ");
-			// 自定义where条件拼接，直接通过，放行
-		}else if (key == null || value == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
+		if (key == null || value == null || key.endsWith("()")
+				|| (key.startsWith("@") && KEY_RAW.equals(key) == false)) { //关键字||方法, +或-直接报错
 			Log.d(TAG, "getWhereItem  key == null || value == null"
 					+ " || key.startsWith(@) || key.endsWith(()) >> continue;");
 			return null;
