@@ -86,6 +86,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	public static final Map<String, String> TABLE_KEY_MAP;
 	public static final List<String> DATABASE_LIST;
+	// 自定义where条件拼接
+	public static final Map<String, String> RAW_MAP;
 	static {
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
@@ -101,6 +103,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_POSTGRESQL);
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
+
+		RAW_MAP = new HashMap<>();
 	}
 
 	@Override
@@ -1442,7 +1446,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			, RequestMethod method, boolean verifyName) throws Exception {
 		Log.d(TAG, "getWhereItem  key = " + key);
 		//避免筛选到全部	value = key == null ? null : where.get(key);
-		if (key == null || value == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
+		if(key.equals("@raw")){
+			Log.d(TAG, "getWhereItem  key startsWith @ = @raw ");
+			// 自定义where条件拼接，直接通过，放行
+		}else if (key == null || value == null || key.startsWith("@") || key.endsWith("()")) {//关键字||方法, +或-直接报错
 			Log.d(TAG, "getWhereItem  key == null || value == null"
 					+ " || key.startsWith(@) || key.endsWith(()) >> continue;");
 			return null;
@@ -1483,7 +1490,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		else if (key.endsWith("<")) {
 			keyType = 10;
 		}
-		else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
+		else if (key.startsWith("@")) {
+			keyType = 11;
+		} else { //else绝对不能省，避免再次踩坑！ keyType = 0; 写在for循环外面都没注意！
 			keyType = 0;
 		}
 		key = getRealKey(method, key, false, true, verifyName, getQuote());
@@ -1510,11 +1519,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getCompareString(key, value, ">");
 		case 10:
 			return getCompareString(key, value, "<");
+		case 11:
+			return getRaw(key,value);
 		default: //TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
 			return getEqualString(key, value);
 		}
 	}
 
+	@JSONField(serialize = false)
+	public String getRaw(String key, Object value) throws Exception {
+		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
+			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
+		}
+
+		String[] rawList = ((String)value).split(",");
+		String whereItem = "";
+		for (int i = 0; i < rawList.length; i++) {
+			if(rawList.length>1&& i!=0){
+				whereItem += " and " + RAW_MAP.get(rawList[i]);
+			}else{
+				whereItem += RAW_MAP.get(rawList[i]);
+			}
+		}
+
+		return whereItem;
+	}
 
 	@JSONField(serialize = false)
 	public String getEqualString(String key, Object value) throws Exception {
@@ -2041,7 +2070,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String quote = getQuote();
 
 			boolean isFirst = true;
-			int keyType = 0;// 0 - =; 1 - +, 2 - -
+			int keyType;// 0 - =; 1 - +, 2 - -
 			Object value;
 
 			String idKey = getIdKey();
@@ -2055,6 +2084,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					keyType = 1;
 				} else if (key.endsWith("-")) {
 					keyType = 2;
+				} else {
+					keyType = 0; //注意重置类型，不然不该加减的字段会跟着加减
 				}
 				value = content.get(key);
 				key = getRealKey(method, key, false, true, verifyName, quote);
