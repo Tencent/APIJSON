@@ -18,8 +18,11 @@ SQLConfig.onFakeDelete(Map<String, Object> map) 来新增条件： <br />
 GET: map.put("deleted", 0) <br />
 PUT:  map.put("deleted", 0) <br />
 DELETE:  map.put("deleted", 1) <br />
-当然也可以再加一个删除时间 deletedTime 之类的。(POST 用不上)
-
+当然也可以再加一个删除时间 deletedTime 之类的。(POST 用不上) <br />
+ <br />
+还可以在 apijson-framework 层支持 Access 表新增字段 deleteKey, deletedValue, notDeletedValue， <br />
+然后读表自动配置是否为假删除 StringUtil.isNotEmpty(deleteKey, true) ，是假删除时 put 相应键值对。 <br />
+ 
 #### 新增支持 @having& 
 
 来实现内部条件 AND 连接，原来的 @having 由 AND 连接变为 OR 连接，保持 横或纵与 的统一规则。<br />
