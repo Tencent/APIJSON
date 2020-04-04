@@ -257,6 +257,8 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 
 [APIJSON在mac电脑环境下配置去连接SQL Server](https://juejin.im/post/5e16d21ef265da3e2e4f4956)
 
+[APIJSON深入实践（持续更新中）](https://blog.csdn.net/aa330233789/article/details/105309571)
+
 
 ### 生态项目
 [APIAuto](https://github.com/TommyLemon/APIAuto) 机器学习测试、自动生成代码、自动静态检查、自动生成文档与注释等，做最先进的接口管理工具
