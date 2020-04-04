@@ -178,11 +178,11 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
  height="68" width="68" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/APIJSON/APIJSON/pull/119"><img src="https://avatars1.githubusercontent.com/u/25604004?s=460&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/70"><img src="https://avatars1.githubusercontent.com/u/22228201?s=400&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/74"><img src="https://avatars0.githubusercontent.com/u/1274536?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/119"><img src="https://avatars1.githubusercontent.com/u/25604004?s=460&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/APIJSON/APIJSON/pull/92"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/APIJSON/APIJSON/pull/103"><img src="https://avatars0.githubusercontent.com/u/25990237?s=400&v=4"  height="68" width="68" ></a>
   <a href="https://github.com/TommyLemon/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="68" width="68" ></a>
