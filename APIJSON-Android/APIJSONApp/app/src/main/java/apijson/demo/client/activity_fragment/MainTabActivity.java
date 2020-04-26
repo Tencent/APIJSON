@@ -40,7 +40,6 @@ import zuo.biao.library.interfaces.OnBottomDragListener;
 import zuo.biao.library.manager.HttpManager.OnHttpResponseListener;
 import zuo.biao.library.ui.EditTextInfoWindow;
 import zuo.biao.library.util.Log;
-import zuo.biao.library.util.SettingUtil;
 import zuo.biao.library.util.StringUtil;
 
 /**应用主页
@@ -86,14 +85,26 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 				, new String[]{ACTION_EXIT_APP, ActionUtil.ACTION_RELOAD_CURRENT_USER});
 
 
-		if (SettingUtil.isOnTestMode) {
+//		if (SettingUtil.isOnTestMode) {
 			showShortToast("测试服务器\n" + HttpRequest.URL_BASE);
 
 			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseJava.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
 				@Override
 				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
 					TestRequestAndResponseJava.response(resultJson);
+					if (e != null) {
+						e.printStackTrace();
+					}
+				}
+			});
+
+			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseJava.smartRequest()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+				@Override
+				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
 					TestRequestAndResponseJava.smartResponse(resultJson);
+					if (e != null) {
+						e.printStackTrace();
+					}
 				}
 			});
 
@@ -102,10 +113,22 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 				@Override
 				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
 					TestRequestAndResponseKt.response(resultJson);
-					TestRequestAndResponseKt.smartResponse(resultJson);
+					if (e != null) {
+						e.printStackTrace();
+					}
 				}
 			});
-		}
+
+			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.smartRequest()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+				@Override
+				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+					TestRequestAndResponseKt.smartResponse(resultJson);
+					if (e != null) {
+						e.printStackTrace();
+					}
+				}
+			});
+//		}
 
 	}
 
