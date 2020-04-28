@@ -101,7 +101,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_summary.jpg) 
 <p align="center" >
-  <a >一图胜前言 - 部分基础功能概览</a>
+  <a >一图胜千言 - 部分基础功能概览</a>
 </p>
 
 <br /><br />
