@@ -34,7 +34,7 @@ public enum Operation {
 	
 	/**TODO 是否应该把数组类型写成 BOOLEANS, NUMBERS 等复数单词，以便抽取 enum ？扩展用 VERIFY 或 INSERT/UPDATE 远程函数等
 	 * 验证是否符合预设的类型:
-	 * BOOLEAN, NUMBER, DECIMAL, STRING, URL, DATE, TIME, DATETIME, OBJECT, ARRAY ] 
+	 * BOOLEAN, NUMBER, DECIMAL, STRING, URL, DATE, TIME, DATETIME, OBJECT, ARRAY 
 	 * 或它们的数组
 	 * BOOLEAN[], NUMBER[], DECIMAL[], STRING[], URL[], DATE[], TIME[], DATETIME[], OBJECT[], ARRAY[]
 	 * 结构是
