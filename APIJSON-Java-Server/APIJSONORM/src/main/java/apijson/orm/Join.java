@@ -28,7 +28,7 @@ public class Join {
 	private String originKey;
 	private String originValue;
 
-	private String joinType; // "@" - APP, "&" - INNER, "|" - FULL, "!" - OUTTER, "<" - LEFT, ">" - RIGHT, "^" - SIDE, "*" - CROSS
+	private String joinType; // "@" - APP, "<" - LEFT, ">" - RIGHT, "&" - INNER, "|" - FULL, "!" - OUTTER, "(" - ANTI, ")" - FOREIGN, "^" - SIDE, "*" - CROSS
 	private String relateType; // "" - 一对一, "{}" - 一对多, "<>" - 多对一
 	private JSONObject request; // { "id@":"/Moment/userId" }
 	private String table; //User

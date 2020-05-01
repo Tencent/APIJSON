@@ -1350,7 +1350,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (joinList != null) {
 
 			String newWs = "";
-			String ws = "" + whereString;
+			String ws = whereString;
 
 			List<Object> newPvl = new ArrayList<>();
 			List<Object> pvl = new ArrayList<>(preparedValueList);
@@ -1371,6 +1371,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "|": // FULL JOIN  不支持 <>, [] ，避免太多符号
 				case "&": // INNER JOIN 
 				case "!": // OUTTER JOIN
+				case "(": // ANTI JOIN
+				case ")": // FOREIGN JOIN
 				case "^": // SIDE JOIN
 				case "*": // CROSS JOIN
 					jc = j.getJoinConfig();
@@ -1379,7 +1381,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					js = jc.getWhereString(false);
 					jc.setMain(isMain);
 
+					boolean isWsEmpty = StringUtil.isEmpty(ws, true);
+
 					if (StringUtil.isEmpty(js, true)) {
+						if (")".equals(j.getJoinType())) { // FOREIGN JOIN: B & ! A
+							if (isWsEmpty) {
+								throw new NotExistException("no result for ) FOREIGN JOIN(A & ! B) while both A and B are empty!");
+							}
+							
+							newWs += " ( " + getCondition(true, ws) + " ) ";
+							newPvl.addAll(pvl);
+							changed = true;
+						}
 						continue;
 					}
 
@@ -1388,27 +1401,42 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					//MySQL 因为 NULL 值处理问题，(A & ! B) | (B & ! A) 与 ! (A & B) 返回结果不一样，后者往往更多
-					if ("^".equals(j.getJoinType())) { // (A & ! B) | (B & ! A)
-						newWs += " (   ( " + ws + ( StringUtil.isEmpty(ws, true) ? "" : AND + NOT ) + " ( " + js + " ) ) "
-								+ OR
-								+ " ( " + js + AND + NOT + " ( " + ws + " )  )   ) ";
+					if ("^".equals(j.getJoinType())) { //SIDE JOIN:  (A & ! B) | (B & ! A)
+						if (isWsEmpty) {
+							newWs += js;
+							
+							newPvl.addAll(pvl);
+							newPvl.addAll(jc.getPreparedValueList());
+						}
+						else {
+							newWs += " (   ( " + ws + AND + NOT + " ( " + js + " ) ) "
+									+ OR
+									+ " ( " + js + AND + NOT + " ( " + ws + " )  )   ) ";
 
-						newPvl.addAll(pvl);
-						newPvl.addAll(jc.getPreparedValueList());
-						newPvl.addAll(jc.getPreparedValueList());
-						newPvl.addAll(pvl);
+							newPvl.addAll(pvl);
+							newPvl.addAll(jc.getPreparedValueList());
+							newPvl.addAll(jc.getPreparedValueList());
+							newPvl.addAll(pvl);
+						}
 					}
 					else {
-						logic = Logic.getType(j.getJoinType());
-
-						newWs += " ( "
-								+ getCondition(
-										Logic.isNot(logic), 
-										ws
-										+ ( StringUtil.isEmpty(ws, true) ? "" : (Logic.isAnd(logic) ? AND : OR) )
-										+ " ( " + js + " ) "
-										)
-								+ " ) ";
+						if ("(".equals(j.getJoinType())) { // ANTI JOIN: A & ! B  
+							newWs += " ( " + ( isWsEmpty ? "" : ws + AND ) + NOT + " ( " + js + " ) " + " ) ";
+						}
+						else if (")".equals(j.getJoinType())) { // FOREIGN JOIN: B & ! A
+							newWs += " ( " + " ( " + js + " ) " + ( isWsEmpty ? "" : AND + NOT + ws ) + " ) ";
+						}
+						else {  // & INNER JOIN: A & B; | FULL JOIN: A | B; OUTER JOIN: ! (A & B)
+							logic = Logic.getType(j.getJoinType());
+							newWs += " ( "
+									+ getCondition(
+											Logic.isNot(logic), 
+											ws
+											+ ( isWsEmpty ? "" : (Logic.isAnd(logic) ? AND : OR) )
+											+ " ( " + js + " ) "
+											)
+									+ " ) ";
+						}
 
 						newPvl.addAll(pvl);
 						newPvl.addAll(jc.getPreparedValueList());
@@ -1417,7 +1445,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					changed = true;
 					break;
 				default:
-					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
+					throw new UnsupportedOperationException(
+							"join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath()
+							+ "错误！不支持 " + j.getJoinType() + " 等 [ @ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER"
+							+ ", ( ANTI, ) FOREIGN, ^ SIDE, * CROSS ] 之外的JOIN类型 !"
+					);
 				}
 			}
 
@@ -1427,7 +1459,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-		String s = whereString.isEmpty() ? "" : (hasPrefix ? " WHERE " : "") + whereString;
+		String s = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
 
 		if (s.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
 			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
@@ -2313,13 +2345,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "&": // INNER JOIN 
 				case "!": // OUTTER JOIN
 				case "^": // SIDE JOIN
+				case "(": // ANTI JOIN
+				case ")": // FOREIGN JOIN
 					//场景少且性能差，默认禁用	case "*": // CROSS JOIN
 					sql = ("*".equals(j.getJoinType()) ? " CROSS JOIN " : " INNER JOIN ") + jc.getTablePath()
 					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tn + quote + "." + quote + j.getTargetKey() + quote;
 					break;
 				default:
-					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
-				}
+					throw new UnsupportedOperationException(
+							"join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath()
+							+ "错误！不支持 " + j.getJoinType() + " 等 [ @ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER"
+							+ ", ( ANTI, ) FOREIGN, ^ SIDE, * CROSS ] 之外的JOIN类型 !"
+					);				}
 
 				joinOns += "  \n  " + sql;
 			}
