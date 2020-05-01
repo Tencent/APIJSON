@@ -1387,6 +1387,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						newWs += AND;
 					}
 
+					//MySQL 因为 NULL 值处理问题，(A & ! B) | (B & ! A) 与 ! (A & B) 返回结果不一样，后者往往更多
 					if ("^".equals(j.getJoinType())) { // (A & ! B) | (B & ! A)
 						newWs += " (   ( " + ws + ( StringUtil.isEmpty(ws, true) ? "" : AND + NOT ) + " ( " + js + " ) ) "
 								+ OR
