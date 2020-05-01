@@ -1387,31 +1387,36 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						newWs += AND;
 					}
 
-					if ("^".equals(j.getJoinType())) { // ! (A & B)
-						newWs += " ( " + getCondition(
-								true, 
-								( StringUtil.isEmpty(ws, true) ? "" : ws + AND ) + " ( " + js + " ) "
-						) + " ) ";
+					if ("^".equals(j.getJoinType())) { // (A & ! B) | (B & ! A)
+						newWs += " (   ( " + ws + ( StringUtil.isEmpty(ws, true) ? "" : AND + NOT ) + " ( " + js + " ) ) "
+								+ OR
+								+ " ( " + js + AND + NOT + " ( " + ws + " )  )   ) ";
+
+						newPvl.addAll(pvl);
+						newPvl.addAll(jc.getPreparedValueList());
+						newPvl.addAll(jc.getPreparedValueList());
+						newPvl.addAll(pvl);
 					}
 					else {
 						logic = Logic.getType(j.getJoinType());
 
-						newWs += " ( " + getCondition(
-								Logic.isNot(logic), 
-								( StringUtil.isEmpty(ws, true) ? "" : ws + (Logic.isAnd(logic) ? AND : OR) ) + " ( " + js + " ) "
-						) + " ) ";
+						newWs += " ( "
+								+ getCondition(
+										Logic.isNot(logic), 
+										ws
+										+ ( StringUtil.isEmpty(ws, true) ? "" : (Logic.isAnd(logic) ? AND : OR) )
+										+ " ( " + js + " ) "
+										)
+								+ " ) ";
+
+						newPvl.addAll(pvl);
+						newPvl.addAll(jc.getPreparedValueList());
 					}
-					
-					newPvl.addAll(pvl);
-					newPvl.addAll(jc.getPreparedValueList());
 
 					changed = true;
 					break;
 				default:
-					throw new UnsupportedOperationException(
-							"join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType()
-							+ " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !"
-					);
+					throw new UnsupportedOperationException("join:value 中 value 里的 " + j.getJoinType() + "/" + j.getPath() + "错误！不支持 " + j.getJoinType() + " 等 [@ APP, < LEFT, > RIGHT, | FULL, & INNER, ! OUTTER, ^ SIDE, * CROSS] 之外的JOIN类型 !");
 				}
 			}
 
