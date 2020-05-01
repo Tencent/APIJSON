@@ -17,10 +17,13 @@ package apijson.boot;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -45,7 +48,7 @@ import apijson.orm.Verifier;
  */
 @Configuration
 @SpringBootApplication
-public class DemoApplication {
+public class DemoApplication implements ApplicationContextAware {
 
 	static {
 		Map<String, Pattern> COMPILE_MAP = Structure.COMPILE_MAP;
@@ -88,6 +91,16 @@ public class DemoApplication {
 		Log.DEBUG = true; //上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
 		APIJSONApplication.init(true);
 	}
+	
+	
+	private static ApplicationContext APPLICATION_CONTEXT;
+	public static ApplicationContext getApplicationContext() {
+		return APPLICATION_CONTEXT;
+	}
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		APPLICATION_CONTEXT = applicationContext;		
+	}	
 
 	//SpringBoot 2.x 自定义端口方式
 	//	@Bean

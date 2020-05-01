@@ -34,7 +34,6 @@ import java.rmi.ServerException;
 
 import javax.servlet.http.HttpSession;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.Log;

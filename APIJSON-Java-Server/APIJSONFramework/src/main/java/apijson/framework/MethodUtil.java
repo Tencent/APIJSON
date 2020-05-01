@@ -136,7 +136,7 @@ public class MethodUtil {
 			if (req  == null) {
 				req = new JSONObject(true);
 			}
-			boolean sync = req.getBooleanValue("sync");
+			//			boolean sync = req.getBooleanValue("sync");
 			//			boolean returnList = req.getBooleanValue("return");
 			String pkgName = req.getString("package");
 			String clsName = req.getString("class");
