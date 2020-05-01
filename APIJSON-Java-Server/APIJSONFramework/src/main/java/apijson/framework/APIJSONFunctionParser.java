@@ -16,6 +16,7 @@ package apijson.framework;
 
 import static apijson.framework.APIJSONConstant.FUNCTION_;
 
+import java.io.IOException;
 import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.RequestRole;
 import apijson.StringUtil;
+import apijson.framework.MethodUtil.Argument;
 import apijson.orm.AbstractFunctionParser;
 import apijson.orm.JSONRequest;
 import apijson.orm.ParserCreator;
@@ -290,6 +292,149 @@ public class APIJSONFunctionParser extends AbstractFunctionParser {
 		return null;
 	}
 
+
+
+	/**获取方法参数的定义
+	 * @param request
+	 * @return
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 * @throws IllegalArgumentException 
+	 */
+	public String getMethodArguments(@NotNull JSONObject request) throws IllegalArgumentException, ClassNotFoundException, IOException {
+		return getMethodArguments(request, "methodArgs");
+	}
+	/**获取方法参数的定义
+	 * @param request
+	 * @param requestKey
+	 * @param methodArgs
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
+	public String getMethodArguments(@NotNull JSONObject request, String methodArgsKey) throws IllegalArgumentException, ClassNotFoundException, IOException {
+		String argsStr = request.getString(methodArgsKey);
+		if (StringUtil.isEmpty(argsStr, true)) {
+			JSONObject obj = request.getJSONObject("request");
+			argsStr = obj == null ? null : obj.getString(methodArgsKey);
+		}
+		List<Argument> methodArgs = JSON.parseArray(removeComment(argsStr), Argument.class);
+		if (methodArgs == null || methodArgs.isEmpty()) {
+			return "";
+		}
+
+		Class<?>[] types = new Class<?>[methodArgs.size()];
+		Object[] args = new Object[methodArgs.size()];
+		MethodUtil.initTypesAndValues(methodArgs, types, args, true);
+
+		String s = "";
+		if (types != null) {
+			String sn;
+			for (int i = 0; i < types.length; i++) {
+				sn = types[i] == null ? null : types[i].getSimpleName();
+				if (sn == null) {
+					sn = Object.class.getSimpleName();
+				}
+
+				if (i > 0) {
+					s += ",";
+				}
+
+				if (MethodUtil.CLASS_MAP.containsKey(sn)) {
+					s += sn;
+				}
+				else {
+					s += types[i].getName();
+				}
+			}
+		}
+		return s;
+	}
+
+
+	/**获取方法的定义
+	 * @param request
+	 * @return
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 * @throws IllegalArgumentException 
+	 */
+	public String getMethodDefination(@NotNull JSONObject request)
+			throws IllegalArgumentException, ClassNotFoundException, IOException {
+//		request.put("arguments", removeComment(request.getString("methodArgs")));
+		return getMethodDefination(request, "method", "arguments", "type", "exceptions", "Java");
+	}
+	/**获取方法的定义
+	 * @param request
+	 * @param method
+	 * @param arguments
+	 * @param type
+	 * @return method(argType0,argType1...): returnType
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 * @throws IllegalArgumentException 
+	 */
+	public String getMethodDefination(@NotNull JSONObject request, String method, String arguments, String type, String exceptions, String language)
+			throws IllegalArgumentException, ClassNotFoundException, IOException {
+		String n = request.getString(method);
+		if (StringUtil.isEmpty(n, true)) {
+			throw new NullPointerException("getMethodDefination  StringUtil.isEmpty(methodArgs, true) !");
+		}
+		String a = request.getString(arguments);
+		String t = request.getString(type);
+		String e = request.getString(exceptions);
+
+		if (language == null) {
+			language = "";
+		}
+		switch (language) {
+		case "TypeScript":
+			return n + "(" + (StringUtil.isEmpty(a, true) ? "" : a) + ")" + (StringUtil.isEmpty(t, true) ? "" : ": " + t) + (StringUtil.isEmpty(e, true) ? "" : " throws " + e);
+		case "Go":
+			return n + "(" + (StringUtil.isEmpty(a, true) ? "" : a ) + ")" + (StringUtil.isEmpty(t, true) ? "" : " " + t) + (StringUtil.isEmpty(e, true) ? "" : " throws " + e);
+		default:
+			//类型可能很长，Eclipse, Idea 代码提示都是类型放后面			return (StringUtil.isEmpty(t, true) ? "" : t + " ") + n + "(" + (StringUtil.isEmpty(a, true) ? "" : a) + ")";
+			return n + "(" + (StringUtil.isEmpty(a, true) ? "" : a) + ")" + (StringUtil.isEmpty(t, true) ? "" : ": " + t) + (StringUtil.isEmpty(e, true) ? "" : " throws " + e);
+		}
+	}
+
+	/**
+	 * methodArgs 和 classArgs 都可以带注释
+	 */
+	public String getMethodRequest(@NotNull JSONObject request) {
+		String req = request.getString("request");
+		if (StringUtil.isEmpty(req, true) == false) {
+			return req;
+		}
+		
+		req = "{";
+		Boolean isStatic = request.getBoolean("static");
+		String methodArgs = request.getString("methodArgs");
+		String classArgs = request.getString("classArgs");
+
+		boolean comma = false;
+		if (isStatic != null && isStatic) {
+			req += "\n    \"static\": " + true;
+			comma = true;
+		}
+		if (StringUtil.isEmpty(methodArgs, true) == false) {
+			req += (comma ? "," : "") + "\n    \"methodArgs\": " + methodArgs;
+			comma = true;
+		} 
+		if (StringUtil.isEmpty(classArgs, true) == false) {
+			req += (comma ? "," : "") + "\n    \"classArgs\": " + classArgs;
+		}
+		req += "\n}";
+		return req;
+	}
+
+	//	public static JSONObject removeComment(String json) {
+	//		return JSON.parseObject(removeComment(json));
+	//	}
+	public static String removeComment(String json) {
+		return json == null ? null: json.replaceAll("(//.*)|(/\\*[\\s\\S]*?\\*/)", "");
+	}
 
 
 
