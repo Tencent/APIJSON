@@ -618,9 +618,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String order = StringUtil.getTrimedString(getOrder());
-		if ("rand()".equals(order)) {
-			return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(order, joinOrder, ", ");
-		}
+		// SELECT * FROM sys.Moment ORDER BY userId ASC, rand();   前面的 userId ASC 和后面的 rand() 都有效
+		//		if ("rand()".equals(order)) {
+		//			return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(order, joinOrder, ", ");
+		//		}
 
 		if (getCount() > 0 && (isOracle() || isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY
 
@@ -653,38 +654,37 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 
-		if (order.contains("+")) { //replace 没有包含 的replacement 会崩溃
-			order = order.replaceAll("\\+", " ASC ");
-		}
-		if (order.contains("-")) {
-			order = order.replaceAll("-", " DESC ");
-		}
-
 		String[] keys = StringUtil.split(order);
 		if (keys == null || keys.length <= 0) {
 			return StringUtil.isEmpty(joinOrder, true) ? "" : (hasPrefix ? " ORDER BY " : "") + joinOrder;
 		}
 
-		String origin;
-		String sort;
-		int index;
 		for (int i = 0; i < keys.length; i++) {
-			index = keys[i].trim().endsWith(" ASC") ? keys[i].lastIndexOf(" ASC") : -1; //StringUtil.split返回数组中，子项不会有null
+			String item = keys[i];
+			if ("rand()".equals(item)) {
+				continue;
+			}
+
+			int index = item.endsWith("+") ? item.length() - 1 : -1; //StringUtil.split返回数组中，子项不会有null
+			String sort;
 			if (index < 0) {
-				index = keys[i].trim().endsWith(" DESC") ? keys[i].lastIndexOf(" DESC") : -1;
+				index = item.endsWith("-") ? item.length() - 1 : -1;
 				sort = index <= 0 ? "" : " DESC ";
-			} else {
+			}
+			else {
 				sort = " ASC ";
 			}
-			origin = index < 0 ? keys[i] : keys[i].substring(0, index);
+			
+			String origin = index < 0 ? item : item.substring(0, index);
 
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
 				if (StringUtil.isName(origin) == false) {
-					throw new IllegalArgumentException("预编译模式下 @order:value 中 value 只能是 rand() 或 里面用 , 分割的每一项"
-							+ " column+ / column- 中 column必须是1个单词！并且不要有多余的空格！");
+					throw new IllegalArgumentException("预编译模式下 @order:value 中 " + item + " 不合法! value 里面用 , 分割的"
+							+ "每一项必须是 随机函数 rand() 或 column+ / column- 且其中 column 必须是 1 个单词！并且不要有多余的空格！");
 				}
 			}
+			
 			keys[i] = getKey(origin) + sort;
 		}
 
