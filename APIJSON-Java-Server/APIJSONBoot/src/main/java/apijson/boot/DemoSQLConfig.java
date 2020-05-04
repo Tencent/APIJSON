@@ -94,6 +94,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isOracle()) {
 			return "18c"; //TODO 改成你自己的
 		}
+		if (isDb2()) {
+			return "11.5"; //TODO 改成你自己的
+		}
 		return null;
 	}
 	@Override
@@ -109,6 +112,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		if (isOracle()) {
 			return "jdbc:oracle:thin:@localhost:1521:orcl"; //TODO 改成你自己的
+		}
+		if (isDb2()) {
+			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
 		return null;
 	}
@@ -126,6 +132,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isOracle()) {
 			return "scott";  //TODO 改成你自己的
 		}
+		if (isDb2()) {
+			return "db2admin"; //TODO 改成你自己的
+		}
 		return null;
 	}
 	@Override
@@ -142,9 +151,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isOracle()) {
 			return "tiger";  //TODO 改成你自己的
 		}
+		if (isDb2()) {
+			return "123"; //TODO 改成你自己的
+		}
 		return null;
 	}
-
+	
 	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
 	//	@Override
 	//	public String getDatabase() {
@@ -167,6 +179,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//	}
 	//	@Override
 	//	public boolean isOracle() {
+	//		return false;
+	//	}
+	//	@Override
+	//	public boolean isDb2() {
 	//		return false;
 	//	}
 

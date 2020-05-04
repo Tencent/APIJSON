@@ -30,6 +30,7 @@ public interface SQLConfig {
 	String DATABASE_POSTGRESQL = "POSTGRESQL";
 	String DATABASE_SQLSERVER = "SQLSERVER";
 	String DATABASE_ORACLE = "ORACLE";
+	String DATABASE_DB2 = "DB2";
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -44,10 +45,12 @@ public interface SQLConfig {
 	boolean isPostgreSQL();
 	boolean isSQLServer();
 	boolean isOracle();
-	//暂时只兼容以上 4 种
+	boolean isDb2();
+	//暂时只兼容以上 5 种
 	//	boolean isSQL();
+	//	boolean isTSQL();
 	//	boolean isPLSQL();
-	//	boolean isTransactSQL();
+	//	boolean isAnsiSQL();
 
 	boolean limitSQLCount(); //用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制 
 	

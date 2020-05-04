@@ -104,6 +104,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_POSTGRESQL);
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
+		DATABASE_LIST.add(DATABASE_DB2);
 
 		RAW_MAP = new HashMap<>();
 	}
@@ -298,6 +299,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	public static boolean isOracle(String db) {
 		return DATABASE_ORACLE.equals(db);
+	}
+	@Override
+	public boolean isDb2() {
+		return isDb2(getSQLDatabase());
+	}
+	public static boolean isDb2(String db) {
+		return DATABASE_DB2.equals(db);
 	}
 
 	@Override
@@ -611,7 +619,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String order = StringUtil.getTrimedString(getOrder());
 
-		if (getCount() > 0 && (isOracle() || isSQLServer())) { // Oracle 和 SQL Server 的 OFFSET 必须加 ORDER BY
+		if (getCount() > 0 && (isOracle() || isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY
 
 			//			String[] ss = StringUtil.split(order);
 			if (StringUtil.isEmpty(order, true)) {  //SQL Server 子查询内必须指定 OFFSET 才能用 ORDER BY
@@ -1137,7 +1145,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
 			return "";
 		}
-		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer());
+		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer() || isDb2());
 	}
 	/**获取限制数量
 	 * @param limit
