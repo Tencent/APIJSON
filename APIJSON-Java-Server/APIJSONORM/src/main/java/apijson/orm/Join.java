@@ -28,7 +28,7 @@ public class Join {
 	private String originKey;
 	private String originValue;
 
-	private String joinType; // "@" - APP, "<" - LEFT, ">" - RIGHT, "&" - INNER, "|" - FULL, "!" - OUTTER, "(" - ANTI, ")" - FOREIGN, "^" - SIDE, "*" - CROSS
+	private String joinType; // "@" - APP, "<" - LEFT, ">" - RIGHT, "&" - INNER, "|" - FULL, "!" - OUTER, "(" - ANTI, ")" - FOREIGN, "^" - SIDE, "*" - CROSS
 	private String relateType; // "" - 一对一, "{}" - 一对多, "<>" - 多对一
 	private JSONObject request; // { "id@":"/Moment/userId" }
 	private String table; //User
@@ -113,10 +113,10 @@ public class Join {
 		this.targetKey = targetKey;
 	}
 
-	public JSONObject getOutter() {
+	public JSONObject getOuter() {
 		return outter;
 	}
-	public void setOutter(JSONObject outter) {
+	public void setOuter(JSONObject outter) {
 		this.outter = outter;
 	}
 
@@ -133,10 +133,10 @@ public class Join {
 		this.cacheConfig = cacheConfig;
 	}
 
-	public SQLConfig getOutterConfig() {
+	public SQLConfig getOuterConfig() {
 		return outterConfig;
 	}
-	public void setOutterConfig(SQLConfig outterConfig) {
+	public void setOuterConfig(SQLConfig outterConfig) {
 		this.outterConfig = outterConfig;
 	}
 

@@ -1056,7 +1056,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			j.setTargetKey(targetKey);
 			j.setKeyAndType(key);
 			j.setRequest(getJoinObject(table, tableObj, key));
-			j.setOutter((JSONObject) e.getValue());
+			j.setOuter((JSONObject) e.getValue());
 
 			joinList.add(j);
 
