@@ -22,12 +22,14 @@ public enum Operation {
 	/**
 	 * 不允许传的字段，结构是
 	 * "key0,key1,key2..."
+	 * TODO 改成 MUST 减少长度 ?
 	 */
 	DISALLOW,
 	
 	/**
 	 * 必须传的字段，结构是
 	 * "key0,key1,key2..."
+	 * TODO 改成 REFUSE 减少长度 ?
 	 */
 	NECESSARY,
 	

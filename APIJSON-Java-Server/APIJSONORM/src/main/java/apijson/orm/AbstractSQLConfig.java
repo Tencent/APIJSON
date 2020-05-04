@@ -2589,7 +2589,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String[] ws = StringUtil.split(combine);
 			if (ws != null) {
 				if (method == DELETE || method == GETS || method == HEADS) {
-					throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:\"conditons\" !");
+					throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:value !");
 				}
 				whereList = new ArrayList<>();
 
@@ -2633,8 +2633,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 						whereList.add(w);
 					}
-					if (request.containsKey(w) == false) {
-						throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
+
+					// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
+					if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
+						//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
+						callback.onMissingKey4Combine(table, request, combine, ws[i], w);
 					}
 				}
 
@@ -2931,7 +2934,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 */
 		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
 
-
 		/**为 post 请求新建 id， 只能是 Long 或 String
 		 * @param method
 		 * @param database
@@ -2956,6 +2958,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @return
 		 */
 		String getUserIdKey(String database, String schema, String table);
+
+		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
+		 * @param combine
+		 * @param key
+		 * @param request
+		 */
+		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
 	}
 
 	public static abstract class SimpleCallback implements Callback {
@@ -2974,6 +2983,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		@Override
 		public String getUserIdKey(String database, String schema, String table) {
 			return KEY_USER_ID;
+		}
+		
+		@Override
+		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+			throw new IllegalArgumentException(name + ":{} 里的 @combine:value 中的value里 " + item + " 对应的条件 " + key + ":value 中 value 不能为 null！");
 		}
 
 	}

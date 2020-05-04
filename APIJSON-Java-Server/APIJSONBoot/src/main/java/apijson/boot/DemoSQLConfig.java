@@ -19,6 +19,8 @@ import static apijson.framework.APIJSONConstant.PRIVACY_;
 import static apijson.framework.APIJSONConstant.USER_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 
+import com.alibaba.fastjson.JSONObject;
+
 import apijson.RequestMethod;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
@@ -72,6 +74,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//			public Object newId(RequestMethod method, String database, String schema, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
+			
+			@Override
+			public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+//				super.onMissingKey4Combine(name, request, combine, item, key);
+			}
 		};
 
 		// 自定义where条件拼接
