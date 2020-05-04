@@ -618,6 +618,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		String order = StringUtil.getTrimedString(getOrder());
+		if ("rand()".equals(order)) {
+			return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(order, joinOrder, ", ");
+		}
 
 		if (getCount() > 0 && (isOracle() || isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY
 
@@ -650,7 +653,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 
-		if (order.contains("+")) {//replace没有包含的replacement会崩溃
+		if (order.contains("+")) { //replace 没有包含 的replacement 会崩溃
 			order = order.replaceAll("\\+", " ASC ");
 		}
 		if (order.contains("-")) {
@@ -678,7 +681,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
 				if (StringUtil.isName(origin) == false) {
-					throw new IllegalArgumentException("预编译模式下 @order:value 中 value里面用 , 分割的每一项"
+					throw new IllegalArgumentException("预编译模式下 @order:value 中 value 只能是 rand() 或 里面用 , 分割的每一项"
 							+ " column+ / column- 中 column必须是1个单词！并且不要有多余的空格！");
 				}
 			}
