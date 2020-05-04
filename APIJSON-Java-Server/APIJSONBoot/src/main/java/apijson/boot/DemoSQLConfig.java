@@ -75,10 +75,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
 			
-			@Override
-			public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
-//				super.onMissingKey4Combine(name, request, combine, item, key);
-			}
+//			@Override
+//			public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+////				super.onMissingKey4Combine(name, request, combine, item, key);
+//			}
 		};
 
 		// 自定义where条件拼接
