@@ -143,11 +143,13 @@ public class Structure {
 			protected JSONArray onParseJSONArray(String key, JSONArray tarray, JSONArray rarray) throws Exception {
 				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONRequest.isArrayKey(key)) {
 					if (rarray == null || rarray.isEmpty()) {
-						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":[{}] ，批量新增 Table[]:value 中 value 必须是包含表对象的非空数组！");
+						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":[{ ... }] "
+								+ "，批量新增 Table[]:value 中 value 必须是包含表对象的非空数组！其中每个子项 { ... } 都是"
+								+ " tag:" + key.substring(0, key.length() - 2) + " 对应单个新增的 structure ！");
 					}
 					if (rarray.size() > maxUpdateCount) {
 						throw new IllegalArgumentException(method + "请求，" + name + "/" + key
-								+ " 里面的 " + key + ":[{}] 中[]的长度不能超过 " + maxUpdateCount + " ！");
+								+ " 里面的 " + key + ":[{ ... }] 中 [] 的长度不能超过 " + maxUpdateCount + " ！");
 					}
 				}
 				return super.onParseJSONArray(key, tarray, rarray);

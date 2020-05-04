@@ -469,19 +469,20 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			child = parser.onArrayParse(value, path, key, isSubquery);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 		}
-		else {//APIJSON Object
+		else { //APIJSON Object
 			boolean isTableKey = JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey());
 			if (type == TYPE_ITEM && isTableKey == false) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
 			}
 
-			if (//避免使用 "test":{"Test":{}} 绕过限制，实现查询爆炸   isTableKey && 
+			if ( //避免使用 "test":{"Test":{}} 绕过限制，实现查询爆炸   isTableKey && 
 					(arrayConfig == null || arrayConfig.getPosition() == 0)) {
 				objectCount ++;
 				int maxObjectCount = parser.getMaxObjectCount();
-				if (objectCount > maxObjectCount) {
-					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时对象 key:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
+				if (objectCount > maxObjectCount) {  //TODO 这里判断是批量新增/修改，然后上限为 maxUpdateCount
+					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时对象"
+							+ " key:{} 的数量达到 " + objectCount + " 已超限，必须在 0-" + maxObjectCount + " 内 !");
 				}
 			}
 
@@ -606,7 +607,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		allResult.put(JSONResponse.KEY_COUNT, allCount);
 		allResult.put(idKey + "[]", ids);
 
-		response.put(key, allResult); //不按原样返回，避免数据量过大
+		response.put(childKey, allResult); //不按原样返回，避免数据量过大
 	}
 
 

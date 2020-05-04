@@ -464,7 +464,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		if (StringUtil.isEmpty(tag, true)) {
-			throw new IllegalArgumentException("请在最外层设置 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
+			throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
 		}
 
 		//获取指定的JSON结构 <<<<<<<<<<<<
@@ -475,17 +475,28 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		} catch (Exception e) {
 			error = e.getMessage();
 		}
-		if (object == null) {//empty表示随意操作  || object.isEmpty()) {
-			throw new UnsupportedOperationException("非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error);
+		if (object == null) { //empty表示随意操作  || object.isEmpty()) {
+			throw new UnsupportedOperationException("找不到 version: " + version + ", method: " + method.name() + ", tag: " + tag + " 对应的 structure ！"
+					+ "非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error + "\n如果需要则在 Request 表中新增配置！");
 		}
 
-		JSONObject target = null;
-		if (apijson.JSONObject.isTableKey(tag) && object.containsKey(tag) == false) {//tag是table名
-			target = new JSONObject(true);
-			target.put(tag, object);
-		} else {
-			target = object;
+		JSONObject target = object;
+		if (object.containsKey(tag) == false) { //tag 是 Table 名或 Table[]
+			
+			boolean isArrayKey = tag.endsWith(":[]");  //  JSONRequest.isArrayKey(tag);
+			String key = isArrayKey ? tag.substring(0, tag.length() - 3) : tag;
+			
+			if (apijson.JSONObject.isTableKey(key)) {
+				if (isArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
+					target.put(key + "[]", new JSONArray()); 
+				}
+				else { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
+					target = new JSONObject(true);
+					target.put(tag, object);
+				}
+			}
 		}
+		
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
 
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}

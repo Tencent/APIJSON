@@ -138,11 +138,21 @@ public class StructureUtil {
 			JSONObject target = null;
 
 			if (structure != null) {
-				if (apijson.JSONObject.isTableKey(tag) && structure.containsKey(tag) == false) {//tag是table名
-					target = new JSONObject(true);
-					target.put(tag, structure);
-				} else {
-					target = structure;
+				target = structure;
+				if (structure.containsKey(tag) == false) { //tag 是 Table 名或 Table[]
+					
+					boolean isArrayKey = tag.endsWith(":[]");  //  JSONRequest.isArrayKey(tag);
+					String key = isArrayKey ? tag.substring(0, tag.length() - 3) : tag;
+					
+					if (apijson.JSONObject.isTableKey(key)) {
+						if (isArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
+							target.put(key + "[]", new JSONArray()); 
+						}
+						else { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
+							target = new JSONObject(true);
+							target.put(tag, structure);
+						}
+					}
 				}
 			}
 
