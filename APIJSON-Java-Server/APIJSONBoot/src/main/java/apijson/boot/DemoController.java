@@ -1095,7 +1095,7 @@ public class DemoController extends APIJSONController {
 				"                        \"default\": 10\n"+
 				"                    },\n"+
 				"                    {\n"+
-				"                        \"name\": \"page\",\n"+
+				"                        \"name\": \"pageNum\",\n"+
 				"                        \"default\": 1\n"+
 				"                    },\n"+
 				"                    {\n"+
@@ -1133,7 +1133,7 @@ public class DemoController extends APIJSONController {
 				"                        \"default\": 15\n"+
 				"                    },\n"+
 				"                    {\n"+
-				"                        \"name\": \"conent\",\n"+
+				"                        \"name\": \"content\",\n"+
 				"                        \"description\": \"内容\",\n"+
 				"                        \"default\": \"测试评论\"\n"+
 				"                    }\n"+
