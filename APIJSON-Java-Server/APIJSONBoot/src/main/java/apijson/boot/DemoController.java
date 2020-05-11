@@ -29,6 +29,8 @@ import static apijson.framework.APIJSONConstant.ID;
 import static apijson.framework.APIJSONConstant.REQUEST_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 import static apijson.framework.APIJSONConstant.VERSION;
+import static org.springframework.http.HttpHeaders.COOKIE;
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 import java.net.URLDecoder;
 import java.rmi.ServerException;
@@ -232,7 +234,7 @@ public class DemoController extends APIJSONController {
 
 
 
-	
+
 	public static final String USER_;
 	public static final String PRIVACY_;
 	public static final String VERIFY_; //加下划线后缀是为了避免 Verify 和 verify 都叫VERIFY，分不清
@@ -242,7 +244,7 @@ public class DemoController extends APIJSONController {
 		VERIFY_ = Verify.class.getSimpleName();
 	}
 
-	
+
 
 	public static final String CURRENT_USER_ID = "currentUserId";
 	public static final String NAME = "name";
@@ -603,7 +605,7 @@ public class DemoController extends APIJSONController {
 		session.setAttribute(PRIVACY_, privacy); //用户隐私信息
 		session.setAttribute(REMEMBER, remember); //是否记住登录
 		session.setMaxInactiveInterval(60*60*24*(remember ? 7 : 1)); //设置session过期时间
-		
+
 		response.put(REMEMBER, remember);
 		response.put(DEFAULTS, defaults);
 		return response;
@@ -974,7 +976,7 @@ public class DemoController extends APIJSONController {
 	}
 
 
-	public static final String COOKIE = "Cookie";
+	public static final String ADD_COOKIE = "Add-Cookie";
 	public static final List<String> EXCEPT_HEADER_LIST;
 	static {
 		EXCEPT_HEADER_LIST = Arrays.asList(  //accept-encoding 在某些情况下导致乱码，origin 和 sec-fetch-mode 等 CORS 信息导致服务器代理失败
@@ -996,6 +998,7 @@ public class DemoController extends APIJSONController {
 	 * @param session HTTP session
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/delegate")
 	public String delegate(
 			@RequestParam(value = "$_except_headers", required = false) String exceptHeaders,
@@ -1013,22 +1016,41 @@ public class DemoController extends APIJSONController {
 			List<String> exceptHeaderList = StringUtil.isEmpty(exceptHeaders, true) 
 					? EXCEPT_HEADER_LIST : Arrays.asList(StringUtil.split(exceptHeaders));
 
+
+			List<String> setCookie = null;
+			List<String> addCookie = null;
+
 			while (names.hasMoreElements()) {
 				name = names.nextElement();
 				if (name != null && exceptHeaderList.contains(name.toLowerCase()) == false) {
-					headers.add(name, request.getHeader(name));
+					//APIAuto 是一定精准发送 Set-Cookie 名称过来的，预留其它命名可实现覆盖原 Cookie Header 等更多可能 
+					if (SET_COOKIE.toLowerCase().equals(name.toLowerCase())) {  //接收到时就已经被强制小写
+						setCookie = Arrays.asList(request.getHeader(name));  // JSON.parseArray(request.getHeader(name), String.class);
+					}
+					else if (ADD_COOKIE.toLowerCase().equals(name.toLowerCase())) {
+						addCookie = Arrays.asList(request.getHeader(name));
+					}
+					else {
+						headers.add(name, request.getHeader(name));
+					}
 				}
 			}
 
-			@SuppressWarnings("unchecked")
-			List<String> cookie = session == null ? null : (List<String>) session.getAttribute(COOKIE);
-			if (cookie != null && cookie.isEmpty() == false) {
-				List<String> c = headers.get(COOKIE);
-				if (c == null) {
-					c = new ArrayList<>();
+			if (setCookie == null && session != null) {
+				setCookie = (List<String>) session.getAttribute(COOKIE);
+			}
+			if (addCookie != null && addCookie.isEmpty() == false) {
+				if (setCookie == null) {
+					setCookie = addCookie;
 				}
-				c.addAll(cookie);
-				headers.put(COOKIE, c);
+				else {
+					setCookie = new ArrayList<>(setCookie);
+					setCookie.addAll(addCookie);
+				}
+			}
+			
+			if (setCookie != null) { //允许传空的 Cookie && setCookie.isEmpty() == false) {
+				headers.put(COOKIE, setCookie);
 			}
 		}
 
@@ -1069,7 +1091,7 @@ public class DemoController extends APIJSONController {
 
 		HttpHeaders hs = entity.getHeaders();
 		if (session != null && hs != null) {
-			List<String> cookie = hs.get("Set-Cookie");
+			List<String> cookie = hs.get(SET_COOKIE);
 			if (cookie != null && cookie.isEmpty() == false) {
 				session.setAttribute(COOKIE, cookie);
 			}
@@ -1143,8 +1165,8 @@ public class DemoController extends APIJSONController {
 				"    }\n"+
 				"}";
 	}
-	
-	
+
+
 
 
 	@PostMapping("method/invoke")
@@ -1158,13 +1180,13 @@ public class DemoController extends APIJSONController {
 						req,
 						DemoApplication.getApplicationContext().getBean(
 								Class.forName(pkgName.replaceAll("/", ".") + "." + clsName)
-						)
-				);
+								)
+						);
 			}
 		} catch (Exception e) {
 			Log.e(TAG, "listMethod  try { JSONObject req = JSON.parseObject(request); ... } catch (Exception e) { \n" + e.getMessage());
 		}
-		
+
 		return super.invokeMethod(request);
 	}
 
