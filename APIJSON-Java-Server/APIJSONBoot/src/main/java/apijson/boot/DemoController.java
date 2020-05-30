@@ -1178,7 +1178,7 @@ public class DemoController extends APIJSONController {
         "            \"name\": \"Test\",\n" +
         "            \"description\": \"4 test\",\n" +
         "            \"logo\": null,\n" +
-        "            \"token\": \"JrA77ktHhrGJtlhtUwt4bpk3l96-QQLE\",\n" +
+        "            \"token\": \"JrA78ktHhsGJtlhtUwt4Bpk3i96-QQLE\",\n" +
         "            \"visibility\": true,\n" +
         "            \"ownerId\": 1803,\n" +
         "            \"organizationId\": null,\n" +
@@ -1190,19 +1190,19 @@ public class DemoController extends APIJSONController {
         "            \"creator\": {\n" +
         "                \"id\": 1803,\n" +
         "                \"fullname\": \"TommyLemon\",\n" +
-        "                \"email\": \"1184482681@qq.com\"\n" +
+        "                \"email\": \"111@qq.com\"\n" +
         "            },\n" +
         "            \"owner\": {\n" +
         "                \"id\": 1803,\n" +
         "                \"fullname\": \"TommyLemon\",\n" +
-        "                \"email\": \"1184482681@qq.com\"\n" +
+        "                \"email\": \"111@qq.com\"\n" +
         "            },\n" +
         "            \"locker\": null,\n" +
         "            \"members\": [\n" +
         "                {\n" +
         "                    \"id\": 1803,\n" +
         "                    \"fullname\": \"TommyLemon\",\n" +
-        "                    \"email\": \"1184482681@qq.com\"\n" +
+        "                    \"email\": \"111@qq.com\"\n" +
         "                }\n" +
         "            ],\n" +
         "            \"organization\": null,\n" +
@@ -1224,13 +1224,13 @@ public class DemoController extends APIJSONController {
 	 */
 	@GetMapping("repository/get")
 	public String rapRepositoryDetail(@RequestParam("id") String id) {
-		return 	"{\n" +
+		return "{\n" +
         "    \"data\": {\n" +
-        "        \"id\": 1243,\n" +
+        "        \"id\": " + id + ",\n" +
         "        \"name\": \"Test\",\n" +
         "        \"description\": \"4 test\",\n" +
         "        \"logo\": null,\n" +
-        "        \"token\": \"JrA77ktHhrGJtlhtUwt4bpk3l96-QQLE\",\n" +
+        "        \"token\": \"JrA78ktHhsGJtlhtUwt4Bpk3i96-QQLE\",\n" +
         "        \"visibility\": true,\n" +
         "        \"ownerId\": 1803,\n" +
         "        \"organizationId\": null,\n" +
@@ -1242,19 +1242,19 @@ public class DemoController extends APIJSONController {
         "        \"creator\": {\n" +
         "            \"id\": 1803,\n" +
         "            \"fullname\": \"TommyLemon\",\n" +
-        "            \"email\": \"1184482681@qq.com\"\n" +
+        "            \"email\": \"111@qq.com\"\n" +
         "        },\n" +
         "        \"owner\": {\n" +
         "            \"id\": 1803,\n" +
         "            \"fullname\": \"TommyLemon\",\n" +
-        "            \"email\": \"1184482681@qq.com\"\n" +
+        "            \"email\": \"111@qq.com\"\n" +
         "        },\n" +
         "        \"locker\": null,\n" +
         "        \"members\": [\n" +
         "            {\n" +
         "                \"id\": 1803,\n" +
         "                \"fullname\": \"TommyLemon\",\n" +
-        "                \"email\": \"1184482681@qq.com\"\n" +
+        "                \"email\": \"111@qq.com\"\n" +
         "            }\n" +
         "        ],\n" +
         "        \"organization\": null,\n" +
@@ -1274,7 +1274,7 @@ public class DemoController extends APIJSONController {
         "                    {\n" +
         "                        \"id\": 4042,\n" +
         "                        \"name\": \"getUser\",\n" +
-        "                        \"url\": \"http://39.108.143.172:8080/get\",\n" +
+        "                        \"url\": \"/get\",\n" +
         "                        \"method\": \"POST\",\n" +
         "                        \"description\": \"get an User\",\n" +
         "                        \"priority\": 1,\n" +
@@ -1284,7 +1284,7 @@ public class DemoController extends APIJSONController {
         "                        \"moduleId\": 1973,\n" +
         "                        \"repositoryId\": 1243,\n" +
         "                        \"createdAt\": \"2017-12-05T08:51:02.000Z\",\n" +
-        "                        \"updatedAt\": \"2020-05-24T15:39:34.000Z\",\n" +
+        "                        \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
         "                        \"deletedAt\": null,\n" +
         "                        \"locker\": null,\n" +
         "                        \"properties\": [\n" +
@@ -1305,7 +1305,7 @@ public class DemoController extends APIJSONController {
         "                                \"repositoryId\": 1243,\n" +
         "                                \"required\": false,\n" +
         "                                \"createdAt\": \"2017-12-05T08:52:03.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-24T15:39:50.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
         "                                \"deletedAt\": null\n" +
         "                            },\n" +
         "                            {\n" +
@@ -1325,7 +1325,27 @@ public class DemoController extends APIJSONController {
         "                                \"repositoryId\": 1243,\n" +
         "                                \"required\": false,\n" +
         "                                \"createdAt\": \"2017-12-05T08:54:16.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-24T15:39:50.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
+        "                                \"deletedAt\": null\n" +
+        "                            },\n" +
+        "                            {\n" +
+        "                                \"id\": 17621689,\n" +
+        "                                \"scope\": \"request\",\n" +
+        "                                \"type\": \"String\",\n" +
+        "                                \"pos\": 1,\n" +
+        "                                \"name\": \"site\",\n" +
+        "                                \"rule\": null,\n" +
+        "                                \"value\": \"apijson\",\n" +
+        "                                \"description\": \"来源网站\",\n" +
+        "                                \"parentId\": -1,\n" +
+        "                                \"priority\": 1590855928395,\n" +
+        "                                \"interfaceId\": 4042,\n" +
+        "                                \"creatorId\": 1803,\n" +
+        "                                \"moduleId\": 1973,\n" +
+        "                                \"repositoryId\": 1243,\n" +
+        "                                \"required\": false,\n" +
+        "                                \"createdAt\": \"2020-05-30T16:25:28.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
         "                                \"deletedAt\": null\n" +
         "                            }\n" +
         "                        ]\n" +
@@ -1339,24 +1359,20 @@ public class DemoController extends APIJSONController {
         "                        \"priority\": 2,\n" +
         "                        \"status\": 200,\n" +
         "                        \"creatorId\": 1803,\n" +
-        "                        \"lockerId\": 1803,\n" +
+        "                        \"lockerId\": null,\n" +
         "                        \"moduleId\": 1973,\n" +
         "                        \"repositoryId\": 1243,\n" +
         "                        \"createdAt\": \"2020-01-13T10:32:51.000Z\",\n" +
-        "                        \"updatedAt\": \"2020-05-24T15:39:55.000Z\",\n" +
+        "                        \"updatedAt\": \"2020-05-30T16:29:13.000Z\",\n" +
         "                        \"deletedAt\": null,\n" +
-        "                        \"locker\": {\n" +
-        "                            \"id\": 1803,\n" +
-        "                            \"fullname\": \"TommyLemon\",\n" +
-        "                            \"email\": \"1184482681@qq.com\"\n" +
-        "                        },\n" +
+        "                        \"locker\": null,\n" +
         "                        \"properties\": [\n" +
         "                            {\n" +
         "                                \"id\": 17394319,\n" +
         "                                \"scope\": \"request\",\n" +
         "                                \"type\": \"String\",\n" +
         "                                \"pos\": 1,\n" +
-        "                                \"name\": \"h\",\n" +
+        "                                \"name\": \"he\",\n" +
         "                                \"rule\": null,\n" +
         "                                \"value\": \"test\",\n" +
         "                                \"description\": \"\",\n" +
@@ -1368,7 +1384,126 @@ public class DemoController extends APIJSONController {
         "                                \"repositoryId\": 1243,\n" +
         "                                \"required\": false,\n" +
         "                                \"createdAt\": \"2020-05-24T15:39:50.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-24T15:39:50.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:29:13.000Z\",\n" +
+        "                                \"deletedAt\": null\n" +
+        "                            }\n" +
+        "                        ]\n" +
+        "                    },\n" +
+        "                    {\n" +
+        "                        \"id\": 1596193,\n" +
+        "                        \"name\": \"login\",\n" +
+        "                        \"url\": \"/login\",\n" +
+        "                        \"method\": \"POST\",\n" +
+        "                        \"description\": \"\",\n" +
+        "                        \"priority\": 1590853798312,\n" +
+        "                        \"status\": 200,\n" +
+        "                        \"creatorId\": 1803,\n" +
+        "                        \"lockerId\": null,\n" +
+        "                        \"moduleId\": 1973,\n" +
+        "                        \"repositoryId\": 1243,\n" +
+        "                        \"createdAt\": \"2020-05-30T15:49:58.000Z\",\n" +
+        "                        \"updatedAt\": \"2020-05-30T16:25:08.000Z\",\n" +
+        "                        \"deletedAt\": null,\n" +
+        "                        \"locker\": null,\n" +
+        "                        \"properties\": [\n" +
+        "                            {\n" +
+        "                                \"id\": 17621552,\n" +
+        "                                \"scope\": \"request\",\n" +
+        "                                \"type\": \"String\",\n" +
+        "                                \"pos\": 3,\n" +
+        "                                \"name\": \"phone\",\n" +
+        "                                \"rule\": null,\n" +
+        "                                \"value\": \"13000082001\",\n" +
+        "                                \"description\": \"手机号\",\n" +
+        "                                \"parentId\": -1,\n" +
+        "                                \"priority\": 1590853936991,\n" +
+        "                                \"interfaceId\": 1596193,\n" +
+        "                                \"creatorId\": 1803,\n" +
+        "                                \"moduleId\": 1973,\n" +
+        "                                \"repositoryId\": 1243,\n" +
+        "                                \"required\": false,\n" +
+        "                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+        "                                \"deletedAt\": null\n" +
+        "                            },\n" +
+        "                            {\n" +
+        "                                \"id\": 17621553,\n" +
+        "                                \"scope\": \"request\",\n" +
+        "                                \"type\": \"String\",\n" +
+        "                                \"pos\": 3,\n" +
+        "                                \"name\": \"password\",\n" +
+        "                                \"rule\": null,\n" +
+        "                                \"value\": \"123456\",\n" +
+        "                                \"description\": \"密码\",\n" +
+        "                                \"parentId\": -1,\n" +
+        "                                \"priority\": 1590853936994,\n" +
+        "                                \"interfaceId\": 1596193,\n" +
+        "                                \"creatorId\": 1803,\n" +
+        "                                \"moduleId\": 1973,\n" +
+        "                                \"repositoryId\": 1243,\n" +
+        "                                \"required\": false,\n" +
+        "                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+        "                                \"deletedAt\": null\n" +
+        "                            },\n" +
+        "                            {\n" +
+        "                                \"id\": 17621554,\n" +
+        "                                \"scope\": \"response\",\n" +
+        "                                \"type\": \"String\",\n" +
+        "                                \"pos\": 3,\n" +
+        "                                \"name\": \"msg\",\n" +
+        "                                \"rule\": null,\n" +
+        "                                \"value\": \"\",\n" +
+        "                                \"description\": \"success\",\n" +
+        "                                \"parentId\": -1,\n" +
+        "                                \"priority\": 1590853936997,\n" +
+        "                                \"interfaceId\": 1596193,\n" +
+        "                                \"creatorId\": 1803,\n" +
+        "                                \"moduleId\": 1973,\n" +
+        "                                \"repositoryId\": 1243,\n" +
+        "                                \"required\": false,\n" +
+        "                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+        "                                \"deletedAt\": null\n" +
+        "                            },\n" +
+        "                            {\n" +
+        "                                \"id\": 17621565,\n" +
+        "                                \"scope\": \"response\",\n" +
+        "                                \"type\": \"Number\",\n" +
+        "                                \"pos\": 3,\n" +
+        "                                \"name\": \"code\",\n" +
+        "                                \"rule\": \"\",\n" +
+        "                                \"value\": \"200\",\n" +
+        "                                \"description\": null,\n" +
+        "                                \"parentId\": -1,\n" +
+        "                                \"priority\": 1590853937020,\n" +
+        "                                \"interfaceId\": 1596193,\n" +
+        "                                \"creatorId\": null,\n" +
+        "                                \"moduleId\": 1973,\n" +
+        "                                \"repositoryId\": 1243,\n" +
+        "                                \"required\": false,\n" +
+        "                                \"createdAt\": \"2020-05-30T15:52:17.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+        "                                \"deletedAt\": null\n" +
+        "                            },\n" +
+        "                            {\n" +
+        "                                \"id\": 17621688,\n" +
+        "                                \"scope\": \"request\",\n" +
+        "                                \"type\": \"String\",\n" +
+        "                                \"pos\": 1,\n" +
+        "                                \"name\": \"head\",\n" +
+        "                                \"rule\": null,\n" +
+        "                                \"value\": \"apijson\",\n" +
+        "                                \"description\": \"请求头\",\n" +
+        "                                \"parentId\": -1,\n" +
+        "                                \"priority\": 1590855907992,\n" +
+        "                                \"interfaceId\": 1596193,\n" +
+        "                                \"creatorId\": 1803,\n" +
+        "                                \"moduleId\": 1973,\n" +
+        "                                \"repositoryId\": 1243,\n" +
+        "                                \"required\": false,\n" +
+        "                                \"createdAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
         "                                \"deletedAt\": null\n" +
         "                            }\n" +
         "                        ]\n" +
