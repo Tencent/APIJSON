@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.11</version>
+			<version>8.0.16</version>
 		</dependency>
 		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
 
