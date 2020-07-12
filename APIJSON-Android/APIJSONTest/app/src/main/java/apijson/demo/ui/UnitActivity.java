@@ -25,10 +25,10 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
 import java.lang.reflect.Method;
 
-import apijson.demo.server.MethodUtil;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
 import apijson.demo.application.DemoApplication;
+import apijson.demo.server.MethodUtil;
 
 
 public class UnitActivity extends Activity implements HttpServerRequestCallback {
@@ -153,6 +153,27 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
 
     @Override
     public void onRequest(final AsyncHttpServerRequest asyncHttpServerRequest, final AsyncHttpServerResponse asyncHttpServerResponse) {
+        Headers allHeaders = asyncHttpServerResponse.getHeaders();
+        Headers reqHeaders = asyncHttpServerRequest.getHeaders();
+
+        String corsHeaders = reqHeaders.get("access-control-request-headers");
+        String corsMethod = reqHeaders.get("access-control-request-method");
+
+//      if ("OPTIONS".toLowerCase().equals(asyncHttpServerRequest.getMethod().toLowerCase())) {
+
+        String origin = reqHeaders.get("origin");
+        reqHeaders.remove("cookie");  // 用不上还很占显示面积 String cookie = reqHeaders.get("cookie");
+
+        allHeaders.set("Access-Control-Allow-Origin", TextUtils.isEmpty(origin) ? "*" : origin);
+        allHeaders.set("Access-Control-Allow-Credentials", "true");
+        allHeaders.set("Access-Control-Allow-Headers", TextUtils.isEmpty(corsHeaders) ? "*" : corsHeaders);
+        allHeaders.set("Access-Control-Allow-Methods", TextUtils.isEmpty(corsMethod) ? "*" : corsMethod);
+        allHeaders.set("Access-Control-Max-Age", "86400");
+//        if (TextUtils.isEmpty(cookie) == false) {
+//            allHeaders.set("Set-Cookie", cookie + System.currentTimeMillis());
+//        }
+//    }
+
         final AsyncHttpRequestBody requestBody = asyncHttpServerRequest.getBody();
         final String request = requestBody == null || requestBody.get() == null ? null : requestBody.get().toString();
 
@@ -166,27 +187,6 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
             }
         });
 
-
-        Headers allHeaders = asyncHttpServerResponse.getHeaders();
-        Headers reqHeaders = asyncHttpServerRequest.getHeaders();
-
-        String corsHeaders = reqHeaders.get("access-control-request-headers");
-        String corsMethod = reqHeaders.get("access-control-request-method");
-
-//      if ("OPTIONS".toLowerCase().equals(asyncHttpServerRequest.getMethod().toLowerCase())) {
-
-        String origin = reqHeaders.get("origin");
-        String cookie = reqHeaders.get("cookie");
-
-        allHeaders.set("Access-Control-Allow-Origin", TextUtils.isEmpty(origin) ? "*" : origin);
-        allHeaders.set("Access-Control-Allow-Credentials", "true");
-        allHeaders.set("Access-Control-Allow-Headers", TextUtils.isEmpty(corsHeaders) ? "*" : corsHeaders);
-        allHeaders.set("Access-Control-Allow-Methods", TextUtils.isEmpty(corsMethod) ? "*" : corsMethod);
-        allHeaders.set("Access-Control-Max-Age", "86400");
-//        if (TextUtils.isEmpty(cookie) == false) {
-//            allHeaders.set("Set-Cookie", cookie + System.currentTimeMillis());
-//        }
-//    }
 
         try {
             if ("OPTIONS".toLowerCase().equals(asyncHttpServerRequest.getMethod().toLowerCase())) {
