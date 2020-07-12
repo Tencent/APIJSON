@@ -132,23 +132,13 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
 
 
     private void startServer(int port) {
-//        server.addAction("OPTIONS","*", this);
-//        server.get("/test", new HttpServerRequestCallback() {
-//            @Override
-//            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-//                response.send("{\"hello\": \"world!\"}");
-//            }
-//        });
-
-//        server.post("/get", this);
         server.addAction("OPTIONS", "[\\d\\D]*", this);
-        server.get("[\\d\\D]*", this);
-//        server.post("/get", this);
+//        server.get("[\\d\\D]*", this);
 //        server.post("[\\d\\D]*", this);
+        server.get("/", this);
         server.post("/method/list", this);
         server.post("/method/invoke", this);
         server.listen(mAsyncServer, port);
-
     }
 
     @Override
@@ -181,7 +171,7 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
 
             @Override
             public void run() {
-                if (isAlive) {
+                if (isAlive) {  //TODO 改为 ListView 展示，保证每次请求都能对齐 Request 和 Response 的显示
                     tvUnitRequest.setText(StringUtil.getString(asyncHttpServerRequest) + "Content:\n" + zuo.biao.apijson.JSON.format(request) + "\n\n\n\n\n" + StringUtil.getString(tvUnitRequest));
                 }
             }
@@ -195,6 +185,9 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
             }
 
             switch (asyncHttpServerRequest.getPath()) {
+                case "/":
+                    send(asyncHttpServerResponse, "ok");
+                    break;
                 case "/method/list":
                     asyncHttpServerResponse.send("application/json; charset=utf-8", MethodUtil.listMethod(request).toJSONString());
                     break;
@@ -246,8 +239,10 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
                     }
 
                     break;
+                default:
+                    asyncHttpServerResponse.end();
+                    break;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             send(asyncHttpServerResponse, MethodUtil.CALLBACK.newErrorResult(e).toJSONString());
@@ -272,6 +267,7 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
     @Override
     protected void onDestroy() {
         isAlive = false;
+        stop(etUnitPort);
         super.onDestroy();
     }
 
