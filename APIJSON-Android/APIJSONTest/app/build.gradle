@@ -5,8 +5,8 @@ android {
     buildToolsVersion '29.0.0'
     defaultConfig {
         applicationId "apijson.demo"
-        minSdkVersion 20
-        targetSdkVersion 22
+        minSdkVersion 26
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -17,6 +17,10 @@ android {
         }
     }
     productFlavors {
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
     }
 }
 

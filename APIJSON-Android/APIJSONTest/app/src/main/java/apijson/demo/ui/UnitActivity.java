@@ -1,16 +1,20 @@
 package apijson.demo.ui;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.http.Headers;
 import com.koushikdutta.async.http.body.AsyncHttpRequestBody;
@@ -19,11 +23,12 @@ import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.lang.reflect.Method;
 
+import apijson.demo.server.MethodUtil;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
+import apijson.demo.application.DemoApplication;
 
 
 public class UnitActivity extends Activity implements HttpServerRequestCallback {
@@ -139,24 +144,28 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
         server.addAction("OPTIONS", "[\\d\\D]*", this);
         server.get("[\\d\\D]*", this);
 //        server.post("/get", this);
-        server.post("[\\d\\D]*", this);
+//        server.post("[\\d\\D]*", this);
+        server.post("/method/list", this);
+        server.post("/method/invoke", this);
         server.listen(mAsyncServer, port);
 
     }
 
     @Override
     public void onRequest(final AsyncHttpServerRequest asyncHttpServerRequest, final AsyncHttpServerResponse asyncHttpServerResponse) {
+        final AsyncHttpRequestBody requestBody = asyncHttpServerRequest.getBody();
+        final String request = requestBody == null || requestBody.get() == null ? null : requestBody.get().toString();
+
         runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
                 if (isAlive) {
-                    tvUnitRequest.setText(StringUtil.getString(asyncHttpServerRequest) + "\n\n\n\n\n" + StringUtil.getString(tvUnitRequest));
+                    tvUnitRequest.setText(StringUtil.getString(asyncHttpServerRequest) + "Content:\n" + zuo.biao.apijson.JSON.format(request) + "\n\n\n\n\n" + StringUtil.getString(tvUnitRequest));
                 }
             }
         });
 
-        AsyncHttpRequestBody requestBody = asyncHttpServerRequest.getBody();
 
         Headers allHeaders = asyncHttpServerResponse.getHeaders();
         Headers reqHeaders = asyncHttpServerRequest.getHeaders();
@@ -174,41 +183,90 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
         allHeaders.set("Access-Control-Allow-Headers", TextUtils.isEmpty(corsHeaders) ? "*" : corsHeaders);
         allHeaders.set("Access-Control-Allow-Methods", TextUtils.isEmpty(corsMethod) ? "*" : corsMethod);
         allHeaders.set("Access-Control-Max-Age", "86400");
-        if (TextUtils.isEmpty(cookie) == false) {
-            allHeaders.set("Set-Cookie", cookie + System.currentTimeMillis());
-        }
+//        if (TextUtils.isEmpty(cookie) == false) {
+//            allHeaders.set("Set-Cookie", cookie + System.currentTimeMillis());
+//        }
 //    }
 
         try {
-            JSONObject obj = new JSONObject();
-            obj.put("code", 200);
-            obj.put("msg", "success");
-            asyncHttpServerResponse.code(200);
+            if ("OPTIONS".toLowerCase().equals(asyncHttpServerRequest.getMethod().toLowerCase())) {
+                send(asyncHttpServerResponse, "{}");
+                return;
+            }
 
             switch (asyncHttpServerRequest.getPath()) {
-                case "/invokeMethod":
-                    obj.put("api", "/invokeMethod");
+                case "/method/list":
+                    asyncHttpServerResponse.send("application/json; charset=utf-8", MethodUtil.listMethod(request).toJSONString());
                     break;
-                case "/listMethod":
-                    obj.put("api", "/listMethod");
+                case "/method/invoke":
+                    MethodUtil.Listener<JSONObject> listener = new MethodUtil.Listener<JSONObject>() {
+
+                        @Override
+                        public void complete(JSONObject data, Method method, MethodUtil.InterfaceProxy proxy, Object... extras) throws Exception {
+                            if (! asyncHttpServerResponse.isOpen()) {
+                                Log.w(TAG, "invokeMethod  listener.complete  ! asyncHttpServerResponse.isOpen() >> return;");
+                                return;
+                            }
+
+                            send(asyncHttpServerResponse, data.toJSONString());
+                        }
+                    };
+
+                    try {
+                        JSONObject req = JSON.parseObject(request);
+
+                        Object instance = null;
+                        try {
+                            String pkgName = req.getString("package");
+                            String clsName = req.getString("class");
+                            Class<?> clazz = Class.forName(pkgName.replaceAll("/", ".") + "." + clsName);
+                            if (clazz.isAssignableFrom(Activity.class)) {
+                                instance = UnitActivity.this;
+                            } else if (clazz.isAssignableFrom(Application.class)) {
+                                instance = DemoApplication.getInstance();
+                            } else {
+                                instance = null;
+                            }
+                        }
+                        catch (Exception e) {
+                            Log.e(TAG, "invokeMethod  try { instance =  Class<?> clazz = Class.forName(pkgName.replaceAll(\"/\", \".\") + \".\" + clsName); ... } catch (Exception e) { \n" + e.getMessage());
+                        }
+
+                        MethodUtil.invokeMethod(req, instance, listener);
+                    }
+                    catch (Exception e) {
+                        Log.e(TAG, "invokeMethod  try { JSONObject req = JSON.parseObject(request); ... } catch (Exception e) { \n" + e.getMessage());
+                        try {
+                            listener.complete(MethodUtil.CALLBACK.newErrorResult(e));
+                        }
+                        catch (Exception e1) {
+                            e1.printStackTrace();
+                            send(asyncHttpServerResponse, MethodUtil.CALLBACK.newErrorResult(e1).toJSONString());
+                        }
+                    }
+
                     break;
             }
 
-            asyncHttpServerResponse.send("OPTIONS".toLowerCase().equals(asyncHttpServerRequest.getMethod().toLowerCase()) ? new JSONObject() : obj);
-//            asyncHttpServerResponse.send("application/json; charset=utf-8", obj.toString());
-
-            runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (isAlive) {
-                        tvUnitResponse.setText(StringUtil.getString(asyncHttpServerResponse) + "\n\n\n\n\n" + StringUtil.getString(tvUnitResponse));
-                    }
-                }
-            });
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            send(asyncHttpServerResponse, MethodUtil.CALLBACK.newErrorResult(e).toJSONString());
         }
+
+    }
+
+    private void send(AsyncHttpServerResponse asyncHttpServerResponse, String json) {
+        asyncHttpServerResponse.send("application/json; charset=utf-8", json);
+
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                if (isAlive) {
+                    tvUnitResponse.setText(StringUtil.getString(asyncHttpServerResponse) + "Content:\n" + zuo.biao.apijson.JSON.format(json) + "\n\n\n\n\n" + StringUtil.getString(tvUnitResponse));
+                }
+            }
+        });
     }
 
     @Override
