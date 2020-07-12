@@ -3,9 +3,12 @@ package apijson.demo.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
 import android.widget.TextView;
 
 import com.koushikdutta.async.AsyncServer;
@@ -41,20 +44,64 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
     private Activity context;
     private boolean isAlive;
 
-    private TextView etUnitPort;
     private TextView tvUnitRequest;
     private TextView tvUnitResponse;
+
+    private TextView tvUnitOrient;
+    private TextView etUnitPort;
+    private View pbUnit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.unit_activity);
         context = this;
         isAlive = true;
 
-        etUnitPort = findViewById(R.id.etUnitPort);
+
         tvUnitRequest = findViewById(R.id.tvUnitRequest);
         tvUnitResponse = findViewById(R.id.tvUnitResponse);
+
+        tvUnitOrient = findViewById(R.id.tvUnitOrient);
+        etUnitPort = findViewById(R.id.etUnitPort);
+        pbUnit = findViewById(R.id.pbUnit);
+
         etUnitPort.setText(port);
+        pbUnit.setVisibility(View.GONE);
+
+
+        getWindow().getDecorView().addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                onConfigurationChanged(getResources().getConfiguration());
+            }
+        });
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        onConfigurationChanged(getResources().getConfiguration());
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        tvUnitOrient.setText(
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+                        ? (getString(R.string.screen) + getString(R.string.horizontal))
+                        : getString(R.string.vertical)
+        );
+        super.onConfigurationChanged(newConfig);
+    }
+
+    public void copy(View v) {
+        StringUtil.copyText(context, StringUtil.getString((TextView) v));
+    }
+
+    public void orient(View v) {
+        setRequestedOrientation(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+                ? ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
     }
 
 
@@ -62,30 +109,24 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
     public void start(View v) {
         v.setEnabled(false);
         port = StringUtil.getString(etUnitPort);
+        startServer(Integer.valueOf(port));
 
-        etUnitPort.setText(port + " is starting...");
-        startServer();
-
-        etUnitPort.setText(port + " is listening...");
-        etUnitPort.setEnabled(false);
         v.setEnabled(true);
+        etUnitPort.setEnabled(false);
+        pbUnit.setVisibility(View.VISIBLE);
     }
     public void stop(View v) {
         v.setEnabled(false);
         server.stop();
         mAsyncServer.stop();
 
-        etUnitPort.setText(port);
-        etUnitPort.setEnabled(true);
         v.setEnabled(true);
+        etUnitPort.setEnabled(true);
+        pbUnit.setVisibility(View.GONE);
     }
 
 
-    public void copy(View v) {
-        StringUtil.copyText(context, StringUtil.getString((TextView) v));
-    }
-
-    private void startServer() {
+    private void startServer(int port) {
 //        server.addAction("OPTIONS","*", this);
 //        server.get("/test", new HttpServerRequestCallback() {
 //            @Override
@@ -99,7 +140,7 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
         server.get("[\\d\\D]*", this);
 //        server.post("/get", this);
         server.post("[\\d\\D]*", this);
-        server.listen(mAsyncServer, Integer.valueOf(port));
+        server.listen(mAsyncServer, port);
 
     }
 

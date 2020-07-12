@@ -19,6 +19,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -56,10 +58,15 @@ public class AutoActivity extends Activity {
 
 	private TextView tvAutoRequest;
 	private TextView tvAutoResponse;
+
+	private TextView tvAutoCodePortrait;
+	private TextView tvAutoCodeLandscape;
+	private TextView tvAutoOrient;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+//		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 		setContentView(R.layout.auto_activity);
 		context = this;
 
@@ -75,16 +82,43 @@ public class AutoActivity extends Activity {
 		}
 
 
+		tvAutoRequest = findViewById(R.id.tvAutoRequest);
+		tvAutoResponse = findViewById(R.id.tvAutoResponse);
 
-		tvAutoRequest = (TextView) findViewById(R.id.tvAutoRequest);
-		tvAutoResponse = (TextView) findViewById(R.id.tvAutoResponse);
-
-
+		tvAutoCodePortrait = findViewById(R.id.tvAutoCodePortrait);
+		tvAutoCodeLandscape = findViewById(R.id.tvAutoCodeLandscape);
+		tvAutoOrient = findViewById(R.id.tvAutoOrient);
 
 		tvAutoRequest.setText(StringUtil.getString(JSON.format(request)));
+		tvAutoRequest.setText(StringUtil.getString(JSON.format(request)));
+
+
+		getWindow().getDecorView().addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+			@Override
+			public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+				onConfigurationChanged(getResources().getConfiguration());
+			}
+		});
 
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		onConfigurationChanged(getResources().getConfiguration());
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		onScreenChange(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE);
+		super.onConfigurationChanged(newConfig);
+	}
+
+	private void onScreenChange(boolean isHorizontal) {
+		tvAutoCodePortrait.setVisibility(! isHorizontal ? View.VISIBLE : View.GONE);
+		tvAutoCodeLandscape.setVisibility(isHorizontal ? View.VISIBLE : View.GONE);
+		tvAutoOrient.setText(getString(R.string.screen) + getString(isHorizontal ? R.string.horizontal : R.string.vertical));
+	}
 
 	public void copy(View v) {
 		StringUtil.copyText(context, StringUtil.getString((TextView) v));
@@ -100,6 +134,12 @@ public class AutoActivity extends Activity {
 	public void head(View v) {
 		request((TextView) v);
 	}
+	public void gets(View v) {
+		request((TextView) v);
+	}
+	public void heads(View v) {
+		request((TextView) v);
+	}
 	public void post(View v) {
 		request((TextView) v);
 	}
@@ -108,6 +148,11 @@ public class AutoActivity extends Activity {
 	}
 	public void delete(View v) {
 		request((TextView) v);
+	}
+
+	public void orient(View v) {
+		setRequestedOrientation(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+				? ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
 	}
 
 
@@ -121,7 +166,7 @@ public class AutoActivity extends Activity {
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n request = \n" + request + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n response = \n" + response + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-		tvAutoResponse.setText(StringUtil.getString(response));
+		tvAutoResponse.setText(StringUtil.getTrimedString(response));
 	}
 
 

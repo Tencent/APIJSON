@@ -21,6 +21,10 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
     </style>
+    <style name="wrap_match">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
 
     <style name="activity_page" parent="match_match">
         <item name="android:background">#f7f8f8</item>

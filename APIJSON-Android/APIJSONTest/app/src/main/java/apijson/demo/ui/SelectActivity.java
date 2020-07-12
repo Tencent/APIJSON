@@ -71,19 +71,19 @@ public class SelectActivity extends Activity implements OnClickListener {
 		method = sp.getString(KEY_METHOD, null);
 		name = sp.getString(KEY_NAME, null);
 
-		tvSelectLogin = (TextView) findViewById(R.id.tvSelectLogin);
+		tvSelectLogin = findViewById(R.id.tvSelectLogin);
 
 		buttons = new Button[10];
-		buttons[0] = (Button) findViewById(R.id.btnSelectPost);
-		buttons[1] = (Button) findViewById(R.id.btnSelectPut);
-		buttons[2] = (Button) findViewById(R.id.btnSelectDelete);
-		buttons[3] = (Button) findViewById(R.id.btnSelectSingle);
-		buttons[4] = (Button) findViewById(R.id.btnSelectColumns);
-		buttons[5] = (Button) findViewById(R.id.btnSelectRely);
-		buttons[6] = (Button) findViewById(R.id.btnSelectArray);
-		buttons[7] = (Button) findViewById(R.id.btnSelectComplex);
-		buttons[8] = (Button) findViewById(R.id.btnSelectAccessError);
-		buttons[9] = (Button) findViewById(R.id.btnSelectAccessPermitted);
+		buttons[0] = findViewById(R.id.btnSelectPost);
+		buttons[1] = findViewById(R.id.btnSelectPut);
+		buttons[2] = findViewById(R.id.btnSelectDelete);
+		buttons[3] = findViewById(R.id.btnSelectSingle);
+		buttons[4] = findViewById(R.id.btnSelectColumns);
+		buttons[5] = findViewById(R.id.btnSelectRely);
+		buttons[6] = findViewById(R.id.btnSelectArray);
+		buttons[7] = findViewById(R.id.btnSelectComplex);
+		buttons[8] = findViewById(R.id.btnSelectAccessError);
+		buttons[9] = findViewById(R.id.btnSelectAccessPermitted);
 
 
 		setRequest();

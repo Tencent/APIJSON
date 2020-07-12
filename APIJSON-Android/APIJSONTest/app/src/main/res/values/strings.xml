@@ -25,5 +25,11 @@
     <string name="apijson_slogan">APIJSON,&#160;let&#160;interfaces&#160;go&#160;to&#160;hell!</string>
     <string name="apijson_info">APIJSON&#160;is&#160;a&#160;JSON&#160;Transmission&#160;Structure&#160;Protocol&#8230;</string>
     <string name="unit">自动单元测试</string>
+    <string name="start">启动</string>
+    <string name="stop">停止</string>
+    <string name="port">端口：</string>
+    <string name="screen">屏幕：</string>
+    <string name="horizontal">横向</string>
+    <string name="vertical">纵向</string>
 
 </resources>

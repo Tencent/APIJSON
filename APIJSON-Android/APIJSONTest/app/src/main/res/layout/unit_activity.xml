@@ -1,7 +1,8 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.UnitActivity"
     >
@@ -14,10 +15,11 @@
             style="@style/match_match"
             android:orientation="horizontal" >
 
-            <EditText
+            <TextView
                 android:id="@+id/tvUnitRequest"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:padding="2dp"
                 android:layout_weight="1"
                 android:background="@null"
                 android:gravity="top|left"
@@ -33,7 +35,7 @@
                 android:id="@+id/tvUnitResponse"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="6dp"
+                android:padding="2dp"
                 android:layout_weight="2"
                 android:background="@null"
                 android:gravity="top|left"
@@ -43,44 +45,61 @@
         </LinearLayout>
     </ScrollView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/white" />
+
     <LinearLayout
-        android:layout_height="wrap_content"
+        android:layout_height="45dp"
         android:layout_width="match_parent"
         >
+        <Button
+            android:id="@+id/tvUnitOrient"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="orient"
+            android:text="Horizontal" />
+
+        <Button
+            android:id="@+id/tvUnitStop"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/stop"
+            android:onClick="stop"
+            />
 
         <TextView
-            android:text="Port: "
+            android:text="@string/port"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
             />
 
         <EditText
             android:id="@+id/etUnitPort"
             android:hint="8080"
             android:inputType="number"
-            android:maxLength="4"
-            android:minEms="4"
+            android:maxLength="6"
+            android:minEms="2"
             android:digits="1234567890"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:enabled="true"
             />
 
+        <ProgressBar
+            android:id="@+id/pbUnit"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
         <Button
             android:id="@+id/tvUnitStart"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start"
+            android:layout_height="match_parent"
+            android:text="@string/start"
             android:onClick="start"
-            />
-
-        <Button
-            android:id="@+id/tvUnitStop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stop"
-            android:onClick="stop"
             />
 
     </LinearLayout>

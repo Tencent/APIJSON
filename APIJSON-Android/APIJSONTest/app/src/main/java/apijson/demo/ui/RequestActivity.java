@@ -105,6 +105,7 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//FIXME 也解决不了竖屏只显示一半 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);  // AndroidManifest 设置不兼容小米 MIX 3 Android 9.0
 		setContentView(R.layout.request_activity);
 		context = this;
 		isAlive = true;
@@ -118,15 +119,15 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 		method = StringUtil.getTrimedString(method);
 		url = StringUtil.getCorrectUrl(url);
 
-		tvRequestResult = (TextView) findViewById(R.id.tvRequestResult);
-		pbRequest = (ProgressBar) findViewById(R.id.pbRequest);
-		etRequestUrl = (EditText) findViewById(R.id.etRequestUrl);
-		btnRequestRequest = (Button) findViewById(R.id.btnRequestRequest);
+		tvRequestResult = findViewById(R.id.tvRequestResult);
+		pbRequest = findViewById(R.id.pbRequest);
+		etRequestUrl = findViewById(R.id.etRequestUrl);
+		btnRequestRequest = findViewById(R.id.btnRequestRequest);
 
 
 
 		etRequestUrl.setText(StringUtil.getString(StringUtil.isNotEmpty(url, true)
-				? url : "http://apijson.cn:8080/"));//TODO 把这个ip地址改成你自己服务器的
+				? url : "http://apijson.cn:8080/"));  // TODO 把这个ip地址改成你自己服务器的
 		btnRequestRequest.setText(method);
 
 		error = String.format(getResources().getString(R.string.request_error), StringUtil.getTrimedString(btnRequestRequest));

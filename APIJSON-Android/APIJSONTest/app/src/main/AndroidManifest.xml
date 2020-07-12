@@ -32,18 +32,21 @@
         </activity>
         <activity
             android:name="apijson.demo.ui.RequestActivity"
-            android:label="@string/request" />
+            android:label="@string/request"
+            />
         <activity
             android:name="apijson.demo.ui.AutoActivity"
             android:label="@string/auto"
-            android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="userLandscape"
             />
         <activity
             android:name="apijson.demo.ui.UnitActivity"
             android:label="@string/unit"
-            android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="userLandscape"
             />
     </application>
 
