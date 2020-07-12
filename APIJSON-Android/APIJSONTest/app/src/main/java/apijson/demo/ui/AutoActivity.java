@@ -87,7 +87,7 @@ public class AutoActivity extends Activity {
 
 
 	public void copy(View v) {
-		StringUtil.copyText(context, StringUtil.getString(tvAutoResponse));
+		StringUtil.copyText(context, StringUtil.getString((TextView) v));
 	}
 
 	public void auto(View v) {

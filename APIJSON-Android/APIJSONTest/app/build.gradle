@@ -26,4 +26,5 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.1.0'
     compile 'com.alibaba:fastjson:1.2.61'
     compile 'com.github.APIJSON:apijson-orm:3.9.0'
+    compile 'com.koushikdutta.async:androidasync:2.+'
 }

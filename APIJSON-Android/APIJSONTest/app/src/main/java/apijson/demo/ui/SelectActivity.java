@@ -122,6 +122,11 @@ public class SelectActivity extends Activity implements OnClickListener {
 	public void toAuto(View v) {
 		startActivityForResult(AutoActivity.createIntent(context), REQUEST_TO_AUTO);
 	}
+
+	public void toUnit(View v) {
+		startActivity(UnitActivity.createIntent(context));
+	}
+
 	public void toUpdateLog(View v) {
 		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(
 				StringUtil.getCorrectUrl("github.com/TommyLemon/APIJSON/commits/master"))));

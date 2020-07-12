@@ -105,6 +105,12 @@
             android:text="@string/auto" />
 
         <Button
+            style="@style/match_wrap"
+            android:layout_marginTop="30dp"
+            android:onClick="toUnit"
+            android:text="@string/unit" />
+
+        <Button
             android:onClick="toUpdateLog"
             style="@style/match_wrap"
             android:layout_marginTop="30dp"

@@ -283,8 +283,8 @@ public class RequestActivity extends Activity implements OnHttpResponseListener 
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
 		isAlive = false;
+		super.onDestroy();
 	}
 
 }
