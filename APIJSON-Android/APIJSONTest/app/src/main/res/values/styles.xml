@@ -49,4 +49,12 @@
         <item name="android:gravity">left|top</item>
     </style>
 
+        <!-- 也不能传递给被遮挡的 Activity <item name="android:windowIsFloating">true</item>-->
+    <style name="Window">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+
 </resources>

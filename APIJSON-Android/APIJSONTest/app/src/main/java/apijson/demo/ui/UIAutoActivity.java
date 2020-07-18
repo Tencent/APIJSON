@@ -17,18 +17,30 @@ package apijson.demo.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Display;
+import android.support.annotation.RequiresApi;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yhao.floatwindow.FloatWindow;
+import com.yhao.floatwindow.MoveType;
+
 import java.util.Calendar;
 
 import apijson.demo.R;
+import apijson.demo.application.DemoApplication;
 
 
 /**自动 UI 测试，需要用 UIAuto 发请求到这个设备
@@ -36,22 +48,119 @@ import apijson.demo.R;
  * @author Lemon
  */
 public class UIAutoActivity extends Activity {
+    private static final String TAG = "UIAutoActivity";
+    private static final String DIVIDER_Y = "DIVIDER_Y";
+    private static final String DIVIDER_HEIGHT = "DIVIDER_HEIGHT";
+    private static final String DIVIDER_COLOR = "DIVIDER_COLOR";
+
     /**
      * @param context
      * @return
      */
     public static Intent createIntent(Context context) {
-        return new Intent(context, UIAutoActivity.class);
+        return new Intent(context, UIAutoActivity.class); //.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     private Activity context;
+    int screenWidth;
+    int screenHeight;
+
+    View cover;
+    View divider;
+    View rlUnitAutoDivider;
+    View vUnitAutoDivider;
+    View ivUnitAutoMenu;
+    private float dividerY;
+    private float dividerHeight;
+    private boolean moved = false;
+
+    SharedPreferences cache;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //反而让 cover 与底部差一个导航栏高度 requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.ui_auto_activity);
+        Window window = getWindow();
+        //反而让 cover 与底部差一个导航栏高度 window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         context = this;
 
-        final Display d = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        screenWidth = outMetrics.widthPixels;
+        screenHeight = outMetrics.heightPixels;
+        cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
+        dividerY = cache.getFloat(DIVIDER_Y, screenHeight - dip2px(30));
+
+        ViewGroup root = (ViewGroup) getWindow().getDecorView();
+        cover = getLayoutInflater().inflate(R.layout.unit_auto_cover_layout, null);
+        divider = getLayoutInflater().inflate(R.layout.unit_auto_divider_layout, null);
+
+        rlUnitAutoDivider = divider.findViewById(R.id.rlUnitAutoDivider);
+        vUnitAutoDivider = divider.findViewById(R.id.vUnitAutoDivider);
+        ivUnitAutoMenu = divider.findViewById(R.id.ivUnitAutoMenu);
+
+        dividerHeight = cache.getFloat(DIVIDER_HEIGHT, dip2px(24));
+        ViewGroup.LayoutParams dividerLp = rlUnitAutoDivider.getLayoutParams();
+        if (dividerLp == null) {
+            dividerLp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) dividerHeight);
+        } else {
+            dividerLp.height = (int) dividerHeight;
+        }
+        rlUnitAutoDivider.setLayoutParams(dividerLp);
+
+//        rlUnitAutoDivider.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                rlUnitAutoDivider.setY(dividerY - rlUnitAutoDivider.getHeight()/2);
+//                cover.setVisibility(View.GONE);
+//            }
+//        });
+
+        vUnitAutoDivider.setBackgroundColor(Color.parseColor(cache.getString(DIVIDER_COLOR, "#10000000")));
+
+        ViewGroup.LayoutParams lineLp = ivUnitAutoMenu.getLayoutParams();
+        if (lineLp == null) {
+            lineLp = new RelativeLayout.LayoutParams((int) dividerHeight, (int) dividerHeight);
+        } else {
+            lineLp.width = lineLp.height = (int) dividerHeight;
+        }
+        ivUnitAutoMenu.setLayoutParams(lineLp);
+
+        ivUnitAutoMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                ((ViewGroup) v.getParent()).removeView(v);
+                FloatWindow.destroy();
+                FloatWindow.destroy("ball");
+                startActivity(UIAutoActivity.createIntent(DemoApplication.getInstance()));
+            }
+        });
+//        ivUnitAutoMenu.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+////                都不动了 if (event.getY() - event.getRawY() >= 10) {
+//                if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
+//                    moved = true;
+//                    cover.setY(event.getY());
+//                } else {
+//                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//                        moved = false;
+//                    }
+//                    else if (event.getAction() == MotionEvent.ACTION_UP) {
+//                        if (! moved) {
+//                            ivUnitAutoMenu.performClick();
+//                        }
+//                    }
+//                }
+////                }
+//                return true;
+//            }
+//        });
+
+//        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//        root.addView(cover, lp);
+
 
         final ScrollView svTouch = findViewById(R.id.svTouch);
         final TextView tvTouch = findViewById(R.id.tvTouch);
@@ -66,8 +175,39 @@ public class UIAutoActivity extends Activity {
 
 
         View.OnTouchListener listener = new View.OnTouchListener() {
+            @RequiresApi(api = 29)
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                Log.d(TAG, "onTouchEvent  " + Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY());
+
+                Activity a = DemoApplication.getInstance().getCurrentActivity();
+                if (a != null) {
+                    View decorView = a.getWindow().getDecorView();
+                    float y = decorView.getY();
+                    float top = decorView.getTop();
+                    event.offsetLocation(0, decorView.getTop());
+                    View content = decorView.findViewById(android.R.id.content);
+                    float cy = content.getY();
+                    float ctop = content.getTop();
+
+                    Rect rectangle= new Rect();
+                    decorView.getWindowVisibleDisplayFrame(rectangle);
+
+//                    event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
+                    event.offsetLocation(0, rectangle.top);
+                    a.dispatchTouchEvent(event);
+                } else {
+                    //TODO 不是本 APP 的界面
+                }
+
+                if (isFinishing() || isDestroyed()) {
+//                    ActivityManager activityManager=(ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+//                    Activity runningActivity = activityManager.getRunningTasks(1).get(0);
+//                    getWindow().getDecorView().dispatchTouchEvent(event);
+
+                    return true;
+                }
+
                 vDispatchTouch.dispatchTouchEvent(event);
 
 //                vTouch.setOnTouchListener(new View.OnTouchListener() {
@@ -82,7 +222,10 @@ public class UIAutoActivity extends Activity {
                     s = "";
                 }
 
-                tvTouch.setText(Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY() + "\n" + s);
+                float dividerY = rlUnitAutoDivider.getY() + rlUnitAutoDivider.getHeight()/2;
+                float relativeY = event.getY() <= dividerY ? event.getY() : event.getY() - screenHeight;
+
+                tvTouch.setText(Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY() + "; relativeY: " + relativeY + "\n" + s);
 //                Toast.makeText(context, "vTouch.action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY(), Toast.LENGTH_SHORT).show();
 
 //死循环                llTouch.dispatchTouchEvent(event);
@@ -93,7 +236,7 @@ public class UIAutoActivity extends Activity {
                 return true;  //连续记录只能 return true
             }
         };
-        vTouch.setOnTouchListener(listener);
+//        vTouch.setOnTouchListener(listener);
 
         tvButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,7 +266,7 @@ public class UIAutoActivity extends Activity {
             public void run() {
 
                 MotionEvent e = MotionEvent.obtain(1000, 1000,
-                        MotionEvent.ACTION_DOWN, d.getWidth()/2, d.getHeight()/2, 0);
+                        MotionEvent.ACTION_DOWN, screenWidth/2, screenHeight/2, 0);
 
                 //TODO onTouchEvent ?
                 vTouch.dispatchTouchEvent(e);
@@ -132,10 +275,86 @@ public class UIAutoActivity extends Activity {
 
             }
         }, 1000);
+
+
+        cover.setOnTouchListener(listener);
+
     }
 
 
     public void onClick(View v) {
+        cover.setVisibility(View.VISIBLE);
         Toast.makeText(context, "onClick BUTTON", Toast.LENGTH_SHORT).show();
+
+        if (FloatWindow.get()== null) {
+            FloatWindow
+                    .with(getApplicationContext())
+                    .setView(cover)
+                    .setWidth(screenWidth)                               //设置控件宽高
+                    .setHeight(screenHeight)
+                    .setX(0)                                   //设置控件初始位置
+                    .setY(0)
+                    .setMoveType(MoveType.inactive)
+                    .setDesktopShow(true)                        //桌面显示
+//                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+//                .setPermissionListener(mPermissionListener)  //监听权限申请结果
+                    .build();
+        }
+        FloatWindow.get().show();
+
+
+        if (FloatWindow.get("ball") == null) {
+            FloatWindow
+                    .with(getApplicationContext())
+                    .setTag("ball")
+                    .setView(divider)
+                    .setWidth(screenWidth)                               //设置控件宽高
+                    .setHeight((int) dividerHeight)
+                    .setX(0)                                   //设置控件初始位置
+                    .setY((int) (dividerY + dividerHeight/2))
+//                    .setY(screenHeight/2)
+                    .setMoveType(MoveType.slide)
+                    .setDesktopShow(true)                        //桌面显示
+//                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+//                .setPermissionListener(mPermissionListener)  //监听权限申请结果
+                    .build();
+        }
+        FloatWindow.get("ball").show();
+
+//        finish();
     }
+
+    /**
+     * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
+     */
+    public int dip2px(float dpValue) {
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
+    /**
+     * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
+     */
+    public int px2dip(float pxValue) {
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int) (pxValue / scale + 0.5f);
+    }
+
+    @Override
+    protected void onDestroy() {
+        cache.edit().remove(DIVIDER_Y).putFloat(DIVIDER_Y, rlUnitAutoDivider.getY() + rlUnitAutoDivider.getHeight()/2).apply();
+        super.onDestroy();
+    }
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        super.dispatchTouchEvent(ev);
+//        return false;
+//    }
+//
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        super.onTouchEvent(event);
+//        return false;
+//    }
 }

@@ -14,8 +14,15 @@ limitations under the License.*/
 
 package apijson.demo.application;
 
+import android.app.Activity;
 import android.app.Application;
+import android.os.Bundle;
 import android.util.Log;
+
+import java.lang.ref.WeakReference;
+import java.util.LinkedList;
+import java.util.List;
+
 import apijson.demo.R;
 
 /**Application
@@ -24,18 +31,61 @@ import apijson.demo.R;
 public class DemoApplication extends Application {
 	private static final String TAG = "DemoApplication";
 
-	
-	private static Application instance;
-	public static Application getInstance() {
+
+	private static DemoApplication instance;
+	public static DemoApplication getInstance() {
 		return instance;
 	}
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		instance = this;
 		Log.d(TAG, "项目启动 >>>>>>>>>>>>>>>>>>>> \n\n");
-		
+
+		registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+
+
+			@Override
+			public void onActivityStarted(Activity activity) {
+				Log.v(TAG, "onActivityStarted  activity = " + activity.getClass().getName());
+			}
+
+			@Override
+			public void onActivityStopped(Activity activity) {
+				Log.v(TAG, "onActivityStopped  activity = " + activity.getClass().getName());
+			}
+
+			@Override
+			public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+				Log.v(TAG, "onActivitySaveInstanceState  activity = " + activity.getClass().getName());
+			}
+
+			@Override
+			public void onActivityResumed(Activity activity) {
+				Log.v(TAG, "onActivityResumed  activity = " + activity.getClass().getName());
+				setCurrentActivity(activity);
+			}
+
+			@Override
+			public void onActivityPaused(Activity activity) {
+				Log.v(TAG, "onActivityPaused  activity = " + activity.getClass().getName());
+				setCurrentActivity(activityList.isEmpty() ? null : activityList.get(activityList.size() - 1));
+			}
+
+			@Override
+			public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+				Log.v(TAG, "onActivityCreated  activity = " + activity.getClass().getName());
+				activityList.add(activity);
+			}
+
+			@Override
+			public void onActivityDestroyed(Activity activity) {
+				Log.v(TAG, "onActivityDestroyed  activity = " + activity.getClass().getName());
+				activityList.remove(activity);
+			}
+
+		});
 	}
 
 
@@ -52,5 +102,20 @@ public class DemoApplication extends Application {
 		return getResources().getString(R.string.app_version);
 	}
 
+	private List<Activity> activityList = new LinkedList<>();
 
+	private WeakReference<Activity> sCurrentActivityWeakRef;
+	public Activity getCurrentActivity() {
+		Activity currentActivity = null;
+		if (sCurrentActivityWeakRef != null) {
+			currentActivity = sCurrentActivityWeakRef.get();
+		}
+		return currentActivity;
+	}
+
+	public void setCurrentActivity(Activity activity) {
+		if (sCurrentActivityWeakRef == null || !activity.equals(sCurrentActivityWeakRef.get())) {
+			sCurrentActivityWeakRef = new WeakReference<>(activity);
+		}
+	}
 }
