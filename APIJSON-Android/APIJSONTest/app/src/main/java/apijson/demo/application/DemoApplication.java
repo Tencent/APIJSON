@@ -77,6 +77,7 @@ public class DemoApplication extends Application {
 			public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
 				Log.v(TAG, "onActivityCreated  activity = " + activity.getClass().getName());
 				activityList.add(activity);
+				//TODO 按键、键盘监听拦截和转发
 			}
 
 			@Override

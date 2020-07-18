@@ -8,12 +8,28 @@
     android:layout_alignParentBottom="true"
     >
 
+
     <View
         android:id="@+id/vUnitAutoDivider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#10000000"
         android:layout_centerInParent="true"
+        />
+
+
+    <View
+        android:layout_above="@id/vUnitAutoDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#DDEEEEEE"
+        />
+
+    <View
+        android:layout_below="@id/vUnitAutoDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#DDEEEEEE"
         />
 
     <ImageView

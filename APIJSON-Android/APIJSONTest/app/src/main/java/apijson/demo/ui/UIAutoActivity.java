@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -131,8 +132,8 @@ public class UIAutoActivity extends Activity {
             @Override
             public void onClick(View v) {
 //                ((ViewGroup) v.getParent()).removeView(v);
-                FloatWindow.destroy();
-                FloatWindow.destroy("ball");
+                FloatWindow.destroy("v");
+                FloatWindow.destroy("v_ball");
                 startActivity(UIAutoActivity.createIntent(DemoApplication.getInstance()));
             }
         });
@@ -196,6 +197,14 @@ public class UIAutoActivity extends Activity {
 //                    event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
                     event.offsetLocation(0, rectangle.top);
                     a.dispatchTouchEvent(event);
+
+                    //放到 Application 中   have already added to window manager
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            showCover(true, a);
+                        }
+                    }, 1000);
                 } else {
                     //TODO 不是本 APP 的界面
                 }
@@ -231,7 +240,7 @@ public class UIAutoActivity extends Activity {
 //死循环                llTouch.dispatchTouchEvent(event);
 //                vDispatchTouch.dispatchTouchEvent(event);
 //                vDispatchTouch.dispatchTouchEvent(event);
-               //onTouchEvent 不能处理事件 vDispatchTouch.onTouchEvent(event);
+                //onTouchEvent 不能处理事件 vDispatchTouch.onTouchEvent(event);
 //                vTouch.setOnTouchListener(this);
                 return true;  //连续记录只能 return true
             }
@@ -252,6 +261,7 @@ public class UIAutoActivity extends Activity {
             }
         });
 
+
         btnButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -259,7 +269,6 @@ public class UIAutoActivity extends Activity {
                 return true;
             }
         });
-
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -276,7 +285,6 @@ public class UIAutoActivity extends Activity {
             }
         }, 1000);
 
-
         cover.setOnTouchListener(listener);
 
     }
@@ -286,9 +294,17 @@ public class UIAutoActivity extends Activity {
         cover.setVisibility(View.VISIBLE);
         Toast.makeText(context, "onClick BUTTON", Toast.LENGTH_SHORT).show();
 
-        if (FloatWindow.get()== null) {
+        showCover(true, context);
+
+//        finish();
+    }
+
+    private void showCover(boolean show, Activity activity) {
+        //TODO 为纵屏、横屏分别加两套，判断屏幕方向来显示对应的一套
+        if (FloatWindow.get("v")== null) {
             FloatWindow
                     .with(getApplicationContext())
+                    .setTag("v")
                     .setView(cover)
                     .setWidth(screenWidth)                               //设置控件宽高
                     .setHeight(screenHeight)
@@ -300,13 +316,12 @@ public class UIAutoActivity extends Activity {
 //                .setPermissionListener(mPermissionListener)  //监听权限申请结果
                     .build();
         }
-        FloatWindow.get().show();
 
 
-        if (FloatWindow.get("ball") == null) {
+        if (FloatWindow.get("v_ball") == null) {
             FloatWindow
                     .with(getApplicationContext())
-                    .setTag("ball")
+                    .setTag("v_ball")
                     .setView(divider)
                     .setWidth(screenWidth)                               //设置控件宽高
                     .setHeight((int) dividerHeight)
@@ -319,10 +334,57 @@ public class UIAutoActivity extends Activity {
 //                .setPermissionListener(mPermissionListener)  //监听权限申请结果
                     .build();
         }
-        FloatWindow.get("ball").show();
 
-//        finish();
+        //TODO 新建一个  have already added to window manager
+
+//        if (FloatWindow.get("h")== null) {
+//            FloatWindow
+//                    .with(getApplicationContext())
+//                    .setTag("h")
+//                    .setView(cover)
+//                    .setWidth(screenWidth)                               //设置控件宽高
+//                    .setHeight(screenHeight)
+//                    .setX(0)                                   //设置控件初始位置
+//                    .setY(0)
+//                    .setMoveType(MoveType.inactive)
+//                    .setDesktopShow(true)                        //桌面显示
+////                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+////                .setPermissionListener(mPermissionListener)  //监听权限申请结果
+//                    .build();
+//        }
+//
+//        if (FloatWindow.get("h_ball") == null) {
+//            FloatWindow
+//                    .with(getApplicationContext())
+//                    .setTag("h_ball")
+//                    .setView(divider)
+//                    .setWidth(screenWidth)                               //设置控件宽高
+//                    .setHeight((int) dividerHeight)
+//                    .setX(0)                                   //设置控件初始位置
+//                    .setY((int) (dividerY + dividerHeight/2))
+////                    .setY(screenHeight/2)
+//                    .setMoveType(MoveType.slide)
+//                    .setDesktopShow(true)                        //桌面显示
+////                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+////                .setPermissionListener(mPermissionListener)  //监听权限申请结果
+//                    .build();
+//        }
+
+        FloatWindow.get("v").hide();
+        FloatWindow.get("v_ball").hide();
+//        FloatWindow.get("h").hide();
+//        FloatWindow.get("h_ball").hide();
+        if (show) {
+            if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                FloatWindow.get("v").show();
+                FloatWindow.get("v_ball").show();
+            } else {
+//                FloatWindow.get("h").show();
+//                FloatWindow.get("h_ball").show();
+            }
+        }
     }
+
 
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
