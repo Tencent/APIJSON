@@ -1,9 +1,24 @@
+/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.*/
+
 package apijson.demo.ui;
 
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -12,6 +27,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -30,9 +46,13 @@ import apijson.demo.StringUtil;
 import apijson.demo.application.DemoApplication;
 import apijson.demo.server.MethodUtil;
 
-
+/**自动单元测试，需要用 UnitAuto 发请求到这个设备
+ * https://github.com/TommyLemon/UnitAuto
+ * @author Lemon
+ */
 public class UnitActivity extends Activity implements HttpServerRequestCallback {
     private static final String TAG = "UnitActivity";
+    private static final String KEY_PORT = "KEY_PORT";
 
     /**
      * @param context
@@ -70,6 +90,10 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
         tvUnitOrient = findViewById(R.id.tvUnitOrient);
         etUnitPort = findViewById(R.id.etUnitPort);
         pbUnit = findViewById(R.id.pbUnit);
+
+
+        SharedPreferences sp = getSharedPreferences(TAG, Context.MODE_PRIVATE);
+        port = sp.getString(KEY_PORT, "");
 
         etUnitPort.setText(port);
         pbUnit.setVisibility(View.GONE);
@@ -113,21 +137,33 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
     private String port = "8080";
     public void start(View v) {
         v.setEnabled(false);
-        port = StringUtil.getString(etUnitPort);
-        startServer(Integer.valueOf(port));
+        port = StringUtil.getTrimedString(etUnitPort);
 
+        try {
+            startServer(StringUtil.isEmpty(port, true) ? 8080 : Integer.valueOf(port));
+
+            etUnitPort.setEnabled(false);
+            pbUnit.setVisibility(View.VISIBLE);
+
+            Toast.makeText(context, R.string.please_send_request_with_unit_auto, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {  // FIXME 端口异常 catch 不到
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
         v.setEnabled(true);
-        etUnitPort.setEnabled(false);
-        pbUnit.setVisibility(View.VISIBLE);
     }
     public void stop(View v) {
         v.setEnabled(false);
-        server.stop();
-        mAsyncServer.stop();
 
+        try {
+            server.stop();
+            mAsyncServer.stop();
+
+            etUnitPort.setEnabled(true);
+            pbUnit.setVisibility(View.GONE);
+        } catch (Exception e) {
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
         v.setEnabled(true);
-        etUnitPort.setEnabled(true);
-        pbUnit.setVisibility(View.GONE);
     }
 
 
@@ -268,6 +304,9 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
     protected void onDestroy() {
         isAlive = false;
         stop(etUnitPort);
+
+        getSharedPreferences(TAG, Context.MODE_PRIVATE).edit().remove(KEY_PORT).putString(KEY_PORT, port).apply();
+
         super.onDestroy();
     }
 
