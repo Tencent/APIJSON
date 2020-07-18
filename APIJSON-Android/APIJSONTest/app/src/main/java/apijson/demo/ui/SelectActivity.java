@@ -124,7 +124,11 @@ public class SelectActivity extends Activity implements OnClickListener {
 	}
 
 	public void toUnit(View v) {
-		startActivity(UnitActivity.createIntent(context));
+		startActivity(UnitAutoActivity.createIntent(context));
+	}
+
+	public void toUI(View v) {
+		startActivity(UIAutoActivity.createIntent(context));
 	}
 
 	public void toUpdateLog(View v) {

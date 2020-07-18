@@ -14,6 +14,20 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.URI;
@@ -23,21 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import zuo.biao.apijson.StringUtil;
-import android.content.Context;
-import android.os.AsyncTask;
-import android.text.TextUtils;
-import android.util.Log;
 import apijson.demo.application.DemoApplication;
-
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import zuo.biao.apijson.StringUtil;
 
 /**HTTP请求管理类
  * @author Lemon
@@ -137,12 +138,8 @@ public class HttpManager {
 	public static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
 	/**POST请求
-	 * @param paramList 请求参数列表，（可以一个键对应多个值）
-	 * @param url 接口url
-	 * @param requestCode
-	 *            请求码，类似onActivityResult中请求码，当同一activity中以实现接口方式发起多个网络请求时，请求结束后都会回调
-	 *            {@link OnHttpResponseListener#onHttpResponse(int, String, Exception)}<br/>
-	 *            在发起请求的类中可以用requestCode来区分各个请求
+	 * @param url_ 接口url
+	 * @param request 请求参数，（可以一个键对应多个值）
 	 * @param listener
 	 */
 	public void post(final String url_, final String request, final OnHttpResponseListener listener) {
@@ -208,7 +205,7 @@ public class HttpManager {
 	}
 
 	/**
-	 * @param paramList
+	 * @param tag
 	 * @must demo_***改为服务器设定值
 	 * @return
 	 */
@@ -266,7 +263,7 @@ public class HttpManager {
 	 * @param json
 	 * @param key
 	 * @return
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	public <T> T getValue(String json, String key) throws JSONException {
 		return getValue(new JSONObject(json), key);
@@ -276,7 +273,7 @@ public class HttpManager {
 	 * @param object
 	 * @param key
 	 * @return
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getValue(JSONObject object, String key) throws JSONException {

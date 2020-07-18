@@ -32,5 +32,6 @@
     <string name="horizontal">横向</string>
     <string name="vertical">纵向</string>
     <string name="please_send_request_with_unit_auto">请用 UnitAuto 向这个设备发送请求 \nhttp://apijson.org/unit</string>
+    <string name="ui">自动 UI 测试</string>
 
 </resources>

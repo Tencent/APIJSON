@@ -30,4 +30,5 @@
     <string name="horizontal">Horizontal</string>
     <string name="vertical">Vertical</string>
     <string name="please_send_request_with_unit_auto">Please send request to this device with UnitAuto \nhttp://apijson.org/unit</string>
+    <string name="ui">UI Test</string>
 </resources>

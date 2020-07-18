@@ -111,6 +111,12 @@
             android:text="@string/unit" />
 
         <Button
+            style="@style/match_wrap"
+            android:layout_marginTop="30dp"
+            android:onClick="toUI"
+            android:text="@string/ui" />
+
+        <Button
             android:onClick="toUpdateLog"
             style="@style/match_wrap"
             android:layout_marginTop="30dp"

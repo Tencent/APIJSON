@@ -42,11 +42,18 @@
             android:screenOrientation="userLandscape"
             />
         <activity
-            android:name="apijson.demo.ui.UnitActivity"
+            android:name="apijson.demo.ui.UnitAutoActivity"
             android:label="@string/unit"
             android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="userLandscape"
+            />
+        <activity
+            android:name="apijson.demo.ui.UIAutoActivity"
+            android:label="@string/ui"
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait"
             />
     </application>
 

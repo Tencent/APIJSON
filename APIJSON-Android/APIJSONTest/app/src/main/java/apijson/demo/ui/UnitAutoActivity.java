@@ -50,8 +50,8 @@ import apijson.demo.server.MethodUtil;
  * https://github.com/TommyLemon/UnitAuto
  * @author Lemon
  */
-public class UnitActivity extends Activity implements HttpServerRequestCallback {
-    private static final String TAG = "UnitActivity";
+public class UnitAutoActivity extends Activity implements HttpServerRequestCallback {
+    private static final String TAG = "UnitAutoActivity";
     private static final String KEY_PORT = "KEY_PORT";
 
     /**
@@ -59,7 +59,7 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
      * @return
      */
     public static Intent createIntent(Context context) {
-        return new Intent(context, UnitActivity.class);
+        return new Intent(context, UnitAutoActivity.class);
     }
 
 
@@ -79,7 +79,7 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.unit_activity);
+        setContentView(R.layout.unit_auto_activity);
         context = this;
         isAlive = true;
 
@@ -250,7 +250,7 @@ public class UnitActivity extends Activity implements HttpServerRequestCallback 
                             String clsName = req.getString("class");
                             Class<?> clazz = Class.forName(pkgName.replaceAll("/", ".") + "." + clsName);
                             if (clazz.isAssignableFrom(Activity.class)) {
-                                instance = UnitActivity.this;
+                                instance = UnitAutoActivity.this;
                             } else if (clazz.isAssignableFrom(Application.class)) {
                                 instance = DemoApplication.getInstance();
                             } else {
