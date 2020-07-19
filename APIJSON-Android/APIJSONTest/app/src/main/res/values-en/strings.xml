@@ -31,4 +31,9 @@
     <string name="vertical">Vertical</string>
     <string name="please_send_request_with_unit_auto">Please send request to this device with UnitAuto \nhttp://apijson.org/unit</string>
     <string name="ui">UI Test</string>
+    <string name="local">Local</string>
+    <string name="remote">Remote</string>
+    <string name="record">Record</string>
+    <string name="name">Name:</string>
+    <string name="recover">Recover</string>
 </resources>

@@ -33,5 +33,10 @@
     <string name="vertical">纵向</string>
     <string name="please_send_request_with_unit_auto">请用 UnitAuto 向这个设备发送请求 \nhttp://apijson.org/unit</string>
     <string name="ui">自动 UI 测试</string>
+    <string name="local">本地列表</string>
+    <string name="remote">共享列表</string>
+    <string name="record">录制</string>
+    <string name="name">名称：</string>
+    <string name="recover">回放</string>
 
 </resources>

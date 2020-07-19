@@ -59,6 +59,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/Window"
             />
+        <activity
+            android:name="apijson.demo.ui.UIAutoListActivity"
+            android:label="@string/ui"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"
+            />
     </application>
 
 </manifest>

@@ -53,7 +53,9 @@
     <LinearLayout
         android:layout_height="45dp"
         android:layout_width="match_parent"
+        android:orientation="horizontal"
         >
+
         <Button
             android:id="@+id/tvUnitOrient"
             android:layout_width="wrap_content"

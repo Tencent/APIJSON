@@ -82,4 +82,48 @@
             android:layout_height="match_parent"
             />
     </LinearLayout>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/white" />
+
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:layout_height="45dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+
+        <Button
+            android:id="@+id/tvUnitOrient"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="toRemote"
+            android:text="@string/remote"
+            />
+
+        <Button
+            android:id="@+id/tvUnitStop"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:onClick="toLocal"
+            android:layout_weight="1"
+            android:text="@string/local"
+            />
+
+        <Button
+            android:id="@+id/tvUnitStart"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/record"
+            android:onClick="record"
+            android:minWidth="60dp"
+            />
+
+    </LinearLayout>
+
 </RelativeLayout>

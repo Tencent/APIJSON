@@ -51,7 +51,7 @@ import apijson.demo.server.MethodUtil;
  * @author Lemon
  */
 public class UnitAutoActivity extends Activity implements HttpServerRequestCallback {
-    private static final String TAG = "UnitAutoActivity";
+    public static final String TAG = "UnitAutoActivity";
     private static final String KEY_PORT = "KEY_PORT";
 
     /**

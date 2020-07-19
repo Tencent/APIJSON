@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.UIAutoListActivity"
+    android:orientation="vertical"
+    >
+
+    <EditText
+        android:id="@+id/etUIAutoListName"
+        style="@style/select_name"
+        android:layout_height="45dp"
+        android:padding="0dp"
+        android:background="@null"
+        android:text="操作流程 Temp"
+        android:enabled="true"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/white" />
+
+    <ListView
+        android:id="@+id/lvUIAutoList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:listitem="@android:layout/simple_list_item_1"
+        />
+
+    <LinearLayout
+        android:id="@+id/llUIAutoListBar"
+        style="@style/match_wrap"
+        android:layout_height="45dp"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/btnUIAutoListRecover"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:text="@string/recover"
+            android:onClick="recover"
+            />
+
+        <ProgressBar
+            android:id="@+id/pbUIAutoList"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            />
+
+        <EditText
+            android:id="@+id/etUIAutoListUrl"
+            style="@style/select_name"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:gravity="left|center_vertical"
+            android:padding="0dp"
+            android:text="http://apijson.cn:8080/"
+            />
+
+        <Button
+            android:id="@+id/btnUIAutoListGet"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textAllCaps="false"
+            android:gravity="center"
+            android:text="get"
+            android:onClick="send"
+            />
+    </LinearLayout>
+
+</LinearLayout>

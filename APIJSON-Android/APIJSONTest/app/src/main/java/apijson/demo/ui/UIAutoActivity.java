@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.yhao.floatwindow.FloatWindow;
 import com.yhao.floatwindow.MoveType;
 
@@ -42,6 +45,7 @@ import java.util.Calendar;
 
 import apijson.demo.R;
 import apijson.demo.application.DemoApplication;
+import zuo.biao.apijson.JSON;
 
 
 /**自动 UI 测试，需要用 UIAuto 发请求到这个设备
@@ -54,6 +58,9 @@ public class UIAutoActivity extends Activity {
     private static final String DIVIDER_HEIGHT = "DIVIDER_HEIGHT";
     private static final String DIVIDER_COLOR = "DIVIDER_COLOR";
 
+    private static final String INTENT_FLOW_ID = "INTENT_FLOW_ID";
+    private static final String INTENT_TOUCH_LIST = "INTENT_TOUCH_LIST";
+
     /**
      * @param context
      * @return
@@ -61,10 +68,19 @@ public class UIAutoActivity extends Activity {
     public static Intent createIntent(Context context) {
         return new Intent(context, UIAutoActivity.class); //.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
+    /**
+     * @param context
+     * @return
+     */
+    public static Intent createIntent(Context context, String list) {
+        return new Intent(context, UIAutoActivity.class).putExtra(INTENT_TOUCH_LIST, list);
+    }
 
     private Activity context;
     int screenWidth;
     int screenHeight;
+    int windowWidth;
+    int windowHeight;
 
     View cover;
     View divider;
@@ -75,7 +91,10 @@ public class UIAutoActivity extends Activity {
     private float dividerHeight;
     private boolean moved = false;
 
+    private JSONArray touchList;
+
     SharedPreferences cache;
+    private long flowId = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,8 +105,22 @@ public class UIAutoActivity extends Activity {
 
         context = this;
 
+        flowId = getIntent().getLongExtra(INTENT_FLOW_ID, flowId);
+        touchList = JSON.parseArray(getIntent().getStringExtra(INTENT_TOUCH_LIST));
+
+        if (touchList != null && touchList.isEmpty() == false) { //TODO 回放操作
+
+        } else { //TODO 录制操作
+
+        }
+
         DisplayMetrics outMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getRealMetrics(outMetrics);
+        Display display = getWindowManager().getDefaultDisplay();
+
+        windowWidth = display.getWidth();
+        windowHeight = display.getHeight();
+
+        display.getRealMetrics(outMetrics);
         screenWidth = outMetrics.widthPixels;
         screenHeight = outMetrics.heightPixels;
         cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
@@ -132,9 +165,24 @@ public class UIAutoActivity extends Activity {
             @Override
             public void onClick(View v) {
 //                ((ViewGroup) v.getParent()).removeView(v);
+
+                String cacheKey = UIAutoListActivity.CACHE_TOUCH;
+                SharedPreferences cache = getSharedPreferences(UnitAutoActivity.TAG, Context.MODE_PRIVATE);
+                JSONArray allList = JSON.parseArray(cache.getString(cacheKey, null));
+
+                if (allList == null || allList.isEmpty()) {
+                    allList = touchList;
+                }
+                else {
+                    allList.addAll(touchList);
+                }
+                cache.edit().remove(cacheKey).putString(cacheKey, JSON.toJSONString(allList)).commit();
+
+//                startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), flowId));  // touchList == null ? null : touchList.toJSONString()));
+                startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()));
+
                 FloatWindow.destroy("v");
                 FloatWindow.destroy("v_ball");
-                startActivity(UIAutoActivity.createIntent(DemoApplication.getInstance()));
             }
         });
 //        ivUnitAutoMenu.setOnTouchListener(new View.OnTouchListener() {
@@ -195,7 +243,11 @@ public class UIAutoActivity extends Activity {
                     decorView.getWindowVisibleDisplayFrame(rectangle);
 
 //                    event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
-                    event.offsetLocation(0, rectangle.top);
+
+                    if (rectangle.top > 0) {
+                        event = MotionEvent.obtain(event);
+                        event.offsetLocation(0, rectangle.top);
+                    }
                     a.dispatchTouchEvent(event);
 
                     //放到 Application 中   have already added to window manager
@@ -208,6 +260,20 @@ public class UIAutoActivity extends Activity {
                 } else {
                     //TODO 不是本 APP 的界面
                 }
+
+                if (touchList == null) {
+                    touchList = new JSONArray();
+                }
+
+                JSONObject obj = new JSONObject(true);
+                obj.put("id", - System.currentTimeMillis());
+                obj.put("flowId", flowId);
+                obj.put("action", event.getAction());
+                obj.put("x", (int) event.getX());
+                obj.put("y", (int) event.getY() <= dividerY ? event.getY() : event.getY() - screenHeight);
+                obj.put("dividerY", (int) dividerY);
+                obj.put("time", System.currentTimeMillis());
+                touchList.add(obj);
 
                 if (isFinishing() || isDestroyed()) {
 //                    ActivityManager activityManager=(ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -291,13 +357,30 @@ public class UIAutoActivity extends Activity {
 
 
     public void onClick(View v) {
-        cover.setVisibility(View.VISIBLE);
         Toast.makeText(context, "onClick BUTTON", Toast.LENGTH_SHORT).show();
 
+        record(v);
+    }
+
+    public void toRemote(View v) {
+        startActivityForResult(UIAutoListActivity.createIntent(context, false), REQUEST_UI_AUTO_LIST);
+    }
+
+    public void toLocal(View v) {
+        startActivityForResult(UIAutoListActivity.createIntent(context, true), REQUEST_UI_AUTO_LIST);
+    }
+
+    public void record(View v) {
+        flowId = - System.currentTimeMillis();
+
+        cover.setVisibility(View.VISIBLE);
         showCover(true, context);
 
 //        finish();
     }
+
+
+
 
     private void showCover(boolean show, Activity activity) {
         //TODO 为纵屏、横屏分别加两套，判断屏幕方向来显示对应的一套
@@ -419,4 +502,25 @@ public class UIAutoActivity extends Activity {
 //        super.onTouchEvent(event);
 //        return false;
 //    }
+
+
+    public static final int REQUEST_UI_AUTO_LIST = 1;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        if (requestCode == REQUEST_UI_AUTO_LIST) {
+            JSONArray array = data == null ? null : JSON.parseArray(data.getStringExtra(UIAutoListActivity.RESULT_LIST));
+
+            Toast.makeText(context, "onActivityResult  array = " + JSON.toJSONString(array), Toast.LENGTH_LONG).show();
+            //TODO  恢复
+        }
+
+    }
 }
+
