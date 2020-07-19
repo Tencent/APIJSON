@@ -265,12 +265,15 @@ public class UIAutoActivity extends Activity {
                     touchList = new JSONArray();
                 }
 
+                float dividerY = rlUnitAutoDivider.getY() + rlUnitAutoDivider.getHeight()/2;
+                float relativeY = event.getY() <= dividerY ? event.getY() : (event.getY() - screenHeight);
+
                 JSONObject obj = new JSONObject(true);
                 obj.put("id", - System.currentTimeMillis());
                 obj.put("flowId", flowId);
                 obj.put("action", event.getAction());
                 obj.put("x", (int) event.getX());
-                obj.put("y", (int) event.getY() <= dividerY ? event.getY() : event.getY() - screenHeight);
+                obj.put("y", (int) relativeY);
                 obj.put("dividerY", (int) dividerY);
                 obj.put("time", System.currentTimeMillis());
                 touchList.add(obj);
@@ -297,8 +300,6 @@ public class UIAutoActivity extends Activity {
                     s = "";
                 }
 
-                float dividerY = rlUnitAutoDivider.getY() + rlUnitAutoDivider.getHeight()/2;
-                float relativeY = event.getY() <= dividerY ? event.getY() : event.getY() - screenHeight;
 
                 tvTouch.setText(Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY() + "; relativeY: " + relativeY + "\n" + s);
 //                Toast.makeText(context, "vTouch.action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY(), Toast.LENGTH_SHORT).show();
