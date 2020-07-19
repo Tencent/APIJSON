@@ -82,8 +82,8 @@ public class UIAutoActivity extends Activity {
     int windowWidth;
     int windowHeight;
 
-    View cover;
-    View divider;
+    ViewGroup cover;
+    ViewGroup divider;
     View rlUnitAutoDivider;
     View vUnitAutoDivider;
     View ivUnitAutoMenu;
@@ -127,8 +127,8 @@ public class UIAutoActivity extends Activity {
         dividerY = cache.getFloat(DIVIDER_Y, screenHeight - dip2px(30));
 
         ViewGroup root = (ViewGroup) getWindow().getDecorView();
-        cover = getLayoutInflater().inflate(R.layout.unit_auto_cover_layout, null);
-        divider = getLayoutInflater().inflate(R.layout.unit_auto_divider_layout, null);
+        cover = (ViewGroup) getLayoutInflater().inflate(R.layout.unit_auto_cover_layout, null);
+        divider = (ViewGroup) getLayoutInflater().inflate(R.layout.unit_auto_divider_layout, null);
 
         rlUnitAutoDivider = divider.findViewById(R.id.rlUnitAutoDivider);
         vUnitAutoDivider = divider.findViewById(R.id.vUnitAutoDivider);
@@ -142,6 +142,8 @@ public class UIAutoActivity extends Activity {
             dividerLp.height = (int) dividerHeight;
         }
         rlUnitAutoDivider.setLayoutParams(dividerLp);
+
+        cover.addView(divider);
 
 //        rlUnitAutoDivider.post(new Runnable() {
 //            @Override
@@ -185,27 +187,28 @@ public class UIAutoActivity extends Activity {
                 FloatWindow.destroy("v_ball");
             }
         });
-//        ivUnitAutoMenu.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-////                都不动了 if (event.getY() - event.getRawY() >= 10) {
-//                if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
-//                    moved = true;
-//                    cover.setY(event.getY());
-//                } else {
-//                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                        moved = false;
-//                    }
-//                    else if (event.getAction() == MotionEvent.ACTION_UP) {
-//                        if (! moved) {
-//                            ivUnitAutoMenu.performClick();
-//                        }
-//                    }
+        rlUnitAutoDivider.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+//                都不动了 if (event.getY() - event.getRawY() >= 10) {
+                if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
+                    moved = true;
+                    divider.setY(event.getY());
+//                    divider.invalidate();
+                } else {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        moved = false;
+                    }
+                    else if (event.getAction() == MotionEvent.ACTION_UP) {
+                        if (! moved) {
+                            ivUnitAutoMenu.performClick();
+                        }
+                    }
+                }
 //                }
-////                }
-//                return true;
-//            }
-//        });
+                return true;
+            }
+        });
 
 //        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 //        root.addView(cover, lp);
@@ -385,6 +388,9 @@ public class UIAutoActivity extends Activity {
 
     private void showCover(boolean show, Activity activity) {
         //TODO 为纵屏、横屏分别加两套，判断屏幕方向来显示对应的一套
+        rlUnitAutoDivider.setVisibility(show ? View.VISIBLE : View.GONE);
+        rlUnitAutoDivider.setY(dividerY + dividerHeight/2);
+
         if (FloatWindow.get("v")== null) {
             FloatWindow
                     .with(getApplicationContext())
@@ -400,24 +406,24 @@ public class UIAutoActivity extends Activity {
 //                .setPermissionListener(mPermissionListener)  //监听权限申请结果
                     .build();
         }
-
-
-        if (FloatWindow.get("v_ball") == null) {
-            FloatWindow
-                    .with(getApplicationContext())
-                    .setTag("v_ball")
-                    .setView(divider)
-                    .setWidth(screenWidth)                               //设置控件宽高
-                    .setHeight((int) dividerHeight)
-                    .setX(0)                                   //设置控件初始位置
-                    .setY((int) (dividerY + dividerHeight/2))
-//                    .setY(screenHeight/2)
-                    .setMoveType(MoveType.slide)
-                    .setDesktopShow(true)                        //桌面显示
-//                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
-//                .setPermissionListener(mPermissionListener)  //监听权限申请结果
-                    .build();
-        }
+//
+//
+//        if (FloatWindow.get("v_ball") == null) {
+//            FloatWindow
+//                    .with(getApplicationContext())
+//                    .setTag("v_ball")
+//                    .setView(divider)
+//                    .setWidth(screenWidth)                               //设置控件宽高
+//                    .setHeight((int) dividerHeight)
+//                    .setX(0)                                   //设置控件初始位置
+//                    .setY((int) (dividerY + dividerHeight/2))
+////                    .setY(screenHeight/2)
+//                    .setMoveType(MoveType.slide)
+//                    .setDesktopShow(true)                        //桌面显示
+////                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+////                .setPermissionListener(mPermissionListener)  //监听权限申请结果
+//                    .build();
+//        }
 
         //TODO 新建一个  have already added to window manager
 
@@ -455,13 +461,13 @@ public class UIAutoActivity extends Activity {
 //        }
 
         FloatWindow.get("v").hide();
-        FloatWindow.get("v_ball").hide();
+//        FloatWindow.get("v_ball").hide();
 //        FloatWindow.get("h").hide();
 //        FloatWindow.get("h_ball").hide();
         if (show) {
             if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 FloatWindow.get("v").show();
-                FloatWindow.get("v_ball").show();
+//                FloatWindow.get("v_ball").show();
             } else {
 //                FloatWindow.get("h").show();
 //                FloatWindow.get("h_ball").show();

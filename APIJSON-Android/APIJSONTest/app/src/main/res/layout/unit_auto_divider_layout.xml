@@ -22,7 +22,7 @@
         android:layout_above="@id/vUnitAutoDivider"
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="#DDEEEEEE"
+        android:background="@android:color/white"
         />
 
     <View
