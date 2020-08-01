@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -76,6 +77,20 @@ public class UIAutoActivity extends Activity {
         return new Intent(context, UIAutoActivity.class).putExtra(INTENT_TOUCH_LIST, list);
     }
 
+
+    private boolean isRecovering = false;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            if (isRecovering) {
+                MotionEvent event = (MotionEvent) msg.obj;
+                dispatchEventToCurrentActivity(event);
+            }
+        }
+    };
+
     private Activity context;
     int screenWidth;
     int screenHeight;
@@ -108,11 +123,6 @@ public class UIAutoActivity extends Activity {
         flowId = getIntent().getLongExtra(INTENT_FLOW_ID, flowId);
         touchList = JSON.parseArray(getIntent().getStringExtra(INTENT_TOUCH_LIST));
 
-        if (touchList != null && touchList.isEmpty() == false) { //TODO 回放操作
-
-        } else { //TODO 录制操作
-
-        }
 
         DisplayMetrics outMetrics = new DisplayMetrics();
         Display display = getWindowManager().getDefaultDisplay();
@@ -125,6 +135,12 @@ public class UIAutoActivity extends Activity {
         screenHeight = outMetrics.heightPixels;
         cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
         dividerY = cache.getFloat(DIVIDER_Y, screenHeight - dip2px(30));
+
+        if (touchList != null && touchList.isEmpty() == false) { //TODO 回放操作
+            recover(touchList);
+            return;
+        }
+
 
         ViewGroup root = (ViewGroup) getWindow().getDecorView();
         cover = (ViewGroup) getLayoutInflater().inflate(R.layout.unit_auto_cover_layout, null);
@@ -166,6 +182,7 @@ public class UIAutoActivity extends Activity {
         ivUnitAutoMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isRecovering = false;
 //                ((ViewGroup) v.getParent()).removeView(v);
 
                 String cacheKey = UIAutoListActivity.CACHE_TOUCH;
@@ -181,7 +198,7 @@ public class UIAutoActivity extends Activity {
                 cache.edit().remove(cacheKey).putString(cacheKey, JSON.toJSONString(allList)).commit();
 
 //                startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), flowId));  // touchList == null ? null : touchList.toJSONString()));
-                startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()));
+                startActivityForResult(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()), REQUEST_UI_AUTO_LIST);
 
                 FloatWindow.destroy("v");
                 FloatWindow.destroy("v_ball");
@@ -232,37 +249,7 @@ public class UIAutoActivity extends Activity {
             public boolean onTouch(View v, MotionEvent event) {
                 Log.d(TAG, "onTouchEvent  " + Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY());
 
-                Activity a = DemoApplication.getInstance().getCurrentActivity();
-                if (a != null) {
-                    View decorView = a.getWindow().getDecorView();
-                    float y = decorView.getY();
-                    float top = decorView.getTop();
-                    event.offsetLocation(0, decorView.getTop());
-                    View content = decorView.findViewById(android.R.id.content);
-                    float cy = content.getY();
-                    float ctop = content.getTop();
-
-                    Rect rectangle= new Rect();
-                    decorView.getWindowVisibleDisplayFrame(rectangle);
-
-//                    event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
-
-                    if (rectangle.top > 0) {
-                        event = MotionEvent.obtain(event);
-                        event.offsetLocation(0, rectangle.top);
-                    }
-                    a.dispatchTouchEvent(event);
-
-                    //放到 Application 中   have already added to window manager
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            showCover(true, a);
-                        }
-                    }, 1000);
-                } else {
-                    //TODO 不是本 APP 的界面
-                }
+                dispatchEventToCurrentActivity(event);
 
                 if (touchList == null) {
                     touchList = new JSONArray();
@@ -279,6 +266,9 @@ public class UIAutoActivity extends Activity {
                 obj.put("y", (int) relativeY);
                 obj.put("dividerY", (int) dividerY);
                 obj.put("time", System.currentTimeMillis());
+                obj.put("downTime", event.getDownTime());
+                obj.put("eventTime", event.getEventTime());
+                obj.put("metaState", event.getMetaState());
                 touchList.add(obj);
 
                 if (isFinishing() || isDestroyed()) {
@@ -476,6 +466,38 @@ public class UIAutoActivity extends Activity {
     }
 
 
+    public boolean dispatchEventToCurrentActivity(MotionEvent event) {
+        Activity a = DemoApplication.getInstance().getCurrentActivity();
+        if (a != null) {
+            View decorView = a.getWindow().getDecorView();
+            float y = decorView.getY();
+            float top = decorView.getTop();
+            event.offsetLocation(0, decorView.getTop());
+            View content = decorView.findViewById(android.R.id.content);
+            float cy = content.getY();
+            float ctop = content.getTop();
+
+            Rect rectangle= new Rect();
+            decorView.getWindowVisibleDisplayFrame(rectangle);
+
+//                    event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
+
+            if (rectangle.top > 0) {
+                event = MotionEvent.obtain(event);
+                event.offsetLocation(0, rectangle.top);
+            }
+            a.dispatchTouchEvent(event);
+
+            return true;
+        } else {
+            //TODO 不是本 APP 的界面
+        }
+
+        return false;
+    }
+
+
+
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
      */
@@ -511,6 +533,24 @@ public class UIAutoActivity extends Activity {
 //    }
 
 
+    public void recover(JSONArray touchList) {
+        isRecovering = true;
+
+        JSONObject last = null;
+        for (int i = 0; i < touchList.size(); i++) {
+            JSONObject obj = touchList.getJSONObject(i);
+
+            MotionEvent event = MotionEvent.obtain(obj.getIntValue("downTime"), obj.getIntValue("eventTime"),
+                    obj.getIntValue("action"), obj.getIntValue("x"), obj.getIntValue("y"), obj.getIntValue("metaState"));
+
+            Message msg = handler.obtainMessage();
+            msg.obj = event;
+            handler.sendMessageDelayed(msg, last == null ? 0 : obj.getIntValue("eventTime") - last.getIntValue("eventTime"));
+
+            last = obj;
+        }
+    }
+
     public static final int REQUEST_UI_AUTO_LIST = 1;
 
     @Override
@@ -523,6 +563,7 @@ public class UIAutoActivity extends Activity {
 
         if (requestCode == REQUEST_UI_AUTO_LIST) {
             JSONArray array = data == null ? null : JSON.parseArray(data.getStringExtra(UIAutoListActivity.RESULT_LIST));
+            recover(array);
 
             Toast.makeText(context, "onActivityResult  array = " + JSON.toJSONString(array), Toast.LENGTH_LONG).show();
             //TODO  恢复

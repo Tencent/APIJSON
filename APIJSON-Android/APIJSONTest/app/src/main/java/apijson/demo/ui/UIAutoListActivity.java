@@ -265,6 +265,7 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
                     }   // Touch >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     request.setTag("Touch");
 
+                    pbUIAutoList.setVisibility(View.VISIBLE);
                     HttpManager.getInstance().post(fullUrl, request.toString(), new HttpManager.OnHttpResponseListener() {
                         @Override
                         public void onHttpResponse(int requestCode, String resultJson, Exception e) {
