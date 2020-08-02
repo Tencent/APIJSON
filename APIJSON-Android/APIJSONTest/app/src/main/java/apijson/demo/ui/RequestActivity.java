@@ -52,7 +52,7 @@ import static zuo.biao.apijson.StringUtil.UTF_8;
  * 向服务器发起请求查询或操作相应数据
  * @author Lemon
  */
-public class RequestActivity extends Activity implements OnHttpResponseListener {
+public class RequestActivity extends UIAutoBaseActivity implements OnHttpResponseListener {
 	private static final String TAG = "RequestActivity";
 
 

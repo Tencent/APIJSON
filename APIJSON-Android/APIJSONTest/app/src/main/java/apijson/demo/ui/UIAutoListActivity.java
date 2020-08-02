@@ -41,6 +41,7 @@ import java.util.Map;
 import apijson.demo.HttpManager;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
+import apijson.demo.InputUtil;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
@@ -229,15 +230,15 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
 
                         if (isTouch) {
                             if (obj.getIntValue("type") == 1) {
-                                list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + TouchUtil.getActionName(obj.getIntValue("action"))
-                                        + "\nkeyCode: " +  TouchUtil.getKeyCodeName(obj.getIntValue("keyCode")) + ",  scanCode: " + TouchUtil.getScanCodeName(obj.getIntValue("scanCode")) + ",  dividerY: " + obj.getString("dividerY")
-                                        + "\nrepeatCount: " + obj.getString("repeatCount") + "    " + TouchUtil.getOrientationName(obj.getIntValue("orientation"))
+                                list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + InputUtil.getActionName(obj.getIntValue("action"))
+                                        + "\nkeyCode: " +  InputUtil.getKeyCodeName(obj.getIntValue("keyCode")) + ",  scanCode: " + InputUtil.getScanCodeName(obj.getIntValue("scanCode")) + ",  dividerY: " + obj.getString("dividerY")
+                                        + "\nrepeatCount: " + obj.getString("repeatCount") + "    " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
                                 );
                             }
                             else {
-                                list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + TouchUtil.getActionName(obj.getIntValue("action"))
+                                list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + InputUtil.getActionName(obj.getIntValue("action"))
                                         + "\nx: " + obj.getString("x") + ",  y: " + obj.getString("y") + ",  dividerY: " + obj.getString("dividerY")
-                                        + "\npointerCount: " + obj.getString("pointerCount") + "    " + TouchUtil.getOrientationName(obj.getIntValue("orientation"))
+                                        + "\npointerCount: " + obj.getString("pointerCount") + "    " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
                                 );
                             }
                         } else {

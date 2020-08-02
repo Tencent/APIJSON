@@ -28,6 +28,7 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import apijson.demo.CodeUtil;
 import apijson.demo.R;
 import apijson.demo.RequestUtil;
 import apijson.demo.StringUtil;
@@ -36,7 +37,7 @@ import zuo.biao.apijson.JSON;
 /**自动生成代码
  * @author Lemon
  */
-public class AutoActivity extends Activity {
+public class AutoActivity extends UIAutoBaseActivity {
 	private static final String TAG = "AutoActivity";
 
 	public static final String KEY_REQUEST = "KEY_REQUEST";

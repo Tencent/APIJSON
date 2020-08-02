@@ -50,7 +50,7 @@ import apijson.demo.server.MethodUtil;
  * https://github.com/TommyLemon/UnitAuto
  * @author Lemon
  */
-public class UnitAutoActivity extends Activity implements HttpServerRequestCallback {
+public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRequestCallback {
     public static final String TAG = "UnitAutoActivity";
     private static final String KEY_PORT = "KEY_PORT";
 

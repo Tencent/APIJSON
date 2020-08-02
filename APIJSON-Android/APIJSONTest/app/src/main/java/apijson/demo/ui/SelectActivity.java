@@ -32,13 +32,14 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.demo.R;
 import apijson.demo.RequestUtil;
 import apijson.demo.StringUtil;
+import apijson.demo.application.DemoApplication;
 import zuo.biao.apijson.JSON;
 
 /**选择Activity
  * 选择向服务器发起的请求
  * @author Lemon
  */
-public class SelectActivity extends Activity implements OnClickListener {
+public class SelectActivity extends UIAutoBaseActivity implements OnClickListener {
 
 	public static final String CONFIG_PATH = "CONFIG_PATH";
 
@@ -114,6 +115,9 @@ public class SelectActivity extends Activity implements OnClickListener {
 				}
 			});
 		}
+
+		DemoApplication.getInstance().onUIAutoActivityCreate(this);
+		DemoApplication.getInstance().record();
 
 	}
 
