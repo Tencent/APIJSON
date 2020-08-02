@@ -43,6 +43,8 @@ import com.yhao.floatwindow.IFloatWindow;
 import com.yhao.floatwindow.MoveType;
 
 import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
 
 import apijson.demo.R;
 import apijson.demo.application.DemoApplication;
@@ -85,13 +87,29 @@ public class UIAutoActivity extends Activity {
             super.handleMessage(msg);
 
             if (isRecovering) {
-                if (lastCurTime >= System.currentTimeMillis()) {
+                //通过遍历数组来实现
+//                if (lastCurTime >= System.currentTimeMillis()) {
+//                    isRecovering = false;
+//                    pbUIAutoDivider.setVisibility(View.GONE);
+//                }
+//
+//                MotionEvent event = (MotionEvent) msg.obj;
+//                dispatchEventToCurrentActivity(event);
+
+
+                //根据递归链表来实现，能精准地实现两个事件之间的间隔，不受处理时间不一致，甚至卡顿等影响。还能及时终止
+                Node<MotionEvent> eventNode = ( Node<MotionEvent>) msg.obj;
+                dispatchEventToCurrentActivity(eventNode.item);
+
+                if (eventNode.next == null) {
                     isRecovering = false;
                     pbUIAutoDivider.setVisibility(View.GONE);
+                    return;
                 }
 
-                MotionEvent event = (MotionEvent) msg.obj;
-                dispatchEventToCurrentActivity(event);
+                msg = Message.obtain();
+                msg.obj = eventNode.next;
+                sendMessageDelayed(msg, eventNode.next.item.getEventTime() - eventNode.item.getEventTime());
             }
         }
     };
@@ -581,12 +599,17 @@ public class UIAutoActivity extends Activity {
 //    }
 
 
+    private Node<MotionEvent> firstEventNode;
+    private Node<MotionEvent> eventNode;
+
     private long firstTime = 0;
     private long lastTime = 0;
     private long firstCurTime = 0;
     private long lastCurTime = 0;
     public void recover(JSONArray touchList) {
         isRecovering = true;
+
+        List<MotionEvent> list = new LinkedList<>();
 
         showCover(true, DemoApplication.getInstance().getCurrentActivity());
 
@@ -619,16 +642,32 @@ public class UIAutoActivity extends Activity {
                 event.setSource(obj.getIntValue("source"));
 //            event.setEdgeFlags(obj.getIntValue("edgeFlags"));
 
+                list.add(event);
+
                 long time = obj.getIntValue("time");
-                if (i >= touchList.size() - 1) {
+                if (i <= 0) {
+                    firstEventNode = new Node<>(null, event, null);
+                    eventNode = firstEventNode;
+                }
+                else if (i >= touchList.size() - 1) {
                     lastTime = time;
                     lastCurTime = firstCurTime + lastTime - firstTime;
                 }
 
-                Message msg = handler.obtainMessage();
-                msg.obj = event;
-                handler.sendMessageDelayed(msg, i <= 0 ? 0 : time - firstTime);
+                eventNode.next = new Node<>(eventNode, event, null);
+                eventNode = eventNode.next;
+
+                //通过遍历数组来实现
+//                Message msg = handler.obtainMessage();
+//                msg.obj = event;
+//                handler.sendMessageDelayed(msg, i <= 0 ? 0 : time - firstTime);
             }
+
+            //通过递归链表来实现
+            Message msg = handler.obtainMessage();
+            msg.obj = firstEventNode;
+            handler.sendMessage(msg);
+
         }
     }
 
@@ -656,5 +695,20 @@ public class UIAutoActivity extends Activity {
         }
 
     }
+
+
+
+    private static class Node<E> {
+        E item;
+        Node<E> next;
+        Node<E> prev;
+
+        Node(Node<E> prev, E element, Node<E> next) {
+            this.item = element;
+            this.next = next;
+            this.prev = prev;
+        }
+    }
+
 }
 
