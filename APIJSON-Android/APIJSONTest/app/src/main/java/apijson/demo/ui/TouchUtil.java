@@ -1,5 +1,7 @@
 package apijson.demo.ui;
 
+import android.content.res.Configuration;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 public class TouchUtil {
@@ -21,5 +23,17 @@ public class TouchUtil {
             default:
                 return "CANCEL";
         }
+    }
+
+    public static String getOrientationName(int orientation) {
+        return orientation == Configuration.ORIENTATION_LANDSCAPE ? "HORIZONTAL" : "VERTICAL";
+    }
+
+    public static String getKeyCodeName(int keyCode) {
+        return KeyEvent.keyCodeToString(keyCode);
+    }
+
+    public static String getScanCodeName(int scanCode) {
+        return "" + scanCode;  //它是 hardware key id  KeyEvent.keyCodeToString(scanCode);
     }
 }

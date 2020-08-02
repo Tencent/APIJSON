@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +46,6 @@ import com.yhao.floatwindow.IFloatWindow;
 import com.yhao.floatwindow.MoveType;
 
 import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
 
 import apijson.demo.R;
 import apijson.demo.application.DemoApplication;
@@ -98,7 +99,7 @@ public class UIAutoActivity extends Activity {
 
 
                 //根据递归链表来实现，能精准地实现两个事件之间的间隔，不受处理时间不一致，甚至卡顿等影响。还能及时终止
-                Node<MotionEvent> eventNode = ( Node<MotionEvent>) msg.obj;
+                Node<InputEvent> eventNode = ( Node<InputEvent>) msg.obj;
                 dispatchEventToCurrentActivity(eventNode.item);
 
                 if (eventNode.next == null) {
@@ -172,8 +173,9 @@ public class UIAutoActivity extends Activity {
         }
 
         if (touchList != null && touchList.isEmpty() == false) { //TODO 回放操作
-            recover(touchList);
-            return;
+//            recover(touchList);
+            startActivityForResult(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()), REQUEST_UI_AUTO_LIST);
+//            return;
         }
 
 
@@ -234,7 +236,8 @@ public class UIAutoActivity extends Activity {
                 cache.edit().remove(cacheKey).putString(cacheKey, JSON.toJSONString(allList)).commit();
 
 //                startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), flowId));  // touchList == null ? null : touchList.toJSONString()));
-                startActivityForResult(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()), REQUEST_UI_AUTO_LIST);
+//                startActivityForResult(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()), REQUEST_UI_AUTO_LIST);
+                startActivity(UIAutoActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()));
 
                 floatCover = null;
                 floatDivider = null;
@@ -505,10 +508,10 @@ public class UIAutoActivity extends Activity {
         return rectangle.top;
     }
 
-    public boolean dispatchEventToCurrentActivity(MotionEvent event) {
-        Activity a = DemoApplication.getInstance().getCurrentActivity();
-        if (a != null) {
-//                    event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
+    public boolean dispatchEventToCurrentActivity(InputEvent ie) {
+        Activity activity = DemoApplication.getInstance().getCurrentActivity();
+        if (activity != null) {
+//            event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
 //
 //            float y = decorView.getY();
 //            float top = decorView.getTop();
@@ -517,49 +520,53 @@ public class UIAutoActivity extends Activity {
 //            float cy = content.getY();
 //            float ctop = content.getTop();
 
-            int windowY = getWindowY(a);
+            if (ie instanceof MotionEvent) {
+                MotionEvent event = (MotionEvent) ie;
+                int windowY = getWindowY(activity);
 
-            if (windowY > 0) {
-                event = MotionEvent.obtain(event);
-                event.offsetLocation(0, windowY);
+                if (windowY > 0) {
+                    event = MotionEvent.obtain(event);
+                    event.offsetLocation(0, windowY);
+                }
+                activity.dispatchTouchEvent(event);
             }
-            a.dispatchTouchEvent(event);
+            else if (ie instanceof KeyEvent) {
+                KeyEvent event = (KeyEvent) ie;
+                activity.dispatchKeyEvent(event);
+            }
 
         }
 
 
-//                float dividerY = rlUIAutoDivider.getY() + rlUIAutoDivider.getHeight()/2;
-        float dividerY = floatDivider.getY() + rlUIAutoDivider.getHeight()/2;
-        float relativeY = event.getY() <= dividerY ? event.getY() : (event.getY() - screenHeight);
+//        float dividerY = rlUIAutoDivider.getY() + rlUIAutoDivider.getHeight()/2;
+//        float dividerY = floatDivider.getY() + rlUIAutoDivider.getHeight()/2;
+//        float relativeY = event.getY() <= dividerY ? event.getY() : (event.getY() - screenHeight);
+//
+//        JSONObject obj = new JSONObject(true);
+//        obj.put("id", - System.currentTimeMillis());
+//        obj.put("flowId", flowId);
+//        obj.put("action", event.getAction());
+//        obj.put("x", (int) event.getX());
+//        obj.put("y", (int) relativeY);
+//        obj.put("dividerY", (int) dividerY);
+//        obj.put("rawX", (int) event.getRawX());
+//        obj.put("rawY", (int) event.getRawY());
+//        obj.put("time", System.currentTimeMillis());
+//        obj.put("downTime", event.getDownTime());
+//        obj.put("eventTime", event.getEventTime());
+//        obj.put("metaState", event.getMetaState());
+//        obj.put("size", event.getSize());
+//        obj.put("source", event.getSource());
+//        obj.put("pressure", event.getPressure());
+//        obj.put("deviceId", event.getDeviceId());
+//        obj.put("xPrecision", event.getXPrecision());
+//        obj.put("yPrecision", event.getYPrecision());
+//        obj.put("pointerCount", event.getPointerCount());
+//        obj.put("edgeFlags", event.getEdgeFlags());
 
-        JSONObject obj = new JSONObject(true);
-        obj.put("id", - System.currentTimeMillis());
-        obj.put("flowId", flowId);
-        obj.put("action", event.getAction());
-        obj.put("x", (int) event.getX());
-        obj.put("y", (int) relativeY);
-        obj.put("dividerY", (int) dividerY);
-        obj.put("rawX", (int) event.getRawX());
-        obj.put("rawY", (int) event.getRawY());
-        obj.put("time", System.currentTimeMillis());
-        obj.put("downTime", event.getDownTime());
-        obj.put("eventTime", event.getEventTime());
-        obj.put("metaState", event.getMetaState());
-        obj.put("size", event.getSize());
-        obj.put("source", event.getSource());
-        obj.put("pressure", event.getPressure());
-        obj.put("deviceId", event.getDeviceId());
-        obj.put("xPrecision", event.getXPrecision());
-        obj.put("yPrecision", event.getYPrecision());
-        obj.put("pointerCount", event.getPointerCount());
-        obj.put("edgeFlags", event.getEdgeFlags());
+        addInputEvent(ie, activity);
 
-        if (touchList == null) {
-            touchList = new JSONArray();
-        }
-        touchList.add(obj);
-
-        return a != null;
+        return activity != null;
     }
 
 
@@ -599,8 +606,8 @@ public class UIAutoActivity extends Activity {
 //    }
 
 
-    private Node<MotionEvent> firstEventNode;
-    private Node<MotionEvent> eventNode;
+    private Node<InputEvent> firstEventNode;
+    private Node<InputEvent> eventNode;
 
     private long firstTime = 0;
     private long lastTime = 0;
@@ -609,7 +616,7 @@ public class UIAutoActivity extends Activity {
     public void recover(JSONArray touchList) {
         isRecovering = true;
 
-        List<MotionEvent> list = new LinkedList<>();
+//        List<InputEvent> list = new LinkedList<>();
 
         showCover(true, DemoApplication.getInstance().getCurrentActivity());
 
@@ -624,25 +631,83 @@ public class UIAutoActivity extends Activity {
             for (int i = 0; i < touchList.size(); i++) {
                 JSONObject obj = touchList.getJSONObject(i);
 
-                MotionEvent event = MotionEvent.obtain(
-                        obj.getLongValue("downTime"),
-                        obj.getLongValue("eventTime"),
-                        obj.getIntValue("action"),
-//                    obj.getIntValue("pointerCount"),
-                        obj.getFloatValue("x"),
-                        obj.getFloatValue("y"),
-                        obj.getFloatValue("pressure"),
-                        obj.getFloatValue("size"),
-                        obj.getIntValue("metaState"),
-                        obj.getFloatValue("xPrecision"),
-                        obj.getFloatValue("yPrecision"),
-                        obj.getIntValue("deviceId"),
-                        obj.getIntValue("edgeFlags")
-                );
-                event.setSource(obj.getIntValue("source"));
-//            event.setEdgeFlags(obj.getIntValue("edgeFlags"));
+                InputEvent event;
+                if (obj.getIntValue("type") == 1) {
+                    /**
+                     public KeyEvent(long downTime, long eventTime, int action,
+                     int code, int repeat, int metaState,
+                     int deviceId, int scancode, int flags, int source) {
+                     mDownTime = downTime;
+                     mEventTime = eventTime;
+                     mAction = action;
+                     mKeyCode = code;
+                     mRepeatCount = repeat;
+                     mMetaState = metaState;
+                     mDeviceId = deviceId;
+                     mScanCode = scancode;
+                     mFlags = flags;
+                     mSource = source;
+                     mDisplayId = INVALID_DISPLAY;
+                     }
+                     */
+                    event = new KeyEvent(
+                            obj.getLongValue("downTime"),
+                            obj.getLongValue("eventTime"),
+                            obj.getIntValue("action"),
+                            obj.getIntValue("keyCode"),
+                            obj.getIntValue("repeatCount"),
+                            obj.getIntValue("metaState"),
+                            obj.getIntValue("deviceId"),
+                            obj.getIntValue("scanCode"),
+                            obj.getIntValue("flags"),
+                            obj.getIntValue("source")
+                    );
+                }
+                else {
+                    /**
+                     public static MotionEvent obtain(long downTime, long eventTime, int action,
+                     float x, float y, float pressure, float size, int metaState,
+                     float xPrecision, float yPrecision, int deviceId, int edgeFlags, int source,
+                     int displayId)
+                     */
 
-                list.add(event);
+                    //居然编译报错，和
+                    // static public MotionEvent obtain(long downTime, long eventTime,
+                    //    int action, int pointerCount, PointerProperties[] pointerProperties,
+                    //    PointerCoords[] pointerCoords, int metaState, int buttonState,
+                    //    float xPrecision, float yPrecision, int deviceId,
+                    //    int edgeFlags, int source, int displayId, int flags)
+                    //冲突，实际上类型没传错
+
+                    //                    event = MotionEvent.obtain(obj.getLongValue("downTime"),  obj.getLongValue("eventTime"),  obj.getIntValue("action"),
+                    //                    obj.getFloatValue("x"),  obj.getFloatValue("y"),  obj.getFloatValue("pressure"),  obj.getFloatValue("size"),  obj.getIntValue("metaState"),
+                    //                    obj.getFloatValue("xPrecision"),  obj.getFloatValue("yPrecision"),  obj.getIntValue("deviceId"),  obj.getIntValue("edgeFlags"),  obj.getIntValue("source"),
+                    //                    obj.getIntValue("displayId"));
+
+                    event = MotionEvent.obtain(
+                            obj.getLongValue("downTime"),
+                            obj.getLongValue("eventTime"),
+                            obj.getIntValue("action"),
+//                            obj.getIntValue("pointerCount"),
+                            obj.getFloatValue("x"),
+                            obj.getFloatValue("y"),
+                            obj.getFloatValue("pressure"),
+                            obj.getFloatValue("size"),
+                            obj.getIntValue("metaState"),
+                            obj.getFloatValue("xPrecision"),
+                            obj.getFloatValue("yPrecision"),
+                            obj.getIntValue("deviceId"),
+                            obj.getIntValue("edgeFlags")
+//                            obj.getIntValue("source"),
+//                            obj.getIntValue("displayId")
+                    );
+                    ((MotionEvent) event).setSource(obj.getIntValue("source"));
+//                    ((MotionEvent) event).setEdgeFlags(obj.getIntValue("edgeFlags"));
+
+                }
+
+
+//                list.add(event);
 
                 long time = obj.getIntValue("time");
                 if (i <= 0) {
@@ -670,6 +735,91 @@ public class UIAutoActivity extends Activity {
 
         }
     }
+
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        addInputEvent(event, this);
+        return super.onKeyDown(keyCode, event);
+    }
+
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        addInputEvent(event, this);
+        return super.onKeyUp(keyCode, event);
+    }
+
+    private JSONArray addInputEvent(InputEvent ie, Activity activity) {
+        int dividerY = floatDivider.getY() + rlUIAutoDivider.getHeight()/2;
+        int orientation = activity == null ? Configuration.ORIENTATION_PORTRAIT : activity.getResources().getConfiguration().orientation;
+
+        JSONObject obj = new JSONObject(true);
+        obj.put("id", - System.currentTimeMillis());
+        obj.put("flowId", flowId);
+        obj.put("time", System.currentTimeMillis());
+        obj.put("orientation", orientation);
+        obj.put("dividerY", dividerY);
+
+        if (ie instanceof KeyEvent) {
+            KeyEvent event = (KeyEvent) ie;
+            obj.put("type", 1);
+
+            //虽然 KeyEvent 和 MotionEvent 都有，但都不在父类 InputEvent 中 <<<<<<<<<<<<<<<<<<
+            obj.put("action", event.getAction());
+            obj.put("downTime", event.getDownTime());
+            obj.put("eventTime", event.getEventTime());
+            obj.put("metaState", event.getMetaState());
+            obj.put("source", event.getSource());
+            obj.put("deviceId", event.getDeviceId());
+            //虽然 KeyEvent 和 MotionEvent 都有，但都不在父类 InputEvent 中 >>>>>>>>>>>>>>>>>>
+
+            obj.put("keyCode", event.getKeyCode());
+            obj.put("scanCode", event.getScanCode());
+            obj.put("repeatCount", event.getRepeatCount());
+            //通过 keyCode 获取的            obj.put("number", event.getNumber());
+            obj.put("flags", event.getFlags());
+            //通过 mMetaState 获取的 obj.put("modifiers", event.getModifiers());
+            //通过 mKeyCode 获取的 obj.put("displayLabel", event.getDisplayLabel());
+            //通过 mMetaState 获取的 obj.put("unicodeChar", event.getUnicodeChar());
+        }
+        else if (ie instanceof MotionEvent) {
+            MotionEvent event = (MotionEvent) ie;
+            obj.put("type", 0);
+
+            //虽然 KeyEvent 和 MotionEvent 都有，但都不在父类 InputEvent 中 <<<<<<<<<<<<<<<<<<
+            obj.put("action", event.getAction());
+            obj.put("downTime", event.getDownTime());
+            obj.put("eventTime", event.getEventTime());
+            obj.put("metaState", event.getMetaState());
+            obj.put("source", event.getSource());
+            obj.put("deviceId", event.getDeviceId());
+            //虽然 KeyEvent 和 MotionEvent 都有，但都不在父类 InputEvent 中 >>>>>>>>>>>>>>>>>>
+
+            float relativeY = event.getY() <= dividerY ? event.getY() : (event.getY() - screenHeight);
+
+            obj.put("x", (int) event.getX());
+            obj.put("y", (int) relativeY);
+            obj.put("rawX", (int) event.getRawX());
+            obj.put("rawY", (int) event.getRawY());
+            obj.put("size", event.getSize());
+            obj.put("pressure", event.getPressure());
+            obj.put("xPrecision", event.getXPrecision());
+            obj.put("yPrecision", event.getYPrecision());
+            obj.put("pointerCount", event.getPointerCount());
+            obj.put("edgeFlags", event.getEdgeFlags());
+        }
+
+        if (touchList == null) {
+            touchList = new JSONArray();
+        }
+        touchList.add(obj);
+
+        return touchList;
+    }
+
+
 
     public static final int REQUEST_UI_AUTO_LIST = 1;
 

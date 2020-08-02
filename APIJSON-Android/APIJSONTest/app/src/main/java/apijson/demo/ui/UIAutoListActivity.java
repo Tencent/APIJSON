@@ -228,8 +228,18 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
                         }
 
                         if (isTouch) {
-                            list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + TouchUtil.getActionName(obj.getIntValue("action"))
-                                    + "\nx: " + obj.getString("x") + ",  y: " + obj.getString("y") + ",  dividerY: " + obj.getString("dividerY") + ", pointerCount: " + obj.getString("pointerCount"));
+                            if (obj.getIntValue("type") == 1) {
+                                list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + TouchUtil.getActionName(obj.getIntValue("action"))
+                                        + "\nkeyCode: " +  TouchUtil.getKeyCodeName(obj.getIntValue("keyCode")) + ",  scanCode: " + TouchUtil.getScanCodeName(obj.getIntValue("scanCode")) + ",  dividerY: " + obj.getString("dividerY")
+                                        + "\nrepeatCount: " + obj.getString("repeatCount") + "    " + TouchUtil.getOrientationName(obj.getIntValue("orientation"))
+                                );
+                            }
+                            else {
+                                list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + TouchUtil.getActionName(obj.getIntValue("action"))
+                                        + "\nx: " + obj.getString("x") + ",  y: " + obj.getString("y") + ",  dividerY: " + obj.getString("dividerY")
+                                        + "\npointerCount: " + obj.getString("pointerCount") + "    " + TouchUtil.getOrientationName(obj.getIntValue("orientation"))
+                                );
+                            }
                         } else {
                             list.add("[" + state + "]" + " name: " + obj.getString("name") + ",  time: " + new Date(obj.getLongValue("time")).toLocaleString());
                         }
