@@ -8,7 +8,7 @@
     >
 
     <!--<RelativeLayout-->
-        <!--android:id="@+id/rlUnitAutoDivider"-->
+        <!--android:id="@+id/rlUIAutoDivider"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="24dp"-->
         <!--android:minHeight="12dp"-->
@@ -18,7 +18,7 @@
         <!--&gt;-->
 
         <!--<View-->
-            <!--android:id="@+id/vUnitAutoDivider"-->
+            <!--android:id="@+id/vUIAutoDivider"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="1dp"-->
             <!--android:background="#10000000"-->
@@ -26,7 +26,7 @@
             <!--/>-->
 
         <!--<ImageView-->
-            <!--android:id="@+id/ivUnitAutoMenu"-->
+            <!--android:id="@+id/ivUIAutoMenu"-->
             <!--tools:layout_width="24dp"-->
             <!--android:minWidth="12dp"-->
             <!--android:layout_width="wrap_content"-->

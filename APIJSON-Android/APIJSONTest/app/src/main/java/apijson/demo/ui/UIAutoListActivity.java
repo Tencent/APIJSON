@@ -105,6 +105,7 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
     private Button btnUIAutoListGet;
 
     SharedPreferences cache;
+    String cacheKey;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,8 +120,8 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
         isTouch = flowId > 0 || hasTempTouchList;
 
         cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
+        cacheKey = isTouch ? CACHE_TOUCH : CACHE_FLOW;
         if (isLocal) {
-            String cacheKey = isTouch ? CACHE_TOUCH : CACHE_FLOW;
             JSONArray allList = JSON.parseArray(cache.getString(cacheKey, null));
 
             if (hasTempTouchList) {
@@ -227,8 +228,8 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
                         }
 
                         if (isTouch) {
-                            list.add("[" + state + "]" + " action: " + obj.getString("action") + ",  time: " + new Date(obj.getLongValue("time")).toLocaleString()
-                                    + "\nx: " + obj.getString("x") + ",  y: " + obj.getString("y") + ",  dividerY: " + obj.getString("dividerY"));
+                            list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + TouchUtil.getActionName(obj.getIntValue("action"))
+                                    + "\nx: " + obj.getString("x") + ",  y: " + obj.getString("y") + ",  dividerY: " + obj.getString("dividerY") + ", pointerCount: " + obj.getString("pointerCount"));
                         } else {
                             list.add("[" + state + "]" + " name: " + obj.getString("name") + ",  time: " + new Date(obj.getLongValue("time")).toLocaleString());
                         }
@@ -240,11 +241,18 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
         }).start();
     }
 
+
+
     private Map<JSONObject, String> statueList = new HashMap<JSONObject, String>();
     public void send(View v) {
         final String fullUrl = StringUtil.getTrimedString(etUIAutoListUrl) + StringUtil.getString((TextView) v).toLowerCase();
 
         pbUIAutoList.setVisibility(View.VISIBLE);
+
+        if (hasTempTouchList == false) {
+            hasTempTouchList = true;
+            cache.edit().remove(cacheKey).putString(cacheKey, JSON.toJSONString(touchList)).apply();
+        }
 
         if (isLocal) {
             statueList = new HashMap<>();

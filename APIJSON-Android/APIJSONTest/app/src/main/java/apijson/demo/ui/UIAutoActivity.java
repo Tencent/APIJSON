@@ -18,7 +18,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -40,6 +39,7 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yhao.floatwindow.FloatWindow;
+import com.yhao.floatwindow.IFloatWindow;
 import com.yhao.floatwindow.MoveType;
 
 import java.util.Calendar;
@@ -85,6 +85,11 @@ public class UIAutoActivity extends Activity {
             super.handleMessage(msg);
 
             if (isRecovering) {
+                if (lastCurTime >= System.currentTimeMillis()) {
+                    isRecovering = false;
+                    pbUIAutoDivider.setVisibility(View.GONE);
+                }
+
                 MotionEvent event = (MotionEvent) msg.obj;
                 dispatchEventToCurrentActivity(event);
             }
@@ -94,14 +99,18 @@ public class UIAutoActivity extends Activity {
     private Activity context;
     int screenWidth;
     int screenHeight;
+
     int windowWidth;
     int windowHeight;
+    int windowY;
 
     ViewGroup cover;
     ViewGroup divider;
-    View rlUnitAutoDivider;
-    View vUnitAutoDivider;
-    View ivUnitAutoMenu;
+    View rlUIAutoDivider;
+    View vUIAutoDivider;
+    View ivUIAutoDivider;
+    View pbUIAutoDivider;
+
     private float dividerY;
     private float dividerHeight;
     private boolean moved = false;
@@ -129,12 +138,20 @@ public class UIAutoActivity extends Activity {
 
         windowWidth = display.getWidth();
         windowHeight = display.getHeight();
+        windowY = getWindowY(this);
 
         display.getRealMetrics(outMetrics);
         screenWidth = outMetrics.widthPixels;
         screenHeight = outMetrics.heightPixels;
+
         cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
-        dividerY = cache.getFloat(DIVIDER_Y, screenHeight - dip2px(30));
+
+        dividerY = cache.getFloat(DIVIDER_Y, 0);
+        dividerHeight = cache.getFloat(DIVIDER_HEIGHT, dip2px(24));
+
+        if (dividerY <= dividerHeight || dividerY >= windowHeight - dividerHeight) {
+            dividerY = windowHeight - dividerHeight - dip2px(30);
+        }
 
         if (touchList != null && touchList.isEmpty() == false) { //TODO 回放操作
             recover(touchList);
@@ -143,50 +160,51 @@ public class UIAutoActivity extends Activity {
 
 
         ViewGroup root = (ViewGroup) getWindow().getDecorView();
-        cover = (ViewGroup) getLayoutInflater().inflate(R.layout.unit_auto_cover_layout, null);
-        divider = (ViewGroup) getLayoutInflater().inflate(R.layout.unit_auto_divider_layout, null);
+        cover = (ViewGroup) getLayoutInflater().inflate(R.layout.ui_auto_cover_layout, null);
+        divider = (ViewGroup) getLayoutInflater().inflate(R.layout.ui_auto_divider_layout, null);
 
-        rlUnitAutoDivider = divider.findViewById(R.id.rlUnitAutoDivider);
-        vUnitAutoDivider = divider.findViewById(R.id.vUnitAutoDivider);
-        ivUnitAutoMenu = divider.findViewById(R.id.ivUnitAutoMenu);
+        rlUIAutoDivider = divider.findViewById(R.id.rlUIAutoDivider);
+        vUIAutoDivider = divider.findViewById(R.id.vUIAutoDivider);
+        ivUIAutoDivider = divider.findViewById(R.id.ivUIAutoDivider);
+        pbUIAutoDivider = divider.findViewById(R.id.pbUIAutoDivider);
+        pbUIAutoDivider.setVisibility(View.GONE);
 
-        dividerHeight = cache.getFloat(DIVIDER_HEIGHT, dip2px(24));
-        ViewGroup.LayoutParams dividerLp = rlUnitAutoDivider.getLayoutParams();
+        ViewGroup.LayoutParams dividerLp = rlUIAutoDivider.getLayoutParams();
         if (dividerLp == null) {
             dividerLp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) dividerHeight);
         } else {
             dividerLp.height = (int) dividerHeight;
         }
-        rlUnitAutoDivider.setLayoutParams(dividerLp);
+        rlUIAutoDivider.setLayoutParams(dividerLp);
 
-        cover.addView(divider);
+//        cover.addView(divider);
 
-//        rlUnitAutoDivider.post(new Runnable() {
+//        rlUIAutoDivider.post(new Runnable() {
 //            @Override
 //            public void run() {
-//                rlUnitAutoDivider.setY(dividerY - rlUnitAutoDivider.getHeight()/2);
+//                rlUIAutoDivider.setY(dividerY - rlUIAutoDivider.getHeight()/2);
 //                cover.setVisibility(View.GONE);
 //            }
 //        });
 
-        vUnitAutoDivider.setBackgroundColor(Color.parseColor(cache.getString(DIVIDER_COLOR, "#10000000")));
+        vUIAutoDivider.setBackgroundColor(Color.parseColor(cache.getString(DIVIDER_COLOR, "#10000000")));
 
-        ViewGroup.LayoutParams lineLp = ivUnitAutoMenu.getLayoutParams();
+        ViewGroup.LayoutParams lineLp = ivUIAutoDivider.getLayoutParams();
         if (lineLp == null) {
             lineLp = new RelativeLayout.LayoutParams((int) dividerHeight, (int) dividerHeight);
         } else {
             lineLp.width = lineLp.height = (int) dividerHeight;
         }
-        ivUnitAutoMenu.setLayoutParams(lineLp);
+        ivUIAutoDivider.setLayoutParams(lineLp);
 
-        ivUnitAutoMenu.setOnClickListener(new View.OnClickListener() {
+        ivUIAutoDivider.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isRecovering = false;
 //                ((ViewGroup) v.getParent()).removeView(v);
 
                 String cacheKey = UIAutoListActivity.CACHE_TOUCH;
-                SharedPreferences cache = getSharedPreferences(UnitAutoActivity.TAG, Context.MODE_PRIVATE);
+                SharedPreferences cache = getSharedPreferences(UIAutoActivity.TAG, Context.MODE_PRIVATE);
                 JSONArray allList = JSON.parseArray(cache.getString(cacheKey, null));
 
                 if (allList == null || allList.isEmpty()) {
@@ -200,11 +218,13 @@ public class UIAutoActivity extends Activity {
 //                startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), flowId));  // touchList == null ? null : touchList.toJSONString()));
                 startActivityForResult(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()), REQUEST_UI_AUTO_LIST);
 
+                floatCover = null;
+                floatDivider = null;
                 FloatWindow.destroy("v");
                 FloatWindow.destroy("v_ball");
             }
         });
-        rlUnitAutoDivider.setOnTouchListener(new View.OnTouchListener() {
+        rlUIAutoDivider.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 //                都不动了 if (event.getY() - event.getRawY() >= 10) {
@@ -218,7 +238,7 @@ public class UIAutoActivity extends Activity {
                     }
                     else if (event.getAction() == MotionEvent.ACTION_UP) {
                         if (! moved) {
-                            ivUnitAutoMenu.performClick();
+                            ivUIAutoDivider.performClick();
                         }
                     }
                 }
@@ -251,26 +271,6 @@ public class UIAutoActivity extends Activity {
 
                 dispatchEventToCurrentActivity(event);
 
-                if (touchList == null) {
-                    touchList = new JSONArray();
-                }
-
-                float dividerY = rlUnitAutoDivider.getY() + rlUnitAutoDivider.getHeight()/2;
-                float relativeY = event.getY() <= dividerY ? event.getY() : (event.getY() - screenHeight);
-
-                JSONObject obj = new JSONObject(true);
-                obj.put("id", - System.currentTimeMillis());
-                obj.put("flowId", flowId);
-                obj.put("action", event.getAction());
-                obj.put("x", (int) event.getX());
-                obj.put("y", (int) relativeY);
-                obj.put("dividerY", (int) dividerY);
-                obj.put("time", System.currentTimeMillis());
-                obj.put("downTime", event.getDownTime());
-                obj.put("eventTime", event.getEventTime());
-                obj.put("metaState", event.getMetaState());
-                touchList.add(obj);
-
                 if (isFinishing() || isDestroyed()) {
 //                    ActivityManager activityManager=(ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 //                    Activity runningActivity = activityManager.getRunningTasks(1).get(0);
@@ -293,8 +293,10 @@ public class UIAutoActivity extends Activity {
                     s = "";
                 }
 
+                float dividerY = floatDivider.getY() + rlUIAutoDivider.getHeight()/2;
+                float relativeY = event.getY() <= dividerY ? event.getY() : (event.getY() - screenHeight);
 
-                tvTouch.setText(Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY() + "; relativeY: " + relativeY + "\n" + s);
+                tvTouch.setText(Calendar.getInstance().getTime().toLocaleString() +  "   " + TouchUtil.getActionName(event.getAction()) + "\nx:" + event.getX() + "; y:" + event.getY() + "; relativeY: " + relativeY + "; pointerCount: " + event.getPointerCount() + "\n" + s);
 //                Toast.makeText(context, "vTouch.action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY(), Toast.LENGTH_SHORT).show();
 
 //死循环                llTouch.dispatchTouchEvent(event);
@@ -352,8 +354,8 @@ public class UIAutoActivity extends Activity {
 
     public void onClick(View v) {
         Toast.makeText(context, "onClick BUTTON", Toast.LENGTH_SHORT).show();
-
         record(v);
+//        finish();
     }
 
     public void toRemote(View v) {
@@ -376,44 +378,55 @@ public class UIAutoActivity extends Activity {
 
 
 
+    private IFloatWindow floatCover;
+    private IFloatWindow floatDivider;
+
     private void showCover(boolean show, Activity activity) {
         //TODO 为纵屏、横屏分别加两套，判断屏幕方向来显示对应的一套
-        rlUnitAutoDivider.setVisibility(show ? View.VISIBLE : View.GONE);
-        rlUnitAutoDivider.setY(dividerY + dividerHeight/2);
+//        rlUIAutoDivider.setVisibility(show ? View.VISIBLE : View.GONE);
+//        rlUIAutoDivider.setY(dividerY + dividerHeight/2);
 
-        if (FloatWindow.get("v")== null) {
+        floatCover = FloatWindow.get("v");
+        if (floatCover == null) {
             FloatWindow
                     .with(getApplicationContext())
                     .setTag("v")
                     .setView(cover)
-                    .setWidth(screenWidth)                               //设置控件宽高
-                    .setHeight(screenHeight)
+                    .setWidth(windowWidth)                               //设置控件宽高
+                    .setHeight(windowHeight)
                     .setX(0)                                   //设置控件初始位置
-                    .setY(0)
+                    .setY(windowY)
                     .setMoveType(MoveType.inactive)
-                    .setDesktopShow(true)                        //桌面显示
+                    .setDesktopShow(true) //必须为 true，否则切换 Activity 就会自动隐藏                        //桌面显示
 //                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
 //                .setPermissionListener(mPermissionListener)  //监听权限申请结果
                     .build();
+
+            floatCover = FloatWindow.get("v");
         }
-//
-//
-//        if (FloatWindow.get("v_ball") == null) {
-//            FloatWindow
-//                    .with(getApplicationContext())
-//                    .setTag("v_ball")
-//                    .setView(divider)
-//                    .setWidth(screenWidth)                               //设置控件宽高
-//                    .setHeight((int) dividerHeight)
-//                    .setX(0)                                   //设置控件初始位置
-//                    .setY((int) (dividerY + dividerHeight/2))
-////                    .setY(screenHeight/2)
-//                    .setMoveType(MoveType.slide)
-//                    .setDesktopShow(true)                        //桌面显示
-////                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
-////                .setPermissionListener(mPermissionListener)  //监听权限申请结果
-//                    .build();
-//        }
+        floatCover.show();
+
+
+        floatDivider = FloatWindow.get("v_ball");
+        if (floatDivider == null) {
+            FloatWindow
+                    .with(getApplicationContext())
+                    .setTag("v_ball")
+                    .setView(divider)
+                    .setWidth(windowWidth)                               //设置控件宽高
+                    .setHeight((int) dividerHeight)
+                    .setX(0)                                   //设置控件初始位置
+                    .setY((int) (windowY + dividerY - dividerHeight/2))
+//                    .setY(screenHeight/2)
+                    .setMoveType(MoveType.slide)
+                    .setDesktopShow(true) //必须为 true，否则切换 Activity 就会自动隐藏                       //桌面显示
+//                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+//                .setPermissionListener(mPermissionListener)  //监听权限申请结果
+                    .build();
+
+            floatDivider = FloatWindow.get("v_ball");
+        }
+        floatDivider.show();
 
         //TODO 新建一个  have already added to window manager
 
@@ -450,50 +463,85 @@ public class UIAutoActivity extends Activity {
 //                    .build();
 //        }
 
-        FloatWindow.get("v").hide();
-//        FloatWindow.get("v_ball").hide();
-//        FloatWindow.get("h").hide();
-//        FloatWindow.get("h_ball").hide();
-        if (show) {
-            if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                FloatWindow.get("v").show();
+//        FloatWindow.get("v").hide();
+////        FloatWindow.get("v_ball").hide();
+////        FloatWindow.get("h").hide();
+////        FloatWindow.get("h_ball").hide();
+//        if (show) {
+//            if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+//                FloatWindow.get("v").show();
 //                FloatWindow.get("v_ball").show();
-            } else {
-//                FloatWindow.get("h").show();
-//                FloatWindow.get("h_ball").show();
-            }
-        }
+//            } else {
+////                FloatWindow.get("h").show();
+////                FloatWindow.get("h_ball").show();
+//            }
+//        }
     }
 
+
+    public int getWindowY(Activity a) {
+        View decorView = a.getWindow().getDecorView();
+
+        Rect rectangle= new Rect();
+        decorView.getWindowVisibleDisplayFrame(rectangle);
+        return rectangle.top;
+    }
 
     public boolean dispatchEventToCurrentActivity(MotionEvent event) {
         Activity a = DemoApplication.getInstance().getCurrentActivity();
         if (a != null) {
-            View decorView = a.getWindow().getDecorView();
-            float y = decorView.getY();
-            float top = decorView.getTop();
-            event.offsetLocation(0, decorView.getTop());
-            View content = decorView.findViewById(android.R.id.content);
-            float cy = content.getY();
-            float ctop = content.getTop();
-
-            Rect rectangle= new Rect();
-            decorView.getWindowVisibleDisplayFrame(rectangle);
-
 //                    event.offsetLocation(0, a.getWindow().getDecorView().findViewById(android.R.id.content).getTop());
+//
+//            float y = decorView.getY();
+//            float top = decorView.getTop();
+//            event.offsetLocation(0, decorView.getTop());
+//            View content = decorView.findViewById(android.R.id.content);
+//            float cy = content.getY();
+//            float ctop = content.getTop();
 
-            if (rectangle.top > 0) {
+            int windowY = getWindowY(a);
+
+            if (windowY > 0) {
                 event = MotionEvent.obtain(event);
-                event.offsetLocation(0, rectangle.top);
+                event.offsetLocation(0, windowY);
             }
             a.dispatchTouchEvent(event);
 
-            return true;
-        } else {
-            //TODO 不是本 APP 的界面
         }
 
-        return false;
+
+//                float dividerY = rlUIAutoDivider.getY() + rlUIAutoDivider.getHeight()/2;
+        float dividerY = floatDivider.getY() + rlUIAutoDivider.getHeight()/2;
+        float relativeY = event.getY() <= dividerY ? event.getY() : (event.getY() - screenHeight);
+
+        JSONObject obj = new JSONObject(true);
+        obj.put("id", - System.currentTimeMillis());
+        obj.put("flowId", flowId);
+        obj.put("action", event.getAction());
+        obj.put("x", (int) event.getX());
+        obj.put("y", (int) relativeY);
+        obj.put("dividerY", (int) dividerY);
+        obj.put("rawX", (int) event.getRawX());
+        obj.put("rawY", (int) event.getRawY());
+        obj.put("time", System.currentTimeMillis());
+        obj.put("downTime", event.getDownTime());
+        obj.put("eventTime", event.getEventTime());
+        obj.put("metaState", event.getMetaState());
+        obj.put("size", event.getSize());
+        obj.put("source", event.getSource());
+        obj.put("pressure", event.getPressure());
+        obj.put("deviceId", event.getDeviceId());
+        obj.put("xPrecision", event.getXPrecision());
+        obj.put("yPrecision", event.getYPrecision());
+        obj.put("pointerCount", event.getPointerCount());
+        obj.put("edgeFlags", event.getEdgeFlags());
+
+        if (touchList == null) {
+            touchList = new JSONArray();
+        }
+        touchList.add(obj);
+
+        return a != null;
     }
 
 
@@ -516,7 +564,7 @@ public class UIAutoActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        cache.edit().remove(DIVIDER_Y).putFloat(DIVIDER_Y, rlUnitAutoDivider.getY() + rlUnitAutoDivider.getHeight()/2).apply();
+        cache.edit().remove(DIVIDER_Y).putFloat(DIVIDER_Y, rlUIAutoDivider.getY() + rlUIAutoDivider.getHeight()/2).apply();
         super.onDestroy();
     }
 
@@ -533,21 +581,54 @@ public class UIAutoActivity extends Activity {
 //    }
 
 
+    private long firstTime = 0;
+    private long lastTime = 0;
+    private long firstCurTime = 0;
+    private long lastCurTime = 0;
     public void recover(JSONArray touchList) {
         isRecovering = true;
 
-        JSONObject last = null;
-        for (int i = 0; i < touchList.size(); i++) {
-            JSONObject obj = touchList.getJSONObject(i);
+        showCover(true, DemoApplication.getInstance().getCurrentActivity());
 
-            MotionEvent event = MotionEvent.obtain(obj.getIntValue("downTime"), obj.getIntValue("eventTime"),
-                    obj.getIntValue("action"), obj.getIntValue("x"), obj.getIntValue("y"), obj.getIntValue("metaState"));
+        JSONObject first = touchList == null || touchList.isEmpty() ? null : touchList.getJSONObject(0);
+        firstTime = first == null ? 0 : first.getLongValue("time");
 
-            Message msg = handler.obtainMessage();
-            msg.obj = event;
-            handler.sendMessageDelayed(msg, last == null ? 0 : obj.getIntValue("eventTime") - last.getIntValue("eventTime"));
+        firstCurTime = 0;
+        if (firstTime > 0) {
+            firstCurTime = System.currentTimeMillis();
+            pbUIAutoDivider.setVisibility(View.VISIBLE);
 
-            last = obj;
+            for (int i = 0; i < touchList.size(); i++) {
+                JSONObject obj = touchList.getJSONObject(i);
+
+                MotionEvent event = MotionEvent.obtain(
+                        obj.getLongValue("downTime"),
+                        obj.getLongValue("eventTime"),
+                        obj.getIntValue("action"),
+//                    obj.getIntValue("pointerCount"),
+                        obj.getFloatValue("x"),
+                        obj.getFloatValue("y"),
+                        obj.getFloatValue("pressure"),
+                        obj.getFloatValue("size"),
+                        obj.getIntValue("metaState"),
+                        obj.getFloatValue("xPrecision"),
+                        obj.getFloatValue("yPrecision"),
+                        obj.getIntValue("deviceId"),
+                        obj.getIntValue("edgeFlags")
+                );
+                event.setSource(obj.getIntValue("source"));
+//            event.setEdgeFlags(obj.getIntValue("edgeFlags"));
+
+                long time = obj.getIntValue("time");
+                if (i >= touchList.size() - 1) {
+                    lastTime = time;
+                    lastCurTime = firstCurTime + lastTime - firstTime;
+                }
+
+                Message msg = handler.obtainMessage();
+                msg.obj = event;
+                handler.sendMessageDelayed(msg, i <= 0 ? 0 : time - firstTime);
+            }
         }
     }
 
@@ -563,10 +644,15 @@ public class UIAutoActivity extends Activity {
 
         if (requestCode == REQUEST_UI_AUTO_LIST) {
             JSONArray array = data == null ? null : JSON.parseArray(data.getStringExtra(UIAutoListActivity.RESULT_LIST));
-            recover(array);
+            finish();
 
-            Toast.makeText(context, "onActivityResult  array = " + JSON.toJSONString(array), Toast.LENGTH_LONG).show();
-            //TODO  恢复
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    touchList = new JSONArray();
+                    recover(array);
+                }
+            }, 1000);
         }
 
     }

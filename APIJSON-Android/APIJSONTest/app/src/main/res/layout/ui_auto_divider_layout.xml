@@ -1,7 +1,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rlUnitAutoDivider"
+    android:id="@+id/rlUIAutoDivider"
     android:layout_width="match_parent"
     android:layout_height="24dp"
     android:minHeight="12dp"
@@ -10,30 +10,30 @@
 
 
     <View
-        android:id="@+id/vUnitAutoDivider"
+        android:id="@+id/vUIAutoDivider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#10000000"
+        android:background="#EEFFFFFF"
         android:layout_centerInParent="true"
         />
 
 
     <View
-        android:layout_above="@id/vUnitAutoDivider"
+        android:layout_above="@id/vUIAutoDivider"
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@android:color/white"
+        android:background="#10000000"
         />
 
     <View
-        android:layout_below="@id/vUnitAutoDivider"
+        android:layout_below="@id/vUIAutoDivider"
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="#DDEEEEEE"
+        android:background="#10000000"
         />
 
     <ImageView
-        android:id="@+id/ivUnitAutoMenu"
+        android:id="@+id/ivUIAutoDivider"
         tools:layout_width="24dp"
         android:minWidth="12dp"
         android:layout_width="wrap_content"
@@ -41,6 +41,14 @@
         android:layout_centerInParent="true"
         android:background="@drawable/oval_alpha"
         android:scaleType="centerInside"
+        />
+
+    <ProgressBar
+        android:id="@+id/pbUIAutoDivider"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:visibility="visible"
         />
 
 </RelativeLayout>
