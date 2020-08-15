@@ -24,7 +24,9 @@
                 android:background="@null"
                 android:gravity="top|left"
                 android:hint="request"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textIsSelectable="true"
+                />
 
             <View
                 android:layout_width="1dp"
@@ -40,7 +42,7 @@
                 android:background="@null"
                 android:gravity="top|left"
                 android:hint="response"
-                android:onClick="copy"
+                android:textIsSelectable="true"
                 android:textSize="14sp" />
         </LinearLayout>
     </ScrollView>
@@ -72,23 +74,30 @@
             />
 
         <TextView
-            android:text="@string/port"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvUnitIP"
+            android:text="192.168.0.1:"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center"
+            android:singleLine="true"
+            android:onClick="ip"
+            android:ellipsize="middle"
+            android:textSize="16sp"
             />
 
         <EditText
             android:id="@+id/etUnitPort"
             android:hint="8080"
             android:inputType="number"
-            android:maxLength="6"
+            android:maxLength="5"
             android:minEms="2"
             android:digits="1234567890"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:gravity="left|center_vertical"
             android:enabled="true"
+            android:textSize="16sp"
             />
 
         <ProgressBar

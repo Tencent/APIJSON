@@ -1,13 +1,17 @@
 package apijson.demo.server;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import android.content.Context;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.util.TypeUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -20,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,17 +33,19 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.util.TypeUtils;
-
+import dalvik.system.DexFile;
+import dalvik.system.PathClassLoader;
 import zuo.biao.apijson.StringUtil;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 public class MethodUtil {
+
 
 	/**非null注解
 	 * javax.validation.constraints.NotNull不在JDK里面，为了减少第三方库引用就在这里实现了一个替代品
@@ -61,6 +68,12 @@ public class MethodUtil {
 	public interface Callback {
 		JSONObject newSuccessResult();
 		JSONObject newErrorResult(Exception e);
+	}
+
+
+	public interface ClassLoaderCallback {
+		List<Class<?>> loadClassList(String packageOrFileName, String className, boolean ignoreError) throws ClassNotFoundException, IOException;
+		Class<?> loadClass(String className) throws ClassNotFoundException;
 	}
 
 	public static String KEY_CODE = "code";
@@ -88,24 +101,8 @@ public class MethodUtil {
 	public static String KEY_CALL_MAP = "call(){}";
 
 
-	public static Callback CALLBACK = new Callback() {
-
-		@Override
-		public JSONObject newSuccessResult() {
-			JSONObject result = new JSONObject(true);
-			result.put(KEY_CODE, CODE_SUCCESS);
-			result.put(KEY_MSG, MSG_SUCCESS);
-			return result;
-		}
-
-		@Override
-		public JSONObject newErrorResult(Exception e) {
-			JSONObject result = new JSONObject(true);
-			result.put(KEY_CODE, CODE_SERVER_ERROR);
-			result.put(KEY_MSG, e.getMessage());
-			return result;
-		}
-	};
+	public static ClassLoaderCallback CLASS_LOADER_CALLBACK;
+	public static Callback CALLBACK;
 
 	//  Map<class, <constructorArgs, instance>>
 	public static final Map<Class<?>, Map<Object, Object>> INSTANCE_MAP;
@@ -113,6 +110,27 @@ public class MethodUtil {
 	public static final Map<String, Class<?>> BASE_CLASS_MAP;
 	public static final Map<String, Class<?>> CLASS_MAP;
 	static {
+		CLASS_LOADER_CALLBACK = null;
+		CALLBACK = new Callback() {
+
+			@Override
+			public JSONObject newSuccessResult() {
+				JSONObject result = new JSONObject(true);
+				result.put(KEY_CODE, CODE_SUCCESS);
+				result.put(KEY_MSG, MSG_SUCCESS);
+				return result;
+			}
+
+			@Override
+			public JSONObject newErrorResult(Exception e) {
+				JSONObject result = new JSONObject(true);
+				result.put(KEY_CODE, CODE_SERVER_ERROR);
+				result.put(KEY_MSG, e.getMessage());
+				return result;
+			}
+		};
+
+
 		INSTANCE_MAP = new HashMap<>();
 
 		PRIMITIVE_CLASS_MAP = new HashMap<String, Class<?>>();
@@ -582,12 +600,12 @@ public class MethodUtil {
 
 		boolean allMethod = isEmpty(methodName, true);
 
-		List<Class<?>> classlist = findClassList(pkgName, clsName, true);
+		List<Class<?>> classList = findClassList(pkgName, clsName, true);
 		JSONArray list = null;
-		if (classlist != null) {
-			list = new JSONArray(classlist.size());
+		if (classList != null) {
+			list = new JSONArray(classList.size());
 
-			for (Class<?> cls : classlist) {
+			for (Class<?> cls : classList) {
 				if (cls == null) {
 					continue;
 				}
@@ -635,6 +653,10 @@ public class MethodUtil {
 
 	public static String dot2Separator(String name) {
 		return name == null ? null : name.replaceAll("\\.", File.separator);
+	}
+
+	public static String separator2dot(String name) {
+		return name == null ? null : name.replaceAll(File.separator, ".");
 	}
 
 	//	private void initTypesAndValues(JSONArray methodArgs, Class<?>[] types, Object[] args)
@@ -876,7 +898,11 @@ public class MethodUtil {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public static List<Class<?>> findClassList(String packageOrFileName, String className, boolean ignoreError) throws ClassNotFoundException {
+	public static List<Class<?>> findClassList(String packageOrFileName, String className, boolean ignoreError) throws ClassNotFoundException, IOException {
+		if (CLASS_LOADER_CALLBACK != null) {
+			return CLASS_LOADER_CALLBACK.loadClassList(packageOrFileName, className, ignoreError);
+		}
+
 		List<Class<?>> list = new ArrayList<>();
 
 		int index = className.indexOf("<");

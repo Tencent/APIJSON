@@ -41,10 +41,11 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
 import java.lang.reflect.Method;
 
+import apijson.demo.IPUtil;
+import apijson.demo.MethodUtil;
 import apijson.demo.R;
 import apijson.demo.StringUtil;
 import apijson.demo.application.DemoApplication;
-import apijson.demo.server.MethodUtil;
 
 /**自动单元测试，需要用 UnitAuto 发请求到这个设备
  * https://github.com/TommyLemon/UnitAuto
@@ -73,6 +74,7 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
     private TextView tvUnitResponse;
 
     private TextView tvUnitOrient;
+    private TextView tvUnitIP;
     private TextView etUnitPort;
     private View pbUnit;
     @Override
@@ -88,6 +90,7 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
         tvUnitResponse = findViewById(R.id.tvUnitResponse);
 
         tvUnitOrient = findViewById(R.id.tvUnitOrient);
+        tvUnitIP = findViewById(R.id.tvUnitIP);
         etUnitPort = findViewById(R.id.etUnitPort);
         pbUnit = findViewById(R.id.pbUnit);
 
@@ -95,6 +98,7 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
         SharedPreferences sp = getSharedPreferences(TAG, Context.MODE_PRIVATE);
         port = sp.getString(KEY_PORT, "");
 
+        tvUnitIP.setText(IPUtil.getIpAddress(context) + ":");
         etUnitPort.setText(port);
         pbUnit.setVisibility(View.GONE);
 
@@ -114,33 +118,50 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
         onConfigurationChanged(getResources().getConfiguration());
     }
 
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        tvUnitOrient.setText(
-                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
-                        ? (getString(R.string.screen) + getString(R.string.horizontal))
-                        : getString(R.string.vertical)
-        );
+        tvUnitOrient.setText(isLandscape() ? (getString(R.string.screen) + getString(R.string.horizontal)) : getString(R.string.vertical));
         super.onConfigurationChanged(newConfig);
     }
+
+
 
     public void copy(View v) {
         StringUtil.copyText(context, StringUtil.getString((TextView) v));
     }
 
     public void orient(View v) {
-        setRequestedOrientation(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
-                ? ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+        setRequestedOrientation(isLandscape() ? ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+    }
+
+    public void ip(View v) {
+        String ip = IPUtil.getIpAddress(context);
+        tvUnitIP.setText(ip + ":");
+
+        StringUtil.copyText(context, "http://" + ip + ":" + getPort());
     }
 
 
+    private boolean isLandscape() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
     private String port = "8080";
+    private String getPort() {
+        String p = StringUtil.getTrimedString(etUnitPort);
+        if (StringUtil.isEmpty(p, true)) {
+            p = StringUtil.getTrimedString(etUnitPort.getHint());
+        }
+        return StringUtil.isEmpty(p, true) ? "8080" : p;
+    }
+
+
     public void start(View v) {
         v.setEnabled(false);
-        port = StringUtil.getTrimedString(etUnitPort);
 
         try {
-            startServer(StringUtil.isEmpty(port, true) ? 8080 : Integer.valueOf(port));
+            startServer(Integer.valueOf(getPort()));
 
             etUnitPort.setEnabled(false);
             pbUnit.setVisibility(View.VISIBLE);
@@ -208,7 +229,12 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
             @Override
             public void run() {
                 if (isAlive) {  //TODO 改为 ListView 展示，保证每次请求都能对齐 Request 和 Response 的显示
-                    tvUnitRequest.setText(StringUtil.getString(asyncHttpServerRequest) + "Content:\n" + zuo.biao.apijson.JSON.format(request) + "\n\n\n\n\n" + StringUtil.getString(tvUnitRequest));
+                    try {
+                        tvUnitRequest.setText(StringUtil.getString(asyncHttpServerRequest) + "Content:\n" + zuo.biao.apijson.JSON.format(request));   //批量跑测试容易卡死，也没必要显示所有的，专注更好  + "\n\n\n\n\n" + StringUtil.getString(tvUnitRequest));
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -225,7 +251,12 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
                     send(asyncHttpServerResponse, "ok");
                     break;
                 case "/method/list":
-                    asyncHttpServerResponse.send("application/json; charset=utf-8", MethodUtil.listMethod(request).toJSONString());
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            send(asyncHttpServerResponse, MethodUtil.listMethod(request).toJSONString());
+                        }
+                    }).start();
                     break;
                 case "/method/invoke":
                     MethodUtil.Listener<JSONObject> listener = new MethodUtil.Listener<JSONObject>() {
@@ -249,12 +280,14 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
                             String pkgName = req.getString("package");
                             String clsName = req.getString("class");
                             Class<?> clazz = Class.forName(pkgName.replaceAll("/", ".") + "." + clsName);
-                            if (clazz.isAssignableFrom(Activity.class)) {
-                                instance = UnitAutoActivity.this;
-                            } else if (clazz.isAssignableFrom(Application.class)) {
-                                instance = DemoApplication.getInstance();
-                            } else {
-                                instance = null;
+
+                            if (req.getBooleanValue("static") == false) {
+                                if (Activity.class.isAssignableFrom(clazz) || Context.class.isAssignableFrom(clazz)) {
+                                    instance = DemoApplication.getInstance().getCurrentActivity();
+                                }
+                                else if (Application.class.isAssignableFrom(clazz)) {
+                                    instance = DemoApplication.getInstance();
+                                }
                             }
                         }
                         catch (Exception e) {
@@ -294,7 +327,12 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
             @Override
             public void run() {
                 if (isAlive) {
-                    tvUnitResponse.setText(StringUtil.getString(asyncHttpServerResponse) + "Content:\n" + zuo.biao.apijson.JSON.format(json) + "\n\n\n\n\n" + StringUtil.getString(tvUnitResponse));
+                    try {
+                        tvUnitResponse.setText(StringUtil.getString(asyncHttpServerResponse) + "Content:\n" + zuo.biao.apijson.JSON.format(json));  //批量跑测试容易卡死，也没必要显示所有的，专注更好 + "\n\n\n\n\n" + StringUtil.getString(tvUnitResponse));
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
