@@ -2,7 +2,6 @@ package apijson.demo;
 
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -56,47 +55,6 @@ public class MethodUtil extends apijson.demo.server.MethodUtil {
 	}
 
 	public static JSONObject listMethod(String request) {
-		if (CLASS_LOADER_CALLBACK == null) {
-			CLASS_LOADER_CALLBACK = new ClassLoaderCallback() {
-
-				@Override
-				public Class<?> loadClass(String className) {
-					return null;
-				}
-
-				@Override
-				public List<Class<?>> loadClassList(String packageOrFileName, String className, boolean ignoreError) throws ClassNotFoundException, IOException {
-					List<Class<?>> list = new ArrayList<Class<?>>();
-					int index = className.indexOf("<");
-					if (index >= 0) {
-						className = className.substring(0, index);
-					}
-
-					boolean allPackage = isEmpty(packageOrFileName, true);
-					boolean allName = isEmpty(className, true);
-
-					//将包名替换成目录  TODO 应该一层层查找进去，实时判断是 package 还是 class，如果已经是 class 还有下一级，应该用 $ 隔开内部类。简单点也可以认为大驼峰是类
-					String fileName = allPackage ? File.separator : dot2Separator(packageOrFileName);
-
-					ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-					DexFile dex = new DexFile(DemoApplication.getInstance().getPackageResourcePath());
-					Enumeration<String> entries = dex.entries();
-					while (entries.hasMoreElements()) {
-						String entryName = entries.nextElement();
-						if (allPackage || entryName.startsWith(fileName)) {
-							Class<?> entryClass = Class.forName(entryName, true, classLoader);
-
-							if (allName || className.equals(entryClass.getSimpleName())) {
-								list.add(entryClass);
-							}
-						}
-					}
-
-					return list;
-				}
-			};
-		}
 		return apijson.demo.server.MethodUtil.listMethod(request);
 	}
 

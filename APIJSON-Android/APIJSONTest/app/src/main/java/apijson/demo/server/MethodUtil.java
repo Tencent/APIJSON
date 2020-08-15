@@ -1,7 +1,5 @@
 package apijson.demo.server;
 
-import android.content.Context;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -24,7 +22,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,8 +30,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-import dalvik.system.DexFile;
-import dalvik.system.PathClassLoader;
 import zuo.biao.apijson.StringUtil;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
@@ -101,8 +96,25 @@ public class MethodUtil {
 	public static String KEY_CALL_MAP = "call(){}";
 
 
-	public static ClassLoaderCallback CLASS_LOADER_CALLBACK;
-	public static Callback CALLBACK;
+	public static ClassLoaderCallback CLASS_LOADER_CALLBACK = null;  //不能在 static 代码块赋值，否则 MethodUtil 子类中 static 代码块对它赋值的代码不会执行！
+	public static Callback CALLBACK = new Callback() {  //不能在 static 代码块赋值，否则 MethodUtil 子类中 static 代码块对它赋值的代码不会执行！
+
+		@Override
+		public JSONObject newSuccessResult() {
+			JSONObject result = new JSONObject(true);
+			result.put(KEY_CODE, CODE_SUCCESS);
+			result.put(KEY_MSG, MSG_SUCCESS);
+			return result;
+		}
+
+		@Override
+		public JSONObject newErrorResult(Exception e) {
+			JSONObject result = new JSONObject(true);
+			result.put(KEY_CODE, CODE_SERVER_ERROR);
+			result.put(KEY_MSG, e.getMessage());
+			return result;
+		}
+	};
 
 	//  Map<class, <constructorArgs, instance>>
 	public static final Map<Class<?>, Map<Object, Object>> INSTANCE_MAP;
@@ -110,27 +122,6 @@ public class MethodUtil {
 	public static final Map<String, Class<?>> BASE_CLASS_MAP;
 	public static final Map<String, Class<?>> CLASS_MAP;
 	static {
-		CLASS_LOADER_CALLBACK = null;
-		CALLBACK = new Callback() {
-
-			@Override
-			public JSONObject newSuccessResult() {
-				JSONObject result = new JSONObject(true);
-				result.put(KEY_CODE, CODE_SUCCESS);
-				result.put(KEY_MSG, MSG_SUCCESS);
-				return result;
-			}
-
-			@Override
-			public JSONObject newErrorResult(Exception e) {
-				JSONObject result = new JSONObject(true);
-				result.put(KEY_CODE, CODE_SERVER_ERROR);
-				result.put(KEY_MSG, e.getMessage());
-				return result;
-			}
-		};
-
-
 		INSTANCE_MAP = new HashMap<>();
 
 		PRIMITIVE_CLASS_MAP = new HashMap<String, Class<?>>();
