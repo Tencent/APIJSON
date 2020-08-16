@@ -7,7 +7,8 @@ import android.view.MotionEvent;
 public class InputUtil {
 
     public static String getActionName(int action) {
-        return MotionEvent.actionToString(action);
+        String s = StringUtil.getTrimedString(MotionEvent.actionToString(action));
+        return s.startsWith("ACTION_") ? s.substring("ACTION_".length()) : s;
 //        switch (action) {
 //            case MotionEvent.ACTION_DOWN:
 //                return "DOWN";
