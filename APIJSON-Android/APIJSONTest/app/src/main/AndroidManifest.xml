@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="apijson.demo"
-    android:versionCode="1"
-    android:versionName="@string/app_version" >
+          xmlns:tools="http://schemas.android.com/tools"
+          package="apijson.demo"
+          android:versionCode="1"
+          android:versionName="@string/app_version">
 
     <uses-sdk
         android:minSdkVersion="15"
@@ -27,7 +28,9 @@
 
         <activity
             android:name="apijson.demo.ui.SelectActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            tools:replace="android:name"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,13 +49,6 @@
             android:screenOrientation="userLandscape"
             />
         <activity
-            android:name="apijson.demo.ui.UnitAutoActivity"
-            android:label="@string/unit"
-            android:windowSoftInputMode="adjustPan"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="userLandscape"
-            />
-        <activity
             android:name="apijson.demo.ui.UIAutoActivity"
             android:label="@string/ui"
             android:windowSoftInputMode="adjustPan"
@@ -66,6 +62,15 @@
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             />
+
+        <activity
+            android:name="unitauto.apk.UnitAutoActivity"
+            android:label="@string/unit"
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="userLandscape"
+            />
+
     </application>
 
 </manifest>

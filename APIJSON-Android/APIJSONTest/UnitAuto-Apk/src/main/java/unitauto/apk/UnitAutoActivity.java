@@ -1,4 +1,4 @@
-/*Copyright ©2016 TommyLemon(https://github.com/TommyLemon)
+/*Copyright ©2020 TommyLemon(https://github.com/TommyLemon)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,10 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package apijson.demo.ui;
+package unitauto.apk;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,7 +31,6 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.http.Headers;
@@ -41,17 +42,15 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
 import java.lang.reflect.Method;
 
-import apijson.demo.IPUtil;
-import apijson.demo.MethodUtil;
-import apijson.demo.R;
-import apijson.demo.StringUtil;
-import apijson.demo.application.DemoApplication;
+import unitauto.JSON;
+import unitauto.StringUtil;
+
 
 /**自动单元测试，需要用 UnitAuto 发请求到这个设备
  * https://github.com/TommyLemon/UnitAuto
  * @author Lemon
  */
-public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRequestCallback {
+public class UnitAutoActivity extends Activity implements HttpServerRequestCallback {
     public static final String TAG = "UnitAutoActivity";
     private static final String KEY_PORT = "KEY_PORT";
 
@@ -128,7 +127,7 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
 
 
     public void copy(View v) {
-        StringUtil.copyText(context, StringUtil.getString((TextView) v));
+        copyText(context, StringUtil.getString(((TextView) v).getText()));
     }
 
     public void orient(View v) {
@@ -139,7 +138,22 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
         String ip = IPUtil.getIpAddress(context);
         tvUnitIP.setText(ip + ":");
 
-        StringUtil.copyText(context, "http://" + ip + ":" + getPort());
+        copyText(context, "http://" + ip + ":" + getPort());
+    }
+
+
+    /**
+     * @param value
+     */
+    public static void copyText(Context context, String value) {
+        if (context == null || StringUtil.isEmpty(value, true)) {
+            Log.e("StringUtil", "copyText  context == null || StringUtil.isNotEmpty(value, true) == false >> return;");
+            return;
+        }
+        ClipData cd = ClipData.newPlainText("simple text", value);
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboardManager.setPrimaryClip(cd);
+        Toast.makeText(context, "已复制\n" + value, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -149,7 +163,7 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
 
     private String port = "8080";
     private String getPort() {
-        String p = StringUtil.getTrimedString(etUnitPort);
+        String p = StringUtil.getTrimedString(etUnitPort.getText());
         if (StringUtil.isEmpty(p, true)) {
             p = StringUtil.getTrimedString(etUnitPort.getHint());
         }
@@ -230,7 +244,7 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
             public void run() {
                 if (isAlive) {  //TODO 改为 ListView 展示，保证每次请求都能对齐 Request 和 Response 的显示
                     try {
-                        tvUnitRequest.setText(StringUtil.getString(asyncHttpServerRequest) + "Content:\n" + zuo.biao.apijson.JSON.format(request));   //批量跑测试容易卡死，也没必要显示所有的，专注更好  + "\n\n\n\n\n" + StringUtil.getString(tvUnitRequest));
+                        tvUnitRequest.setText(StringUtil.getString(asyncHttpServerRequest) + "Content:\n" + JSON.format(request));   //批量跑测试容易卡死，也没必要显示所有的，专注更好  + "\n\n\n\n\n" + StringUtil.getString(tvUnitRequest));
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -283,10 +297,10 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
 
                             if (req.getBooleanValue("static") == false) {
                                 if (Activity.class.isAssignableFrom(clazz) || Context.class.isAssignableFrom(clazz)) {
-                                    instance = DemoApplication.getInstance().getCurrentActivity();
+                                    instance = UnitAutoApp.getInstance().getCurrentActivity();
                                 }
                                 else if (Application.class.isAssignableFrom(clazz)) {
-                                    instance = DemoApplication.getInstance();
+                                    instance = UnitAutoApp.getApp();
                                 }
                             }
                         }
@@ -328,7 +342,7 @@ public class UnitAutoActivity extends UIAutoBaseActivity implements HttpServerRe
             public void run() {
                 if (isAlive) {
                     try {
-                        tvUnitResponse.setText(StringUtil.getString(asyncHttpServerResponse) + "Content:\n" + zuo.biao.apijson.JSON.format(json));  //批量跑测试容易卡死，也没必要显示所有的，专注更好 + "\n\n\n\n\n" + StringUtil.getString(tvUnitResponse));
+                        tvUnitResponse.setText(StringUtil.getString(asyncHttpServerResponse) + "Content:\n" + JSON.format(json));  //批量跑测试容易卡死，也没必要显示所有的，专注更好 + "\n\n\n\n\n" + StringUtil.getString(tvUnitResponse));
                     }
                     catch (Exception e) {
                         e.printStackTrace();

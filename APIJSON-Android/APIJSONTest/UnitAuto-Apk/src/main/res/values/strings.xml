@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="unit">自动单元测试</string>
+    <string name="start">启动</string>
+    <string name="stop">停止</string>
+    <string name="port">端口：</string>
+    <string name="screen">屏幕：</string>
+    <string name="horizontal">横向</string>
+    <string name="vertical">纵向</string>
+    <string name="please_send_request_with_unit_auto">请用 UnitAuto 向这个设备发送请求 \nhttp://apijson.org/unit</string>
+
+</resources>

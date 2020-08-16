@@ -50,6 +50,7 @@ import java.util.List;
 import apijson.demo.R;
 import apijson.demo.ui.UIAutoActivity;
 import apijson.demo.ui.UIAutoListActivity;
+import unitauto.apk.UnitAutoApp;
 import zuo.biao.apijson.JSON;
 
 /**Application
@@ -133,6 +134,8 @@ public class DemoApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		instance = this;
+
+		UnitAutoApp.init(this);
 		Log.d(TAG, "项目启动 >>>>>>>>>>>>>>>>>>>> \n\n");
 
 		registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
@@ -270,17 +273,19 @@ public class DemoApplication extends Application {
 				isRecovering = false;
 //                ((ViewGroup) v.getParent()).removeView(v);
 
-				String cacheKey = UIAutoListActivity.CACHE_TOUCH;
-				SharedPreferences cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
-				JSONArray allList = JSON.parseArray(cache.getString(cacheKey, null));
+				if (touchList != null && touchList.isEmpty() == false) {
+					String cacheKey = UIAutoListActivity.CACHE_TOUCH;
+					SharedPreferences cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
+					JSONArray allList = JSON.parseArray(cache.getString(cacheKey, null));
 
-				if (allList == null || allList.isEmpty()) {
-					allList = touchList;
+					if (allList == null || allList.isEmpty()) {
+						allList = touchList;
+					}
+					else {
+						allList.addAll(touchList);
+					}
+					cache.edit().remove(cacheKey).putString(cacheKey, JSON.toJSONString(allList)).commit();
 				}
-				else {
-					allList.addAll(touchList);
-				}
-				cache.edit().remove(cacheKey).putString(cacheKey, JSON.toJSONString(allList)).commit();
 
 //                startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), flowId));  // touchList == null ? null : touchList.toJSONString()));
 //                startActivityForResult(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()), REQUEST_UI_AUTO_LIST);
@@ -552,6 +557,7 @@ public class DemoApplication extends Application {
 	private long firstCurTime = 0;
 	private long lastCurTime = 0;
 	public void recover(JSONArray touchList) {
+		touchList = new JSONArray();
 		isRecovering = true;
 
 //        List<InputEvent> list = new LinkedList<>();
@@ -676,6 +682,11 @@ public class DemoApplication extends Application {
 
 
 	private JSONArray addInputEvent(InputEvent ie, Activity activity) {
+		if (floatDivider == null || rlUIAutoDivider == null) {
+			Log.e(TAG, "addInputEvent  floatDivider == null || rlUIAutoDivider == null >> return null;");
+			return null;
+		}
+
 		int dividerY = floatDivider.getY() + rlUIAutoDivider.getHeight()/2;
 		int orientation = activity == null ? Configuration.ORIENTATION_PORTRAIT : activity.getResources().getConfiguration().orientation;
 

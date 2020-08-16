@@ -1,16 +1,31 @@
-package apijson.demo;
+/*Copyright ©2020 TommyLemon(https://github.com/TommyLemon)
 
-import com.alibaba.fastjson.JSONObject;
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.*/
+
+package unitauto.apk;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import apijson.demo.application.DemoApplication;
 import dalvik.system.DexFile;
 
-public class MethodUtil extends apijson.demo.server.MethodUtil {
+
+/**针对 Apk 文件的方法/函数的工具类
+ * @author Lemon
+ */
+public class MethodUtil extends unitauto.MethodUtil {
 
 	static {
 		CLASS_LOADER_CALLBACK = new ClassLoaderCallback() {
@@ -36,7 +51,7 @@ public class MethodUtil extends apijson.demo.server.MethodUtil {
 
 				ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-				DexFile dex = new DexFile(DemoApplication.getInstance().getPackageResourcePath());
+				DexFile dex = new DexFile(UnitAutoApp.getApp().getPackageResourcePath());
 				Enumeration<String> entries = dex.entries();
 				while (entries.hasMoreElements()) {
 					String entryName = entries.nextElement();
@@ -52,18 +67,6 @@ public class MethodUtil extends apijson.demo.server.MethodUtil {
 				return list;
 			}
 		};
-	}
-
-	public static JSONObject listMethod(String request) {
-		return apijson.demo.server.MethodUtil.listMethod(request);
-	}
-
-	public static void invokeMethod(String request, Object instance, Listener<JSONObject> listener) throws Exception {
-		apijson.demo.server.MethodUtil.invokeMethod(request, instance, listener);
-	}
-
-	public static void invokeMethod(JSONObject request, Object instance, Listener<JSONObject> listener) throws Exception {
-		apijson.demo.server.MethodUtil.invokeMethod(request, instance, listener);
 	}
 
 }

@@ -26,10 +26,9 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
     compile 'com.squareup.okhttp:okhttp:2.1.0'
     compile 'com.alibaba:fastjson:1.2.61'
     compile 'com.github.APIJSON:apijson-orm:3.9.0'
-    compile 'com.koushikdutta.async:androidasync:2.+'
     compile 'com.github.yhaolpz:FloatWindow:1.0.9'
+    compile project(path: ':UnitAuto-Apk')
 }

@@ -47,7 +47,7 @@ import zuo.biao.apijson.JSONRequest;
 import zuo.biao.apijson.JSONResponse;
 
 
-/** 操作流程 Flow /操作步骤 Touch 列表
+/** 操作流程 Flow /操作步骤 Input 列表
  * https://github.com/TommyLemon/UIAuto
  * @author Lemon
  */
@@ -270,19 +270,19 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
 
             if (touchList != null) {
                 for (int i = 0; i < touchList.size(); i++) {
-                    JSONObject touch = touchList.getJSONObject(i);
-                    String state = statueList.get(touch);
+                    JSONObject input = touchList.getJSONObject(i);
+                    String state = statueList.get(input);
                     if ("Remote".equals(state) || "Uploading".equals(state)) {
                         return;
                     }
 
-                    statueList.put(touch, "Uploading");
+                    statueList.put(input, "Uploading");
 
                     JSONRequest request = new JSONRequest();
-                    {   // Touch <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        request.put("Touch", touch);
-                    }   // Touch >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                    request.setTag("Touch");
+                    {   // Input <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                        request.put("Input", input);
+                    }   // Input >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                    request.setTag("Input");
 
                     pbUIAutoList.setVisibility(View.VISIBLE);
                     HttpManager.getInstance().post(fullUrl, request.toString(), new HttpManager.OnHttpResponseListener() {
@@ -290,10 +290,10 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
                         public void onHttpResponse(int requestCode, String resultJson, Exception e) {
                             JSONResponse response = new JSONResponse(resultJson);
                             if (response.isSuccess()) {
-                                statueList.put(touch, "Remote");
+                                statueList.put(input, "Remote");
                             }
                             else {
-                                statueList.put(touch, "Local");
+                                statueList.put(input, "Local");
                             }
                             showList(array);
                         }
@@ -306,15 +306,15 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
             JSONRequest request = new JSONRequest();
 
             if (isTouch) {
-                {   // Touch[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                {   // Input[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     JSONRequest touchItem = new JSONRequest();
-                    {   // Touch <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        JSONRequest touch = new JSONRequest();
-                        touch.put("flowId", flowId);
-                        touchItem.put("Touch", touch);
-                    }   // Touch >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                    request.putAll(touchItem.toArray(0, 0, "Touch"));
-                }   // Touch[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                    {   // Input <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                        JSONRequest input = new JSONRequest();
+                        input.put("flowId", flowId);
+                        touchItem.put("Input", input);
+                    }   // Input >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                    request.putAll(touchItem.toArray(0, 0, "Input"));
+                }   // Input[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             }
             else {
                 {   // Flow[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -345,7 +345,7 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
             Log.e(TAG, "onHttpResponse e = " + e.getMessage());
         }
         JSONResponse response = new JSONResponse(resultJson);
-        array = response.getJSONArray(isTouch ? "Touch[]" : "Flow[]");
+        array = response.getJSONArray(isTouch ? "Input[]" : "Flow[]");
         if (array == null) {
             array = new JSONArray();
         }

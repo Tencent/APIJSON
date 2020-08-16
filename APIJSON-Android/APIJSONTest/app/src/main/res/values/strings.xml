@@ -24,14 +24,6 @@
     <string name="request_error">可能出现了一些问题，可以按照以下步骤解决：\n\n1.检查网络连接\n\n2.检查url是否为一个可用的IPV4地址\n\n3.长按[ %1$s ]按钮用浏览器发送请求\n\n4.查看目标服务器上的log\n\n5.再试一次</string>
     <string name="apijson_slogan">APIJSON,&#160;let&#160;interfaces&#160;go&#160;to&#160;hell!</string>
     <string name="apijson_info">APIJSON&#160;is&#160;a&#160;JSON&#160;Transmission&#160;Structure&#160;Protocol&#8230;</string>
-    <string name="unit">自动单元测试</string>
-    <string name="start">启动</string>
-    <string name="stop">停止</string>
-    <string name="port">端口：</string>
-    <string name="screen">屏幕：</string>
-    <string name="horizontal">横向</string>
-    <string name="vertical">纵向</string>
-    <string name="please_send_request_with_unit_auto">请用 UnitAuto 向这个设备发送请求 \nhttp://apijson.org/unit</string>
     <string name="ui">自动 UI 测试</string>
     <string name="local">本地列表</string>
     <string name="remote">共享列表</string>
