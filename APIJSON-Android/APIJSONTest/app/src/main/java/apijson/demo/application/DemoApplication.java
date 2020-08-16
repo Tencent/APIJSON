@@ -557,7 +557,6 @@ public class DemoApplication extends Application {
 	private long firstCurTime = 0;
 	private long lastCurTime = 0;
 	public void recover(JSONArray touchList) {
-		touchList = new JSONArray();
 		isRecovering = true;
 
 //        List<InputEvent> list = new LinkedList<>();

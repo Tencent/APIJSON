@@ -32,6 +32,7 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.demo.R;
 import apijson.demo.RequestUtil;
 import apijson.demo.StringUtil;
+import apijson.demo.application.DemoApplication;
 import unitauto.apk.UnitAutoActivity;
 import zuo.biao.apijson.JSON;
 
@@ -116,8 +117,8 @@ public class SelectActivity extends UIAutoBaseActivity implements OnClickListene
 			});
 		}
 
-//		DemoApplication.getInstance().onUIAutoActivityCreate(this);
-//		DemoApplication.getInstance().record();
+		DemoApplication.getInstance().onUIAutoActivityCreate(this);
+		DemoApplication.getInstance().record();
 
 	}
 

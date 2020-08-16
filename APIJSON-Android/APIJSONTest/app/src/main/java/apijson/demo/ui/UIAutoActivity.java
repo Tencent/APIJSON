@@ -129,7 +129,6 @@ public class UIAutoActivity extends Activity {
         //反而让 cover 与底部差一个导航栏高度 window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         context = this;
-        DemoApplication.getInstance().setCurrentActivity(this);
 
 
         flowId = getIntent().getLongExtra(INTENT_FLOW_ID, flowId);
@@ -379,6 +378,7 @@ public class UIAutoActivity extends Activity {
 //        showCover(true, context);
 //        finish();
 
+        DemoApplication.getInstance().onUIAutoActivityCreate(this);
         DemoApplication.getInstance().record();
         finish();
     }
