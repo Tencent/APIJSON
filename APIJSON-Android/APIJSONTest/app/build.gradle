@@ -25,10 +25,10 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.squareup.okhttp:okhttp:2.1.0'
-    compile 'com.alibaba:fastjson:1.2.61'
-    compile 'com.github.APIJSON:apijson-orm:3.9.0'
-    compile 'com.github.yhaolpz:FloatWindow:1.0.9'
-    compile project(path: ':UnitAuto-Apk')
+    api fileTree(dir: 'libs', include: ['*.jar'])
+    api 'com.squareup.okhttp:okhttp:2.1.0'
+    api 'com.alibaba:fastjson:1.2.61'
+    api 'com.github.APIJSON:apijson-orm:3.9.0'
+    api 'com.github.yhaolpz:FloatWindow:1.0.9'
+    api 'com.github.TommyLemon:UnitAuto:1.0.3'
 }
