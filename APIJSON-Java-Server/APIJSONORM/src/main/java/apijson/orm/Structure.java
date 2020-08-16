@@ -17,6 +17,7 @@ package apijson.orm;
 import static apijson.JSONObject.KEY_ID;
 import static apijson.JSONObject.KEY_USER_ID;
 import static apijson.orm.Operation.DISALLOW;
+import static apijson.orm.Operation.EXIST;
 import static apijson.orm.Operation.INSERT;
 import static apijson.orm.Operation.NECESSARY;
 import static apijson.orm.Operation.REMOVE;
@@ -257,6 +258,7 @@ public class Structure {
 		JSONObject update = target.getJSONObject(UPDATE.name());
 		JSONObject replace = target.getJSONObject(REPLACE.name());
 
+		String exist = StringUtil.getNoBlankString(target.getString(EXIST.name()));
 		String unique = StringUtil.getNoBlankString(target.getString(UNIQUE.name()));
 		String remove = StringUtil.getNoBlankString(target.getString(REMOVE.name()));
 		String necessary = StringUtil.getNoBlankString(target.getString(NECESSARY.name()));
@@ -268,6 +270,7 @@ public class Structure {
 		target.remove(UPDATE.name());
 		target.remove(REPLACE.name());
 
+		target.remove(EXIST.name());
 		target.remove(UNIQUE.name());
 		target.remove(REMOVE.name());
 		target.remove(NECESSARY.name());
@@ -411,7 +414,18 @@ public class Structure {
 		//校验与修改Request>>>>>>>>>>>>>>>>>
 
 		//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
-		//校验重复<<<<<<<<<<<<<<<<<<<
+		//校验存在<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
+		String[] exists = StringUtil.split(exist);
+		if (exists != null && exists.length > 0) {
+			long exceptId = real.getLongValue(KEY_ID);
+			for (String e : exists) {
+				verifyExist(name, e, real.get(e), exceptId, creator);
+			}
+		}
+		//校验存在>>>>>>>>>>>>>>>>>>>
+
+		//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
+		//校验重复<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
 		String[] uniques = StringUtil.split(unique);
 		if (uniques != null && uniques.length > 0) {
 			long exceptId = real.getLongValue(KEY_ID);
@@ -429,6 +443,7 @@ public class Structure {
 		target.put(UPDATE.name(), update);
 		target.put(REPLACE.name(), replace);
 
+		target.put(EXIST.name(), exist);
 		target.put(UNIQUE.name(), unique);
 		target.put(REMOVE.name(), remove);
 		target.put(NECESSARY.name(), necessary);
@@ -779,6 +794,40 @@ public class Structure {
 		}		
 	}
 
+	
+	/**验证是否存在
+	 * @param table
+	 * @param key
+	 * @param value
+	 * @throws Exception
+	 */
+	public static void verifyExist(String table, String key, Object value, @NotNull SQLCreator creator) throws Exception {
+		if (key == null || value == null) {
+			Log.e(TAG, "verifyExist  key == null || value == null >> return;");
+			return;
+		}
+		if (value instanceof JSON) {
+			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
+		}
+
+
+		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
+		config.setTable(table);
+		config.putWhere(key, value, false);
+
+		SQLExecutor executor = creator.createSQLExecutor();
+		try {
+			JSONObject result = executor.execute(config, false);
+			if (result == null) {
+				throw new Exception("服务器内部错误  verifyExist  result == null");
+			}
+			if (result.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+				throw new ConflictException(key + ": " + value + " 不存在！如果必要请先创建！");
+			}
+		} finally {
+			executor.close();
+		}
+	}
 
 	/**验证是否重复
 	 * @param table
@@ -789,6 +838,7 @@ public class Structure {
 	public static void verifyRepeat(String table, String key, Object value, @NotNull SQLCreator creator) throws Exception {
 		verifyRepeat(table, key, value, 0, creator);
 	}
+	
 	/**验证是否重复
 	 * @param table
 	 * @param key
@@ -804,15 +854,15 @@ public class Structure {
 		if (value instanceof JSON) {
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
-
-
+		
+		
 		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
 			config.putWhere(JSONRequest.KEY_ID + "!", exceptId, false);
 		}
 		config.putWhere(key, value, false);
-
+		
 		SQLExecutor executor = creator.createSQLExecutor();
 		try {
 			JSONObject result = executor.execute(config, false);
