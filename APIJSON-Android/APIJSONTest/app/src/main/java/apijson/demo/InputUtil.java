@@ -32,7 +32,8 @@ public class InputUtil {
     }
 
     public static String getKeyCodeName(int keyCode) {
-        return KeyEvent.keyCodeToString(keyCode);
+        String s = StringUtil.getTrimedString(KeyEvent.keyCodeToString(keyCode));
+        return s.startsWith("KEYCODE_") ? s.substring("KEYCODE_".length()) : s;
     }
 
     public static String getScanCodeName(int scanCode) {
