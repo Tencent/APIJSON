@@ -368,6 +368,8 @@ public class DemoApplication extends Application {
 		if (sCurrentActivityWeakRef == null || ! activity.equals(sCurrentActivityWeakRef.get())) {
 			sCurrentActivityWeakRef = new WeakReference<>(activity);
 		}
+
+		UnitAutoApp.setCurrentActivity(activity);
 	}
 
 
