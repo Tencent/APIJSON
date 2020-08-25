@@ -801,7 +801,7 @@ public class Structure {
 	 * @param value
 	 * @throws Exception
 	 */
-	public static void verifyExist(String table, String key, Object value, @NotNull SQLCreator creator) throws Exception {
+	public static void verifyExist(String table, String key, Object value, long exceptId, @NotNull SQLCreator creator) throws Exception {
 		if (key == null || value == null) {
 			Log.e(TAG, "verifyExist  key == null || value == null >> return;");
 			return;

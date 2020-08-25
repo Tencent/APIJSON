@@ -23,11 +23,11 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.61</version>
 		</dependency>
-		<dependency>
+<!-- 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-orm</artifactId>
 			<version>4.1.0</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>

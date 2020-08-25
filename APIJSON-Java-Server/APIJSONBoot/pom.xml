@@ -73,11 +73,11 @@
 		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
 		
 		<!-- 可使用 libs 目录的 apijson-framework.jar 和 apijson-orm.jar 本地 jar 包依赖来替代，两种方式二选一 -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
 			<version>LATEST</version>
-		</dependency>
+		</dependency> -->
 
 	</dependencies>
 
