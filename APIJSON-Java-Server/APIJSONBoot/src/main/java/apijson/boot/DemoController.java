@@ -1001,12 +1001,35 @@ public class DemoController extends APIJSONController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/delegate")
 	public String delegate(
+			@RequestParam(value = "$_type", required = false) String type,
 			@RequestParam(value = "$_except_headers", required = false) String exceptHeaders,
 			@RequestParam("$_delegate_url") String url, 
 			@RequestBody(required = false) String body, 
 			HttpMethod method, HttpSession session
 			) {
 
+		if ("GRPC".equals(type)) {
+			int index = url.indexOf("://");
+			String endpoint = index < 0 ? url : url.substring(index + 3);
+			
+			index = endpoint.indexOf("/");
+			String remoteMethod = index < 0 ? "" : endpoint.substring(index);
+			
+			url = "http://localhost:50050" + remoteMethod;
+			
+			
+			JSONObject obj = JSON.parseObject(body);
+			if (obj == null) {
+				obj = new JSONObject(true);
+			}
+			if (obj.get("endpoint") == null) {
+				endpoint = index < 0 ? endpoint : endpoint.substring(0, index);
+				obj.put("endpoint", endpoint);
+			}
+			
+			body = obj.toJSONString();
+		}
+		
 		Enumeration<String> names = request.getHeaderNames();
 		HttpHeaders headers = null;
 		String name;
@@ -1059,6 +1082,7 @@ public class DemoController extends APIJSONController {
 
 		if (map != null) {
 			map = new HashMap<>(map);  //解决 throw exception: Unmodified Map
+			map.remove("$_type");
 			map.remove("$_except_headers");
 			map.remove("$_delegate_url");
 
