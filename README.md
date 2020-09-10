@@ -285,6 +285,8 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 
 [APIJSONParser](https://github.com/Zerounary/APIJSONParser) 第三方 APIJSON 解析器，将 JSON 动态解析成 SQL
 
+[apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 apijson 构建 rest 请求的 js 库
+
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
 
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
