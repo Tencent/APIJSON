@@ -251,7 +251,7 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 
 [后端自动化版本管理，再也不用改URL了！](https://my.oschina.net/tommylemon/blog/1576587)
 
-[APIJSON简单使用](https://blog.csdn.net/m450744192/article/details/108462611)
+[APIJSON简单部署和使用](https://blog.csdn.net/m450744192/article/details/108462611)
 
 [3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
