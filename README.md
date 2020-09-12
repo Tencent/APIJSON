@@ -228,7 +228,7 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 如果有什么问题或建议可以 [提ISSUE](https://github.com/TommyLemon/APIJSON/issues) 或 加群，交流技术，分享经验。<br >
 如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/TommyLemon/APIJSON/pulls)，感激不尽~
 
-#### QQ解决群 - 607020115（付费）<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=oJ8Le8M6"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="MVVMHabit-Family" title="APIJSON付费群"></a>
+#### QQ解决群 - 607020115（付费）<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=oJ8Le8M6"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="MVVMHabit-Family" title="APIJSON付费群" style="top:6px"></a>
 自开群以来，还是有很多的朋友提出了很多问题，我也解决了很多问题，其中有大半问题是本库的Bug导致，也有些是使用者项目本
 身的环境问题，这花费了我大量的时间，经过我的观察和测试，到目前为止，本库的bug已经越来越少，当然不能说完全没有，但是
 已经能满足很大部分项目的需求。所以从现在起，我做出一个决定：把之前的讨论群改成解决群，并开启付费入群功能，专为解决大
@@ -236,7 +236,7 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 我也有自己的工作和娱乐时间，只有大家理解和支持我，我才能专心的为大家解决问题。不过也不用担心，我已经建立了另一个可以免费
 进入的QQ讨论群。
 
-#### QQ讨论群 - 734652054（免费）<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=M3LYbt4t"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="MVVMHabit-Family" title="APIJSON讨论群"></a>
+#### QQ讨论群 - 734652054（免费）<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=M3LYbt4t"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="MVVMHabit-Family" title="APIJSON讨论群" style="top:6px"></a>
 这个群，免费进入，大家可以相互讨论本库的相关使用和出现的问题，群主也会在里面解决问题，如果提出的问题，群成员不能帮助
 解决，需要群主解决，但是要花费群主五分钟以上的时间（本库Bug除外），群主将不会解决这个问题，如果项目紧急，请付费进入解
 决群解决（不过注意，付费群中群主会很认真很努力的解决问题，但也不能保证已经能完美解决）或者转换使用其他的开源库。
@@ -287,11 +287,11 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 
 [APIJSONParser](https://github.com/Zerounary/APIJSONParser) 第三方 APIJSON 解析器，将 JSON 动态解析成 SQL
 
-[apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 apijson 构建 rest 请求的 js 库
-
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
 
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
+
+[apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
 
 [AbsGrade](https://github.com/APIJSON/AbsGrade) 列表级联算法，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
 
