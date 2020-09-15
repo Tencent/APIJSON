@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <dimen name="qrcode_size">200dp</dimen>
-    <dimen name="moment_view_head_width">60dp</dimen>
-    <dimen name="moment_view_head_height">50dp</dimen>
-    <dimen name="moment_view_head_padding_right">10dp</dimen>
-
-</resources>

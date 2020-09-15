@@ -1,8 +1,0 @@
-
-# 配置 undertow，更多配置见官方文档：
-# https://www.jfinal.com/doc/1-4
-
-undertow.devMode=false
-undertow.host=localhost
-undertow.port=8080
-
