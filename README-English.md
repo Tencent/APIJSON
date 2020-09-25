@@ -275,7 +275,7 @@ You can also open it with Vue javascript framework. Click [here](https://vuejs.o
 
 ## <h2 id="4">4. Contributing<h2/> 
 	
-We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/APIJSON/APIJSON/issues) before opening a new one .<br />
+We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/APIJSON/APIJSON/issues) before opening a new one.<br />
 
 Fork the project and send a pull request.<br />
 
@@ -284,13 +284,13 @@ Please also ⭐Star the project!
 
 ## <h2 id="5">5. Versioning<h2/> 
 	
-See the latest version [here.](https://github.com/APIJSON/APIJSON/commits/master)
+See the latest version [here](https://github.com/APIJSON/APIJSON/commits/master).
 
 <br />
 
 ## <h2 id="6">6. Auhtor<h2/> 	
 	
-Check out the author's [github account](https://github.com/TommyLemon)to see more related projects.<br>
+Check out the author's [github account](https://github.com/TommyLemon) to see more related projects.<br>
 
 If you have any questions or suggestions, you can [create an issue](https://github.com/APIJSON/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
 
