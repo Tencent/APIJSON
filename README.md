@@ -214,15 +214,9 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
-你也还可以扫描下面的二维码，赞助点服务器和域名的购买及维护费用，或者请作者喝一杯咖啡~
-
-<img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/WechatPay.JPG"  width="240" ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/QQPay.JPG"  width="240" >
-
-> 如果希望捐赠之后能获得相关的帮助，可以选择加入下面的付费群来取代普通捐赠，可以获得作者的直接帮助。
-
-如果在捐赠留言中备注名称，将会被记录到列表中~ 如果你也是 Github 开源作者，<br />
-捐赠时可以留下 Github 项目地址或者个人主页地址，链接将会被添加到列表中起到互相推广的作用。
-
+<br />
+<br />
+<br />
 
 ### 技术交流
 如果有什么问题或建议可以 [提ISSUE](https://github.com/APIJSON/APIJSON/issues) 或 加群，交流技术，分享经验。<br >
