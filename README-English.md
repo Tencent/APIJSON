@@ -314,8 +314,6 @@ If you have any questions or suggestions, you can [create an issue](https://gith
 
 [More APIJSON Users](https://github.com/APIJSON/APIJSON/issues/73)
 
-<br />
-
 ### Contributers of this project:
 
 <div style="float:left">
