@@ -293,16 +293,29 @@ See the latest version [here.](https://github.com/APIJSON/APIJSON/commits/master
 Check out the author's [github account](https://github.com/TommyLemon)to see more related projects.<br>
 
 If you have any questions or suggestions, you can [create an issue](https://github.com/APIJSON/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
-`
+
+<br />
 <br />
 
-## <h2 id="7">7. Donating<h2/> 
-		
-If you like this projects and want to donate for maintainance cost, or want to buy me a coffee, you can scan Wechat QR code or QQ QR code below. <br />
+### Users of this project:
 
-<img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/WechatPay.JPG"  width="240" ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/pay/QQPay.JPG"  width="240" >
+<div style="float:left">
+  <a href="http://www.transsion.com"><img src="http://apijson.org:8000/images/www.transsion.com.jpeg" height="90"></a>
+  <a href="http://shebaochina.com"><img src="http://shebaochina.com/static/cn/img/index/logo.png" height="90"></a>
+  <a href="http://www.xmfish.com"><img src="http://www.xmfish.com/images/chanel/www/f_logo.gif" height="90"></a>
+  <a href="http://www.xxwolo.com"><img src="http://img.qichacha.com/Product/a917fcca-fbb1-44a2-a079-56985ebf8f9c.jpg" height="90"></a>
+  <a href="http://t-think.com"><img src="http://t-think.com/img/logo-1.png" height="90"></a>
+  <a href="http://www.8soo.com"><img src="http://ww1.sinaimg.cn/large/756dd729gw1f9n5ckuq6vj208902it8v.jpg" height="90"></a>
+  <a href="http://hh.com"><img src="https://www.9800.com/img/logo.png?v=19032201" height="90"></a>
+  <a href="http://www.aipaipai-inc.com"><img src="http://www.aipaipai-inc.com/uploadfile/upload/2019042913403029.png" height="90"></a>
+  <a href="https://www.shulian8.com"><img src="https://bookstore-prod.oss-cn-hangzhou.aliyuncs.com/%E5%90%8E%E5%8F%B0%E9%A1%B5%E9%9D%A2_03.png" height="90"></a>
+  <a href="http://www.hec-bang.com"><img src="http://www.hec-bang.com/assets/images/logo-200x50.png" height="90"></a>
 <br />
+
+[More APIJSON Users](https://github.com/APIJSON/APIJSON/issues/73)
+
 <br />
+
 ### Contributers of this project:
 
 <div style="float:left">
