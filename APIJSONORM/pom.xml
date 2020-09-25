@@ -5,7 +5,7 @@
 
 	<groupId>apijson.orm</groupId>
 	<artifactId>apijson-orm</artifactId>
-	<version>4.1.0</version>
+	<version>4.2.1</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.61</version>
+			<version>1.2.73</version>
 		</dependency>
 	</dependencies>
 
