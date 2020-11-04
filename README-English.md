@@ -1,3 +1,6 @@
+Tencent is pleased to support the open source community by making APIJSON available.   <br/>
+Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
+This source code is licensed under the Apache License Version 2.0 <br/>
 
 <h1 align="center" style="text-align:center;">
   APIJSON
