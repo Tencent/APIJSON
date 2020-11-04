@@ -179,7 +179,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 
 ### 贡献者们
-主项目 APIJSON 的贡献者和 生态周边项目 作者：
+主项目 APIJSON 的贡献者们和 生态周边项目 的作者们：
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
  height="68" width="68" ></a>
