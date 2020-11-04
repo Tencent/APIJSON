@@ -1,3 +1,6 @@
+Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
+This source code is licensed under the Apache License Version 2.0
+
 
 <h1 align="center" style="text-align:center;">
   APIJSON
@@ -219,8 +222,9 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 <br />
 
 ### 技术交流
-如果有什么问题或建议可以 [提ISSUE](https://github.com/APIJSON/APIJSON/issues) 或 加群，交流技术，分享经验。<br >
-如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/APIJSON/APIJSON/pulls)，感激不尽~
+如果有什么问题或建议可以 [提ISSUE](https://github.com/APIJSON/APIJSON/issues) 或 加群，交流技术，分享经验。 <br >
+如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/APIJSON/APIJSON/pulls)，感激不尽~ <br >
+https://github.com/APIJSON/APIJSON/blob/master/CONTRIBUTING.md
 
 #### QQ解决群 - 607020115（付费）<a target="_blank" style="bottom:2px;padding-top:4px" href="https://qm.qq.com/cgi-bin/qm/qr?k=1wnUodOM6ngXnl0rubf06DuAUbOX-u44&jump_from=webapi"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="APIJSON-Fee" title="APIJSON付费解决群"  style="bottom:2px;margin-top:4px" /></a>
 自开群以来，还是有很多的朋友提出了很多问题，我也解决了很多问题，其中有大半问题是本库的Bug导致，也有些是使用者项目本
