@@ -213,6 +213,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 
 ### 规划及路线图
+新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用
 https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 
 
