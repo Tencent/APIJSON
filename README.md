@@ -209,6 +209,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
   <a href="https://gitee.com/zhiyuexin/ApiJsonByJFinal"><img src="https://avatar.gitee.com/uploads/90/490_zhiyuexin.jpg!avatar100?1368664499"  
  height="68" width="68" ></a>
   <a href="https://github.com/Airforce-1/SpringServer1.2-APIJSON"><img src="https://avatars3.githubusercontent.com/u/6212428?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/pengxianggui/apijson-builder"><img src="https://avatars2.githubusercontent.com/u/16299169?s=460&v=4"  height="68" width="68" ></a>
 </div>
 <br />
 感谢大家的贡献。
