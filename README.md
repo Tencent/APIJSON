@@ -37,7 +37,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 </p>
 
 <p align="center" >
-  <img src="https://raw.githubusercontent.com/APIJSON/APIJSON/master/logo.png" />
+  <img src="https://oscimg.oschina.net/oscnet/up-3299d6e53eb0534703a20e96807727fac63.png" />
 </p>
 
 ---
@@ -54,7 +54,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 后端再也不用为了兼容旧接口写新版接口和文档了！再也不会被前端随时随地没完没了地烦了！
 
 <p align="center" >
-  <a ><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSONisOneOfTheGVPsIn2019-small.jpg"></a>
+  <a ><img src="https://oscimg.oschina.net/oscnet/up-5de4773b834bb9bef0432a88c122840deae.JPEG"></a>
 </p>
 
 
@@ -86,39 +86,48 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 ### APIJSON接口展示
 使用 APIAuto-机器学习HTTP接口工具来展示基于 APIJSON 协议的 HTTP API： <br/>
 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_get.jpg) 
 <p align="center" >
   <a >多表关联查询、结构自由组合、多个测试账号、一键共享测试用例</a>
-</p>
+</p> 
 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_code.jpg) 
+![](https://oscimg.oschina.net/oscnet/up-bbbec4fc5edc472be127c02a4f3cd8f4ec2.JPEG) 
+
+
 <p align="center" >
   <a >自动生成封装请求JSON的Android与iOS代码、一键自动生成JavaBean或解析Response的代码</a>
-</p>
+</p> 
 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_doc.jpg) 
+![](https://oscimg.oschina.net/oscnet/up-637193bbd89b41c3264827786319e842aee.JPEG) 
+
+
 <p align="center" >
   <a >自动保存请求记录、自动生成接口文档，可添加常用请求、快捷查看一键恢复</a>
-</p>
+</p> 
 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_test.jpg) 
+![](https://oscimg.oschina.net/oscnet/up-7dcb4ae71bd3892a909e4ffa37ba7c1d92a.JPEG) 
+
+
 <p align="center" >
   <a >一键自动接口回归测试，不需要写任何代码(注解、注释等全都不要)</a>
-</p>
+</p> 
 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_summary.jpg) 
+![](https://oscimg.oschina.net/oscnet/up-c1ba774f8e7fcc5adcdb05cad5bd414d766.JPEG) 
+
+
 <p align="center" >
   <a >一图胜千言 - 部分基础功能概览</a>
-</p>
+</p> 
+
+![](https://oscimg.oschina.net/oscnet/up-e21240ef3770326ee6015e052226d0da184.JPEG) 
 
 <br /><br />
 
 ### APIJSON App演示
 使用 APIJSON + ZBLibrary 开发的 Android 客户端 Demo。以下 Gif 图看起来比较卡，实际在手机上 App 运行很流畅：
 <br />
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_MomentList_Circle.gif) 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Name.gif) 
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_App_Moment_Comment.gif)
+![](https://oscimg.oschina.net/oscnet/up-a3f167e593080e8a3fc09c3d5fc09330c98.gif) 
+![](https://oscimg.oschina.net/oscnet/up-141abcb5dabc01c890d70c461bd1fdc751f.gif) 
+![](https://oscimg.oschina.net/oscnet/up-58aecc2701c2c4ea33e53f246e427773b09.gif)
 
 <br />
 
