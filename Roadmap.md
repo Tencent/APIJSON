@@ -4,7 +4,7 @@
 </h1>
 
 
-### 完善功能
+### 新增功能
 部分功能描述可在 [APIAuto](https://github.com/TommyLemon/APIAuto) 上查看 <br />
 账号 13000002020 密码 123456 <br />
 http://apijson.org:8000/auto/ <br />
@@ -167,7 +167,7 @@ SELECT * FROM `sys`.`Comment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DES
 
 
 
-### 保障安全
+### 强化安全
 APIJSON 提供了各种安全机制，可在目前的基础上新增或改进。
 
 #### 防越权操作
@@ -190,7 +190,7 @@ https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 #### ...  //欢迎补充
 
 
-### 优化性能
+### 提高性能
 
 #### 解析 JSON
 
