@@ -36,7 +36,7 @@ POST:  用不上，不处理 <br />
 
 #### 新增支持 @column!
 
-这个只在 [APIJSONFramework](https://github.com/Tencent/APIJSON/blob/master/APIJSONFramework) 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
+这个只在 [apijson-framework](https://github.com/APIJSON/apijson-framework) 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
 可新增一个 VersionedColumn 表记录来代替 HashMap 代码配置。<br />
 需要注意的是，可能前端传参里既有 @column 又有 @column! ，碰到这种情况：<br />
 如果没有重合字段就忽略 @column! ，只让 @column 生效；<br />
@@ -174,7 +174,7 @@ APIJSON 提供了各种安全机制，可在目前的基础上新增或改进。
 
 目前有 RBAC 自动化权限管理。<br />
 APIJSONORM 提供 [@MethodAccess](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/MethodAccess.java) 注解来配置 <br />
-APIJSONFramework 则使用 [Access 表](https://github.com/APIJSON/APIJSON-Demo/blob/master/MySQL/single/sys_Access.sql) 记录来配置 <br />
+[apijson-framework](https://github.com/APIJSON/apijson-framework) 则使用 [Access 表](https://github.com/APIJSON/APIJSON-Demo/blob/master/MySQL/single/sys_Access.sql) 记录来配置 <br />
 在 [AbstractVerifier](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java) 中，假定真实、强制匹配。 <br />
 
 
@@ -273,9 +273,9 @@ https://github.com/APIJSON/APIJSON-Demo <br />
 
 #### 新增扩展
 
-##### 1.基于或整合 [APIJSONORM](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM) 或 [APIJSONFramework](https://github.com/Tencent/APIJSON/blob/master/APIJSONFramework) 来实现的库/框架
+##### 1.基于或整合 [APIJSONORM](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM) 或 [apijson-framework](https://github.com/APIJSON/apijson-framework) 来实现的库/框架
 
-##### 2.扩展 [APIJSONORM](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM) 或 [APIJSONFramework](https://github.com/Tencent/APIJSON/blob/master/APIJSONFramework) 功能的插件
+##### 2.扩展 [APIJSONORM](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM) 或 [apijson-framework](https://github.com/APIJSON/apijson-framework) 功能的插件
 可以通过扩展对象关键词 @key，数组关键词 key，远程函数，重写部分方法等来实现。<br />
 
 ##### 3.前端/客户端 封装/解析 APIJSON 的库/框架
