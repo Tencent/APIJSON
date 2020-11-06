@@ -36,7 +36,7 @@ POST:  用不上，不处理 <br />
 
 #### 新增支持 @column!
 
-这个只在 [APIJSONFramework](https://github.com/APIJSON/APIJSON/blob/master/APIJSONFramework) 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
+这个只在 [APIJSONFramework](https://github.com/Tencent/APIJSON/blob/master/APIJSONFramework) 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
 可新增一个 VersionedColumn 表记录来代替 HashMap 代码配置。<br />
 需要注意的是，可能前端传参里既有 @column 又有 @column! ，碰到这种情况：<br />
 如果没有重合字段就忽略 @column! ，只让 @column 生效；<br />
@@ -45,16 +45,16 @@ POST:  用不上，不处理 <br />
 #### 新增支持 TSQL 的 @explain
 
 目前 APIJSON 支持 [Oracle](https://github.com/APIJSON/APIJSON-Demo/tree/master/Oracle) 和 [SQL Server](https://github.com/APIJSON/APIJSON-Demo/tree/master/SQLServer) 这两种 TSQL 数据库（群友测试 IBM DB2 也行）。<br />
-但是 "@explain": true 使用的是 SET STATISTICS PROFILE ON(具体见 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 和 [AbstrctSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstrctSQLExecutor.java))  <br />
+但是 "@explain": true 使用的是 SET STATISTICS PROFILE ON(具体见 [AbstractSQLConfig](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 和 [AbstrctSQLExecutor](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstrctSQLExecutor.java))  <br />
 执行后居然是 SELECT 查到的放在默认的 ResultSet，性能分析放在 moreResult，<br />
 因为这个问题目前以上两个数据库的性能分析 @explain 实际并不可用，需要改用其它方式或解决现有方式的 bug。<br />
 
 #### 新增支持 page 从 1 开始
 目前只能从 0 开始，实际使用 1 更广泛，而且这方面用户习惯很强，支持它成本也不高。 <br />
-[Parser](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/Parser.java) 新增 DEFAULT_QUERY_PAGE 和 getDefaultQueryPage， <br />
+[Parser](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/Parser.java) 新增 DEFAULT_QUERY_PAGE 和 getDefaultQueryPage， <br />
 与 DEFAULT_QUERY_COUNT 和 getDefaultQueryCount 统一， <br />
 方便前端直接用页码的值传参，以及 info.page 的值来渲染页码。 <br />
-建议在 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java)，[AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 用到 page 的地方判断 getDefaultQueryPage，做兼容处理。 <br />
+建议在 [AbstractParser](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java)，[AbstractSQLConfig](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 用到 page 的地方判断 getDefaultQueryPage，做兼容处理。 <br />
 
 #### 新增支持分布式
 
@@ -173,19 +173,19 @@ APIJSON 提供了各种安全机制，可在目前的基础上新增或改进。
 #### 防越权操作
 
 目前有 RBAC 自动化权限管理。<br />
-APIJSONORM 提供 [@MethodAccess](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/MethodAccess.java) 注解来配置 <br />
+APIJSONORM 提供 [@MethodAccess](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/MethodAccess.java) 注解来配置 <br />
 APIJSONFramework 则使用 [Access 表](https://github.com/APIJSON/APIJSON-Demo/blob/master/MySQL/single/sys_Access.sql) 记录来配置 <br />
-在 [AbstractVerifier](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java) 中，假定真实、强制匹配。 <br />
+在 [AbstractVerifier](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java) 中，假定真实、强制匹配。 <br />
 
 
 #### 防 SQL 注入
 
-目前有 预编译 + 白名单 校验机制。具体见 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java)  和 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 。 <br />
+目前有 预编译 + 白名单 校验机制。具体见 [AbstractSQLExecutor](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java)  和 [AbstractSQLConfig](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 。 <br />
 
 #### 防恶意请求
 
 目前有限流机制，getMaxQueryCount, getMaxUpdateCount, getMaxObjectCount, getMaxSQLCount, getMaxQueryDepth 等。 <br />
-https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/Parser.java <br />
+https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/Parser.java <br />
 
 #### ...  //欢迎补充
 
@@ -194,21 +194,21 @@ https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 
 #### 解析 JSON
 
-优化 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 和 [AbstractObjectParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractObjectParser.java) 解析 JSON 性能。 <br />
+优化 [AbstractParser](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 和 [AbstractObjectParser](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractObjectParser.java) 解析 JSON 性能。 <br />
 
 #### 封装 JSON
 
-优化 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 封装 JSON 性能。 <br />
+优化 [AbstractSQLExecutor](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 封装 JSON 性能。 <br />
 
 #### 拼接 SQL
 
-优化 [AbstractSQLConfig](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 拼接 SQL 性能。<br />
-[完善功能](https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md#%E5%AE%8C%E5%96%84%E5%8A%9F%E8%83%BD) 中 Union 和 With 也是优化 SQL 性能的方式。 <br />
+优化 [AbstractSQLConfig](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 拼接 SQL 性能。<br />
+[完善功能](https://github.com/Tencent/APIJSON/blob/master/Roadmap.md#%E5%AE%8C%E5%96%84%E5%8A%9F%E8%83%BD) 中 Union 和 With 也是优化 SQL 性能的方式。 <br />
 
 #### 读写缓存
 
-在 [AbstractParser](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 使用了 HashMap<String, JSONObject> queryResultMap 存已解析的对象、总数等数据。<br />
-在 [AbstractSQLExecutor](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 使用了 HashMap<String, JSONObject> cacheMap 存已通过 SQL 查出的结果集。<br />
+在 [AbstractParser](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 使用了 HashMap<String, JSONObject> queryResultMap 存已解析的对象、总数等数据。<br />
+在 [AbstractSQLExecutor](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 使用了 HashMap<String, JSONObject> cacheMap 存已通过 SQL 查出的结果集。<br />
 
 #### ...  //欢迎补充
 
@@ -216,7 +216,7 @@ https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 
 ### 增强稳定
 APIJSON 代码经过商业分析软件 [源伞Pinpoint](https://www.sourcebrella.com/) 的质检，报告说明 APIJSON 非常可靠。<br />
-https://github.com/APIJSON/APIJSON/issues/48 <br />
+https://github.com/Tencent/APIJSON/issues/48 <br />
 但我们需要再接再厉，尽可能做到 99.999% 可靠度，降低使用风险，让用户放心和安心。 <br />
 
 #### 减少 Bug
@@ -226,7 +226,7 @@ https://github.com/APIJSON/APIJSON/issues/48 <br />
 http://apijson.org:8000/auto/ <br />
 
 ##### 其它发现的 Bug
-https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug <br />
+https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug <br />
 
 #### 完善测试
 
@@ -241,7 +241,7 @@ https://gitee.com/TommyLemon/UnitAuto <br />
 #### 中文文档
 
 ##### 通用文档
-https://github.com/APIJSON/APIJSON/blob/master/Document.md <br />
+https://github.com/Tencent/APIJSON/blob/master/Document.md <br />
 
 ##### 配置与部署
 https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server <br />
@@ -252,8 +252,8 @@ https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server <br />
 #### English Document
 
 Translation for Chinese document. <br />
-https://github.com/APIJSON/APIJSON/blob/master/README-English.md <br />
-https://github.com/APIJSON/APIJSON/blob/master/Document-English.md <br />
+https://github.com/Tencent/APIJSON/blob/master/README-English.md <br />
+https://github.com/Tencent/APIJSON/blob/master/Document-English.md <br />
 https://github.com/ruoranw/APIJSONdocs <br />
 
 
@@ -273,9 +273,9 @@ https://github.com/APIJSON/APIJSON-Demo <br />
 
 #### 新增扩展
 
-##### 1.基于或整合 [APIJSONORM](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM) 或 [APIJSONFramework](https://github.com/APIJSON/APIJSON/blob/master/APIJSONFramework) 来实现的库/框架
+##### 1.基于或整合 [APIJSONORM](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM) 或 [APIJSONFramework](https://github.com/Tencent/APIJSON/blob/master/APIJSONFramework) 来实现的库/框架
 
-##### 2.扩展 [APIJSONORM](https://github.com/APIJSON/APIJSON/blob/master/APIJSONORM) 或 [APIJSONFramework](https://github.com/APIJSON/APIJSON/blob/master/APIJSONFramework) 功能的插件
+##### 2.扩展 [APIJSONORM](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM) 或 [APIJSONFramework](https://github.com/Tencent/APIJSON/blob/master/APIJSONFramework) 功能的插件
 可以通过扩展对象关键词 @key，数组关键词 key，远程函数，重写部分方法等来实现。<br />
 
 ##### 3.前端/客户端 封装/解析 APIJSON 的库/框架
@@ -289,12 +289,12 @@ https://github.com/APIJSON/APIJSON-Demo <br />
 ### 推广使用
 #### 为 APIJSON 编写/发表 博客/文章/资讯 等
 
-https://github.com/APIJSON/APIJSON#%E7%9B%B8%E5%85%B3%E6%8E%A8%E8%8D%90
+https://github.com/Tencent/APIJSON#%E7%9B%B8%E5%85%B3%E6%8E%A8%E8%8D%90
 
 
 #### 登记正在使用 APIJSON 的公司或项目
 
-https://github.com/TommyLemon/APIJSON/issues/73
+https://github.com/Tencent/APIJSON/issues/73
 
 #### 在社交技术群、论坛等聊天或评论时推荐 APIJSON
 
