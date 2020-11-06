@@ -327,7 +327,10 @@ https://github.com/APIJSON/APIJSON/blob/master/CONTRIBUTING.md
 
 
 ### 持续更新
-[https://github.com/APIJSON/APIJSON/commits/master](https://github.com/APIJSON/APIJSON/commits/master)
+https://github.com/Tencent/APIJSON/commits/master
 
 ### 码云主页
 https://gitee.com/TommyLemon/APIJSON
+
+### 工蜂主页
+https://git.code.tencent.com/Tencent_Open_Source/APIJSON
