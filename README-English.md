@@ -30,14 +30,14 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
-  <a href="https://github.com/APIJSON/APIJSON/blob/master/README.md">&nbsp;中文版&nbsp;</a>
-  <a href="https://github.com/APIJSON/APIJSON/blob/master/Document-English.md">&nbsp;Document&nbsp;</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/README.md">&nbsp;中文版&nbsp;</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/Document-English.md">&nbsp;Document&nbsp;</a>
   <a href="http://i.youku.com/apijson">&nbsp;Video&nbsp;</a>
   <a href="http://apijson.org/auto">&nbsp;Test&nbsp;</a>
 </p>
 
 <p align="center" >
-  <img src="https://raw.githubusercontent.com/APIJSON/APIJSON/master/logo.png" />
+  <img src="https://raw.githubusercontent.com/Tencent/APIJSON/master/logo.png" />
 </p>
 <br />
 
@@ -278,7 +278,7 @@ You can also open it with Vue javascript framework. Click [here](https://vuejs.o
 
 ## <h2 id="4">4. Contributing<h2/> 
 	
-We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/APIJSON/APIJSON/issues) before opening a new one.<br />
+We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/Tencent/APIJSON/issues) before opening a new one.<br />
 
 Fork the project and send a pull request.<br />
 
@@ -287,7 +287,7 @@ Please also ⭐Star the project!
 
 ## <h2 id="5">5. Versioning<h2/> 
 	
-See the latest version [here](https://github.com/APIJSON/APIJSON/commits/master).
+See the latest version [here](https://github.com/Tencent/APIJSON/commits/master).
 
 <br />
 
@@ -295,7 +295,7 @@ See the latest version [here](https://github.com/APIJSON/APIJSON/commits/master)
 	
 Check out the author's [github account](https://github.com/TommyLemon) to see more related projects.<br>
 
-If you have any questions or suggestions, you can [create an issue](https://github.com/APIJSON/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
+If you have any questions or suggestions, you can [create an issue](https://github.com/Tencent/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
 
 <br />
 <br />
@@ -315,7 +315,7 @@ If you have any questions or suggestions, you can [create an issue](https://gith
   <a href="http://www.hec-bang.com"><img src="http://www.hec-bang.com/assets/images/logo-200x50.png" height="90"></a>
 <br />
 
-[More APIJSON Users](https://github.com/APIJSON/APIJSON/issues/73)
+[More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
 
 ### Contributers of APIJSON:
 Here are the contributers of this project and authors of other projects for ecosystem of APIJSON:
