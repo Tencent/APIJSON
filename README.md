@@ -317,8 +317,8 @@ QQ 技术群： 734652054（新）、607020115（旧）
 ### 持续更新
 https://github.com/Tencent/APIJSON/commits/master
 
-### 码云主页
-https://gitee.com/TommyLemon/APIJSON
-
 ### 工蜂主页
 https://git.code.tencent.com/Tencent_Open_Source/APIJSON
+
+### 码云主页
+https://gitee.com/TommyLemon/APIJSON
