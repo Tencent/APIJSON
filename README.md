@@ -30,8 +30,8 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
-  <a href="https://github.com/APIJSON/APIJSON/blob/master/README-English.md">English</a>
-  <a href="https://github.com/APIJSON/APIJSON/blob/master/Document.md">通用文档</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
   <a href="http://i.youku.com/apijson">视频教程</a>
   <a href="http://apijson.org/auto">在线工具</a>
 </p>
@@ -134,25 +134,25 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 ### 为什么要用APIJSON？
 前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
-https://github.com/APIJSON/APIJSON/wiki
+https://github.com/Tencent/APIJSON/wiki
 
 
 ### 常见问题
 #### 1.如何定制业务逻辑？
 在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 <br />
-https://github.com/APIJSON/APIJSON/issues/101
+https://github.com/Tencent/APIJSON/issues/101
 
 #### 2.如何控制权限？
 在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度细分到 Row 级 <br />
-https://github.com/APIJSON/APIJSON/issues/12
+https://github.com/Tencent/APIJSON/issues/12
 
 #### 3.如何校验参数？
 在 Request 表配置校验规则 structure，提供 NECESSARY、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 <br />
-https://github.com/APIJSON/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
+https://github.com/Tencent/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
 <br />
 其它问题见 Closed Issues <br />
-https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
+https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 
 ### 快速上手
@@ -189,7 +189,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
   <a href="http://www.hec-bang.com"><img src="http://apijson.org/images/www.hec-bang.com.png" height="90"></a>
 <br />
 
-[更多 APIJSON 使用者](https://github.com/APIJSON/APIJSON/issues/73)
+[更多 APIJSON 使用者](https://github.com/Tencent/APIJSON/issues/73)
 
 
 ### 贡献者们
@@ -197,17 +197,17 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/119"><img src="https://avatars1.githubusercontent.com/u/25604004?s=460&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/70"><img src="https://avatars1.githubusercontent.com/u/22228201?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/74"><img src="https://avatars0.githubusercontent.com/u/1274536?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/92"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/103"><img src="https://avatars0.githubusercontent.com/u/25990237?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/72"><img src="https://avatars1.githubusercontent.com/u/10663804?s=400&v=4"  height="68" width="68" ></a>
-  <a href="https://github.com/APIJSON/APIJSON/pull/33"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/119"><img src="https://avatars1.githubusercontent.com/u/25604004?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/70"><img src="https://avatars1.githubusercontent.com/u/22228201?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/74"><img src="https://avatars0.githubusercontent.com/u/1274536?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/92"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/103"><img src="https://avatars0.githubusercontent.com/u/25990237?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/72"><img src="https://avatars1.githubusercontent.com/u/10663804?s=400&v=4"  height="68" width="68" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/33"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="68" width="68" ></a>
   <br />
   <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://avatars3.githubusercontent.com/u/12622501?s=400&v=4"  
  height="68" width="68" ></a>
@@ -231,7 +231,7 @@ https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 ### 规划及路线图
 新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
-https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
+https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 
 ### 我要赞赏
@@ -241,9 +241,9 @@ https://github.com/APIJSON/APIJSON/blob/master/Roadmap.md
 <br />
 
 ### 技术交流
-如果有什么问题或建议可以 [提ISSUE](https://github.com/APIJSON/APIJSON/issues) 或 加群，交流技术，分享经验。 <br >
-如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/APIJSON/APIJSON/pulls)，感激不尽~ <br >
-https://github.com/APIJSON/APIJSON/blob/master/CONTRIBUTING.md
+如果有什么问题或建议可以 [提ISSUE](https://github.com/Tencent/APIJSON/issues) 或 加群，交流技术，分享经验。 <br >
+如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
+https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 #### QQ解决群 - 607020115（付费）<a target="_blank" style="bottom:2px;padding-top:4px" href="https://qm.qq.com/cgi-bin/qm/qr?k=1wnUodOM6ngXnl0rubf06DuAUbOX-u44&jump_from=webapi"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="APIJSON-Fee" title="APIJSON付费解决群"  style="bottom:2px;margin-top:4px" /></a>
 自开群以来，还是有很多的朋友提出了很多问题，我也解决了很多问题，其中有大半问题是本库的Bug导致，也有些是使用者项目本
@@ -304,7 +304,7 @@ https://github.com/APIJSON/APIJSON/blob/master/CONTRIBUTING.md
 
 [uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite 等
 
-[APIJSON](https://github.com/crazytaxi824/APIJSON) Go 版 APIJSON，功能开发中...([不可用且长期未更新，期待热心开发者帮助完善或新增项目](https://github.com/APIJSON/APIJSON/issues/111))
+[APIJSON](https://github.com/crazytaxi824/APIJSON) Go 版 APIJSON，功能开发中...([不可用且长期未更新，期待热心开发者帮助完善或新增项目](https://github.com/Tencent/APIJSON/issues/111))
 
 [APIJSONKOTLIN](https://github.com/luckyxiaomo/APIJSONKOTLIN) Kotlin 版 APIJSON，基础框架搭建中...(不可用且长期未更新，期待热心开发者帮助完善或新增项目)
 
