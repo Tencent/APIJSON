@@ -84,7 +84,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 <br />
 
 ### APIJSON接口展示
-以下使用 APIAuto-机器学习HTTP接口工具 来展示基于 APIJSON 协议的 HTTP API (当然 Postman 等也都可以请求)： <br/>
+以下使用 APIAuto-机器学习HTTP接口工具 来展示基于 APIJSON 协议的 HTTP API（当然 Postman 等也都可以请求）： <br/>
 <br />
 <p align="center" >
   <a >多表关联查询、结构自由组合、多个测试账号、一键共享测试用例</a>
@@ -123,7 +123,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 <br /><br />
 
 ### APIJSON App演示
-使用 APIJSON + ZBLibrary 开发的 Android 客户端 Demo。以下 Gif 图看起来比较卡，实际上运行很流畅：
+使用 APIJSON + ZBLibrary 开发的 Android 客户端 Demo（以下 Gif 图看起来比较卡，实际上运行很流畅）：
 <br />
 ![](https://oscimg.oschina.net/oscnet/up-a3f167e593080e8a3fc09c3d5fc09330c98.gif) 
 ![](https://oscimg.oschina.net/oscnet/up-141abcb5dabc01c890d70c461bd1fdc751f.gif) 
@@ -162,7 +162,7 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 见&nbsp; [APIJSON后端部署 - Java](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)<br />
 
 #### 2.前端部署
-可以跳过这个步骤，直接使用 [APIAuto-自动化接口管理工具](https://github.com/TommyLemon/APIAuto) 或 下载客户端App。<br />
+可以跳过这个步骤，直接使用 [APIAuto-机器学习HTTP接口工具](https://github.com/TommyLemon/APIAuto) 或 下载客户端App。<br />
 见&nbsp; [Android](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android) &nbsp;或&nbsp; [iOS](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS) &nbsp;或&nbsp; [JavaScript](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript)<br />
 
 
