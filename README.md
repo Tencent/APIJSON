@@ -123,7 +123,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 <br /><br />
 
 ### APIJSON App演示
-使用 APIJSON + ZBLibrary 开发的 Android 客户端 Demo。以下 Gif 图看起来比较卡，实际在手机上 App 运行很流畅：
+使用 APIJSON + ZBLibrary 开发的 Android 客户端 Demo。以下 Gif 图看起来比较卡，实际上运行很流畅：
 <br />
 ![](https://oscimg.oschina.net/oscnet/up-a3f167e593080e8a3fc09c3d5fc09330c98.gif) 
 ![](https://oscimg.oschina.net/oscnet/up-141abcb5dabc01c890d70c461bd1fdc751f.gif) 
