@@ -83,14 +83,14 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 <br />
 
-### APIJSON接口展示
+### APIJSON 接口展示
 #### Postman 展示 APIJSON
 ![](https://static.oschina.net/uploads/img/201711/12230359_f7fQ.jpg)
 <br/>
 
 #### APIAuto 展示 APIJSON
-搭配 APIAuto-机器学习接口工具 来管理和测试 APIJSON 可大幅提升联调效率<br/>
-(注意网页工具界面是 APIAuto， URL+JSON 才是 APIJSON 的 HTTP API)： <br/>
+搭配 APIAuto-机器学习接口工具 来管理和测试 APIJSON 可大幅提升接口联调效率<br/>
+(注意网页工具界面是 APIAuto，里面的 URL+JSON 才是 APIJSON 的 HTTP API)： <br/>
 <br />
 <p align="center" >
   <a >APIJSON 多表关联查询、结构自由组合，APIAuto 多个测试账号、一键共享测试用例</a>
@@ -128,7 +128,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 <br /><br />
 
-### APIJSON App演示
+### APIJSON App 演示
 使用 APIJSON + ZBLibrary 开发的 Android 客户端 Demo (以下 Gif 图看起来比较卡，实际上运行很流畅)：
 <br />
 ![](https://oscimg.oschina.net/oscnet/up-a3f167e593080e8a3fc09c3d5fc09330c98.gif) 
@@ -138,7 +138,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 <br />
 
 
-### 为什么要用APIJSON？
+### 为什么要用 APIJSON？
 前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
 https://github.com/Tencent/APIJSON/wiki
 
@@ -172,7 +172,7 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 见&nbsp; [Android](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android) &nbsp;或&nbsp; [iOS](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS) &nbsp;或&nbsp; [JavaScript](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript)<br />
 
 
-### 下载客户端App
+### 下载客户端 App
 
 仿微信朋友圈动态实战项目<br />
 [APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
