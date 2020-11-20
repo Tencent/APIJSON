@@ -87,35 +87,35 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 以下使用 APIAuto-机器学习HTTP接口工具 来展示基于 APIJSON 协议的 HTTP API (当然 Postman 等也都可以请求)： <br/>
 <br />
 <p align="center" >
-  <a >多表关联查询、结构自由组合、多个测试账号、一键共享测试用例</a>
+  <a >APIJSON 多表关联查询、结构自由组合，APIAuto 多个测试账号、一键共享测试用例</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-bbbec4fc5edc472be127c02a4f3cd8f4ec2.JPEG) 
 
 <br />
 <p align="center" >
-  <a >自动生成封装请求JSON的Android与iOS代码、一键自动生成JavaBean或解析Response的代码</a>
+  <a >APIAuto 自动生成前端(客户端)请求代码、后端接口代码、测试用例代码，一键下载</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-637193bbd89b41c3264827786319e842aee.JPEG) 
 
 <br />
 <p align="center" >
-  <a >自动保存请求记录、自动生成接口文档，可添加常用请求、快捷查看一键恢复</a>
+  <a >APIAuto 自动保存请求记录、自动生成接口文档，可添加常用请求、快捷查看一键恢复</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-7dcb4ae71bd3892a909e4ffa37ba7c1d92a.JPEG) 
 
 <br />
 <p align="center" >
-  <a >一键自动接口回归测试，不需要写任何代码(注解、注释等全都不要)</a>
+  <a >APIAuto 一键自动接口回归测试，不需要写任何代码(注解、注释等全都不要)</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-c1ba774f8e7fcc5adcdb05cad5bd414d766.JPEG) 
 
 <br />
 <p align="center" >
-  <a >一图胜千言 - 部分基础功能概览</a>
+  <a >一图胜千言 - APIJSON 部分基础功能概览</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-e21240ef3770326ee6015e052226d0da184.JPEG) 
