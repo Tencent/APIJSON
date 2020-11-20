@@ -85,7 +85,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 ### APIJSON接口展示
 以下使用 APIAuto-机器学习接口工具 来展示基于 APIJSON 协议的 HTTP API (注意界面是 APIAuto， URL+JSON 才是 APIJSON。<br/>
-当然 Postman 等也都可以请求，只是没有 静态检查、自动注释、悬浮文档、机器学习测试 等功能)： <br/>
+当然 [Postman 等也都可以请求](https://my.oschina.net/tommylemon/blog/889074)，只是没有 APIAuto 的 静态检查、自动注释、悬浮文档、机器学习测试 等功能)： <br/>
 <br />
 <p align="center" >
   <a >APIJSON 多表关联查询、结构自由组合，APIAuto 多个测试账号、一键共享测试用例</a>
