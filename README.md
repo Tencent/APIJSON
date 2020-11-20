@@ -89,7 +89,8 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 <br/>
 
 #### APIAuto 展示 APIJSON
-搭配 APIAuto-机器学习接口工具 来管理和测试 APIJSON 可大幅提升联调效率(注意界面是 APIAuto， URL+JSON 才是 APIJSON)： <br/>
+搭配 APIAuto-机器学习接口工具 来管理和测试 APIJSON 可大幅提升联调效率<br/>
+(注意网页工具界面是 APIAuto， URL+JSON 才是 APIJSON 的 HTTP API)： <br/>
 <br />
 <p align="center" >
   <a >APIJSON 多表关联查询、结构自由组合，APIAuto 多个测试账号、一键共享测试用例</a>
