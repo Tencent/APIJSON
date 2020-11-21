@@ -19,7 +19,7 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 #### 2. Add the APIJSON dependency to pom.xml
 ```xml
 	<dependency>
-		<groupId>com.github.Tencent</groupId>
+	    <groupId>com.github.Tencent</groupId>
 	    <artifactId>APIJSON</artifactId>
 	    <version>LATEST</version>
 	</dependency>
