@@ -34,6 +34,7 @@ import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.RequestRole;
 import apijson.StringUtil;
+import apijson.orm.AbstractSQLConfig.IdCallback;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.NotExistException;
@@ -43,7 +44,7 @@ import apijson.orm.exception.OutOfRangeException;
 /**parser for parsing request to JSONObject
  * @author Lemon
  */
-public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
+public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator, IdCallback {
 	protected static final String TAG = "AbstractParser";
 
 
@@ -490,11 +491,25 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
 
+		
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
-		return Structure.parseRequest(method, name, target, request, maxUpdateCount, creator);
+		return Structure.parseRequest(method, name, target, request, maxUpdateCount, getGlobleDatabase(), getGlobleSchema(), this, creator);
 	}
 
-
+	@Override
+	public String getIdKey(String database, String schema, String table) {
+		return apijson.JSONObject.KEY_ID;
+	}
+	@Override
+	public String getUserIdKey(String database, String schema, String table) {
+		return apijson.JSONObject.KEY_USER_ID;
+	}
+	@Override
+	public Object newId(RequestMethod method, String database, String schema, String table) {
+		return System.currentTimeMillis();
+	}
+	
+	
 	/**新建带状态内容的JSONObject
 	 * @param code
 	 * @param msg

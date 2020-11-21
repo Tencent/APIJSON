@@ -16,8 +16,8 @@ import static apijson.JSONObject.KEY_HAVING;
 import static apijson.JSONObject.KEY_ID;
 import static apijson.JSONObject.KEY_JSON;
 import static apijson.JSONObject.KEY_ORDER;
-import static apijson.JSONObject.KEY_ROLE;
 import static apijson.JSONObject.KEY_RAW;
+import static apijson.JSONObject.KEY_ROLE;
 import static apijson.JSONObject.KEY_SCHEMA;
 import static apijson.JSONObject.KEY_USER_ID;
 import static apijson.RequestMethod.DELETE;
@@ -48,6 +48,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.JSON;
+import apijson.JSONResponse;
 import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
@@ -55,13 +56,20 @@ import apijson.RequestRole;
 import apijson.SQL;
 import apijson.StringUtil;
 import apijson.orm.exception.NotExistException;
+import apijson.orm.model.Access;
 import apijson.orm.model.Column;
+import apijson.orm.model.Document;
 import apijson.orm.model.ExtendedProperty;
+import apijson.orm.model.Function;
 import apijson.orm.model.PgAttribute;
 import apijson.orm.model.PgClass;
+import apijson.orm.model.Request;
+import apijson.orm.model.Response;
 import apijson.orm.model.SysColumn;
 import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
+import apijson.orm.model.Test;
+import apijson.orm.model.TestRecord;
 
 /**config sql for JSON Request
  * @author Lemon
@@ -77,6 +85,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
 	public static final Map<String, String> TABLE_KEY_MAP;
+	public static final List<String> CONFIG_TABLE_LIST;
 	public static final List<String> DATABASE_LIST;
 	// 自定义where条件拼接
 	public static final Map<String, String> RAW_MAP;
@@ -89,6 +98,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		TABLE_KEY_MAP.put(SysTable.class.getSimpleName(), SysTable.TABLE_NAME);
 		TABLE_KEY_MAP.put(SysColumn.class.getSimpleName(), SysColumn.TABLE_NAME);
 		TABLE_KEY_MAP.put(ExtendedProperty.class.getSimpleName(), ExtendedProperty.TABLE_NAME);
+		
+		CONFIG_TABLE_LIST = new ArrayList<>();  // Table, Column 等是系统表 AbstractVerifier.SYSTEM_ACCESS_MAP.keySet());
+		CONFIG_TABLE_LIST.add(Function.class.getSimpleName());
+		CONFIG_TABLE_LIST.add(Request.class.getSimpleName());
+		CONFIG_TABLE_LIST.add(Response.class.getSimpleName());
+		CONFIG_TABLE_LIST.add(Test.class.getSimpleName());
+		CONFIG_TABLE_LIST.add(Access.class.getSimpleName());
+		CONFIG_TABLE_LIST.add(Document.class.getSimpleName());
+		CONFIG_TABLE_LIST.add(TestRecord.class.getSimpleName());
+		
 
 		DATABASE_LIST = new ArrayList<>();
 		DATABASE_LIST.add(DATABASE_MYSQL);
@@ -1623,8 +1642,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	public String getKey(String key) {
+		if (isTest()) {
+			if (key.contains("'")) {  // || key.contains("#") || key.contains("--")) {
+				throw new IllegalArgumentException("参数 " + key + " 不合法！key 中不允许有单引号 ' ！");
+			}
+			return getSQLValue(key).toString();
+		}
+		
+		return getSQLKey(key);
+	}
+	public String getSQLKey(String key) {
 		String q = getQuote();
-		return (isKeyPrefix() ? getAliasWithQuote() + "." : "") + q  + key + q;
+		return (isKeyPrefix() ? getAliasWithQuote() + "." : "") + q + key + q;
 	}
 
 	/**
@@ -1636,6 +1665,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			preparedValueList.add(value);
 			return "?";
 		}
+		return getSQLValue(value);
+	}
+	public Object getSQLValue(@NotNull Object value) {
 		//		return (value instanceof Number || value instanceof Boolean) && DATABASE_POSTGRESQL.equals(getDatabase()) ? value :  "'" + value + "'";
 		return (value instanceof Number || value instanceof Boolean) ? value :  "'" + value + "'"; //MySQL 隐式转换用不了索引
 	}
@@ -2230,9 +2262,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case DELETE:
 			return "DELETE FROM " + tablePath + config.getWhereString(true);
 		default:
+			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
+			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {
+				String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
+				return explain + "SELECT " + config.getWhereString(false) + " AS " + q + JSONResponse.KEY_CODE + q + config.getLimitString();
+			}
+			
 			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
-			return (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "") + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
+			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
 		}
 	}
 
@@ -2915,16 +2953,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
-	public static interface Callback {
-		/**获取 SQLConfig 的实例
-		 * @param method
-		 * @param database
-		 * @param schema
-		 * @param table
-		 * @return
-		 */
-		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
-
+	public static interface IdCallback {
 		/**为 post 请求新建 id， 只能是 Long 或 String
 		 * @param method
 		 * @param database
@@ -2949,7 +2978,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @return
 		 */
 		String getUserIdKey(String database, String schema, String table);
-
+	}
+	
+	public static interface Callback extends IdCallback {
+		/**获取 SQLConfig 的实例
+		 * @param method
+		 * @param database
+		 * @param schema
+		 * @param table
+		 * @return
+		 */
+		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
+		
 		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
 		 * @param combine
 		 * @param key

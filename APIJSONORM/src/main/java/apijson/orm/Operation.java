@@ -9,21 +9,26 @@ package apijson.orm;
  * @author Lemon
  */
 public enum Operation {
+	/**
+	 * 必须传的字段，结构是
+	 * "key0,key1,key2..."
+	 */
+	MUST,
+	/**
+	 * @deprecated  用 MUST 代替，最早可能 4.5.0 移除
+	 */
+	NECESSARY,
 
 	/**
 	 * 不允许传的字段，结构是
 	 * "key0,key1,key2..."
-	 * TODO 改成 MUST 减少长度 ?
+	 */
+	REFUSE,
+	/**
+	 * @deprecated  用 REFUSE 代替，最早可能 4.5.0 移除
 	 */
 	DISALLOW,
-	
-	/**
-	 * 必须传的字段，结构是
-	 * "key0,key1,key2..."
-	 * TODO 改成 REFUSE 减少长度 ?
-	 */
-	NECESSARY,
-	
+
 	
 	/**TODO 是否应该把数组类型写成 BOOLEANS, NUMBERS 等复数单词，以便抽取 enum ？扩展用 VERIFY 或 INSERT/UPDATE 远程函数等
 	 * 验证是否符合预设的类型:

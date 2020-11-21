@@ -5,12 +5,12 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import static apijson.JSONObject.KEY_ID;
-import static apijson.JSONObject.KEY_USER_ID;
 import static apijson.orm.Operation.DISALLOW;
 import static apijson.orm.Operation.EXIST;
 import static apijson.orm.Operation.INSERT;
+import static apijson.orm.Operation.MUST;
 import static apijson.orm.Operation.NECESSARY;
+import static apijson.orm.Operation.REFUSE;
 import static apijson.orm.Operation.REMOVE;
 import static apijson.orm.Operation.REPLACE;
 import static apijson.orm.Operation.TYPE;
@@ -45,10 +45,11 @@ import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import apijson.orm.AbstractSQLConfig.Callback;
+import apijson.orm.AbstractSQLConfig.IdCallback;
 import apijson.orm.exception.ConflictException;
-import apijson.orm.model.Test;
 
-/**结构类
+/**结构类。 TODO 重构为 AbstractContentVerifier implements ContentVerifier 或干脆整合进 AbstractVerifier
  * 增删改查: OPERATION(ADD,REPLACE,PUT,REMOVE)   OPERATION:{key0:value0, key1:value1 ...}
  * 对值校验: VERIFY:{key0:value0, key1:value1 ...}  (key{}:range,key$:"%m%"等)
  * 对值重复性校验: UNIQUE:"key0:, key1 ..."  (UNIQUE:"phone,email" 等)
@@ -62,7 +63,7 @@ public class Structure {
 		COMPILE_MAP = new HashMap<String, Pattern>();
 	}
 
-	
+
 	private Structure() {}
 
 
@@ -91,9 +92,28 @@ public class Structure {
 	 */
 	public static JSONObject parseRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request, final int maxUpdateCount, final SQLCreator creator) throws Exception {
+		return parseRequest(method, name, target, request, maxUpdateCount, null, null, null, creator);
+	}
+	/**从request提取target指定的内容
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param request
+	 * @param maxUpdateCount
+	 * @param idKey
+	 * @param userIdKey
+	 * @param creator
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject parseRequest(@NotNull final RequestMethod method, final String name
+			, final JSONObject target, final JSONObject request, final int maxUpdateCount
+			, final String database, final String schema, final IdCallback idCallback, final SQLCreator creator) throws Exception {
+
 		Log.i(TAG, "parseRequest  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
 				+ "\n request = \n" + JSON.toJSONString(request));
+
 		if (target == null || request == null) {// || request.isEmpty()) {
 			Log.i(TAG, "parseRequest  target == null || request == null >> return null;");
 			return null;
@@ -105,30 +125,47 @@ public class Structure {
 		//					":{ " + JSONRequest.KEY_ROLE + ":admin } ！");
 		//		}
 
+
 		//解析
-		return parse(method, name, target, request, creator, new OnParseCallback() {
+		return parse(method, name, target, request, database, schema, idCallback, creator, new OnParseCallback() {
 
 			@Override
 			public JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
 				//				Log.i(TAG, "parseRequest.parse.onParseJSONObject  key = " + key + "; robj = " + robj);
+
 				if (robj == null) {
 					if (tobj != null) {//不允许不传Target中指定的Table
 						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":{} ！");
 					}
 				} else if (apijson.JSONObject.isTableKey(key)) {
+					String db = request.getString(apijson.JSONObject.KEY_DATABASE);
+					String sh = request.getString(apijson.JSONObject.KEY_SCHEMA);
+					if (StringUtil.isEmpty(db, false)) {
+						db = database;
+					}
+					if (StringUtil.isEmpty(sh, false)) {
+						sh = schema;
+					}
+
+					String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, key);
+					String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
+
 					if (method == RequestMethod.POST) {
-						if (robj.containsKey(KEY_ID)) {
-							throw new IllegalArgumentException(method + "请求，" + name + "/" + key + " 不能传 " + KEY_ID + " ！");
+						if (robj.containsKey(finalIdKey)) {
+							throw new IllegalArgumentException(method + "请求，" + name + "/" + key + " 不能传 " + finalIdKey + " ！");
 						}
 					} else {
 						if (RequestMethod.isQueryMethod(method) == false) {
-							verifyId(method.name(), name, key, robj, KEY_ID, maxUpdateCount, true);
-							verifyId(method.name(), name, key, robj, KEY_USER_ID, maxUpdateCount, false);
+							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, true);
+
+							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, key);
+							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? apijson.JSONObject.KEY_USER_ID : userIdKey;
+							verifyId(method.name(), name, key, robj, finalUserIdKey, maxUpdateCount, false);
 						}
 					}
 				} 
 
-				return parseRequest(method, key, tobj, robj, maxUpdateCount, creator);
+				return parseRequest(method, key, tobj, robj, maxUpdateCount, database, schema, idCallback, creator);
 			}
 
 			@Override
@@ -214,33 +251,69 @@ public class Structure {
 	 */
 	public static JSONObject parseResponse(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject response, SQLCreator creator, OnParseCallback callback) throws Exception {
+		return parseResponse(method, name, target, response, null, null, null, creator, callback);
+	}
+	/**校验并将response转换为指定的内容和结构
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param response
+	 * @param idKey
+	 * @param callback 
+	 * @param creator 
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject parseResponse(@NotNull final RequestMethod method, final String name
+			, final JSONObject target, final JSONObject response, final String database, final String schema
+			, final Callback idKeyCallback, SQLCreator creator, OnParseCallback callback) throws Exception {
+
 		Log.i(TAG, "parseResponse  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
 				+ "\n response = \n" + JSON.toJSONString(response));
+
 		if (target == null || response == null) {// || target.isEmpty() {
 			Log.i(TAG, "parseRequest  target == null || response == null >> return response;");
 			return response;
 		}
 
 		//解析
-		return parse(method, name, target, response, creator, callback != null ? callback : new OnParseCallback() {});
+		return parse(method, name, target, response, database, schema, idKeyCallback, creator, callback != null ? callback : new OnParseCallback() {});
 	}
 
 
 	/**对request和response不同的解析用callback返回
+	 * @param method
+	 * @param name
 	 * @param target
-	 * @param request
+	 * @param real
+	 * @param creator
 	 * @param callback
-	 * @param creator 
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
 			, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
+		return parse(method, name, target, real, null, null, null, creator, callback);
+	}
+
+	/**对request和response不同的解析用callback返回
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param real
+	 * @param idKey
+	 * @param userIdKey
+	 * @param creator
+	 * @param callback
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
+			, final String database, final String schema, final IdCallback idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		if (target == null) {
 			return null;
 		}
-
 
 		//获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONObject type = target.getJSONObject(TYPE.name());
@@ -252,6 +325,8 @@ public class Structure {
 		String exist = StringUtil.getNoBlankString(target.getString(EXIST.name()));
 		String unique = StringUtil.getNoBlankString(target.getString(UNIQUE.name()));
 		String remove = StringUtil.getNoBlankString(target.getString(REMOVE.name()));
+		String must = StringUtil.getNoBlankString(target.getString(MUST.name()));
+		String refuse = StringUtil.getNoBlankString(target.getString(REFUSE.name()));
 		String necessary = StringUtil.getNoBlankString(target.getString(NECESSARY.name()));
 		String disallow = StringUtil.getNoBlankString(target.getString(DISALLOW.name()));
 
@@ -264,6 +339,8 @@ public class Structure {
 		target.remove(EXIST.name());
 		target.remove(UNIQUE.name());
 		target.remove(REMOVE.name());
+		target.remove(MUST.name());
+		target.remove(REFUSE.name());
 		target.remove(NECESSARY.name());
 		target.remove(DISALLOW.name());
 
@@ -279,6 +356,15 @@ public class Structure {
 		//移除字段>>>>>>>>>>>>>>>>>>>
 
 		//判断必要字段是否都有<<<<<<<<<<<<<<<<<<<
+		String[] musts = StringUtil.split(must);
+		List<String> mustList = musts == null ? new ArrayList<String>() : Arrays.asList(musts);
+		for (String s : mustList) {
+			if (real.get(s) == null) {//可能传null进来，这里还会通过 real.containsKey(s) == false) {
+				throw new IllegalArgumentException(method + "请求，" + name
+						+ " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
+			}
+		}
+
 		String[] necessarys = StringUtil.split(necessary);
 		List<String> necessaryList = necessarys == null ? new ArrayList<String>() : Arrays.asList(necessarys);
 		for (String s : necessaryList) {
@@ -323,7 +409,7 @@ public class Structure {
 						throw new UnsupportedDataTypeException(key + ":value 的value不合法！类型必须是 ARRAY ，结构为 [] !");
 					}
 					tvalue = callback.onParseJSONArray(key, (JSONArray) tvalue, (JSONArray) rvalue);
-					
+
 					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONRequest.isArrayKey(key)) {
 						objKeySet.add(key);
 					}
@@ -345,6 +431,21 @@ public class Structure {
 		Set<String> rkset = real.keySet(); //解析内容并没有改变rkset
 
 		//解析不允许的字段<<<<<<<<<<<<<<<<<<<
+		List<String> refuseList = new ArrayList<String>();
+		if ("!".equals(refuse)) {//所有非 must，改成 !must 更好
+			for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
+				if (key != null && key.startsWith("@") == false
+						&& necessaryList.contains(key) == false && objKeySet.contains(key) == false) {
+					refuseList.add(key);
+				}
+			}
+		} else {
+			String[] refuses = StringUtil.split(refuse);
+			if (refuses != null && refuses.length > 0) {
+				refuseList.addAll(Arrays.asList(refuses));
+			}
+		}
+
 		List<String> disallowList = new ArrayList<String>();
 		if ("!".equals(disallow)) {//所有非necessary，改成 !necessary 更好
 			for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
@@ -364,6 +465,10 @@ public class Structure {
 
 		//判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
+			if (refuseList.contains(rk)) { //不允许的字段
+				throw new IllegalArgumentException(method + "请求，" + name
+						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(refuseList) + "内的任何字段！");
+			}
 			if (disallowList.contains(rk)) { //不允许的字段
 				throw new IllegalArgumentException(method + "请求，" + name
 						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(disallowList) + "内的任何字段！");
@@ -378,7 +483,7 @@ public class Structure {
 
 			//不允许传远程函数，只能后端配置
 			if (rk.endsWith("()") && rv instanceof String) {
-				throw new UnsupportedOperationException(method + " 请求，" +rk + " 不合法！非开放请求不允许传远程函数 key():\"fun()\" ！");
+				throw new UnsupportedOperationException(method + " 请求，" + rk + " 不合法！非开放请求不允许传远程函数 key():\"fun()\" ！");
 			}
 
 			//不在target内的 key:{}
@@ -404,11 +509,23 @@ public class Structure {
 		real = operate(REPLACE, replace, real, creator);
 		//校验与修改Request>>>>>>>>>>>>>>>>>
 
+
+		String db = real.getString(apijson.JSONObject.KEY_DATABASE);
+		String sh = real.getString(apijson.JSONObject.KEY_SCHEMA);
+		if (StringUtil.isEmpty(db, false)) {
+			db = database;
+		}
+		if (StringUtil.isEmpty(sh, false)) {
+			sh = schema;
+		}
+		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, name);
+		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
+
 		//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
 		//校验存在<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
 		String[] exists = StringUtil.split(exist);
 		if (exists != null && exists.length > 0) {
-			long exceptId = real.getLongValue(KEY_ID);
+			long exceptId = real.getLongValue(finalIdKey);
 			for (String e : exists) {
 				verifyExist(name, e, real.get(e), exceptId, creator);
 			}
@@ -419,9 +536,9 @@ public class Structure {
 		//校验重复<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
 		String[] uniques = StringUtil.split(unique);
 		if (uniques != null && uniques.length > 0) {
-			long exceptId = real.getLongValue(KEY_ID);
+			long exceptId = real.getLongValue(finalIdKey);
 			for (String u : uniques) {
-				verifyRepeat(name, u, real.get(u), exceptId, creator);
+				verifyRepeat(name, u, real.get(u), exceptId, finalIdKey, creator);
 			}
 		}
 		//校验重复>>>>>>>>>>>>>>>>>>>
@@ -437,6 +554,8 @@ public class Structure {
 		target.put(EXIST.name(), exist);
 		target.put(UNIQUE.name(), unique);
 		target.put(REMOVE.name(), remove);
+		target.put(MUST.name(), must);
+		target.put(REFUSE.name(), refuse);
 		target.put(NECESSARY.name(), necessary);
 		target.put(DISALLOW.name(), disallow);
 		//还原 >>>>>>>>>>
@@ -768,10 +887,16 @@ public class Structure {
 			return;
 		}
 
-		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
-		config.setTable(Test.class.getSimpleName());
+		if (rv instanceof String && ((String) rv).contains("'")) {  // || key.contains("#") || key.contains("--")) {
+			throw new IllegalArgumentException(rk + ":value 中value不合法！value 中不允许有单引号 ' ！");
+		}
+
+		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.GET).setCount(1).setPage(0);
 		config.setTest(true);
-		config.putWhere("'" + rv + "'" + logic.getChar() + funChar, tv, false);
+		//		config.setTable(Test.class.getSimpleName());
+		//		config.setColumn(rv + logic.getChar() + funChar)
+		config.putWhere(rv + logic.getChar() + funChar, tv, false);  // 字符串可能 SQL 注入，目前的解决方式是加 TYPE 校验类型或者干脆不用 sqlVerify，而是通过远程函数来校验
+		config.setCount(1);
 
 		SQLExecutor executor = creator.createSQLExecutor();
 		JSONObject result = null;
@@ -780,12 +905,12 @@ public class Structure {
 		} finally {
 			executor.close();
 		}
-		if (result != null && JSONResponse.isExist(result.getIntValue(JSONResponse.KEY_COUNT)) == false) {
-			throw new IllegalArgumentException(rk + ":" + rv + "中value不合法！必须匹配 " + logic.getChar() + tv + " ！");
+		if (result != null && JSONResponse.isExist(result.getIntValue(JSONResponse.KEY_CODE)) == false) {
+			throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 '" + tk + "': '" + tv + "' ！");
 		}		
 	}
 
-	
+
 	/**验证是否存在
 	 * @param table
 	 * @param key
@@ -829,7 +954,7 @@ public class Structure {
 	public static void verifyRepeat(String table, String key, Object value, @NotNull SQLCreator creator) throws Exception {
 		verifyRepeat(table, key, value, 0, creator);
 	}
-	
+
 	/**验证是否重复
 	 * @param table
 	 * @param key
@@ -838,6 +963,19 @@ public class Structure {
 	 * @throws Exception
 	 */
 	public static void verifyRepeat(String table, String key, Object value, long exceptId, @NotNull SQLCreator creator) throws Exception {
+		verifyRepeat(table, key, value, exceptId, null, creator);
+	}
+
+	/**验证是否重复
+	 * @param table
+	 * @param key
+	 * @param value
+	 * @param exceptId 不包含id
+	 * @param idKey
+	 * @param creator
+	 * @throws Exception
+	 */
+	public static void verifyRepeat(String table, String key, Object value, long exceptId, String idKey, @NotNull SQLCreator creator) throws Exception {
 		if (key == null || value == null) {
 			Log.e(TAG, "verifyRepeat  key == null || value == null >> return;");
 			return;
@@ -845,15 +983,16 @@ public class Structure {
 		if (value instanceof JSON) {
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
-		
-		
+
+		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
+
 		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
-			config.putWhere(JSONRequest.KEY_ID + "!", exceptId, false);
+			config.putWhere(finalIdKey + "!", exceptId, false);
 		}
 		config.putWhere(key, value, false);
-		
+
 		SQLExecutor executor = creator.createSQLExecutor();
 		try {
 			JSONObject result = executor.execute(config, false);
