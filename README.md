@@ -233,6 +233,8 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
 https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
+理论上所有支持 SQL 与 JDBC 的数据库，都可以用本项目对接 CRUD，待测试:
+[Hive](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select),  [ClickHouse](https://clickhouse.tech/docs/zh/sql-reference/syntax/) 
 
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
