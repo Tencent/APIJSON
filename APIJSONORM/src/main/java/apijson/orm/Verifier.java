@@ -5,22 +5,32 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
+import com.alibaba.fastjson.JSONObject;
+
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.RequestRole;
 
-/**权限验证器
+/**校验器(权限、请求参数、返回结果等)
  * @author Lemon
  */
 public interface Verifier<T> {
 
+	/**验证权限是否通过，用 verifyAccess 替代，最早 4.5.0 移除
+	 * @param config
+	 * @param visitor
+	 * @return
+	 * @throws Exception
+	 */
+	@Deprecated
+	boolean verify(SQLConfig config) throws Exception;
 	/**验证权限是否通过
 	 * @param config
 	 * @param visitor
 	 * @return
 	 * @throws Exception
 	 */
-	boolean verify(SQLConfig config) throws Exception;
+	boolean verifyAccess(SQLConfig config) throws Exception;
 
 	/**允许请求，角色不好判断，让访问者发过来角色名，OWNER,CONTACT,ADMIN等
 	 * @param table
@@ -62,15 +72,33 @@ public interface Verifier<T> {
 	 */
 	void verifyRepeat(String table, String key, Object value, long exceptId) throws Exception;
 	
+	/**验证请求参数的数据和结构
+	 * @param table
+	 * @param key
+	 * @param value
+	 * @param exceptId 不包含id
+	 * @throws Exception
+	 */
+	JSONObject verifyRequest(RequestMethod method, String name, JSONObject target, JSONObject request,
+			int maxUpdateCount, String globleDatabase, String globleSchema, SQLCreator creator) throws Exception;
+
+	/**验证返回结果的数据和结构
+	 * @param table
+	 * @param key
+	 * @param value
+	 * @param exceptId 不包含id
+	 * @throws Exception
+	 */
+	JSONObject verifyResponse(RequestMethod method, String name, JSONObject target, JSONObject response,
+			String database, String schema, SQLCreator creator, OnParseCallback callback) throws Exception;
+
 
 	@NotNull
 	Parser<T> createParser();
-	
 
 	@NotNull
 	Visitor<T> getVisitor();
 	Verifier<T> setVisitor(@NotNull Visitor<T> visitor);
-
 	
 	String getVisitorIdKey(SQLConfig config);
 

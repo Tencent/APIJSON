@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 
 import apijson.MethodAccess;
 
-/**条件测试
+/**测试结果。5.0.0 之后可能改名为 Test
  * @author Lemon
  */
 @MethodAccess(GET = { LOGIN, ADMIN }, HEAD = { LOGIN, ADMIN })

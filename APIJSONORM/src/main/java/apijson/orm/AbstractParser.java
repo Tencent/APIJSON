@@ -34,7 +34,6 @@ import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.RequestRole;
 import apijson.StringUtil;
-import apijson.orm.AbstractSQLConfig.IdCallback;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.NotExistException;
@@ -44,7 +43,7 @@ import apijson.orm.exception.OutOfRangeException;
 /**parser for parsing request to JSONObject
  * @author Lemon
  */
-public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator, IdCallback {
+public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
 
 
@@ -248,10 +247,16 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 	@Override
 	public SQLExecutor getSQLExecutor() {
+		if (sqlExecutor == null) {
+			sqlExecutor = createSQLExecutor();
+		}
 		return sqlExecutor;
 	}
 	@Override
 	public Verifier<T> getVerifier() {
+		if (verifier == null) {
+			verifier = createVerifier().setVisitor(getVisitor());
+		}
 		return verifier;
 	}
 
@@ -377,7 +382,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		long duration = endTime - startTime;
 
 		if (Log.DEBUG) { //用 | 替代 /，避免 APIJSON ORM，APIAuto 等解析路径错误
-			requestObject.put("sql:generate|cache|execute|maxExecute", sqlExecutor.getGeneratedSQLCount() + "|" + sqlExecutor.getCachedSQLCount() + "|" + sqlExecutor.getExecutedSQLCount() + "|" + getMaxSQLCount());
+			requestObject.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
 			requestObject.put("time:start|duration|end", startTime + "|" + duration + "|" + endTime);
 		}
@@ -402,7 +407,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 	@Override
 	public void onVerifyLogin() throws Exception {
-		verifier.verifyLogin();
+		getVerifier().verifyLogin();
 	}
 	@Override
 	public void onVerifyContent() throws Exception {
@@ -427,7 +432,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					config.setRole(getVisitor().getId() == null ? RequestRole.UNKNOWN : RequestRole.LOGIN);
 				}
 			}
-			verifier.verify(config);
+			getVerifier().verifyAccess(config);
 		}
 
 	}
@@ -493,20 +498,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
-		return Structure.parseRequest(method, name, target, request, maxUpdateCount, getGlobleDatabase(), getGlobleSchema(), this, creator);
-	}
-
-	@Override
-	public String getIdKey(String database, String schema, String table) {
-		return apijson.JSONObject.KEY_ID;
-	}
-	@Override
-	public String getUserIdKey(String database, String schema, String table) {
-		return apijson.JSONObject.KEY_USER_ID;
-	}
-	@Override
-	public Object newId(RequestMethod method, String database, String schema, String table) {
-		return System.currentTimeMillis();
+		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobleDatabase(), getGlobleSchema(), creator);
 	}
 	
 	
@@ -694,12 +686,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		config.setOrder(JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
 		config.setCount(1);
 
-		if (sqlExecutor == null) {
-			sqlExecutor = createSQLExecutor();
-		}
-
 		//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
-		JSONObject result = sqlExecutor.execute(config, false);
+		JSONObject result = getSQLExecutor().execute(config, false);
 		return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
 	}
 
@@ -1405,10 +1393,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			JSONObject result;
 			if (explain) { //如果先执行 explain，则 execute 会死循环，所以只能先执行非 explain
 				config.setExplain(false); //对下面 config.getSQL(false); 生效
-				JSONObject res = sqlExecutor.execute(config, false);
+				JSONObject res = getSQLExecutor().execute(config, false);
 
 				config.setExplain(explain);
-				JSONObject explainResult = config.isMain() && config.getPosition() != 0 ? null : sqlExecutor.execute(config, false);
+				JSONObject explainResult = config.isMain() && config.getPosition() != 0 ? null : getSQLExecutor().execute(config, false);
 
 				if (explainResult == null) {
 					result = res;
@@ -1420,7 +1408,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				}
 			}
 			else {
-				result = sqlExecutor.execute(config, false);
+				result = getSQLExecutor().execute(config, false);
 			}
 
 			return parseCorrectResponse(config.getTable(), result);
@@ -1434,7 +1422,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		finally {
 			if (config.getPosition() == 0 && config.limitSQLCount()) {
 				int maxSQLCount = getMaxSQLCount();
-				int sqlCount = sqlExecutor.getExecutedSQLCount();
+				int sqlCount = getSQLExecutor().getExecutedSQLCount();
 				Log.d(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n\n\n 已执行 " + sqlCount + "/" + maxSQLCount + " 条 SQL \n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 				if (sqlCount > maxSQLCount) {
 					throw new IllegalArgumentException("截至 " + config.getTable() + " 已执行 " + sqlCount + " 条 SQL，数量已超限，必须在 0-" + maxSQLCount + " 内 !");
@@ -1458,27 +1446,27 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	@Override
 	public void begin(int transactionIsolation) {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< begin transactionIsolation = " + transactionIsolation + " >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		sqlExecutor.setTransactionIsolation(transactionIsolation); //不知道 connection 什么时候创建，不能在这里准确控制，sqlExecutor.begin(transactionIsolation);
+		getSQLExecutor().setTransactionIsolation(transactionIsolation); //不知道 connection 什么时候创建，不能在这里准确控制，getSqlExecutor().begin(transactionIsolation);
 	}
 	@Override
 	public void rollback() throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< rollback >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		sqlExecutor.rollback();
+		getSQLExecutor().rollback();
 	}
 	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< rollback savepoint " + (savepoint == null ? "" : "!") + "= null >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		sqlExecutor.rollback(savepoint);
+		getSQLExecutor().rollback(savepoint);
 	}
 	@Override
 	public void commit() throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< commit >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		sqlExecutor.commit();
+		getSQLExecutor().commit();
 	}
 	@Override
 	public void close() {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< close >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		sqlExecutor.close();
+		getSQLExecutor().close();
 	}
 
 	/**开始事务
@@ -1535,6 +1523,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		//		Log.d(TAG, "onClose >>");
 
 		close();
+		verifier = null;
 		sqlExecutor = null;
 		queryResultMap.clear();
 		queryResultMap = null;
