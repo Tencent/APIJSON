@@ -234,7 +234,7 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 理论上所有支持 SQL 与 JDBC/ODBC 的软件，都可以用本项目对接 CRUD，待测试: <br />
-[DB2](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.ref.doc/doc/r0059224.html), [ClickHouse](https://clickhouse.tech/docs/zh/sql-reference/syntax/), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](http://spark.apache.org/sql/), [Hive](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select)(延伸支持 Hadoop, Spark)
+[DB2](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.ref.doc/doc/r0059224.html), [ClickHouse](https://clickhouse.tech/docs/zh/sql-reference/syntax/), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](http://spark.apache.org/sql/), [Hive](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select)(延伸支持 Hadoop, Spark), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
 
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
