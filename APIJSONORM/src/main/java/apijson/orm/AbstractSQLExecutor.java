@@ -666,31 +666,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		connection = connectionMap.get(config.getDatabase());
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
-
-			if (config.isMySQL()) {
-				int v;
-				try {
-					String[] vs = config.getDBVersion().split("[.]");
-					v = Integer.parseInt(vs[0]);
-				}
-				catch (Exception e) {
-					v = 1;
-					Log.e(TAG, "getStatement  try { String[] vs = config.getDBVersion().split([.]); ... >> } catch (Exception e) {\n" + e.getMessage());
-				}
-
-				if (v >= 8) {
-					connection = DriverManager.getConnection(config.getDBUri() + "?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
-							+ config.getDBAccount() + "&password=" + config.getDBPassword());
-				}
-				else {
-					connection = DriverManager.getConnection(config.getDBUri() + "?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&user="
-							+ config.getDBAccount() + "&password=" + config.getDBPassword());
-				}
-			}
-			else { //PostgreSQL 不允许 cross-database
-				connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
-			}
-
+			// PostgreSQL 不允许 cross-database
+			connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
 			connectionMap.put(config.getDatabase(), connection);
 		}
 
@@ -795,14 +772,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
 		PreparedStatement s = getStatement(config);
 		int count = s.executeUpdate(); //PreparedStatement 不用传 SQL
-		
+
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
 			ResultSet rs = s.getGeneratedKeys();
 			if (rs != null && rs.next()) {
 				config.setId(rs.getLong(1));//返回插入的主键id
 			}
 		}
-		
+
 		return count;
 	}
 
