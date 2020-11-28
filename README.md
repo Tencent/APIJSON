@@ -233,7 +233,7 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
 https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
-理论上所有支持 SQL 与 JDBC 的数据库，都可以用本项目对接 CRUD，待测试: <br />
+理论上所有支持 SQL 与 JDBC/ODBC 的数据库，都可以用本项目对接 CRUD，待测试: <br />
 [DB2](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.ref.doc/doc/r0059224.html), [ClickHouse](https://clickhouse.tech/docs/zh/sql-reference/syntax/), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](http://spark.apache.org/sql/), [Hive](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select)(延伸支持 Hadoop, Spark)
 
 ### 我要赞赏
