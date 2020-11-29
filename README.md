@@ -136,7 +136,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 https://github.com/Tencent/APIJSON/wiki
 
 * 解决十大痛点 (APIJSON 提振开发效率、杜绝联调扯皮、规避文档缺陷、节省流量带宽 等)
-* 开发提速巨大 (CRUD 零代码热更新自动化，APIJSONBoot 对比 SSM 等提速 20 倍以上)
+* 开发提速巨大 (CRUD 零代码热更新自动化，APIJSONBoot 对比 SSM、SSH 等提速 20 倍以上)
 * 腾讯官方开源 (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
 * 社区影响力大 (GitHub 9.2K Star 在 350W Java 项目中排名前 200，远超 FLAG, BAT 等国内外绝大部分开源项目)
 * 各项荣誉成就 (腾讯开源五个第一、首个 GVP 获奖项目、腾讯后端开源项目 Star 第一 等)
