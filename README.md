@@ -198,8 +198,8 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
   <a href="http://t-think.com"><img src="http://apijson.org/images/t-think.com.png" height="90"></a>
   <a href="http://www.8soo.com"><img src="http://apijson.org/images/www.8sso.com.jpeg" height="90"></a>
   <a href="https://www.9800.com"><img src="http://apijson.org/images/hh.com.png" height="90"></a>
-  <a href="http://www.aipaipai-inc.com"><img src="http://apijson.org/images/www.aipaipai-inc.com.png" height="90"></a>
   <a href="https://www.shulian8.com"><img src="http://apijson.org/images/www.shulian8.com.png" height="90"></a>
+  <a href="http://www.aipaipai-inc.com"><img src="http://apijson.org/images/www.aipaipai-inc.com.png" height="90"></a>
   <a href="http://www.hec-bang.com"><img src="http://apijson.org/images/www.hec-bang.com.png" height="90"></a>
   <a href="http://www.hngtrust.com"><img src="http://www.hngtrust.com/r/cms/www/default/images/logo.png" height="90"></a>
 <br />
