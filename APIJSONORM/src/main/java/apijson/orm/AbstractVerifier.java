@@ -56,6 +56,7 @@ import apijson.RequestRole;
 import apijson.StringUtil;
 import apijson.orm.AbstractSQLConfig.IdCallback;
 import apijson.orm.exception.ConflictException;
+import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.NotLoggedInException;
 import apijson.orm.model.Access;
 import apijson.orm.model.Column;
@@ -610,7 +611,25 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			//new ArrayList<Long>(idIn) 不能检查类型，Java泛型擦除问题，居然能把 ["a"] 赋值进去还不报错
 			for (int i = 0; i < idIn.size(); i++) {
 				Object o = idIn.get(i);
-				if (o != null && o instanceof Number == false && o instanceof String == false) {
+				if (o == null) {
+					throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+							+ " 里面的 " + idInKey + ":[] 中所有项都不能为 [ null, <= 0 的数字, 空字符串 \"\" ] 中任何一个 ！");
+				}
+				if (o instanceof Number) {
+					//解决 Windows mysql-5.6.26-winx64 等低于 5.7 的 MySQL 可能 id{}: [0] 生成 id IN(0) 触发 MySQL bug 导致忽略 IN 条件
+					//例如 UPDATE `apijson`.`TestRecord` SET `testAccountId` = -1 WHERE ( (`id` IN (0)) AND (`userId`= 82001) )
+					if (((Number) o).longValue() <= 0) {
+						throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+								+ " 里面的 " + idInKey + ":[] 中所有项都不能为 [ null, <= 0 的数字, 空字符串 \"\" ] 中任何一个 ！");
+					}
+				}
+				else if (o instanceof String) {
+					if (StringUtil.isEmpty(o, true)) {
+						throw new IllegalArgumentException(method + "请求，" + name + "/" + key
+								+ " 里面的 " + idInKey + ":[] 中所有项都不能为 [ null, <= 0 的数字, 空字符串 \"\" ] 中任何一个 ！");
+					}
+				}
+				else {
 					throw new IllegalArgumentException(method + "请求，" + name + "/" + key
 							+ " 里面的 " + idInKey + ":[] 中所有项的类型都只能是 Long 或 String ！");
 				}
