@@ -702,7 +702,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public JSONObject response() throws Exception {
 		if (sqlReponse == null || sqlReponse.isEmpty()) {
 			if (isTable) {//Table自身都获取不到值，则里面的Child都无意义，不需要再解析
-				return response;
+				return null;  // response;
 			}
 		} else {
 			response.putAll(sqlReponse);
