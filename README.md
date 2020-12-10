@@ -93,7 +93,7 @@ APIJSON是一种专为API而生的 JSON网络传输协议 以及 基于这套协
 
 <br />
 <p align="center" >
-  <a >APIAuto 自动生成前端(客户端)请求代码、后端接口代码、测试用例代码，一键下载</a>
+  <a >APIAuto 自动生成前端(客户端)请求代码 和 Python 测试用例代码，一键下载</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-637193bbd89b41c3264827786319e842aee.JPEG) 
