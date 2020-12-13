@@ -138,6 +138,9 @@ public interface SQLConfig {
 
 	String getTablePath();
 
+	List<String> getRaw();
+	SQLConfig setRaw(List<String> raw);
+
 	SQLConfig setTable(String table);
 
 	String getGroup();
@@ -163,8 +166,6 @@ public interface SQLConfig {
 
 	Map<String, Object> getContent();
 	SQLConfig setContent(Map<String, Object> content);
-
-
 
 	Map<String, Object> getWhere();
 	SQLConfig setWhere(Map<String, Object> where);
@@ -213,6 +214,8 @@ public interface SQLConfig {
 
 	String getWhereString(boolean hasPrefix) throws Exception;
 
+	String getRawSQL(String key, Object value) throws Exception;
+
 	boolean isKeyPrefix();
 
 	SQLConfig setKeyPrefix(boolean keyPrefix);
@@ -228,5 +231,6 @@ public interface SQLConfig {
 	String getSubqueryString(Subquery subquery) throws Exception;
 
 	SQLConfig setProcedure(String procedure);
+
 
 }

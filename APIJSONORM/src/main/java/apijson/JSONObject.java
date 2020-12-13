@@ -145,8 +145,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_GROUP = "@group"; //分组方式
 	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_ORDER = "@order"; //排序方式
+	public static final String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
 	public static final String KEY_JSON = "@json"; //SQL Server 把字段转为 JSON 输出
-	public static final String KEY_RAW = "@raw"; //自定义where条件拼接
 
 	public static final List<String> TABLE_KEY_LIST;
 	static {
@@ -162,8 +162,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_GROUP);
 		TABLE_KEY_LIST.add(KEY_HAVING);
 		TABLE_KEY_LIST.add(KEY_ORDER);
-		TABLE_KEY_LIST.add(KEY_JSON);
 		TABLE_KEY_LIST.add(KEY_RAW);
+		TABLE_KEY_LIST.add(KEY_JSON);
 	}
 
 	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>
@@ -325,10 +325,29 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return puts(KEY_ORDER, keys);
 	}
 
+	/**set keys to raw
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setRaw(String keys) {
+		return puts(KEY_RAW, keys);
+	}
+
 	/**set keys to cast to json
 	 * @param keys  "key0,key1,key2..."
 	 * @return
 	 */
+	public JSONObject setJson(String keys) {
+		return puts(KEY_JSON, keys);
+	}
+
+	/**用 setJson 替代。
+	 * set keys to cast to json
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 * @see #{@link #setJson(String)}
+	 */
+	@Deprecated
 	public JSONObject setJSON(String keys) {
 		return puts(KEY_JSON, keys);
 	}
