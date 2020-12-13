@@ -81,6 +81,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static String DEFAULT_SCHEMA = "sys";
 	public static String PREFFIX_DISTINCT = "DISTINCT ";
 
+	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
+	private static final Pattern PATTERN_RANGE;
+	private static final Pattern PATTERN_FUNCTION;
+	
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
@@ -89,7 +93,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static final List<String> DATABASE_LIST;
 	// 自定义原始 SQL 片段 Map<key, substring>：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
 	public static final Map<String, String> RAW_MAP;
-	static {
+	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- ，以免拼接 SQL 时被注入意外可执行指令
+		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
+		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\$]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
+		
+		
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
 		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TABLE_NAME);
@@ -118,6 +126,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
 	}
+
 
 	@Override
 	public boolean limitSQLCount() {
@@ -487,7 +496,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.having = having;
 		return this;
 	}
-	/**
+	/**TODO @having 改为默认 | 或连接，且支持 @having: { "key1>": 1, "key{}": "length(key2)>0", "@combine": "key1,key2" }
 	 * @return HAVING conditoin0 AND condition1 OR condition2 ...
 	 */
 	@JSONField(serialize = false)
@@ -517,12 +526,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-		having = StringUtil.getTrimedString(having);
-		String[] keys = StringUtil.split(having, ";");
+		String[] keys = StringUtil.split(getHaving(), ";");
 		if (keys == null || keys.length <= 0) {
 			return StringUtil.isEmpty(joinHaving, true) ? "" : (hasPrefix ? " HAVING " : "") + joinHaving;
 		}
+		
+		String quote = getQuote();
+		String tableAlias = getAliasWithQuote();
 
+		List<String> raw = getRaw();
+		boolean containRaw = raw != null && raw.contains(KEY_HAVING);
+		
 		String expression;
 		String method;
 		//暂时不允许 String prefix;
@@ -533,13 +547,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			//fun(arg0,arg1,...)
 			expression = keys[i];
+			if (containRaw) {
+				try {
+					String rawSQL = getRawSQL(KEY_HAVING, expression);
+					if (rawSQL != null) {
+						keys[i] = rawSQL;
+						continue;
+					}
+				} catch (Exception e) {
+					Log.e(TAG, "newSQLConfig  rawColumnSQL == null >> try {  "
+							+ "  String rawSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, fk); ... "
+							+ "} catch (Exception e) = " + e.getMessage());
+				}
+			}
+			
+			if (expression.length() > 50) {
+				throw new UnsupportedOperationException("@having:value 的 value 中字符串 " + expression + " 不合法！"
+						+ "不允许传超过 50 个字符的函数或表达式！请用 @raw 简化传参！");
+			}
 
 			int start = expression.indexOf("(");
 			if (start < 0) {
-				if (isPrepared() && PATTERN_HAVING.matcher(expression).matches() == false) {
+				if (isPrepared() && PATTERN_FUNCTION.matcher(expression).matches() == false) {
 					throw new UnsupportedOperationException("字符串 " + expression + " 不合法！"
 							+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-							+ " 中 column?value 必须符合正则表达式 ^[A-Za-z0-9%!=<>]+$ ！不允许空格！");
+							+ " 中 column?value 必须符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！不允许空格！");
 				}
 				continue;
 			}
@@ -560,24 +592,40 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			suffix = expression.substring(end + 1, expression.length());
 
-			if (isPrepared() && PATTERN_HAVING_SUFFIX.matcher((String) suffix).matches() == false) {
+			if (isPrepared() && (((String) suffix).contains("--") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
 				throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
 						+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-						+ " 中 ?value 必须符合正则表达式 ^[0-9%!=<>]+$ ！不允许空格！");
+						+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- ！不允许多余的空格！");
 			}
 
 			String[] ckeys = StringUtil.split(expression.substring(start + 1, end));
 
 			if (ckeys != null) {
 				for (int j = 0; j < ckeys.length; j++) {
+					String origin = ckeys[j];
 
-					if (isPrepared() && (StringUtil.isName(ckeys[j]) == false || ckeys[j].startsWith("_"))) {
-						throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
-								+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-								+ " 中所有 arg 都必须是1个不以 _ 开头的单词！并且不要有空格！");
+					if (isPrepared()) {
+						if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
+							throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
+									+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+									+ " 中所有 column, arg 都必须是1个不以 _ 开头的单词 或者 符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！不允许多余的空格！");
+						}
 					}
 
-					ckeys[j] = getKey(ckeys[j]);
+					//JOIN 副表不再在外层加副表名前缀 userId AS `Commet.userId`， 而是直接 userId AS `userId`
+					boolean isName = false;
+					if (StringUtil.isNumer(origin)) {
+						//do nothing
+					}
+					else if (StringUtil.isName(origin)) {
+						origin = quote + origin + quote;
+						isName = true;
+					} 
+					else {
+						origin = getValue(origin).toString();
+					}
+
+					ckeys[j] = (isName && isKeyPrefix() ? tableAlias + "." : "") + origin;
 				}
 			}
 
@@ -876,8 +924,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				//fun(arg0,arg1,...)
 				expression = keys[i];
 
-				if (containRaw) {
-					if (RAW_MAP.containsValue(expression) || "".equals(RAW_MAP.get(expression))) {  // newSQLConfig 提前处理好的
+				if (containRaw) {  // 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
+					if ("".equals(RAW_MAP.get(expression)) || RAW_MAP.containsValue(expression)) {  // newSQLConfig 提前处理好的
 						continue;
 					}
 
@@ -890,6 +938,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					//						expression = pre + (hasAlias ? " AS " + alias : "");
 					//						continue;
 					//					}
+				}
+
+				if (expression.length() > 50) {
+					throw new UnsupportedOperationException("@column:value 的 value 中字符串 " + expression + " 不合法！"
+							+ "不允许传超过 50 个字符的函数或表达式！请用 @raw 简化传参！");
 				}
 
 
@@ -944,10 +997,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							}
 							else {
 								//								if ((StringUtil.isName(origin) == false || origin.startsWith("_"))) {
-								if (origin.startsWith("_") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
+								if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
 									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
 											+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-											+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
+											+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
 								}
 							}
 						}
@@ -1626,16 +1679,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		switch (keyType) {
 		case 1:
-			return getSearchString(key, value);
+			return getSearchString(key, value, rawSQL);
 		case -2:
 		case 2:
-			return getRegExpString(key, value, keyType < 0);
+			return getRegExpString(key, value, keyType < 0, rawSQL);
 		case 3:
 			return getBetweenString(key, value, rawSQL);
 		case 4:
 			return getRangeString(key, value, rawSQL);
 		case 5:
-			return getExistsString(key, value);
+			return getExistsString(key, value, rawSQL);
 		case 6:
 			return getContainString(key, value, rawSQL);
 		case 7:
@@ -1647,13 +1700,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case 10:
 			return getCompareString(key, value, "<", rawSQL);
 		default:  // TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
-			return getEqualString(key, value);
+			return getEqualString(key, value, rawSQL);
 		}
 	}
 
 
 	@JSONField(serialize = false)
-	public String getEqualString(String key, Object value) throws Exception {
+	public String getEqualString(String key, Object value, String rawSQL) throws Exception {
 		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
 			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
 		}
@@ -1666,7 +1719,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(key + ":value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
 
-		return getKey(key) + (not ? " != " : " = ") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : getValue(value));
+		return getKey(key) + (not ? " != " : " = ") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : (rawSQL != null ? rawSQL : getValue(value)));
 	}
 
 	@JSONField(serialize = false)
@@ -1729,7 +1782,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getSearchString(String key, Object value) throws IllegalArgumentException {
+	public String getSearchString(String key, Object value, String rawSQL) throws IllegalArgumentException {
+		if (rawSQL != null) {
+			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key$ 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
+		}
 		if (value == null) {
 			return "";
 		}
@@ -1789,7 +1845,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getRegExpString(String key, Object value, boolean ignoreCase) throws IllegalArgumentException {
+	public String getRegExpString(String key, Object value, boolean ignoreCase, String rawSQL) throws IllegalArgumentException {
+		if (rawSQL != null) {
+			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key~ 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
+		}
 		if (value == null) {
 			return "";
 		}
@@ -1925,18 +1984,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	//{} range <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
-	private static final Pattern PATTERN_RANGE;
-	private static final Pattern PATTERN_FUNCTION;
-	private static final Pattern PATTERN_HAVING;
-	private static final Pattern PATTERN_HAVING_SUFFIX;
-	static {
-		PATTERN_RANGE = Pattern.compile("^[0-9%!=<>,]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
-		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%-_:!=<> ]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
-		PATTERN_HAVING = Pattern.compile("^[A-Za-z0-9%!=<>]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
-		PATTERN_HAVING_SUFFIX = Pattern.compile("^[0-9%!=<>]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
-	}
-
 
 	/**WHERE key > 'key0' AND key <= 'key1' AND ...
 	 * @param key
@@ -2070,7 +2117,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws NotExistException
 	 */
 	@JSONField(serialize = false)
-	public String getExistsString(String key, Object value) throws Exception {
+	public String getExistsString(String key, Object value, String rawSQL) throws Exception {
+		if (rawSQL != null) {
+			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key}{ 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
+		}
 		if (value == null) {
 			return "";
 		}
@@ -2562,6 +2612,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
+		if (idIn instanceof List) { // 排除掉 0, 负数, 空字符串 等无效 id 值
+			List<?> ids = ((List<?>) idIn);
+			List<Object> newIdIn = new ArrayList<>();
+			Object d;
+			for (int i = 0; i < ids.size(); i++) { //不用 idIn.contains(id) 因为 idIn 里存到很可能是 Integer，id 又是 Long！
+				d = ids.get(i);
+				if ((d instanceof Number && ((Number) d).longValue() > 0) || (d instanceof String && StringUtil.isNotEmpty(d, true))) {
+					newIdIn.add(d);
+				}
+			}
+			if (newIdIn.isEmpty()) {
+				throw new NotExistException(TAG + ": newSQLConfig idIn instanceof List >> 去掉无效 id 后 newIdIn.isEmpty()");
+			}
+			idIn = newIdIn;
+		}
+		
 		//对id和id{}处理，这两个一定会作为条件
 		Object id = request.get(idKey);
 		if (id != null) { //null无效
@@ -2786,11 +2852,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		List<String> cs = new ArrayList<>();
 
-		String rawColumnSQL = null;
 		List<String> rawList = config.getRaw();
-		boolean containRaw = rawList != null && rawList.contains(KEY_COLUMN);
+		boolean containColumnRaw = rawList != null && rawList.contains(KEY_COLUMN);
 
-		if (containRaw) {
+		String rawColumnSQL = null;
+		if (containColumnRaw) {
 			try {
 				rawColumnSQL = config.getRawSQL(KEY_COLUMN, column);
 				if (rawColumnSQL != null) {
@@ -2809,7 +2875,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (fks != null) {
 				String[] ks;
 				for (String fk : fks) {
-					if (containRaw) {
+					if (containColumnRaw) {
 						try {
 							String rawSQL = config.getRawSQL(KEY_COLUMN, fk);
 							if (rawSQL != null) {
