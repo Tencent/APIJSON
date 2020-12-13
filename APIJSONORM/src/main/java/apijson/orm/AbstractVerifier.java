@@ -56,7 +56,6 @@ import apijson.RequestRole;
 import apijson.StringUtil;
 import apijson.orm.AbstractSQLConfig.IdCallback;
 import apijson.orm.exception.ConflictException;
-import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.NotLoggedInException;
 import apijson.orm.model.Access;
 import apijson.orm.model.Column;
@@ -1182,10 +1181,10 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		String rk;
 		Object rv;
 		Logic logic;
-		if (tk.endsWith("$")) { //搜索
+		if (tk.endsWith("$")) {  // 模糊搜索
 			verifyCondition("$", real, tk, tv, creator);
 		}
-		else if (tk.endsWith("~") || tk.endsWith("?")) { //TODO 正则表达式, 以后可能取消支持 ? 作为 正则匹配 的功能符
+		else if (tk.endsWith("~")) {  // 正则匹配
 			logic = new Logic(tk.substring(0, tk.length() - 1));
 			rk = logic.getKey();
 			rv = real.get(rk);

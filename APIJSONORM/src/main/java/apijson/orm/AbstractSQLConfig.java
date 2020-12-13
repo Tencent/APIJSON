@@ -882,14 +882,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					// 简单点， 后台配置就带上 AS
-//					int index = expression.lastIndexOf(":");
-//					String alias = expression.substring(index+1);
-//					boolean hasAlias = StringUtil.isName(alias);
-//					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
-//					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
-//						expression = pre + (hasAlias ? " AS " + alias : "");
-//						continue;
-//					}
+					//					int index = expression.lastIndexOf(":");
+					//					String alias = expression.substring(index+1);
+					//					boolean hasAlias = StringUtil.isName(alias);
+					//					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
+					//					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
+					//						expression = pre + (hasAlias ? " AS " + alias : "");
+					//						continue;
+					//					}
 				}
 
 
@@ -1572,8 +1572,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	private String getWhereItem(String key, Object value
-			, RequestMethod method, boolean verifyName) throws Exception {
+	protected String getWhereItem(String key, Object value, RequestMethod method, boolean verifyName) throws Exception {
 		Log.d(TAG, "getWhereItem  key = " + key);
 		//避免筛选到全部	value = key == null ? null : where.get(key);
 		if (key == null || value == null || key.endsWith("()") || key.startsWith("@")) { //关键字||方法, +或-直接报错
@@ -1593,7 +1592,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (key.endsWith("$")) {
 			keyType = 1;
 		} 
-		else if (key.endsWith("~") || key.endsWith("?")) { //TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法 
+		else if (key.endsWith("~")) {
 			keyType = key.charAt(key.length() - 2) == '*' ? -2 : 2;  //FIXME StringIndexOutOfBoundsException
 		}
 		else if (key.endsWith("%")) {
@@ -1623,7 +1622,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			keyType = 0;
 		}
 
-		key = getRealKey(method, key, false, true, verifyName, getQuote());
+		key = getRealKey(method, key, false, true, verifyName);
 
 		switch (keyType) {
 		case 1:
@@ -2223,8 +2222,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String setString = "";
 
 		if (set != null && set.size() > 0) {
-			String quote = getQuote();
-
 			boolean isFirst = true;
 			int keyType;// 0 - =; 1 - +, 2 - -
 			Object value;
@@ -2244,7 +2241,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					keyType = 0; //注意重置类型，不然不该加减的字段会跟着加减
 				}
 				value = content.get(key);
-				key = getRealKey(method, key, false, true, verifyName, quote);
+				key = getRealKey(method, key, false, true, verifyName);
 
 				setString += (isFirst ? "" : ", ") + (getKey(key) + " = " + (keyType == 1 ? getAddString(key, value) : (keyType == 2
 						? getRemoveString(key, value) : getValue(value)) ) );
@@ -2967,8 +2964,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 */
 	public static String getRealKey(RequestMethod method, String originKey
-			, boolean isTableKey, boolean saveLogic, String quote) throws Exception {
-		return getRealKey(method, originKey, isTableKey, saveLogic, true, quote);
+			, boolean isTableKey, boolean saveLogic) throws Exception {
+		return getRealKey(method, originKey, isTableKey, saveLogic, true);
 	}
 	/**获取客户端实际需要的key
 	 * @param method
@@ -2979,11 +2976,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 */
 	public static String getRealKey(RequestMethod method, String originKey
-			, boolean isTableKey, boolean saveLogic, boolean verifyName, String quote) throws Exception {
+			, boolean isTableKey, boolean saveLogic, boolean verifyName) throws Exception {
 		Log.i(TAG, "getRealKey  saveLogic = " + saveLogic + "; originKey = " + originKey);
-		if (originKey == null || originKey.startsWith(quote) || apijson.JSONObject.isArrayKey(originKey)) {
-			Log.w(TAG, "getRealKey  originKey == null || originKey.startsWith(`)"
-					+ " || apijson.JSONObject.isArrayKey(originKey) >>  return originKey;");
+		if (originKey == null || apijson.JSONObject.isArrayKey(originKey)) {
+			Log.w(TAG, "getRealKey  originKey == null || apijson.JSONObject.isArrayKey(originKey) >>  return originKey;");
 			return originKey;
 		}
 
@@ -2991,7 +2987,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (key.endsWith("$")) {//搜索 LIKE，查询时处理
 			key = key.substring(0, key.length() - 1);
 		}
-		else if (key.endsWith("~") || key.endsWith("?")) {//匹配正则表达式 REGEXP，查询时处理  TODO ？可能以后会被废弃，全用 ~ 和 *~ 替代，更接近 PostgreSQL 语法 
+		else if (key.endsWith("~")) {//匹配正则表达式 REGEXP，查询时处理
 			key = key.substring(0, key.length() - 1);
 			if (key.endsWith("*")) {//忽略大小写
 				key = key.substring(0, key.length() - 1);
