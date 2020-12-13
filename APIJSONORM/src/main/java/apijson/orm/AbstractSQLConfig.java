@@ -2062,9 +2062,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					else if ("!=null".equals(c)) {
 						c = SQL.isNull(false);
 					}
-					else if (isPrepared() && PATTERN_RANGE.matcher(c).matches() == false) {
+					else if (isPrepared() && (c.contains("--") || PATTERN_RANGE.matcher(c).matches() == false)) {
 						throw new UnsupportedOperationException(key + "{}:value 的 value 中 " + c + " 不合法！"
-								+ "预编译模式下 key{}:\"condition\" 中 condition 必须 为 =null 或 !=null 或 符合正则表达式 ^[0-9%!=<>,]+$ ！不允许空格！");
+								+ "预编译模式下 key{}:\"condition\" 中 condition 必须 为 =null 或 !=null 或 符合正则表达式 ^[0-9%!=<>,]+$ ！不允许连续减号 -- ！不允许空格！");
 					}
 
 					index = c == null ? -1 : c.indexOf("(");
