@@ -290,7 +290,7 @@ QQ 技术群： 734652054（新）、607020115（旧）
 
 
 ### 生态项目
-[APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架的使用示例项目
+[APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架的使用示例项目及上手文档
 
 [apijson-orm](https://github.com/APIJSON/apijson-orm) APIJSON ORM 库，可通过 Maven, Gradle 等远程依赖
 
