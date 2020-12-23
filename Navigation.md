@@ -18,7 +18,7 @@
 #### [2.如何控制权限？](https://github.com/Tencent/APIJSON#2%E5%A6%82%E4%BD%95%E6%8E%A7%E5%88%B6%E6%9D%83%E9%99%90)
 #### [3.如何校验参数？](https://github.com/Tencent/APIJSON#3%E5%A6%82%E4%BD%95%E6%A0%A1%E9%AA%8C%E5%8F%82%E6%95%B0)
 
-<br /><br /><br /><br />
+<br /><br />
 
 ### [快速上手](https://github.com/Tencent/APIJSON#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B)
 #### [1.后端上手](https://github.com/Tencent/APIJSON#1%E5%90%8E%E7%AB%AF%E4%B8%8A%E6%89%8B)
@@ -34,7 +34,7 @@
 
 ### [我要赞赏](https://github.com/Tencent/APIJSON#%E6%88%91%E8%A6%81%E8%B5%9E%E8%B5%8F)
 
-<br /><br /><br /><br />
+<br /><br />
 
 ### [技术交流](https://github.com/Tencent/APIJSON#%E6%8A%80%E6%9C%AF%E4%BA%A4%E6%B5%81)
 
