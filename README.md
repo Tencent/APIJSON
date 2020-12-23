@@ -169,7 +169,7 @@ https://github.com/Tencent/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
 <br />
 其它问题见 Closed Issues <br />
-https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
+https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed <br />
 <br />
 <br />
 <br />
