@@ -314,10 +314,6 @@ QQ 技术群： 734652054（新）、607020115（旧）
 
 [uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite 等
 
-[APIJSON](https://github.com/crazytaxi824/APIJSON) Go 版 APIJSON，功能开发中...([不可用且长期未更新，期待热心开发者帮助完善或新增项目](https://github.com/Tencent/APIJSON/issues/111))
-
-[APIJSONKOTLIN](https://github.com/luckyxiaomo/APIJSONKOTLIN) Kotlin 版 APIJSON，基础框架搭建中...(不可用且长期未更新，期待热心开发者帮助完善或新增项目)
-
 [APIJSONParser](https://github.com/Zerounary/APIJSONParser) 第三方 APIJSON 解析器，将 JSON 动态解析成 SQL
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
