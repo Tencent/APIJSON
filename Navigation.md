@@ -16,7 +16,7 @@
 ### [为什么选择 APIJSON？](/README.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9-apijson)
 <br />
 
-### [常见问题](/README.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9-apijson)
+### [常见问题](/README.md#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)
 #### [1.如何定制业务逻辑？](/README.md#1%E5%A6%82%E4%BD%95%E5%AE%9A%E5%88%B6%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91)
 #### [2.如何控制权限？](/README.md#2%E5%A6%82%E4%BD%95%E6%8E%A7%E5%88%B6%E6%9D%83%E9%99%90)
 #### [3.如何校验参数？](/README.md#3%E5%A6%82%E4%BD%95%E6%A0%A1%E9%AA%8C%E5%8F%82%E6%95%B0)
