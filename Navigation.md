@@ -3,7 +3,7 @@
 
 ### [特点功能](/README.md#%E7%89%B9%E7%82%B9%E5%8A%9F%E8%83%BD)
 #### [对于前端](/README.md#%E7%89%B9%E7%82%B9%E5%8A%9F%E8%83%BD)
-#### [对于后端]/README.md#%E5%AF%B9%E4%BA%8E%E5%90%8E%E7%AB%AF)
+#### [对于后端](/README.md#%E5%AF%B9%E4%BA%8E%E5%90%8E%E7%AB%AF)
 
 ### [APIJSON 接口展示](/README.md#apijson-%E6%8E%A5%E5%8F%A3%E5%B1%95%E7%A4%BA)
 #### [Postman 展示 APIJSON](/README.md#postman-%E5%B1%95%E7%A4%BA-apijson)
@@ -11,7 +11,7 @@
 
 ### [APIJSON App 演示](/README.md#apijson-app-%E6%BC%94%E7%A4%BA)
 
-### [为什么选择 APIJSON？](/README.md#%E7%89%B9%E7%82%B9%E5%8A%9F%E8%83%BD)
+### [为什么选择 APIJSON？](/README.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9-apijson)
 
 ### [常见问题](/README.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9-apijson)
 #### [1.如何定制业务逻辑？](/README.md#1%E5%A6%82%E4%BD%95%E5%AE%9A%E5%88%B6%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91)
