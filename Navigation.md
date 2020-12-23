@@ -12,7 +12,6 @@
 <br />
 
 ### [APIJSON App 演示](/README.md#apijson-app-%E6%BC%94%E7%A4%BA)
-<br />
 
 ### [为什么选择 APIJSON？](/README.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9-apijson)
 <br />
@@ -30,34 +29,25 @@
 <br />
 
 ### [下载客户端 App](/README.md#%E4%B8%8B%E8%BD%BD%E5%AE%A2%E6%88%B7%E7%AB%AF-app)
-<br />
 
 ### [使用登记](/README.md#%E4%BD%BF%E7%94%A8%E7%99%BB%E8%AE%B0)
-<br />
 
 ### [贡献者们](/README.md#%E8%B4%A1%E7%8C%AE%E8%80%85%E4%BB%AC)
-<br />
 
 ### [规划及路线图](/README.md#%E8%A7%84%E5%88%92%E5%8F%8A%E8%B7%AF%E7%BA%BF%E5%9B%BE)
-<br />
 
 ### [我要赞赏](/README.md#%E6%88%91%E8%A6%81%E8%B5%9E%E8%B5%8F)
 
 <br /><br />
 
 ### [技术交流](/README.md#%E6%8A%80%E6%9C%AF%E4%BA%A4%E6%B5%81)
-<br />
 
 ### [相关推荐](/README.md#%E7%9B%B8%E5%85%B3%E6%8E%A8%E8%8D%90)
-<br />
 
 ### [生态项目](/README.md#%E7%94%9F%E6%80%81%E9%A1%B9%E7%9B%AED)
-<br />
 
 ### [持续更新](/README.md#%E6%8C%81%E7%BB%AD%E6%9B%B4%E6%96%B0)
-<br />
 
 ### [工蜂主页](/README.md#%E5%B7%A5%E8%9C%82%E4%B8%BB%E9%A1%B5)
-<br />
 
 ### [码云主页](/README.md#%E7%A0%81%E4%BA%91%E4%B8%BB%E9%A1%B5)
