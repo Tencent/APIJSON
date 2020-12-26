@@ -592,10 +592,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			suffix = expression.substring(end + 1, expression.length());
 
-			if (isPrepared() && (((String) suffix).contains("--") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
+			if (isPrepared() && (((String) suffix).contains("--") || ((String) suffix).contains("/*") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
 				throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
 						+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-						+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- ！不允许多余的空格！");
+						+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
 			}
 
 			String[] ckeys = StringUtil.split(expression.substring(start + 1, end));
@@ -1056,10 +1056,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
 					}
 					
-					if (suffix.isEmpty() == false && (((String) suffix).contains("--") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
+					if (suffix.isEmpty() == false && (((String) suffix).contains("--") || ((String) suffix).contains("/*") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
 						throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
 								+ "预编译模式下 @column:\"column?value;function(arg0,arg1,...)?value...\""
-								+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- ！不允许多余的空格！");
+								+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
 					}
 
 					String origin = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
