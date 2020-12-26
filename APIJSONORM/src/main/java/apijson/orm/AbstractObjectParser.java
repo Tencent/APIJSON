@@ -568,6 +568,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		int maxUpdateCount = parser.getMaxUpdateCount();
 
 		String idKey = parser.createSQLConfig().getIdKey(); //Table[]: [{}] arrayConfig 为 null
+		boolean isNeedVerifyContent = parser.isNeedVerifyContent();
+		
 		for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
 			//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
 			JSONObject item;
@@ -580,13 +582,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			JSONRequest req = new JSONRequest(childKey, item);
 
 			//parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
-			JSONObject result = (JSONObject) onChildParse(0, "" + i, parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser));
+			JSONObject result = (JSONObject) onChildParse(0, "" + i, isNeedVerifyContent == false ? req : parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser));
 			result = result.getJSONObject(childKey);
 			//
 			boolean success = JSONResponse.isSuccess(result);
 			int count = result == null ? null : result.getIntValue(JSONResponse.KEY_COUNT);
 
-			if (success == false || count != 1) { //如果 code = 200 但 count != 1，不能算成功，掩盖了错误为不好排查问题
+			if (success == false || count != 1) { //如果 code = 200 但 count != 1，不能算成功，掩盖了错误不好排查问题
 				throw new ServerException("批量新增/修改失败！" + key + "/" +  i + "：" + (success ? "成功但 count != 1 ！" : (result == null ? "null" : result.getString(JSONResponse.KEY_MSG))));
 			}
 

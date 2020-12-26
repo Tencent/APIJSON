@@ -34,11 +34,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.regex.Pattern;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -83,9 +85,17 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 	// <TableName, <METHOD, allowRoles>>
 	// <User, <GET, [OWNER, ADMIN]>>
+	@NotNull
 	public static final Map<String, Map<RequestMethod, RequestRole[]>> SYSTEM_ACCESS_MAP;
+	@NotNull
 	public static final Map<String, Map<RequestMethod, RequestRole[]>> ACCESS_MAP;
+	
+	// <method tag, <version, Request>>
+	// <PUT Comment, <1, { "method":"PUT", "tag":"Comment", "structure":{ "MUST":"id"... }... }>>
+	@NotNull
+	public static final Map<String, SortedMap<Integer, JSONObject>> REQUEST_MAP;
 
+	@NotNull
 	public static final Map<String, Pattern> COMPILE_MAP;
 	static {
 		SYSTEM_ACCESS_MAP = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
@@ -110,6 +120,8 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		}
 
 		ACCESS_MAP = new HashMap<>(SYSTEM_ACCESS_MAP);
+		
+		REQUEST_MAP = new HashMap<>(ACCESS_MAP.size()*6);  // 单个与批量增删改
 
 		COMPILE_MAP = new HashMap<String, Pattern>();
 	}
@@ -689,7 +701,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 				+ "\n response = \n" + JSON.toJSONString(response));
 
 		if (target == null || response == null) {// || target.isEmpty() {
-			Log.i(TAG, "verifyRequest  target == null || response == null >> return response;");
+			Log.i(TAG, "verifyResponse  target == null || response == null >> return response;");
 			return response;
 		}
 
@@ -1424,5 +1436,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		}
 	}
 
+	public static String getCacheKeyForRequest(String method, String tag) {
+		return method + " " + tag;
+	}
+	
 
 }

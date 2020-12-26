@@ -74,7 +74,7 @@ public interface Parser<T> {
 	
 	JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception;
 
-	JSONObject getStructure(String table, String key, String value, int version) throws Exception;
+	JSONObject getStructure(String table, String method, String tag, int version) throws Exception;
 
 
 

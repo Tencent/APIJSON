@@ -14,12 +14,15 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.TimeoutException;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -472,7 +475,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		JSONObject object = null;
 		String error = "";
 		try {
-			object = getStructure("Request", JSONRequest.KEY_TAG, tag, version);
+			object = getStructure("Request", method.name(), tag, version);
 		} catch (Exception e) {
 			error = e.getMessage();
 		}
@@ -665,34 +668,91 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 	/**获取Request或Response内指定JSON结构
 	 * @param table
-	 * @param key
-	 * @param value
+	 * @param method
+	 * @param tag
 	 * @param version
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public JSONObject getStructure(@NotNull String table, String key, String value, int version) throws Exception  {
-		//获取指定的JSON结构 <<<<<<<<<<<<<<
-		SQLConfig config = createSQLConfig().setMethod(GET).setTable(table);
-		config.setPrepared(false);
-		config.setColumn(Arrays.asList("structure"));
+	public JSONObject getStructure(@NotNull String table, String method, String tag, int version) throws Exception  {
+		// TODO 目前只使用 Request 而不使用 Response，所以这里写死用 REQUEST_MAP，以后可能 Response 表也会与 Request 表合并，用字段来区分
+		String cacheKey = AbstractVerifier.getCacheKeyForRequest(method, tag);
+		SortedMap<Integer, JSONObject> versionedMap = AbstractVerifier.REQUEST_MAP.get(cacheKey);
+		
+		JSONObject result = versionedMap == null ? null : versionedMap.get(Integer.valueOf(version));
+		if (result == null) {  // version <= 0 时使用最新，version > 0 时使用 > version 的最接近版本（最小版本）
+			Set<Entry<Integer, JSONObject>> set = versionedMap == null ? null : versionedMap.entrySet();
+			
+			if (set != null && set.isEmpty() == false) {
+				Entry<Integer, JSONObject> maxEntry = null;
+				
+				for (Entry<Integer, JSONObject> entry : set) {
+					if (entry == null || entry.getKey() == null || entry.getValue() == null) {
+						continue;
+					}
 
-		Map<String, Object> where = new HashMap<String, Object>();
-		where.put("method", requestMethod.name());
-		if (key != null) {
-			where.put(key, value);
-		}
-		if (version > 0) {
-			where.put(JSONRequest.KEY_VERSION + "{}", ">=" + version);
-		}
-		config.setWhere(where);
-		config.setOrder(JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
-		config.setCount(1);
+					if (version <= 0 || version == entry.getKey()) {  // 这里应该不会出现相等，因为上面 versionedMap.get(Integer.valueOf(version))
+						maxEntry = entry;
+						break;
+					}
 
-		//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
-		JSONObject result = getSQLExecutor().execute(config, false);
-		return getJSONObject(result, "structure");//解决返回值套了一层 "structure":{}
+					if (entry.getKey() < version) {
+						break;
+					}
+					
+					maxEntry = entry;
+				}
+				
+				result = maxEntry == null ? null : maxEntry.getValue();
+			}
+			
+			if (result != null) {  // 加快下次查询，查到值的话组合情况其实是有限的，不属于恶意请求
+				if (versionedMap == null) {
+					versionedMap = new TreeMap<>(new Comparator<Integer>() {
+
+						@Override
+						public int compare(Integer o1, Integer o2) {
+							return o2 == null ? -1 : o2.compareTo(o1);  // 降序
+						}
+					});
+				}
+				
+				versionedMap.put(Integer.valueOf(version), result);
+				AbstractVerifier.REQUEST_MAP.put(cacheKey, versionedMap);
+			}
+		}
+		
+		if (result == null) {
+			if (AbstractVerifier.REQUEST_MAP.isEmpty() == false) {
+				return null;  // 已使用 REQUEST_MAP 缓存全部，但没查到
+			}
+			
+			//获取指定的JSON结构 <<<<<<<<<<<<<<
+			SQLConfig config = createSQLConfig().setMethod(GET).setTable(table);
+			config.setPrepared(false);
+			config.setColumn(Arrays.asList("structure"));
+
+			Map<String, Object> where = new HashMap<String, Object>();
+			where.put("method", method);
+			where.put(JSONRequest.KEY_TAG, tag);
+			
+			if (version > 0) {
+				where.put(JSONRequest.KEY_VERSION + "{}", ">=" + version);
+			}
+			config.setWhere(where);
+			config.setOrder(JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
+			config.setCount(1);
+
+			//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
+			result = getSQLExecutor().execute(config, false);
+			
+			// version, method, tag 组合情况太多了，JDK 里又没有 LRUCache，所以要么启动时一次性缓存全部后面只用缓存，要么每次都查数据库
+			//			versionedMap.put(Integer.valueOf(version), result);
+			//			AbstractVerifier.REQUEST_MAP.put(cacheKey, versionedMap);
+		}
+		
+		return getJSONObject(result, "structure"); //解决返回值套了一层 "structure":{}
 	}
 
 
