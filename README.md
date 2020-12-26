@@ -284,6 +284,8 @@ QQ 技术群： 734652054（新）、607020115（旧）
 
 [3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
+[APIJSON对接HTAP数据库TiDB](https://asktug.com/t/htap-tidb/395)
+
 [APIJSON简单部署和使用](https://blog.csdn.net/m450744192/article/details/108462611)
 
 [学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
