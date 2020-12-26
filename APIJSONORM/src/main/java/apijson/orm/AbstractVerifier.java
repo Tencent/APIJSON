@@ -863,7 +863,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			if ("!".equals(refuse)) {//所有非 must，改成 !must 更好
 				for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
 					if (key != null && key.startsWith("@") == false
-							&& necessaryList.contains(key) == false && objKeySet.contains(key) == false) {
+							&& mustList.contains(key) == false && objKeySet.contains(key) == false) {
 						refuseList.add(key);
 					}
 				}
