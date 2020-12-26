@@ -957,11 +957,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 					method = expression.substring(0, start);
 					boolean distinct = i <= 0 && method.startsWith(PREFFIX_DISTINCT);
-					if (StringUtil.isName(distinct ? method.substring(PREFFIX_DISTINCT.length()) : method) == false) {
+					String fun = distinct ? method.substring(PREFFIX_DISTINCT.length()) : method;
+					
+					if (fun.isEmpty() == false && StringUtil.isName(fun) == false) {
 						throw new IllegalArgumentException("字符 " + method + " 不合法！"
 								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 								+ " 中SQL函数名 function 必须符合正则表达式 ^[0-9a-zA-Z_]+$ ！");
 					}
+					
 				}
 
 				boolean isColumn = start < 0;
@@ -1043,23 +1046,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 				else {
 					String suffix = expression.substring(end + 1, expression.length()); //:contactCount
-					String alias = suffix.startsWith(":") ? suffix.substring(1) : null; //contactCount
-
-					if (StringUtil.isEmpty(alias, true)) {
-						if (suffix.isEmpty() == false) {
-							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
-									+ " function(arg0,arg1,...):alias 中 alias 如果有就必须是1个单词！并且不要有多余的空格！");
-						}
-					} 
-					else {
-						if (StringUtil.isEmpty(alias, true) == false && StringUtil.isName(alias) == false) {
-							throw new IllegalArgumentException("GET请求: 预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
-									+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
-						}
+					int index = suffix.lastIndexOf(":");
+					String alias = index < 0 ? "" : suffix.substring(index + 1); //contactCount
+					suffix = index < 0 ? suffix : suffix.substring(0, index);
+					
+					if (alias.isEmpty() == false && StringUtil.isName(alias) == false) {
+						throw new IllegalArgumentException("字符串 " + alias + " 不合法！"
+								+ "预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
+								+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
+					}
+					
+					if (suffix.isEmpty() == false && (((String) suffix).contains("--") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
+						throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
+								+ "预编译模式下 @column:\"column?value;function(arg0,arg1,...)?value...\""
+								+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- ！不允许多余的空格！");
 					}
 
-
-					String origin = method + "(" + StringUtil.getString(ckeys) + ")";
+					String origin = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
 					//					if (isKeyPrefix()) {
 					//						keys[i] = origin + " AS " + quote + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? method : alias) + quote;
 					//					}
