@@ -222,36 +222,42 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					key = entry.getKey();
 
 					try {
-						if (value instanceof JSONObject && key.startsWith("@") == false && key.endsWith("@") == false) { //JSONObject，往下一级提取
-							if (childMap != null) {//添加到childMap，最后再解析
+						if (key.startsWith("@") || key.endsWith("@")) {
+							if (onParse(key, value) == false) {
+								invalidate();
+							}
+						}
+						else if (value instanceof JSONObject) {  // JSONObject，往下一级提取
+							if (childMap != null) {  // 添加到childMap，最后再解析
 								childMap.put(key, (JSONObject)value);
 							}
-							else { //直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
+							else {  // 直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
 								response.put(key, onChildParse(index, key, (JSONObject)value));
 								index ++;
 							}
 						}
-						else if ((method == POST || method == PUT) && value instanceof JSONArray && JSONRequest.isTableArray(key)) { //JSONArray，批量新增或修改，往下一级提取
+						else if ((method == POST || method == PUT) && value instanceof JSONArray
+								&& JSONRequest.isTableArray(key)) {  // JSONArray，批量新增或修改，往下一级提取
 							onTableArrayParse(key, (JSONArray) value);
 						}
 						else if (method == PUT && value instanceof JSONArray
-								&& (whereList == null || whereList.contains(key) == false)) { //PUT JSONArray
+								&& (whereList == null || whereList.contains(key) == false)) {  // PUT JSONArray
 							onPUTArrayParse(key, (JSONArray) value);
 						}
-						else {//JSONArray或其它Object，直接填充
+						else {  // JSONArray或其它Object，直接填充
 							if (onParse(key, value) == false) {
 								invalidate();
 							}
 						}
 					} catch (Exception e) {
 						if (tri == false) {
-							throw e;//不忽略错误，抛异常
+							throw e;  // 不忽略错误，抛异常
 						}
-						invalidate();//忽略错误，还原request
+						invalidate();  // 忽略错误，还原request
 					}
 				}
 
-				//非Table内的函数会被滞后在onChildParse后调用！ onFunctionResponse("-");
+				// 非Table内的函数会被滞后在onChildParse后调用！ onFunctionResponse("-");
 			}
 
 			if (isTable) {
