@@ -13,6 +13,8 @@
 
 ### [APIJSON App 演示](/README.md#apijson-app-%E6%BC%94%E7%A4%BA)
 
+### [APIJSON 分享演讲](/README.md#apijson-%E5%88%86%E4%BA%AB%E6%BC%94%E8%AE%B2)
+
 ### [为什么选择 APIJSON？](/README.md#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9-apijson)
 <br />
 
