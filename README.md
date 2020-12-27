@@ -132,7 +132,7 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 <br />
 
 ### APIJSON 分享演讲
-https://github.com/TommyLemon/StaticResources/tree/master/APIJSON/Share/GiteeGVPMeetup2020
+https://github.com/TommyLemon/StaticResources/tree/master/APIJSON/Share/GiteeGVPMeetup2020 <br />
 <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/Share/GiteeGVPMeetup2020/APIJSON_summary_GiteeGVPMeetup2020.jpg" width="360" />
 
 <br />
