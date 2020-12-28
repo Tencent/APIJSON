@@ -179,7 +179,7 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
 
 ### 注意事项
 APIJSON 表名、字段名、关键词及对应的值等基本都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感， <br />
-大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](https://github.com/Tencent/APIJSON/blob/master/Document.md#3) 操作
+大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](https://github.com/Tencent/APIJSON/blob/master/Document.md#3) 来调用 API
 [#181](https://github.com/Tencent/APIJSON/issues/181)
 <br />
 <br />
