@@ -174,7 +174,13 @@ https://github.com/Tencent/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
 <br />
 其它问题见 Closed Issues <br />
-https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed <br />
+https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
+<br />
+
+### 注意事项
+APIJSON 表名、字段名、关键词及对应的值等全都是大小写敏感、空格敏感、换行敏感，大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](https://github.com/Tencent/APIJSON/blob/master/Document.md#3) 操作
+[#181](https://github.com/Tencent/APIJSON/issues/181) [#181](https://github.com/Tencent/APIJSON/issues/181)
+<br />
 <br />
 <br />
 <br />
