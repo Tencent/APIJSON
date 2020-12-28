@@ -172,6 +172,15 @@ https://github.com/Tencent/APIJSON/issues/12
 在 Request 表配置校验规则 structure，提供 MUST、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 <br />
 https://github.com/Tencent/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 
+#### 4.如何 OR 连接不同 key 对应的条件？
+用对象关键词 @combine，例如 "@combine":"name~,tag~" <br />
+https://github.com/Tencent/APIJSON/issues/107
+
+#### 5.登录后 增删改 报错未登录？
+如果是自己的网页、小程序、客户端这样报错，一般是因为没有存取 Cookie，需要在登录成功后保存 Cookie 并在调其它接口时带上；<br />
+如果使用网页工具测试报错，则很可能是 Chrome 80+ 强制 same-site Cookie 的策略导致，可以改用 Postman 或修改 Chrome 设置 <br />
+https://github.com/Tencent/APIJSON/issues/166
+
 <br />
 其它问题见 Closed Issues <br />
 https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aclosed
