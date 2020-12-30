@@ -136,6 +136,8 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSON/Share/GiteeGVP
 https://my.oschina.net/u/4570368/blog/4818203 <br />
 https://my.oschina.net/gitosc/blog/4864607 <br />
 <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/Share/GiteeGVPMeetup2020/APIJSON_summary_GiteeGVPMeetup2020.jpg" width="360" />
+演讲录播视频
+https://www.bilibili.com/video/BV1Tv411t74v?p=4
 
 <br />
 
