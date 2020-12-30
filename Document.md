@@ -25,7 +25,7 @@
 }
 </code></pre>
 
-[点击这里测试](http://apijson.cn:8080/get/{"User":{}})
+[点击这里测试](http://apijson.cn:8080/get/{"User":{"id":38710}})
 
 返回：
 <pre><code class="language-json">{
