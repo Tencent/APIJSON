@@ -213,7 +213,8 @@ https://github.com/Tencent/APIJSON/issues/36
 
 
 ### 使用登记
-如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要：https://github.com/Tencent/APIJSON/issues/187 （按登记顺序排列）
+如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(按登记顺序排列)：<br />
+https://github.com/Tencent/APIJSON/issues/187 
 <div style="float:left">
   <a href="http://www.transsion.com"><img src="http://apijson.org/images/www.transsion.com.jpeg" height="90"></a>
   <a href="http://shebaochina.com"><img src="http://apijson.org/images/shebaochina.com.png" height="90"></a>
