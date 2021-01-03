@@ -96,9 +96,9 @@ $ git rebase <name>/<branch>
 
 Commit 信息请遵循 [Commit 消息约定](./CONTRIBUTING_COMMIT.md)，以便可以自动生成 `CHANGELOG` 。具体格式请参考 Commit 文档规范。
 
-#### 详细的图文步骤可参考
+#### 详细的图文步骤可参考以下任意一篇
 GitHub - 对项目做出贡献 <br/>
 https://www.jianshu.com/p/00cf29d2d66c
-<br/>
+<br/><br/>
 如何在 Github 上给别人的项目贡献代码 <br/>
 https://git-scm.com/book/zh/v2/GitHub-%E5%AF%B9%E9%A1%B9%E7%9B%AE%E5%81%9A%E5%87%BA%E8%B4%A1%E7%8C%AE
