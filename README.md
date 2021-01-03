@@ -145,7 +145,7 @@ https://www.bilibili.com/video/BV1Tv411t74v?p=4
 ### 为什么选择 APIJSON？
 前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
 https://github.com/Tencent/APIJSON/wiki
-<br/><br/><br/><br/><br/>
+
 * **解决十大痛点** (APIJSON 大幅提振开发效率、强力杜绝联调扯皮、巧妙规避文档缺陷、非常节省流量带宽 等)
 * **开发提速巨大** (CRUD 零代码热更新自动化，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
 * **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
@@ -162,7 +162,7 @@ https://github.com/Tencent/APIJSON/wiki
 * **兼容各种项目** (对各类 Web 框架集成友好且提供 SpringBoot, JFinal 的 Demo，协议不限 HTTP，与其它库无冲突)
 * **工程轻量小巧** (仅依赖 fastjson，Jar 仅 280KB，Java 文件仅 59 个共 13719 行代码，例如 APIJSONORM 4.3.1)
 * **多年持续迭代** (自 2016 年开源至今已连续维护 4 年，累计 2000+ Commits、70+ Releases，不断更新迭代中...)
-<br/><br/><br/><br/><br/>
+
 
 ### 常见问题
 #### 1.如何定制业务逻辑？
