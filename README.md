@@ -225,8 +225,8 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="http://xm.juhu.com"><img src="http://xm.juhu.com/img/logo.png" height="90"></a>
   <a href="https://www.shulian8.com"><img src="http://apijson.org/images/www.shulian8.com.png" height="90"></a>
   <a href="http://www.aipaipai-inc.com"><img src="http://apijson.org/images/www.aipaipai-inc.com.png" height="90"></a>
-  <a href="http://www.hec-bang.com"><img src="http://apijson.org/images/www.hec-bang.com.png" height="90"></a>
   <a href="http://www.hngtrust.com"><img src="http://www.hngtrust.com/r/cms/www/default/images/logo.png" height="90"></a>
+  <a href="http://www.hec-bang.com"><img src="http://apijson.org/images/www.hec-bang.com.png" height="90"></a>
 <br />
 
 
