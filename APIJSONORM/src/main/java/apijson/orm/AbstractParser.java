@@ -709,12 +709,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			
 			if (result != null) {  // 加快下次查询，查到值的话组合情况其实是有限的，不属于恶意请求
 				if (versionedMap == null) {
-					versionedMap = new TreeMap<>(new Comparator<Integer>() {
-
-						@Override
-						public int compare(Integer o1, Integer o2) {
-							return o2 == null ? -1 : o2.compareTo(o1);  // 降序
-						}
+					versionedMap = new TreeMap<>((o1, o2) -> {
+						return o2 == null ? -1 : o2.compareTo(o1);  // 降序
 					});
 				}
 				

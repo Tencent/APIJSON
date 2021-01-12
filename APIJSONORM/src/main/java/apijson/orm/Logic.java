@@ -108,12 +108,16 @@ public class Logic {
 	public static int getType(String logicChar) {
 		int type = -1;
 		if (logicChar != null && logicChar.length() == 1) {
-			if ("|".equals(logicChar)) {
-				type = 0;
-			} else if ("&".equals(logicChar)) {
-				type = 1;
-			} else if ("!".equals(logicChar)) {
-				type = 2;
+			switch (logicChar) {
+				case "|":
+					type = 0;
+					break;
+				case "&":
+					type = 1;
+					break;
+				case "!":
+					type = 2;
+					break;
 			}
 		}
 		return type;
