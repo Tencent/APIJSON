@@ -211,6 +211,8 @@ https://github.com/Tencent/APIJSON/issues/36
 测试及自动生成代码工具<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
+### 开源许可
+使用 [Apache License 2.0](/LICENSE)，对 公司、团队、个人 等 商用、非商用 都自由免费且非常友好，请放心使用和登记
 
 ### 使用登记
 如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(按登记顺序排列)：<br />
