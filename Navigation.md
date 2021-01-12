@@ -35,6 +35,8 @@
 
 ### [下载客户端 App](/README.md#%E4%B8%8B%E8%BD%BD%E5%AE%A2%E6%88%B7%E7%AB%AF-app)
 
+### [开源许可](/README.md#%E5%BC%80%E6%BA%90%E8%AE%B8%E5%8F%AF)
+
 ### [使用登记](/README.md#%E4%BD%BF%E7%94%A8%E7%99%BB%E8%AE%B0)
 
 ### [贡献者们](/README.md#%E8%B4%A1%E7%8C%AE%E8%80%85%E4%BB%AC)
