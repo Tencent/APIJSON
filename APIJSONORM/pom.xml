@@ -5,12 +5,11 @@
 
 	<groupId>apijson.orm</groupId>
 	<artifactId>apijson-orm</artifactId>
-	<version>4.4.8</version>
+	<version>4.5.1</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>
 	<description>APIJSON ORM Library</description>
-
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,10 +18,11 @@
 	</properties>
 
 	<dependencies>
+		<!-- 1.2.75 会导致编译报错，且忽略错误后启动报错找不到主类 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.75</version>
+			<version>1.2.74</version>
 		</dependency>
 	</dependencies>
 
