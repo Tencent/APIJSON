@@ -82,6 +82,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	private static final String TAG = "AbstractVerifier";
 
 
+	// 共享 STRUCTURE_MAP 则不能 remove 等做任何变更，否则在并发情况下可能会出错，加锁效率又低，所以这里改为忽略对应的 key
+	public static final List<String> OPERATION_KEY_LIST;
+
 	// <TableName, <METHOD, allowRoles>>
 	// <User, <GET, [OWNER, ADMIN]>>
 	@NotNull
@@ -97,6 +100,21 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	@NotNull
 	public static final Map<String, Pattern> COMPILE_MAP;
 	static {
+		OPERATION_KEY_LIST = new ArrayList<>();
+		OPERATION_KEY_LIST.add(TYPE.name());
+		OPERATION_KEY_LIST.add(VERIFY.name());
+		OPERATION_KEY_LIST.add(INSERT.name());
+		OPERATION_KEY_LIST.add(UPDATE.name());
+		OPERATION_KEY_LIST.add(REPLACE.name());
+		OPERATION_KEY_LIST.add(EXIST.name());
+		OPERATION_KEY_LIST.add(UNIQUE.name());
+		OPERATION_KEY_LIST.add(REMOVE.name());
+		OPERATION_KEY_LIST.add(MUST.name());
+		OPERATION_KEY_LIST.add(REFUSE.name());
+		OPERATION_KEY_LIST.add(NECESSARY.name());
+		OPERATION_KEY_LIST.add(DISALLOW.name());
+		
+		
 		SYSTEM_ACCESS_MAP = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
 
 		SYSTEM_ACCESS_MAP.put(Access.class.getSimpleName(), getAccessMap(Access.class.getAnnotation(MethodAccess.class)));
@@ -742,7 +760,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			return null;
 		}
 
-		//获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		// 获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONObject type = target.getJSONObject(TYPE.name());
 		JSONObject verify = target.getJSONObject(VERIFY.name());
 		JSONObject insert = target.getJSONObject(INSERT.name());
@@ -757,238 +775,204 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		String necessary = StringUtil.getNoBlankString(target.getString(NECESSARY.name()));
 		String disallow = StringUtil.getNoBlankString(target.getString(DISALLOW.name()));
 
-		target.remove(TYPE.name());
-		target.remove(VERIFY.name());
-		target.remove(INSERT.name());
-		target.remove(UPDATE.name());
-		target.remove(REPLACE.name());
 
-		target.remove(EXIST.name());
-		target.remove(UNIQUE.name());
-		target.remove(REMOVE.name());
-		target.remove(MUST.name());
-		target.remove(REFUSE.name());
-		target.remove(NECESSARY.name());
-		target.remove(DISALLOW.name());
-
-
-		try {  // 避免中间抛异常导致 target 未 put 进 remove 掉的键值对
-
-			//移除字段<<<<<<<<<<<<<<<<<<<
-			String[] removes = StringUtil.split(remove);
-			if (removes != null && removes.length > 0) {
-				for (String r : removes) {
-					real.remove(r);
-				}
+		// 移除字段<<<<<<<<<<<<<<<<<<<
+		String[] removes = StringUtil.split(remove);
+		if (removes != null && removes.length > 0) {
+			for (String r : removes) {
+				real.remove(r);
 			}
-			//移除字段>>>>>>>>>>>>>>>>>>>
+		}
+		// 移除字段>>>>>>>>>>>>>>>>>>>
 
-			//判断必要字段是否都有<<<<<<<<<<<<<<<<<<<
-			String[] musts = StringUtil.split(must);
-			List<String> mustList = musts == null ? new ArrayList<String>() : Arrays.asList(musts);
-			for (String s : mustList) {
-				if (real.get(s) == null) {//可能传null进来，这里还会通过 real.containsKey(s) == false) {
-					throw new IllegalArgumentException(method + "请求，" + name
-							+ " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
-				}
+		// 判断必要字段是否都有<<<<<<<<<<<<<<<<<<<
+		String[] musts = StringUtil.split(must);
+		List<String> mustList = musts == null ? new ArrayList<String>() : Arrays.asList(musts);
+		for (String s : mustList) {
+			if (real.get(s) == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
+				throw new IllegalArgumentException(method + "请求，" + name
+						+ " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
 			}
+		}
 
-			String[] necessarys = StringUtil.split(necessary);
-			List<String> necessaryList = necessarys == null ? new ArrayList<String>() : Arrays.asList(necessarys);
-			for (String s : necessaryList) {
-				if (real.get(s) == null) {//可能传null进来，这里还会通过 real.containsKey(s) == false) {
-					throw new IllegalArgumentException(method + "请求，" + name
-							+ " 里面不能缺少 " + s + " 等[" + necessary + "]内的任何字段！");
-				}
+		String[] necessarys = StringUtil.split(necessary);
+		List<String> necessaryList = necessarys == null ? new ArrayList<String>() : Arrays.asList(necessarys);
+		for (String s : necessaryList) {
+			if (real.get(s) == null) {//可能传null进来，这里还会通过 real.containsKey(s) == false) {
+				throw new IllegalArgumentException(method + "请求，" + name
+						+ " 里面不能缺少 " + s + " 等[" + necessary + "]内的任何字段！");
 			}
-			//判断必要字段是否都有>>>>>>>>>>>>>>>>>>>
+		}
+		//判断必要字段是否都有>>>>>>>>>>>>>>>>>>>
 
 
-			Set<String> objKeySet = new HashSet<String>(); //不能用tableKeySet，仅判断 Table:{} 会导致 key:{ Table:{} } 绕过判断
+		Set<String> objKeySet = new HashSet<String>(); //不能用tableKeySet，仅判断 Table:{} 会导致 key:{ Table:{} } 绕过判断
 
-			//解析内容<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		//解析内容<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-			Set<Entry<String, Object>> set = new LinkedHashSet<>(target.entrySet());
-			if (set.isEmpty() == false) {
+		Set<Entry<String, Object>> set = new LinkedHashSet<>(target.entrySet());
+		if (set.isEmpty() == false) {
 
-				String key;
-				Object tvalue;
-				Object rvalue;
-				for (Entry<String, Object> entry : set) {
-					key = entry == null ? null : entry.getKey();
-					if (key == null) {
-						continue;
-					}
-					tvalue = entry.getValue();
-					rvalue = real.get(key);
-					if (callback.onParse(key, tvalue, rvalue) == false) {
-						continue;
-					}
-
-					if (tvalue instanceof JSONObject) { //JSONObject，往下一级提取
-						if (rvalue != null && rvalue instanceof JSONObject == false) {
-							throw new UnsupportedDataTypeException(key + ":value 的value不合法！类型必须是 OBJECT ，结构为 {} !");
-						}
-						tvalue = callback.onParseJSONObject(key, (JSONObject) tvalue, (JSONObject) rvalue);
-
-						objKeySet.add(key);
-					} else if (tvalue instanceof JSONArray) { //JSONArray
-						if (rvalue != null && rvalue instanceof JSONArray == false) {
-							throw new UnsupportedDataTypeException(key + ":value 的value不合法！类型必须是 ARRAY ，结构为 [] !");
-						}
-						tvalue = callback.onParseJSONArray(key, (JSONArray) tvalue, (JSONArray) rvalue);
-
-						if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONRequest.isArrayKey(key)) {
-							objKeySet.add(key);
-						}
-					} else {//其它Object
-						tvalue = callback.onParseObject(key, tvalue, rvalue);
-					}
-
-					if (tvalue != null) {//可以在target中加上一些不需要客户端传的键值对
-						real.put(key, tvalue);
-					}
+			String key;
+			Object tvalue;
+			Object rvalue;
+			for (Entry<String, Object> entry : set) {
+				key = entry == null ? null : entry.getKey();
+				if (key == null || OPERATION_KEY_LIST.contains(key)) {
+					continue;
 				}
-
-			}
-
-			//解析内容>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-			Set<String> rkset = real.keySet(); //解析内容并没有改变rkset
-
-			//解析不允许的字段<<<<<<<<<<<<<<<<<<<
-			List<String> refuseList = new ArrayList<String>();
-			if ("!".equals(refuse)) {//所有非 must，改成 !must 更好
-				for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
-					if (key != null && key.startsWith("@") == false
-							&& mustList.contains(key) == false && objKeySet.contains(key) == false) {
-						refuseList.add(key);
-					}
-				}
-			} else {
-				String[] refuses = StringUtil.split(refuse);
-				if (refuses != null && refuses.length > 0) {
-					refuseList.addAll(Arrays.asList(refuses));
-				}
-			}
-
-			List<String> disallowList = new ArrayList<String>();
-			if ("!".equals(disallow)) {//所有非necessary，改成 !necessary 更好
-				for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
-					if (key != null && key.startsWith("@") == false
-							&& necessaryList.contains(key) == false && objKeySet.contains(key) == false) {
-						disallowList.add(key);
-					}
-				}
-			} else {
-				String[] disallows = StringUtil.split(disallow);
-				if (disallows != null && disallows.length > 0) {
-					disallowList.addAll(Arrays.asList(disallows));
-				}
-			}
-			//解析不允许的字段>>>>>>>>>>>>>>>>>>>
-
-
-			//判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
-			for (String rk : rkset) {
-				if (refuseList.contains(rk)) { //不允许的字段
-					throw new IllegalArgumentException(method + "请求，" + name
-							+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(refuseList) + "内的任何字段！");
-				}
-				if (disallowList.contains(rk)) { //不允许的字段
-					throw new IllegalArgumentException(method + "请求，" + name
-							+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(disallowList) + "内的任何字段！");
-				}
-
-				if (rk == null) { //无效的key
-					real.remove(rk);
+				tvalue = entry.getValue();
+				rvalue = real.get(key);
+				if (callback.onParse(key, tvalue, rvalue) == false) {
 					continue;
 				}
 
-				Object rv = real.get(rk);
-
-				//不允许传远程函数，只能后端配置
-				if (rk.endsWith("()") && rv instanceof String) {
-					throw new UnsupportedOperationException(method + " 请求，" + rk + " 不合法！非开放请求不允许传远程函数 key():\"fun()\" ！");
-				}
-
-				//不在target内的 key:{}
-				if (rk.startsWith("@") == false && objKeySet.contains(rk) == false) {
-					if (rv instanceof JSONObject) {
-						throw new UnsupportedOperationException(method + " 请求，" +name + " 里面不允许传 " + rk + ":{} ！");
+				if (tvalue instanceof JSONObject) { //JSONObject，往下一级提取
+					if (rvalue != null && rvalue instanceof JSONObject == false) {
+						throw new UnsupportedDataTypeException(key + ":value 的value不合法！类型必须是 OBJECT ，结构为 {} !");
 					}
-					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && rv instanceof JSONArray && JSONRequest.isArrayKey(rk)) {
-						throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 " + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
+					tvalue = callback.onParseJSONObject(key, (JSONObject) tvalue, (JSONObject) rvalue);
+
+					objKeySet.add(key);
+				} else if (tvalue instanceof JSONArray) { //JSONArray
+					if (rvalue != null && rvalue instanceof JSONArray == false) {
+						throw new UnsupportedDataTypeException(key + ":value 的value不合法！类型必须是 ARRAY ，结构为 [] !");
 					}
+					tvalue = callback.onParseJSONArray(key, (JSONArray) tvalue, (JSONArray) rvalue);
+
+					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONRequest.isArrayKey(key)) {
+						objKeySet.add(key);
+					}
+				} else {//其它Object
+					tvalue = callback.onParseObject(key, tvalue, rvalue);
+				}
+
+				if (tvalue != null) {//可以在target中加上一些不需要客户端传的键值对
+					real.put(key, tvalue);
 				}
 			}
-			//判断不允许传的key>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-			//校验与修改Request<<<<<<<<<<<<<<<<<
-			//在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
-			real = operate(TYPE, type, real, creator);
-			real = operate(VERIFY, verify, real, creator);
-			real = operate(INSERT, insert, real, creator);
-			real = operate(UPDATE, update, real, creator);
-			real = operate(REPLACE, replace, real, creator);
-			//校验与修改Request>>>>>>>>>>>>>>>>>
-
-
-			String db = real.getString(apijson.JSONObject.KEY_DATABASE);
-			String sh = real.getString(apijson.JSONObject.KEY_SCHEMA);
-			if (StringUtil.isEmpty(db, false)) {
-				db = database;
-			}
-			if (StringUtil.isEmpty(sh, false)) {
-				sh = schema;
-			}
-			String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, name);
-			String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
-
-			//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
-			//校验存在<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
-			String[] exists = StringUtil.split(exist);
-			if (exists != null && exists.length > 0) {
-				long exceptId = real.getLongValue(finalIdKey);
-				for (String e : exists) {
-					verifyExist(name, e, real.get(e), exceptId, creator);
-				}
-			}
-			//校验存在>>>>>>>>>>>>>>>>>>>
-
-			//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
-			//校验重复<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
-			String[] uniques = StringUtil.split(unique);
-			if (uniques != null && uniques.length > 0) {
-				long exceptId = real.getLongValue(finalIdKey);
-				for (String u : uniques) {
-					verifyRepeat(name, u, real.get(u), exceptId, finalIdKey, creator);
-				}
-			}
-			//校验重复>>>>>>>>>>>>>>>>>>>
 
 		}
-		finally {
-			//还原 <<<<<<<<<<
-			target.put(TYPE.name(), type);
-			target.put(VERIFY.name(), verify);
-			target.put(INSERT.name(), insert);
-			target.put(UPDATE.name(), update);
-			target.put(REPLACE.name(), replace);
 
-			target.put(EXIST.name(), exist);
-			target.put(UNIQUE.name(), unique);
-			target.put(REMOVE.name(), remove);
-			target.put(MUST.name(), must);
-			target.put(REFUSE.name(), refuse);
-			target.put(NECESSARY.name(), necessary);
-			target.put(DISALLOW.name(), disallow);
-			//还原 >>>>>>>>>>
+		//解析内容>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+		Set<String> rkset = real.keySet(); //解析内容并没有改变rkset
+
+		//解析不允许的字段<<<<<<<<<<<<<<<<<<<
+		List<String> refuseList = new ArrayList<String>();
+		if ("!".equals(refuse)) {//所有非 must，改成 !must 更好
+			for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
+				if (key != null && key.startsWith("@") == false
+						&& mustList.contains(key) == false && objKeySet.contains(key) == false) {
+					refuseList.add(key);
+				}
+			}
+		} else {
+			String[] refuses = StringUtil.split(refuse);
+			if (refuses != null && refuses.length > 0) {
+				refuseList.addAll(Arrays.asList(refuses));
+			}
 		}
+
+		List<String> disallowList = new ArrayList<String>();
+		if ("!".equals(disallow)) {//所有非necessary，改成 !necessary 更好
+			for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
+				if (key != null && key.startsWith("@") == false
+						&& necessaryList.contains(key) == false && objKeySet.contains(key) == false) {
+					disallowList.add(key);
+				}
+			}
+		} else {
+			String[] disallows = StringUtil.split(disallow);
+			if (disallows != null && disallows.length > 0) {
+				disallowList.addAll(Arrays.asList(disallows));
+			}
+		}
+		//解析不允许的字段>>>>>>>>>>>>>>>>>>>
+
+
+		//判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
+		for (String rk : rkset) {
+			if (refuseList.contains(rk)) { //不允许的字段
+				throw new IllegalArgumentException(method + "请求，" + name
+						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(refuseList) + "内的任何字段！");
+			}
+			if (disallowList.contains(rk)) { //不允许的字段
+				throw new IllegalArgumentException(method + "请求，" + name
+						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(disallowList) + "内的任何字段！");
+			}
+
+			if (rk == null) { //无效的key
+				real.remove(rk);
+				continue;
+			}
+
+			Object rv = real.get(rk);
+
+			//不允许传远程函数，只能后端配置
+			if (rk.endsWith("()") && rv instanceof String) {
+				throw new UnsupportedOperationException(method + " 请求，" + rk + " 不合法！非开放请求不允许传远程函数 key():\"fun()\" ！");
+			}
+
+			//不在target内的 key:{}
+			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false) {
+				if (rv instanceof JSONObject) {
+					throw new UnsupportedOperationException(method + " 请求，" +name + " 里面不允许传 " + rk + ":{} ！");
+				}
+				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && rv instanceof JSONArray && JSONRequest.isArrayKey(rk)) {
+					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 " + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
+				}
+			}
+		}
+		//判断不允许传的key>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+		//校验与修改Request<<<<<<<<<<<<<<<<<
+		//在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
+		real = operate(TYPE, type, real, creator);
+		real = operate(VERIFY, verify, real, creator);
+		real = operate(INSERT, insert, real, creator);
+		real = operate(UPDATE, update, real, creator);
+		real = operate(REPLACE, replace, real, creator);
+		//校验与修改Request>>>>>>>>>>>>>>>>>
+
+
+		String db = real.getString(apijson.JSONObject.KEY_DATABASE);
+		String sh = real.getString(apijson.JSONObject.KEY_SCHEMA);
+		if (StringUtil.isEmpty(db, false)) {
+			db = database;
+		}
+		if (StringUtil.isEmpty(sh, false)) {
+			sh = schema;
+		}
+		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, name);
+		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
+
+		//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
+		//校验存在<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
+		String[] exists = StringUtil.split(exist);
+		if (exists != null && exists.length > 0) {
+			long exceptId = real.getLongValue(finalIdKey);
+			for (String e : exists) {
+				verifyExist(name, e, real.get(e), exceptId, creator);
+			}
+		}
+		//校验存在>>>>>>>>>>>>>>>>>>>
+
+		//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
+		//校验重复<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
+		String[] uniques = StringUtil.split(unique);
+		if (uniques != null && uniques.length > 0) {
+			long exceptId = real.getLongValue(finalIdKey);
+			for (String u : uniques) {
+				verifyRepeat(name, u, real.get(u), exceptId, finalIdKey, creator);
+			}
+		}
+		//校验重复>>>>>>>>>>>>>>>>>>>
+
 
 		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
 		return real;
@@ -1019,9 +1003,10 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 		for (Entry<String, Object> e : set) {
 			tk = e == null ? null : e.getKey();
-			if (tk == null) {
+			if (tk == null || OPERATION_KEY_LIST.contains(tk)) {
 				continue;
 			}
+			
 			tv = e.getValue();
 
 			if (opt == TYPE) {
