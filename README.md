@@ -290,7 +290,11 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
-QQ 技术群： 734652054（新）、607020115（旧）
+<b >QQ 技术群</b>： 734652054（新）、607020115（旧）
+
+如果你为 APIJSON [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/94)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940) 或 [登记了企业或项目](https://github.com/Tencent/APIJSON/issues/187)， <br >
+<b >贡献者微信群</b>，注意联系 LonelyExplorer，加好友描述中附上贡献链接，谢谢
+
 
 ### 相关推荐
 [APIJSON, 让接口和文档见鬼去吧！](https://my.oschina.net/tommylemon/blog/805459)
