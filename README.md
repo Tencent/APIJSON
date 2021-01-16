@@ -292,7 +292,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 <b >QQ 技术群</b>： 734652054（新）、607020115（旧）
 
-如果你为 APIJSON [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940) 或 [登记了你的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 <br >
+如果你为 APIJSON [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， 或 [登记了你的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 <br >
 <b >贡献者微信群</b>，注意联系 LonelyExplorer，加好友描述中附上贡献链接，谢谢
 
 
