@@ -19,6 +19,7 @@
 - [CoolGeo2016](https://github.com/CoolGeo2016)
 - [1906522096](https://github.com/1906522096)
 - [github-ganyu](https://github.com/github-ganyu)
+- [sunxiaoguang](https://github.com/sunxiaoguang)
 
 #### 其中特别致谢: <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
