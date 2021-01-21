@@ -32,7 +32,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
   <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
   <a href="http://i.youku.com/apijson">视频教程</a>
-  <a href="http://apijson.org/api">在线体验</a>
+  <a href="http://apijson.cn/api">在线体验</a>
 </p>
 
 <p align="center" >
