@@ -311,6 +311,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON对接分布式HTAP数据库TiDB](https://asktug.com/t/htap-tidb/395)
 
+[apijson简单使用](https://www.cnblogs.com/greyzeng/p/14311995.html)
+
 [APIJSON简单部署和使用](https://blog.csdn.net/m450744192/article/details/108462611)
 
 [学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
