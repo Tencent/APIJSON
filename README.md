@@ -269,7 +269,7 @@ https://github.com/Tencent/APIJSON/issues/187
 </div>
 <br />
 
-还有为 APIJSON 扫描代码贡献 Bug 的 [奇安信代码卫士](https://github.com/QiAnXinCodeSafe) 和 [源伞科技](https://www.sourcebrella.com) 
+还有为 APIJSON 扫描代码贡献 Issue 的 [奇安信代码卫士](https://github.com/QiAnXinCodeSafe) 和 [源伞科技](https://www.sourcebrella.com) 
 <div style="float:left">
   <a href="https://github.com/QiAnXinCodeSafe" style="margin-right: 20px"><img src="https://avatars.githubusercontent.com/u/39950310?s=460&u=8c4ad8c2174ba78c0604614a6e2feced07521ce6&v=4"  height="90" ></a>
   <a href="https://www.sourcebrella.com" style="padding: 5px"><img src="https://www.sourcebrella.com/static/img/sb_logo_zh.svg"  height="81" ></a>
