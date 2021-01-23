@@ -177,7 +177,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			functionMap = null;//must init
 			childMap = null;//must init
 
-			Set<Entry<String, Object>> set = new LinkedHashSet<Entry<String, Object>>(request.entrySet());
+			Set<Entry<String, Object>> set = request.isEmpty() ? null : new LinkedHashSet<Entry<String, Object>>(request.entrySet());
 			if (set != null && set.isEmpty() == false) {//判断换取少几个变量的初始化是否值得？
 				if (isTable) {//非Table下必须保证原有顺序！否则 count,page 会丢, total@:"/[]/total" 会在[]:{}前执行！
 					customMap = new LinkedHashMap<String, Object>();
@@ -261,17 +261,17 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			}
 
 			if (isTable) {
-				if (sqlRequest.get(JSONRequest.KEY_DATABASE) == null && parser.getGlobleDatabase() != null) {
+				if (parser.getGlobleDatabase() != null && sqlRequest.get(JSONRequest.KEY_DATABASE) == null) {
 					sqlRequest.put(JSONRequest.KEY_DATABASE, parser.getGlobleDatabase());
 				}
-				if (sqlRequest.get(JSONRequest.KEY_SCHEMA) == null && parser.getGlobleSchema() != null) {
+				if (parser.getGlobleSchema() != null && sqlRequest.get(JSONRequest.KEY_SCHEMA) == null) {
 					sqlRequest.put(JSONRequest.KEY_SCHEMA, parser.getGlobleSchema());
 				}
 				if (isSubquery == false) {  //解决 SQL 语法报错，子查询不能 EXPLAIN
-					if (sqlRequest.get(JSONRequest.KEY_EXPLAIN) == null && parser.getGlobleExplain() != null) {
+					if (parser.getGlobleExplain() != null && sqlRequest.get(JSONRequest.KEY_EXPLAIN) == null) {
 						sqlRequest.put(JSONRequest.KEY_EXPLAIN, parser.getGlobleExplain());
 					}
-					if (sqlRequest.get(JSONRequest.KEY_CACHE) == null && parser.getGlobleCache() != null) {
+					if (parser.getGlobleCache() != null && sqlRequest.get(JSONRequest.KEY_CACHE) == null) {
 						sqlRequest.put(JSONRequest.KEY_CACHE, parser.getGlobleCache());
 					}
 				}
