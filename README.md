@@ -325,6 +325,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
 
+[APIJSON 接口调试实践](https://github.com/Tencent/APIJSON/issues/189)
+
 [APIJSON使用例子总结](https://blog.csdn.net/weixin_41077841/article/details/110518007)
 
 [APIJSON 自动化接口和文档的快速开发神器 （一）](https://blog.csdn.net/qq_41829492/article/details/88670940)
