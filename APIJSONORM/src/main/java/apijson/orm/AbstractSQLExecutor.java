@@ -155,7 +155,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		config.setPrepared(prepared);
 
 		if (StringUtil.isEmpty(sql, true)) {
-			Log.e(TAG, "select  StringUtil.isEmpty(sql, true) >> return null;");
+			Log.e(TAG, "execute  StringUtil.isEmpty(sql, true) >> return null;");
 			return null;
 		}
 
@@ -169,7 +169,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		long startTime = System.currentTimeMillis();
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 				+ "\n已生成 " + generatedSQLCount + " 条 SQL"
-				+ "\nselect  startTime = " + startTime
+				+ "\nexecute  startTime = " + startTime
 				+ "\ndatabase = " + StringUtil.getString(config.getDatabase())
 				+ "; schema = " + StringUtil.getString(config.getSchema())
 				+ "; sql = \n" + sql
@@ -225,11 +225,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				case GET:
 				case GETS:
 					result = getCacheItem(sql, position, config.getCache());
-					Log.i(TAG, ">>> select  result = getCache('" + sql + "', " + position + ") = " + result);
+					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
 						cachedSQLCount ++;
 
-						Log.d(TAG, "\n\n select  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
+						Log.d(TAG, "\n\n execute  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 						return result;
 					}
 
@@ -241,7 +241,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					break;
 
 				default://OPTIONS, TRACE等
-					Log.e(TAG, "select  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
+					Log.e(TAG, "execute  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
 					return null;
 				}
 			}
@@ -266,7 +266,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			int viceColumnStart = length + 1; //第一个副表字段的index
 			while (rs.next()) {
 				index ++;
-				Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n select while (rs.next()){  index = " + index + "\n\n");
+				Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
 
 				JSONObject item = new JSONObject(true);
 
@@ -293,7 +293,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				resultList = onPutTable(config, rs, rsmd, resultList, index, item);
 
-				Log.d(TAG, "\n select  while (rs.next()) { resultList.put( " + index + ", result); "
+				Log.d(TAG, "\n execute  while (rs.next()) { resultList.put( " + index + ", result); "
 						+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 			}
 
@@ -345,12 +345,24 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 
 		putCache(sql, resultList, config.getCache());
-		Log.i(TAG, ">>> select  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
+		Log.i(TAG, ">>> execute  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
+		  // 数组主表对象额外一次返回全部，方便 Parser 缓存来提高性能
+		
+		result = position >= resultList.size() ? new JSONObject() : resultList.get(position);
+		if (position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false) { 
+			// 不是 main 不会直接执行，count=1 返回的不会超过 1   && config.isMain() && config.getCount() != 1
+			Log.i(TAG, ">>> execute  position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false"
+					+ " >> result = new JSONObject(result); result.put(KEY_RAW_LIST, resultList);");
+
+			result = new JSONObject(result);
+			result.put(KEY_RAW_LIST, resultList);
+		}
+		
 		long endTime = System.currentTimeMillis();
-		Log.d(TAG, "\n\n select  endTime = " + endTime + "; duration = " + (endTime - startTime)
+		Log.d(TAG, "\n\n execute  endTime = " + endTime + "; duration = " + (endTime - startTime)
 				+ "\n return resultList.get(" + position + ");"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
-		return position >= resultList.size() ? new JSONObject() : resultList.get(position);
+		return result;
 	}
 
 

@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -792,8 +791,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 
 		JSONObject response = null;
-		if (op != null) {//TODO SQL查询结果为空时，functionMap和customMap还有没有意义？
-			if (arrayConfig == null) {//Common
+		if (op != null) {//SQL查询结果为空时，functionMap和customMap没有意义
+			if (arrayConfig == null) { //Common
 				response = op.setSQLConfig().executeSQL().response();
 			}
 			else {//Array Item Child
@@ -1431,6 +1430,20 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 
 	public static final String KEY_CONFIG = "config";
+	
+	protected Map<String, List<JSONObject>> arrayMainCacheMap = new HashMap<>();
+	public void putArrayMainCache(String arrayPath, List<JSONObject> mainTableDataList) {
+		arrayMainCacheMap.put(arrayPath, mainTableDataList);
+	}
+	public List<JSONObject> getArrayMainCache(String arrayPath) {
+		return arrayMainCacheMap.get(arrayPath);
+	}
+	public JSONObject getArrayMainCacheItem(String arrayPath, int position) {
+		List<JSONObject> list = getArrayMainCache(arrayPath);
+		return list == null || position >= list.size() ? null : list.get(position);
+	}
+	
+	
 
 	/**执行 SQL 并返回 JSONObject
 	 * @param config
@@ -1451,8 +1464,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		try {
-			boolean explain = config.isExplain();
 			JSONObject result;
+			
+			boolean explain = config.isExplain();
 			if (explain) { //如果先执行 explain，则 execute 会死循环，所以只能先执行非 explain
 				config.setExplain(false); //对下面 config.getSQL(false); 生效
 				JSONObject res = getSQLExecutor().execute(config, false);

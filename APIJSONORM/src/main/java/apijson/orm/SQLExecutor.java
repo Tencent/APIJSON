@@ -22,6 +22,8 @@ import apijson.NotNull;
  */
 public interface SQLExecutor {
 
+	String KEY_RAW_LIST = "@RAW@LIST";  // 避免和字段命名冲突，不用 $RAW@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
+
 	/**保存缓存
 	 * @param sql
 	 * @param map
