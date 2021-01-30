@@ -1920,7 +1920,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getBetweenString(String key, Object value) throws IllegalArgumentException {
+	public String getBetweenString(String key, Object value, String rawSQL) throws IllegalArgumentException {
+		if (rawSQL != null) {
+			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key% 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
+		}
 		if (value == null) {
 			return "";
 		}
@@ -1960,7 +1963,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				throw new IllegalArgumentException(key + "%:value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
 			}
 
-			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + "(" + getBetweenString(key, vs[0], vs[1]) + ")";
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + "(" + getBetweenString(key, (Object) vs[0], (Object) vs[1]) + ")";
 		}
 
 		return getCondition(Logic.isNot(type), condition);
@@ -2149,6 +2152,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getContainString(String key, Object value, String rawSQL) throws IllegalArgumentException {
+		if (rawSQL != null) {
+			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key<> 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
+		}
 		if (value == null) {
 			return "";
 		}

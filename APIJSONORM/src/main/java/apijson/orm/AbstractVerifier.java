@@ -262,7 +262,8 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 			//key!{}:[] 或 其它没有明确id的条件 等 可以和key{}:list组合。类型错误就报错
 			requestId = (Number) config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
-			JSONArray requestIdArray = (JSONArray) config.getWhere(visitorIdkey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
+			@SuppressWarnings("unchecked") 
+			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdkey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
 			if (requestId != null) {
 				if (requestIdArray == null) {
 					requestIdArray = new JSONArray();
