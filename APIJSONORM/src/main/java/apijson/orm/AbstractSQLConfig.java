@@ -1284,11 +1284,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static String getLimitString(int page, int count, boolean isTSQL) {
 		int offset = getOffset(page, count);
 
-		if (isTSQL) {
+		if (isTSQL) {  // OFFSET FECTH 中所有关键词都不可省略
 			return " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
 		}
 
-		return " LIMIT " + count + " OFFSET " + offset;
+		return " LIMIT " + count + (offset <= 0 ? "" : " OFFSET " + offset);  // DELETE, UPDATE 不支持 OFFSET
 	}
 
 	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -2179,20 +2179,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String condition = "";
 		if (childs != null) {
 			for (int i = 0; i < childs.length; i++) {
-				if (childs[i] != null) {
-					if (childs[i] instanceof JSON) {
+				Object c = childs[i];
+				if (c != null) {
+					if (c instanceof JSON) {
 						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
 					}
 
 					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
 					if (isPostgreSQL()) {
-						condition += (getKey(key) + " @> " + getValue(newJSONArray(childs[i]))); //operator does not exist: jsonb @> character varying  "[" + childs[i] + "]"); 
+						condition += (getKey(key) + " @> " + getValue(newJSONArray(c))); //operator does not exist: jsonb @> character varying  "[" + c + "]"); 
 					}
 					else if (isOracle()) {
-						condition += ("json_textcontains(" + getKey(key) + ", '$', " + getValue(childs[i].toString()) + ")");
+						condition += ("json_textcontains(" + getKey(key) + ", '$', " + getValue(c.toString()) + ")");
 					}
 					else {
-						condition += ("json_contains(" + getKey(key) + ", " + getValue(childs[i].toString()) + ")");
+						boolean isNum = c instanceof Number;
+						String v = (isNum ? "" : "\"") + childs[i] + (isNum ? "" : "\"");
+						condition += ("json_contains(" + getKey(key) + ", " +  getValue(v) + ")");
 					}
 				}
 			}
@@ -2390,9 +2393,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case POST:
 			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
 		case PUT:
-			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true);
+			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + config.getLimitString();
 		case DELETE:
-			return "DELETE FROM " + tablePath + config.getWhereString(true);
+			return "DELETE FROM " + tablePath + config.getWhereString(true) + config.getLimitString();
 		default:
 			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {
@@ -2635,6 +2638,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				throw new NotExistException(TAG + ": newSQLConfig idIn instanceof List >> 去掉无效 id 后 newIdIn.isEmpty()");
 			}
 			idIn = newIdIn;
+			
+			if (method == DELETE || method == PUT) {
+				config.setCount(newIdIn.size());
+			}
 		}
 		
 		//对id和id{}处理，这两个一定会作为条件
@@ -2669,6 +2676,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (contains == false) {//empty有效  BaseModel.isEmpty(idIn) == false) {
 					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && (((List<?>) idIn).contains(id) == false");
 				}
+			}
+			
+			if (method == DELETE || method == PUT) {
+				config.setCount(1);
 			}
 		}
 

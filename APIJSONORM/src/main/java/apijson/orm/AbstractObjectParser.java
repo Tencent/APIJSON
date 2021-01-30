@@ -650,7 +650,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 */
 	@Override
 	public AbstractObjectParser setSQLConfig() throws Exception {
-		return setSQLConfig(1, 0, 0);
+		return setSQLConfig(RequestMethod.isQueryMethod(method) ? 1 : 0, 0, 0);
 	}
 
 	@Override
@@ -668,7 +668,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				return this;
 			}
 		}
-		sqlConfig.setCount(count).setPage(page).setPosition(position);
+		sqlConfig.setCount(sqlConfig.getCount() <= 0 ? count : sqlConfig.getCount()).setPage(page).setPosition(position);
 
 		parser.onVerifyRole(sqlConfig);
 
