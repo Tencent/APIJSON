@@ -752,6 +752,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 
 
+	protected Map<String, ObjectParser> arrayObjectParserCacheMap = new HashMap<>();
+	
 	//	protected SQLConfig itemConfig;
 	/**获取单个对象，该对象处于parentObject内
 	 * @param parentPath parentObject的路径
@@ -774,9 +776,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		int type = arrayConfig == null ? 0 : arrayConfig.getType();
+		int position = arrayConfig == null ? 0 : arrayConfig.getPosition();
 
 		String[] arr = StringUtil.split(parentPath, "/");
-		if (arrayConfig == null || arrayConfig.getPosition() == 0) {
+		if (position == 0) {
 			int d = arr == null ? 1 : arr.length + 1;
 			if (queryDepth < d) {
 				queryDepth = d;
@@ -786,12 +789,24 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				}
 			}
 		}
+		
+		boolean isTable = apijson.JSONObject.isTableKey(name);
+		boolean isArrayMainTable = isSubquery == false && isTable && type == SQLConfig.TYPE_ITEM_CHILD_0 && arrayConfig != null && RequestMethod.isGetMethod(arrayConfig.getMethod(), true);
+		boolean isReuse = isArrayMainTable && position > 0;
 
-		ObjectParser op = createObjectParser(request, parentPath, name, arrayConfig, isSubquery).parse();
-
-
+		ObjectParser op = null;
+		if (isReuse) {  // 数组主表使用专门的缓存数据
+			op = arrayObjectParserCacheMap.get(parentPath.substring(0, parentPath.lastIndexOf("[]") + 2));
+		}
+		
+		if (op == null) {
+			op = createObjectParser(request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
+		}
+		op = op.parse(name, isReuse);
+		
 		JSONObject response = null;
 		if (op != null) {//SQL查询结果为空时，functionMap和customMap没有意义
+			
 			if (arrayConfig == null) { //Common
 				response = op.setSQLConfig().executeSQL().response();
 			}
@@ -799,9 +814,12 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				int query = arrayConfig.getQuery();
 
 				//total 这里不能用arrayConfig.getType()，因为在createObjectParser.onChildParse传到onObjectParse时已被改掉
-				if (type == SQLConfig.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE
-						&& arrayConfig.getPosition() == 0) {
+				if (type == SQLConfig.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE && position == 0) {
+					
+					RequestMethod method = op.getMethod();
 					JSONObject rp = op.setMethod(RequestMethod.HEAD).setSQLConfig().executeSQL().getSqlReponse();
+					op.setMethod(method);
+					
 					if (rp != null) {
 						int index = parentPath.lastIndexOf("]/");
 						if (index >= 0) {
@@ -842,14 +860,21 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					response = null;//不再往后查询
 				} else {
 					response = op
-							.setSQLConfig(arrayConfig.getCount(), arrayConfig.getPage(), arrayConfig.getPosition())
+							.setSQLConfig(arrayConfig.getCount(), arrayConfig.getPage(), position)
 							.executeSQL()
 							.response();
 					//					itemConfig = op.getConfig();
 				}
 			}
 
-			op.recycle();
+			if (isArrayMainTable) {
+				if (position == 0) {  // 提取并缓存数组主表的列表数据
+					arrayObjectParserCacheMap.put(parentPath.substring(0, parentPath.lastIndexOf("[]") + 2), op);
+				}
+			}
+//			else {
+//				op.recycle();
+//			}
 			op = null;
 		}
 

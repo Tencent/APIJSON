@@ -84,7 +84,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static final Pattern PATTERN_RANGE;
 	private static final Pattern PATTERN_FUNCTION;
-	
+
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
@@ -96,8 +96,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- ，以免拼接 SQL 时被注入意外可执行指令
 		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
 		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\$]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
-		
-		
+
+
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
 		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TABLE_NAME);
@@ -530,13 +530,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (keys == null || keys.length <= 0) {
 			return StringUtil.isEmpty(joinHaving, true) ? "" : (hasPrefix ? " HAVING " : "") + joinHaving;
 		}
-		
+
 		String quote = getQuote();
 		String tableAlias = getAliasWithQuote();
 
 		List<String> raw = getRaw();
 		boolean containRaw = raw != null && raw.contains(KEY_HAVING);
-		
+
 		String expression;
 		String method;
 		//暂时不允许 String prefix;
@@ -560,7 +560,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							+ "} catch (Exception e) = " + e.getMessage());
 				}
 			}
-			
+
 			if (expression.length() > 50) {
 				throw new UnsupportedOperationException("@having:value 的 value 中字符串 " + expression + " 不合法！"
 						+ "不允许传超过 50 个字符的函数或表达式！请用 @raw 简化传参！");
@@ -958,13 +958,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					method = expression.substring(0, start);
 					boolean distinct = i <= 0 && method.startsWith(PREFFIX_DISTINCT);
 					String fun = distinct ? method.substring(PREFFIX_DISTINCT.length()) : method;
-					
+
 					if (fun.isEmpty() == false && StringUtil.isName(fun) == false) {
 						throw new IllegalArgumentException("字符 " + method + " 不合法！"
 								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 								+ " 中SQL函数名 function 必须符合正则表达式 ^[0-9a-zA-Z_]+$ ！");
 					}
-					
+
 				}
 
 				boolean isColumn = start < 0;
@@ -1049,13 +1049,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					int index = suffix.lastIndexOf(":");
 					String alias = index < 0 ? "" : suffix.substring(index + 1); //contactCount
 					suffix = index < 0 ? suffix : suffix.substring(0, index);
-					
+
 					if (alias.isEmpty() == false && StringUtil.isName(alias) == false) {
 						throw new IllegalArgumentException("字符串 " + alias + " 不合法！"
 								+ "预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
 								+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
 					}
-					
+
 					if (suffix.isEmpty() == false && (((String) suffix).contains("--") || ((String) suffix).contains("/*") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
 						throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
 								+ "预编译模式下 @column:\"column?value;function(arg0,arg1,...)?value...\""
@@ -2393,9 +2393,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case POST:
 			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
 		case PUT:
-			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + config.getLimitString();
+			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
 		case DELETE:
-			return "DELETE FROM " + tablePath + config.getWhereString(true) + config.getLimitString();
+			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
 		default:
 			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {
@@ -2615,15 +2615,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String userIdKey = callback.getUserIdKey(database, schema, table);
 		String userIdInKey = userIdKey + "{}";
 
+		//对id和id{}处理，这两个一定会作为条件
+
 		Object idIn = request.get(idInKey); //可能是 id{}:">0"
-
-		if (method == POST && request.get(idKey) == null) {
-			Object newId = callback.newId(method, database, schema, table); // null 表示数据库自增 id
-			if (newId != null) { 
-				request.put(idKey, newId);
-			}
-		}
-
 		if (idIn instanceof List) { // 排除掉 0, 负数, 空字符串 等无效 id 值
 			List<?> ids = ((List<?>) idIn);
 			List<Object> newIdIn = new ArrayList<>();
@@ -2638,14 +2632,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				throw new NotExistException(TAG + ": newSQLConfig idIn instanceof List >> 去掉无效 id 后 newIdIn.isEmpty()");
 			}
 			idIn = newIdIn;
-			
+
 			if (method == DELETE || method == PUT) {
 				config.setCount(newIdIn.size());
 			}
 		}
-		
-		//对id和id{}处理，这两个一定会作为条件
+
 		Object id = request.get(idKey);
+		boolean hasId = id != null;
+		if (method == POST && hasId == false) {
+			id = callback.newId(method, database, schema, table); // null 表示数据库自增 id
+		}
+
 		if (id != null) { //null无效
 			if (id instanceof Number) { 
 				if (((Number) id).longValue() <= 0) { //一定没有值
@@ -2677,7 +2675,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && (((List<?>) idIn).contains(id) == false");
 				}
 			}
-			
+
 			if (method == DELETE || method == PUT) {
 				config.setCount(1);
 			}
@@ -2695,271 +2693,276 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String raw = request.getString(KEY_RAW);
 		String json = request.getString(KEY_JSON);
 
-		//强制作为条件且放在最前面优化性能
-		request.remove(idKey);
-		request.remove(idInKey);
-		//关键词
-		request.remove(KEY_ROLE);
-		request.remove(KEY_EXPLAIN);
-		request.remove(KEY_CACHE);
-		request.remove(KEY_DATABASE);
-		request.remove(KEY_SCHEMA);
-		request.remove(KEY_COMBINE);
-		request.remove(KEY_FROM);
-		request.remove(KEY_COLUMN);
-		request.remove(KEY_GROUP);
-		request.remove(KEY_HAVING);
-		request.remove(KEY_ORDER);
-		request.remove(KEY_RAW);
-		request.remove(KEY_JSON);
-
-		String[] rawArr = StringUtil.split(raw);
-		config.setRaw(rawArr == null || rawArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(rawArr)));
-
-		Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
-
-		//已经remove了id和id{}，以及@key
-		Set<String> set = request.keySet(); //前面已经判断request是否为空
-		if (method == POST) { //POST操作
-			if (idIn != null) {
-				throw new IllegalArgumentException("POST 请求中不允许传 " + idInKey + " !");
-			}
-
-			if (set != null && set.isEmpty() == false) { //不能直接return，要走完下面的流程
-				String[] columns = set.toArray(new String[]{});
-
-				Collection<Object> valueCollection = request.values();
-				Object[] values = valueCollection == null ? null : valueCollection.toArray();
-
-				if (values == null || values.length != columns.length) {
-					throw new Exception("服务器内部错误:\n" + TAG
-							+ " newSQLConfig  values == null || values.length != columns.length !");
-				}
-				column = (id == null ? "" : idKey + ",") + StringUtil.getString(columns); //set已经判断过不为空
-
-				List<List<Object>> valuess = new ArrayList<>(1);
-				List<Object> items; //(item0, item1, ...)
-				if (id == null) { //数据库自增 id
-					items = Arrays.asList(values); //FIXME 是否还需要进行 add 或 remove 操作？Arrays.ArrayList 不允许修改，会抛异常
-				}
-				else {
-					int size = columns.length + (id == null ? 0 : 1); //以key数量为准
-
-					items = new ArrayList<>(size);
-					items.add(id); //idList.get(i)); //第0个就是id
-
-					for (int j = 1; j < size; j++) {
-						items.add(values[j-1]); //从第1个开始，允许"null"
-					}
-				}
-
-				valuess.add(items);
-				config.setValues(valuess);
-			}
-		} 
-		else { //非POST操作
-			final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
-
-			//条件<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-			List<String> whereList = null;
-
-			Map<String, List<String>> combineMap = new LinkedHashMap<>();
-			List<String> andList = new ArrayList<>();
-			List<String> orList = new ArrayList<>();
-			List<String> notList = new ArrayList<>();
-
+		try {
 			//强制作为条件且放在最前面优化性能
-			if (id != null) {
-				tableWhere.put(idKey, id);
-				andList.add(idKey);
-			}
-			if (idIn != null) {
-				tableWhere.put(idInKey, idIn);
-				andList.add(idInKey);
-			}
+			request.remove(idKey);
+			request.remove(idInKey);
+			//关键词
+			request.remove(KEY_ROLE);
+			request.remove(KEY_EXPLAIN);
+			request.remove(KEY_CACHE);
+			request.remove(KEY_DATABASE);
+			request.remove(KEY_SCHEMA);
+			request.remove(KEY_COMBINE);
+			request.remove(KEY_FROM);
+			request.remove(KEY_COLUMN);
+			request.remove(KEY_GROUP);
+			request.remove(KEY_HAVING);
+			request.remove(KEY_ORDER);
+			request.remove(KEY_RAW);
+			request.remove(KEY_JSON);
 
-			String[] ws = StringUtil.split(combine);
-			if (ws != null) {
-				if (method == DELETE || method == GETS || method == HEADS) {
-					throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:value !");
+			String[] rawArr = StringUtil.split(raw);
+			config.setRaw(rawArr == null || rawArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(rawArr)));
+
+			Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
+
+			//已经remove了id和id{}，以及@key
+			Set<String> set = request.keySet(); //前面已经判断request是否为空
+			if (method == POST) { //POST操作
+				if (idIn != null) {
+					throw new IllegalArgumentException("POST 请求中不允许传 " + idInKey + " !");
 				}
-				whereList = new ArrayList<>();
 
-				String w;
-				for (int i = 0; i < ws.length; i++) { //去除 &,|,! 前缀
-					w = ws[i];
-					if (w != null) {
-						if (w.startsWith("&")) {
-							w = w.substring(1);
-							andList.add(w);
-						}
-						else if (w.startsWith("|")) {
-							if (method == PUT) {
-								throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
-										+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
-							}
-							w = w.substring(1);
-							orList.add(w);
-						}
-						else if (w.startsWith("!")) {
-							if (method == PUT) {
-								throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
-										+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
-							}
-							w = w.substring(1);
-							notList.add(w);
-						}
-						else {
-							orList.add(w);
-						}
+				if (set != null && set.isEmpty() == false) { //不能直接return，要走完下面的流程
+					String[] columns = set.toArray(new String[]{});
 
-						if (w.isEmpty()) {
-							throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
-						}
-						else {
-							if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
-								throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 不合法！"
-										+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
-							}
-						}
+					Collection<Object> valueCollection = request.values();
+					Object[] values = valueCollection == null ? null : valueCollection.toArray();
 
-						whereList.add(w);
+					if (values == null || values.length != columns.length) {
+						throw new Exception("服务器内部错误:\n" + TAG
+								+ " newSQLConfig  values == null || values.length != columns.length !");
+					}
+					column = (id == null ? "" : idKey + ",") + StringUtil.getString(columns); //set已经判断过不为空
+
+					List<List<Object>> valuess = new ArrayList<>(1);
+					List<Object> items; //(item0, item1, ...)
+					if (id == null) { //数据库自增 id
+						items = Arrays.asList(values); //FIXME 是否还需要进行 add 或 remove 操作？Arrays.ArrayList 不允许修改，会抛异常
+					}
+					else {
+						int size = columns.length + (id == null ? 0 : 1); //以key数量为准
+
+						items = new ArrayList<>(size);
+						items.add(id); //idList.get(i)); //第0个就是id
+
+						for (int j = 1; j < size; j++) {
+							items.add(values[j-1]); //从第1个开始，允许"null"
+						}
 					}
 
-					// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
-					if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
-						//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
-						callback.onMissingKey4Combine(table, request, combine, ws[i], w);
+					valuess.add(items);
+					config.setValues(valuess);
+				}
+			} 
+			else { //非POST操作
+				final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
+
+				//条件<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				List<String> whereList = null;
+
+				Map<String, List<String>> combineMap = new LinkedHashMap<>();
+				List<String> andList = new ArrayList<>();
+				List<String> orList = new ArrayList<>();
+				List<String> notList = new ArrayList<>();
+
+				//强制作为条件且放在最前面优化性能
+				if (id != null) {
+					tableWhere.put(idKey, id);
+					andList.add(idKey);
+				}
+				if (idIn != null) {
+					tableWhere.put(idInKey, idIn);
+					andList.add(idInKey);
+				}
+
+				String[] ws = StringUtil.split(combine);
+				if (ws != null) {
+					if (method == DELETE || method == GETS || method == HEADS) {
+						throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:value !");
+					}
+					whereList = new ArrayList<>();
+
+					String w;
+					for (int i = 0; i < ws.length; i++) { //去除 &,|,! 前缀
+						w = ws[i];
+						if (w != null) {
+							if (w.startsWith("&")) {
+								w = w.substring(1);
+								andList.add(w);
+							}
+							else if (w.startsWith("|")) {
+								if (method == PUT) {
+									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+											+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+								}
+								w = w.substring(1);
+								orList.add(w);
+							}
+							else if (w.startsWith("!")) {
+								if (method == PUT) {
+									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+											+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+								}
+								w = w.substring(1);
+								notList.add(w);
+							}
+							else {
+								orList.add(w);
+							}
+
+							if (w.isEmpty()) {
+								throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
+							}
+							else {
+								if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
+									throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 不合法！"
+											+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
+								}
+							}
+
+							whereList.add(w);
+						}
+
+						// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
+						if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
+							//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
+							callback.onMissingKey4Combine(table, request, combine, ws[i], w);
+						}
+					}
+
+				}
+
+				//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+				Map<String, Object> tableContent = new LinkedHashMap<String, Object>();
+				Object value;
+				for (String key : set) {
+					value = request.get(key);
+
+					if (value instanceof Map) {//只允许常规Object
+						throw new IllegalArgumentException("不允许 " + key + " 等任何key的value类型为 {JSONObject} !");
+					}
+
+					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
+					if (isWhere) {
+						tableWhere.put(key, value);
+						if (whereList == null || whereList.contains(key) == false) {
+							andList.add(key);
+						}
+					}
+					else if (whereList != null && whereList.contains(key)) {
+						tableWhere.put(key, value);
+					}
+					else {
+						tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 					}
 				}
 
+				combineMap.put("&", andList);
+				combineMap.put("|", orList);
+				combineMap.put("!", notList);
+				config.setCombine(combineMap);
+
+				config.setContent(tableContent);
 			}
 
-			//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-			Map<String, Object> tableContent = new LinkedHashMap<String, Object>();
-			Object value;
-			for (String key : set) {
-				value = request.get(key);
+			List<String> cs = new ArrayList<>();
 
-				if (value instanceof Map) {//只允许常规Object
-					throw new IllegalArgumentException("不允许 " + key + " 等任何key的value类型为 {JSONObject} !");
+			List<String> rawList = config.getRaw();
+			boolean containColumnRaw = rawList != null && rawList.contains(KEY_COLUMN);
+
+			String rawColumnSQL = null;
+			if (containColumnRaw) {
+				try {
+					rawColumnSQL = config.getRawSQL(KEY_COLUMN, column);
+					if (rawColumnSQL != null) {
+						cs.add(rawColumnSQL);
+					}
+				} catch (Exception e) {
+					Log.e(TAG, "newSQLConfig  config instanceof AbstractSQLConfig >> try {  "
+							+ "  rawColumnSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, column); "
+							+ "} catch (Exception e) = " + e.getMessage());
 				}
+			}
 
-				//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-				if (isWhere) {
-					tableWhere.put(key, value);
-					if (whereList == null || whereList.contains(key) == false) {
-						andList.add(key);
+			boolean distinct = column == null || rawColumnSQL != null ? false : column.startsWith(PREFFIX_DISTINCT);
+			if (rawColumnSQL == null) {
+				String[] fks = StringUtil.split(distinct ? column.substring(PREFFIX_DISTINCT.length()) : column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
+				if (fks != null) {
+					String[] ks;
+					for (String fk : fks) {
+						if (containColumnRaw) {
+							try {
+								String rawSQL = config.getRawSQL(KEY_COLUMN, fk);
+								if (rawSQL != null) {
+									cs.add(rawSQL);
+									continue;
+								}
+							} catch (Exception e) {
+								Log.e(TAG, "newSQLConfig  rawColumnSQL == null >> try {  "
+										+ "  String rawSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, fk); ... "
+										+ "} catch (Exception e) = " + e.getMessage());
+							}
+						}
+
+						if (fk.contains("(")) {  // fun0(key0,...)
+							cs.add(fk);
+						}
+						else { //key0,key1...
+							ks = StringUtil.split(fk);
+							if (ks != null && ks.length > 0) {
+								cs.addAll(Arrays.asList(ks));
+							}
+						}
 					}
 				}
-				else if (whereList != null && whereList.contains(key)) {
-					tableWhere.put(key, value);
-				}
-				else {
-					tableContent.put(key, value);//一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
-				}
 			}
 
-			combineMap.put("&", andList);
-			combineMap.put("|", orList);
-			combineMap.put("!", notList);
-			config.setCombine(combineMap);
+			config.setExplain(explain);
+			config.setCache(getCache(cache));
+			config.setFrom(from);
+			config.setDistinct(distinct);
+			config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
+			config.setWhere(tableWhere);					
 
-			config.setContent(tableContent);
+			config.setId(id);
+			//在	tableWhere 第0个		config.setIdIn(idIn);
+
+			config.setRole(RequestRole.get(role));
+			config.setGroup(group);
+			config.setHaving(having);
+			config.setOrder(order);
+
+			String[] jsonArr = StringUtil.split(json);
+			config.setJson(jsonArr == null || jsonArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(jsonArr)));
+
+			//TODO 解析JOIN，包括 @column，@group 等要合并
+
 		}
-
-
-		List<String> cs = new ArrayList<>();
-
-		List<String> rawList = config.getRaw();
-		boolean containColumnRaw = rawList != null && rawList.contains(KEY_COLUMN);
-
-		String rawColumnSQL = null;
-		if (containColumnRaw) {
-			try {
-				rawColumnSQL = config.getRawSQL(KEY_COLUMN, column);
-				if (rawColumnSQL != null) {
-					cs.add(rawColumnSQL);
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "newSQLConfig  config instanceof AbstractSQLConfig >> try {  "
-						+ "  rawColumnSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, column); "
-						+ "} catch (Exception e) = " + e.getMessage());
+		finally {//后面还可能用到，要还原
+			//id或id{}条件
+			if (hasId) {
+				request.put(idKey, id);
 			}
+			request.put(idInKey, idIn);
+			//关键词
+			request.put(KEY_DATABASE, database);
+			request.put(KEY_ROLE, role);
+			request.put(KEY_EXPLAIN, explain);
+			request.put(KEY_CACHE, cache);
+			request.put(KEY_SCHEMA, schema);
+			request.put(KEY_COMBINE, combine);
+			request.put(KEY_FROM, from);
+			request.put(KEY_COLUMN, column);
+			request.put(KEY_GROUP, group);
+			request.put(KEY_HAVING, having);
+			request.put(KEY_ORDER, order);
+			request.put(KEY_RAW, raw);
+			request.put(KEY_JSON, json);
 		}
-
-		boolean distinct = column == null || rawColumnSQL != null ? false : column.startsWith(PREFFIX_DISTINCT);
-		if (rawColumnSQL == null) {
-			String[] fks = StringUtil.split(distinct ? column.substring(PREFFIX_DISTINCT.length()) : column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
-			if (fks != null) {
-				String[] ks;
-				for (String fk : fks) {
-					if (containColumnRaw) {
-						try {
-							String rawSQL = config.getRawSQL(KEY_COLUMN, fk);
-							if (rawSQL != null) {
-								cs.add(rawSQL);
-								continue;
-							}
-						} catch (Exception e) {
-							Log.e(TAG, "newSQLConfig  rawColumnSQL == null >> try {  "
-									+ "  String rawSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, fk); ... "
-									+ "} catch (Exception e) = " + e.getMessage());
-						}
-					}
-
-					if (fk.contains("(")) {  // fun0(key0,...)
-						cs.add(fk);
-					}
-					else { //key0,key1...
-						ks = StringUtil.split(fk);
-						if (ks != null && ks.length > 0) {
-							cs.addAll(Arrays.asList(ks));
-						}
-					}
-				}
-			}
-		}
-
-		config.setExplain(explain);
-		config.setCache(getCache(cache));
-		config.setFrom(from);
-		config.setDistinct(distinct);
-		config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
-		config.setWhere(tableWhere);					
-
-		config.setId(id);
-		//在	tableWhere 第0个		config.setIdIn(idIn);
-
-		config.setRole(RequestRole.get(role));
-		config.setGroup(group);
-		config.setHaving(having);
-		config.setOrder(order);
-
-		String[] jsonArr = StringUtil.split(json);
-		config.setJson(jsonArr == null || jsonArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(jsonArr)));
-
-		//TODO 解析JOIN，包括 @column，@group 等要合并
-
-		//后面还可能用到，要还原
-		//id或id{}条件
-		request.put(idKey, id);
-		request.put(idInKey, idIn);
-		//关键词
-		request.put(KEY_DATABASE, database);
-		request.put(KEY_ROLE, role);
-		request.put(KEY_EXPLAIN, explain);
-		request.put(KEY_CACHE, cache);
-		request.put(KEY_SCHEMA, schema);
-		request.put(KEY_COMBINE, combine);
-		request.put(KEY_FROM, from);
-		request.put(KEY_COLUMN, column);
-		request.put(KEY_GROUP, group);
-		request.put(KEY_HAVING, having);
-		request.put(KEY_ORDER, order);
-		request.put(KEY_RAW, raw);
-		request.put(KEY_JSON, json);
 
 		return config;
 	}

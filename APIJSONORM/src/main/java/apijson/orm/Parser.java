@@ -93,7 +93,7 @@ public interface Parser<T> {
 	 */
 	Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject) throws Exception;
 	
-	ObjectParser createObjectParser(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;
+	ObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception;
 
 	int getDefaultQueryCount();
 	int getMaxQueryPage();

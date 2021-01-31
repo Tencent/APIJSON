@@ -20,14 +20,15 @@ import apijson.RequestMethod;
  */
 public interface ObjectParser {
 
-
 	/**解析成员
 	 * response重新赋值
-	 * @param config 传递给第0个Table
+	 * @param parentPath 
+	 * @param name 
+	 * @param isReuse 
 	 * @return null or this
 	 * @throws Exception
 	 */
-	ObjectParser parse() throws Exception;
+	ObjectParser parse(String name, boolean isReuse) throws Exception;
 
 	/**调用 parser 的 sqlExecutor 来解析结果
 	 * @param method
@@ -158,5 +159,6 @@ public interface ObjectParser {
 	Map<String, Object> getCustomMap();
 	Map<String, Map<String, String>> getFunctionMap();
 	Map<String, JSONObject> getChildMap();
+
 
 }
