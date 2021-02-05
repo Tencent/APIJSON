@@ -191,9 +191,9 @@ https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 
 
 ### 提高性能
-最近的两次大幅提升性能相关优化及 Release <br />
+20200205 更新：最近的两次大幅提升性能相关优化及 Release <br />
 [4.6.0【性能】大幅提升数组内主表查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.6.0) <br />
-[4.4.5【性能】大幅提升增删改的性能](https://github.com/Tencent/APIJSON/releases) <br />
+[4.4.5【性能】大幅提升增删改的性能](https://github.com/Tencent/APIJSON/releases/tag/4.4.5) <br />
 
 #### 解析 JSON
 
@@ -222,6 +222,9 @@ APIJSON 代码经过商业分析软件 [源伞Pinpoint](https://www.sourcebrella
 https://github.com/Tencent/APIJSON/issues/48 <br />
 但我们需要再接再厉，尽可能做到 99.999% 可靠度，降低使用风险，让用户放心和安心。 <br />
 
+20200205 更新：已经解决了 [源伞科技](https://www.sourcebrella.com) 以上报告中的大部分问题 及 [奇安信代码卫士](https://github.com/QiAnXinCodeSafe) 发现的部分问题
+https://github.com/Tencent/APIJSON/issues/created_by/QiAnXinCodeSafe
+
 #### 减少 Bug
 
 ##### [APIAuto](https://github.com/TommyLemon/APIAuto) 上统计的 bug
@@ -241,6 +244,9 @@ https://gitee.com/TommyLemon/UnitAuto <br />
 
 
 ### 完善文档
+20200205 更新：最近完善及更新了通用文档、上手文档、图文入门文档等，还对首页引导文档加了导航目录
+https://github.com/Tencent/APIJSON/blob/master/Navigation.md
+
 #### 中文文档
 
 ##### 通用文档
@@ -294,6 +300,8 @@ https://github.com/APIJSON/APIJSON-Demo <br />
 
 https://github.com/Tencent/APIJSON#%E7%9B%B8%E5%85%B3%E6%8E%A8%E8%8D%90
 
+20200205 更新：最近首页相关推荐新增了 1 篇官方发的文章和 6 篇用户发的文章
+https://github.com/Tencent/APIJSON/blob/master/README.md#%E7%9B%B8%E5%85%B3%E6%8E%A8%E8%8D%90
 
 #### 登记正在使用 APIJSON 的公司或项目
 
