@@ -191,6 +191,9 @@ https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 
 
 ### 提高性能
+最近的两次大幅提升性能相关优化及 Release <br />
+[4.6.0【性能】大幅提升数组内主表查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.6.0) <br />
+[4.4.5【性能】大幅提升增删改的性能](https://github.com/Tencent/APIJSON/releases) <br />
 
 #### 解析 JSON
 
