@@ -7,7 +7,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
  
-<p align="center">🏆 码云最有价值开源项目<br />🚀 后端接口和文档自动化，前端(客户端) 定制返回JSON的数据和结构！</p>
+<p align="center">🏆 码云最有价值开源项目<br />🚀 后端接口和文档自动化，前端(客户端) 定制返回 JSON 的数据和结构！</p>
 
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
