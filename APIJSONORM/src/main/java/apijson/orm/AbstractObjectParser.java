@@ -853,7 +853,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						list.set(i, obj);
 
 						if (obj != null) {
-							parser.putQueryResult(arrayPath + "/" + i + "/" + table, obj); //解决获取关联数据时requestObject里不存在需要的关联数据
+							parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj); //解决获取关联数据时requestObject里不存在需要的关联数据
 						}
 					}
 

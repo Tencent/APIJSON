@@ -790,7 +790,11 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			}
 		}
 		
-		boolean isTable = apijson.JSONObject.isTableKey(name);
+		apijson.orm.Entry<String, String> entry = Pair.parseEntry(name, true);
+		String table = entry.getKey(); //Comment
+		// String alias = entry.getValue(); //to
+
+		boolean isTable = apijson.JSONObject.isTableKey(table);
 		boolean isArrayMainTable = isSubquery == false && isTable && type == SQLConfig.TYPE_ITEM_CHILD_0 && arrayConfig != null && RequestMethod.isGetMethod(arrayConfig.getMethod(), true);
 		boolean isReuse = isArrayMainTable && position > 0;
 
