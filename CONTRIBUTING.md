@@ -7,19 +7,19 @@
 
 非常感谢以下几位贡献者对于 APIJSON 的做出的贡献：
 
-- [ruoranw](https://github.com/ruoranw)
+- [ruoranw](https://github.com/ruoranw)(现居美国洛杉矶)
 - [zhoulingfengofcd](https://github.com/zhoulingfengofcd)
 - [Zerounary](https://github.com/Zerounary)
 - [vincentCheng](https://github.com/vincentCheng)
 - [justinfengchen](https://github.com/justinfengchen)
 - [linlwqq](https://github.com/linlwqq)
-- [redcatmiss](https://github.com/redcatmiss)
+- [redcatmiss](https://github.com/redcatmiss)(社保科技员工)
 - [linbren](https://github.com/linbren)
 - [jinzhongjian](https://github.com/jinzhongjian)
 - [CoolGeo2016](https://github.com/CoolGeo2016)
 - [1906522096](https://github.com/1906522096)
 - [github-ganyu](https://github.com/github-ganyu)
-- [sunxiaoguang](https://github.com/sunxiaoguang)
+- [sunxiaoguang](https://github.com/sunxiaoguang)(知乎基础研发架构师)
 
 #### 其中特别致谢: <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
