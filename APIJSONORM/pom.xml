@@ -5,7 +5,7 @@
 
 	<groupId>apijson.orm</groupId>
 	<artifactId>apijson-orm</artifactId>
-	<version>4.6.0</version>
+	<version>4.6.1</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>
