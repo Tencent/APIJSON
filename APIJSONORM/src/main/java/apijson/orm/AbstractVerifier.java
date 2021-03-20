@@ -70,7 +70,6 @@ import apijson.orm.model.Response;
 import apijson.orm.model.SysColumn;
 import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
-import apijson.orm.model.Test;
 import apijson.orm.model.TestRecord;
 
 /**校验器(权限、请求参数、返回结果等)
@@ -121,7 +120,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		SYSTEM_ACCESS_MAP.put(Function.class.getSimpleName(), getAccessMap(Function.class.getAnnotation(MethodAccess.class)));
 		SYSTEM_ACCESS_MAP.put(Request.class.getSimpleName(), getAccessMap(Request.class.getAnnotation(MethodAccess.class)));
 		SYSTEM_ACCESS_MAP.put(Response.class.getSimpleName(), getAccessMap(Response.class.getAnnotation(MethodAccess.class)));
-		SYSTEM_ACCESS_MAP.put(Test.class.getSimpleName(), getAccessMap(Test.class.getAnnotation(MethodAccess.class)));
 
 		if (Log.DEBUG) {
 			SYSTEM_ACCESS_MAP.put(Table.class.getSimpleName(), getAccessMap(Table.class.getAnnotation(MethodAccess.class)));
@@ -724,7 +722,12 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		}
 
 		//解析
-		return parse(method, name, target, response, database, schema, idKeyCallback, creator, callback != null ? callback : new OnParseCallback() {});
+		return parse(method, name, target, response, database, schema, idKeyCallback, creator, callback != null ? callback : new OnParseCallback() {
+			@Override
+			protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
+				return verifyResponse(method, key, tobj, robj, database, schema, idKeyCallback, creator, callback);
+			}
+		});
 	}
 
 
