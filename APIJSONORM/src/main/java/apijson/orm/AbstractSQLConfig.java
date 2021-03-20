@@ -68,7 +68,6 @@ import apijson.orm.model.Response;
 import apijson.orm.model.SysColumn;
 import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
-import apijson.orm.model.Test;
 import apijson.orm.model.TestRecord;
 
 /**config sql for JSON Request
@@ -111,7 +110,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		CONFIG_TABLE_LIST.add(Function.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(Request.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(Response.class.getSimpleName());
-		CONFIG_TABLE_LIST.add(Test.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(Access.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(Document.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(TestRecord.class.getSimpleName());
