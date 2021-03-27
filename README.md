@@ -385,6 +385,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
 
+[light4j](https://github.com/xlongwei/light4j) 整合 APIJSON 和微服务框架 light-4j 的 Demo，同时接入了 Redis
+
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
 
 [apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
