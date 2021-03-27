@@ -25,7 +25,8 @@ public class Join {
 	private String table; //User
 	private String alias; //owner
 	private String key; //id
-	private String targetName; // Moment
+	private String targetTable; // Moment
+	private String targetAlias; //main
 	private String targetKey; // userId
 
 	private JSONObject outter;
@@ -91,11 +92,17 @@ public class Join {
 	public void setKey(String key) {
 		this.key = key;
 	}
-	public String getTargetName() {
-		return targetName;
+	public void setTargetTable(String targetTable) {
+		this.targetTable = targetTable;
 	}
-	public void setTargetName(String targetName) {
-		this.targetName = targetName;
+	public String getTargetTable() {
+		return targetTable;
+	}
+	public void setTargetAlias(String targetAlias) {
+		this.targetAlias = targetAlias;
+	}
+	public String getTargetAlias() {
+		return targetAlias;
 	}
 	public String getTargetKey() {
 		return targetKey;

@@ -2489,7 +2489,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String sql = null;
 			SQLConfig jc;
 			String jt;
-			String tn;
+			String tt;
+			String ta;
 			for (Join j : joinList) {
 				if (j.isAppJoin()) { // APP JOIN，只是作为一个标记，执行完主表的查询后自动执行副表的查询 User.id IN($commentIdList)
 					continue;
@@ -2502,7 +2503,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				jc.setPrepared(isPrepared());
 
 				jt = StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
-				tn = j.getTargetName();
+				tt = j.getTargetTable();
 
 				//如果要强制小写，则可在子类重写这个方法再 toLowerCase
 				//				if (DATABASE_POSTGRESQL.equals(getDatabase())) {
@@ -2522,7 +2523,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					sql = ( "<".equals(type) ? " LEFT" : (">".equals(type) ? " RIGHT" : " CROSS") )
 							+ " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS "
 							+ quote + jt + quote + " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = "
-							+ quote + tn + quote + "." + quote + j.getTargetKey() + quote;
+							+ quote + tt + quote + "." + quote + j.getTargetKey() + quote;
 					jc.setMain(false).setKeyPrefix(true);
 
 					pvl.addAll(jc.getPreparedValueList());
@@ -2537,7 +2538,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "(": // ANTI JOIN: A & ! B
 				case ")": // FOREIGN JOIN: B & ! A
 					sql = " INNER JOIN " + jc.getTablePath()
-					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tn + quote + "." + quote + j.getTargetKey() + quote;
+					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tt + quote + "." + quote + j.getTargetKey() + quote;
 					break;
 				default:
 					throw new UnsupportedOperationException(

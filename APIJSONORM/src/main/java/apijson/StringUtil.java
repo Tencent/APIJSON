@@ -399,29 +399,36 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isName(String s) {
-		return s != null && PATTERN_NAME.matcher(s).matches();
+		if (s == null || s.isEmpty()) {
+			return false;
+		}
+		
+		String first = s.substring(0, 1);
+		if ("_".equals(first) == false && PATTERN_ALPHA.matcher(first).matches() == false) {
+			return false;
+		}
+		
+		return s.length() <= 1 ? true : PATTERN_NAME.matcher(s.substring(1)).matches();
 	}
 	/**判断是否为首字母大写的代码名称
 	 * @param s
 	 * @return
 	 */
 	public static boolean isBigName(String s) {
-		s = getString(s);
-		if (s.isEmpty() || PATTERN_ALPHA_BIG.matcher(s.substring(0, 1)).matches() == false) {
+		if (s == null || s.isEmpty() || PATTERN_ALPHA_BIG.matcher(s.substring(0, 1)).matches() == false) {
 			return false;
 		}
-		return s.length() <= 1 ? true : isName(s.substring(1));
+		return s.length() <= 1 ? true : PATTERN_NAME.matcher(s.substring(1)).matches();
 	}
 	/**判断是否为首字母小写的代码名称
 	 * @param s
 	 * @return
 	 */
 	public static boolean isSmallName(String s) {
-		s = getString(s);
-		if (s.isEmpty() || PATTERN_ALPHA_SMALL.matcher(s.substring(0, 1)).matches() == false) {
+		if (s == null || s.isEmpty() || PATTERN_ALPHA_SMALL.matcher(s.substring(0, 1)).matches() == false) {
 			return false;
 		}
-		return s.length() <= 1 ? true : isName(s.substring(1));
+		return s.length() <= 1 ? true : PATTERN_NAME.matcher(s.substring(1)).matches();
 	}
 
 
