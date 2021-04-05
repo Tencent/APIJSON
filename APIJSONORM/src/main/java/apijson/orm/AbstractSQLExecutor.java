@@ -210,8 +210,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					int updateCount = executeUpdate(config);
 
-					result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
-							, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "没权限访问或对象不存在！");
+					result = new JSONObject();
+					if (config.getMethod() == RequestMethod.DELETE) {
+						result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND,
+								updateCount > 0 ? JSONResponse.MSG_SUCCEED : "没权限访问或对象不存在！");
+					}
 
 					//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
 					result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
