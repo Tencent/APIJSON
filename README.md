@@ -363,6 +363,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON 服务端框架，可通过 Maven, Gradle 等远程依赖
 
+[apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
+
 [APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释
 
 [UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性和可用性
