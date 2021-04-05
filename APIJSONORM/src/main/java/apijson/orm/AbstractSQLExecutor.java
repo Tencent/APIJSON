@@ -212,6 +212,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					result = new JSONObject();
 					if (config.getMethod() == RequestMethod.DELETE) {
+						// 特别地，针对DELETE请求，如果需要提示code，可以用内部的code来判断。其余请求类型统一使用外层错误码。
 						result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND,
 								updateCount > 0 ? JSONResponse.MSG_SUCCEED : "没权限访问或对象不存在！");
 					}
