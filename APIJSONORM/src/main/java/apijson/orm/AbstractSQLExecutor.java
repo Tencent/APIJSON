@@ -249,7 +249,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 			//		final boolean cache = config.getCount() != 1;
-			resultList = new ArrayList<>();
+			// TODO 设置初始容量为查到的数据量，解决频繁扩容导致的延迟，貌似只有 rs.last 取 rs.getRow() ? 然后又得 rs.beforeFirst 重置位置以便下方取值
+			resultList = new ArrayList<>(config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount());
 			//		Log.d(TAG, "select  cache = " + cache + "; resultList" + (resultList == null ? "=" : "!=") + "null");
 
 			int index = -1;
@@ -504,7 +505,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		//已改为  rsmd.getTableName(columnIndex) 支持副表不传 @column ， 但如何判断是副表？childMap != null
 		//		String lable = rsmd.getColumnLabel(columnIndex);
 		//		int dotIndex = lable.indexOf(".");
-		String lable = rsmd.getColumnLabel(columnIndex);//dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
+		String lable = getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
 
 		String childTable = childMap == null ? null : rsmd.getTableName(columnIndex); //dotIndex < 0 ? null : lable.substring(0, dotIndex);
 
@@ -567,6 +568,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return resultList;
 	}
 
+	
+
+	protected String getKey(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+		return rsmd.getColumnLabel(columnIndex);  // dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
+	}
 
 	protected Object getValue(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
 			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {

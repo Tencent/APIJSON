@@ -5,7 +5,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-/**对请求JSON的操作
+/**对请求 JSON 的操作
  * @author Lemon
  */
 public enum Operation {
@@ -14,21 +14,12 @@ public enum Operation {
 	 * "key0,key1,key2..."
 	 */
 	MUST,
-	/**
-	 * @deprecated  用 MUST 代替，最早可能 4.5.0 移除
-	 */
-	NECESSARY,
 
 	/**
 	 * 不允许传的字段，结构是
 	 * "key0,key1,key2..."
 	 */
 	REFUSE,
-	/**
-	 * @deprecated  用 REFUSE 代替，最早可能 4.5.0 移除
-	 */
-	DISALLOW,
-
 	
 	/**TODO 是否应该把数组类型写成 BOOLEANS, NUMBERS 等复数单词，以便抽取 enum ？扩展用 VERIFY 或 INSERT/UPDATE 远程函数等
 	 * 验证是否符合预设的类型:
@@ -47,7 +38,7 @@ public enum Operation {
 	 *   "id": "NUMBER", //id 类型必须为 NUMBER
 	 *   "pictureList": "URL[]", //pictureList 类型必须为 URL[]
 	 * }
-	 * @see {@link Structure#type(String, String, Object, boolean)}
+	 * @see {@link AbstractVerifier#verifyType(String, String, Object, boolean)}
 	 */
 	TYPE,
 	
@@ -61,7 +52,7 @@ public enum Operation {
 	 * }
 	 * 例如
 	 * {
-	 *   "phone~": "PHONE",  //phone 必须满足 PHONE 的格式
+	 *   "phone~": "PHONE",  //phone 必须满足 PHONE 的格式，配置见 {@link AbstractVerifier#COMPILE_MAP}
 	 *   "status{}": [1,2,3],  //status 必须在给出的范围内
 	 *   "balance&{}":">0,<=10000"  //必须满足 balance>0 & balance<=10000
 	 * }

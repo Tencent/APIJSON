@@ -12,11 +12,9 @@ import static apijson.RequestMethod.HEAD;
 import static apijson.RequestMethod.HEADS;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
-import static apijson.orm.Operation.DISALLOW;
 import static apijson.orm.Operation.EXIST;
 import static apijson.orm.Operation.INSERT;
 import static apijson.orm.Operation.MUST;
-import static apijson.orm.Operation.NECESSARY;
 import static apijson.orm.Operation.REFUSE;
 import static apijson.orm.Operation.REMOVE;
 import static apijson.orm.Operation.REPLACE;
@@ -96,6 +94,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	@NotNull
 	public static final Map<String, SortedMap<Integer, JSONObject>> REQUEST_MAP;
 
+	// 正则匹配的别名快捷方式，例如用 "PHONE" 代替 "^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$"
 	@NotNull
 	public static final Map<String, Pattern> COMPILE_MAP;
 	static {
@@ -110,8 +109,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		OPERATION_KEY_LIST.add(REMOVE.name());
 		OPERATION_KEY_LIST.add(MUST.name());
 		OPERATION_KEY_LIST.add(REFUSE.name());
-		OPERATION_KEY_LIST.add(NECESSARY.name());
-		OPERATION_KEY_LIST.add(DISALLOW.name());
 		
 		
 		SYSTEM_ACCESS_MAP = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
@@ -776,8 +773,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		String remove = StringUtil.getNoBlankString(target.getString(REMOVE.name()));
 		String must = StringUtil.getNoBlankString(target.getString(MUST.name()));
 		String refuse = StringUtil.getNoBlankString(target.getString(REFUSE.name()));
-		String necessary = StringUtil.getNoBlankString(target.getString(NECESSARY.name()));
-		String disallow = StringUtil.getNoBlankString(target.getString(DISALLOW.name()));
 
 
 		// 移除字段<<<<<<<<<<<<<<<<<<<
@@ -796,15 +791,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			if (real.get(s) == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
 				throw new IllegalArgumentException(method + "请求，" + name
 						+ " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
-			}
-		}
-
-		String[] necessarys = StringUtil.split(necessary);
-		List<String> necessaryList = necessarys == null ? new ArrayList<String>() : Arrays.asList(necessarys);
-		for (String s : necessaryList) {
-			if (real.get(s) == null) {//可能传null进来，这里还会通过 real.containsKey(s) == false) {
-				throw new IllegalArgumentException(method + "请求，" + name
-						+ " 里面不能缺少 " + s + " 等[" + necessary + "]内的任何字段！");
 			}
 		}
 		//判断必要字段是否都有>>>>>>>>>>>>>>>>>>>
@@ -879,21 +865,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 				refuseList.addAll(Arrays.asList(refuses));
 			}
 		}
-
-		List<String> disallowList = new ArrayList<String>();
-		if ("!".equals(disallow)) {//所有非necessary，改成 !necessary 更好
-			for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
-				if (key != null && key.startsWith("@") == false
-						&& necessaryList.contains(key) == false && objKeySet.contains(key) == false) {
-					disallowList.add(key);
-				}
-			}
-		} else {
-			String[] disallows = StringUtil.split(disallow);
-			if (disallows != null && disallows.length > 0) {
-				disallowList.addAll(Arrays.asList(disallows));
-			}
-		}
 		//解析不允许的字段>>>>>>>>>>>>>>>>>>>
 
 
@@ -902,10 +873,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			if (refuseList.contains(rk)) { //不允许的字段
 				throw new IllegalArgumentException(method + "请求，" + name
 						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(refuseList) + "内的任何字段！");
-			}
-			if (disallowList.contains(rk)) { //不允许的字段
-				throw new IllegalArgumentException(method + "请求，" + name
-						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(disallowList) + "内的任何字段！");
 			}
 
 			if (rk == null) { //无效的key

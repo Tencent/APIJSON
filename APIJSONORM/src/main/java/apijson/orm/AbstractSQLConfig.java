@@ -143,6 +143,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("locate", "");  // LOCATE(s1, s)	从字符串 s 中获取 s1 的开始位置	
 		SQL_FUNCTION_MAP.put("lcase", "");  // LCASE(s)	将字符串 s 的所有字母变成小写字母	
 		SQL_FUNCTION_MAP.put("left", "");  // LEFT(s, n)	返回字符串 s 的前 n 个字符	
+		SQL_FUNCTION_MAP.put("length", "");  // LENGTH(s)	返回字符串 s 的字符数	
 		SQL_FUNCTION_MAP.put("lower", "");  // LOWER(s)	将字符串 s 的所有字母变成小写字母	
 		SQL_FUNCTION_MAP.put("lpad", "");  // LPAD(s1, len, s2)	在字符串 s1 的开始处填充字符串 s2，使字符串长度达到 len	
 		SQL_FUNCTION_MAP.put("ltrim", "");  // LTRIM(s)	去掉字符串 s 开始处的空格	
@@ -1013,6 +1014,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	@JSONField(serialize = false)
 	public String getColumnString(boolean inSQLJoin) throws Exception {
+		List<String> column = getColumn();
+		
 		switch (getMethod()) {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
@@ -2011,10 +2014,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String condition = "";
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] instanceof String == false) {
-				throw new IllegalArgumentException(key + "$:value 中value的类型只能为String或String[]！");
+			Object v = values[i];
+			if (v instanceof String == false) {
+				throw new IllegalArgumentException(key + "$:value 中 value 的类型只能为 String 或 String[]！");
 			}
-			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, values[i]);
+			if (((String) v).contains("%%")) {
+				throw new IllegalArgumentException(key + "$:value 中 value 值 " + v + " 中包含 %% ！不允许有连续的 % ！");
+			}
+			
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, v);
 		}
 
 		return getCondition(Logic.isNot(type), condition);
