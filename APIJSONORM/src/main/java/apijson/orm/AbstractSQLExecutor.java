@@ -214,7 +214,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						throw new NotExistException("没权限访问或对象不存在！");
 					}
 
-					// 更新成功后收集结果。例如更新操作成功时，返回count(affected rows)、id字段
+					// updateCount>0时收集结果。例如更新操作成功时，返回count(affected rows)、id字段
 					result = new JSONObject(true);
 
 					//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
