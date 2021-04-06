@@ -48,6 +48,11 @@ import apijson.orm.exception.OutOfRangeException;
 public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
 
+	/**
+	 * 打印大数据量日志的标识。线上环境比较敏感，可以通过切换该变量来控制异常栈抛出、错误日志打印。保守起见，该值默认为false。
+	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求及响应信息。
+	 */
+	public static boolean IS_PRINT_BIG_LOG = false;
 
 	/**
 	 * method = null
@@ -301,9 +306,6 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 	private int queryDepth;
 
-	// 打印异常日志的标识。线上环境比较敏感，可以通过切换该变量来控制异常栈抛出、错误日志打印。保守起见，该值默认为false。
-	public static boolean isPrintErrorLog = false;
-
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return requestObject
@@ -386,12 +388,11 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 
-		if (isPrintErrorLog) { //用 | 替代 /，避免 APIJSON ORM，APIAuto 等解析路径错误
+		if (Log.DEBUG) {
 			requestObject.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
 			requestObject.put("time:start|duration|end", startTime + "|" + duration + "|" + endTime);
 			if (error != null) {
-				Log.d(TAG, String.format("onObjectParse error, error is %s", error.getMessage()));
 				requestObject.put("throw", error.getClass().getName());
 				requestObject.put("trace", error.getStackTrace());
 			}
@@ -399,17 +400,15 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		onClose();
 
-		//会不会导致原来的session = null？		session = null;
-
-		if (isPrintErrorLog) {
-			Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
-					+ requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
-
-			Log.d(TAG, "parseResponse  return response = \n" + JSON.toJSONString(requestObject)
-			+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n");
+		System.err.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
+				+ TAG + ".DEBUG: " + requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
+	
+		if (Log.DEBUG || IS_PRINT_BIG_LOG || error != null) {  // 日志仅存服务器，所以不太敏感，而且这些日志虽然量大但非常重要，对排查 bug 很关键
+			System.err.println(TAG + ".DEBUG: " + requestMethod + "/parseResponse return response = \n" + JSON.toJSONString(requestObject) + "\n\n");
 		}
-		Log.d(TAG, "parseResponse  endTime = " + endTime + ";  duration = " + duration
-				+ ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
+		
+		System.err.println(TAG + ".DEBUG: " + requestMethod + "/parseResponse  endTime = " + endTime + ";  duration = " + duration
+				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n");
 
 		return res;
 	}

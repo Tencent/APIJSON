@@ -2018,9 +2018,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (v instanceof String == false) {
 				throw new IllegalArgumentException(key + "$:value 中 value 的类型只能为 String 或 String[]！");
 			}
-			if (((String) v).contains("%%")) {
-				throw new IllegalArgumentException(key + "$:value 中 value 值 " + v + " 中包含 %% ！不允许有连续的 % ！");
+			if (((String) v).isEmpty()) {  // 允许查空格 StringUtil.isEmpty((String) v, true)
+				throw new IllegalArgumentException(key + "$:value 中 value 值 " + v + "是空字符串，没有意义，不允许这样传！");
 			}
+			//			if (((String) v).contains("%%")) {  // 需要通过 %\%% 来模糊搜索 %
+			//				throw new IllegalArgumentException(key + "$:value 中 value 值 " + v + " 中包含 %% ！不允许有连续的 % ！");
+			//			}
 			
 			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, v);
 		}
