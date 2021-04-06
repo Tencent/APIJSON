@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import apijson.orm.exception.NotExistException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
@@ -209,9 +210,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					executedSQLCount ++;
 
 					int updateCount = executeUpdate(config);
+					if (updateCount <= 0) {
+						throw new NotExistException("没权限访问或对象不存在！");
+					}
 
-					result = AbstractParser.newResult(updateCount > 0 ? JSONResponse.CODE_SUCCESS : JSONResponse.CODE_NOT_FOUND
-							, updateCount > 0 ? JSONResponse.MSG_SUCCEED : "没权限访问或对象不存在！");
+					// updateCount>0时收集结果。例如更新操作成功时，返回count(affected rows)、id字段
+					result = new JSONObject(true);
 
 					//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
 					result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
