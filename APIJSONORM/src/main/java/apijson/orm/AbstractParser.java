@@ -301,6 +301,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 	private int queryDepth;
 
+	// 打印异常日志的标识。线上环境比较敏感，可以通过切换该变量来控制异常栈抛出、错误日志打印。保守起见，该值默认为false。
+	public static boolean isPrintErrorLog = false;
+
 	/**解析请求json并获取对应结果
 	 * @param request
 	 * @return requestObject
@@ -383,11 +386,12 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 
-		if (Log.DEBUG) { //用 | 替代 /，避免 APIJSON ORM，APIAuto 等解析路径错误
+		if (isPrintErrorLog) { //用 | 替代 /，避免 APIJSON ORM，APIAuto 等解析路径错误
 			requestObject.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
 			requestObject.put("time:start|duration|end", startTime + "|" + duration + "|" + endTime);
 			if (error != null) {
+				Log.d(TAG, String.format("onObjectParse error, error is %s", error.getMessage()));
 				requestObject.put("throw", error.getClass().getName());
 				requestObject.put("trace", error.getStackTrace());
 			}
@@ -397,7 +401,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		//会不会导致原来的session = null？		session = null;
 
-		if (Log.DEBUG) {
+		if (isPrintErrorLog) {
 			Log.d(TAG, "\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
 					+ requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
 
