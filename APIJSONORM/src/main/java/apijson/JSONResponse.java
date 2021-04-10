@@ -7,6 +7,7 @@ package apijson;
 
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -502,23 +503,17 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @return
 	 */
 	public static String formatHyphen(@NotNull String key, boolean firstCase) {
-		boolean first = true;
-		int index;
-
 		String name = "";
-		String part;
-		do {
-			index = key.indexOf("-");
-			part = index < 0 ? key : key.substring(0, index);
 
-			name += firstCase && first == false ? StringUtil.firstCase(part, true) : part;
-			key = key.substring(index + 1);
+        StringTokenizer parts = new StringTokenizer(key, "-");
+        name += parts.nextToken();
+        while(parts.hasMoreTokens())
+        {
+            String part = parts.nextToken();
+            name += firstCase ? StringUtil.firstCase(part, true) : part;
+        }
 
-			first = false;
-		}
-		while (index >= 0);
-
-		return name;
+        return name;
 	}
 
 
