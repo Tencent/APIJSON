@@ -1570,7 +1570,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			combine = getCombine();
 			List<String> andList = combine.get("&");
 			if (value == null) {
-				andList.remove(key);
+				if (andList != null) {
+					andList.remove(key);
+				}
 			}
 			else if (andList == null || andList.contains(key) == false) {
 				int i = 0;

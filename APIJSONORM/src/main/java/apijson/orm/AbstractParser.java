@@ -1174,7 +1174,19 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中路径对应的对象 '" + targetTableKey + "':{} 不存在或值为 null ！必须是 {} 这种 JSONObject 格式！");
 			}
 
-			tableObj.put(key, tableObj.remove(key)); //保证和SQLExcecutor缓存的Config里where顺序一致，生成的SQL也就一致
+			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 <<<<<<<<<
+			// AbstractSQLConfig.newSQLConfig 中强制把 id, id{}, userId, userId{} 放到了最前面		tableObj.put(key, tableObj.remove(key));
+			
+			if (tableObj.size() > 1) {  // 把 key 强制放最前，AbstractSQLExcecutor 中 config.putWhere 也是放尽可能最前
+				JSONObject newTableObj = new JSONObject(tableObj.size(), true);
+				newTableObj.put(key, tableObj.remove(key));
+				newTableObj.putAll(tableObj);
+				
+				tableObj = newTableObj;
+				request.put(tableKey, tableObj);
+			}
+			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 >>>>>>>>>
+			
 
 			Join j = new Join();
 			j.setPath(path);

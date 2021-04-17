@@ -408,8 +408,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 				//替换为 "id{}": [userId1, userId2, userId3...]
-				jc.putWhere(j.getOriginKey(), null, false);
-				jc.putWhere(j.getKey() + "{}", targetValueList, false);
+				jc.putWhere(j.getOriginKey(), null, false);  // remove orginKey
+				jc.putWhere(j.getKey() + "{}", targetValueList, true);  // add orginKey{}
 
 				jc.setMain(true).setPreparedValueList(new ArrayList<>());
 
@@ -456,7 +456,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 								+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
 						//缓存到 childMap
-						cc.putWhere(j.getKey(), result.get(j.getKey()), false);
+						cc.putWhere(j.getKey(), result.get(j.getKey()), true);
 						cacheSql = cc.getSQL(false);
 						childMap.put(cacheSql, result);
 
@@ -531,7 +531,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					if (childConfig != null && childTable.equalsIgnoreCase(childConfig.getSQLTable())) {
 
-						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()), false);
+						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()), true);
 						childSql = childConfig.getSQL(false);
 
 						if (StringUtil.isEmpty(childSql, true)) {
