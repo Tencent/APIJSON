@@ -162,7 +162,48 @@ public class Join {
 	}
 
 
+	public boolean isAppJoin() {
+		return "@".equals(getJoinType());
+	}
+	public boolean isLeftJoin() {
+		return "<".equals(getJoinType());
+	}
+	public boolean isRightJoin() {
+		return ">".equals(getJoinType());
+	}
+	public boolean isCrossJoin() {
+		return "*".equals(getJoinType());
+	}
+	public boolean isInnerJoin() {
+		return "&".equals(getJoinType());
+	}
+	public boolean isFullJoin() {
+		String jt = getJoinType();
+		return "".equals(jt) || "|".equals(jt);
+	}
+	public boolean isOuterJoin() {
+		return "!".equals(getJoinType());
+	}
+	public boolean isSideJoin() {
+		return "^".equals(getJoinType());
+	}
+	public boolean isAntiJoin() {
+		return "(".equals(getJoinType());
+	}
+	public boolean isForeignJoin() {
+		return ")".equals(getJoinType());
+	}
 
+	public boolean isLeftOrRightJoin() {
+		String jt = getJoinType();
+		return "<".equals(jt) || ">".equals(jt);
+	}
+	
+	public boolean canCacheViceTable() {
+		String jt = getJoinType();
+		return "@".equals(jt) || "<".equals(jt) || ">".equals(jt) || "&".equals(jt) || "*".equals(jt) || ")".equals(jt);
+	}
+	
 	public boolean isSQLJoin() {
 		return ! isAppJoin();
 	}
@@ -171,22 +212,13 @@ public class Join {
 		return j != null && j.isSQLJoin();
 	}
 
-	public boolean isAppJoin() {
-		return "@".equals(getJoinType());
-	}
-
 	public static boolean isAppJoin(Join j) {
 		return j != null && j.isAppJoin();
 	}
-
-	public boolean isLeftOrRightJoin() {
-		return "<".equals(getJoinType()) || ">".equals(getJoinType());
-	}
-
+	
 	public static boolean isLeftOrRightJoin(Join j) {
 		return j != null && j.isLeftOrRightJoin();
 	}
-
 
 
 }

@@ -389,8 +389,15 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					continue;
 				}
 
-				jc = j.getJoinConfig();
 				cc = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+				if (cc == null) {
+					if (Log.DEBUG) {
+						throw new NullPointerException("服务器内部错误, executeAppJoin cc == null ! 导致不能缓存 @ APP JOIN 的副表数据！");
+					}
+					continue;
+				}
+				
+				jc = j.getJoinConfig();
 
 				//取出 "id@": "@/User/userId" 中所有 userId 的值
 				List<Object> targetValueList = new ArrayList<>();
@@ -543,15 +550,18 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 				}
 			}
+			
+		}
 
+		Object value = getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
+		if (value != null) {
 			if (finalTable == null) {
 				finalTable = new JSONObject(true);
 				childMap.put(childSql, finalTable);
 			}
+			finalTable.put(lable, value);
 		}
-
-		finalTable.put(lable, getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap));
-
+		
 		return table;
 	}
 

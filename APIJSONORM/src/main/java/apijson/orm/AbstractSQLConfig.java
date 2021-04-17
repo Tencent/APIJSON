@@ -1769,8 +1769,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (isAntiJoin) { // ( ANTI JOIN: A & ! B  
 						newWs += " ( " + ( isWsEmpty ? "" : ws + AND ) + NOT + " ( " + js + " ) " + " ) ";
 					}
-					else if (isForeignJoin) { // ) FOREIGN JOIN: B & ! A
-						newWs += " ( " + " ( " + js + " ) " + ( isWsEmpty ? "" : AND + NOT + ws ) + " ) ";
+					else if (isForeignJoin) { // ) FOREIGN JOIN: (! A) & B  // preparedValueList.add 不好反过来  B & ! A
+						newWs += " ( " + NOT + " ( " + ws + " ) ) " + AND + " ( " + js + " ) ";
 					}
 					else if (isSideJoin) { // ^ SIDE JOIN:  ! (A & B)
 						//MySQL 因为 NULL 值处理问题，(A & ! B) | (B & ! A) 与 ! (A & B) 返回结果不一样，后者往往更多
@@ -3203,7 +3203,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			alias = j.getAlias();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
 			SQLConfig joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
-			SQLConfig cacheConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback).setCount(1);
+			SQLConfig cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias, j.getRequest(), null, false, callback).setCount(1);
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
 				if (joinConfig.getDatabase() == null) {
@@ -3215,7 +3215,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (joinConfig.getSchema() == null) {
 					joinConfig.setSchema(config.getSchema()); //主表 JOIN 副表，默认 schema 一致
 				}
-				cacheConfig.setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
+				
+				if (cacheConfig != null) {
+					cacheConfig.setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
+				}
 
 
 				if (isQuery) {
@@ -3238,8 +3241,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				joinConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
 				joinConfig.setColumn(Arrays.asList(j.getKey())); //优化性能，不取非必要的字段
 
-				cacheConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
-				cacheConfig.setColumn(Arrays.asList(j.getKey())); //优化性能，不取非必要的字段
+				if (cacheConfig != null) {
+					cacheConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
+					cacheConfig.setColumn(Arrays.asList(j.getKey())); //优化性能，不取非必要的字段
+				}
 			}
 
 			j.setJoinConfig(joinConfig);
