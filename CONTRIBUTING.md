@@ -21,7 +21,8 @@
 - [1906522096](https://github.com/1906522096)
 - [github-ganyu](https://github.com/github-ganyu)
 - [sunxiaoguang](https://github.com/sunxiaoguang)(知乎基础研发架构师)
-- [403f](https://github.com/Tencent/APIJSON/pull/217)
+- [403f](https://github.com/403f)
+- [gujiachun](https://github.com/gujiachun)
 
 #### 其中特别致谢: <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
