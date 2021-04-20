@@ -1512,6 +1512,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 
 	public static final String KEY_CONFIG = "config";
+
+	public static final String KEY_SQL = "sql";
 	
 	protected Map<String, List<JSONObject>> arrayMainCacheMap = new HashMap<>();
 	public void putArrayMainCache(String arrayPath, List<JSONObject> mainTableDataList) {
@@ -1549,19 +1551,27 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			JSONObject result;
 			
 			boolean explain = config.isExplain();
-			if (explain) { //如果先执行 explain，则 execute 会死循环，所以只能先执行非 explain
+			if (explain) {
+				//如果先执行 explain，则 execute 会死循环，所以只能先执行非 explain
 				config.setExplain(false); //对下面 config.getSQL(false); 生效
 				JSONObject res = getSQLExecutor().execute(config, false);
 
-				config.setExplain(explain);
-				JSONObject explainResult = config.isMain() && config.getPosition() != 0 ? null : getSQLExecutor().execute(config, false);
+				//如果是查询方法，才能执行explain
+				if (RequestMethod.isQueryMethod(config.getMethod())){
+					config.setExplain(explain);
+					JSONObject explainResult = config.isMain() && config.getPosition() != 0 ? null : getSQLExecutor().execute(config, false);
 
-				if (explainResult == null) {
-					result = res;
-				}
-				else {
+					if (explainResult == null) {
+						result = res;
+					}
+					else {
+						result = new JSONObject(true);
+						result.put(KEY_EXPLAIN, explainResult);
+						result.putAll(res);
+					}
+				}else{//如果是更新请求，不执行explain，但可以返回sql
 					result = new JSONObject(true);
-					result.put(KEY_EXPLAIN, explainResult);
+					result.put(KEY_SQL, config.getSQL(false));
 					result.putAll(res);
 				}
 			}
