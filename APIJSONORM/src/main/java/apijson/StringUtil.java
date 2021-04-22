@@ -118,7 +118,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String getString(Object[] array, String split, boolean ignoreEmptyItem) {
-		String s = "";
+		StringBuilder s = new StringBuilder("");
 		if (array != null) {
 			if (split == null) {
 				split = ",";
@@ -127,10 +127,10 @@ public class StringUtil {
 				if (ignoreEmptyItem && isEmpty(array[i], true)) {
 					continue;
 				}
-				s += ((i > 0 ? split : "") + array[i]);
+				s.append(((i > 0 ? split : "") + array[i]));
 			}
 		}
-		return getString(s);
+		return getString(s.toString());
 	}
 
 	//获取string,为null时返回"" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -540,20 +540,19 @@ public class StringUtil {
 			return "";
 		}
 
-		String numberString = "";
+		StringBuilder numberString = new StringBuilder("");
 		String single;
 		for (int i = 0; i < s.length(); i++) {
 			single = s.substring(i, i + 1);
 			if (isNumer(single)) {
-				numberString += single;
+				numberString.append(single);
 			} else {
 				if (onlyStart) {
-					return numberString;
+					return numberString.toString();
 				}
 			}
 		}
-
-		return numberString;
+		return numberString.toString();
 	}
 
 	//提取特殊字符>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -643,14 +642,16 @@ public class StringUtil {
 		}
 
 		//单独写到getCorrectPrice? <<<<<<<<<<<<<<<<<<<<<<
-		String correctPrice = "";
+		String correctPrice;
+		StringBuilder correctPriceBuilder = new StringBuilder("");
 		String s;
 		for (int i = 0; i < price.length(); i++) {
 			s = price.substring(i, i + 1);
 			if (".".equals(s) || isNumer(s)) {
-				correctPrice += s;
+				correctPriceBuilder.append(s);
 			}
 		}
+		correctPrice = correctPriceBuilder.toString();
 		//单独写到getCorrectPrice? >>>>>>>>>>>>>>>>>>>>>>
 
 		Log.i(TAG, "getPrice  <<<<<<<<<<<<<<<<<< correctPrice =  " + correctPrice);
