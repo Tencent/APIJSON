@@ -167,7 +167,7 @@ public class AbstractFunctionParser implements FunctionParser {
 		String[] methods = StringUtil.split(row.getString("methods"));
 		List<String> ml = methods == null || methods.length <= 0 ? null : Arrays.asList(methods);
 		if (ml != null && ml.contains(parser.getMethod().toString()) == false) {
-			throw new UnsupportedOperationException("不允许 method = " + parser.getMethod() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 method 在 " + methods + "内 !");
+			throw new UnsupportedOperationException("不允许 method = " + parser.getMethod() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 method 在 " + Arrays.toString(methods) + "内 !");
 		}
 
 		try {
