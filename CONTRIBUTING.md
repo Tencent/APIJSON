@@ -62,7 +62,7 @@ APIJSON 作为腾讯开源的知名热门项目，贡献代码除了可以给简
 
 我们除了希望听到您的反馈和建议外，我们也希望您接受代码形式的直接帮助，对我们的 GitHub 发出 Pull Request 请求。
 
-以下是具体步骤：
+以下是具体步骤：(注意本步骤将不会自动记录贡献者的 GitHub 账号到 contributors 中，推荐用以下 [详细的图文步骤](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md#%E8%AF%A6%E7%BB%86%E7%9A%84%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4%E5%8F%AF%E5%8F%82%E8%80%83%E4%BB%A5%E4%B8%8B%E4%BB%BB%E6%84%8F%E4%B8%80%E7%AF%87))
 
 #### Fork 仓库
 
