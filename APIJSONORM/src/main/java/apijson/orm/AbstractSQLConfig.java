@@ -1473,17 +1473,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
 			return "";
 		}
-		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer() || isDb2());
+		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer() || isDb2(), isOracle());
 	}
 	/**获取限制数量
 	 * @param limit
 	 * @return
 	 */
-	public static String getLimitString(int page, int count, boolean isTSQL) {
+	public static String getLimitString(int page, int count, boolean isTSQL, boolean isOracle) {
 		int offset = getOffset(page, count);
 
-		if (isTSQL) {  // OFFSET FECTH 中所有关键词都不可省略
-			return " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
+		if (isTSQL) {  // OFFSET FECTH 中所有关键词都不可省略, 另外 Oracle 数据库使用子查询加 where 分页
+			return isOracle? " WHERE ROWNUM BETWEEN "+ offset +" AND "+ (offset + count): " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
 		}
 
 		return " LIMIT " + count + (offset <= 0 ? "" : " OFFSET " + offset);  // DELETE, UPDATE 不支持 OFFSET
@@ -2613,8 +2613,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
-			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
-		}
+			if(config.isOracle()){
+				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
+				return explain + "SELECT * FROM (SELECT"+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM "+getConditionString(column, tablePath, config)+ ") "+config.getLimitString();
+			}else
+				return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
+			}
 	}
 
 	/**获取条件SQL字符串
@@ -2641,7 +2645,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		//no need to optimize
 		//		if (config.getPage() <= 0 || ID.equals(column.trim())) {
-		return condition + config.getLimitString();
+		return config.isOracle()? condition:condition + config.getLimitString();
 		//		}
 		//
 		//
