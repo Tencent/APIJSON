@@ -1351,7 +1351,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					String k = entry.getKey();
 					index = k.indexOf(key);
 					if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
-						return where.get(k);
+						return entry.getValue();
 					}
 				}
 			}
@@ -2304,7 +2304,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				} else {
 					keyType = 0; //注意重置类型，不然不该加减的字段会跟着加减
 				}
-				value = content.get(key);
+				value = entry.getValue();
 				key = getRealKey(method, key, false, true, verifyName);
 
 				setString += (isFirst ? "" : ", ") + (getKey(key) + " = " + (keyType == 1 ? getAddString(key, value) : (keyType == 2

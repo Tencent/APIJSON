@@ -1398,7 +1398,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			String path = entry.getKey();
 			if (valuePath.startsWith(path + "/")) {
 				try {
-					parent = (JSONObject) queryResultMap.get(path);
+					parent = (JSONObject) entry.getValue();
 				} catch (Exception e) {
 					Log.e(TAG, "getValueByPath  try { parent = (JSONObject) queryResultMap.get(path); } catch { "
 							+ "\n parent not instanceof JSONObject!");
