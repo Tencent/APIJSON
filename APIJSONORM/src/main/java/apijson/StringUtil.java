@@ -111,11 +111,13 @@ public class StringUtil {
 	public static String getString(Object[] array, String split) {
 		return getString(array, split, false);
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
 	/**获取string,为null则返回""
-	 * @param array
-	 * @param split
-	 * @param ignoreEmptyItem
-	 * @return
+	 * @param array -the str array given
+	 * @param split -the token used to split
+	 * @param ignoreEmptyItem -whether to ignore empty item or not
+	 * @return {@link #getString(Object[], String, boolean)}
+	 * <p>Here we replace the simple "+" way of concatenating with Stringbuilder 's append</p>
 	 */
 	public static String getString(Object[] array, String split, boolean ignoreEmptyItem) {
 		StringBuilder s = new StringBuilder("");
@@ -530,10 +532,13 @@ public class StringUtil {
 	public static String getNumber(String s) {
 		return getNumber(s, false);
 	}
+
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
 	/**去掉string内所有非数字类型字符
-	 * @param s
+	 * @param s -string passed in
 	 * @param onlyStart 中间有非数字时只获取前面的数字
-	 * @return
+	 * @return limit String
+	 * <p>Here we replace the simple "+" way of concatenating with Stringbuilder 's append</p>
 	 */
 	public static String getNumber(String s, boolean onlyStart) {
 		if (isNotEmpty(s, true) == false) {
@@ -631,10 +636,12 @@ public class StringUtil {
 	public static String getPrice(String price) {
 		return getPrice(price, PRICE_FORMAT_DEFAULT);
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
 	/**获取价格，保留两位小数
-	 * @param price
+	 * @param price -price passed in
 	 * @param formatType 添加单位（元）
-	 * @return
+	 * @return limit String
+	 * <p>Here we replace the simple "+" way of concatenating with Stringbuilder 's append</p>
 	 */
 	public static String getPrice(String price, int formatType) {
 		if (isNotEmpty(price, true) == false) {

@@ -1329,10 +1329,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public Object getWhere(String key) {
 		return getWhere(key, false);
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
 	/**
-	 * @param key
-	 * @param exactMatch
+	 * @param key - the key passed in
+	 * @param exactMatch - whether it is exact match
 	 * @return
+	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
 	@JSONField(serialize = false)
 	@Override
@@ -2273,11 +2275,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getSetString() throws Exception {
 		return getSetString(getMethod(), getContent(), ! isTest());
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
 	/**获取SET
-	 * @param method
-	 * @param content
+	 * @param method -the method used
+	 * @param content -the content map
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
+	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
 	@JSONField(serialize = false)
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {

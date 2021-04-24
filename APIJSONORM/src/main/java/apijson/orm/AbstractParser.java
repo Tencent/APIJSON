@@ -1375,9 +1375,11 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		queryResultMap.put(path, result);
 		//		}
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
 	/**根据路径获取值
-	 * @param valuePath
+	 * @param valuePath -the path need to get value
 	 * @return parent == null ? valuePath : parent.get(keys[keys.length - 1])
+	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
 	@Override
 	public Object getValueByPath(String valuePath) {
