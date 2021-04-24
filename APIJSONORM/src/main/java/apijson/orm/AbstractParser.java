@@ -1392,10 +1392,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		//取出key被valuePath包含的result，再从里面获取key对应的value
-		Set<String> set = queryResultMap.keySet();
 		JSONObject parent = null;
 		String[] keys = null;
-		for (String path : set) {
+		for (Map.Entry<String,Object> entry : queryResultMap.entrySet()){
+			String path = entry.getKey();
 			if (valuePath.startsWith(path + "/")) {
 				try {
 					parent = (JSONObject) queryResultMap.get(path);

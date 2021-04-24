@@ -1341,16 +1341,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return where == null ? null : where.get(key);
 		}
 
-		Set<String> set = key == null || where == null ? null : where.keySet();
-		if (set != null) {
-			synchronized (where) {
-				if (where != null) {
-					int index;
-					for (String k : set) {
-						index = k.indexOf(key);
-						if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
-							return where.get(k);
-						}
+		if (key == null || where == null){
+			return null;
+		}
+		synchronized (where) {
+			if (where != null) {
+				int index;
+				for (Map.Entry<String,Object> entry : where.entrySet()) {
+					String k = entry.getKey();
+					index = k.indexOf(key);
+					if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
+						return where.get(k);
 					}
 				}
 			}
@@ -2289,7 +2290,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			Object value;
 
 			String idKey = getIdKey();
-			for (String key : set) {
+			for (Map.Entry<String,Object> entry : content.entrySet()) {
+				String key = entry.getKey();
 				//避免筛选到全部	value = key == null ? null : content.get(key);
 				if (key == null || idKey.equals(key)) {
 					continue;
