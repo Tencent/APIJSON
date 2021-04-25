@@ -505,16 +505,12 @@ public class JSONResponse extends apijson.JSONObject {
 	public static String formatHyphen(@NotNull String key, boolean firstCase) {
 		String name = "";
 
-        StringTokenizer parts = new StringTokenizer(key, "-");
-        name += parts.nextToken();
-        while(parts.hasMoreTokens())
-        {
-            String part = parts.nextToken();
-            name += firstCase ? StringUtil.firstCase(part, true) : part;
-        }
-
-        return name;
+		StringTokenizer parts = new StringTokenizer(key, "-");
+		name += parts.nextToken();
+		while(parts.hasMoreTokens()) {
+			String part = parts.nextToken();
+			name += firstCase ? StringUtil.firstCase(part, true) : part;
+		}
+		return name;
 	}
-
-
 }
