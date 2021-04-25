@@ -277,7 +277,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 					if (id instanceof Number == false) {//不能准确地判断Long，可能是Integer
 						throw new UnsupportedDataTypeException(table + ".id类型错误，id类型必须是Long！");
 					}
-					if (list.contains(new Long("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
+					if (list.contains(Long.valueOf("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
 						throw new IllegalAccessException(visitorIdkey + " = " + id + " 的 " + table
 								+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
 					}
