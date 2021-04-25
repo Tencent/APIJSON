@@ -1428,9 +1428,11 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		queryResultMap.put(path, result);
 		//		}
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
 	/**根据路径获取值
-	 * @param valuePath
+	 * @param valuePath -the path need to get value
 	 * @return parent == null ? valuePath : parent.get(keys[keys.length - 1])
+	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
 	@Override
 	public Object getValueByPath(String valuePath) {
@@ -1445,13 +1447,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		//取出key被valuePath包含的result，再从里面获取key对应的value
-		Set<String> set = queryResultMap.keySet();
 		JSONObject parent = null;
 		String[] keys = null;
-		for (String path : set) {
+		for (Map.Entry<String,Object> entry : queryResultMap.entrySet()){
+			String path = entry.getKey();
 			if (valuePath.startsWith(path + "/")) {
 				try {
-					parent = (JSONObject) queryResultMap.get(path);
+					parent = (JSONObject) entry.getValue();
 				} catch (Exception e) {
 					Log.e(TAG, "getValueByPath  try { parent = (JSONObject) queryResultMap.get(path); } catch { "
 							+ "\n parent not instanceof JSONObject!");

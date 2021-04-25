@@ -1527,10 +1527,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public Object getWhere(String key) {
 		return getWhere(key, false);
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
 	/**
-	 * @param key
-	 * @param exactMatch
+	 * @param key - the key passed in
+	 * @param exactMatch - whether it is exact match
 	 * @return
+	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
 	@JSONField(serialize = false)
 	@Override
@@ -1539,16 +1541,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return where == null ? null : where.get(key);
 		}
 
-		Set<String> set = key == null || where == null ? null : where.keySet();
-		if (set != null) {
-			synchronized (where) {
-				if (where != null) {
-					int index;
-					for (String k : set) {
-						index = k.indexOf(key);
-						if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
-							return where.get(k);
-						}
+		if (key == null || where == null){
+			return null;
+		}
+		synchronized (where) {
+			if (where != null) {
+				int index;
+				for (Map.Entry<String,Object> entry : where.entrySet()) {
+					String k = entry.getKey();
+					index = k.indexOf(key);
+					if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
+						return entry.getValue();
 					}
 				}
 			}
@@ -2480,11 +2483,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public String getSetString() throws Exception {
 		return getSetString(getMethod(), getContent(), ! isTest());
 	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
 	/**获取SET
-	 * @param method
-	 * @param content
+	 * @param method -the method used
+	 * @param content -the content map
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
+	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
 	@JSONField(serialize = false)
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
@@ -2497,7 +2502,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			Object value;
 
 			String idKey = getIdKey();
-			for (String key : set) {
+			for (Map.Entry<String,Object> entry : content.entrySet()) {
+				String key = entry.getKey();
 				//避免筛选到全部	value = key == null ? null : content.get(key);
 				if (key == null || idKey.equals(key)) {
 					continue;
@@ -2510,7 +2516,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				} else {
 					keyType = 0; //注意重置类型，不然不该加减的字段会跟着加减
 				}
-				value = content.get(key);
+				value = entry.getValue();
 				key = getRealKey(method, key, false, true, verifyName);
 
 				setString += (isFirst ? "" : ", ") + (getKey(key) + " = " + (keyType == 1 ? getAddString(key, value) : (keyType == 2
