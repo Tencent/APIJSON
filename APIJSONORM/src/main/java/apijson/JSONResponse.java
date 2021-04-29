@@ -57,9 +57,9 @@ public class JSONResponse extends apijson.JSONObject {
 	public static final String MSG_SERVER_ERROR = "Internal Server Error!"; //服务器内部错误
 
 
-	public static final String KEY_OK = "ok";
-	public static final String KEY_CODE = "code";
-	public static final String KEY_MSG = "msg";
+	public static String KEY_OK = "ok";
+	public static String KEY_CODE = "code";
+	public static String KEY_MSG = "msg";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_TOTAL = "total";
 	public static final String KEY_INFO = "info"; //详细的分页信息
