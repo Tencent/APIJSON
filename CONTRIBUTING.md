@@ -27,6 +27,8 @@
 - [gdjs2](https://github.com/gdjs2)
 - [Rkyzzy](https://github.com/Rkyzzy)(SUSTech)
 - [kxlv2000](https://github.com/kxlv2000)(SUSTech)
+- [caohao-php](https://github.com/caohao-php)(腾讯工程师)
+
 
 #### 其中特别致谢: <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
