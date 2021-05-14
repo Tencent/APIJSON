@@ -75,19 +75,22 @@ With APIJSON, client developers will no longer be suffered from possible errors 
 Server developers no longer need to worry about compatibility of APIs and documents with legacy apps.
 
 ### Examples:
+
 #### Get a User
 Request:
-<pre><code class="language-json">
+
+```json
 {
   "User":{
   }
 }
-</code></pre>
+```
 
 [Click here to test](http://apijson.cn:8080/get/{"User":{}})
 
 Response:
-<pre><code class="language-json">
+
+```json
 {
   "User":{
     "id":38710,
@@ -106,13 +109,14 @@ Response:
   "code":200,
   "msg":"success"
 }
-</code></pre>
-
+```
 <br />
 
 #### Get an Array of Users
+
 Request:
-<pre><code class="language-json">
+
+```json
 {
   "[]":{
     "count":3,             //just get 3 results
@@ -121,12 +125,13 @@ Request:
     }
   }
 }
-</code></pre>
+```
 
 [Click here to test](http://apijson.cn:8080/get/{"[]":{"count":3,"User":{"@column":"id,name"}}})
 
 Response:
-<pre><code class="language-json">
+
+```json
 {
   "[]":[
     {
@@ -151,7 +156,7 @@ Response:
   "code":200,
   "msg":"success"
 }
-</code></pre>
+```
 
 <br />
 
@@ -188,28 +193,28 @@ In the menu at the right, click libs, right click apijson-orm.jar,click add as l
   
 Open apijson.demo.server.DemoSQLConfig. In line 40-61, change return values of `getDBUri`,`getDBAccount`,`getDBPassword`,`getSchema` to your own database.<br/>
 
-<pre><code class="language-java">
+```java
 @Override
-	public String getDBUri() {
-		//TODO: Change the return value to your own
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432/postgres" : "jdbc:mysql://192.168.71.146:3306/";
-	}
-	@Override
-	public String getDBAccount() {
+public String getDBUri() {
     //TODO: Change the return value to your own
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "postgres" : "root";
-	}
-	@Override
-	public String getDBPassword() {
-  	//TODO: Change the return value to your own
-		return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "root"; 
-	}
-	@Override
-	public String getSchema() {
-		String s = super.getSchema();
-		return StringUtil.isEmpty(s, true) ? "thea" : s; //TODO: Change the return value to your own. For here,change "thea" to "your database's name"
-	}
-</code></pre>
+    return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432/postgres" : "jdbc:mysql://192.168.71.146:3306/";
+}
+@Override
+public String getDBAccount() {
+    //TODO: Change the return value to your own
+    return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "postgres" : "root";
+}
+@Override
+public String getDBPassword() {
+    //TODO: Change the return value to your own
+    return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "root"; 
+}
+@Override
+public String getSchema() {
+    String s = super.getSchema();
+    return StringUtil.isEmpty(s, true) ? "thea" : s; //TODO: Change the return value to your own. For here,change "thea" to "your database's name"
+}
+```
 
 **Note**: Instead of this step, you can also [import your database](#2.2).
   
