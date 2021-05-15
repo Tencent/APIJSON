@@ -56,11 +56,6 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 前端再也不用和后端沟通接口或文档问题了！再也不会被文档各种错误坑了！<br />
 后端再也不用为了兼容旧接口写新版接口和文档了！再也不会被前端随时随地没完没了地烦了！
 
-<p align="center" >
-  <a ><img src="https://oscimg.oschina.net/oscnet/up-5de4773b834bb9bef0432a88c122840deae.JPEG"></a>
-</p>
-
-
 ### 特点功能
 
 #### 对于前端
@@ -134,13 +129,9 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 <br />
 
 ### APIJSON 分享演讲
-https://github.com/TommyLemon/StaticResources/tree/master/APIJSON/Share/GiteeGVPMeetup2020 <br />
-https://my.oschina.net/u/4570368/blog/4818203 <br />
-https://my.oschina.net/gitosc/blog/4864607 <br />
-<img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/Share/GiteeGVPMeetup2020/APIJSON_summary_GiteeGVPMeetup2020.jpg" width="360" />
-<br />
-演讲录播视频
 https://www.bilibili.com/video/BV1Tv411t74v?p=4
+![image](https://user-images.githubusercontent.com/5738175/118364689-18440980-b5cc-11eb-9291-51053954f805.png)
+
 
 <br />
 
