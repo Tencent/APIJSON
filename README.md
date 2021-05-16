@@ -129,7 +129,7 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 <br />
 
 ### APIJSON 分享演讲
-https://www.bilibili.com/video/BV1Tv411t74v?p=4
+https://www.bilibili.com/video/BV1Tv411t74v
 ![image](https://user-images.githubusercontent.com/5738175/118364689-18440980-b5cc-11eb-9291-51053954f805.png)
 
 
