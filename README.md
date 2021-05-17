@@ -9,7 +9,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
  
-<p align="center">零代码、热更新、自动化 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构！</p>
+<p align="center">零代码、热更新、自动化 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
@@ -51,10 +51,10 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 能大幅降低开发和沟通成本，简化开发流程，缩短开发周期。<br />
 适合中小型前后端分离的项目，尤其是 BaaS、Serverless、互联网创业项目和企业自用项目。<br />
 
-通过万能的 API，前端可以定制任何数据、任何结构！<br />
-大部分 HTTP 请求后端再也不用写接口了，更不用写文档了！<br />
-前端再也不用和后端沟通接口或文档问题了！再也不会被文档各种错误坑了！<br />
-后端再也不用为了兼容旧接口写新版接口和文档了！再也不会被前端随时随地没完没了地烦了！
+通过万能的 API，前端可以定制任何数据、任何结构。<br />
+大部分 HTTP 请求后端再也不用写接口了，更不用写文档了。<br />
+前端再也不用和后端沟通接口或文档问题了。再也不会被文档各种错误坑了。<br />
+后端再也不用为了兼容旧接口写新版接口和文档了。再也不会被前端随时随地没完没了地烦了。
 
 ### 特点功能
 
