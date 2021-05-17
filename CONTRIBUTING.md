@@ -5,14 +5,14 @@
 
 ## Acknowledgements
 
-非常感谢以下贡献者们对于 APIJSON 的做出的贡献：
+非常感谢以下贡献者们对于 APIJSON 本项目做出的贡献：
 
 - [TommyLemon](https://github.com/TommyLemon)(腾讯工程师)
 - [ruoranw](https://github.com/ruoranw)(现居美国洛杉矶)
 - [zhoulingfengofcd](https://github.com/zhoulingfengofcd)
-- [Zerounary](https://github.com/Zerounary)
+- [Zerounary](https://github.com/Zerounary)(还贡献了 APIJSONParser)
 - [fineday009](https://github.com/fineday009)(腾讯工程师)
-- [vincentCheng](https://github.com/vincentCheng)
+- [vincentCheng](https://github.com/vincentCheng)(还贡献了 apijson-doc)
 - [justinfengchen](https://github.com/justinfengchen)
 - [linlwqq](https://github.com/linlwqq)
 - [redcatmiss](https://github.com/redcatmiss)(社保科技工程师)
