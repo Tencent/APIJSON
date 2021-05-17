@@ -6,7 +6,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
 
-<p align="center">🚀A JSON Transmission Protocol and an ORM Library for providing APIs and Documents automatically.</p>
+<p align="center">🚀 A JSON Transmission Protocol and an ORM Library for providing APIs and Documents automatically. </p>
 
 
 <p align="center" >
