@@ -7,7 +7,7 @@
 
 非常感谢以下贡献者们对于 APIJSON 本项目做出的贡献：
 
-- [TommyLemon](https://github.com/TommyLemon)(腾讯工程师)
+- [TommyLemon](https://github.com/TommyLemon)(腾讯工程师，还开源了 apijson-framework, APIJSON-Demo, apijson-column 等)
 - [ruoranw](https://github.com/ruoranw)(现居美国洛杉矶)
 - [zhoulingfengofcd](https://github.com/zhoulingfengofcd)
 - [Zerounary](https://github.com/Zerounary)(还开源了 APIJSONParser)
