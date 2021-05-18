@@ -140,7 +140,7 @@ https://www.bilibili.com/video/BV1Tv411t74v
 https://github.com/Tencent/APIJSON/wiki
 
 * **解决十个痛点** (APIJSON 可帮助用户 提振开发效率、杜绝联调扯皮、规避文档缺陷、节省流量带宽 等)
-* **开发提速巨大** (CRUD 零代码热更新自动化，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
+* **开发提速很大** (CRUD 零代码热更新自动化，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
 * **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
 * **社区影响力大** (GitHub 1W+ Star 在 350W Java 项目中排名前 140，远超 FLAG, BAT 等国内外绝大部分开源项目)
 * **多样用户案例** (腾讯内部用户包含 互娱、音乐、云与智慧，外部用户包含 500 强上市公司、数千亿资本国企 等)
