@@ -136,10 +136,10 @@ https://www.bilibili.com/video/BV1Tv411t74v
 <br />
 
 ### 为什么选择 APIJSON？
-前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
+前后端 关于接口的 开发、文档、联调 等 10 个痛点解析 <br />
 https://github.com/Tencent/APIJSON/wiki
 
-* **解决多个痛点** (APIJSON 可帮助用户 提振开发效率、杜绝联调扯皮、规避文档缺陷、节省流量带宽 等)
+* **解决十个痛点** (APIJSON 可帮助用户 提振开发效率、杜绝联调扯皮、规避文档缺陷、节省流量带宽 等)
 * **开发提速巨大** (CRUD 零代码热更新自动化，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
 * **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
 * **社区影响力大** (GitHub 1W+ Star 在 350W Java 项目中排名前 140，远超 FLAG, BAT 等国内外绝大部分开源项目)
