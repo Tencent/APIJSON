@@ -52,19 +52,19 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * 可以通过切换该变量来控制是否打印关键的接口请求内容。保守起见，该值默认为false。
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求内容。
 	 */
-	public static boolean IS_PRINT_REQUEST_STRING_LOG = true;
+	public static boolean IS_PRINT_REQUEST_STRING_LOG = false;
 
 	/**
 	 * 打印大数据量日志的标识。线上环境比较敏感，可以通过切换该变量来控制异常栈抛出、错误日志打印。保守起见，该值默认为false。
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求及响应信息。
 	 */
-	public static boolean IS_PRINT_BIG_LOG = true;
+	public static boolean IS_PRINT_BIG_LOG = false;
 
 	/**
 	 * 可以通过切换该变量来控制是否打印关键的接口请求结束时间。保守起见，该值默认为false。
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求结束时间。
 	 */
-	public static boolean IS_PRINT_REQUEST_ENDTIME_LOG = true;
+	public static boolean IS_PRINT_REQUEST_ENDTIME_LOG = false;
 
 
 	/**

@@ -23,6 +23,25 @@ public class Log {
 	}
 
 	/**
+	 * Forced debug
+	 * @param TAG tag
+	 * @param msg debug messages
+	 */
+	public static void fd(String TAG, String msg) {
+			System.err.println(TAG + ".DEBUG: " + msg);
+	}
+
+	/**
+	 * Generate separation line
+	 * @param pre prefix
+	 * @param symbol used for generating separation line
+	 * @param post postfix
+	 */
+	public static void sl(String pre,char symbol ,String post) {
+		System.err.println(pre+new String(new char[48]).replace('\u0000', symbol)+post);
+	}
+
+	/**
 	 * @param TAG
 	 * @param msg
 	 */
