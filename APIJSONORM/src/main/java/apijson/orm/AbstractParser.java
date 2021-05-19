@@ -49,10 +49,23 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	protected static final String TAG = "AbstractParser";
 
 	/**
+	 * 可以通过切换该变量来控制是否打印关键的接口请求内容。保守起见，该值默认为false。
+	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求内容。
+	 */
+	public static boolean IS_PRINT_REQUEST_STRING_LOG = true;
+
+	/**
 	 * 打印大数据量日志的标识。线上环境比较敏感，可以通过切换该变量来控制异常栈抛出、错误日志打印。保守起见，该值默认为false。
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求及响应信息。
 	 */
-	public static boolean IS_PRINT_BIG_LOG = false;
+	public static boolean IS_PRINT_BIG_LOG = true;
+
+	/**
+	 * 可以通过切换该变量来控制是否打印关键的接口请求结束时间。保守起见，该值默认为false。
+	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求结束时间。
+	 */
+	public static boolean IS_PRINT_REQUEST_ENDTIME_LOG = true;
+
 
 	/**
 	 * method = null
@@ -400,16 +413,18 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		onClose();
 
-		System.err.println("\n\n\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "
-				+ TAG + ".DEBUG: " + requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
-	
-		if (Log.DEBUG || IS_PRINT_BIG_LOG || error != null) {  // 日志仅存服务器，所以不太敏感，而且这些日志虽然量大但非常重要，对排查 bug 很关键
-			System.err.println(TAG + ".DEBUG: " + requestMethod + "/parseResponse return response = \n" + JSON.toJSONString(requestObject) + "\n\n");
+		//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/232
+		if (IS_PRINT_REQUEST_STRING_LOG||Log.DEBUG||error != null) {
+			Log.sl("\n\n\n",'<',"");
+			Log.fd(TAG , requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
 		}
-		
-		System.err.println(TAG + ".DEBUG: " + requestMethod + "/parseResponse  endTime = " + endTime + ";  duration = " + duration
-				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n");
-
+		if (IS_PRINT_BIG_LOG||Log.DEBUG||error != null) {  // 日志仅存服务器，所以不太敏感，而且这些日志虽然量大但非常重要，对排查 bug 很关键
+			Log.fd(TAG,requestMethod + "/parseResponse return response = \n" + JSON.toJSONString(requestObject) + "\n\n");
+		}
+		if (IS_PRINT_REQUEST_ENDTIME_LOG||Log.DEBUG||error != null) {
+			Log.fd(TAG , requestMethod + "/parseResponse  endTime = " + endTime + ";  duration = " + duration);
+			Log.sl("",'>',"\n\n\n");
+		}
 		return res;
 	}
 
