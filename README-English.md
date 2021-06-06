@@ -331,17 +331,26 @@ Here are the contributers of this project and authors of other projects for ecos
  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/41"><img src="https://avatars0.githubusercontent.com/u/39320217?s=460&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/119"><img src="https://avatars1.githubusercontent.com/u/25604004?s=460&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/223"><img src="https://avatars.githubusercontent.com/u/49295281?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/43"><img src="https://avatars0.githubusercontent.com/u/23173448?s=460&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/47"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/212"><img src="https://avatars.githubusercontent.com/u/8936328?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/70"><img src="https://avatars1.githubusercontent.com/u/22228201?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/74"><img src="https://avatars0.githubusercontent.com/u/1274536?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/92"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/103"><img src="https://avatars0.githubusercontent.com/u/25990237?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/194"><img src="https://avatars0.githubusercontent.com/u/3982329?s=460&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/219"><img src="https://avatars.githubusercontent.com/u/7135770?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/222"><img src="https://avatars.githubusercontent.com/u/49233056?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/221"><img src="https://avatars.githubusercontent.com/u/17545585?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/217"><img src="https://avatars.githubusercontent.com/u/30771966?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/190"><img src="https://avatars3.githubusercontent.com/u/25056767?s=460&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/69"><img src="https://avatars0.githubusercontent.com/u/13880474?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/72"><img src="https://avatars1.githubusercontent.com/u/10663804?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/33"><img src="https://avatars1.githubusercontent.com/u/5328313?s=460&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/235"><img src="https://avatars.githubusercontent.com/u/17243165?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/233"><img src="https://avatars.githubusercontent.com/u/1252459?v=4"  height="54" width="54" ></a>
+
   <br />
   <a href="https://github.com/APIJSON/apijson-orm"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  
  height="54" width="54" ></a>
