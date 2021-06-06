@@ -160,7 +160,7 @@ Response:
 
 <br />
 
-[Test it online](http://apijson.cn/)<br />
+[Test it online](http://apijson.cn/api)<br />
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_get.jpg) 
 
