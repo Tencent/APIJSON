@@ -79,7 +79,7 @@ Server developers no longer need to worry about compatibility of APIs and docume
 #### Get a User
 Request:
 
-```json
+```js
 {
   "User":{
   }
@@ -90,7 +90,7 @@ Request:
 
 Response:
 
-```json
+```js
 {
   "User":{
     "id":38710,
@@ -116,7 +116,7 @@ Response:
 
 Request:
 
-```json
+```js
 {
   "[]":{
     "count":3,             //just get 3 results
@@ -131,7 +131,7 @@ Request:
 
 Response:
 
-```json
+```js
 {
   "[]":[
     {
