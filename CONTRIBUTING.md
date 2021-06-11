@@ -29,6 +29,7 @@
 - [kxlv2000](https://github.com/kxlv2000)(SUSTech)
 - [caohao-php](https://github.com/caohao-php)(腾讯工程师)
 - [Wscats](https://github.com/Wscats)(腾讯工程师)
+- [jun0315](https://github.com/jun0315)
 
 
 #### 其中特别致谢: <br/>
