@@ -124,6 +124,7 @@ public interface Parser<T> {
 	RequestRole getGlobleRole();
 	String getGlobleDatabase();
 	String getGlobleSchema();
+	String getGlobleDatasource();
 	Boolean getGlobleExplain();
 	String getGlobleCache();
 
