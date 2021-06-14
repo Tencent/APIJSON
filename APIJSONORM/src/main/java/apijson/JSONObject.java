@@ -137,9 +137,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	public static final String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
+	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
+	public static final String KEY_DATASOURCE = "@datasource"; //数据源
 	public static final String KEY_EXPLAIN = "@explain"; //分析 true/false
 	public static final String KEY_CACHE = "@cache"; //缓存 RAM/ROM/ALL
-	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
 	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
 	public static final String KEY_FROM = "@from"; //FROM语句
 	public static final String KEY_COMBINE = "@combine"; //条件组合，每个条件key前面可以放&,|,!逻辑关系  "id!{},&sex,!name&$"
@@ -154,9 +155,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST = new ArrayList<String>();
 		TABLE_KEY_LIST.add(KEY_ROLE);
 		TABLE_KEY_LIST.add(KEY_DATABASE);
+		TABLE_KEY_LIST.add(KEY_SCHEMA);
+		TABLE_KEY_LIST.add(KEY_DATASOURCE);
 		TABLE_KEY_LIST.add(KEY_EXPLAIN);
 		TABLE_KEY_LIST.add(KEY_CACHE);
-		TABLE_KEY_LIST.add(KEY_SCHEMA);
 		TABLE_KEY_LIST.add(KEY_COLUMN);
 		TABLE_KEY_LIST.add(KEY_FROM);
 		TABLE_KEY_LIST.add(KEY_COMBINE);
@@ -216,6 +218,20 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject setDatabase(String database) {
 		return puts(KEY_DATABASE, database);
 	}
+	/**set schema where table was puts
+	 * @param schema
+	 * @return this
+	 */
+	public JSONObject setSchema(String schema) {
+		return puts(KEY_SCHEMA, schema);
+	}
+	/**set datasource where table was puts
+	 * @param datasource
+	 * @return this
+	 */
+	public JSONObject setDatasource(String datasource) {
+		return puts(KEY_DATASOURCE, datasource);
+	}
 	/**set if return explain informations
 	 * @param explain
 	 * @return
@@ -242,13 +258,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject setCache(String cache) {
 		return puts(KEY_CACHE, cache);
-	}
-	/**set schema where table was puts
-	 * @param schema
-	 * @return this
-	 */
-	public JSONObject setSchema(String schema) {
-		return puts(KEY_SCHEMA, schema);
 	}
 
 	/**set keys need to be returned

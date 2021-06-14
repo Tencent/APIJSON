@@ -199,6 +199,16 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	public String getGlobleSchema() {
 		return globleSchema;
 	}
+	protected String globleDatasource;
+	@Override
+	public String getGlobleDatasource() {
+		return globleDatasource;
+	}
+	public AbstractParser<T> setGlobleDatasource(String globleDatasource) {
+		this.globleDatasource = globleDatasource;
+		return this;
+	}
+	
 	protected Boolean globleExplain;
 	public AbstractParser<T> setGlobleExplain(Boolean globleExplain) {
 		this.globleExplain = globleExplain;
@@ -361,12 +371,14 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			setGlobleFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
 			setGlobleDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
 			setGlobleSchema(requestObject.getString(JSONRequest.KEY_SCHEMA));
+			setGlobleDatasource(requestObject.getString(JSONRequest.KEY_DATASOURCE));
 			setGlobleExplain(requestObject.getBoolean(JSONRequest.KEY_EXPLAIN));
 			setGlobleCache(requestObject.getString(JSONRequest.KEY_CACHE));
 
 			requestObject.remove(JSONRequest.KEY_FORMAT);
 			requestObject.remove(JSONRequest.KEY_DATABASE);
 			requestObject.remove(JSONRequest.KEY_SCHEMA);
+			requestObject.remove(JSONRequest.KEY_DATASOURCE);
 			requestObject.remove(JSONRequest.KEY_EXPLAIN);
 			requestObject.remove(JSONRequest.KEY_CACHE);
 		} catch (Exception e) {
@@ -1245,6 +1257,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ROLE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATABASE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_SCHEMA);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATASOURCE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COLUMN);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COMBINE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_GROUP);
@@ -1464,7 +1477,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		//取出key被valuePath包含的result，再从里面获取key对应的value
 		JSONObject parent = null;
 		String[] keys = null;
-		for (Map.Entry<String,Object> entry : queryResultMap.entrySet()){
+		for (Entry<String,Object> entry : queryResultMap.entrySet()){
 			String path = entry.getKey();
 			if (valuePath.startsWith(path + "/")) {
 				try {

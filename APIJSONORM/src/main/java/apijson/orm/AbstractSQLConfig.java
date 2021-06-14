@@ -9,6 +9,7 @@ import static apijson.JSONObject.KEY_CACHE;
 import static apijson.JSONObject.KEY_COLUMN;
 import static apijson.JSONObject.KEY_COMBINE;
 import static apijson.JSONObject.KEY_DATABASE;
+import static apijson.JSONObject.KEY_DATASOURCE;
 import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.JSONObject.KEY_FROM;
 import static apijson.JSONObject.KEY_GROUP;
@@ -335,6 +336,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private boolean distinct = false;
 	private String database; //表所在的数据库类型
 	private String schema; //表所在的数据库名
+	private String datasource; //数据源
 	private String table; //表名
 	private String alias; //表别名
 	private String group; //分组方式的字符串数组，','分隔
@@ -549,6 +551,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.schema = schema;
 		return this;
 	}
+	
+	@Override
+	public String getDatasource() {
+		return datasource;
+	}
+	@Override
+	public SQLConfig setDatasource(String datasource) {
+		this.datasource = datasource;
+		return this;
+	}
+	
 	/**请求传进来的Table名
 	 * @return
 	 * @see {@link #getSQLTable()}
@@ -1547,7 +1560,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		synchronized (where) {
 			if (where != null) {
 				int index;
-				for (Map.Entry<String,Object> entry : where.entrySet()) {
+				for (Entry<String,Object> entry : where.entrySet()) {
 					String k = entry.getKey();
 					index = k.indexOf(key);
 					if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
@@ -2502,7 +2515,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			Object value;
 
 			String idKey = getIdKey();
-			for (Map.Entry<String,Object> entry : content.entrySet()) {
+			for (Entry<String,Object> entry : content.entrySet()) {
 				String key = entry.getKey();
 				//避免筛选到全部	value = key == null ? null : content.get(key);
 				if (key == null || idKey.equals(key)) {
@@ -2811,12 +2824,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		String schema = request.getString(KEY_SCHEMA);
+		String datasource = request.getString(KEY_DATASOURCE);
 
 		SQLConfig config = callback.getSQLConfig(method, database, schema, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); //不删，后面表对象还要用的，必须放在 parseJoin 前
 		config.setSchema(schema); //不删，后面表对象还要用的
+		config.setDatasource(datasource); //不删，后面表对象还要用的
 
 		if (isProcedure) {
 			return config;
@@ -3387,21 +3402,39 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 */
 		Object newId(RequestMethod method, String database, String schema, String table);
 
+		/**已废弃，最早 5.0.0 移除，改用 {@link #getIdKey(String, String, String, String)}
+		 * @param database
+		 * @param schema
+		 * @param table
+		 * @return
+		 */
+		@Deprecated
+		String getIdKey(String database, String schema, String table);
+		
 		/**获取主键名
 		 * @param database
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		String getIdKey(String database, String schema, String table);
+		String getIdKey(String database, String schema, String datasource, String table);
 
+		/**已废弃，最早 5.0.0 移除，改用 {@link #getUserIdKey(String, String, String, String)}
+		 * @param database
+		 * @param schema
+		 * @param table
+		 * @return
+		 */
+		@Deprecated
+		String getUserIdKey(String database, String schema, String table);
+		
 		/**获取 User 的主键名
 		 * @param database
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		String getUserIdKey(String database, String schema, String table);
+		String getUserIdKey(String database, String schema, String datasource, String table);
 	}
 
 	public static interface Callback extends IdCallback {
@@ -3434,10 +3467,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		public String getIdKey(String database, String schema, String table) {
 			return KEY_ID;
 		}
+		
+		@Override
+		public String getIdKey(String database, String schema, String datasource, String table) {
+			return getIdKey(database, schema, table);
+		}
 
 		@Override
 		public String getUserIdKey(String database, String schema, String table) {
 			return KEY_USER_ID;
+		}
+		
+		@Override
+		public String getUserIdKey(String database, String schema, String datasource, String table) {
+			return getUserIdKey(database, schema, table);
 		}
 
 		@Override
