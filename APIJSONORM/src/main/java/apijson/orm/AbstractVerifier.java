@@ -109,8 +109,8 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		OPERATION_KEY_LIST.add(REMOVE.name());
 		OPERATION_KEY_LIST.add(MUST.name());
 		OPERATION_KEY_LIST.add(REFUSE.name());
-		
-		
+
+
 		SYSTEM_ACCESS_MAP = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
 
 		SYSTEM_ACCESS_MAP.put(Access.class.getSimpleName(), getAccessMap(Access.class.getAnnotation(MethodAccess.class)));
@@ -170,8 +170,16 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		return apijson.JSONObject.KEY_ID;
 	}
 	@Override
+	public String getIdKey(String database, String schema, String datasource, String table) {
+		return getIdKey(database, schema, table);
+	}
+	@Override
 	public String getUserIdKey(String database, String schema, String table) {
 		return apijson.JSONObject.KEY_USER_ID;
+	}
+	@Override
+	public String getUserIdKey(String database, String schema, String datasource, String table) {
+		return getUserIdKey(database, schema, table);
 	}
 	@Override
 	public Object newId(RequestMethod method, String database, String schema, String table) {
@@ -515,6 +523,23 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	public static JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request, final int maxUpdateCount
 			, final String database, final String schema, final IdCallback idCallback, final SQLCreator creator) throws Exception {
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, null, idCallback, creator);
+	}
+	/**从request提取target指定的内容
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param request
+	 * @param maxUpdateCount
+	 * @param idKey
+	 * @param userIdKey
+	 * @param creator
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
+			, final JSONObject target, final JSONObject request, final int maxUpdateCount
+			, final String database, final String schema, final String datasource, final IdCallback idCallback, final SQLCreator creator) throws Exception {
 
 		Log.i(TAG, "verifyRequest  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -546,14 +571,18 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 				} else if (apijson.JSONObject.isTableKey(key)) {
 					String db = request.getString(apijson.JSONObject.KEY_DATABASE);
 					String sh = request.getString(apijson.JSONObject.KEY_SCHEMA);
+					String ds = request.getString(apijson.JSONObject.KEY_DATASOURCE);
 					if (StringUtil.isEmpty(db, false)) {
 						db = database;
 					}
 					if (StringUtil.isEmpty(sh, false)) {
 						sh = schema;
 					}
+					if (StringUtil.isEmpty(ds, false)) {
+						ds = datasource;
+					}
 
-					String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, key);
+					String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, key);
 					String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
 
 					if (method == RequestMethod.POST) {
@@ -564,7 +593,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 						if (RequestMethod.isQueryMethod(method) == false) {
 							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, true);
 
-							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, key);
+							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, ds, key);
 							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? apijson.JSONObject.KEY_USER_ID : userIdKey;
 							verifyId(method.name(), name, key, robj, finalUserIdKey, maxUpdateCount, false);
 						}
@@ -742,14 +771,14 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		return parse(method, name, target, real, null, null, null, creator, callback);
 	}
-
 	/**对request和response不同的解析用callback返回
 	 * @param method
 	 * @param name
 	 * @param target
 	 * @param real
-	 * @param idKey
-	 * @param userIdKey
+	 * @param database
+	 * @param schema
+	 * @param idCallback
 	 * @param creator
 	 * @param callback
 	 * @return
@@ -757,6 +786,24 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 */
 	public static JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
 			, final String database, final String schema, final IdCallback idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
+		return parse(method, name, target, real, database, schema, null, idCallback, creator, callback);
+	}
+	/**对request和response不同的解析用callback返回
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param real
+	 * @param database
+	 * @param schema
+	 * @param datasource
+	 * @param idCallback
+	 * @param creator
+	 * @param callback
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
+			, final String database, final String schema, final String datasource, final IdCallback idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		if (target == null) {
 			return null;
 		}
@@ -913,11 +960,15 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 		String db = real.getString(apijson.JSONObject.KEY_DATABASE);
 		String sh = real.getString(apijson.JSONObject.KEY_SCHEMA);
+		String ds = real.getString(apijson.JSONObject.KEY_DATASOURCE);
 		if (StringUtil.isEmpty(db, false)) {
 			db = database;
 		}
 		if (StringUtil.isEmpty(sh, false)) {
 			sh = schema;
+		}
+		if (StringUtil.isEmpty(ds, false)) {
+			ds = datasource;
 		}
 		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, name);
 		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
@@ -977,7 +1028,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			if (tk == null || OPERATION_KEY_LIST.contains(tk)) {
 				continue;
 			}
-			
+
 			tv = e.getValue();
 
 			if (opt == TYPE) {

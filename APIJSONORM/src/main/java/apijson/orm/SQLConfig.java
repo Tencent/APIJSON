@@ -120,10 +120,13 @@ public interface SQLConfig {
 	String getDatabase();
 	SQLConfig setDatabase(String database);
 
-	String getQuote();
-
 	String getSchema();
 	SQLConfig setSchema(String schema);
+	
+	String getDatasource();
+	SQLConfig setDatasource(String datasource);
+
+	String getQuote();
 
 	/**请求传进来的Table名
 	 * @return
