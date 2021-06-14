@@ -2647,12 +2647,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
-			if(config.isOracle()){
+			if (config.isOracle()) {
 				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
-				return explain + "SELECT * FROM (SELECT"+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM "+getConditionString(column, tablePath, config)+ ") "+config.getLimitString();
-			}else
-				return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
+				return explain + "SELECT * FROM (SELECT"+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
 			}
+			
+			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + config.getLimitString();
+		}
 	}
 
 	/**获取条件SQL字符串
@@ -2679,7 +2680,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		//no need to optimize
 		//		if (config.getPage() <= 0 || ID.equals(column.trim())) {
-		return config.isOracle()? condition:condition + config.getLimitString();
+		return condition;  // config.isOracle() ? condition : condition + config.getLimitString();
 		//		}
 		//
 		//
