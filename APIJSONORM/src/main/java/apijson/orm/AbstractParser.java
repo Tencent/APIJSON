@@ -871,6 +871,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 							}
 
 							JSONObject pagination = new JSONObject(true);
+							Object explain = rp.get(JSONResponse.KEY_EXPLAIN);
+							if (explain instanceof JSONObject) {
+								pagination.put(JSONResponse.KEY_EXPLAIN, explain);
+							}
 							pagination.put(JSONResponse.KEY_TOTAL, total);
 							pagination.put(JSONRequest.KEY_COUNT, count);
 							pagination.put(JSONRequest.KEY_PAGE, page);
@@ -878,6 +882,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 							pagination.put(JSONResponse.KEY_MORE, page < max);
 							pagination.put(JSONResponse.KEY_FIRST, page == 0);
 							pagination.put(JSONResponse.KEY_LAST, page == max);
+							
 							putQueryResult(pathPrefix + JSONResponse.KEY_INFO, pagination);
 
 							if (total <= count*page) {

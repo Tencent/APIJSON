@@ -148,21 +148,24 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 */
 	@Override
 	public JSONObject execute(@NotNull SQLConfig config, boolean unknowType) throws Exception {
-		boolean prepared = config.isPrepared();
+		boolean isPrepared = config.isPrepared();
 
 		final String sql = config.getSQL(false);
 
-		config.setPrepared(prepared);
+		config.setPrepared(isPrepared);
 
 		if (StringUtil.isEmpty(sql, true)) {
 			Log.e(TAG, "execute  StringUtil.isEmpty(sql, true) >> return null;");
 			return null;
 		}
+		
+		boolean isExplain = config.isExplain();
+		boolean isHead = RequestMethod.isHeadMethod(config.getMethod(), true);
 
 		final int position = config.getPosition();
 		JSONObject result;
 
-		if (config.isExplain() == false) {
+		if (isExplain == false) {
 			generatedSQLCount ++;
 		}
 
@@ -192,17 +195,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 			else {
 				switch (config.getMethod()) {
-				case HEAD:
-				case HEADS:
-					rs = executeQuery(config);
-
-					executedSQLCount ++;
-
-					result = rs.next() ? AbstractParser.newSuccessResult()
-							: AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
-					result.put(JSONResponse.KEY_COUNT, rs.getLong(1));
-					return result;
-
 				case POST:
 				case PUT:
 				case DELETE:
@@ -224,10 +216,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						result.put(config.getIdKey() + "[]", config.getWhere(config.getIdKey() + "{}", true));
 					}
 					return result;
-
+									
 				case GET:
 				case GETS:
-					result = getCacheItem(sql, position, config.getCache());
+				case HEAD:
+				case HEADS:
+					result = isHead ? null : getCacheItem(sql, position, config.getCache());
 					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
 						cachedSQLCount ++;
@@ -238,7 +232,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					rs = executeQuery(config);  //FIXME SQL Server 是一次返回两个结果集，包括查询结果和执行计划，需要 moreResults 
 
-					if (config.isExplain() == false) { //只有 SELECT 才能 EXPLAIN
+					if (isExplain == false) { //只有 SELECT 才能 EXPLAIN
 						executedSQLCount ++;
 					}
 					break;
@@ -249,58 +243,68 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				}
 			}
 
-
-
-			//		final boolean cache = config.getCount() != 1;
-			// TODO 设置初始容量为查到的数据量，解决频繁扩容导致的延迟，貌似只有 rs.last 取 rs.getRow() ? 然后又得 rs.beforeFirst 重置位置以便下方取值
-			resultList = new ArrayList<>(config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount());
-			//		Log.d(TAG, "select  cache = " + cache + "; resultList" + (resultList == null ? "=" : "!=") + "null");
-
-			int index = -1;
-
-			ResultSetMetaData rsmd = rs.getMetaData();
-			final int length = rsmd.getColumnCount();
-
-			//<SELECT * FROM Comment WHERE momentId = '470', { id: 1, content: "csdgs" }>
-			childMap = new HashMap<>(); //要存到cacheMap
-			// WHERE id = ? AND ... 或 WHERE ... AND id = ? 强制排序 remove 再 put，还是重新 getSQL吧
-
-
-			boolean hasJoin = config.hasJoin();
-			int viceColumnStart = length + 1; //第一个副表字段的index
-			while (rs.next()) {
-				index ++;
-				Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
-
-				JSONObject item = new JSONObject(true);
-
-				for (int i = 1; i <= length; i++) {
-
-					// if (hasJoin && viceColumnStart > length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
-					// 	viceColumnStart = i;
-					// }
-
-					// bugfix-修复非常规数据库字段，获取表名失败导致输出异常
-					if (config.isExplain() == false && hasJoin && viceColumnStart > length) {
-						List<String> column = config.getColumn();
-
-						if (column != null && column.isEmpty() == false) {
-							viceColumnStart = column.size() + 1;
-						}
-						else if (config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
-							viceColumnStart = i;
-						}
-					}
-
-					item = onPutColumn(config, rs, rsmd, index, item, i, config.isExplain() == false && hasJoin && i >= viceColumnStart ? childMap : null);
+		
+			if (isExplain == false && isHead) {
+				if (rs.next() == false) {
+					return AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
 				}
 
-				resultList = onPutTable(config, rs, rsmd, resultList, index, item);
-
-				Log.d(TAG, "\n execute  while (rs.next()) { resultList.put( " + index + ", result); "
-						+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
+				result = AbstractParser.newSuccessResult();
+				result.put(JSONResponse.KEY_COUNT, rs.getLong(1));
+				resultList = new ArrayList<>(1);
+				resultList.add(result);
 			}
+			else {
+				//		final boolean cache = config.getCount() != 1;
+				// TODO 设置初始容量为查到的数据量，解决频繁扩容导致的延迟，貌似只有 rs.last 取 rs.getRow() ? 然后又得 rs.beforeFirst 重置位置以便下方取值
+				resultList = new ArrayList<>(config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount());
+				//		Log.d(TAG, "select  cache = " + cache + "; resultList" + (resultList == null ? "=" : "!=") + "null");
 
+				int index = -1;
+
+				ResultSetMetaData rsmd = rs.getMetaData();
+				final int length = rsmd.getColumnCount();
+
+				//<SELECT * FROM Comment WHERE momentId = '470', { id: 1, content: "csdgs" }>
+				childMap = new HashMap<>(); //要存到cacheMap
+				// WHERE id = ? AND ... 或 WHERE ... AND id = ? 强制排序 remove 再 put，还是重新 getSQL吧
+
+
+				boolean hasJoin = config.hasJoin();
+				int viceColumnStart = length + 1; //第一个副表字段的index
+				while (rs.next()) {
+					index ++;
+					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
+
+					JSONObject item = new JSONObject(true);
+
+					for (int i = 1; i <= length; i++) {
+
+						// if (hasJoin && viceColumnStart > length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
+						// 	viceColumnStart = i;
+						// }
+
+						// bugfix-修复非常规数据库字段，获取表名失败导致输出异常
+						if (isExplain == false && hasJoin && viceColumnStart > length) {
+							List<String> column = config.getColumn();
+
+							if (column != null && column.isEmpty() == false) {
+								viceColumnStart = column.size() + 1;
+							}
+							else if (config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
+								viceColumnStart = i;
+							}
+						}
+
+						item = onPutColumn(config, rs, rsmd, index, item, i, isExplain == false && hasJoin && i >= viceColumnStart ? childMap : null);
+					}
+
+					resultList = onPutTable(config, rs, rsmd, resultList, index, item);
+
+					Log.d(TAG, "\n execute  while (rs.next()) { resultList.put( " + index + ", result); "
+							+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
+				}
+			}
 		}
 		finally {
 			if (rs != null) {
@@ -317,50 +321,51 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			return null;
 		}
 
-		if (unknowType || config.isExplain()) {
-			if (config.isExplain()) {
+		if (unknowType || isExplain) {
+			if (isExplain) {
 				if (result == null) {
 					result = new JSONObject(true);
 				}
-				boolean explain = config.isExplain();
 				config.setExplain(false);
 				result.put("sql", config.getSQL(false));
-				config.setExplain(explain);
-				config.setPrepared(prepared);
+				config.setExplain(isExplain);
+				config.setPrepared(isPrepared);
 			}
 			result.put("list", resultList);
 			return result;
 		}
-
-		// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-		executeAppJoin(config, resultList, childMap);
-
-		// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-		//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
-		Set<Entry<String, JSONObject>> set = childMap.entrySet();
-
-		//<sql, Table>
-		for (Entry<String, JSONObject> entry : set) {
-			List<JSONObject> l = new ArrayList<>();
-			l.add(entry.getValue());
-			putCache(entry.getKey(), l, JSONRequest.CACHE_ROM);
-		}
-
-		putCache(sql, resultList, config.getCache());
-		Log.i(TAG, ">>> execute  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
-
-		  // 数组主表对象额外一次返回全部，方便 Parser 缓存来提高性能
 		
-		result = position >= resultList.size() ? new JSONObject() : resultList.get(position);
-		if (position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false) { 
-			// 不是 main 不会直接执行，count=1 返回的不会超过 1   && config.isMain() && config.getCount() != 1
-			Log.i(TAG, ">>> execute  position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false"
-					+ " >> result = new JSONObject(result); result.put(KEY_RAW_LIST, resultList);");
+		if (isHead == false) {
+			// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-			result = new JSONObject(result);
-			result.put(KEY_RAW_LIST, resultList);
+			executeAppJoin(config, resultList, childMap);
+
+			// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+			//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
+			Set<Entry<String, JSONObject>> set = childMap.entrySet();
+
+			//<sql, Table>
+			for (Entry<String, JSONObject> entry : set) {
+				List<JSONObject> l = new ArrayList<>();
+				l.add(entry.getValue());
+				putCache(entry.getKey(), l, JSONRequest.CACHE_ROM);
+			}
+
+			putCache(sql, resultList, config.getCache());
+			Log.i(TAG, ">>> execute  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
+
+			// 数组主表对象额外一次返回全部，方便 Parser 缓存来提高性能
+
+			result = position >= resultList.size() ? new JSONObject() : resultList.get(position);
+			if (position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false) { 
+				// 不是 main 不会直接执行，count=1 返回的不会超过 1   && config.isMain() && config.getCount() != 1
+				Log.i(TAG, ">>> execute  position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false"
+						+ " >> result = new JSONObject(result); result.put(KEY_RAW_LIST, resultList);");
+
+				result = new JSONObject(result);
+				result.put(KEY_RAW_LIST, resultList);
+			}
 		}
 		
 		long endTime = System.currentTimeMillis();
@@ -396,7 +401,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 					continue;
 				}
-				
+
 				jc = j.getJoinConfig();
 
 				//取出 "id@": "@/User/userId" 中所有 userId 的值
@@ -550,7 +555,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 				}
 			}
-			
+
 		}
 
 		Object value = getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
@@ -561,7 +566,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 			finalTable.put(lable, value);
 		}
-		
+
 		return table;
 	}
 
@@ -581,7 +586,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return resultList;
 	}
 
-	
+
 
 	protected String getKey(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
 			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
