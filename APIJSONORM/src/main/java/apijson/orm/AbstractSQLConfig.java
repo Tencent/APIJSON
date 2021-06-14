@@ -768,7 +768,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				continue;
 			}
 
-			int end = expression.indexOf(")");
+			int end = expression.lastIndexOf(")");
 			if (start >= end) {
 				throw new IllegalArgumentException("字符 " + expression + " 不合法！"
 						+ "@having:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
@@ -1040,13 +1040,28 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					index = c.lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
 					origin = index < 0 ? c : c.substring(0, index);
 					alias = index < 0 ? null : c.substring(index + 1);
-					if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
-						throw new IllegalArgumentException("HEAD请求: 预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+
+					if (alias != null && StringUtil.isName(alias) == false) {
+						throw new IllegalArgumentException("HEAD请求: 字符 " + alias + " 不合法！预编译模式下 @column:value 中 value里面用 , 分割的每一项"
 								+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
+					}
+
+					if (StringUtil.isName(origin) == false) {
+						int start = origin.indexOf("(");
+						if (start < 0 || origin.lastIndexOf(")") <= start) { 
+							throw new IllegalArgumentException("HEAD请求: 字符" + origin + " 不合法！预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+									+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
+						}
+						
+						if (start > 0 && StringUtil.isName(origin.substring(0, start)) == false) {
+							throw new IllegalArgumentException("HEAD请求: 字符 " + origin.substring(0, start) + " 不合法！预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+									+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！并且不要有多余的空格！");
+						}
 					}
 				}
 			}
-			return SQL.count(column != null && column.size() == 1 ? getKey(Pair.parseEntry(column.get(0), true).getKey()) : "*");
+
+			return SQL.count(column != null && column.size() == 1 && StringUtil.isName(column.get(0)) ? getKey(column.get(0)) : "*");
 		case POST:
 			if (column == null || column.isEmpty()) {
 				throw new IllegalArgumentException("POST 请求必须在Table内设置要保存的 key:value ！");
@@ -1151,7 +1166,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				int start = expression.indexOf("(");
 				int end = 0;
 				if (start >= 0) {
-					end = expression.indexOf(")");
+					end = expression.lastIndexOf(")");
 					if (start >= end) {
 						throw new IllegalArgumentException("字符 " + expression + " 不合法！"
 								+ "@column:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
@@ -2254,7 +2269,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			if (rawSQL != null) {
 				int index = rawSQL == null ? -1 : rawSQL.indexOf("(");
-				condition = (index >= 0 && index < rawSQL.indexOf(")") ? "" : getKey(k) + " ") + rawSQL;
+				condition = (index >= 0 && index < rawSQL.lastIndexOf(")") ? "" : getKey(k) + " ") + rawSQL;
 			}
 
 			// 还是只支持整段为 Raw SQL 比较好
@@ -2299,7 +2314,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 					index = c == null ? -1 : c.indexOf("(");
 					condition += ((i <= 0 ? "" : (logic.isAnd() ? AND : OR)) //连接方式
-							+ (index >= 0 && index < c.indexOf(")") ? "" : getKey(k) + " ") //函数和非函数条件
+							+ (index >= 0 && index < c.lastIndexOf(")") ? "" : getKey(k) + " ") //函数和非函数条件
 							+ c);  // 还是只支持整段为 Raw SQL 比较好  (appendRaw && index > 0 ? rawSQL : "") + c); //单个条件，如果有 Raw SQL 则按原来位置拼接
 				}
 			}
