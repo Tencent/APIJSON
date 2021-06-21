@@ -1035,21 +1035,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (isPrepared() && column != null) {
 								
 				List<String> raw = getRaw();
-                                boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
+				boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
 				
 				String origin;
 				String alias;
 				int index;
 
-                                for (String c : column) {
-                                    if (containRaw) {
-                                                // 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
-                                                if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig 提前处理好的
-                                                        //排除@raw中的值，以避免使用date_format(date,'%Y-%m-%d %H:%i:%s') 时,冒号的解析出错
-                                                        column.remove(c);
-                                                        continue;
-                                                }
-                                        }
+				for (String c : column) {
+					if (containRaw) {
+						// 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
+						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig 提前处理好的
+							//排除@raw中的值，以避免使用date_format(date,'%Y-%m-%d %H:%i:%s') 时,冒号的解析出错
+							column.remove(c);
+							continue;
+						}
+					}
 					
 					index = c.lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
 					origin = index < 0 ? c : c.substring(0, index);
