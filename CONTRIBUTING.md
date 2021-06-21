@@ -30,6 +30,7 @@
 - [caohao-php](https://github.com/caohao-php)(腾讯工程师)
 - [Wscats](https://github.com/Wscats)(腾讯工程师)
 - [jun0315](https://github.com/jun0315)(腾讯工程师)
+- [JieJo](https://github.com/JieJo)
 
 
 #### 其中特别致谢: <br/>
