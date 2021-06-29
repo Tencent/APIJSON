@@ -732,7 +732,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@NotNull
 	@Override
 	public Connection getConnection(@NotNull SQLConfig config) throws Exception {
-		String connectionKey = config.getDatasource() + "-" + config.getDatabase()
+		String connectionKey = config.getDatasource() + "-" + config.getDatabase();
 		connection = connectionMap.get(connectionKey);
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
