@@ -70,7 +70,6 @@ import apijson.orm.model.SysColumn;
 import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
 import apijson.orm.model.TestRecord;
-import org.omg.PortableServer.REQUEST_PROCESSING_POLICY_ID;
 
 /**config sql for JSON Request
  * @author Lemon
