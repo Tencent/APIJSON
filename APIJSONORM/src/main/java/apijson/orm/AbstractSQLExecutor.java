@@ -732,12 +732,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@NotNull
 	@Override
 	public Connection getConnection(@NotNull SQLConfig config) throws Exception {
-		connection = connectionMap.get(config.getDatabase());
+		String connectionKey = config.getDatasource() + "-" + config.getDatabase();
+		connection = connectionMap.get(connectionKey);
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 			// PostgreSQL 不允许 cross-database
 			connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
-			connectionMap.put(config.getDatabase(), connection);
+			connectionMap.put(connectionKey, connection);
 		}
 
 		int ti = getTransactionIsolation();

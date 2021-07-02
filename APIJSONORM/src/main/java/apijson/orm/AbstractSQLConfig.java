@@ -2965,6 +2965,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.remove(KEY_ROLE);
 			request.remove(KEY_EXPLAIN);
 			request.remove(KEY_CACHE);
+			request.remove(KEY_DATASOURCE);
 			request.remove(KEY_DATABASE);
 			request.remove(KEY_SCHEMA);
 			request.remove(KEY_COMBINE);
@@ -3217,6 +3218,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.put(KEY_ROLE, role);
 			request.put(KEY_EXPLAIN, explain);
 			request.put(KEY_CACHE, cache);
+			request.put(KEY_DATASOURCE, datasource);
 			request.put(KEY_SCHEMA, schema);
 			request.put(KEY_COMBINE, combine);
 			request.put(KEY_FROM, from);
