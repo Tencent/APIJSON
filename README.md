@@ -220,6 +220,10 @@ https://github.com/Tencent/APIJSON/issues/36
 如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(按登记顺序排列)：<br />
 https://github.com/Tencent/APIJSON/issues/187 
 <div style="float:left">
+   <a href="https://ieg.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126523572-7ba8aaee-4e04-4b8c-b356-7c789f00ccad.png" height="75"></a>
+  <a href="https://cloud.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126523558-2ea51301-8e2b-4cd7-8eb0-e1ce73cc37ff.png" height="75"></a>
+  <a href="https://www.tencentmusic.com"><img src="https://user-images.githubusercontent.com/5738175/126523583-e9e936ae-7208-4506-885c-d4a48b5e3372.png" height="75"></a>
+  <br />
   <a href="http://www.transsion.com"><img src="http://apijson.cn/images/www.transsion.com.jpeg" height="75"></a>
   <a href="http://shebaochina.com"><img src="http://apijson.cn/images/shebaochina.com.png" height="75"></a>
   <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/www.xmfish.com.gif" height="75"></a>
