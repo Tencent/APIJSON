@@ -1525,7 +1525,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		int offset = getOffset(page, count);
 
 		if (isTSQL) {  // OFFSET FECTH 中所有关键词都不可省略, 另外 Oracle 数据库使用子查询加 where 分页
-			return isOracle? " WHERE ROWNUM BETWEEN "+ offset +" AND "+ (offset + count): " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
+			return isOracle ? " WHERE ROWNUM BETWEEN "+ offset +" AND "+ (offset + count) : " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
 		}
 
 		return " LIMIT " + count + (offset <= 0 ? "" : " OFFSET " + offset);  // DELETE, UPDATE 不支持 OFFSET
