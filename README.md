@@ -1,5 +1,3 @@
-[【腾讯犀牛鸟开源人才培养计划】开始啦！加入我们开源共建吧~](https://github.com/Tencent/APIJSON/issues/229)
-
 Tencent is pleased to support the open source community by making APIJSON available.   <br/>
 Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
 This source code is licensed under the Apache License Version 2.0 <br/>
@@ -241,7 +239,7 @@ https://github.com/Tencent/APIJSON/issues/187
 
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(5 个腾讯工程师、1 个知乎基础研发架构师 等)：<br />
+主项目 APIJSON 的贡献者们(5 个腾讯工程师、1 个知乎基础研发架构师、1 个圆通工程师 等)：<br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -385,7 +383,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON复杂业务深入实践（类似12306订票系统）](https://blog.csdn.net/aa330233789/article/details/105309571)
 
-[全国行政区划数据抓取与处理](https://my.oschina.net/hwxia/blog/4999897)
+[全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
@@ -450,6 +448,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
 ### 腾讯犀牛鸟开源人才培养计划
+https://github.com/Tencent/APIJSON/issues/229
   
 #### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
 APIJSON-Demo接入db2 <br />
