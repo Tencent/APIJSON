@@ -269,7 +269,6 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/233"><img src="https://avatars.githubusercontent.com/u/1252459?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/250"><img src="https://avatars.githubusercontent.com/u/44310040?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/253"><img src="https://avatars.githubusercontent.com/u/19265050?v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/253"><img src="https://avatars.githubusercontent.com/u/19265050?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/278"><img src="https://avatars.githubusercontent.com/u/4099373?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/279"><img src="https://avatars.githubusercontent.com/u/28685375?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/280"><img src="https://avatars.githubusercontent.com/u/60541766?v=4"  height="54" width="54" ></a>
@@ -452,10 +451,6 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 ### 腾讯犀牛鸟开源人才培养计划
   
-#### zhouzuobiao 1.完善入门介绍视频  
-APIJSON- 后端零代码接口和文档ORM库 <br />
-https://lexiangla.com/teams/k100046/classes/a4eba9f4b6d711eba2ec268dd73d15f1?type=0&company_from=79350bd4d06911ea91f05254002f1020
-
 #### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
 APIJSON-Demo接入db2 <br />
 https://github.com/andream7/apijson-db2
