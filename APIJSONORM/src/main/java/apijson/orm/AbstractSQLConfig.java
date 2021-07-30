@@ -1046,7 +1046,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						// 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
 						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig 提前处理好的
 							//排除@raw中的值，以避免使用date_format(date,'%Y-%m-%d %H:%i:%s') 时,冒号的解析出错
-							column.remove(c);
+							//column.remove(c);
 							continue;
 						}
 					}
