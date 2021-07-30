@@ -383,7 +383,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON复杂业务深入实践（类似12306订票系统）](https://blog.csdn.net/aa330233789/article/details/105309571)
 
-[全国行政区划数据抓取与处理](https://my.oschina.net/hwxia/blog/4999897)
+[全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
