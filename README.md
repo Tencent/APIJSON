@@ -450,7 +450,22 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 APIJSON- 后端零代码接口和文档ORM库 <br />
 https://lexiangla.com/teams/k100046/classes/a4eba9f4b6d711eba2ec268dd73d15f1?type=0&company_from=79350bd4d06911ea91f05254002f1020
 
-  
+#### zhaoqiming 1.完善入门介绍视频  
+APIJSON 后端教程（1）：简介
+https://www.bilibili.com/video/BV1vL411W7yd
+
+APIJSON 后端教程（2）：数据库 
+https://www.bilibili.com/video/BV1eB4y1N77s
+
+APIJSON 后端教程（3）：Demo
+https://www.bilibili.com/video/BV1FX4y1c7ug
+
+APIJSON 后端教程（4）：Boot
+https://www.bilibili.com/video/BV18h411z7FK
+
+APIJSON 后端教程（5）：Final
+https://www.bilibili.com/video/BV1GM4y1N7XJ
+
 ### 持续更新
 https://github.com/Tencent/APIJSON/commits/master
 
