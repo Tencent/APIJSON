@@ -9,7 +9,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
  
-<p align="center">零代码、热更新、自动化 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
+<p align="center">零代码、热更新、全自动 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
@@ -444,7 +444,12 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
+### 腾讯犀牛鸟开源人才培养计划
+  
+#### zhouzuobiao 1.完善入门介绍视频  
+https://lexiangla.com/teams/k100046/classes/a4eba9f4b6d711eba2ec268dd73d15f1?type=0&company_from=79350bd4d06911ea91f05254002f1020
 
+  
 ### 持续更新
 https://github.com/Tencent/APIJSON/commits/master
 
