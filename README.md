@@ -1,5 +1,3 @@
-[【腾讯犀牛鸟开源人才培养计划】开始啦！加入我们开源共建吧~](https://github.com/Tencent/APIJSON/issues/229)
-
 Tencent is pleased to support the open source community by making APIJSON available.   <br/>
 Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
 This source code is licensed under the Apache License Version 2.0 <br/>
@@ -450,6 +448,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
 ### 腾讯犀牛鸟开源人才培养计划
+https://github.com/Tencent/APIJSON/issues/229
   
 #### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
 APIJSON-Demo接入db2 <br />
