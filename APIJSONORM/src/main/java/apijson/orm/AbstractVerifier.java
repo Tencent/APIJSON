@@ -447,14 +447,14 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
 			request.put(JSONRequest.KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
 		}
-		JSONObject repeat = createParser().setMethod(GET).setNeedVerify(true).parseResponse(
+		JSONObject repeat = createParser().setMethod(HEAD).setNeedVerify(true).parseResponse(
 				new JSONRequest(table, request)
 				);
 		repeat = repeat == null ? null : repeat.getJSONObject(table);
 		if (repeat == null) {
 			throw new Exception("服务器内部错误  verifyRepeat  repeat == null");
 		}
-		if (repeat.getIntValue(JSONResponse.KEY_CODE) > 0) {
+		if (repeat.getIntValue(JSONResponse.KEY_COUNT) > 0) {
 			throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
 		}
 	}
@@ -1424,7 +1424,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
 
-		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.GET).setCount(1).setPage(0);
+		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		if (exceptId > 0) { //允许修改自己的属性为该属性原来的值
 			config.putWhere(finalIdKey + "!", exceptId, false);
@@ -1437,7 +1437,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			if (result == null) {
 				throw new Exception("服务器内部错误  verifyRepeat  result == null");
 			}
-			if (result.getIntValue(JSONResponse.KEY_CODE) > 0) {
+			if (result.getIntValue(JSONResponse.KEY_COUNT) > 0) {
 				throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
 			}
 		} finally {
