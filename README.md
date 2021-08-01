@@ -385,6 +385,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
+[新手搭建 APIJSON 项目指北](https://github.com/jerrylususu/apijson_todo_demo/blob/master/FULLTEXT.md)  
+  
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
@@ -444,7 +446,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [Android-ZBLibrary](https://github.com/TommyLemon/Android-ZBLibrary) Android MVP快速开发框架，Demo全面，注释详细，使用简单，代码严谨
 
-
+[APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) 一个简单的 todo 示例项目，精简数据，简化上手流程，带自定义鉴权逻辑
+  
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
 ### 腾讯犀牛鸟开源人才培养计划
@@ -496,13 +499,20 @@ https://github.com/hclown9804/APIJSONDemo_presto
 APIJSON结合已有项目，简化开发流程
 https://github.com/haolingzhang1/APIJson--demo
 
+说明文档
+https://github.com/haolingzhang1/APIJson--demo/tree/main/APIJson集成项目说明
+  
+(1)官方demo
+https://github.com/haolingzhang1/APIJson--demo/blob/main/APIJson集成项目说明/APIJson集成现有项目（1）-%20官方demo.pdf
+  
+(2)单表配置
+https://github.com/haolingzhang1/APIJson--demo/blob/main/APIJson集成项目说明/APIJson集成现有项目（2）-%20单表配置.pdf 
+  
 #### zhoukaile 1.完善入门介绍视频
 
 视频链接：https://www.bilibili.com/video/BV1Uh411z7kZ/
 
 文档链接：https://gitee.com/funkiz/apijson_camp
-
-
 
 ### 持续更新
 
