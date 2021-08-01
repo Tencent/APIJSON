@@ -1033,10 +1033,24 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
 			if (isPrepared() && column != null) {
+								
+				List<String> raw = getRaw();
+				boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
+				
 				String origin;
 				String alias;
 				int index;
+
 				for (String c : column) {
+					if (containRaw) {
+						// 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
+						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig 提前处理好的
+							//排除@raw中的值，以避免使用date_format(date,'%Y-%m-%d %H:%i:%s') 时,冒号的解析出错
+							//column.remove(c);
+							continue;
+						}
+					}
+					
 					index = c.lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
 					origin = index < 0 ? c : c.substring(0, index);
 					alias = index < 0 ? null : c.substring(index + 1);
@@ -1511,7 +1525,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		int offset = getOffset(page, count);
 
 		if (isTSQL) {  // OFFSET FECTH 中所有关键词都不可省略, 另外 Oracle 数据库使用子查询加 where 分页
-			return isOracle? " WHERE ROWNUM BETWEEN "+ offset +" AND "+ (offset + count): " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
+			return isOracle ? " WHERE ROWNUM BETWEEN "+ offset +" AND "+ (offset + count) : " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
 		}
 
 		return " LIMIT " + count + (offset <= 0 ? "" : " OFFSET " + offset);  // DELETE, UPDATE 不支持 OFFSET
@@ -2951,6 +2965,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.remove(KEY_ROLE);
 			request.remove(KEY_EXPLAIN);
 			request.remove(KEY_CACHE);
+			request.remove(KEY_DATASOURCE);
 			request.remove(KEY_DATABASE);
 			request.remove(KEY_SCHEMA);
 			request.remove(KEY_COMBINE);
@@ -3203,6 +3218,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.put(KEY_ROLE, role);
 			request.put(KEY_EXPLAIN, explain);
 			request.put(KEY_CACHE, cache);
+			request.put(KEY_DATASOURCE, datasource);
 			request.put(KEY_SCHEMA, schema);
 			request.put(KEY_COMBINE, combine);
 			request.put(KEY_FROM, from);
