@@ -459,6 +459,10 @@ https://github.com/qiujunlin/APIJSONDemo
 APIJSON-Demo接入db2 <br />
 https://github.com/andream7/apijson-db2
   
+#### chenyanlan 2.接入 presto/hive/clickhouse/db2 任意一个 
+APIJSON + SpringBoot连接ClickHouse使用的Demo <br /> 
+https://github.com/chenyanlann/APIJSONDemo_ClickHouse
+  
 #### zhaoqiming 1.完善入门介绍视频  
 APIJSON 后端教程（1）：简介
 https://www.bilibili.com/video/BV1vL411W7yd
