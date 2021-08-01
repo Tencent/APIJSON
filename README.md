@@ -8,7 +8,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <h1 align="center" style="text-align:center;">
   APIJSON
 </h1>
- 
+
 <p align="center">零代码、热更新、全自动 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
@@ -224,7 +224,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="https://cloud.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75"></a>
   <a href="https://www.tencentmusic.com"><img src="https://user-images.githubusercontent.com/5738175/126524713-b38a8f02-3086-45d4-91db-6f5389811d51.png" height="75"></a>
   <br />
-  
+
   <a href="http://www.transsion.com"><img src="http://apijson.cn/images/www.transsion.com.jpeg" height="75"></a>
   <a href="http://shebaochina.com"><img src="http://apijson.cn/images/shebaochina.com.png" height="75"></a>
   <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/www.xmfish.com.gif" height="75"></a>
@@ -271,7 +271,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/253"><img src="https://avatars.githubusercontent.com/u/19265050?v=4"  height="54" width="54" ></a>
 </div>
 <br />
-  
+
 生态周边项目的作者们(1 个腾讯工程师、1 个字节跳动工程师 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
@@ -445,13 +445,20 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
 ### 腾讯犀牛鸟开源人才培养计划
-  
-#### zhouzuobiao 1.完善入门介绍视频  
+
+####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
+
+APIJSON 接入 clickhouse 使用demo
+
+https://github.com/qiujunlin/APIJSONDemo
+
+#### zhouzuobiao 1.完善入门介绍视频
+
 APIJSON- 后端零代码接口和文档ORM库 <br />
 https://lexiangla.com/teams/k100046/classes/a4eba9f4b6d711eba2ec268dd73d15f1?type=0&company_from=79350bd4d06911ea91f05254002f1020
 
-  
 ### 持续更新
+
 https://github.com/Tencent/APIJSON/commits/master
 
 ### 工蜂主页
