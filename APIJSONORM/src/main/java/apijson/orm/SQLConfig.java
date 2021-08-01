@@ -22,6 +22,7 @@ public interface SQLConfig {
 	String DATABASE_SQLSERVER = "SQLSERVER";
 	String DATABASE_ORACLE = "ORACLE";
 	String DATABASE_DB2 = "DB2";
+	String DATABASE_CLICKHOUSE = "CLICKHOUSE";
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -37,6 +38,7 @@ public interface SQLConfig {
 	boolean isSQLServer();
 	boolean isOracle();
 	boolean isDb2();
+	boolean isClickHouse();
 	//暂时只兼容以上 5 种
 	//	boolean isSQL();
 	//	boolean isTSQL();
