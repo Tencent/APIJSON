@@ -488,6 +488,10 @@ https://www.bilibili.com/video/BV1GM4y1N7XJ
 APIJSON-Demo 接入presto
 https://github.com/hclown9804/APIJSONDemo_presto
 
+#### zhanghaoling 1.完善入门介绍视频
+APIJSON结合已有项目，简化开发流程
+https://github.com/haolingzhang1/APIJson--demo
+  
 ### 持续更新
 
 https://github.com/Tencent/APIJSON/commits/master
