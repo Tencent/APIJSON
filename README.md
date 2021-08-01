@@ -476,8 +476,18 @@ APIJSON 后端教程（5）：Final
 https://www.bilibili.com/video/BV1GM4y1N7XJ
 
 #### zhanghaoling 1.完善入门介绍视频
+
 APIJSON结合已有项目，简化开发流程
 https://github.com/haolingzhang1/APIJson--demo
+  
+说明文档
+https://github.com/haolingzhang1/APIJson--demo/tree/main/APIJson集成项目说明
+  
+(1)官方demo
+https://github.com/haolingzhang1/APIJson--demo/blob/main/APIJson集成项目说明/APIJson集成现有项目（1）-%20官方demo.pdf
+  
+(2)单表配置
+https://github.com/haolingzhang1/APIJson--demo/blob/main/APIJson集成项目说明/APIJson集成现有项目（2）-%20单表配置.pdf 
   
 ### 持续更新
 
