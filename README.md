@@ -6,7 +6,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <h1 align="center" style="text-align:center;">
   APIJSON
 </h1>
- 
+
 <p align="center">零代码、热更新、全自动 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
@@ -222,7 +222,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="https://cloud.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75"></a>
   <a href="https://www.tencentmusic.com"><img src="https://user-images.githubusercontent.com/5738175/126524713-b38a8f02-3086-45d4-91db-6f5389811d51.png" height="75"></a>
   <br />
-  
+
   <a href="http://www.transsion.com"><img src="http://apijson.cn/images/www.transsion.com.jpeg" height="75"></a>
   <a href="http://shebaochina.com"><img src="http://apijson.cn/images/shebaochina.com.png" height="75"></a>
   <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/www.xmfish.com.gif" height="75"></a>
@@ -272,7 +272,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/280"><img src="https://avatars.githubusercontent.com/u/60541766?v=4"  height="54" width="54" ></a>
 </div>
 <br />
-  
+
 生态周边项目的作者们(1 个腾讯工程师、1 个字节跳动工程师 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
@@ -449,6 +449,11 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 ### 腾讯犀牛鸟开源人才培养计划
 https://github.com/Tencent/APIJSON/issues/229
+
+####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
+
+APIJSON 接入 clickhouse 使用demo <br />
+https://github.com/qiujunlin/APIJSONDemo
   
 #### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
 APIJSON-Demo接入db2 <br />
@@ -470,8 +475,8 @@ https://www.bilibili.com/video/BV18h411z7FK
 APIJSON 后端教程（5）：Final
 https://www.bilibili.com/video/BV1GM4y1N7XJ
 
-  
 ### 持续更新
+
 https://github.com/Tencent/APIJSON/commits/master
 
 ### 工蜂主页
