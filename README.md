@@ -449,13 +449,13 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 ### 腾讯犀牛鸟开源人才培养计划
 https://github.com/Tencent/APIJSON/issues/229
-  
+
 
 ####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
 
 APIJSON 接入 clickhouse 使用demo <br />
 https://github.com/qiujunlin/APIJSONDemo
-  
+
 #### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
 APIJSON-Demo接入db2 <br />
 https://github.com/andream7/apijson-db2
@@ -467,11 +467,11 @@ https://hanxu2018.github.io/APIJSON-DOC/ <br />
 https://github.com/HANXU2018/APIJSON-DOC  <br /> 
 配套评论区 apijson-doc-Comment  <br /> 
 https://github.com/HANXU2018/apijson-doc-Comment
-  
+
 #### chenyanlan 2.接入 presto/hive/clickhouse/db2 任意一个 
 APIJSON + SpringBoot连接ClickHouse使用的Demo <br /> 
 https://github.com/chenyanlann/APIJSONDemo_ClickHouse
-  
+
 #### zhaoqiming 1.完善入门介绍视频  
 APIJSON 后端教程（1）：简介
 https://www.bilibili.com/video/BV1vL411W7yd
@@ -487,7 +487,7 @@ https://www.bilibili.com/video/BV18h411z7FK
 
 APIJSON 后端教程（5）：Final
 https://www.bilibili.com/video/BV1GM4y1N7XJ
-  
+
 #### huwen 2.接入 presto/hive/clickhouse/db2 任意一个
 APIJSON-Demo 接入presto
 https://github.com/hclown9804/APIJSONDemo_presto
@@ -495,7 +495,15 @@ https://github.com/hclown9804/APIJSONDemo_presto
 #### zhanghaoling 1.完善入门介绍视频
 APIJSON结合已有项目，简化开发流程
 https://github.com/haolingzhang1/APIJson--demo
-  
+
+#### zhoukaile 1.完善入门介绍视频
+
+视频链接：https://www.bilibili.com/video/BV1Uh411z7kZ/
+
+文档链接：https://gitee.com/funkiz/apijson_camp
+
+
+
 ### 持续更新
 
 https://github.com/Tencent/APIJSON/commits/master
