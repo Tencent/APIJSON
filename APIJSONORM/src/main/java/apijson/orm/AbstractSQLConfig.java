@@ -124,6 +124,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
 		DATABASE_LIST.add(DATABASE_DB2);
+		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -508,10 +509,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isDb2(String db) {
 		return DATABASE_DB2.equals(db);
 	}
+	@Override
+	public boolean isClickHouse() {
+		return isClickHouse(getSQLDatabase());
+	}
+	public static boolean isClickHouse(String db) {
+		return DATABASE_CLICKHOUSE.equals(db);
+	}
 
 	@Override
 	public String getQuote() {
-		return isMySQL() ? "`" : "\"";
+		return isMySQL() ? "`" : ( isClickHouse()? "" : "\"");
 	}
 
 	@Override
@@ -2158,6 +2166,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (isOracle()) {
 			return "regexp_like(" + getKey(key) + ", " + getValue(value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
+		if (isClickHouse()) {
+			return "match(" + (ignoreCase ? "lower(" : "") + getKey(key) + (ignoreCase ? ")" : "") + ", " + (ignoreCase ? "lower(" : "") + getValue(value) + (ignoreCase ? ")" : "") + ")";
+		}
 		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
 	}
 	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2448,7 +2459,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					else {
 						boolean isNum = c instanceof Number;
 						String v = (isNum ? "" : "\"") + childs[i] + (isNum ? "" : "\"");
-						condition += ("json_contains(" + getKey(key) + ", " +  getValue(v) + ")");
+						if (isClickHouse()) {
+							condition += condition + "has(JSONExtractArrayRaw(assumeNotNull(" + getKey(key) + "))" + ", " + getValue(v) + ")";
+						}
+						else {
+							condition += ("json_contains(" + getKey(key) + ", " +  getValue(v) + ")");
+						}
 					}
 				}
 			}
@@ -2649,9 +2665,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case POST:
 			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
 		case PUT:
-			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
+			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL()||config.isClickHouse() ? config.getLimitString() : "");
 		case DELETE:
-			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
+			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL()||config.isClickHouse() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
 		default:
 			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {
