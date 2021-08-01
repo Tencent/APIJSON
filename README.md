@@ -449,6 +449,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 ### 腾讯犀牛鸟开源人才培养计划
 https://github.com/Tencent/APIJSON/issues/229
+  
 
 ####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
 
@@ -458,6 +459,14 @@ https://github.com/qiujunlin/APIJSONDemo
 #### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
 APIJSON-Demo接入db2 <br />
 https://github.com/andream7/apijson-db2
+
+#### hanxu 1.完善入门介绍视频 
+重构 APIJSON 文档
+https://hanxu2018.github.io/APIJSON-DOC/
+文档源码 
+https://github.com/HANXU2018/APIJSON-DOC 
+配套评论区 apijson-doc-Comment 
+https://github.com/HANXU2018/apijson-doc-Comment
   
 #### zhaoqiming 1.完善入门介绍视频  
 APIJSON 后端教程（1）：简介
