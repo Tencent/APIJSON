@@ -1,5 +1,3 @@
-[【腾讯犀牛鸟开源人才培养计划】开始啦！加入我们开源共建吧~](https://github.com/Tencent/APIJSON/issues/229)
-
 Tencent is pleased to support the open source community by making APIJSON available.   <br/>
 Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
 This source code is licensed under the Apache License Version 2.0 <br/>
@@ -241,7 +239,7 @@ https://github.com/Tencent/APIJSON/issues/187
 
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(5 个腾讯工程师、1 个知乎基础研发架构师 等)：<br />
+主项目 APIJSON 的贡献者们(5 个腾讯工程师、1 个知乎基础研发架构师、1 个圆通工程师 等)：<br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -269,6 +267,9 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/233"><img src="https://avatars.githubusercontent.com/u/1252459?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/250"><img src="https://avatars.githubusercontent.com/u/44310040?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/253"><img src="https://avatars.githubusercontent.com/u/19265050?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/278"><img src="https://avatars.githubusercontent.com/u/4099373?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/279"><img src="https://avatars.githubusercontent.com/u/28685375?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/280"><img src="https://avatars.githubusercontent.com/u/60541766?v=4"  height="54" width="54" ></a>
 </div>
 <br />
 
@@ -279,6 +280,8 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
   <a href="https://github.com/APIJSON/apijson-orm"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  
  height="54" width="54" ></a>
   <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://avatars3.githubusercontent.com/u/12622501?s=400&v=4"  
+ height="54" width="54" ></a>
+  <a href="https://gitee.com/tiangao/apijson-go"><img src="https://portrait.gitee.com/uploads/avatars/user/43/130007_tiangao_1578918889.png!avatar200"  
  height="54" width="54" ></a>
   <a href="https://github.com/qq547057827/apijson-php"><img src="https://avatars3.githubusercontent.com/u/1657532?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/xianglong111/json-api"><img src="https://avatars.githubusercontent.com/u/9738743?s=460&v=4"  height="54" width="54" ></a>
@@ -380,7 +383,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON复杂业务深入实践（类似12306订票系统）](https://blog.csdn.net/aa330233789/article/details/105309571)
 
-[全国行政区划数据抓取与处理](https://my.oschina.net/hwxia/blog/4999897)
+[全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
@@ -445,17 +448,32 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
 ### 腾讯犀牛鸟开源人才培养计划
+https://github.com/Tencent/APIJSON/issues/229
 
 ####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
 
-APIJSON 接入 clickhouse 使用demo
-
+APIJSON 接入 clickhouse 使用demo <br />
 https://github.com/qiujunlin/APIJSONDemo
+  
+#### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
+APIJSON-Demo接入db2 <br />
+https://github.com/andream7/apijson-db2
+  
+#### zhaoqiming 1.完善入门介绍视频  
+APIJSON 后端教程（1）：简介
+https://www.bilibili.com/video/BV1vL411W7yd
 
-#### zhouzuobiao 1.完善入门介绍视频
+APIJSON 后端教程（2）：数据库 
+https://www.bilibili.com/video/BV1eB4y1N77s
 
-APIJSON- 后端零代码接口和文档ORM库 <br />
-https://lexiangla.com/teams/k100046/classes/a4eba9f4b6d711eba2ec268dd73d15f1?type=0&company_from=79350bd4d06911ea91f05254002f1020
+APIJSON 后端教程（3）：Demo
+https://www.bilibili.com/video/BV1FX4y1c7ug
+
+APIJSON 后端教程（4）：Boot
+https://www.bilibili.com/video/BV18h411z7FK
+
+APIJSON 后端教程（5）：Final
+https://www.bilibili.com/video/BV1GM4y1N7XJ
 
 ### 持续更新
 
