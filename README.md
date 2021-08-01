@@ -468,6 +468,10 @@ https://github.com/HANXU2018/APIJSON-DOC
 配套评论区 apijson-doc-Comment 
 https://github.com/HANXU2018/apijson-doc-Comment
   
+#### chenyanlan 2.接入 presto/hive/clickhouse/db2 任意一个 
+APIJSON + SpringBoot连接ClickHouse使用的Demo <br /> 
+https://github.com/chenyanlann/APIJSONDemo_ClickHouse
+  
 #### zhaoqiming 1.完善入门介绍视频  
 APIJSON 后端教程（1）：简介
 https://www.bilibili.com/video/BV1vL411W7yd
