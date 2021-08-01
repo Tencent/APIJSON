@@ -1,5 +1,3 @@
-[【腾讯犀牛鸟开源人才培养计划】开始啦！加入我们开源共建吧~](https://github.com/Tencent/APIJSON/issues/229)
-
 Tencent is pleased to support the open source community by making APIJSON available.   <br/>
 Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
 This source code is licensed under the Apache License Version 2.0 <br/>
@@ -8,8 +6,8 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <h1 align="center" style="text-align:center;">
   APIJSON
 </h1>
- 
-<p align="center">零代码、热更新、自动化 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
+
+<p align="center">零代码、热更新、全自动 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
@@ -33,7 +31,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
   <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
-  <a href="http://i.youku.com/apijson">视频教程</a>
+  <a href="https://search.bilibili.com/all?keyword=APIJSON&from_source=webtop_search&spm_id_from=333.999">视频教程</a>
   <a href="http://apijson.cn/api">在线体验</a>
 </p>
 
@@ -220,6 +218,11 @@ https://github.com/Tencent/APIJSON/issues/36
 如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(按登记顺序排列)：<br />
 https://github.com/Tencent/APIJSON/issues/187 
 <div style="float:left">
+   <a href="https://ieg.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75"></a>
+  <a href="https://cloud.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75"></a>
+  <a href="https://www.tencentmusic.com"><img src="https://user-images.githubusercontent.com/5738175/126524713-b38a8f02-3086-45d4-91db-6f5389811d51.png" height="75"></a>
+  <br />
+
   <a href="http://www.transsion.com"><img src="http://apijson.cn/images/www.transsion.com.jpeg" height="75"></a>
   <a href="http://shebaochina.com"><img src="http://apijson.cn/images/shebaochina.com.png" height="75"></a>
   <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/www.xmfish.com.gif" height="75"></a>
@@ -236,7 +239,8 @@ https://github.com/Tencent/APIJSON/issues/187
 
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们和 生态周边项目 的作者们：
+主项目 APIJSON 的贡献者们(5 个腾讯工程师、1 个知乎基础研发架构师、1 个圆通工程师 等)：<br />
+https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
  height="54" width="54" ></a>
@@ -262,11 +266,22 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="https://github.com/Tencent/APIJSON/pull/235"><img src="https://avatars.githubusercontent.com/u/17243165?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/233"><img src="https://avatars.githubusercontent.com/u/1252459?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/250"><img src="https://avatars.githubusercontent.com/u/44310040?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/253"><img src="https://avatars.githubusercontent.com/u/19265050?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/278"><img src="https://avatars.githubusercontent.com/u/4099373?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/279"><img src="https://avatars.githubusercontent.com/u/28685375?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/280"><img src="https://avatars.githubusercontent.com/u/60541766?v=4"  height="54" width="54" ></a>
+</div>
+<br />
 
-  <br />
+生态周边项目的作者们(1 个腾讯工程师、1 个字节跳动工程师 等)：<br />
+https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
+https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
+<div style="float:left">
   <a href="https://github.com/APIJSON/apijson-orm"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  
  height="54" width="54" ></a>
   <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://avatars3.githubusercontent.com/u/12622501?s=400&v=4"  
+ height="54" width="54" ></a>
+  <a href="https://gitee.com/tiangao/apijson-go"><img src="https://portrait.gitee.com/uploads/avatars/user/43/130007_tiangao_1578918889.png!avatar200"  
  height="54" width="54" ></a>
   <a href="https://github.com/qq547057827/apijson-php"><img src="https://avatars3.githubusercontent.com/u/1657532?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/xianglong111/json-api"><img src="https://avatars.githubusercontent.com/u/9738743?s=460&v=4"  height="54" width="54" ></a>
@@ -368,7 +383,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON复杂业务深入实践（类似12306订票系统）](https://blog.csdn.net/aa330233789/article/details/105309571)
 
-[全国行政区划数据抓取与处理](https://my.oschina.net/hwxia/blog/4999897)
+[全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
@@ -391,6 +406,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON.NET](https://github.com/liaozb/APIJSON.NET) C# 版 APIJSON ，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite
 
+[apijson-go](https://gitee.com/tiangao/apijson-go) Go 版 APIJSON ，支持单表查询、数组查询、多表一对一关联查询、多表一对多关联查询 等
+
 [APIJSON-php](https://github.com/xianglong111/APIJSON-php) PHP 版 APIJSON，基于 ThinkPHP，支持 MySQL, PostgreSQL, SQL Server, Oracle 等
 
 [apijson-php](https://github.com/qq547057827/apijson-php) PHP 版 APIJSON，基于 ThinkPHP，支持 MySQL, PostgreSQL, SQL Server, Oracle 等
@@ -402,6 +419,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 [APIJSONParser](https://github.com/Zerounary/APIJSONParser) 第三方 APIJSON 解析器，将 JSON 动态解析成 SQL
 
 [FfApiJson](https://gitee.com/own_3_0/ff-api-json) 用 JSON 格式直接生成 SQL，借鉴 APIJSON 支持多数据源
+
+[apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON 学习笔记和源码解析
 
 [apijson-sample](https://gitee.com/greyzeng/apijson-sample) APIJSON 简单使用 Demo 及教程
 
@@ -415,6 +434,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
 
+[APIJSONDemo_ClickHouse](https://github.com/chenyanlann/APIJSONDemo_ClickHouse) APIJSON + SpringBoot 连接 ClickHouse 使用的 Demo
+
 [apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
 
 [AbsGrade](https://github.com/APIJSON/AbsGrade) 列表级联算法，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
@@ -426,8 +447,36 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
+### 腾讯犀牛鸟开源人才培养计划
+https://github.com/Tencent/APIJSON/issues/229
+
+####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
+
+APIJSON 接入 clickhouse 使用demo <br />
+https://github.com/qiujunlin/APIJSONDemo
+  
+#### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
+APIJSON-Demo接入db2 <br />
+https://github.com/andream7/apijson-db2
+  
+#### zhaoqiming 1.完善入门介绍视频  
+APIJSON 后端教程（1）：简介
+https://www.bilibili.com/video/BV1vL411W7yd
+
+APIJSON 后端教程（2）：数据库 
+https://www.bilibili.com/video/BV1eB4y1N77s
+
+APIJSON 后端教程（3）：Demo
+https://www.bilibili.com/video/BV1FX4y1c7ug
+
+APIJSON 后端教程（4）：Boot
+https://www.bilibili.com/video/BV18h411z7FK
+
+APIJSON 后端教程（5）：Final
+https://www.bilibili.com/video/BV1GM4y1N7XJ
 
 ### 持续更新
+
 https://github.com/Tencent/APIJSON/commits/master
 
 ### 工蜂主页

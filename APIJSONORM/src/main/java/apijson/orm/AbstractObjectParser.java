@@ -774,12 +774,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		//解析函数function
 		Set<Entry<String, String>> functionSet = map == null ? null : map.entrySet();
 		if (functionSet != null && functionSet.isEmpty() == false) {
-			//			JSONObject json = "-".equals(type) ? request : response; // key-():function 是实时执行，而不是在这里批量执行
+			JSONObject json = "-".equals(type) ? request : response; // key-():function 是实时执行，而不是在这里批量执行
 
 			for (Entry<String, String> entry : functionSet) {
-
-				//				parseFunction(json, entry.getKey(), entry.getValue());
-				parseFunction(entry.getKey(), entry.getValue(), parentPath, name, response);
+				parseFunction(entry.getKey(), entry.getValue(), parentPath, name, json);
 			}
 		}
 	}
