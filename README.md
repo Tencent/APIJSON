@@ -474,6 +474,10 @@ https://www.bilibili.com/video/BV18h411z7FK
 
 APIJSON 后端教程（5）：Final
 https://www.bilibili.com/video/BV1GM4y1N7XJ
+  
+#### huwen 2.接入 presto/hive/clickhouse/db2 任意一个
+APIJSON-Demo 接入presto
+https://github.com/hclown9804/APIJSONDemo_presto
 
 ### 持续更新
 
