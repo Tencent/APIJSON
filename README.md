@@ -514,6 +514,10 @@ https://github.com/haolingzhang1/APIJson--demo/blob/main/APIJson集成项目说�
 
 文档链接：https://gitee.com/funkiz/apijson_camp
 
+#### lintao 1.完善入门介绍视频
+
+APIJSON 上手教程：https://www.bilibili.com/video/BV1Pq4y1n7rJ
+
 ### 持续更新
 
 https://github.com/Tencent/APIJSON/commits/master
