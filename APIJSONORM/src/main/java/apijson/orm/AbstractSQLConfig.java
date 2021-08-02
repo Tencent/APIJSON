@@ -1179,9 +1179,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					//					}
 				}
 
-				if (expression.length() > 50) {
+				if (expression.length() > 100) {
 					throw new UnsupportedOperationException("@column:value 的 value 中字符串 " + expression + " 不合法！"
-							+ "不允许传超过 50 个字符的函数或表达式！请用 @raw 简化传参！");
+							+ "不允许传超过 100 个字符的函数或表达式！请用 @raw 简化传参！");
 				}
 
 
