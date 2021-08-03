@@ -310,6 +310,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
   <a href="https://github.com/pengxianggui/apijson-builder"><img src="https://avatars2.githubusercontent.com/u/16299169?s=460&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/APIJSON/AbsGrade"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/TommyLemon/Android-ZBLibrary"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/APIJSON/apijson_todo_demo"><img src="https://avatars.githubusercontent.com/u/17522475?v=4"  height="54" width="54" ></a>
 </div>
 <br />
 
@@ -422,6 +423,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [FfApiJson](https://gitee.com/own_3_0/ff-api-json) 用 JSON 格式直接生成 SQL，借鉴 APIJSON 支持多数据源
 
+[APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) 一个简单的 todo 示例项目，精简数据，简化上手流程，带自定义鉴权逻辑 
+  
 [apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON 学习笔记和源码解析
 
 [apijson-sample](https://gitee.com/greyzeng/apijson-sample) APIJSON 简单使用 Demo 及教程
@@ -445,8 +448,6 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 [APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
 
 [Android-ZBLibrary](https://github.com/TommyLemon/Android-ZBLibrary) Android MVP快速开发框架，Demo全面，注释详细，使用简单，代码严谨
-
-[APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) 一个简单的 todo 示例项目，精简数据，简化上手流程，带自定义鉴权逻辑
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
