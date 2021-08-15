@@ -47,7 +47,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这套协议实现的 ORM 库。<br />
 为 简单的增删改查、复杂的查询、简单的事务操作 提供了完全自动化的万能 API。<br />
 能大幅降低开发和沟通成本，简化开发流程，缩短开发周期。<br />
-适合中小型前后端分离的项目，尤其是 BaaS、Serverless、互联网创业项目和企业自用项目。<br />
+适合中小型前后端分离的项目，尤其是 互联网创业项目、企业自用项目、低代码/零代码平台、小程序、BaaS、Serverless 等。<br />
 
 通过万能的 API，前端可以定制任何数据、任何结构。<br />
 大部分 HTTP 请求后端再也不用写接口了，更不用写文档了。<br />
