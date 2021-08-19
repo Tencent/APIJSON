@@ -241,7 +241,7 @@ https://github.com/Tencent/APIJSON/issues/187
 
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(5 个腾讯工程师、1 个知乎基础研发架构师、1 个圆通工程师 等)：<br />
+主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个知乎基础研发架构师、1 个圆通工程师 等)：<br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -275,7 +275,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 </div>
 <br />
 
-生态周边项目的作者们(1 个腾讯工程师、1 个字节跳动工程师 等)：<br />
+生态周边项目的作者们(2 个腾讯工程师、1 个字节跳动工程师 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">
