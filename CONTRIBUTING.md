@@ -34,6 +34,7 @@
 - [yeyuezhishou](https://github.com/yeyuezhishou)(圆通工程师)
 - [kenlig](https://github.com/kenlig)
 - [andream7](https://github.com/andream7)
+- [haolingzhang1](https://github.com/haolingzhang1)(腾讯工程师，还开源了 APIJson--demo)
 
 
 #### 其中特别致谢: <br/>
@@ -73,6 +74,19 @@ APIJSON 作为腾讯开源的知名热门项目，贡献代码除了可以给简
 ##  Pull Request
 
 我们除了希望听到您的反馈和建议外，我们也希望您接受代码形式的直接帮助，对我们的 GitHub 发出 Pull Request 请求。
+
+### 如果是小改文档或代码
+
+直接点文件右上角的编辑图标按钮 <br/> 
+![image](https://user-images.githubusercontent.com/5738175/130585672-8bd49ae5-2978-4ad6-a7a6-de0a0c2d0b68.png)
+
+<br/>
+
+然后底部简要输入修改说明，点击 Commit Change 按钮 <br/> 
+![image](https://user-images.githubusercontent.com/5738175/130586073-4a6aea74-3c88-4cd9-9c93-ffaba1270ab8.png)
+
+
+### 如果有比较大的改动
 
 以下是具体步骤：(如果使用本步骤，GitHub 可能不会把贡献者添加到 Contributors 中，推荐用以下 [详细的图文步骤](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md#%E8%AF%A6%E7%BB%86%E7%9A%84%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4%E5%8F%AF%E5%8F%82%E8%80%83%E4%BB%A5%E4%B8%8B%E4%BB%BB%E6%84%8F%E4%B8%80%E7%AF%87))
 
