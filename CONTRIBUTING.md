@@ -41,7 +41,7 @@
 - [haolingzhang1](https://github.com/haolingzhang1)(腾讯工程师，还开源了 APIJson--demo)
 - [jerrylususu](https://github.com/jerrylususu)(还开源了 apijson_todo_demo 和 apijson_role_extend)
 - [Dalezee](https://github.com/Dalezee)(还开源了 apijson_camp)
-
+- [aaronlinv](https://github.com/aaronlinv)
 
 #### 其中特别致谢: <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
