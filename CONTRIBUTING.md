@@ -116,7 +116,7 @@ $ git remote add APIJSON git@github.com:Tencent/APIJSON.git
 
 直接在 fork Repo 的首页点 Contribute > Open pull request
 
-![image](https://user-images.githubusercontent.com/5738175/131775861-15a2bf9e-4e85-4588-bd2d-f9d78b76541c.png)
+![image](https://user-images.githubusercontent.com/5738175/131776033-74caf279-ebbf-45f1-a9c1-beff937a87fb.png)
 
 或者
 ```bash
