@@ -114,8 +114,10 @@ $ git remote add APIJSON git@github.com:Tencent/APIJSON.git
 
 #### 保持与 APIJSON 仓库的同步
 
-更新上游仓库：
+直接在 fork Repo 的首页点 Contribute > Open pull request
+![image](https://user-images.githubusercontent.com/5738175/131775861-15a2bf9e-4e85-4588-bd2d-f9d78b76541c.png)
 
+或者
 ```bash
 $ git pull --rebase <name> <branch>
 # 等同于以下两条命令
