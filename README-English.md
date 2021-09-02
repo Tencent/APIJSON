@@ -348,7 +348,7 @@ If you have any questions or suggestions, you can [create an issue](https://gith
 [More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
 
 ### Contributers of APIJSON:
-Contributers for the APIJSON core project(6 Tencent engineers、1 Zhihu architect、1 Yuantong engineer, etc.): <br />
+Contributers for the APIJSON core project(6 Tencent engineers、1 Zhihu architect、1 YTO Express engineer, etc.): <br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
