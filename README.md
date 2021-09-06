@@ -504,6 +504,9 @@ https://www.bilibili.com/video/BV1GM4y1N7XJ
 
 APIJSON 后端教程（6）：uliweb_apijson
 https://www.bilibili.com/video/BV1yb4y1S79v/
+
+APIJSON 后端教程（7）：问题答疑
+https://www.bilibili.com/video/BV1dQ4y1h7Df
   
 APIJSON配套文档：
 https://github.com/kenlig/apijsondocs
