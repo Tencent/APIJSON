@@ -238,6 +238,8 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="http://www.hec-bang.com"><img src="http://apijson.cn/images/www.hec-bang.com.png" height="75"></a>
   <a href="https://www.toutou.com.cn"><img src="http://apijson.cn/images/www.toutou.com.cn.jpg" height="75"></a>
 <br />
+  
+ * [腾讯科技有限公司](https://www.tencent.com)
 
 
 ### 贡献者们
@@ -282,8 +284,6 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/295"><img src="https://avatars.githubusercontent.com/u/11210385?v=4"  height="54" width="54" ></a>
 </div>
 <br />
-
- * [腾讯科技有限公司](https://www.tencent.com)
 
 生态周边项目的作者们(2 个腾讯工程师、1 个字节跳动工程师 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
