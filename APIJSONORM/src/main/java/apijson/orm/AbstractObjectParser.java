@@ -261,7 +261,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 									&& JSONRequest.isTableArray(key)) {  // JSONArray，批量新增或修改，往下一级提取
 								onTableArrayParse(key, (JSONArray) value);
 							}
-							else if (method == PUT && value instanceof JSONArray && (whereList == null || whereList.contains(key) == false) && (StringUtil.isName(key) || ((key.endsWith("+") || key.endsWith("-")) && StringUtil.isName(key.substring(0, key.length()-1)))))
+							else if (method == PUT && value instanceof JSONArray && (whereList == null || whereList.contains(key) == false) && StringUtil.isName(key.replaceFirst("[+-]$", "")))
 							{  // PUT JSONArray
 								onPUTArrayParse(key, (JSONArray) value);
 							}
