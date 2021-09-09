@@ -3127,7 +3127,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-					if (isWhere) {
+					if (isWhere || (StringUtil.isName(key) == false)) {
 						tableWhere.put(key, value);
 						if (whereList == null || whereList.contains(key) == false) {
 							andList.add(key);
