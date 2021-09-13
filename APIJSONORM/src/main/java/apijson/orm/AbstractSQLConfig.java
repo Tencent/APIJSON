@@ -2587,7 +2587,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (setString.isEmpty()) {
 			throw new IllegalArgumentException("PUT 请求必须在Table内设置要修改的 key:value ！");
 		}
-		return " SET " + setString;
+		return (isClickHouse()?" ":" SET ") + setString;
 	}
 
 	/**SET key = concat(key, 'value')
@@ -2665,9 +2665,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case POST:
 			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
 		case PUT:
-			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL()||config.isClickHouse() ? config.getLimitString() : "");
+			if(config.isClickHouse()){
+				return  "ALTER TABLE " +  tablePath + " UPDATE"+ config.getSetString()+ config.getWhereString(true);
+			}
+			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
 		case DELETE:
-			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL()||config.isClickHouse() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
+			if(config.isClickHouse()){
+				return  "ALTER TABLE " +  tablePath + " DELETE" + config.getWhereString(true);
+			}
+			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
 		default:
 			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {
@@ -2679,7 +2685,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String column = config.getColumnString();
 			if (config.isOracle()) {
 				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
-				return explain + "SELECT * FROM (SELECT"+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
+				return explain + "SELECT * FROM (SELECT "+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
 			}
 			
 			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + config.getLimitString();
