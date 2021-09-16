@@ -21,12 +21,7 @@ import static apijson.JSONObject.KEY_RAW;
 import static apijson.JSONObject.KEY_ROLE;
 import static apijson.JSONObject.KEY_SCHEMA;
 import static apijson.JSONObject.KEY_USER_ID;
-import static apijson.RequestMethod.DELETE;
-import static apijson.RequestMethod.GET;
-import static apijson.RequestMethod.GETS;
-import static apijson.RequestMethod.HEADS;
-import static apijson.RequestMethod.POST;
-import static apijson.RequestMethod.PUT;
+import static apijson.RequestMethod.*;
 import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.OR;
@@ -890,7 +885,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//			return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(order, joinOrder, ", ");
 		//		}
 
-		if (getCount() > 0 && (isOracle() || isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY
+		if (getCount() > 0 && (isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY.去掉Oracle，Oracle里面没有offset关键字
 
 			//			String[] ss = StringUtil.split(order);
 			if (StringUtil.isEmpty(order, true)) {  //SQL Server 子查询内必须指定 OFFSET 才能用 ORDER BY
@@ -2685,6 +2680,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String column = config.getColumnString();
 			if (config.isOracle()) {
 				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
+				//针对oracle分组后条数的统计
+				if ((config.getMethod() == HEAD || config.getMethod() == HEADS)
+						&& StringUtil.isNotEmpty(config.getGroup(),true)){
+					return explain + "SELECT count(*) FROM (SELECT "+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
+				}
 				return explain + "SELECT * FROM (SELECT "+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
 			}
 			
@@ -2693,10 +2693,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	/**获取条件SQL字符串
-	 * @param page 
 	 * @param column
 	 * @param table
-	 * @param where
+	 * @param config
 	 * @return
 	 * @throws Exception 
 	 */
@@ -2708,11 +2707,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
 		}
 
-		String condition = table + config.getJoinString() + where + (
-				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
-						"" : config.getGroupString(true) + config.getHavingString(true) + config.getOrderString(true)
-				)
-				; //+ config.getLimitString();
+		//根据方法不同，聚合语句不同。GROUP  BY 和 HAVING 可以加在 HEAD 上, HAVING 可以加在 PUT, DELETE 上，GET 全加，POST 全都不加
+		String aggregation = "";
+		if (RequestMethod.isGetMethod(config.getMethod(), true)){
+			aggregation = config.getGroupString(true) + config.getHavingString(true) +
+					config.getOrderString(true);
+		}
+		if (RequestMethod.isHeadMethod(config.getMethod(), true)){
+			aggregation = config.getGroupString(true) + config.getHavingString(true) ;
+		}
+		if (config.getMethod() == PUT || config.getMethod() == DELETE){
+			aggregation = config.getHavingString(true) ;
+		}
+
+		String condition = table + config.getJoinString() + where + aggregation;
+		; //+ config.getLimitString();
 
 		//no need to optimize
 		//		if (config.getPage() <= 0 || ID.equals(column.trim())) {
@@ -2748,7 +2757,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//		condition += config.getLimitString();
 		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
 	}
-
 
 	private boolean keyPrefix;
 	@Override
