@@ -435,6 +435,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [FfApiJson](https://gitee.com/own_3_0/ff-api-json) 用 JSON 格式直接生成 SQL，借鉴 APIJSON 支持多数据源
 
+[apijson-practice](https://github.com/vcoolwind/apijson-practice) 实践一下apijson，对做管理平台还是能有不少提效的
+
 [APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) 一个简单的 todo 示例项目，精简数据，简化上手流程，带自定义鉴权逻辑 
   
 [apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON 学习笔记和源码解析
