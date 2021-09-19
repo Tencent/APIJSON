@@ -32,9 +32,16 @@
 - [jun0315](https://github.com/jun0315)(腾讯工程师)
 - [JieJo](https://github.com/JieJo)
 - [yeyuezhishou](https://github.com/yeyuezhishou)(圆通工程师)
-- [kenlig](https://github.com/kenlig)
-- [andream7](https://github.com/andream7)
-
+- [kenlig](https://github.com/kenlig)(还开源了 apijsondocs)
+- [andream7](https://github.com/andream7)(还开源了 apijson-db2)
+- [qiujunlin](https://github.com/qiujunlin)(还开源了 APIJSONDemo)
+- [HANXU2018](https://github.com/HANXU2018)(还开源了 APIJSON-DOC)
+- [hclown9804](https://github.com/hclown9804)
+- [chenyanlann](https://github.com/chenyanlann)(还开源了 APIJSONDemo_ClickHouse)
+- [haolingzhang1](https://github.com/haolingzhang1)(腾讯工程师，还开源了 APIJson--demo)
+- [jerrylususu](https://github.com/jerrylususu)(还开源了 apijson_todo_demo 和 apijson_role_extend)
+- [Dalezee](https://github.com/Dalezee)(还开源了 apijson_camp)
+- [aaronlinv](https://github.com/aaronlinv)
 
 #### 其中特别致谢: <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
@@ -74,6 +81,19 @@ APIJSON 作为腾讯开源的知名热门项目，贡献代码除了可以给简
 
 我们除了希望听到您的反馈和建议外，我们也希望您接受代码形式的直接帮助，对我们的 GitHub 发出 Pull Request 请求。
 
+### 如果是小改文档或代码
+
+直接点文件右上角的编辑图标按钮 <br/> 
+![image](https://user-images.githubusercontent.com/5738175/130585672-8bd49ae5-2978-4ad6-a7a6-de0a0c2d0b68.png)
+
+<br/>
+
+然后底部简要输入修改说明，点击 Commit Change 按钮 <br/> 
+![image](https://user-images.githubusercontent.com/5738175/130586073-4a6aea74-3c88-4cd9-9c93-ffaba1270ab8.png)
+
+
+### 如果有比较大的改动
+
 以下是具体步骤：(如果使用本步骤，GitHub 可能不会把贡献者添加到 Contributors 中，推荐用以下 [详细的图文步骤](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md#%E8%AF%A6%E7%BB%86%E7%9A%84%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4%E5%8F%AF%E5%8F%82%E8%80%83%E4%BB%A5%E4%B8%8B%E4%BB%BB%E6%84%8F%E4%B8%80%E7%AF%87))
 
 #### Fork 仓库
@@ -100,8 +120,11 @@ $ git remote add APIJSON git@github.com:Tencent/APIJSON.git
 
 #### 保持与 APIJSON 仓库的同步
 
-更新上游仓库：
+直接在 fork Repo 的首页点 Contribute > Open pull request
 
+![image](https://user-images.githubusercontent.com/5738175/131776033-74caf279-ebbf-45f1-a9c1-beff937a87fb.png)
+
+或者
 ```bash
 $ git pull --rebase <name> <branch>
 # 等同于以下两条命令

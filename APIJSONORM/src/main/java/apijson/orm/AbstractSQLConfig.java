@@ -21,12 +21,7 @@ import static apijson.JSONObject.KEY_RAW;
 import static apijson.JSONObject.KEY_ROLE;
 import static apijson.JSONObject.KEY_SCHEMA;
 import static apijson.JSONObject.KEY_USER_ID;
-import static apijson.RequestMethod.DELETE;
-import static apijson.RequestMethod.GET;
-import static apijson.RequestMethod.GETS;
-import static apijson.RequestMethod.HEADS;
-import static apijson.RequestMethod.POST;
-import static apijson.RequestMethod.PUT;
+import static apijson.RequestMethod.*;
 import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.OR;
@@ -124,6 +119,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
 		DATABASE_LIST.add(DATABASE_DB2);
+		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -508,10 +504,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isDb2(String db) {
 		return DATABASE_DB2.equals(db);
 	}
+	@Override
+	public boolean isClickHouse() {
+		return isClickHouse(getSQLDatabase());
+	}
+	public static boolean isClickHouse(String db) {
+		return DATABASE_CLICKHOUSE.equals(db);
+	}
 
 	@Override
 	public String getQuote() {
-		return isMySQL() ? "`" : "\"";
+		return isMySQL()||isClickHouse() ? "`" : "\"";
 	}
 
 	@Override
@@ -882,7 +885,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//			return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(order, joinOrder, ", ");
 		//		}
 
-		if (getCount() > 0 && (isOracle() || isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY
+		if (getCount() > 0 && (isSQLServer() || isDb2())) { // Oracle, SQL Server, DB2 的 OFFSET 必须加 ORDER BY.去掉Oracle，Oracle里面没有offset关键字
 
 			//			String[] ss = StringUtil.split(order);
 			if (StringUtil.isEmpty(order, true)) {  //SQL Server 子查询内必须指定 OFFSET 才能用 ORDER BY
@@ -1171,9 +1174,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					//					}
 				}
 
-				if (expression.length() > 50) {
+				if (expression.length() > 100) {
 					throw new UnsupportedOperationException("@column:value 的 value 中字符串 " + expression + " 不合法！"
-							+ "不允许传超过 50 个字符的函数或表达式！请用 @raw 简化传参！");
+							+ "不允许传超过 100 个字符的函数或表达式！请用 @raw 简化传参！");
 				}
 
 
@@ -2158,6 +2161,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (isOracle()) {
 			return "regexp_like(" + getKey(key) + ", " + getValue(value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
+		if (isClickHouse()) {
+			return "match(" + (ignoreCase ? "lower(" : "") + getKey(key) + (ignoreCase ? ")" : "") + ", " + (ignoreCase ? "lower(" : "") + getValue(value) + (ignoreCase ? ")" : "") + ")";
+		}
 		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
 	}
 	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2448,7 +2454,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					else {
 						boolean isNum = c instanceof Number;
 						String v = (isNum ? "" : "\"") + childs[i] + (isNum ? "" : "\"");
-						condition += ("json_contains(" + getKey(key) + ", " +  getValue(v) + ")");
+						if (isClickHouse()) {
+							condition += condition + "has(JSONExtractArrayRaw(assumeNotNull(" + getKey(key) + "))" + ", " + getValue(v) + ")";
+						}
+						else {
+							condition += ("json_contains(" + getKey(key) + ", " +  getValue(v) + ")");
+						}
 					}
 				}
 			}
@@ -2571,7 +2582,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (setString.isEmpty()) {
 			throw new IllegalArgumentException("PUT 请求必须在Table内设置要修改的 key:value ！");
 		}
-		return " SET " + setString;
+		return (isClickHouse()?" ":" SET ") + setString;
 	}
 
 	/**SET key = concat(key, 'value')
@@ -2649,8 +2660,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case POST:
 			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
 		case PUT:
+			if(config.isClickHouse()){
+				return  "ALTER TABLE " +  tablePath + " UPDATE"+ config.getSetString()+ config.getWhereString(true);
+			}
 			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
 		case DELETE:
+			if(config.isClickHouse()){
+				return  "ALTER TABLE " +  tablePath + " DELETE" + config.getWhereString(true);
+			}
 			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
 		default:
 			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
@@ -2663,7 +2680,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String column = config.getColumnString();
 			if (config.isOracle()) {
 				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
-				return explain + "SELECT * FROM (SELECT"+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
+				//针对oracle分组后条数的统计
+				if ((config.getMethod() == HEAD || config.getMethod() == HEADS)
+						&& StringUtil.isNotEmpty(config.getGroup(),true)){
+					return explain + "SELECT count(*) FROM (SELECT "+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
+				}
+				return explain + "SELECT * FROM (SELECT "+ (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
 			}
 			
 			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + config.getLimitString();
@@ -2671,10 +2693,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	/**获取条件SQL字符串
-	 * @param page 
 	 * @param column
 	 * @param table
-	 * @param where
+	 * @param config
 	 * @return
 	 * @throws Exception 
 	 */
@@ -2686,11 +2707,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
 		}
 
-		String condition = table + config.getJoinString() + where + (
-				RequestMethod.isGetMethod(config.getMethod(), true) == false ?
-						"" : config.getGroupString(true) + config.getHavingString(true) + config.getOrderString(true)
-				)
-				; //+ config.getLimitString();
+		//根据方法不同，聚合语句不同。GROUP  BY 和 HAVING 可以加在 HEAD 上, HAVING 可以加在 PUT, DELETE 上，GET 全加，POST 全都不加
+		String aggregation = "";
+		if (RequestMethod.isGetMethod(config.getMethod(), true)){
+			aggregation = config.getGroupString(true) + config.getHavingString(true) +
+					config.getOrderString(true);
+		}
+		if (RequestMethod.isHeadMethod(config.getMethod(), true)){
+			aggregation = config.getGroupString(true) + config.getHavingString(true) ;
+		}
+		if (config.getMethod() == PUT || config.getMethod() == DELETE){
+			aggregation = config.getHavingString(true) ;
+		}
+
+		String condition = table + config.getJoinString() + where + aggregation;
+		; //+ config.getLimitString();
 
 		//no need to optimize
 		//		if (config.getPage() <= 0 || ID.equals(column.trim())) {
@@ -2726,7 +2757,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//		condition += config.getLimitString();
 		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
 	}
-
 
 	private boolean keyPrefix;
 	@Override
@@ -3111,7 +3141,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-					if (isWhere) {
+					if (isWhere || (StringUtil.isName(key) == false)) {
 						tableWhere.put(key, value);
 						if (whereList == null || whereList.contains(key) == false) {
 							andList.add(key);
