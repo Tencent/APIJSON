@@ -30,6 +30,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.JSON;
+import apijson.JSONRequest;
 import apijson.JSONResponse;
 import apijson.Log;
 import apijson.NotNull;
@@ -513,31 +514,53 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					+ "非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error + "\n如果需要则在 Request 表中新增配置！");
 		}
 
-		JSONObject target = object;
-		if (object.containsKey(tag) == false) { //tag 是 Table 名或 Table[]
-
-			boolean isArrayKey = tag.endsWith(":[]");  //  JSONRequest.isArrayKey(tag);
-			String key = isArrayKey ? tag.substring(0, tag.length() - 3) : tag;
-
-			if (apijson.JSONObject.isTableKey(key)) {
-				if (isArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
-					target.put(key + "[]", new JSONArray()); 
-				}
-				else { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
-					target = new JSONObject(true);
-					target.put(tag, object);
-				}
-			}
-		}
-
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
-
-
+		JSONObject target = wrapRequest(object, tag, false);
+		
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
 		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobleDatabase(), getGlobleSchema(), creator);
 	}
 
 
+	/**自动根据 tag 是否为 TableKey 及是否被包含在 object 内来决定是否包装一层，改为 { tag: object, "tag": tag }
+	 * @param object
+	 * @param tag
+	 * @return
+	 */
+	public static JSONObject wrapRequest(JSONObject object, String tag, boolean putTag) {
+		if (object == null || object.containsKey(tag)) { //tag 是 Table 名或 Table[]
+			if (putTag) {
+				if (object == null) {
+					object = new JSONObject(true);
+				}
+				object.put(JSONRequest.KEY_TAG, tag);
+			}
+			return object;
+		}
+
+		boolean isDiffArrayKey = tag.endsWith(":[]");
+		boolean isArrayKey = isDiffArrayKey || JSONRequest.isArrayKey(tag);
+		String key = isArrayKey ? tag.substring(0, tag.length() - (isDiffArrayKey ? 3 : 2)) : tag;
+
+		JSONObject target = object;
+		if (apijson.JSONObject.isTableKey(key)) {
+			if (isDiffArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
+				target.put(key + "[]", new JSONArray()); 
+			}
+			else { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
+				target = new JSONObject(true);
+				target.put(tag, object);
+			}
+		}
+		
+		if (putTag) {
+			target.put(JSONRequest.KEY_TAG, tag);
+		}
+		
+		return target;
+	}
+
+	
 	/**新建带状态内容的JSONObject
 	 * @param code
 	 * @param msg
