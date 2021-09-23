@@ -970,7 +970,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		if (StringUtil.isEmpty(ds, false)) {
 			ds = datasource;
 		}
-		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, name);
+		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, name);
 		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
 
 		//TODO放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
