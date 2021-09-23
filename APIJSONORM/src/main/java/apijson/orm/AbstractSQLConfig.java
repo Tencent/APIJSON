@@ -133,35 +133,35 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
 
-		// mysql关键字
-		RAW_MAP.put("AS","");
-		RAW_MAP.put("VALUE","");
-		RAW_MAP.put("DISTINCT","");
+		// MySQL 关键字
+		RAW_MAP.put("AS", "");
+		RAW_MAP.put("VALUE", "");
+		RAW_MAP.put("DISTINCT", "");
 
 		//时间
-		RAW_MAP.put("DATE","");
-		RAW_MAP.put("now()","");
-		RAW_MAP.put("DATETIME","");
-		RAW_MAP.put("DateTime","");
-		RAW_MAP.put("SECOND","");
-		RAW_MAP.put("MINUTE","");
-		RAW_MAP.put("HOUR","");
-		RAW_MAP.put("DAY","");
-		RAW_MAP.put("WEEK","");
-		RAW_MAP.put("MONTH","");
-		RAW_MAP.put("QUARTER","");
-		RAW_MAP.put("YEAR","");
-		RAW_MAP.put("json","");
-		RAW_MAP.put("unit","");
+		RAW_MAP.put("DATE", "");
+		RAW_MAP.put("now()", "");
+		RAW_MAP.put("DATETIME", "");
+		RAW_MAP.put("DateTime", "");
+		RAW_MAP.put("SECOND", "");
+		RAW_MAP.put("MINUTE", "");
+		RAW_MAP.put("HOUR", "");
+		RAW_MAP.put("DAY", "");
+		RAW_MAP.put("WEEK", "");
+		RAW_MAP.put("MONTH", "");
+		RAW_MAP.put("QUARTER", "");
+		RAW_MAP.put("YEAR", "");
+		RAW_MAP.put("json", "");
+		RAW_MAP.put("unit", "");
 
 		//MYSQL 数据类型 BINARY，CHAR，DATETIME，TIME，DECIMAL，SIGNED，UNSIGNED
-		RAW_MAP.put("BINARY","");
-		RAW_MAP.put("SIGNED","");
-		RAW_MAP.put("DECIMAL","");
-		RAW_MAP.put("BINARY","");
-		RAW_MAP.put("UNSIGNED","");
-		RAW_MAP.put("CHAR","");
-		RAW_MAP.put("TIME","");
+		RAW_MAP.put("BINARY", "");
+		RAW_MAP.put("SIGNED", "");
+		RAW_MAP.put("DECIMAL", "");
+		RAW_MAP.put("BINARY", "");
+		RAW_MAP.put("UNSIGNED", "");
+		RAW_MAP.put("CHAR", "");
+		RAW_MAP.put("TIME", "");
 
 		//窗口函数关键字
 		RAW_MAP.put("OVER", "");
@@ -384,7 +384,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 
-		//clickhouse 字符串函数  注释的函数表示返回的格式暂时不支持，如：返回数组 ，同时包含因版本不同 clickhosue不支持的函数，版本
+		//ClickHouse 字符串函数  注释的函数表示返回的格式暂时不支持，如：返回数组 ，同时包含因版本不同 clickhosue不支持的函数，版本
 		SQL_FUNCTION_MAP.put("empty", "");  // empty(s) 对于空字符串s返回1，对于非空字符串返回0
 		SQL_FUNCTION_MAP.put("notEmpty", "");  //notEmpty(s) 对于空字符串返回0，对于非空字符串返回1。
 		SQL_FUNCTION_MAP.put("lengthUTF8", "");  //假定字符串以UTF-8编码组成的文本，返回此字符串的Unicode字符长度。如果传入的字符串不是UTF-8编码，则函数可能返回一个预期外的值
@@ -492,7 +492,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("timestamp_add", ""); //使用提供的日期或日期时间值添加指定的时间值。
 		SQL_FUNCTION_MAP.put("timestamp_sub", ""); //从提供的日期或带时间的日期中减去时间间隔。
 
-		//clickhouse json函数
+		//ClickHouse json函数
 		SQL_FUNCTION_MAP.put("visitParamHas", ""); //visitParamHas(params, name)检查是否存在«name»名称的字段
 		SQL_FUNCTION_MAP.put("visitParamExtractUInt", ""); //visitParamExtractUInt(params, name)将名为«name»的字段的值解析成UInt64。
 		SQL_FUNCTION_MAP.put("visitParamExtractInt", ""); //与visitParamExtractUInt相同，但返回Int64。
@@ -513,7 +513,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("JSONExtractRaw", ""); //返回JSON的部分。
 		SQL_FUNCTION_MAP.put("toJSONString", ""); //
 
-		//clickhouse 类型转换函数
+		//ClickHouse 类型转换函数
 		SQL_FUNCTION_MAP.put("toInt8", ""); //toInt8(expr)  转换一个输入值为Int类型
 		SQL_FUNCTION_MAP.put("toInt16", "");
 		SQL_FUNCTION_MAP.put("toInt32", "");
@@ -581,11 +581,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 
-		////clickhouse hash函数
+		////ClickHouse hash函数
 		SQL_FUNCTION_MAP.put("halfMD5", ""); //计算字符串的MD5。然后获取结果的前8个字节并将它们作为UInt64（大端）返回
 		SQL_FUNCTION_MAP.put("MD5", "");  //计算字符串的MD5并将结果放入FixedString(16)中返回
 
-		//clickhouse ip地址函数
+		//ClickHouse ip地址函数
 		SQL_FUNCTION_MAP.put("IPv4NumToString", "");  //接受一个UInt32（大端）表示的IPv4的地址，返回相应IPv4的字符串表现形式，格式为A.B.C.D（以点分割的十进制数字）。
 		SQL_FUNCTION_MAP.put("IPv4StringToNum", ""); //与IPv4NumToString函数相反。如果IPv4地址格式无效，则返回0。
 		SQL_FUNCTION_MAP.put("IPv6NumToString", ""); //接受FixedString(16)类型的二进制格式的IPv6地址。以文本格式返回此地址的字符串。
@@ -596,18 +596,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("toIPv6", ""); //IPv6StringToNum()的别名
 		SQL_FUNCTION_MAP.put("isIPAddressInRange", ""); //确定一个IP地址是否包含在以CIDR符号表示的网络中
 
-		//clickhouse Nullable处理函数
+		//ClickHouse Nullable处理函数
 		SQL_FUNCTION_MAP.put("isNull", "");  //检查参数是否为NULL。
 		SQL_FUNCTION_MAP.put("isNotNull", ""); //检查参数是否不为 NULL.
 		SQL_FUNCTION_MAP.put("ifNull", ""); //如果第一个参数为«NULL»，则返回第二个参数的值。
 		SQL_FUNCTION_MAP.put("assumeNotNull", ""); //将可为空类型的值转换为非Nullable类型的值。
 		SQL_FUNCTION_MAP.put("toNullable", "");  //将参数的类型转换为Nullable。
 
-		//clickhouse UUID函数
+		//ClickHouse UUID函数
 		SQL_FUNCTION_MAP.put("generateUUIDv4", ""); // 生成一个UUID
 		SQL_FUNCTION_MAP.put("toUUID", ""); //toUUID(x) 将String类型的值转换为UUID类型的值。
 
-		//clickhouse 系统函数
+		//ClickHouse 系统函数
 		SQL_FUNCTION_MAP.put("hostName", ""); //hostName()回一个字符串，其中包含执行此函数的主机的名称。
 		SQL_FUNCTION_MAP.put("getMacro", ""); //从服务器配置的宏部分获取指定值。
 		SQL_FUNCTION_MAP.put("FQDN", "");//返回完全限定的域名。
@@ -616,7 +616,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("version", ""); //以字符串形式返回服务器版本。
 		SQL_FUNCTION_MAP.put("uptime", "");//以秒为单位返回服务器的正常运行时间。
 
-		//clickhouse 数学函数
+		//ClickHouse 数学函数
 		SQL_FUNCTION_MAP.put("least", ""); //返回a和b中最小的值。
 		SQL_FUNCTION_MAP.put("greatest", ""); //返回a和b的最大值。
 		SQL_FUNCTION_MAP.put("plus", "");  //plus(a, b), a + b operator¶计算数值的总和。
