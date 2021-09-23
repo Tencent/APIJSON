@@ -158,7 +158,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			Log.e(TAG, "execute  StringUtil.isEmpty(sql, true) >> return null;");
 			return null;
 		}
-		
+
 		boolean isExplain = config.isExplain();
 		boolean isHead = RequestMethod.isHeadMethod(config.getMethod(), true);
 
@@ -216,7 +216,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						result.put(config.getIdKey() + "[]", config.getWhere(config.getIdKey() + "{}", true));
 					}
 					return result;
-									
+
 				case GET:
 				case GETS:
 				case HEAD:
@@ -243,7 +243,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				}
 			}
 
-		
+
 			if (isExplain == false && isHead) {
 				if (rs.next() == false) {
 					return AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
@@ -337,7 +337,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			result.put("list", resultList);
 			return result;
 		}
-		
+
 		if (isHead == false) {
 			// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -370,7 +370,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				result.put(KEY_RAW_LIST, resultList);
 			}
 		}
-		
+
 		long endTime = System.currentTimeMillis();
 		Log.d(TAG, "\n\n execute  endTime = " + endTime + "; duration = " + (endTime - startTime)
 				+ "\n return resultList.get(" + position + ");"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");

@@ -87,10 +87,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 		this.type = arrayConfig == null ? 0 : arrayConfig.getType();
 		this.joinList = arrayConfig == null ? null : arrayConfig.getJoinList();
-		
+
 		this.isTable = isTable; // apijson.JSONObject.isTableKey(table);
 		this.isArrayMainTable = isArrayMainTable; // isSubquery == false && this.isTable && this.type == SQLConfig.TYPE_ITEM_CHILD_0 && RequestMethod.isGetMethod(method, true);
-//		this.isReuse = isReuse; // isArrayMainTable && arrayConfig != null && arrayConfig.getPosition() > 0;
+		//		this.isReuse = isReuse; // isArrayMainTable && arrayConfig != null && arrayConfig.getPosition() > 0;
 
 		this.objectCount = 0;
 		this.arrayCount = 0;
@@ -182,11 +182,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			apijson.orm.Entry<String, String> tentry = Pair.parseEntry(name, true);
 			this.table = tentry.getKey();
 			this.alias = tentry.getValue();
-			
+
 			Log.d(TAG, "AbstractObjectParser  parentPath = " + parentPath + "; name = " + name + "; table = " + table + "; alias = " + alias);
 			Log.d(TAG, "AbstractObjectParser  type = " + type + "; isTable = " + isTable + "; isArrayMainTable = " + isArrayMainTable);
 			Log.d(TAG, "AbstractObjectParser  isEmpty = " + request.isEmpty() + "; tri = " + tri + "; drop = " + drop);
-			
+
 			breakParse = false;
 
 			response = new JSONObject(true);//must init
@@ -224,8 +224,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						whereList = new ArrayList<String>(Arrays.asList(combine != null ? combine : new String[]{}));
 						whereList.add(apijson.JSONRequest.KEY_ID);
 						whereList.add(apijson.JSONRequest.KEY_ID_IN);
-//						whereList.add(apijson.JSONRequest.KEY_USER_ID);
-//						whereList.add(apijson.JSONRequest.KEY_USER_ID_IN);
+						//						whereList.add(apijson.JSONRequest.KEY_USER_ID);
+						//						whereList.add(apijson.JSONRequest.KEY_USER_ID_IN);
 					}
 					//条件>>>>>>>>>>>>>>>>>>>
 
@@ -292,7 +292,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					if (parser.getGlobleDatasource() != null && sqlRequest.get(JSONRequest.KEY_DATASOURCE) == null) {
 						sqlRequest.put(JSONRequest.KEY_DATASOURCE, parser.getGlobleDatasource());
 					}
-					
+
 					if (isSubquery == false) {  //解决 SQL 语法报错，子查询不能 EXPLAIN
 						if (parser.getGlobleExplain() != null && sqlRequest.get(JSONRequest.KEY_EXPLAIN) == null) {
 							sqlRequest.put(JSONRequest.KEY_EXPLAIN, parser.getGlobleExplain());
@@ -818,10 +818,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				if (child == null
 						|| (child instanceof JSONObject && ((JSONObject) child).isEmpty())
 						|| (child instanceof JSONArray && ((JSONArray) child).isEmpty())
-				) {
+						) {
 					continue;
 				}
-				
+
 				response.put(entry.getKey(), child );
 				index ++;
 			}

@@ -209,7 +209,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		this.globleDatasource = globleDatasource;
 		return this;
 	}
-	
+
 	protected Boolean globleExplain;
 	public AbstractParser<T> setGlobleExplain(Boolean globleExplain) {
 		this.globleExplain = globleExplain;
@@ -516,7 +516,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
 		JSONObject target = wrapRequest(method, tag, object, true);
-		
+
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
 		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobleDatabase(), getGlobleSchema(), creator);
 	}
@@ -529,7 +529,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 */
 	public static JSONObject wrapRequest(RequestMethod method, String tag, JSONObject object, boolean isStructure) {
 		boolean putTag = ! isStructure;
-		
+
 		if (object == null || object.containsKey(tag)) { //tag 是 Table 名或 Table[]
 			if (putTag) {
 				if (object == null) {
@@ -549,18 +549,18 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			if (isDiffArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对为 { "Comment[]":[], "TYPE": { "Comment[]": "OBJECT[]" } ... }
 				if (isStructure && (method == RequestMethod.POST || method == RequestMethod.PUT)) {
 					String arrKey = key + "[]";
-					
+
 					if (target.containsKey(arrKey) == false) {
 						target.put(arrKey, new JSONArray()); 
 					}
-					
+
 					try {
 						JSONObject type = target.getJSONObject(Operation.TYPE.name());
 						if (type == null || (type.containsKey(arrKey) == false)) {
 							if (type == null) {
 								type = new JSONObject(true);
 							}
-							
+
 							type.put(arrKey, "OBJECT[]");
 							target.put(Operation.TYPE.name(), type);
 						}
@@ -581,15 +581,15 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				}
 			}
 		}
-		
+
 		if (putTag) {
 			target.put(JSONRequest.KEY_TAG, tag);
 		}
-		
+
 		return target;
 	}
 
-	
+
 	/**新建带状态内容的JSONObject
 	 * @param code
 	 * @param msg
@@ -835,7 +835,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 
 	protected Map<String, ObjectParser> arrayObjectParserCacheMap = new HashMap<>();
-	
+
 	//	protected SQLConfig itemConfig;
 	/**获取单个对象，该对象处于parentObject内
 	 * @param parentPath parentObject的路径
@@ -871,7 +871,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				}
 			}
 		}
-		
+
 		apijson.orm.Entry<String, String> entry = Pair.parseEntry(name, true);
 		String table = entry.getKey(); //Comment
 		// String alias = entry.getValue(); //to
@@ -884,15 +884,15 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		if (isReuse) {  // 数组主表使用专门的缓存数据
 			op = arrayObjectParserCacheMap.get(parentPath.substring(0, parentPath.lastIndexOf("[]") + 2));
 		}
-		
+
 		if (op == null) {
 			op = createObjectParser(request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
 		}
 		op = op.parse(name, isReuse);
-		
+
 		JSONObject response = null;
 		if (op != null) {//SQL查询结果为空时，functionMap和customMap没有意义
-			
+
 			if (arrayConfig == null) { //Common
 				response = op.setSQLConfig().executeSQL().response();
 			}
@@ -901,11 +901,11 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 				//total 这里不能用arrayConfig.getType()，因为在createObjectParser.onChildParse传到onObjectParse时已被改掉
 				if (type == SQLConfig.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE && position == 0) {
-					
+
 					RequestMethod method = op.getMethod();
 					JSONObject rp = op.setMethod(RequestMethod.HEAD).setSQLConfig().executeSQL().getSqlReponse();
 					op.setMethod(method);
-					
+
 					if (rp != null) {
 						int index = parentPath.lastIndexOf("]/");
 						if (index >= 0) {
@@ -934,7 +934,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 							pagination.put(JSONResponse.KEY_MORE, page < max);
 							pagination.put(JSONResponse.KEY_FIRST, page == 0);
 							pagination.put(JSONResponse.KEY_LAST, page == max);
-							
+
 							putQueryResult(pathPrefix + JSONResponse.KEY_INFO, pagination);
 
 							if (total <= count*page) {
@@ -963,9 +963,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					arrayObjectParserCacheMap.put(parentPath.substring(0, parentPath.lastIndexOf("[]") + 2), op);
 				}
 			}
-//			else {
-//				op.recycle();
-//			}
+			//			else {
+			//				op.recycle();
+			//			}
 			op = null;
 		}
 
@@ -1196,13 +1196,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 Table 值 " + table + " 不合法！"
 						+ "必须为 &/Table0/key0,</Table1:alias1/key1,... 这种形式！且 Table0 必须满足大写字母开头的表对象英文单词 key 格式！");
 			}
-			
+
 			String alias = entry.getValue(); //owner
 			if (StringUtil.isNotEmpty(alias, true) && StringUtil.isName(alias) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 alias 值 " + alias + " 不合法！"
 						+ "必须为 &/Table0/key0,</Table1:alias1/key1,... 这种形式！且 Table:alias 的 alias 必须满足英文单词变量名格式！");
 			}
-			
+
 			String key = StringUtil.isEmpty(table, true) ? null : path.substring(index + 1);//id@
 
 			//取出Table对应的JSONObject，及内部引用赋值 key:value
@@ -1212,7 +1212,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			catch (Exception e2) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + path + "' 对应的 " + tableKey + ":value 中 value 类型不合法！必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
 			}
-			
+
 			targetPath = tableObj == null ? null : tableObj.getString(key);
 			if (StringUtil.isEmpty(targetPath, true)) {
 				throw new IllegalArgumentException("/" + path + ":value 中 value 值 " + targetPath + " 不合法！必须为引用赋值的路径 '/targetTable/targetKey' ！");
@@ -1240,12 +1240,12 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			//			if (StringUtil.isNotEmpty(targetAlias, true) && StringUtil.isName(targetAlias) == false) {
 			//				throw new IllegalArgumentException("/" + path + ":'/targetTable:targetAlias/targetKey' 中 targetAlias 值 " + targetAlias + " 不合法！必须满足英文单词变量名格式！");
 			//			}
-			
+
 			targetTable = targetTableKey;  // 主表不允许别名
 			if (StringUtil.isName(targetTable) == false) {
 				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中 targetTable 值 " + targetTable + " 不合法！必须满足大写字母开头的表对象英文单词 key 格式！");
 			}
-			
+
 			//对引用的JSONObject添加条件
 			try {
 				targetObj = request.getJSONObject(targetTableKey);
@@ -1253,24 +1253,24 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			catch (Exception e2) {
 				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中路径对应的 '" + targetTableKey + "':value 中 value 类型不合法！必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
 			}
-			
+
 			if (targetObj == null) {
 				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中路径对应的对象 '" + targetTableKey + "':{} 不存在或值为 null ！必须是 {} 这种 JSONObject 格式！");
 			}
 
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 <<<<<<<<<
 			// AbstractSQLConfig.newSQLConfig 中强制把 id, id{}, userId, userId{} 放到了最前面		tableObj.put(key, tableObj.remove(key));
-			
+
 			if (tableObj.size() > 1) {  // 把 key 强制放最前，AbstractSQLExcecutor 中 config.putWhere 也是放尽可能最前
 				JSONObject newTableObj = new JSONObject(tableObj.size(), true);
 				newTableObj.put(key, tableObj.remove(key));
 				newTableObj.putAll(tableObj);
-				
+
 				tableObj = newTableObj;
 				request.put(tableKey, tableObj);
 			}
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 >>>>>>>>>
-			
+
 
 			Join j = new Join();
 			j.setPath(path);
@@ -1285,7 +1285,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			j.setKeyAndType(key);
 			j.setRequest(getJoinObject(table, tableObj, key));
 			j.setOuter((JSONObject) e.getValue());
-			
+
 			if (StringUtil.isName(j.getKey()) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 key@ 中 key 值 " + j.getKey() + " 不合法！必须满足英文单词变量名格式！");
 			}
@@ -1601,7 +1601,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	public static final String KEY_CONFIG = "config";
 
 	public static final String KEY_SQL = "sql";
-	
+
 	protected Map<String, List<JSONObject>> arrayMainCacheMap = new HashMap<>();
 	public void putArrayMainCache(String arrayPath, List<JSONObject> mainTableDataList) {
 		arrayMainCacheMap.put(arrayPath, mainTableDataList);
@@ -1613,8 +1613,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		List<JSONObject> list = getArrayMainCache(arrayPath);
 		return list == null || position >= list.size() ? null : list.get(position);
 	}
-	
-	
+
+
 
 	/**执行 SQL 并返回 JSONObject
 	 * @param config
@@ -1636,7 +1636,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		try {
 			JSONObject result;
-			
+
 			boolean explain = config.isExplain();
 			if (explain) {
 				//如果先执行 explain，则 execute 会死循环，所以只能先执行非 explain
