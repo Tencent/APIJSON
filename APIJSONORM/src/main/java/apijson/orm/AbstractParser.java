@@ -515,7 +515,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		//获取指定的JSON结构 >>>>>>>>>>>>>>
-		JSONObject target = wrapRequest(object, tag, false);
+		JSONObject target = wrapRequest(method, tag, object, true);
 		
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
 		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobleDatabase(), getGlobleSchema(), creator);
@@ -527,7 +527,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * @param tag
 	 * @return
 	 */
-	public static JSONObject wrapRequest(JSONObject object, String tag, boolean putTag) {
+	public static JSONObject wrapRequest(RequestMethod method, String tag, JSONObject object, boolean isStructure) {
+		boolean putTag = ! isStructure;
+		
 		if (object == null || object.containsKey(tag)) { //tag 是 Table 名或 Table[]
 			if (putTag) {
 				if (object == null) {
@@ -544,12 +546,39 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		JSONObject target = object;
 		if (apijson.JSONObject.isTableKey(key)) {
-			if (isDiffArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
-				target.put(key + "[]", new JSONArray()); 
+			if (isDiffArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对为 { "Comment[]":[], "TYPE": { "Comment[]": "OBJECT[]" } ... }
+				if (isStructure && (method == RequestMethod.POST || method == RequestMethod.PUT)) {
+					String arrKey = key + "[]";
+					
+					if (target.containsKey(arrKey) == false) {
+						target.put(arrKey, new JSONArray()); 
+					}
+					
+					try {
+						JSONObject type = target.getJSONObject(Operation.TYPE.name());
+						if (type == null || (type.containsKey(arrKey) == false)) {
+							if (type == null) {
+								type = new JSONObject(true);
+							}
+							
+							type.put(arrKey, "OBJECT[]");
+							target.put(Operation.TYPE.name(), type);
+						}
+					}
+					catch (Throwable e) {
+						Log.w(TAG, "wrapRequest try { JSONObject type = target.getJSONObject(Operation.TYPE.name()); } catch (Exception e) = " + e.getMessage());
+					}
+				}
 			}
 			else { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
-				target = new JSONObject(true);
-				target.put(tag, object);
+				if (isArrayKey == false || RequestMethod.isGetMethod(method, true)) {
+					target = new JSONObject(true);
+					target.put(tag, object);
+				}
+				else if (target.containsKey(key) == false) {
+					target = new JSONObject(true);
+					target.put(key, object);
+				}
 			}
 		}
 		
@@ -958,10 +987,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
-		if (isSubquery == false && RequestMethod.isGetMethod(requestMethod, false) == false) {
-			throw new UnsupportedOperationException("key[]:{}只支持GET方法！不允许传 " + name + ":{} ！");
+		if (isSubquery == false && RequestMethod.isGetMethod(requestMethod, true) == false) {
+			throw new UnsupportedOperationException("key[]:{} 只支持 GET, GETS 方法！其它方法不允许传 " + name + ":{} 等这种 key[]:{} 格式！");
 		}
-		if (request == null || request.isEmpty()) {//jsonKey-jsonValue条件
+		if (request == null || request.isEmpty()) { // jsonKey-jsonValue 条件
 			return null;
 		}
 		String path = getAbsPath(parentPath, name);
