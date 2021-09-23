@@ -79,6 +79,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static final Pattern PATTERN_RANGE;
 	private static final Pattern PATTERN_FUNCTION;
+	private  static final Pattern PATTERN_STRING;
 
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -86,14 +87,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static final Map<String, String> TABLE_KEY_MAP;
 	public static final List<String> CONFIG_TABLE_LIST;
 	public static final List<String> DATABASE_LIST;
-	// 自定义原始 SQL 片段 Map<key, substring>：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
-	public static final Map<String, String> RAW_MAP;
-	// 允许调用的 SQL 函数：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
-	public static final Map<String, String> SQL_FUNCTION_MAP;
+
 	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- ，以免拼接 SQL 时被注入意外可执行指令
 		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
-		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\$]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
-
+		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\(\\)\\$]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
+		PATTERN_STRING = Pattern.compile("^[,#;\"`]+$");
 
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
@@ -120,186 +118,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_ORACLE);
 		DATABASE_LIST.add(DATABASE_DB2);
 		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
-
-
-		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
-
-
-		SQL_FUNCTION_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
-
-		// MySQL 字符串函数
-		SQL_FUNCTION_MAP.put("ascii", "");  // ASCII(s)	返回字符串 s 的第一个字符的 ASCII 码。	
-		SQL_FUNCTION_MAP.put("char_length", "");  // CHAR_LENGTH(s)	返回字符串 s 的字符数	
-		SQL_FUNCTION_MAP.put("character_length", "");  // CHARACTER_LENGTH(s)	返回字符串 s 的字符数	
-		SQL_FUNCTION_MAP.put("concat", "");  // CONCAT(s1, s2...sn)	字符串 s1,s2 等多个字符串合并为一个字符串	
-		SQL_FUNCTION_MAP.put("concat_ws", "");  // CONCAT_WS(x, s1, s2...sn)	同 CONCAT(s1, s2 ...) 函数，但是每个字符串之间要加上 x，x 可以是分隔符	
-		SQL_FUNCTION_MAP.put("field", "");  // FIELD(s, s1, s2...)	返回第一个字符串 s 在字符串列表 (s1, s2...)中的位置	
-		SQL_FUNCTION_MAP.put("find_in_set", "");  // FIND_IN_SET(s1, s2)	返回在字符串s2中与s1匹配的字符串的位置	
-		SQL_FUNCTION_MAP.put("format", "");  // FORMAT(x, n)	函数可以将数字 x 进行格式化 "#,###.##", 将 x 保留到小数点后 n 位，最后一位四舍五入。	
-		SQL_FUNCTION_MAP.put("insert", "");  // INSERT(s1, x, len, s2)	字符串 s2 替换 s1 的 x 位置开始长度为 len 的字符串	
-		SQL_FUNCTION_MAP.put("locate", "");  // LOCATE(s1, s)	从字符串 s 中获取 s1 的开始位置	
-		SQL_FUNCTION_MAP.put("lcase", "");  // LCASE(s)	将字符串 s 的所有字母变成小写字母	
-		SQL_FUNCTION_MAP.put("left", "");  // LEFT(s, n)	返回字符串 s 的前 n 个字符	
-		SQL_FUNCTION_MAP.put("length", "");  // LENGTH(s)	返回字符串 s 的字符数	
-		SQL_FUNCTION_MAP.put("lower", "");  // LOWER(s)	将字符串 s 的所有字母变成小写字母	
-		SQL_FUNCTION_MAP.put("lpad", "");  // LPAD(s1, len, s2)	在字符串 s1 的开始处填充字符串 s2，使字符串长度达到 len	
-		SQL_FUNCTION_MAP.put("ltrim", "");  // LTRIM(s)	去掉字符串 s 开始处的空格	
-		SQL_FUNCTION_MAP.put("mid", "");  // MID(s, n, len)	从字符串 s 的 n 位置截取长度为 len 的子字符串，同 SUBSTRING(s, n, len)	
-		SQL_FUNCTION_MAP.put("position", "");  // POSITION(s, s1);	从字符串 s 中获取 s1 的开始位置	
-		SQL_FUNCTION_MAP.put("repeat", "");  // REPEAT(s, n)	将字符串 s 重复 n 次	
-		SQL_FUNCTION_MAP.put("replace", "");  // REPLACE(s, s1, s2)	将字符串 s2 替代字符串 s 中的字符串 s1	
-		SQL_FUNCTION_MAP.put("reverse", "");  // REVERSE(s);  // )	将字符串s的顺序反过来	
-		SQL_FUNCTION_MAP.put("right", "");  // RIGHT(s, n)	返回字符串 s 的后 n 个字符	
-		SQL_FUNCTION_MAP.put("rpad", "");  // RPAD(s1, len, s2)	在字符串 s1 的结尾处添加字符串 s2，使字符串的长度达到 len	
-		SQL_FUNCTION_MAP.put("rtrim", "");  // RTRIM", "");  // )	去掉字符串 s 结尾处的空格	
-		SQL_FUNCTION_MAP.put("space", "");  // SPACE(n)	返回 n 个空格	
-		SQL_FUNCTION_MAP.put("strcmp", "");  // STRCMP(s1, s2)	比较字符串 s1 和 s2，如果 s1 与 s2 相等返回 0 ，如果 s1>s2 返回 1，如果 s1<s2 返回 -1	
-		SQL_FUNCTION_MAP.put("substr", "");  // SUBSTR(s, start, length)	从字符串 s 的 start 位置截取长度为 length 的子字符串	
-		SQL_FUNCTION_MAP.put("substring", "");  // STRING(s, start, length))	从字符串 s 的 start 位置截取长度为 length 的子字符串	
-		SQL_FUNCTION_MAP.put("substring_index", "");  // SUBSTRING_INDEX(s, delimiter, number)	返回从字符串 s 的第 number 个出现的分隔符 delimiter 之后的子串。
-		SQL_FUNCTION_MAP.put("trim", "");  // TRIM(s)	去掉字符串 s 开始和结尾处的空格	
-		SQL_FUNCTION_MAP.put("ucase", "");  // UCASE(s)	将字符串转换为大写	
-		SQL_FUNCTION_MAP.put("upper", "");  // UPPER(s)	将字符串转换为大写	
-
-		// MySQL 数字函数
-		SQL_FUNCTION_MAP.put("abs", "");  // ABS(x)	返回 x 的绝对值　　	
-		SQL_FUNCTION_MAP.put("acos", "");  // ACOS(x)	求 x 的反余弦值(参数是弧度)	
-		SQL_FUNCTION_MAP.put("asin", "");  // ASIN(x)	求反正弦值(参数是弧度)	
-		SQL_FUNCTION_MAP.put("atan", "");  // ATAN(x)	求反正切值(参数是弧度)	
-		SQL_FUNCTION_MAP.put("atan2", "");  // ATAN2(n, m)	求反正切值(参数是弧度)	
-		SQL_FUNCTION_MAP.put("avg", "");  // AVG(expression)	返回一个表达式的平均值，expression 是一个字段	
-		SQL_FUNCTION_MAP.put("ceil", "");  // CEIL(x)	返回大于或等于 x 的最小整数　	
-		SQL_FUNCTION_MAP.put("ceiling", "");  // CEILING(x)	返回大于或等于 x 的最小整数　	
-		SQL_FUNCTION_MAP.put("cos", "");  // COS(x)	求余弦值(参数是弧度)	
-		SQL_FUNCTION_MAP.put("cot", "");  // COT(x)	求余切值(参数是弧度)	
-		SQL_FUNCTION_MAP.put("count", "");  // COUNT(expression)	返回查询的记录总数，expression 参数是一个字段或者 * 号	
-		SQL_FUNCTION_MAP.put("degrees", "");  // DEGREES(x)	将弧度转换为角度　　	
-		SQL_FUNCTION_MAP.put("div", "");  // n DIV m	整除，n 为被除数，m 为除数	
-		SQL_FUNCTION_MAP.put("exp", "");  // EXP(x)	返回 e 的 x 次方　　	
-		SQL_FUNCTION_MAP.put("floor", "");  // FLOOR(x)	返回小于或等于 x 的最大整数　　	
-		SQL_FUNCTION_MAP.put("greatest", "");  // GREATEST(expr1, expr2, expr3, ...)	返回列表中的最大值	
-		SQL_FUNCTION_MAP.put("least", "");  // LEAST(expr1, expr2, expr3, ...)	返回列表中的最小值	
-		SQL_FUNCTION_MAP.put("ln", "");  // 2);  LN	返回数字的自然对数，以 e 为底。	
-		SQL_FUNCTION_MAP.put("log", "");  // LOG(x) 或 LOG(base, x)	返回自然对数(以 e 为底的对数)，如果带有 base 参数，则 base 为指定带底数。　　	
-		SQL_FUNCTION_MAP.put("log10", "");  // LOG10(x)	返回以 10 为底的对数　　	
-		SQL_FUNCTION_MAP.put("log2", "");  // LOG2(x)	返回以 2 为底的对数	
-		SQL_FUNCTION_MAP.put("max", "");  // MAX(expression)	返回字段 expression 中的最大值	
-		SQL_FUNCTION_MAP.put("min", "");  // MIN(expression)	返回字段 expression 中的最小值	
-		SQL_FUNCTION_MAP.put("mod", "");  // MOD(x,y)	返回 x 除以 y 以后的余数　	
-		SQL_FUNCTION_MAP.put("pi", "");  // PI()	返回圆周率(3.141593）　　	
-		SQL_FUNCTION_MAP.put("pow", "");  // POW(x,y)	返回 x 的 y 次方　	
-		SQL_FUNCTION_MAP.put("power", "");  // POWER(x,y)	返回 x 的 y 次方　	
-		SQL_FUNCTION_MAP.put("radians", "");  // RADIANS(x)	将角度转换为弧度　　	
-		SQL_FUNCTION_MAP.put("rand", "");  // RAND()	返回 0 到 1 的随机数　　	
-		SQL_FUNCTION_MAP.put("round", "");  // ROUND(x)	返回离 x 最近的整数	
-		SQL_FUNCTION_MAP.put("sign", "");  // SIGN(x)	返回 x 的符号，x 是负数、0、正数分别返回 -1、0 和 1　	
-		SQL_FUNCTION_MAP.put("sin", "");  // SIN(x)	求正弦值(参数是弧度)　　	
-		SQL_FUNCTION_MAP.put("sqrt", "");  // SQRT(x)	返回x的平方根　　	
-		SQL_FUNCTION_MAP.put("sum", "");  // SUM(expression)	返回指定字段的总和	
-		SQL_FUNCTION_MAP.put("tan", "");  // TAN(x)	求正切值(参数是弧度)	
-		SQL_FUNCTION_MAP.put("truncate", "");  // TRUNCATE(x,y)	返回数值 x 保留到小数点后 y 位的值（与 ROUND 最大的区别是不会进行四舍五入）	
-
-		// MySQL 时间与日期函数
-		SQL_FUNCTION_MAP.put("adddate", "");  // ADDDATE(d,n)	计算起始日期 d 加上 n 天的日期	
-		SQL_FUNCTION_MAP.put("addtime", "");  // ADDTIME(t,n)	n 是一个时间表达式，时间 t 加上时间表达式 n	
-		SQL_FUNCTION_MAP.put("curdate", "");  // CURDATE()	返回当前日期	
-		SQL_FUNCTION_MAP.put("current_date", "");  // CURRENT_DATE()	返回当前日期	
-		SQL_FUNCTION_MAP.put("current_time", "");  // CURRENT_TIME	返回当前时间	
-		SQL_FUNCTION_MAP.put("current_timestamp", "");  // CURRENT_TIMESTAMP()	返回当前日期和时间	
-		SQL_FUNCTION_MAP.put("curtime", "");  // CURTIME()	返回当前时间	
-		SQL_FUNCTION_MAP.put("date", "");  // DATE()	从日期或日期时间表达式中提取日期值	
-		SQL_FUNCTION_MAP.put("datediff", "");  // DATEDIFF(d1,d2)	计算日期 d1->d2 之间相隔的天数	
-		SQL_FUNCTION_MAP.put("date_add", "");  // DATE_ADD(d，INTERVAL expr type)	计算起始日期 d 加上一个时间段后的日期	
-		SQL_FUNCTION_MAP.put("date_format", "");  // DATE_FORMAT(d,f)	按表达式 f的要求显示日期 d	
-		SQL_FUNCTION_MAP.put("date_sub", "");  // DATE_SUB(date,INTERVAL expr type)	函数从日期减去指定的时间间隔。	
-		SQL_FUNCTION_MAP.put("day", "");  // DAY(d)	返回日期值 d 的日期部分	
-		SQL_FUNCTION_MAP.put("dayname", "");  // DAYNAME(d)	返回日期 d 是星期几，如 Monday,Tuesday	
-		SQL_FUNCTION_MAP.put("dayofmonth", "");  // DAYOFMONTH(d)	计算日期 d 是本月的第几天	
-		SQL_FUNCTION_MAP.put("dayofweek", "");  // DAYOFWEEK(d)	日期 d 今天是星期几，1 星期日，2 星期一，以此类推	
-		SQL_FUNCTION_MAP.put("dayofyear", "");  // DAYOFYEAR(d)	计算日期 d 是本年的第几天	
-		SQL_FUNCTION_MAP.put("extract", "");  // EXTRACT(type FROM d)	从日期 d 中获取指定的值，type 指定返回的值。 
-		SQL_FUNCTION_MAP.put("from_days", "");  // FROM_DAYS(n)	计算从 0000 年 1 月 1 日开始 n 天后的日期	
-		SQL_FUNCTION_MAP.put("hour", "");  // 'HOUR(t)	返回 t 中的小时值	
-		SQL_FUNCTION_MAP.put("last_day", "");  // LAST_DAY(d)	返回给给定日期的那一月份的最后一天	
-		SQL_FUNCTION_MAP.put("localtime", "");  // LOCALTIME()	返回当前日期和时间	
-		SQL_FUNCTION_MAP.put("localtimestamp", "");  // LOCALTIMESTAMP()	返回当前日期和时间	
-		SQL_FUNCTION_MAP.put("makedate", "");  // MAKEDATE(year, day-of-year)	基于给定参数年份 year 和所在年中的天数序号 day-of-year 返回一个日期	
-		SQL_FUNCTION_MAP.put("maketime", "");  // MAKETIME(hour, minute, second)	组合时间，参数分别为小时、分钟、秒	
-		SQL_FUNCTION_MAP.put("microsecond", "");  // MICROSECOND(date)	返回日期参数所对应的微秒数	
-		SQL_FUNCTION_MAP.put("minute", "");  // MINUTE(t)	返回 t 中的分钟值	
-		SQL_FUNCTION_MAP.put("monthname", "");  // MONTHNAME(d)	返回日期当中的月份名称，如 November	
-		SQL_FUNCTION_MAP.put("month", "");  // MONTH(d)	返回日期d中的月份值，1 到 12	
-		SQL_FUNCTION_MAP.put("now", "");  // NOW()	返回当前日期和时间	
-		SQL_FUNCTION_MAP.put("period_add", "");  // PERIOD_ADD(period, number)	为 年-月 组合日期添加一个时段	
-		SQL_FUNCTION_MAP.put("period_diff", "");  // PERIOD_DIFF(period1, period2)	返回两个时段之间的月份差值	
-		SQL_FUNCTION_MAP.put("quarter", "");  // QUARTER(d)	返回日期d是第几季节，返回 1 到 4	
-		SQL_FUNCTION_MAP.put("second", "");  // SECOND(t)	返回 t 中的秒钟值	
-		SQL_FUNCTION_MAP.put("sec_to_time", "");  // SEC_TO_TIME", "");  // )	将以秒为单位的时间 s 转换为时分秒的格式	
-		SQL_FUNCTION_MAP.put("str_to_date", "");  // STR_TO_DATE", "");  // tring, format_mask)	将字符串转变为日期	
-		SQL_FUNCTION_MAP.put("subdate", "");  // SUBDATE(d,n)	日期 d 减去 n 天后的日期	
-		SQL_FUNCTION_MAP.put("subtime", "");  // SUBTIME(t,n)	时间 t 减去 n 秒的时间	
-		SQL_FUNCTION_MAP.put("sysdate", "");  // SYSDATE()	返回当前日期和时间	
-		SQL_FUNCTION_MAP.put("time", "");  // TIME(expression)	提取传入表达式的时间部分	
-		SQL_FUNCTION_MAP.put("time_format", "");  // TIME_FORMAT(t,f)	按表达式 f 的要求显示时间 t	
-		SQL_FUNCTION_MAP.put("time_to_sec", "");  // TIME_TO_SEC(t)	将时间 t 转换为秒	
-		SQL_FUNCTION_MAP.put("timediff", "");  // TIMEDIFF(time1, time2)	计算时间差值	
-		SQL_FUNCTION_MAP.put("timestamp", "");  // TIMESTAMP(expression, interval)	单个参数时，函数返回日期或日期时间表达式；有2个参数时，将参数加和	
-		SQL_FUNCTION_MAP.put("to_days", "");  // TO_DAYS(d)	计算日期 d 距离 0000 年 1 月 1 日的天数	
-		SQL_FUNCTION_MAP.put("week", "");  // WEEK(d)	计算日期 d 是本年的第几个星期，范围是 0 到 53	
-		SQL_FUNCTION_MAP.put("weekday", "");  // WEEKDAY(d)	日期 d 是星期几，0 表示星期一，1 表示星期二	
-		SQL_FUNCTION_MAP.put("weekofyear", "");  // WEEKOFYEAR(d)	计算日期 d 是本年的第几个星期，范围是 0 到 53	
-		SQL_FUNCTION_MAP.put("year", "");  // YEAR(d)	返回年份	
-		SQL_FUNCTION_MAP.put("yearweek", "");  // YEARWEEK(date, mode)	返回年份及第几周（0到53），mode 中 0 表示周天，1表示周一，以此类推	
-		SQL_FUNCTION_MAP.put("unix_timestamp", "");  // UNIX_TIMESTAMP(date)	获取UNIX时间戳函数，返回一个以 UNIX 时间戳为基础的无符号整数
-		SQL_FUNCTION_MAP.put("from_unixtime", "");  // FROM_UNIXTIME(date)	将 UNIX 时间戳转换为时间格式，与UNIX_TIMESTAMP互为反函数
-
-		// MYSQL JSON 函数
-		SQL_FUNCTION_MAP.put("json_append", "");  // JSON_APPEND(json_doc, path, val[, path, val] ...)) 插入JSON数组
-		SQL_FUNCTION_MAP.put("json_array", "");  // JSON_ARRAY(val1, val2...) 创建JSON数组
-		SQL_FUNCTION_MAP.put("json_array_append", "");  // JSON_ARRAY_APPEND(json_doc, val) 将数据附加到JSON文档
-		SQL_FUNCTION_MAP.put("json_array_insert", "");  // JSON_ARRAY_INSERT(json_doc, val) 插入JSON数组
-		SQL_FUNCTION_MAP.put("json_contains", "");  // JSON_CONTAINS(json_doc, val) JSON文档是否在路径中包含特定对象
-		SQL_FUNCTION_MAP.put("json_contains_path", "");  // JSON_CONTAINS_PATH(json_doc, path) JSON文档是否在路径中包含任何数据
-		SQL_FUNCTION_MAP.put("json_depth", "");  // JSON_DEPTH(json_doc) JSON文档的最大深度
-		SQL_FUNCTION_MAP.put("json_extract", "");  // JSON_EXTRACT(json_doc, path) 从JSON文档返回数据
-		SQL_FUNCTION_MAP.put("json_insert", "");  // JSON_INSERT(json_doc, val) 将数据插入JSON文档
-		SQL_FUNCTION_MAP.put("json_keys", "");  // JSON_KEYS(json_doc[, path]) JSON文档中的键数组
-		SQL_FUNCTION_MAP.put("json_length", "");  // JSON_LENGTH(json_doc) JSON文档中的元素数
-		SQL_FUNCTION_MAP.put("json_merge", "");  // JSON_MERGE(json_doc1, json_doc2) （已弃用） 合并JSON文档，保留重复的键。JSON_MERGE_PRESERVE（）的已弃用同义词
-		SQL_FUNCTION_MAP.put("json_merge_patch", "");  // JSON_MERGE_PATCH(json_doc1, json_doc2) 合并JSON文档，替换重复键的值
-		SQL_FUNCTION_MAP.put("json_merge_preserve", "");  // JSON_MERGE_PRESERVE(json_doc1, json_doc2) 合并JSON文档，保留重复的键
-		SQL_FUNCTION_MAP.put("json_object", "");  // JSON_OBJECT(key1, val1, key2, val2...) 创建JSON对象
-		SQL_FUNCTION_MAP.put("json_overlaps", "");  // JSON_OVERLAPS(json_doc1, json_doc2) （引入8.0.17） 比较两个JSON文档，如果它们具有相同的键值对或数组元素，则返回TRUE（1），否则返回FALSE（0）
-		SQL_FUNCTION_MAP.put("json_pretty", "");  // JSON_PRETTY(json_doc) 以易于阅读的格式打印JSON文档
-		SQL_FUNCTION_MAP.put("json_quote", "");  // JSON_QUOTE(json_doc1) 引用JSON文档
-		SQL_FUNCTION_MAP.put("json_remove", "");  // JSON_REMOVE(json_doc1, path) 从JSON文档中删除数据
-		SQL_FUNCTION_MAP.put("json_replace", "");  // JSON_REPLACE(json_doc1, val1, val2) 替换JSON文档中的值
-		SQL_FUNCTION_MAP.put("json_schema_valid", "");  // JSON_SCHEMA_VALID(json_doc) （引入8.0.17） 根据JSON模式验证JSON文档；如果文档针对架构进行验证，则返回TRUE / 1；否则，则返回FALSE / 0
-		SQL_FUNCTION_MAP.put("json_schema_validation_report", "");  // JSON_SCHEMA_VALIDATION_REPORT(json_doc, mode) （引入8.0.17） 根据JSON模式验证JSON文档；以JSON格式返回有关验证结果的报告，包括成功或失败以及失败原因
-		SQL_FUNCTION_MAP.put("json_search", "");  // JSON_SEARCH(json_doc, val) JSON文档中值的路径
-		SQL_FUNCTION_MAP.put("json_set", "");  // JSON_SET(json_doc, val) 将数据插入JSON文档
-		//		SQL_FUNCTION_MAP.put("json_storage_free", "");  // JSON_STORAGE_FREE() 部分更新后，JSON列值的二进制表示形式中的可用空间
-		//		SQL_FUNCTION_MAP.put("json_storage_size", "");  // JSON_STORAGE_SIZE() 用于存储JSON文档的二进制表示的空间
-		SQL_FUNCTION_MAP.put("json_table", "");  // JSON_TABLE() 从JSON表达式返回数据作为关系表
-		SQL_FUNCTION_MAP.put("json_type", "");  // JSON_TYPE(json_doc) JSON值类型
-		SQL_FUNCTION_MAP.put("json_unquote", "");  // JSON_UNQUOTE(json_doc) 取消引用JSON值
-		SQL_FUNCTION_MAP.put("json_valid", "");  // JSON_VALID(json_doc) JSON值是否有效
-		SQL_FUNCTION_MAP.put("json_arrayagg", "");  // JSON_ARRAYAGG(key) 将每个表达式转换为 JSON 值，然后返回一个包含这些 JSON 值的 JSON 数组
-		SQL_FUNCTION_MAP.put("json_objectagg", "");  // JSON_OBJECTAGG(key, val))  将每个表达式转换为 JSON 值，然后返回一个包含这些 JSON 值的 JSON 对象
-
-		// MySQL 高级函数
-		//		SQL_FUNCTION_MAP.put("bin", "");  // BIN(x)	返回 x 的二进制编码	
-		//		SQL_FUNCTION_MAP.put("binary", "");  // BINARY(s)	将字符串 s 转换为二进制字符串	
-		SQL_FUNCTION_MAP.put("case", "");  // CASE 表示函数开始，END 表示函数结束。如果 condition1 成立，则返回 result1, 如果 condition2 成立，则返回 result2，当全部不成立则返回 result，而当有一个成立之后，后面的就不执行了。	
-		SQL_FUNCTION_MAP.put("cast", "");  // CAST(x AS type)	转换数据类型	
-		SQL_FUNCTION_MAP.put("coalesce", "");  // COALESCE(expr1, expr2, ...., expr_n)	返回参数中的第一个非空表达式（从左向右）	
-		//		SQL_FUNCTION_MAP.put("conv", "");  // CONV(x,f1,f2)	返回 f1 进制数变成 f2 进制数	
-		//		SQL_FUNCTION_MAP.put("convert", "");  // CONVERT(s, cs)	函数将字符串 s 的字符集变成 cs	
-		SQL_FUNCTION_MAP.put("if", "");  // IF(expr,v1,v2)	如果表达式 expr 成立，返回结果 v1；否则，返回结果 v2。	
-		SQL_FUNCTION_MAP.put("ifnull", "");  // IFNULL(v1,v2)	如果 v1 的值不为 NULL，则返回 v1，否则返回 v2。	
-		SQL_FUNCTION_MAP.put("isnull", "");  // ISNULL(expression)	判断表达式是否为 NULL	
-		SQL_FUNCTION_MAP.put("nullif", "");  // NULLIF(expr1, expr2)	比较两个字符串，如果字符串 expr1 与 expr2 相等 返回 NULL，否则返回 expr1	
-		SQL_FUNCTION_MAP.put("group_concat", "");  // GROUP_CONCAT([DISTINCT], s1, s2...)	
 
 	}
 
@@ -779,14 +597,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			method = expression.substring(0, start);
 			if (method.isEmpty() == false) {
-				if (SQL_FUNCTION_MAP == null || SQL_FUNCTION_MAP.isEmpty()) {
+				if (FunctionsAndRaws.SQL_FUNCTION_MAP == null || FunctionsAndRaws.SQL_FUNCTION_MAP.isEmpty()) {
 					if (StringUtil.isName(method) == false) {
 						throw new IllegalArgumentException("字符 " + method + " 不合法！"
 								+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
 								+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！");
 					}
 				}
-				else if (SQL_FUNCTION_MAP.containsKey(method) == false) {
+				else if (FunctionsAndRaws.SQL_FUNCTION_MAP.containsKey(method) == false) {
 					throw new IllegalArgumentException("字符 " + method + " 不合法！"
 							+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 							+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！且必须是后端允许调用的 SQL 函数!");
@@ -978,7 +796,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					+ "对应的 " + key + ":value 中 value 类型只能为 String！");
 		}
 
-		String rawSQL = containRaw ? RAW_MAP.get(value) : null;
+		String rawSQL = containRaw ? FunctionsAndRaws.RAW_MAP.get(value) : null;
 		if (containRaw) {
 			if (rawSQL == null) {
 				throw new UnsupportedOperationException("@raw:value 的 value 中 " + key + " 不合法！"
@@ -1047,7 +865,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				for (String c : column) {
 					if (containRaw) {
 						// 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
-						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig 提前处理好的
+						if ("".equals(FunctionsAndRaws.RAW_MAP.get(c)) || FunctionsAndRaws.RAW_MAP.containsValue(c)) {  // newSQLConfig 提前处理好的
 							//排除@raw中的值，以避免使用date_format(date,'%Y-%m-%d %H:%i:%s') 时,冒号的解析出错
 							//column.remove(c);
 							continue;
@@ -1159,7 +977,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				expression = keys[i];
 
 				if (containRaw) {  // 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
-					if ("".equals(RAW_MAP.get(expression)) || RAW_MAP.containsValue(expression)) {  // newSQLConfig 提前处理好的
+					if ("".equals(FunctionsAndRaws.RAW_MAP.get(expression)) || FunctionsAndRaws.RAW_MAP.containsValue(expression)) {  // newSQLConfig 提前处理好的
 						continue;
 					}
 
@@ -1178,153 +996,257 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new UnsupportedOperationException("@column:value 的 value 中字符串 " + expression + " 不合法！"
 							+ "不允许传超过 100 个字符的函数或表达式！请用 @raw 简化传参！");
 				}
-
-
-				int start = expression.indexOf("(");
-				int end = 0;
-				if (start >= 0) {
-					end = expression.lastIndexOf(")");
-					if (start >= end) {
-						throw new IllegalArgumentException("字符 " + expression + " 不合法！"
-								+ "@column:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
-					}
-
-					method = expression.substring(0, start);
-					boolean distinct = i <= 0 && method.startsWith(PREFFIX_DISTINCT);
-					String fun = distinct ? method.substring(PREFFIX_DISTINCT.length()) : method;
-
-					if (fun.isEmpty() == false) {
-						if (SQL_FUNCTION_MAP == null || SQL_FUNCTION_MAP.isEmpty()) {
-							if (StringUtil.isName(fun) == false) {
-								throw new IllegalArgumentException("字符 " + method + " 不合法！"
-										+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-										+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！");
-							}
-						}
-						else if (SQL_FUNCTION_MAP.containsKey(fun) == false) {
-							throw new IllegalArgumentException("字符 " + method + " 不合法！"
-									+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-									+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！且必须是后端允许调用的 SQL 函数!");
-						}
-					}
-
-				}
-
-				boolean isColumn = start < 0;
-
-				String[] ckeys = StringUtil.split(isColumn ? expression : expression.substring(start + 1, end));
-				String quote = getQuote();
-
-				//			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
-				if (ckeys != null && ckeys.length > 0) {
-
-					boolean distinct;
-					String origin;
-					String alias;
-					int index;
-					for (int j = 0; j < ckeys.length; j++) {
-						index = isColumn ? ckeys[j].lastIndexOf(":") : -1; //StringUtil.split返回数组中，子项不会有null
-						origin = index < 0 ? ckeys[j] : ckeys[j].substring(0, index);
-						alias = index < 0 ? null : ckeys[j].substring(index + 1);
-
-						distinct = j <= 0 && origin.startsWith(PREFFIX_DISTINCT);
-						if (distinct) {
-							origin = origin.substring(PREFFIX_DISTINCT.length());
-						}
-
-						if (isPrepared()) {
-							if (isColumn) {
-								if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
-									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
-											+ "预编译模式下 @column:value 中 value里面用 , 分割的每一项"
-											+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！"
-											+ "DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
-								}
-							}
-							else {
-								//								if ((StringUtil.isName(origin) == false || origin.startsWith("_"))) {
-								if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
-									throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
-											+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-											+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
-								}
-							}
-						}
-
-						//JOIN 副表不再在外层加副表名前缀 userId AS `Commet.userId`， 而是直接 userId AS `userId`
-						boolean isName = false;
-						if (StringUtil.isNumer(origin)) {
-							//do nothing
-						}
-						else if (StringUtil.isName(origin)) {
-							origin = quote + origin + quote;
-							isName = true;
-						} 
-						else {
-							origin = getValue(origin).toString();
-						}
-
-						if (isName && isKeyPrefix()) {
-							ckeys[j] = tableAlias + "." + origin;
-							//							if (isColumn) {
-							//								ckeys[j] += " AS " + quote + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? origin : alias) + quote;
-							//							}
-							if (isColumn && StringUtil.isEmpty(alias, true) == false) {
-								ckeys[j] += " AS " + quote + alias + quote;
-							}
-						} else {
-							ckeys[j] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
-						}
-
-						if (distinct) {
-							ckeys[j] = PREFFIX_DISTINCT + ckeys[j];
-						}
-					}
-					//				}
-
-				}
-
-				if (isColumn) {
-					keys[i] = StringUtil.getString(ckeys);
-				}
-				else {
-					String suffix = expression.substring(end + 1, expression.length()); //:contactCount
-					int index = suffix.lastIndexOf(":");
-					String alias = index < 0 ? "" : suffix.substring(index + 1); //contactCount
-					suffix = index < 0 ? suffix : suffix.substring(0, index);
-
-					if (alias.isEmpty() == false && StringUtil.isName(alias) == false) {
-						throw new IllegalArgumentException("字符串 " + alias + " 不合法！"
-								+ "预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
-								+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
-					}
-
-					if (suffix.isEmpty() == false && (((String) suffix).contains("--") || ((String) suffix).contains("/*") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
-						throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
-								+ "预编译模式下 @column:\"column?value;function(arg0,arg1,...)?value...\""
-								+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
-					}
-
-					String origin = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
-					//					if (isKeyPrefix()) {
-					//						keys[i] = origin + " AS " + quote + (isMain() ? "" : tableAlias + ".") + (StringUtil.isEmpty(alias, true) ? method : alias) + quote;
-					//					}
-					//					else {
-					keys[i] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
-					//					}
-				}
-
+				keys[i] = getColumnPrase(expression);
 			}
 
 			String c = StringUtil.getString(keys);
 			c = c + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
-			return isMain() && isDistinct() ? PREFFIX_DISTINCT + c : c;
+			return  c;
 		default:
 			throw new UnsupportedOperationException(
 					"服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(getMethod())
 					+ " 等 [GET,GETS,HEAD,HEADS,POST] 外的ReuqestMethod！"
 					);
 		}
+	}
+
+	/**
+	 * 解析@column 中以“;”分隔的表达式（"@column":"expression1;expression2;expression2;...."）中的expression
+	 *
+	 * @param expression
+	 * @return
+	 */
+	public String getColumnPrase(String expression) {
+		String quote = getQuote();
+		int start = expression.indexOf('(');
+		if (start < 0) {
+			//没有函数 ,可能是字段,也可能是 DISTINCT xx
+			String cks[] = parseArgsSplitWithComma(expression, true);
+			expression = StringUtil.getString(cks);
+		} else {
+			//有函数,但不是窗口函数
+			if (expression.indexOf("OVER") < 0) {
+				int end = expression.lastIndexOf(")");
+				if (start >= end) {
+					throw new IllegalArgumentException("字符 " + expression + " 不合法！"
+							+ "@column:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
+				}
+				String fun = expression.substring(0, start);
+				if (fun.isEmpty() == false) {
+					if (FunctionsAndRaws.SQL_FUNCTION_MAP == null || FunctionsAndRaws.SQL_FUNCTION_MAP.isEmpty()) {
+						if (StringUtil.isName(fun) == false) {
+							throw new IllegalArgumentException("字符 " + fun + " 不合法！"
+									+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+									+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！");
+						}
+					} else if (FunctionsAndRaws.SQL_FUNCTION_MAP.containsKey(fun) == false) {
+						throw new IllegalArgumentException("字符 " + fun + " 不合法！"
+								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！且必须是后端允许调用的 SQL 函数!");
+					}
+				}
+
+				String s = expression.substring(start + 1, end);
+				// 解析函数内的参数
+				String ckeys[] = parseArgsSplitWithComma(s, false);
+
+				String suffix = expression.substring(end + 1, expression.length()); //:contactCount
+				int index = suffix.lastIndexOf(":");
+				String alias = index < 0 ? "" : suffix.substring(index + 1); //contactCount
+				suffix = index < 0 ? suffix : suffix.substring(0, index);
+				if (alias.isEmpty() == false && StringUtil.isName(alias) == false) {
+					throw new IllegalArgumentException("字符串 " + alias + " 不合法！"
+							+ "预编译模式下 @column:value 中 value里面用 ; 分割的每一项"
+							+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
+				}
+
+				if (suffix.isEmpty() == false && (((String) suffix).contains("--") || ((String) suffix).contains("/*") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
+					throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
+							+ "预编译模式下 @column:\"column?value;function(arg0,arg1,...)?value...\""
+							+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
+				}
+
+				String origin = fun + "(" + StringUtil.getString(ckeys) + ")" + suffix;
+				expression = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
+
+			} else {
+				//是窗口函数   fun(arg0,agr1) OVER (agr0 agr1 ...)
+				int overindex = expression.indexOf("OVER"); // OVER 的位置
+				String s1 = expression.substring(0, overindex); // OVER 前半部分
+				String s2 = expression.substring(overindex); // OVER 后半部分
+
+				int index1 = s1.indexOf("("); //  函数 "(" 的起始位置
+				String fun = s1.substring(0, index1); // 函数名称
+				int end = s2.lastIndexOf(")"); // 后半部分 “)” 的位置
+
+				if (index1 >= end) {
+					throw new IllegalArgumentException("字符 " + expression + " 不合法！"
+							+ "@column:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
+				}
+				if (fun.isEmpty() == false) {
+					if (FunctionsAndRaws.SQL_FUNCTION_MAP == null || FunctionsAndRaws.SQL_FUNCTION_MAP.isEmpty()) {
+						if (StringUtil.isName(fun) == false) {
+							throw new IllegalArgumentException("字符 " + fun + " 不合法！"
+									+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+									+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！");
+						}
+					} else if (FunctionsAndRaws.SQL_FUNCTION_MAP.containsKey(fun) == false) {
+						throw new IllegalArgumentException("字符 " + fun + " 不合法！"
+								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！且必须是后端允许调用的 SQL 函数!");
+					}
+				}
+
+				// 获取前半部分函数的参数解析   fun(arg0,agr1)
+				String agrsString1[] = parseArgsSplitWithComma(s1.substring(index1 + 1, s1.lastIndexOf(")")), false);
+
+				int index2 = s2.indexOf("("); // 后半部分 “(”的起始位置
+				String argString2 = s2.substring(index2 + 1, end); // 后半部分的参数
+				// 别名
+				String alias = s2.lastIndexOf(":") < 0 ? null : s2.substring(s2.lastIndexOf(":") + 1);
+				// 获取后半部分的参数解析 (agr0 agr1 ...)
+				String argsString2[] = parseArgsSplitWithComma(argString2,false);
+				expression = fun + "(" + StringUtil.getString(agrsString1) + ")" + " OVER " + "(" + StringUtil.getString(argsString2) + ")" + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);			}
+		}
+		return expression;
+
+	}
+
+	/**
+	 * 解析函数参数或者字段,此函数对于解析字段 和 函数内参数通用
+	 *
+	 * @param param
+	 * @param isColumn true:不是函数参数。false:是函数参数
+	 * @return
+	 */
+	private String[] parseArgsSplitWithComma(String param, boolean isColumn) {
+		// 以"," 分割参数
+		String quote = getQuote();
+		String tableAlias = getAliasWithQuote();
+		String ckeys[] = StringUtil.split(param); // 以","分割参数
+		if (ckeys != null && ckeys.length > 0) {
+			String origin;
+			String alias;
+			int index;
+			for (int i = 0; i < ckeys.length; i++) {
+				// 如果参数包含 "'" ,解析字符串
+				if (ckeys[i].contains("'")) {
+					int count = 0;
+					for (int j = 0; j < ckeys[i].length(); j++) {
+						if (ckeys[i].charAt(j) == '\'') count++;
+					}
+					// 排除字符串中参数中包含 ' 的情况和不以' 开头和结尾的情况，同时排除 cast('s' as ...) 以空格分隔的参数中包含字符串的情况
+					if (count != 2 || !(ckeys[i].startsWith("'") && ckeys[i].endsWith("'"))) {
+						throw new IllegalArgumentException("字符串 " + ckeys[i] + " 不合法！"
+								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中字符串参数不合法，必须以 ' 开头, ' 结尾,字符串中不能包含 ' ");
+					}
+					//sql 注入判断 判断
+					origin = (ckeys[i].substring(1, ckeys[i].length() - 1));
+					if (origin.contains("--") || PATTERN_STRING.matcher(origin).matches() == true) {
+						throw new IllegalArgumentException("字符 " + ckeys[i] + " 不合法！"
+								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中所有字符串 arg 都必须不符合正则表达式 " + PATTERN_STRING + " 且不包含连续减号 -- ！");
+					}
+
+					// 1.字符串不是字段也没有别名,所以不解析别名 2. 是字符串，进行预编译，使用getValue() ,对字符串进行截取
+					ckeys[i] = getValue(ckeys[i].substring(1, ckeys[i].length() - 1)).toString();
+
+				} else {
+					// 参数不包含",",即不是字符串
+					// 解析参数:1. 字段 ,2. 是以空格分隔的参数 eg: cast(now() as date)
+					index = ckeys[i].lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
+					origin = index < 0 ? ckeys[i] : ckeys[i].substring(0, index); //获取 : 之前的
+					alias = index < 0 ? null : ckeys[i].substring(index + 1);
+					if (isPrepared()) {
+						if (isColumn) {
+							if (StringUtil.isName(origin) == false || (alias != null && StringUtil.isName(alias) == false)) {
+								throw new IllegalArgumentException("字符 " + ckeys[i] + " 不合法！"
+										+ "预编译模式下 @column:value 中 value里面用 , 分割的每一项"
+										+ " column:alias 中 column 必须是1个单词！如果有alias，则alias也必须为1个单词！"
+										+ "关键字必须全大写，且以空格分隔的参数，空格必须只有 1 个！其它情况不允许空格！");
+							}
+						} else {
+							if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
+								throw new IllegalArgumentException("字符 " + ckeys[i] + " 不合法！"
+										+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+										+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
+							}
+						}
+					}
+					// 以空格分割参数
+					String mkes[] = StringUtil.split(ckeys[i], " ", true);
+
+					boolean isName = false;
+					//如果参数中含有空格(少数情况) 比如  fun(arg1 arg2 arg3 ,arg4) 中的 arg1 arg2 arg3，比如 DISTINCT id
+					if (mkes != null && mkes.length >= 2) {
+						ckeys[i] = praseArgsSplitWithSpace(mkes);
+					} else {
+						// 如果参数没有空格
+						if ("".equals(FunctionsAndRaws.RAW_MAP.get(origin))) {
+							// do nothing ,  比如 toDate(now()) ,
+						} else if (StringUtil.isNumer(origin)) {
+							//do nothing
+						} else if (StringUtil.isName(origin)) {
+							origin = quote + origin + quote;
+							isName = true;
+						} else {
+							origin = getValue(origin).toString();
+						}
+						if (isName && isKeyPrefix()) {
+							ckeys[i] = tableAlias + "." + origin;
+							if (isColumn && StringUtil.isEmpty(alias, true) == false) {
+								ckeys[i] += " AS " + quote + alias + quote;
+							}
+						} else {
+							ckeys[i] = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
+						}
+					}
+
+				}
+			}
+		}
+		return ckeys;
+	}
+
+
+	/**
+	 * 只解析以空格分隔的参数
+	 *
+	 * @param mkes
+	 * @return
+	 */
+	private String praseArgsSplitWithSpace(String mkes[]) {
+		String quote = getQuote();
+		String tableAlias = getAliasWithQuote();
+		boolean isName = false;
+		// 包含空格的参数  肯定不包含别名 不用处理别名
+		if (mkes != null && mkes.length > 0) {
+			for (int j = 0; j < mkes.length; j++) {
+				// now()/AS/ DISTINCT/VALUE 等等放在RAW_MAP中
+				if ("".equals(FunctionsAndRaws.RAW_MAP.get(mkes[j]))) {
+					continue;
+				} else if (StringUtil.isNumer(mkes[j])) {
+					// do nothing
+				} else {
+					//这里为什么还要做一次判断 是因为解析窗口函数调用的时候会判断一次
+					if (isPrepared()) {
+						if (mkes[j].startsWith("_") || mkes[j].contains("--") || PATTERN_FUNCTION.matcher(mkes[j]).matches() == false) {
+							throw new IllegalArgumentException("字符 " + mkes[j] + " 不合法！"
+									+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+									+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
+						}
+					}
+					mkes[j] = quote + mkes[j] + quote;
+					isName = true;
+				}
+				if (isName && isKeyPrefix()) {
+					mkes[j] = tableAlias + "." + mkes[j];
+				}
+			}
+		}
+		// 返回重新以" "拼接后的参数
+		return StringUtil.join(mkes, " ");
 	}
 
 

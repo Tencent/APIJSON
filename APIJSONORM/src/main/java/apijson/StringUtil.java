@@ -725,7 +725,21 @@ public class StringUtil {
 		}
 	}
 
-
+	/** 数组以指定分隔s拼接
+	 * @param arr
+	 * @param s
+	 * @return
+	 */
+	public static String join(String[] arr, String s) {
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 0; i < arr.length; i++) {
+			stringBuilder.append(arr[i]);
+			if(i<arr.length-1){
+				stringBuilder.append(s);
+			}
+		}
+		return  stringBuilder.toString();
+	}
 	/**分割路径
 	 * @param path
 	 * @return
