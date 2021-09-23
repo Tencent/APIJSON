@@ -135,6 +135,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		// MySQL 关键字
 		RAW_MAP.put("AS", "");
+		RAW_MAP.put("IS NOT NULL", "");
+		RAW_MAP.put("IS NULL", "");
+		RAW_MAP.put("IS", "");
+		RAW_MAP.put("NULL", "");
+		RAW_MAP.put("AND", "");
+		RAW_MAP.put("OR", "");
+		RAW_MAP.put("NOT", "");
 		RAW_MAP.put("VALUE", "");
 		RAW_MAP.put("DISTINCT", "");
 
