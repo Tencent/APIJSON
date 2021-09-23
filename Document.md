@@ -5,7 +5,7 @@ https://github.com/Tencent/APIJSON
 ![image](https://user-images.githubusercontent.com/5738175/134520081-a63d3817-321c-4e7b-9e03-73c6827a19c1.png)
 
 
-后端开发者可以先看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc/zh)（非官方，和本文档有出入的地方以本文档为准，例如正则匹配 key? 已废弃，全面用 key~ 替代。）
+后端开发者可以先看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc/zh)（非官方，和本文档有出入的点以本文档为准，例如正则匹配 key? 已废弃，用 key~ 替代。）
 
 * ### [1.示例](#1)
 * ### [2.对比传统方式](#2)
