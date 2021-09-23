@@ -2,7 +2,8 @@
 本文是通用文档，只和 APIJSON 协议有关，和 C#, Go, Java, JavaScript, Python, PHP 等开发语言无关。 <br />
 具体开发语言相关的 配置、运行、部署 等文档见各个相关项目的文档，可以在首页点击对应语言的入口来查看。<br />
 https://github.com/Tencent/APIJSON
-![image](https://user-images.githubusercontent.com/5738175/134518921-0747a035-6f79-4583-9f5e-fba9481c0a87.png)
+![image](https://user-images.githubusercontent.com/5738175/134520081-a63d3817-321c-4e7b-9e03-73c6827a19c1.png)
+
 
 后端开发者可以先看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc/zh)（非官方，和本文档有出入的地方以本文档为准，例如正则匹配 key? 已废弃，全面用 key~ 替代。）
 
