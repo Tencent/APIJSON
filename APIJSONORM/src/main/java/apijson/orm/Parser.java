@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 
 /**解析器
  * @author Lemon
@@ -121,7 +120,7 @@ public interface Parser<T> {
 	
 	
 	Boolean getGlobleFormat();
-	RequestRole getGlobleRole();
+	String getGlobleRole();
 	String getGlobleDatabase();
 	String getGlobleSchema();
 	String getGlobleDatasource();

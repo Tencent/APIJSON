@@ -35,7 +35,6 @@ import apijson.JSONResponse;
 import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 import apijson.StringUtil;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
@@ -173,13 +172,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	public Boolean getGlobleFormat() {
 		return globleFormat;
 	}
-	protected RequestRole globleRole;
-	public AbstractParser<T> setGlobleRole(RequestRole globleRole) {
+	protected String globleRole;
+	public AbstractParser<T> setGlobleRole(String globleRole) {
 		this.globleRole = globleRole;
 		return this;
 	}
 	@Override
-	public RequestRole getGlobleRole() {
+	public String getGlobleRole() {
 		return globleRole;
 	}
 	protected String globleDatabase;
@@ -361,7 +360,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		//必须在parseCorrectRequest后面，因为parseCorrectRequest可能会添加 @role
 		if (isNeedVerifyRole() && globleRole == null) {
 			try {
-				setGlobleRole(RequestRole.get(requestObject.getString(JSONRequest.KEY_ROLE)));
+				setGlobleRole(requestObject.getString(JSONRequest.KEY_ROLE));
 				requestObject.remove(JSONRequest.KEY_ROLE);
 			} catch (Exception e) {
 				return extendErrorResult(requestObject, e);
@@ -466,7 +465,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				if (globleRole != null) {
 					config.setRole(globleRole);
 				} else {
-					config.setRole(getVisitor().getId() == null ? RequestRole.UNKNOWN : RequestRole.LOGIN);
+					config.setRole(getVisitor().getId() == null ? AbstractVerifier.UNKNOWN : AbstractVerifier.LOGIN);
 				}
 			}
 			getVerifier().verifyAccess(config);

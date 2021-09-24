@@ -10,7 +10,6 @@ import java.util.Map;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 
 /**SQL配置
  * @author Lemon
@@ -113,8 +112,8 @@ public interface SQLConfig {
 	Object getId();
 	SQLConfig setId(Object id);
 
-	RequestRole getRole();
-	SQLConfig setRole(RequestRole role);  // TODO 提供 String 类型的，方便扩展
+	String getRole();
+	SQLConfig setRole(String role);
 
 	public boolean isDistinct();
 	public SQLConfig setDistinct(boolean distinct);

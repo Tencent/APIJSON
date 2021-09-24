@@ -32,10 +32,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
@@ -51,7 +51,6 @@ import apijson.Log;
 import apijson.MethodAccess;
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 import apijson.StringUtil;
 import apijson.orm.AbstractSQLConfig.IdCallback;
 import apijson.orm.exception.ConflictException;
@@ -78,16 +77,42 @@ import apijson.orm.model.TestRecord;
 public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	private static final String TAG = "AbstractVerifier";
 
+	/**未登录，不明身份的用户
+	 */
+	public static final String UNKNOWN = "UNKNOWN";
+
+	/**已登录的用户
+	 */
+	public static final String LOGIN = "LOGIN";
+
+	/**联系人，必须已登录
+	 */
+	public static final String CONTACT = "CONTACT";
+
+	/**圈子成员(CONTACT + OWNER)，必须已登录
+	 */
+	public static final String CIRCLE = "CIRCLE";
+
+	/**拥有者，必须已登录
+	 */
+	public static final String OWNER = "OWNER";
+
+	/**管理员，必须已登录
+	 */
+	public static final String ADMIN = "ADMIN";
+
 
 	// 共享 STRUCTURE_MAP 则不能 remove 等做任何变更，否则在并发情况下可能会出错，加锁效率又低，所以这里改为忽略对应的 key
+	public static final Map<String, Entry<String, Object>> ROLE_MAP;
+	
 	public static final List<String> OPERATION_KEY_LIST;
 
 	// <TableName, <METHOD, allowRoles>>
 	// <User, <GET, [OWNER, ADMIN]>>
 	@NotNull
-	public static final Map<String, Map<RequestMethod, RequestRole[]>> SYSTEM_ACCESS_MAP;
+	public static final Map<String, Map<RequestMethod, String[]>> SYSTEM_ACCESS_MAP;
 	@NotNull
-	public static final Map<String, Map<RequestMethod, RequestRole[]>> ACCESS_MAP;
+	public static final Map<String, Map<RequestMethod, String[]>> ACCESS_MAP;
 
 	// <method tag, <version, Request>>
 	// <PUT Comment, <1, { "method":"PUT", "tag":"Comment", "structure":{ "MUST":"id"... }... }>>
@@ -98,6 +123,14 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	@NotNull
 	public static final Map<String, Pattern> COMPILE_MAP;
 	static {
+		ROLE_MAP = new LinkedHashMap<>();
+		ROLE_MAP.put(UNKNOWN, new Entry<String, Object>());
+		ROLE_MAP.put(LOGIN, new Entry<String, Object>("userId>", 0));
+		ROLE_MAP.put(CONTACT, new Entry<String, Object>("userId{}", "contactIdList"));
+		ROLE_MAP.put(CIRCLE, new Entry<String, Object>("userId-()", "verifyCircle()")); // "userId{}", "circleIdList"));  // 还是 {"userId":"currentUserId", "userId{}": "contactIdList", "@combine": "userId,userId{}" } ? 
+		ROLE_MAP.put(OWNER, new Entry<String, Object>("userId", "userId"));
+		ROLE_MAP.put(ADMIN, new Entry<String, Object>("userId-()", "verifyAdmin()"));
+		
 		OPERATION_KEY_LIST = new ArrayList<>();
 		OPERATION_KEY_LIST.add(TYPE.name());
 		OPERATION_KEY_LIST.add(VERIFY.name());
@@ -111,7 +144,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		OPERATION_KEY_LIST.add(REFUSE.name());
 
 
-		SYSTEM_ACCESS_MAP = new HashMap<String, Map<RequestMethod, RequestRole[]>>();
+		SYSTEM_ACCESS_MAP = new HashMap<String, Map<RequestMethod, String[]>>();
 
 		SYSTEM_ACCESS_MAP.put(Access.class.getSimpleName(), getAccessMap(Access.class.getAnnotation(MethodAccess.class)));
 		SYSTEM_ACCESS_MAP.put(Function.class.getSimpleName(), getAccessMap(Function.class.getAnnotation(MethodAccess.class)));
@@ -142,12 +175,12 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @param access
 	 * @return
 	 */
-	public static HashMap<RequestMethod, RequestRole[]> getAccessMap(MethodAccess access) {
+	public static HashMap<RequestMethod, String[]> getAccessMap(MethodAccess access) {
 		if (access == null) {
 			return null;
 		}
 
-		HashMap<RequestMethod, RequestRole[]> map = new HashMap<>();
+		HashMap<RequestMethod, String[]> map = new HashMap<>();
 		map.put(GET, access.GET());
 		map.put(HEAD, access.HEAD());
 		map.put(GETS, access.GETS());
@@ -166,21 +199,14 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	}
 
 	@Override
-	public String getIdKey(String database, String schema, String table) {
+	public String getIdKey(String database, String schema, String datasource, String table) {
 		return apijson.JSONObject.KEY_ID;
 	}
 	@Override
-	public String getIdKey(String database, String schema, String datasource, String table) {
-		return getIdKey(database, schema, table);
-	}
-	@Override
-	public String getUserIdKey(String database, String schema, String table) {
+	public String getUserIdKey(String database, String schema, String datasource, String table) {
 		return apijson.JSONObject.KEY_USER_ID;
 	}
-	@Override
-	public String getUserIdKey(String database, String schema, String datasource, String table) {
-		return getUserIdKey(database, schema, table);
-	}
+	
 	@Override
 	public Object newId(RequestMethod method, String database, String schema, String table) {
 		return System.currentTimeMillis();
@@ -201,7 +227,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		this.visitor = visitor;
 		this.visitorId = visitor == null ? null : visitor.getId();
 
-		//导致内部调用且放行校验(noVerifyLogin, noVerifyRole)也抛异常
+		//导致内部调用且放行校验(needVerifyLogin, needVerifyRole)也抛异常
 		//		if (visitorId == null) {
 		//			throw new NullPointerException(TAG + ".setVisitor visitorId == null !!! 可能导致权限校验失效，引发安全问题！");
 		//		}
@@ -216,28 +242,25 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	@Deprecated
-	public boolean verify(SQLConfig config) throws Exception {
-		return verifyAccess(config);
-	}
-	/**验证权限是否通过
-	 * @param config
-	 * @param visitor
-	 * @return
-	 * @throws Exception
-	 */
 	public boolean verifyAccess(SQLConfig config) throws Exception {
 		String table = config == null ? null : config.getTable();
 		if (table == null) {
 			return true;
 		}
-		RequestRole role = config.getRole();
+		
+		String role = config.getRole();
 		if (role == null) {
-			role = RequestRole.UNKNOWN;
-		}
+			role = UNKNOWN;
+		} 
+		else { 
+			if (ROLE_MAP.containsKey(role) == false) {
+				Set<String> NAMES = ROLE_MAP.keySet();
+				throw new IllegalArgumentException("角色 " + role + " 不存在！只能是[" + StringUtil.getString(NAMES.toArray()) + "]中的一种！");
+			}
 
-		if (role != RequestRole.UNKNOWN) {//未登录的角色
-			verifyLogin();
+			if (role.equals(UNKNOWN) == false) { //未登录的角色
+				verifyLogin();
+			}
 		}
 
 		RequestMethod method = config.getMethod();
@@ -259,7 +282,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			//不能在Visitor内null -> [] ! 否则会导致某些查询加上不需要的条件！
 			List<Object> list = visitor.getContactIdList() == null
 			? new ArrayList<Object>() : new ArrayList<Object>(visitor.getContactIdList());
-			if (role == RequestRole.CIRCLE) {
+			if (role == CIRCLE) {
 				list.add(visitorId);
 			}
 
@@ -287,7 +310,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 					}
 					if (list.contains(Long.valueOf("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
 						throw new IllegalAccessException(visitorIdkey + " = " + id + " 的 " + table
-								+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+								+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 					}
 				}
 			}
@@ -307,7 +330,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 						oid = ovl == null || index >= ovl.size() ? null : ovl.get(index);
 						if (oid == null || StringUtil.getString(oid).equals("" + visitorId) == false) {
 							throw new IllegalAccessException(visitorIdkey + " = " + oid + " 的 " + table
-									+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+									+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 						}
 					}
 				}
@@ -331,13 +354,13 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 				requestId = config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
 				if (requestId != null && StringUtil.getString(requestId).equals(StringUtil.getString(visitorId)) == false) {
 					throw new IllegalAccessException(visitorIdkey + " = " + requestId + " 的 " + table
-							+ " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+							+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 				}
 
 				config.putWhere(visitorIdkey, visitorId, true);
 			}
 			break;
-		case ADMIN://这里不好做，在特定接口内部判。 可以是  /get/admin + 固定秘钥  Parser#noVerify，之后全局跳过验证
+		case ADMIN://这里不好做，在特定接口内部判。 可以是  /get/admin + 固定秘钥  Parser#needVerify，之后全局跳过验证
 			verifyAdmin();
 			break;
 		default://unknown，verifyRole通过就行
@@ -362,19 +385,20 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @throws Exception 
 	 * @see {@link apijson.JSONObject#KEY_ROLE} 
 	 */
-	public void verifyRole(String table, RequestMethod method, RequestRole role) throws Exception {
+	public void verifyRole(String table, RequestMethod method, String role) throws Exception {
 		Log.d(TAG, "verifyRole  table = " + table + "; method = " + method + "; role = " + role);
 		if (table != null) {
 			if (method == null) {
 				method = GET;
 			}
 			if (role == null) {
-				role = RequestRole.UNKNOWN;
+				role = UNKNOWN;
 			}
-			Map<RequestMethod, RequestRole[]> map = ACCESS_MAP.get(table);
+			
+			Map<RequestMethod, String[]> map = ACCESS_MAP.get(table);
 
 			if (map == null || Arrays.asList(map.get(method)).contains(role) == false) {
-				throw new IllegalAccessException(table + " 不允许 " + role.name() + " 用户的 " + method.name() + " 请求！");
+				throw new IllegalAccessException(table + " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 			}
 		}
 	}
@@ -551,7 +575,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		}
 
 		//已在 Verifier 中处理
-		//		if (RequestRole.get(request.getString(JSONRequest.KEY_ROLE)) == RequestRole.ADMIN) {
+		//		if (get(request.getString(JSONRequest.KEY_ROLE)) == ADMIN) {
 		//			throw new IllegalArgumentException("角色设置错误！不允许在写操作Request中传 " + name +
 		//					":{ " + JSONRequest.KEY_ROLE + ":admin } ！");
 		//		}
@@ -847,13 +871,13 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 		//解析内容<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		Set<Entry<String, Object>> set = new LinkedHashSet<>(target.entrySet());
+		Set<Map.Entry<String, Object>> set = new LinkedHashSet<>(target.entrySet());
 		if (set.isEmpty() == false) {
 
 			String key;
 			Object tvalue;
 			Object rvalue;
-			for (Entry<String, Object> entry : set) {
+			for (Map.Entry<String, Object> entry : set) {
 				key = entry == null ? null : entry.getKey();
 				if (key == null || OPERATION_KEY_LIST.contains(key)) {
 					continue;
@@ -1019,11 +1043,11 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		}
 
 
-		Set<Entry<String, Object>> set = new LinkedHashSet<>(targetChild.entrySet());
+		Set<Map.Entry<String, Object>> set = new LinkedHashSet<>(targetChild.entrySet());
 		String tk;
 		Object tv;
 
-		for (Entry<String, Object> e : set) {
+		for (Map.Entry<String, Object> e : set) {
 			tk = e == null ? null : e.getKey();
 			if (tk == null || OPERATION_KEY_LIST.contains(tk)) {
 				continue;
@@ -1342,7 +1366,8 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		} finally {
 			executor.close();
 		}
-		if (result != null && JSONResponse.isExist(result.getIntValue(JSONResponse.KEY_CODE)) == false) {
+		
+		if (result != null && JSONResponse.isExist(result.getIntValue(JSONResponse.KEY_COUNT)) == false) {
 			throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 '" + tk + "': '" + tv + "' ！");
 		}
 	}

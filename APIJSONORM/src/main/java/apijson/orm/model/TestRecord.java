@@ -5,8 +5,8 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm.model;
 
-import static apijson.RequestRole.ADMIN;
-import static apijson.RequestRole.LOGIN;
+import static apijson.orm.AbstractVerifier.ADMIN;
+import static apijson.orm.AbstractVerifier.LOGIN;
 
 import java.io.Serializable;
 import java.sql.Timestamp;

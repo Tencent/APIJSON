@@ -9,21 +9,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 
 /**校验器(权限、请求参数、返回结果等)
  * @author Lemon
  */
 public interface Verifier<T> {
 
-	/**验证权限是否通过，用 verifyAccess 替代，最早 4.5.0 移除
-	 * @param config
-	 * @param visitor
-	 * @return
-	 * @throws Exception
-	 */
-	@Deprecated
-	boolean verify(SQLConfig config) throws Exception;
+
 	/**验证权限是否通过
 	 * @param config
 	 * @param visitor
@@ -40,7 +32,7 @@ public interface Verifier<T> {
 	 * @throws Exception 
 	 * @see {@link apijson.JSONObject#KEY_ROLE} 
 	 */
-	void verifyRole(String table, RequestMethod method, RequestRole role) throws Exception;
+	void verifyRole(String table, RequestMethod method, String role) throws Exception;
 
 	/**登录校验
 	 * @param config

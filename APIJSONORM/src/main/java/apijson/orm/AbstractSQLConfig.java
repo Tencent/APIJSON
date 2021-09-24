@@ -54,7 +54,6 @@ import apijson.JSONResponse;
 import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 import apijson.SQL;
 import apijson.StringUtil;
 import apijson.orm.exception.NotExistException;
@@ -196,9 +195,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		RAW_MAP.put("LANGUAGE", "");
 		RAW_MAP.put("MODE", "");
 
+		
 
 		SQL_FUNCTION_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
-
 
 		//窗口函数
 		SQL_FUNCTION_MAP.put("rank", "");//得到数据项在分组中的排名，排名相等的时候会留下空位
@@ -689,7 +688,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**
 	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
 	 */
-	private RequestRole role; //发送请求的用户的角色
+	private String role; //发送请求的用户的角色
 	private boolean distinct = false;
 	private String database; //表所在的数据库类型
 	private String schema; //表所在的数据库名
@@ -789,15 +788,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	@Override
-	public RequestRole getRole() {
+	public String getRole() {
 		//不能 @NotNull , AbstractParser#getSQLObject 内当getRole() == null时填充默认值
 		return role;
 	}
-	public AbstractSQLConfig setRole(String roleName) throws Exception {
-		return setRole(RequestRole.get(roleName));
-	}
 	@Override
-	public AbstractSQLConfig setRole(RequestRole role) {
+	public AbstractSQLConfig setRole(String role) {
 		this.role = role;
 		return this;
 	}
@@ -3175,7 +3171,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
 				String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
-				return explain + "SELECT " + config.getWhereString(false) + " AS " + q + JSONResponse.KEY_CODE + q + config.getLimitString();
+				return explain + "SELECT " + config.getWhereString(false) + " AS " + q + JSONResponse.KEY_COUNT + q + config.getLimitString();
 			}
 
 			config.setPreparedValueList(new ArrayList<Object>());
@@ -3728,7 +3724,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			config.setId(id);
 			//在	tableWhere 第0个		config.setIdIn(idIn);
 
-			config.setRole(RequestRole.get(role));
+			config.setRole(role);
 			config.setGroup(group);
 			config.setHaving(having);
 			config.setOrder(order);
@@ -3966,14 +3962,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 */
 		Object newId(RequestMethod method, String database, String schema, String table);
 
-		/**已废弃，最早 5.0.0 移除，改用 {@link #getIdKey(String, String, String, String)}
-		 * @param database
-		 * @param schema
-		 * @param table
-		 * @return
-		 */
-		@Deprecated
-		String getIdKey(String database, String schema, String table);
 
 		/**获取主键名
 		 * @param database
@@ -3982,15 +3970,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @return
 		 */
 		String getIdKey(String database, String schema, String datasource, String table);
-
-		/**已废弃，最早 5.0.0 移除，改用 {@link #getUserIdKey(String, String, String, String)}
-		 * @param database
-		 * @param schema
-		 * @param table
-		 * @return
-		 */
-		@Deprecated
-		String getUserIdKey(String database, String schema, String table);
 
 		/**获取 User 的主键名
 		 * @param database
@@ -4028,23 +4007,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		@Override
-		public String getIdKey(String database, String schema, String table) {
+		public String getIdKey(String database, String schema, String datasource, String table) {
 			return KEY_ID;
 		}
 
 		@Override
-		public String getIdKey(String database, String schema, String datasource, String table) {
-			return getIdKey(database, schema, table);
-		}
-
-		@Override
-		public String getUserIdKey(String database, String schema, String table) {
-			return KEY_USER_ID;
-		}
-
-		@Override
 		public String getUserIdKey(String database, String schema, String datasource, String table) {
-			return getUserIdKey(database, schema, table);
+			return KEY_USER_ID;
 		}
 
 		@Override
