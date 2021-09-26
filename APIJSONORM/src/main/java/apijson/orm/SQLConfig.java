@@ -134,6 +134,9 @@ public interface SQLConfig {
 	 * @see {@link #getSQLTable()}
 	 */
 	String getTable();
+	
+	SQLConfig setTable(String table);
+
 	/**数据库里的真实Table名
 	 * 通过 {@link #TABLE_KEY_MAP} 映射
 	 * @return
@@ -145,7 +148,6 @@ public interface SQLConfig {
 	List<String> getRaw();
 	SQLConfig setRaw(List<String> raw);
 
-	SQLConfig setTable(String table);
 
 	String getGroup();
 	SQLConfig setGroup(String group);

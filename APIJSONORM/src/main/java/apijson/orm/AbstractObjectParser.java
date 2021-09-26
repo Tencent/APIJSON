@@ -58,6 +58,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	protected boolean isSubquery;
 
 	protected final int type;
+	protected final String arrayTable;
 	protected final List<Join> joinList;
 	protected final boolean isTable;
 	protected final boolean isArrayMainTable;
@@ -86,6 +87,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		this.isSubquery = isSubquery;
 
 		this.type = arrayConfig == null ? 0 : arrayConfig.getType();
+		this.arrayTable = arrayConfig == null ? null : arrayConfig.getTable();
 		this.joinList = arrayConfig == null ? null : arrayConfig.getJoinList();
 
 		this.isTable = isTable; // apijson.JSONObject.isTableKey(table);
@@ -835,6 +837,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		return parser.getValueByPath(path);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public JSONObject onSQLExecute() throws Exception {
 		int position = getPosition();
@@ -846,30 +849,47 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		else {
 			result = parser.executeSQL(sqlConfig, isSubquery);
 
-			if (isArrayMainTable && position == 0 && result != null) {  // 提取并缓存数组主表的列表数据
-				@SuppressWarnings("unchecked")
-				List<JSONObject> list = (List<JSONObject>) result.remove(SQLExecutor.KEY_RAW_LIST);
-				if (list != null) {
+			boolean isSimpleArray = false;
+			List<JSONObject> rawList = null;
+			
+			if (isArrayMainTable && position == 0 && result != null) {
+				
+				isSimpleArray = (functionMap == null || functionMap.isEmpty())
+						&& (customMap == null || customMap.isEmpty())
+						&& (table.equals(arrayTable));
+				
+				// 提取并缓存数组主表的列表数据
+				rawList = (List<JSONObject>) result.remove(SQLExecutor.KEY_RAW_LIST);
+				if (rawList != null) {
 					String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
-					long startTime = System.currentTimeMillis();
-					for (int i = 1; i < list.size(); i++) {  // 从 1 开始，0 已经处理过
-						JSONObject obj = list.get(i);
 
-						if (obj != null) {
-							parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj); //解决获取关联数据时requestObject里不存在需要的关联数据
+					if (isSimpleArray == false) {
+						long startTime = System.currentTimeMillis();
+						
+						for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
+							JSONObject obj = rawList.get(i);
+
+							if (obj != null) {
+								parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
+							}
 						}
+						
+						long endTime = System.currentTimeMillis();  // 3ms - 8ms
+						Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
+								+ "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
 					}
-					
-					long endTime = System.currentTimeMillis();
-					Log.e(TAG, "onSQLExecute for (int i = 1; i < list.size(); i++)  startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime));
 
-					parser.putArrayMainCache(arrayPath, list);
+					parser.putArrayMainCache(arrayPath, rawList);
 				}
 			}
 
 			if (isSubquery == false && result != null) {
-				parser.putQueryResult(path, result);//解决获取关联数据时requestObject里不存在需要的关联数据
+				parser.putQueryResult(path, result);  // 解决获取关联数据时requestObject里不存在需要的关联数据
+				
+				if (isSimpleArray && rawList != null) {
+					result.put(SQLExecutor.KEY_RAW_LIST, rawList);
+				}
 			}
 		}
 

@@ -1031,10 +1031,14 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			int index = isSubquery || name == null ? -1 : name.lastIndexOf("[]");
 			String childPath = index <= 0 ? null : Pair.parseEntry(name.substring(0, index), true).getKey(); // Table-key1-key2...
 
+			String arrTableKey = null;
 			//判断第一个key，即Table是否存在，如果存在就提取
 			String[] childKeys = StringUtil.split(childPath, "-", false);
 			if (childKeys == null || childKeys.length <= 0 || request.containsKey(childKeys[0]) == false) {
 				childKeys = null;
+			} 
+			else if (childKeys.length == 1 && JSONRequest.isTableKey(childKeys[0])) {  // 可能无需提取，直接返回 rawList 即可
+				arrTableKey = childKeys[0];
 			}
 
 
@@ -1045,11 +1049,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					.setCount(size)
 					.setPage(page)
 					.setQuery(query2)
+					.setTable(arrTableKey)
 					.setJoinList(onJoinParse(join, request));
 
 			JSONObject parent;
 			
-			long startTime = System.currentTimeMillis();
+			boolean isExtract = true;
+
 			//生成size个
 			for (int i = 0; i < (isSubquery ? 1 : size); i++) {
 				parent = onObjectParse(request, isSubquery ? parentPath : path, isSubquery ? name : "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
@@ -1057,13 +1063,32 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					break;
 				}
 				
+				long startTime = System.currentTimeMillis();
+
+				/* 这里优化了 Table[]: { Table:{} } 这种情况下的性能
+				 * 如果把 List<JSONObject> 改成 JSONArray 来减少以下 addAll 一次复制，则会导致 AbstractSQLExecutor 等其它很多地方 get 要改为 getJSONObject，
+				 * 修改类型会导致不兼容旧版依赖 ORM 的项目，而且整体上性能只有特殊情况下性能提升，其它非特殊情况下因为多出很多 instanceof JSONObject 的判断而降低了性能。
+				 */
+				JSONObject fo = i != 0 || arrTableKey == null ? null : parent.getJSONObject(arrTableKey);
+				@SuppressWarnings("unchecked")
+				List<JSONObject> list = fo == null ? null : (List<JSONObject>) fo.remove(SQLExecutor.KEY_RAW_LIST);
+				
+				if (list != null && list.isEmpty() == false) {
+					isExtract = false;
+					
+					list.set(0, fo);  // 不知道为啥第 0 项也加了 @RAW@LIST
+					response.addAll(list);  // List<JSONObject> cannot match List<Object>   response = new JSONArray(list);
+					
+					long endTime = System.currentTimeMillis();  // 0ms
+					Log.d(TAG, "\n onArrayParse <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 0; i < (isSubquery ? 1 : size); i++) "
+							+ " startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+					break;
+				}
+
 				//key[]:{Table:{}}中key equals Table时 提取Table
 				response.add(getValue(parent, childKeys)); //null有意义
 			}
 			
-			long endTime = System.currentTimeMillis();
-			Log.e(TAG, "onArrayParse for for (int i = 0; i < (isSubquery ? 1 : size); i++)  startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime));
-
 			//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -1082,12 +1107,20 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			    }
 			}
 			 */
-			Object fo = childKeys == null || response.isEmpty() ? null : response.get(0);
-			if (fo instanceof Boolean || fo instanceof Number || fo instanceof String) { //[{}] 和 [[]] 都没意义
-				putQueryResult(path, response);
-			}
-		} finally {
+			if (isExtract) {
+				long startTime = System.currentTimeMillis();
 
+				Object fo = childKeys == null || response.isEmpty() ? null : response.get(0);
+				if (fo instanceof Boolean || fo instanceof Number || fo instanceof String) { //[{}] 和 [[]] 都没意义
+					putQueryResult(path, response);
+				}
+				
+				long endTime = System.currentTimeMillis();
+				Log.d(TAG, "\n onArrayParse <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n isExtract >> putQueryResult "
+						+ " startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+			}
+
+		} finally {
 			//后面还可能用到，要还原
 			request.put(JSONRequest.KEY_QUERY, query);
 			request.put(JSONRequest.KEY_COUNT, count);
