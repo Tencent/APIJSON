@@ -64,6 +64,7 @@ public interface Parser<T> {
 	JSONObject parseResponse(String request);
 	JSONObject parseResponse(JSONObject request);
 
+	// 没必要性能还差 JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception;
 
 
 	JSONObject parseCorrectRequest() throws Exception;
@@ -71,10 +72,8 @@ public interface Parser<T> {
 	JSONObject parseCorrectRequest(RequestMethod method, String tag, int version, String name, JSONObject request,
 			int maxUpdateCount, SQLCreator creator) throws Exception;
 	
-	JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception;
-
+	
 	JSONObject getStructure(String table, String method, String tag, int version) throws Exception;
-
 
 
 	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;

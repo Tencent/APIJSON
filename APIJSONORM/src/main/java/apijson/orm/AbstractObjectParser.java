@@ -852,14 +852,17 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				if (list != null) {
 					String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
+					long startTime = System.currentTimeMillis();
 					for (int i = 1; i < list.size(); i++) {  // 从 1 开始，0 已经处理过
-						JSONObject obj = parser.parseCorrectResponse(table, list.get(i));
-						list.set(i, obj);
+						JSONObject obj = list.get(i);
 
 						if (obj != null) {
 							parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj); //解决获取关联数据时requestObject里不存在需要的关联数据
 						}
 					}
+					
+					long endTime = System.currentTimeMillis();
+					Log.e(TAG, "onSQLExecute for (int i = 1; i < list.size(); i++)  startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime));
 
 					parser.putArrayMainCache(arrayPath, list);
 				}

@@ -719,33 +719,6 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	}
 
 
-	//TODO 优化性能！
-	/**获取正确的返回结果
-	 * @param method
-	 * @param response
-	 * @return
-	 * @throws Exception 
-	 */
-	@Override
-	public JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception {
-		//		Log.d(TAG, "getCorrectResponse  method = " + method + "; table = " + table);
-		//		if (response == null || response.isEmpty()) {//避免无效空result:{}添加内容后变有效
-		//			Log.e(TAG, "getCorrectResponse  response == null || response.isEmpty() >> return response;");
-		return response;
-		//		}
-		//
-		//		JSONObject target = apijson.JSONObject.isTableKey(table) == false
-		//				? new JSONObject() : getStructure(method, "Response", "model", table);
-		//
-		//				return MethodStructure.parseResponse(method, table, target, response, new OnParseCallback() {
-		//
-		//					@Override
-		//					protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
-		//						return getCorrectResponse(method, key, robj);
-		//					}
-		//				});
-	}
-
 	/**获取Request或Response内指定JSON结构
 	 * @param table
 	 * @param method
@@ -1075,15 +1048,22 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					.setJoinList(onJoinParse(join, request));
 
 			JSONObject parent;
+			
+			long startTime = System.currentTimeMillis();
 			//生成size个
 			for (int i = 0; i < (isSubquery ? 1 : size); i++) {
 				parent = onObjectParse(request, isSubquery ? parentPath : path, isSubquery ? name : "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
 				if (parent == null || parent.isEmpty()) {
 					break;
 				}
+				
 				//key[]:{Table:{}}中key equals Table时 提取Table
 				response.add(getValue(parent, childKeys)); //null有意义
 			}
+			
+			long endTime = System.currentTimeMillis();
+			Log.e(TAG, "onArrayParse for for (int i = 0; i < (isSubquery ? 1 : size); i++)  startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime));
+
 			//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -1665,7 +1645,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				result = getSQLExecutor().execute(config, false);
 			}
 
-			return parseCorrectResponse(config.getTable(), result);
+			return result;
 		}
 		catch (Exception e) {
 			if (Log.DEBUG == false && e instanceof SQLException) {
