@@ -283,10 +283,11 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/291"><img src="https://avatars.githubusercontent.com/u/17522475?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/293"><img src="https://avatars.githubusercontent.com/u/53826144?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/295"><img src="https://avatars.githubusercontent.com/u/11210385?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/311"><img src="https://avatars.githubusercontent.com/u/22066942?v=4"  height="54" width="54" ></a>
 </div>
 <br />
 
-生态周边项目的作者们(2 个腾讯工程师、1 个字节跳动工程师 等)：<br />
+生态周边项目的作者们(2 个腾讯工程师、1 个 BAT 技术专家、1 个字节跳动工程师 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">
@@ -297,7 +298,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
   <a href="https://gitee.com/tiangao/apijson-go"><img src="https://portrait.gitee.com/uploads/avatars/user/43/130007_tiangao_1578918889.png!avatar200"  
  height="54" width="54" ></a>
   <a href="https://github.com/qq547057827/apijson-php"><img src="https://avatars3.githubusercontent.com/u/1657532?s=400&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/xianglong111/json-api"><img src="https://avatars.githubusercontent.com/u/9738743?s=460&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/xianglong111/APIJSON-php"><img src="https://avatars.githubusercontent.com/u/9738743?s=460&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/kevinaskin/apijson-node"><img src="https://avatars3.githubusercontent.com/u/20034891?s=400&v=4"
  height="54" width="54" ></a>
   <a href="https://github.com/TEsTsLA/apijson"><img src="https://avatars2.githubusercontent.com/u/17310639?s=400&v=4"
@@ -309,21 +310,28 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
   <a href="https://github.com/Zerounary/APIJSONParser"><img src="https://avatars2.githubusercontent.com/u/31512287?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/APIJSON/apijson-framework"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/APIJSON/apijson_todo_demo"><img src="https://avatars.githubusercontent.com/u/17522475?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/vcoolwind/apijson-practice"><img src="https://avatars.githubusercontent.com/u/22070287?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/rainboy-learn/apijson-learn"><img src="https://avatars.githubusercontent.com/u/43025876?s=200&v=4"  height="54" width="54" ></a>
   <a href="https://gitee.com/greyzeng/apijson-sample"><img src="https://portrait.gitee.com/uploads/avatars/user/367/1102309_greyzeng_1578940307.png!avatar200"  height="54" width="54" ></a>
   <a href="https://gitee.com/zhiyuexin/ApiJsonByJFinal"><img src="https://avatar.gitee.com/uploads/90/490_zhiyuexin.jpg!avatar100?1368664499"  
  height="54" width="54" ></a>
   <a href="https://github.com/Airforce-1/SpringServer1.2-APIJSON"><img src="https://avatars3.githubusercontent.com/u/6212428?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://gitee.com/JinShuProject/JinShuApiJson"><img src="https://portrait.gitee.com/uploads/avatars/user/232/698672_maxiaoji_1578931055.jpg!avatar200"  height="54" width="54" ></a>
+  <a href="https://github.com/qiujunlin/APIJSONDemo"><img src="https://avatars.githubusercontent.com/u/50007106?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/chenyanlann/APIJSONDemo_ClickHouse"><img src="https://avatars.githubusercontent.com/u/62465397?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/andream7/apijson-db2"><img src="https://avatars.githubusercontent.com/u/60541766?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/TommyLemon/APIJSON-Android-RxJava"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/TommyLemon/APIAuto"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/TommyLemon/UnitAuto"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/vincentCheng/apijson-doc"><img src="https://avatars3.githubusercontent.com/u/6327228?s=400&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/ruoranw/APIJSONdocs"><img src="https://avatars.githubusercontent.com/u/25990237?s=460&u=2143b95e5ed39185f2a03d66fbb5638795e16d5a&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/HANXU2018/APIJSON-DOC"><img src="https://avatars.githubusercontent.com/u/45117061?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/kenlig/apijsondocs"><img src="https://avatars.githubusercontent.com/u/28685375?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/APIJSON/apijson.org"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/pengxianggui/apijson-builder"><img src="https://avatars2.githubusercontent.com/u/16299169?s=460&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/APIJSON/AbsGrade"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/TommyLemon/Android-ZBLibrary"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/APIJSON/apijson_todo_demo"><img src="https://avatars.githubusercontent.com/u/17522475?v=4"  height="54" width="54" ></a>
 </div>
 <br />
 
@@ -436,11 +444,11 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [FfApiJson](https://gitee.com/own_3_0/ff-api-json) 用 JSON 格式直接生成 SQL，借鉴 APIJSON 支持多数据源
 
-[apijson-practice](https://github.com/vcoolwind/apijson-practice) 实践一下apijson，对做管理平台还是能有不少提效的
-
 [APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) 一个简单的 todo 示例项目，精简数据，简化上手流程，带自定义鉴权逻辑 
   
 [apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON 学习笔记和源码解析
+
+[apijson-practice](https://github.com/vcoolwind/apijson-practice) 实践一下 apijson，对做管理平台还是能有不少提效的
 
 [apijson-sample](https://gitee.com/greyzeng/apijson-sample) APIJSON 简单使用 Demo 及教程
 
@@ -462,7 +470,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
 
-[Android-ZBLibrary](https://github.com/TommyLemon/Android-ZBLibrary) Android MVP快速开发框架，Demo全面，注释详细，使用简单，代码严谨
+[Android-ZBLibrary](https://github.com/TommyLemon/Android-ZBLibrary) Android MVP 快速开发框架，Demo 全面，注释详细，使用简单，代码严谨
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
