@@ -5,7 +5,7 @@ https://github.com/Tencent/APIJSON
 ![image](https://user-images.githubusercontent.com/5738175/134520081-a63d3817-321c-4e7b-9e03-73c6827a19c1.png)
 
 
-后端开发者可以先看 [图文入门教程1](https://vincentcheng.github.io/apijson-doc/zh) 或 [图文入门教程2](https://hanxu2018.github.io/APIJSON-DOC/) （都非官方，和本文档有出入的点以本文档为准，例如正则匹配 key? 已废弃，用 key~ 替代；例如 "@column":"store_id,sum(amt):totAmt" 中逗号 , 有误，应该用分号 ; 隔开 SQL 函数）
+后端开发者可以先看 [图文入门教程1](https://vincentcheng.github.io/apijson-doc/zh) 或 [图文入门教程2](https://hanxu2018.github.io/APIJSON-DOC/) （都非官方，和本文档有出入的点以本文档为准，例如正则匹配 key? 已废弃，用 key~ 替代；例如 "@column":"store_id,sum(amt):totAmt" 中逗号 , 有误，应该用分号 ; 隔开 SQL 函数，改为 "@column":"store_id;sum(amt):totAmt"）
 
 * ### [1.示例](#1)
 * ### [2.对比传统方式](#2)
@@ -346,7 +346,7 @@ DELETE: <br > 删除数据 | base_url/delete/ | {<br > &nbsp;&nbsp; TableName:{<
 
 
 1.TableName指要查询的数据库表Table的名称字符串。第一个字符为大写字母，剩下的字符要符合英语字母、数字、下划线中的任何一种。对应的值的类型为JSONObject，结构是 {...}，里面放的是Table的字段(列名)。下同。<br >
-2."tag":tag 后面的tag是非GET、HEAD请求中匹配请求的JSON结构的标识，一般是要查询的table的名称，由后端Request表中指定。下同。<br >
+2."tag":tag 后面的tag是非GET、HEAD请求中匹配请求的JSON结构的标识，一般是要查询的Table的名称，由后端Request表中指定。下同。<br >
 3.GET、HEAD请求是开放请求，可任意组合任意嵌套。其它请求为受限制的安全/私密请求，对应的 方法（method）, 标识（tag）, 版本（version）, 结构（structure） 都必须和 后端Request表中所指定的 一一对应，否则请求将不被通过。version 不传、为 null 或 <=0 都会使用最高版本，传了其它有效值则会使用最接近它的最低版本。下同。<br >
 4.GETS与GET、HEADS与HEAD分别为同一类型的操作方法，请求稍有不同但返回结果相同。下同。<br >
 5.在HTTP通信中，自动化接口(get,gets,head,heads,post,put,delete) 全用HTTP POST请求。下同。<br >
