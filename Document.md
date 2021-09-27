@@ -257,7 +257,7 @@ https://github.com/Tencent/APIJSON
 
 <br />
 
-[在线测试](http://apijson.org/auto)
+[在线测试](http://apijson.cn/api)
 
 <br />
 <br />
