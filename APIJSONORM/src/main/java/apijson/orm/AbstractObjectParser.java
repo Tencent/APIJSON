@@ -112,7 +112,16 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	}
 
-
+	@Override
+	public String getParentPath() {
+		return parentPath;
+	}
+	
+	@Override
+	public AbstractObjectParser setParentPath(String parentPath) {
+		this.parentPath = parentPath;
+		return this;
+	}
 
 	protected int position;
 	public int getPosition() {
@@ -144,7 +153,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	protected String table;
 	protected String alias;
 	protected boolean isReuse;
-	protected String parentName;
 	protected String path;
 
 	protected JSONObject response;
@@ -824,7 +832,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					continue;
 				}
 
-				response.put(entry.getKey(), child );
+				response.put(entry.getKey(), child);
 				index ++;
 			}
 		}
@@ -856,13 +864,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				
 				isSimpleArray = (functionMap == null || functionMap.isEmpty())
 						&& (customMap == null || customMap.isEmpty())
+						&& (childMap == null || childMap.isEmpty())
 						&& (table.equals(arrayTable));
 				
 				// 提取并缓存数组主表的列表数据
 				rawList = (List<JSONObject>) result.remove(SQLExecutor.KEY_RAW_LIST);
 				if (rawList != null) {
 					String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
-
 
 					if (isSimpleArray == false) {
 						long startTime = System.currentTimeMillis();

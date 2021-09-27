@@ -20,6 +20,9 @@ import apijson.RequestMethod;
  */
 public interface ObjectParser {
 
+	String getParentPath();
+	ObjectParser setParentPath(String parentPath);
+
 	/**解析成员
 	 * response重新赋值
 	 * @param parentPath 
@@ -138,7 +141,6 @@ public interface ObjectParser {
 	/**回收内存
 	 */
 	void recycle();
-
 
 
 	ObjectParser setMethod(RequestMethod method);

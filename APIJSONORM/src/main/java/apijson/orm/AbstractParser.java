@@ -855,6 +855,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		ObjectParser op = null;
 		if (isReuse) {  // 数组主表使用专门的缓存数据
 			op = arrayObjectParserCacheMap.get(parentPath.substring(0, parentPath.lastIndexOf("[]") + 2));
+			op.setParentPath(parentPath);
 		}
 
 		if (op == null) {
