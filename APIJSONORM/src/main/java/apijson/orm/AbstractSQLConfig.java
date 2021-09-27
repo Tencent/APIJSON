@@ -1562,10 +1562,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			// 全文索引 math(name,tag) AGAINST ('a b +c -d' IN NATURALE LANGUAGE MODE)  // IN BOOLEAN MODE
 
 			//有函数,但不是窗口函数
-			int overIndex = expression.indexOf(") OVER (");
-			int againstIndex = expression.indexOf(") AGAINST (");
-			boolean containOver = overIndex > 0 && overIndex < expression.length() - ") OVER (".length();
-			boolean containAgainst = againstIndex > 0 && againstIndex < expression.length() - ") AGAINST (".length();
+			int overIndex = expression.indexOf(")OVER(");  // 传参不传空格，拼接带空格  ") OVER (");
+			int againstIndex = expression.indexOf(")AGAINST(");  // 传参不传空格，拼接带空格  ") AGAINST (");
+			boolean containOver = overIndex > 0 && overIndex < expression.length() - ")OVER(".length();
+			boolean containAgainst = againstIndex > 0 && againstIndex < expression.length() - ")AGAINST(".length();
 
 			if (containOver && containAgainst) {
 				throw new IllegalArgumentException("字符 " + expression + " 不合法！"
@@ -1658,8 +1658,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				// 别名
 				String alias = s2.lastIndexOf(":") < s2.lastIndexOf(")") ? null : s2.substring(s2.lastIndexOf(":") + 1);
 				// 获取后半部分的参数解析 (agr0 agr1 ...)
-				String argsString2[] = parseArgsSplitWithComma(argString2, false, containRaw);
-				expression = fun + "(" + StringUtil.getString(agrsString1) + (containOver ? ") OVER (" : ") AGAINST (") + StringUtil.getString(argsString2) + ")" + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);			}
+				String argsString2[] = parseArgsSplitWithComma(argString2, false, containRaw); 
+				expression = fun + "(" + StringUtil.getString(agrsString1) + (containOver ? ") OVER (" : ") AGAINST (") // 传参不传空格，拼接带空格
+						+ StringUtil.getString(argsString2) + ")" + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);			}
 		}
 
 		return expression;

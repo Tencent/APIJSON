@@ -961,7 +961,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			//不在target内的 key:{}
 			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false) {
 				if (rv instanceof JSONObject) {
-					throw new UnsupportedOperationException(method + " 请求，" +name + " 里面不允许传 " + rk + ":{} ！");
+					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许传 " + rk + ":{} ！");
 				}
 				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && rv instanceof JSONArray && JSONRequest.isArrayKey(rk)) {
 					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 " + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
