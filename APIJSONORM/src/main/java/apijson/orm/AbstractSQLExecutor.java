@@ -771,7 +771,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		//		if (connection == null || connection.isClosed()) {
 		//			return;
 		//		}
-		connection.setAutoCommit(false);
 		if(! this.setIsolationStatus){ //只设置一次Isolation等级 PG重复设置事务等级会报错
 			connection.setTransactionIsolation(transactionIsolation);
 		}
