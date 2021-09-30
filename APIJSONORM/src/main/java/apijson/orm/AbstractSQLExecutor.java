@@ -763,18 +763,18 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		this.transactionIsolation = transactionIsolation;
 	}
 
+	private boolean isIsolationStatusSet = false; //已设置事务等级
 	@Override
-	private boolean setIsolationStatus = false; //设置事务等级
 	public void begin(int transactionIsolation) throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION begin transactionIsolation = " + transactionIsolation + " >>>>>>>>>>>>>>>>>>>>>>> \n\n");
 		//不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
 		//		if (connection == null || connection.isClosed()) {
 		//			return;
 		//		}
-		if(! this.setIsolationStatus){ //只设置一次Isolation等级 PG重复设置事务等级会报错
+		if (! isIsolationStatusSet) { //只设置一次Isolation等级 PG重复设置事务等级会报错
+			isIsolationStatusSet = true;
 			connection.setTransactionIsolation(transactionIsolation);
 		}
-		this.setIsolationStatus=true;
 		connection.setAutoCommit(false); //java.sql.SQLException: Can''t call commit when autocommit=true
 	}
 	@Override
