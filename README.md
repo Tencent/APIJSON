@@ -451,7 +451,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
   
 [apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON 学习笔记和源码解析
 
-[apijson-practice](https://github.com/vcoolwind/apijson-practice) 实践一下 apijson，对做管理平台还是能有不少提效的
+[apijson-practice](https://github.com/vcoolwind/apijson-practice) BAT 技术专家开源的 APIJSON 参数校验注解 Library 及相关 Demo
 
 [apijson-sample](https://gitee.com/greyzeng/apijson-sample) APIJSON 简单使用 Demo 及教程
 
