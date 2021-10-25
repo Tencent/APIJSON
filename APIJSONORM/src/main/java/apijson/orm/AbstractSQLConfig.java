@@ -65,7 +65,6 @@ import apijson.orm.model.Function;
 import apijson.orm.model.PgAttribute;
 import apijson.orm.model.PgClass;
 import apijson.orm.model.Request;
-import apijson.orm.model.Response;
 import apijson.orm.model.SysColumn;
 import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
@@ -115,7 +114,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		CONFIG_TABLE_LIST = new ArrayList<>();  // Table, Column 等是系统表 AbstractVerifier.SYSTEM_ACCESS_MAP.keySet());
 		CONFIG_TABLE_LIST.add(Function.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(Request.class.getSimpleName());
-		CONFIG_TABLE_LIST.add(Response.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(Access.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(Document.class.getSimpleName());
 		CONFIG_TABLE_LIST.add(TestRecord.class.getSimpleName());
