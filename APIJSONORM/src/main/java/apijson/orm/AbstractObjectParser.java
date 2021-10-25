@@ -549,6 +549,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	@Override
 	public void onPUTArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception {
 		if (isTable == false || array.isEmpty()) {
+			sqlRequest.put(key, array);
 			Log.e(TAG, "onPUTArrayParse  isTable == false || array == null || array.isEmpty() >> return;");
 			return;
 		}
