@@ -465,6 +465,10 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
 
+[apijson-db2](https://github.com/andream7/apijson-db2) APIJSON 接入 IBM 数据库 DB2 的 Demo
+
+[APIJSONDemo](https://github.com/qiujunlin/APIJSONDemo) APIJSON 接入 ClickHouse 的 Demo
+  
 [APIJSONDemo_ClickHouse](https://github.com/chenyanlann/APIJSONDemo_ClickHouse) APIJSON + SpringBoot 连接 ClickHouse 使用的 Demo
 
 [apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
