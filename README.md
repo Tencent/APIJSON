@@ -226,12 +226,12 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="https://www.tencentmusic.com"><img src="https://user-images.githubusercontent.com/5738175/126524713-b38a8f02-3086-45d4-91db-6f5389811d51.png" height="75"></a>
   <br />
 
-  <a href="http://www.transsion.com"><img src="http://apijson.cn/images/www.transsion.com.jpeg" height="75"></a>
-  <a href="http://shebaochina.com"><img src="http://apijson.cn/images/shebaochina.com.png" height="75"></a>
+  <a href="http://www.transsion.com"><img src="http://apijson.cn/images/users/www.transsion.com.jpeg" height="75"></a>
+  <a href="http://shebaochina.com"><img src="http://apijson.cn/images/users/shebaochina.com.png" height="75"></a>
   <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/www.xmfish.com.gif" height="75"></a>
   <a href="http://www.xxwolo.com"><img src="http://apijson.cn/images/www.xxwolo.com.jpeg" height="75"></a>
   <a href="http://t-think.com"><img src="http://apijson.cn/images/t-think.com.png" height="75"></a>
-  <a href="http://xm.juhu.com"><img src="http://apijson.cn/images/xm.juhu.com.png" height="75"></a>
+  <a href="http://xm.juhu.com"><img src="http://apijson.cn/images/users/xm.juhu.com.png" height="75"></a>
   <a href="http://www.aipaipai-inc.com"><img src="http://apijson.cn/images/www.aipaipai-inc.com.png" height="75"></a>
   <a href="http://www.8soo.com"><img src="http://apijson.cn/images/www.8sso.com.jpeg" height="75"></a>
   <a href="https://www.shulian8.com"><img src="http://apijson.cn/images/www.shulian8.com.png" height="75"></a>
