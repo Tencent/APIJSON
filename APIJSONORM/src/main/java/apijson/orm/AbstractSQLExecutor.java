@@ -514,9 +514,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	protected JSONObject onPutColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
 			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
 
-		if (rsmd.getColumnName(columnIndex).startsWith("_")) {
-			Log.i(TAG, "select while (rs.next()){ ..."
-					+ " >>  rsmd.getColumnName(i).startsWith(_) >> continue;");
+		if (isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap)) {
+			Log.i(TAG, "onPutColumn isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap) >> return table;");
 			return table;
 		}
 
@@ -571,6 +570,22 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 
 		return table;
+	}
+	
+	/**如果不需要这个功能，在子类重写并直接 return false; 来提高性能
+	 * @param config
+	 * @param rs
+	 * @param rsmd
+	 * @param tablePosition
+	 * @param table
+	 * @param columnIndex
+	 * @param childMap
+	 * @return
+	 * @throws SQLException
+	 */
+	protected boolean isHideColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws SQLException {
+		return rsmd.getColumnName(columnIndex).startsWith("_");
 	}
 
 	/**resultList.put(position, table);
