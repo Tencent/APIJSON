@@ -282,7 +282,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			//不能在Visitor内null -> [] ! 否则会导致某些查询加上不需要的条件！
 			List<Object> list = visitor.getContactIdList() == null
 			? new ArrayList<Object>() : new ArrayList<Object>(visitor.getContactIdList());
-			if (role == CIRCLE) {
+			if (CIRCLE.equals(role)) {
 				list.add(visitorId);
 			}
 
