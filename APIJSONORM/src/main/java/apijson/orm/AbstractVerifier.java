@@ -63,7 +63,6 @@ import apijson.orm.model.Function;
 import apijson.orm.model.PgAttribute;
 import apijson.orm.model.PgClass;
 import apijson.orm.model.Request;
-import apijson.orm.model.Response;
 import apijson.orm.model.SysColumn;
 import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
@@ -149,7 +148,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		SYSTEM_ACCESS_MAP.put(Access.class.getSimpleName(), getAccessMap(Access.class.getAnnotation(MethodAccess.class)));
 		SYSTEM_ACCESS_MAP.put(Function.class.getSimpleName(), getAccessMap(Function.class.getAnnotation(MethodAccess.class)));
 		SYSTEM_ACCESS_MAP.put(Request.class.getSimpleName(), getAccessMap(Request.class.getAnnotation(MethodAccess.class)));
-		SYSTEM_ACCESS_MAP.put(Response.class.getSimpleName(), getAccessMap(Response.class.getAnnotation(MethodAccess.class)));
 
 		if (Log.DEBUG) {
 			SYSTEM_ACCESS_MAP.put(Table.class.getSimpleName(), getAccessMap(Table.class.getAnnotation(MethodAccess.class)));
