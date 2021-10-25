@@ -316,16 +316,16 @@ https://github.com/Tencent/APIJSON/issues/187
 
   <a href="http://www.transsion.com"><img src="http://apijson.cn/images/users/www.transsion.com.jpeg" height="75"></a>
   <a href="http://shebaochina.com"><img src="http://apijson.cn/images/users/shebaochina.com.png" height="75"></a>
-  <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/www.xmfish.com.gif" height="75"></a>
-  <a href="http://www.xxwolo.com"><img src="http://apijson.cn/images/www.xxwolo.com.jpeg" height="75"></a>
+  <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/users/www.xmfish.com.gif" height="75"></a>
+  <a href="http://www.xxwolo.com"><img src="http://apijson.cn/images/users/www.xxwolo.com.jpeg" height="75"></a>
   <a href="http://t-think.com"><img src="http://apijson.cn/images/t-think.com.png" height="75"></a>
   <a href="http://xm.juhu.com"><img src="http://apijson.cn/images/users/xm.juhu.com.png" height="75"></a>
-  <a href="http://www.aipaipai-inc.com"><img src="http://apijson.cn/images/www.aipaipai-inc.com.png" height="75"></a>
-  <a href="http://www.8soo.com"><img src="http://apijson.cn/images/www.8sso.com.jpeg" height="75"></a>
-  <a href="https://www.shulian8.com"><img src="http://apijson.cn/images/www.shulian8.com.png" height="75"></a>
-  <a href="http://www.hngtrust.com"><img src="http://apijson.cn/images/www.hngtrust.com.png" height="75"></a>
-  <a href="http://www.hec-bang.com"><img src="http://apijson.cn/images/www.hec-bang.com.png" height="75"></a>
-  <a href="https://www.toutou.com.cn"><img src="http://apijson.cn/images/www.toutou.com.cn.jpg" height="75"></a>
+  <a href="http://www.aipaipai-inc.com"><img src="http://apijson.cn/images/users/www.aipaipai-inc.com.png" height="75"></a>
+  <a href="http://www.8soo.com"><img src="http://apijson.cn/images/users/www.8sso.com.jpeg" height="75"></a>
+  <a href="https://www.shulian8.com"><img src="http://apijson.cn/images/users/www.shulian8.com.png" height="75"></a>
+  <a href="http://www.hngtrust.com"><img src="http://apijson.cn/images/users/www.hngtrust.com.png" height="75"></a>
+  <a href="http://www.hec-bang.com"><img src="http://apijson.cn/images/users/www.hec-bang.com.png" height="75"></a>
+  <a href="https://www.toutou.com.cn"><img src="http://apijson.cn/images/users/www.toutou.com.cn.jpg" height="75"></a>
 <br />
 
 [More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
@@ -362,6 +362,16 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/278"><img src="https://avatars.githubusercontent.com/u/4099373?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/279"><img src="https://avatars.githubusercontent.com/u/28685375?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/280"><img src="https://avatars.githubusercontent.com/u/60541766?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/283"><img src="https://avatars.githubusercontent.com/u/50007106?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/284"><img src="https://avatars.githubusercontent.com/u/45117061?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/285"><img src="https://avatars.githubusercontent.com/u/32100214?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/287"><img src="https://avatars.githubusercontent.com/u/62465397?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/288"><img src="https://avatars.githubusercontent.com/u/55579125?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/291"><img src="https://avatars.githubusercontent.com/u/17522475?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/293"><img src="https://avatars.githubusercontent.com/u/53826144?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/295"><img src="https://avatars.githubusercontent.com/u/11210385?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/311"><img src="https://avatars.githubusercontent.com/u/22066942?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/325"><img src="https://avatars.githubusercontent.com/u/33931153?v=4"  height="54" width="54" ></a>
 </div>
 <br />
 	
