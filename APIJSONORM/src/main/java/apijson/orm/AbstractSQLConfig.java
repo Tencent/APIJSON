@@ -145,9 +145,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		RAW_MAP.put("DISTINCT", "");
 
 		//时间
-		RAW_MAP.put("DATE", "");
 		RAW_MAP.put("now()", "");
+		RAW_MAP.put("DATE", "");
+		RAW_MAP.put("TIME", "");
 		RAW_MAP.put("DATETIME", "");
+		RAW_MAP.put("TIMESTAMP", "");
 		RAW_MAP.put("DateTime", "");
 		RAW_MAP.put("SECOND", "");
 		RAW_MAP.put("MINUTE", "");
@@ -157,17 +159,33 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		RAW_MAP.put("MONTH", "");
 		RAW_MAP.put("QUARTER", "");
 		RAW_MAP.put("YEAR", "");
-		RAW_MAP.put("json", "");
-		RAW_MAP.put("unit", "");
+//		RAW_MAP.put("json", "");
+//		RAW_MAP.put("unit", "");
 
 		//MYSQL 数据类型 BINARY，CHAR，DATETIME，TIME，DECIMAL，SIGNED，UNSIGNED
 		RAW_MAP.put("BINARY", "");
 		RAW_MAP.put("SIGNED", "");
 		RAW_MAP.put("DECIMAL", "");
+		RAW_MAP.put("DOUBLE", "");
+		RAW_MAP.put("FLOAT", "");
+		RAW_MAP.put("BOOLEAN", "");
+		RAW_MAP.put("ENUM", "");
+		RAW_MAP.put("SET", "");
+		RAW_MAP.put("POINT", "");
+		RAW_MAP.put("BLOB", "");
+		RAW_MAP.put("LONGBLOB", "");
 		RAW_MAP.put("BINARY", "");
 		RAW_MAP.put("UNSIGNED", "");
+		RAW_MAP.put("BIT", "");
+		RAW_MAP.put("TINYINT", "");
+		RAW_MAP.put("SMALLINT", "");
+		RAW_MAP.put("INT", "");
+		RAW_MAP.put("BIGINT", "");
 		RAW_MAP.put("CHAR", "");
-		RAW_MAP.put("TIME", "");
+		RAW_MAP.put("VARCHAR", "");
+		RAW_MAP.put("TEXT", "");
+		RAW_MAP.put("LONGTEXT", "");
+		RAW_MAP.put("JSON", "");
 
 		//窗口函数关键字
 		RAW_MAP.put("OVER", "");
@@ -1686,28 +1704,33 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				String ck = ckeys[i];
 
 				// 如果参数包含 "'" ,解析字符串
-				if (ck.contains("'")) {
-					int count = 0;
-					for (int j = 0; j < ck.length(); j++) {
-						if (ck.charAt(j) == '\'') count++;
+				if (ck.startsWith("`") && ck.endsWith("`")) {
+					origin = ck.substring(1, ck.length() - 1);
+					//sql 注入判断 判断
+					if (StringUtil.isName(origin) == false) {
+						throw new IllegalArgumentException("字符 " + ck + " 不合法！"
+								+ "预编译模式下 @column:\"`column0`,`column1`:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中所有字符串 column 都必须必须为1个单词 ！");
 					}
-					// FIXME 把 `column` 和 '2 values with [ / : ] ..' 按引号位置分割才能满足全文索引、窗口函数的需要
-					// 排除字符串中参数中包含 ' 的情况和不以' 开头和结尾的情况，同时排除 cast('s' as ...) 以空格分隔的参数中包含字符串的情况
-					if (count != 2 || !(ck.startsWith("'") && ck.endsWith("'"))) {
+
+					ckeys[i] = getKey(origin).toString();
+				}
+				else if (ck.startsWith("'") && ck.endsWith("'")) {
+					origin = ck.substring(1, ck.length() - 1);
+					if (origin.contains("'")) {
 						throw new IllegalArgumentException("字符串 " + ck + " 不合法！"
 								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 								+ " 中字符串参数不合法，必须以 ' 开头, ' 结尾,字符串中不能包含 ' ");
 					}
 					//sql 注入判断 判断
-					origin = (ck.substring(1, ck.length() - 1));
 					if (origin.contains("--") || PATTERN_STRING.matcher(origin).matches() == true) {
 						throw new IllegalArgumentException("字符 " + ck + " 不合法！"
 								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 								+ " 中所有字符串 arg 都必须不符合正则表达式 " + PATTERN_STRING + " 且不包含连续减号 -- ！");
 					}
-
+					
 					// 1.字符串不是字段也没有别名,所以不解析别名 2. 是字符串，进行预编译，使用getValue() ,对字符串进行截取
-					ckeys[i] = getValue(ck.substring(1, ck.length() - 1)).toString();
+					ckeys[i] = getValue(origin).toString();
 				}
 				else {
 					// 参数不包含",",即不是字符串
