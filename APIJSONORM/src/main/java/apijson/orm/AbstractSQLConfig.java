@@ -2502,7 +2502,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**
 	 * 使用prepareStatement预编译，值为 ? ，后续动态set进去
 	 */
-	private List<Object> preparedValueList = new ArrayList<>();
+	protected List<Object> preparedValueList = new ArrayList<>();
 	protected Object getValue(@NotNull Object value) {
 		if (isPrepared()) {
 			preparedValueList.add(value);
