@@ -129,6 +129,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
+		
+		RAW_MAP.put("+", "");
+		RAW_MAP.put("-", "");
+		RAW_MAP.put("*", "");
+		RAW_MAP.put("/", "");
+		RAW_MAP.put("=", "");
+		RAW_MAP.put("!=", "");
+		RAW_MAP.put(">", "");
+		RAW_MAP.put(">=", "");
+		RAW_MAP.put("<", "");
+		RAW_MAP.put("<=", "");
+		RAW_MAP.put("%", "");
+		RAW_MAP.put("(", "");
+		RAW_MAP.put(")", "");
 
 		// MySQL 关键字
 		RAW_MAP.put("AS", "");
@@ -141,6 +155,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		RAW_MAP.put("NOT", "");
 		RAW_MAP.put("VALUE", "");
 		RAW_MAP.put("DISTINCT", "");
+		RAW_MAP.put("CASE", "");
+		RAW_MAP.put("WHEN", "");
+		RAW_MAP.put("THEN", "");
+		RAW_MAP.put("ELSE", "");
+		RAW_MAP.put("END", "");
 
 		//时间
 		RAW_MAP.put("now()", "");
@@ -1705,7 +1724,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (ck.startsWith("`") && ck.endsWith("`")) {
 					origin = ck.substring(1, ck.length() - 1);
 					//sql 注入判断 判断
-					if (StringUtil.isName(origin) == false) {
+					if (origin.startsWith("_") || StringUtil.isName(origin) == false) {
 						throw new IllegalArgumentException("字符 " + ck + " 不合法！"
 								+ "预编译模式下 @column:\"`column0`,`column1`:alias;function0(arg0,arg1,...);function1(...):alias...\""
 								+ " 中所有字符串 column 都必须必须为1个单词 ！");
@@ -1719,12 +1738,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new IllegalArgumentException("字符串 " + ck + " 不合法！"
 								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 								+ " 中字符串参数不合法，必须以 ' 开头, ' 结尾,字符串中不能包含 ' ");
-					}
-					//sql 注入判断 判断
-					if (origin.contains("--") || PATTERN_STRING.matcher(origin).matches() == true) {
-						throw new IllegalArgumentException("字符 " + ck + " 不合法！"
-								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-								+ " 中所有字符串 arg 都必须不符合正则表达式 " + PATTERN_STRING + " 且不包含连续减号 -- ！");
 					}
 					
 					// 1.字符串不是字段也没有别名,所以不解析别名 2. 是字符串，进行预编译，使用getValue() ,对字符串进行截取
@@ -1745,7 +1758,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 										+ "关键字必须全大写，且以空格分隔的参数，空格必须只有 1 个！其它情况不允许空格！");
 							}
 						} else {
-							if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
+							if (origin.startsWith("_") || origin.contains("--")) {  // || PATTERN_FUNCTION.matcher(origin).matches() == false) {
 								throw new IllegalArgumentException("字符 " + ck + " 不合法！"
 										+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
 										+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
@@ -1818,12 +1831,35 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				//这里为什么还要做一次判断 是因为解析窗口函数调用的时候会判断一次
-				if (isPrepared()) {
-					if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
-						throw new IllegalArgumentException("字符 " + origin + " 不合法！"
-								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-								+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
+				String ck = origin;
+				// 如果参数包含 "`" 或 "'" ,解析字符串
+				if (ck.startsWith("`") && ck.endsWith("`")) {
+					origin = ck.substring(1, ck.length() - 1);
+					if (origin.startsWith("_") || StringUtil.isName(origin) == false) {
+						throw new IllegalArgumentException("字符 " + ck + " 不合法！"
+								+ "预编译模式下 @column:\"`column0`,`column1`:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中所有字符串 column 都必须必须为1个单词 ！");
 					}
+
+					mkes[j] = getKey(origin).toString();
+					continue;
+				}
+				else if (ck.startsWith("'") && ck.endsWith("'")) {
+					origin = ck.substring(1, ck.length() - 1);
+					if (origin.contains("'")) {
+						throw new IllegalArgumentException("字符串 " + ck + " 不合法！"
+								+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+								+ " 中字符串参数不合法，必须以 ' 开头, ' 结尾,字符串中不能包含 ' ");
+					}
+
+					// 1.字符串不是字段也没有别名,所以不解析别名 2. 是字符串，进行预编译，使用getValue() ,对字符串进行截取
+					mkes[j] = getValue(origin).toString();
+					continue;
+				}
+				else if (ck.contains("`") || ck.contains("'") || origin.startsWith("_") || origin.contains("--")) {  // || PATTERN_FUNCTION.matcher(origin).matches() == false) {
+					throw new IllegalArgumentException("字符 " + origin + " 不合法！"
+							+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+							+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
 				}
 
 				boolean isName = false;
