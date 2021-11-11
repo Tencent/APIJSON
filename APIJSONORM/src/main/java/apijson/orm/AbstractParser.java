@@ -9,6 +9,8 @@ import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,6 +28,9 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeoutException;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.Query;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -150,6 +155,15 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	@Override
 	public AbstractParser<T> setTag(String tag) {
 		this.tag = tag;
+		return this;
+	}
+
+	protected String requestURL;
+	public String getRequestURL() {
+		return requestURL;
+	}
+	public AbstractParser<T> setRequestURL(String requestURL) {
+		this.requestURL = requestURL;
 		return this;
 	}
 
@@ -354,7 +368,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					onVerifyContent();
 				}
 			} catch (Exception e) {
-				return extendErrorResult(requestObject, e);
+				return extendErrorResult(requestObject, e, requestMethod, getRequestURL());
 			}
 		}
 
@@ -364,7 +378,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				setGlobleRole(requestObject.getString(JSONRequest.KEY_ROLE));
 				requestObject.remove(JSONRequest.KEY_ROLE);
 			} catch (Exception e) {
-				return extendErrorResult(requestObject, e);
+				return extendErrorResult(requestObject, e, requestMethod, getRequestURL());
 			}
 		}
 
@@ -383,7 +397,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			requestObject.remove(JSONRequest.KEY_EXPLAIN);
 			requestObject.remove(JSONRequest.KEY_CACHE);
 		} catch (Exception e) {
-			return extendErrorResult(requestObject, e);
+			return extendErrorResult(requestObject, e, requestMethod, getRequestURL());
 		}
 
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
@@ -407,7 +421,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			onRollback();
 		}
 
-		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error);
+		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error, requestMethod, getRequestURL());
 
 		JSONObject res = (globleFormat != null && globleFormat) && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 
@@ -608,8 +622,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		if (object == null) {
 			object = new JSONObject(true);
 		}
+		boolean isOk = JSONResponse.isSuccess(code);
 		if (object.containsKey(JSONResponse.KEY_OK) == false) {
-			object.put(JSONResponse.KEY_OK, JSONResponse.isSuccess(code));
+			object.put(JSONResponse.KEY_OK, isOk);
 		}
 		if (object.containsKey(JSONResponse.KEY_CODE) == false) {
 			object.put(JSONResponse.KEY_CODE, code);
@@ -619,6 +634,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		if (m.isEmpty() == false) {
 			msg = m + " ;\n " + StringUtil.getString(msg);
 		}
+
 		object.put(JSONResponse.KEY_MSG, msg);
 		return object;
 	}
@@ -642,36 +658,84 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * @return
 	 */
 	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
+		return extendErrorResult(object, e, null, null);
+	}
+	/**添加请求成功的状态内容
+	 * @param object
+	 * @return
+	 */
+	public static JSONObject extendErrorResult(JSONObject object, Exception e, RequestMethod requestMethod, String url) {
 		String msg = e.getMessage();
-		
+
 		if (Log.DEBUG) {
 			try {
 				int index = msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
 				String info = index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
 						: "\n**环境信息** "
 						+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-						+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
 						+ "\n数据库: <!-- 请填写，例如 MySQL 5.7 -->"
+						+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
 						+ "\nAPIJSON: " + Log.VERSION;
 
 				msg = index < 0 ? msg : msg.substring(0, index).trim();
 				String encodedMsg = URLEncoder.encode(msg, "UTF-8");
+
+				if (StringUtil.isEmpty(url, true)) {
+					String host = "localhost";
+					try {
+						host = InetAddress.getLocalHost().getHostAddress();
+					} catch (Throwable e2) {}
+
+					String port = "8080";
+					try {
+						MBeanServer beanServer = ManagementFactory.getPlatformMBeanServer();
+
+						Set<ObjectName> objectNames = beanServer.queryNames(
+								new ObjectName("*:type=Connector,*"),
+								Query.match(Query.attr("protocol"), Query.value("HTTP/1.1"))
+								);
+						String p = objectNames.iterator().next().getKeyProperty("port");
+						port = StringUtil.isEmpty(p, true) ? port : p;
+					} catch (Throwable e2) {}
+
+					url = "http://" + host + ":" + port + "/" + (requestMethod == null ? RequestMethod.GET : requestMethod).name().toLowerCase();
+				}
+
+				String req = JSON.toJSONString(object);
+				try {
+					req = URLEncoder.encode(req, "UTF-8");
+				} catch (Throwable e2) {}
+
+
+				boolean isSQLException = e instanceof SQLException;  // SQL 报错一般都是通用问题，优先搜索引擎
+				String apiatuoAndGitHubLink = "\n【APIAuto】： \n http://apijson.cn/api?type=JSON&url=" + URLEncoder.encode(url, "UTF-8") + "&json=" + req
+						+ "        \n\n【GitHub】： \n https://www.google.com/search?q=site%3Agithub.com%2FTencent%2FAPIJSON+++" + encodedMsg;
 				
-				msg += "    \n\n\n浏览器打开以下链接搜索答案\nGitHub： https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
-						+ "        \n\nGoogle：https://www.google.com/search?q=" + encodedMsg
-						+ "        \n\nBaidu：https://www.baidu.com/s?ie=UTF-8&wd=" + encodedMsg
-						+ "        \n\n都没找到答案？打开这个链接 https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
+				msg += "    \n\n\n浏览器打开以下链接查看解答"
+						+ (isSQLException ? "" : apiatuoAndGitHubLink)
+						//	GitHub Issue 搜索貌似是精准包含，不易找到答案 	+ "        \n\nGitHub： \n https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
+						+ "        \n\n【Google】：\n https://www.google.com/search?q=" + encodedMsg
+						+ "        \n\n【百度】：\n https://www.baidu.com/s?ie=UTF-8&wd=" + encodedMsg
+						+ (isSQLException ? apiatuoAndGitHubLink : "")
+						+ "        \n\n都没找到答案？打开这个链接 \n https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
 						+ "\n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
 						+ "\n【标题】：" + msg
-						+ "\n【内容】：" + info + "\n\n**问题描述**\n" + msg;
-			} catch (Throwable e2) {
-				e2.printStackTrace();
-			}
+						+ "\n【内容】：" + info + "\n\n**问题描述**\n" + msg
+						+ "\n\n<!-- 尽量完整截屏(至少包含请求和回包结果，还可以加上控制台报错日志)，然后复制粘贴到这里 -->"
+						+ "\n\nPOST " + url
+						+ "\n请求 Request JSON：\n ```js"
+						+ "\n 请填写，例如 { \"Users\":{} }"
+						+ "\n```"
+						+ "\n\n返回结果 Response JSON：\n ```js"
+						+ "\n 请填写，例如 { \"Users\": {}, \"code\": 401, \"msg\": \"Users 不允许 UNKNOWN 用户的 GET 请求！\" }"
+						+ "\n```";
+			} catch (Throwable e2) {}
 		}
-		
+
 		JSONObject error = newErrorResult(e);
 		return extendResult(object, error.getIntValue(JSONResponse.KEY_CODE), msg);
 	}
+
 	/**新建错误状态内容
 	 * @param e
 	 * @return
@@ -1000,7 +1064,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		//不能改变，因为后面可能继续用到，导致1以上都改变 []:{0:{Comment[]:{0:{Comment:{}},1:{...},...}},1:{...},...}
 		final String query = request.getString(JSONRequest.KEY_QUERY);
 		final Integer count = request.getInteger(JSONRequest.KEY_COUNT); //TODO 如果不想用默认数量可以改成 getIntValue(JSONRequest.KEY_COUNT);
-		final int page = request.getIntValue(JSONRequest.KEY_PAGE);
+		final Integer page = request.getInteger(JSONRequest.KEY_PAGE);
 		final Object join = request.get(JSONRequest.KEY_JOIN);
 
 		int query2;
@@ -1026,8 +1090,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			}
 		}
 
+		int page2 = page == null ? 0 : page;
 		int maxPage = getMaxQueryPage();
-		if (page < 0 || page > maxPage) {
+		if (page2 < 0 || page2 > maxPage) {
 			throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_PAGE + ":value 中 value 的值不合法！必须在 0-" + maxPage + " 内 !");
 		}
 
@@ -1052,8 +1117,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		JSONArray response = null;
 		try {
-			int size = count2 == 0 ? max : count2;//count为每页数量，size为第page页实际数量，max(size) = count
-			Log.d(TAG, "onArrayParse  size = " + size + "; page = " + page);
+			int size = count2 == 0 ? max : count2; //count为每页数量，size为第page页实际数量，max(size) = count
+			Log.d(TAG, "onArrayParse  size = " + size + "; page = " + page2);
 
 
 			//key[]:{Table:{}}中key equals Table时 提取Table
@@ -1076,13 +1141,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			SQLConfig config = createSQLConfig()
 					.setMethod(requestMethod)
 					.setCount(size)
-					.setPage(page)
+					.setPage(page2)
 					.setQuery(query2)
 					.setTable(arrTableKey)
 					.setJoinList(onJoinParse(join, request));
 
 			JSONObject parent;
-			
+
 			boolean isExtract = true;
 
 			//生成size个
@@ -1091,7 +1156,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				if (parent == null || parent.isEmpty()) {
 					break;
 				}
-				
+
 				long startTime = System.currentTimeMillis();
 
 				/* 这里优化了 Table[]: { Table:{} } 这种情况下的性能
@@ -1101,13 +1166,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				JSONObject fo = i != 0 || arrTableKey == null ? null : parent.getJSONObject(arrTableKey);
 				@SuppressWarnings("unchecked")
 				List<JSONObject> list = fo == null ? null : (List<JSONObject>) fo.remove(SQLExecutor.KEY_RAW_LIST);
-				
+
 				if (list != null && list.isEmpty() == false) {
 					isExtract = false;
-					
+
 					list.set(0, fo);  // 不知道为啥第 0 项也加了 @RAW@LIST
 					response.addAll(list);  // List<JSONObject> cannot match List<Object>   response = new JSONArray(list);
-					
+
 					long endTime = System.currentTimeMillis();  // 0ms
 					Log.d(TAG, "\n onArrayParse <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 0; i < (isSubquery ? 1 : size); i++) "
 							+ " startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
@@ -1117,7 +1182,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				//key[]:{Table:{}}中key equals Table时 提取Table
 				response.add(getValue(parent, childKeys)); //null有意义
 			}
-			
+
 			//Table>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -1143,7 +1208,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				if (fo instanceof Boolean || fo instanceof Number || fo instanceof String) { //[{}] 和 [[]] 都没意义
 					putQueryResult(path, response);
 				}
-				
+
 				long endTime = System.currentTimeMillis();
 				Log.d(TAG, "\n onArrayParse <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n isExtract >> putQueryResult "
 						+ " startTime = " + startTime + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
@@ -1739,13 +1804,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 							e.getMessage()
 							+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n**环境信息** "
 							+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-							+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
 							+ "\n数据库: " + db + " " + config.getDBVersion()
+							+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
 							+ "\nAPIJSON: " + Log.VERSION
 							);
 				} catch (Throwable e2) {}
 			}
-			
+
 			if (Log.DEBUG == false && e instanceof SQLException) {
 				throw new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);
 			}

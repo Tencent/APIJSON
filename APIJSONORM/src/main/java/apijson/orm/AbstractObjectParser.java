@@ -313,8 +313,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 												e.getMessage()
 												+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n**环境信息** "
 												+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-												+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
 												+ "\n数据库: " + db + " " + sqlConfig.getDBVersion()
+												+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
 												+ "\nAPIJSON: " + Log.VERSION
 												);
 									} catch (Throwable e2) {}

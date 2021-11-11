@@ -268,7 +268,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 		//验证角色，假定真实强制匹配<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		String visitorIdkey = getVisitorIdKey(config);
+		String visitorIdKey = getVisitorIdKey(config);
 
 		Object requestId;
 		switch (role) {
@@ -285,9 +285,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			}
 
 			//key!{}:[] 或 其它没有明确id的条件 等 可以和key{}:list组合。类型错误就报错
-			requestId = (Number) config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
+			requestId = config.getWhere(visitorIdKey, true);//JSON里数值不能保证是Long，可能是Integer
 			@SuppressWarnings("unchecked") 
-			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdkey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
+			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdKey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
 			if (requestId != null) {
 				if (requestIdArray == null) {
 					requestIdArray = new JSONArray();
@@ -296,7 +296,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 			}
 
 			if (requestIdArray == null) {//可能是@得到 || requestIdArray.isEmpty()) {//请求未声明key:id或key{}:[...]条件，自动补全
-				config.putWhere(visitorIdkey+"{}", JSON.parseArray(list), true); //key{}:[]有效，SQLConfig里throw NotExistException
+				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); //key{}:[]有效，SQLConfig里throw NotExistException
 			} 
 			else {//请求已声明key:id或key{}:[]条件，直接验证
 				for (Object id : requestIdArray) {
@@ -307,7 +307,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 						throw new UnsupportedDataTypeException(table + ".id类型错误，id类型必须是Long！");
 					}
 					if (list.contains(Long.valueOf("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
-						throw new IllegalAccessException(visitorIdkey + " = " + id + " 的 " + table
+						throw new IllegalAccessException(visitorIdKey + " = " + id + " 的 " + table
 								+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 					}
 				}
@@ -321,20 +321,20 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 					throw new IllegalArgumentException("POST 请求必须在Table内设置要保存的 key:value ！");
 				}
 
-				int index = c.indexOf(visitorIdkey);
+				int index = c.indexOf(visitorIdKey);
 				if (index >= 0) {
 					Object oid;
 					for (List<Object> ovl : ovs) {
 						oid = ovl == null || index >= ovl.size() ? null : ovl.get(index);
 						if (oid == null || StringUtil.getString(oid).equals("" + visitorId) == false) {
-							throw new IllegalAccessException(visitorIdkey + " = " + oid + " 的 " + table
+							throw new IllegalAccessException(visitorIdKey + " = " + oid + " 的 " + table
 									+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 						}
 					}
 				}
 				else {
 					List<String> nc = new ArrayList<>(c);
-					nc.add(visitorIdkey);
+					nc.add(visitorIdKey);
 					config.setColumn(nc);
 
 					List<List<Object>> nvs = new ArrayList<>();
@@ -349,13 +349,13 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 				}
 			}
 			else {
-				requestId = config.getWhere(visitorIdkey, true);//JSON里数值不能保证是Long，可能是Integer
+				requestId = config.getWhere(visitorIdKey, true);//JSON里数值不能保证是Long，可能是Integer
 				if (requestId != null && StringUtil.getString(requestId).equals(StringUtil.getString(visitorId)) == false) {
-					throw new IllegalAccessException(visitorIdkey + " = " + requestId + " 的 " + table
+					throw new IllegalAccessException(visitorIdKey + " = " + requestId + " 的 " + table
 							+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 				}
 
-				config.putWhere(visitorIdkey, visitorId, true);
+				config.putWhere(visitorIdKey, visitorId, true);
 			}
 			break;
 		case ADMIN://这里不好做，在特定接口内部判。 可以是  /get/admin + 固定秘钥  Parser#needVerify，之后全局跳过验证
