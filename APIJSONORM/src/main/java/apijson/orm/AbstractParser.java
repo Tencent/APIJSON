@@ -9,6 +9,7 @@ import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -641,8 +642,35 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * @return
 	 */
 	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
+		String msg = e.getMessage();
+		
+		if (Log.DEBUG) {
+			try {
+				int index = msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
+				String info = index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
+						: "\n**环境信息** "
+						+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+						+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
+						+ "\n数据库: <!-- 请填写，例如 MySQL 5.7 -->"
+						+ "\nAPIJSON: " + Log.VERSION;
+
+				msg = index < 0 ? msg : msg.substring(0, index).trim();
+				String encodedMsg = URLEncoder.encode(msg, "UTF-8");
+				
+				msg += "    \n\n\n浏览器打开以下链接搜索答案\nGitHub： https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
+						+ "        \n\nGoogle：https://www.google.com/search?q=" + encodedMsg
+						+ "        \n\nBaidu：https://www.baidu.com/s?ie=UTF-8&wd=" + encodedMsg
+						+ "        \n\n都没找到答案？打开这个链接 https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
+						+ "\n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
+						+ "\n【标题】：" + msg
+						+ "\n【内容】：" + info + "\n\n**问题描述**\n" + msg;
+			} catch (Throwable e2) {
+				e2.printStackTrace();
+			}
+		}
+		
 		JSONObject error = newErrorResult(e);
-		return extendResult(object, error.getIntValue(JSONResponse.KEY_CODE), error.getString(JSONResponse.KEY_MSG));
+		return extendResult(object, error.getIntValue(JSONResponse.KEY_CODE), msg);
 	}
 	/**新建错误状态内容
 	 * @param e
@@ -1682,6 +1710,42 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			return result;
 		}
 		catch (Exception e) {
+			if (Log.DEBUG && e.getMessage().contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
+				try {
+					String db = config.getDatabase();
+					if (db == null) {
+						if (config.isPostgreSQL()) {
+							db = SQLConfig.DATABASE_POSTGRESQL;
+						}
+						else if (config.isSQLServer()) {
+							db = SQLConfig.DATABASE_SQLSERVER;
+						}
+						else if (config.isOracle()) {
+							db = SQLConfig.DATABASE_ORACLE;
+						}
+						else if (config.isDb2()) {
+							db = SQLConfig.DATABASE_DB2;
+						}
+						else if (config.isClickHouse()) {
+							db = SQLConfig.DATABASE_CLICKHOUSE;
+						}
+						else {
+							db = SQLConfig.DATABASE_MYSQL;
+						}
+					}
+
+					Class<? extends Exception> clazz = e.getClass();
+					e = clazz.getConstructor(String.class).newInstance(
+							e.getMessage()
+							+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n**环境信息** "
+							+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+							+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
+							+ "\n数据库: " + db + " " + config.getDBVersion()
+							+ "\nAPIJSON: " + Log.VERSION
+							);
+				} catch (Throwable e2) {}
+			}
+			
 			if (Log.DEBUG == false && e instanceof SQLException) {
 				throw new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);
 			}

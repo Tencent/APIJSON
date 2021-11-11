@@ -116,7 +116,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public String getParentPath() {
 		return parentPath;
 	}
-	
+
 	@Override
 	public AbstractObjectParser setParentPath(String parentPath) {
 		this.parentPath = parentPath;
@@ -284,6 +284,42 @@ public abstract class AbstractObjectParser implements ObjectParser {
 							}
 						} catch (Exception e) {
 							if (tri == false) {
+								if (Log.DEBUG && sqlConfig != null && e.getMessage().contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
+									try {
+										String db = sqlConfig.getDatabase();
+										if (db == null) {
+											if (sqlConfig.isPostgreSQL()) {
+												db = SQLConfig.DATABASE_POSTGRESQL;
+											}
+											else if (sqlConfig.isSQLServer()) {
+												db = SQLConfig.DATABASE_SQLSERVER;
+											}
+											else if (sqlConfig.isOracle()) {
+												db = SQLConfig.DATABASE_ORACLE;
+											}
+											else if (sqlConfig.isDb2()) {
+												db = SQLConfig.DATABASE_DB2;
+											}
+											else if (sqlConfig.isClickHouse()) {
+												db = SQLConfig.DATABASE_CLICKHOUSE;
+											}
+											else {
+												db = SQLConfig.DATABASE_MYSQL;
+											}
+										}
+
+										Class<? extends Exception> clazz = e.getClass();
+										e = clazz.getConstructor(String.class).newInstance(
+												e.getMessage()
+												+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n**环境信息** "
+												+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+												+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
+												+ "\n数据库: " + db + " " + sqlConfig.getDBVersion()
+												+ "\nAPIJSON: " + Log.VERSION
+												);
+									} catch (Throwable e2) {}
+								}
+
 								throw e;  // 不忽略错误，抛异常
 							}
 							invalidate();  // 忽略错误，还原request
@@ -860,14 +896,14 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 			boolean isSimpleArray = false;
 			List<JSONObject> rawList = null;
-			
+
 			if (isArrayMainTable && position == 0 && result != null) {
-				
+
 				isSimpleArray = (functionMap == null || functionMap.isEmpty())
 						&& (customMap == null || customMap.isEmpty())
 						&& (childMap == null || childMap.isEmpty())
 						&& (table.equals(arrayTable));
-				
+
 				// 提取并缓存数组主表的列表数据
 				rawList = (List<JSONObject>) result.remove(SQLExecutor.KEY_RAW_LIST);
 				if (rawList != null) {
@@ -875,7 +911,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 					if (isSimpleArray == false) {
 						long startTime = System.currentTimeMillis();
-						
+
 						for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
 							JSONObject obj = rawList.get(i);
 
@@ -883,7 +919,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 								parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
 							}
 						}
-						
+
 						long endTime = System.currentTimeMillis();  // 3ms - 8ms
 						Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
 								+ "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
@@ -895,7 +931,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 			if (isSubquery == false && result != null) {
 				parser.putQueryResult(path, result);  // 解决获取关联数据时requestObject里不存在需要的关联数据
-				
+
 				if (isSimpleArray && rawList != null) {
 					result.put(SQLExecutor.KEY_RAW_LIST, rawList);
 				}
