@@ -7,7 +7,7 @@
 ### 新增功能
 部分功能描述可在 [APIAuto](https://github.com/TommyLemon/APIAuto) 上查看 <br />
 账号 13000002020 密码 123456 <br />
-http://apijson.org:8000/auto/ <br />
+http://apijson.cn:8000/api <br />
 
 ##### 基本原则
 1.一定要有相关的应用场景，不能是伪需求，最好举例说明 <br />
@@ -35,6 +35,7 @@ POST:  用不上，不处理 <br />
 @having! 必须性不大，可通过反转内部条件来实现，但如果实现简单、且不影响原来的功能，则可以顺便加上。<br />
 
 #### 新增支持 @column!
+【更新：已提供字段插件 [apijson-column](https://github.com/APIJSON/apijson-column)，支持 字段名映射 和 !key 反选字段。】
 
 这个只在 [apijson-framework](https://github.com/APIJSON/apijson-framework) 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
 可新增一个 VersionedColumn 表记录来代替 HashMap 代码配置。<br />
@@ -191,7 +192,8 @@ https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 
 
 ### 提高性能
-20200205 更新：最近的两次大幅提升性能相关优化及 Release <br />
+20200205 更新：最近的及次大幅提升性能相关优化及 Release <br />
+[4.8.0【性能】大幅提升提升单表数组查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.8.0) <br />
 [4.6.0【性能】大幅提升数组内主表查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.6.0) <br />
 [4.4.5【性能】大幅提升增删改的性能](https://github.com/Tencent/APIJSON/releases/tag/4.4.5) <br />
 
