@@ -193,6 +193,7 @@ https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 
 ### 提高性能
 20200205 更新：最近的及次大幅提升性能相关优化及 Release <br />
+[新增支持 ClickHouse、窗口函数 OVER、反引号 `key`、单引号 'value'；大幅提升单表数组查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.8.0) <br />
 [4.6.0【性能】大幅提升数组内主表查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.6.0) <br />
 [4.4.5【性能】大幅提升增删改的性能](https://github.com/Tencent/APIJSON/releases/tag/4.4.5) <br />
 
@@ -279,7 +280,7 @@ https://github.com/APIJSON/APIJSON#%E7%94%9F%E6%80%81%E9%A1%B9%E7%9B%AE <br />
 
 JavaScript 前端，TypeScript 前端，微信等小程序，<br />
 Android 客户端，iOS 客户端，C# 游戏客户端等。<br />
-Java, C#, Node, Python 等后端 Demo 及数据。<br />
+Java, C#, PHP, Node, Python 等后端 Demo 及数据。<br />
 https://github.com/APIJSON/APIJSON-Demo <br />
 
 #### 新增扩展
