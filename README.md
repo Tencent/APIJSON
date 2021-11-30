@@ -411,6 +411,21 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 [全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
 [新手搭建 APIJSON 项目指北](https://github.com/jerrylususu/apijson_todo_demo/blob/master/FULLTEXT.md)  
+
+[APIJSON（一：综述）](https://blog.csdn.net/qq_50861917/article/details/120556168)
+
+[APIJSON 代码分析（三：demo主体代码）](https://blog.csdn.net/qq_50861917/article/details/120751630)
+
+[APIJSON 代码分析（二）AbstractParser类(解析器)](https://blog.csdn.net/weixin_45767055/article/details/120815927)
+
+[APIJSON 代码分析（四：AbstractObjectParser源码阅读）](https://blog.csdn.net/qq_50861917/article/details/120896381)
+
+[APIJSON 代码分析 AbstractSQLConfig 第二篇](https://blog.csdn.net/csascscascd/article/details/120684889)
+
+[APIJSON 代码分析（六）APIJSON—Verifier检查类](https://blog.csdn.net/weixin_45767055/article/details/121321731)
+
+[APIJSON 代码分析（四）AbstractSQLExecutor—SQL执行器](https://blog.csdn.net/weixin_45767055/article/details/121069887)
+
   
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
@@ -483,6 +498,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
+  
 ### 腾讯犀牛鸟开源人才培养计划
 https://github.com/Tencent/APIJSON/issues/229
 
