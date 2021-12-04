@@ -83,7 +83,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static final Pattern PATTERN_RANGE;
 	private static final Pattern PATTERN_FUNCTION;
-	private  static final Pattern PATTERN_STRING;
+	private static final Pattern PATTERN_STRING;
 
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -1490,9 +1490,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return "(" + s + ")";
 		case GET:
 		case GETS:
-			boolean isQuery = RequestMethod.isQueryMethod(method); //TODO 这个有啥用？上面应是 getMethod 的值 GET 和 GETS 了。
 			String joinColumn = "";
-			if (isQuery && joinList != null) {
+			if (joinList != null) {
 				SQLConfig ecfg;
 				SQLConfig cfg;
 				String c;
@@ -1501,23 +1500,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (j.isAppJoin()) {
 						continue;
 					}
-
-					ecfg = j.getOuterConfig();
-					if (ecfg != null && ecfg.getColumn() != null) { //优先级更高
-						cfg = ecfg;
-					}
-					else {
-						cfg = j.getJoinConfig();
-					}
-
-					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-						cfg.setAlias(cfg.getTable());
-					}
-
-					c = ((AbstractSQLConfig) cfg).getColumnString(true);
-					if (StringUtil.isEmpty(c, true) == false) {
-						joinColumn += (first ? "" : ", ") + c;
+					
+					if (j.isLeftOrRightJoin()) {
+						// 改为 SELECT  ViceTable.* 解决 SELECT sum(ViceTable.id) LEFT/RIGHT JOIN (SELECT sum(id) FROM ViceTable...) AS ViceTable
+						// 不仅导致 SQL 函数重复计算，还有时导致 SQL 报错或对应字段未返回
+						String quote = getQuote();
+						joinColumn += (first ? "" : ", ") + quote + (StringUtil.isEmpty(j.getAlias(), true) ? j.getTable() : j.getAlias()) + quote + ".*";
 						first = false;
+					} else {
+						ecfg = j.getOuterConfig();
+						if (ecfg != null && ecfg.getColumn() != null) { //优先级更高
+							cfg = ecfg;
+						}
+						else {
+							cfg = j.getJoinConfig();
+						}
+	
+						if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+							cfg.setAlias(cfg.getTable());
+						}
+	
+						c = ((AbstractSQLConfig) cfg).getColumnString(true);
+						if (StringUtil.isEmpty(c, true) == false) {
+							joinColumn += (first ? "" : ", ") + c;
+							first = false;
+						}
 					}
 
 					inSQLJoin = true;

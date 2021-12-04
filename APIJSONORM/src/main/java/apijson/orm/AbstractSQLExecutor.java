@@ -542,7 +542,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			if (joinList != null) {
 				for (Join j : joinList) {
 					childConfig = j.isAppJoin() ? null : j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
-
+					
+					// FIXME 副表的 SQL 函数，甚至普通字段都可能从 rsmd.getTableName(columnIndex) 拿到 ""
 					if (childConfig != null && childTable.equalsIgnoreCase(childConfig.getSQLTable())) {
 
 						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()), true);
@@ -561,13 +562,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 
 		Object value = getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
-		if (value != null) {
-			if (finalTable == null) {
-				finalTable = new JSONObject(true);
-				childMap.put(childSql, finalTable);
-			}
-			finalTable.put(lable, value);
+		//	必须 put 进去，否则某个字段为 null 可能导致中断后续正常返回值	if (value != null) {
+		if (finalTable == null) {
+			finalTable = new JSONObject(true);
+			childMap.put(childSql, finalTable);
 		}
+		finalTable.put(lable, value);
+		//		}
 
 		return table;
 	}

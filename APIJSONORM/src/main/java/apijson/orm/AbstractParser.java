@@ -432,6 +432,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			requestObject.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
 			requestObject.put("time:start|duration|end", startTime + "|" + duration + "|" + endTime);
+// TODO 放在 msg 中的调试和提示信息应该单独放一个字段，避免 APIAuto 异常分支不显示提示语或太长，以及 DEBUG 和非 DEBUG 模式下提示语不一致			requestObject.put("debug", debugStr);
 			if (error != null) {
 				requestObject.put("throw", error.getClass().getName());
 				requestObject.put("trace", error.getStackTrace());
