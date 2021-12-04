@@ -331,7 +331,7 @@ https://github.com/Tencent/APIJSON/issues/187
 [More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
 
 ### Contributers of APIJSON:
-Contributers for the APIJSON core project(6 Tencent engineers、1 Zhihu architect、1 YTO Express engineer, etc.): <br />
+Contributers for the APIJSON core project(6 Tencent engineers, 1 Zhihu architect, 1 YTO Express engineer, etc.): <br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -375,7 +375,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 </div>
 <br />
 	
-Authors of other projects for ecosystem of APIJSON(2 Tencent engineers、1 Bytedance(TikTok) engineer, etc.): <br />
+Authors of other projects for ecosystem of APIJSON(2 Tencent engineers, 1 BAT(Baidu/Alibaba/Tencent) specialist, 1 Bytedance(TikTok) engineer, etc.): <br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">

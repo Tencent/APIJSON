@@ -7,7 +7,7 @@
 ### 新增功能
 部分功能描述可在 [APIAuto](https://github.com/TommyLemon/APIAuto) 上查看 <br />
 账号 13000002020 密码 123456 <br />
-http://apijson.org:8000/auto/ <br />
+http://apijson.cn/api <br />
 
 ##### 基本原则
 1.一定要有相关的应用场景，不能是伪需求，最好举例说明 <br />
@@ -35,6 +35,7 @@ POST:  用不上，不处理 <br />
 @having! 必须性不大，可通过反转内部条件来实现，但如果实现简单、且不影响原来的功能，则可以顺便加上。<br />
 
 #### 新增支持 @column!
+20210415 更新：已提供字段插件 [apijson-column](https://github.com/APIJSON/apijson-column)，支持 字段名映射 和 !key 反选字段。
 
 这个只在 [apijson-framework](https://github.com/APIJSON/apijson-framework) 支持，需要配置每个接口版本、每张表所拥有的全部字段，然后排除掉 @column! 的。<br />
 可新增一个 VersionedColumn 表记录来代替 HashMap 代码配置。<br />
@@ -191,7 +192,8 @@ https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 
 
 ### 提高性能
-20200205 更新：最近的两次大幅提升性能相关优化及 Release <br />
+20200205 更新：最近的及次大幅提升性能相关优化及 Release <br />
+[新增支持 ClickHouse、窗口函数 OVER、反引号 `key`、单引号 'value'；大幅提升单表数组查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.8.0) <br />
 [4.6.0【性能】大幅提升数组内主表查询性能](https://github.com/Tencent/APIJSON/releases/tag/4.6.0) <br />
 [4.4.5【性能】大幅提升增删改的性能](https://github.com/Tencent/APIJSON/releases/tag/4.4.5) <br />
 
@@ -229,7 +231,7 @@ https://github.com/Tencent/APIJSON/issues/created_by/QiAnXinCodeSafe
 
 ##### [APIAuto](https://github.com/TommyLemon/APIAuto) 上统计的 bug
 账号 13000002000 密码 123456 <br />
-http://apijson.org:8000/auto/ <br />
+http://apijson.cn/api <br />
 
 ##### 其它发现的 Bug
 https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug <br />
@@ -237,13 +239,14 @@ https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+is%3Aopen+label%3Abug <br
 #### 完善测试
 
 ##### 在 APIAuto-机器学习自动化接口管理平台 上传更多、更全面、更细致的测试用例、动态参数等
-http://apijson.org:8000/auto/ <br />
+http://apijson.cn/api <br />
 
-##### 接入 UnitAuto-机器学习自动化单元测试平台，每次启动都自动测试所有可测方法并输出报告
-https://gitee.com/TommyLemon/UnitAuto <br />
+##### 在 UnitAuto-机器学习自动化单元测试平台 上传更多、更全面、更细致的测试用例、动态参数等
+http://apijson.cn/unit <br />
 
 
 ### 完善文档
+20211112 更新：已在官网部署文档 http://apijson.cn/doc/zh
 20200205 更新：最近完善及更新了通用文档、上手文档、图文入门文档等，还对首页引导文档加了导航目录
 https://github.com/Tencent/APIJSON/blob/master/Navigation.md
 
@@ -277,7 +280,7 @@ https://github.com/APIJSON/APIJSON#%E7%94%9F%E6%80%81%E9%A1%B9%E7%9B%AE <br />
 
 JavaScript 前端，TypeScript 前端，微信等小程序，<br />
 Android 客户端，iOS 客户端，C# 游戏客户端等。<br />
-Java, C#, Node, Python 等后端 Demo 及数据。<br />
+Java, C#, PHP, Node, Python 等后端 Demo 及数据。<br />
 https://github.com/APIJSON/APIJSON-Demo <br />
 
 #### 新增扩展

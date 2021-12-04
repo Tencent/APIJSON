@@ -16,7 +16,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-12C%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/andream7/apijson-db2"><img src="https://img.shields.io/badge/DB2-7.1%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TiDB-2.1%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/chenyanlann/APIJSONDemo_ClickHouse"><img src="https://img.shields.io/badge/ClickHouse-21.1%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/qiujunlin/APIJSONDemo"><img src="https://img.shields.io/badge/ClickHouse-21.1%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server"><img src="https://img.shields.io/badge/Java-1.8%2B-brightgreen.svg?style=flat"></a>
@@ -147,13 +147,13 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 <br />
 
 ### 为什么选择 APIJSON？
-前后端 关于接口的 开发、文档、联调 等 10 个痛点解析 <br />
+前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
 https://github.com/Tencent/APIJSON/wiki
 
-* **解决十个痛点** (APIJSON 可帮助用户 提振开发效率、杜绝联调扯皮、规避文档缺陷、节省流量带宽 等)
+* **解决十大痛点** (APIJSON 可帮助用户 提振开发效率、杜绝联调扯皮、规避文档缺陷、节省流量带宽 等)
 * **开发提速很大** (CRUD 零代码热更新自动化，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
 * **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
-* **社区影响力大** (GitHub 1W+ Star 在 350W Java 项目中排名前 140，远超 FLAG, BAT 等国内外绝大部分开源项目)
+* **社区影响力大** (GitHub 1W+ Star 在 350W Java 项目中排名前 120，远超 FLAG, BAT 等国内外绝大部分开源项目)
 * **多样用户案例** (腾讯内部用户包含 互娱、音乐、云与智慧，外部用户包含 500 强上市公司、数千亿资本国企 等)
 * **适用场景广泛** (社交聊天、阅读资讯、影音视频、办公学习 等各种 App、网站、公众号、小程序 等非金融类项目)
 * **周边生态丰富** (Android, iOS, Web 等各种 Demo、继承 JSON 的海量生态、零代码 接口测试 和 单元测试 工具等)
@@ -162,9 +162,9 @@ https://github.com/Tencent/APIJSON/wiki
 * **使用安全简单** (自动增删改查、自动生成文档、自动管理版本、自动控制权限、自动校验参数、自动防SQL注入等)
 * **灵活定制业务** (在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象 等，然后自定义处理)
 * **高质可靠代码** (代码严谨规范，商业分析软件源伞 Pinpoint 代码扫描报告平均每行代码 Bug 率低至 0.15%)
-* **兼容各种项目** (协议不限 HTTP，与其它库无冲突，对各类 Web 框架集成友好且提供 SpringBoot, JFinal 的 Demo)
+* **兼容各种项目** (协议不限 HTTP，与其它库无冲突，对各类 Web 框架集成友好且提供 SpringBoot, JFinal 的示例)
 * **工程轻量小巧** (仅依赖 fastjson，Jar 仅 280KB，Java 文件仅 59 个共 13719 行代码，例如 APIJSONORM 4.3.1)
-* **多年持续迭代** (自 2016 年开源至今已连续维护 4 年，累计 2000+ Commits、70+ Releases，不断更新迭代中...)
+* **多年持续迭代** (自 2016 年开源至今已连续维护 5 年，累计 2000+ Commits、80+ Releases，不断更新迭代中...)
 
 
 ### 常见问题
@@ -353,7 +353,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 理论上所有支持 SQL 与 JDBC/ODBC 的软件，都可以用本项目对接 CRUD，待测试: <br />
-[DB2](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.ref.doc/doc/r0059224.html), [Elasticsearch](https://www.elastic.co/cn/what-is/elasticsearch-sql), [ClickHouse](https://clickhouse.tech/docs/zh/sql-reference/syntax/), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Presto](https://prestodb.io/docs/current/admin/function-namespace-managers.html), [Spark](http://spark.apache.org/sql/), [Hive](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select)(延伸支持 Hadoop, Spark), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase), [Presto/Trino](https://prestodb.io/docs/current/sql/select.html)(延伸支持 Redis, Hive, Kafka, Elasticsearch, Thrift, Cassandra, MySQL, PostgreSQL, Oracle, MongoDB...)
+[Elasticsearch](https://www.elastic.co/cn/what-is/elasticsearch-sql), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Presto](https://prestodb.io/docs/current/admin/function-namespace-managers.html), [Spark](http://spark.apache.org/sql/), [Hive](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select)(延伸支持 Hadoop, Spark), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase), [Presto/Trino](https://prestodb.io/docs/current/sql/select.html)(延伸支持 Redis, Hive, Kafka, Elasticsearch, Thrift, Cassandra, MySQL, PostgreSQL, Oracle, MongoDB...)
 
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
@@ -411,6 +411,23 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 [全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
 [新手搭建 APIJSON 项目指北](https://github.com/jerrylususu/apijson_todo_demo/blob/master/FULLTEXT.md)  
+
+[使用APIJSON写低代码Crud接口](https://blog.csdn.net/weixin_42375862/article/details/121654264)
+
+[APIJSON（一：综述）](https://blog.csdn.net/qq_50861917/article/details/120556168)
+
+[APIJSON 代码分析（三：demo主体代码）](https://blog.csdn.net/qq_50861917/article/details/120751630)
+
+[APIJSON 代码分析（二）AbstractParser类(解析器)](https://blog.csdn.net/weixin_45767055/article/details/120815927)
+
+[APIJSON 代码分析（四：AbstractObjectParser源码阅读）](https://blog.csdn.net/qq_50861917/article/details/120896381)
+
+[APIJSON 代码分析 AbstractSQLConfig 第二篇](https://blog.csdn.net/csascscascd/article/details/120684889)
+
+[APIJSON 代码分析（六）APIJSON—Verifier检查类](https://blog.csdn.net/weixin_45767055/article/details/121321731)
+
+[APIJSON 代码分析（四）AbstractSQLExecutor—SQL执行器](https://blog.csdn.net/weixin_45767055/article/details/121069887)
+
   
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
@@ -483,6 +500,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
+  
 ### 腾讯犀牛鸟开源人才培养计划
 https://github.com/Tencent/APIJSON/issues/229
 
