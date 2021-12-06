@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
@@ -267,17 +268,29 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				//<SELECT * FROM Comment WHERE momentId = '470', { id: 1, content: "csdgs" }>
 				childMap = new HashMap<>(); //要存到cacheMap
+//				Map<Integer, Join> columnIndexAndJoinMap = new HashMap<>(length); 
+				String lastTableName = null;  // 默认就是主表 config.getTable();
+				int lastViceTableStart = 0;
+				int lastViceColumnStart = 0;
+				Join lastJoin = null;
+				// TODO				String[] columnIndexAndTableMap = new String[length];
 				// WHERE id = ? AND ... 或 WHERE ... AND id = ? 强制排序 remove 再 put，还是重新 getSQL吧
 
 
-				boolean hasJoin = config.hasJoin();
-				int viceColumnStart = length + 1; //第一个副表字段的index
+				List<Join> joinList = config.getJoinList();
+				boolean hasJoin = config.hasJoin() && joinList != null && ! joinList.isEmpty();
+				
+				// 直接用数组存取更快  Map<Integer, Join> columnIndexAndJoinMap = isExplain || ! hasJoin ? null : new HashMap<>(length);
+				Join[] columnIndexAndJoinMap = isExplain || ! hasJoin ? null : new Join[length]; 
+				
+//				int viceColumnStart = length + 1; //第一个副表字段的index
 				while (rs.next()) {
 					index ++;
 					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
 
 					JSONObject item = new JSONObject(true);
-
+					boolean isMain = true;
+					
 					for (int i = 1; i <= length; i++) {
 
 						// if (hasJoin && viceColumnStart > length && config.getSQLTable().equalsIgnoreCase(rsmd.getTableName(i)) == false) {
@@ -285,21 +298,117 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						// }
 
 						// bugfix-修复非常规数据库字段，获取表名失败导致输出异常
-						if (isExplain == false && hasJoin && viceColumnStart > length) {
-							List<String> column = config.getColumn();
-							String sqlTable = rsmd.getTableName(i);
-							if (config.isClickHouse()&&(sqlTable.startsWith("`")||sqlTable.startsWith("\""))){
-								sqlTable = sqlTable.substring(1,sqlTable.length()-1);
+						Join curJoin = columnIndexAndJoinMap == null ? null : columnIndexAndJoinMap[i - 1];  // columnIndexAndJoinMap.get(i);
+						
+						// 为什么 isExplain == false 不用判断？因为所有字段都在一张 Query Plan 表
+						if (index <= 0 && hasJoin && ! isExplain) { // && viceColumnStart > length) {
+							
+							SQLConfig curConfig = curJoin == null || ! curJoin.isSQLJoin() ? null : curJoin.getCacheConfig();
+							List<String> curColumn = curConfig == null ? null : curConfig.getColumn();
+							String sqlTable = curConfig == null ? null : curConfig.getSQLTable();
+							
+							List<String> column = config.getColumn(); 
+							int mainColumnSize = column == null ? 0 : column.size();
+							boolean toFindJoin = mainColumnSize <= 0 || i > mainColumnSize;  // 主表就不用找 JOIN 配置
+							
+							if (StringUtil.isEmpty(sqlTable , true)) {
+								if (toFindJoin) {  // 在主表字段数量内的都归属主表
+									sqlTable = rsmd.getTableName(i);  // SQL 函数甚至部分字段都不返回表名，当然如果没传 @column 生成的 Table.* 则返回的所有字段都会带表名
+
+									if (StringUtil.isEmpty(sqlTable, true)) {  // hasJoin 已包含这个判断 && joinList != null) {
+										
+										int nextViceColumnStart = lastViceColumnStart;  // 主表没有 @column 时会偏小 lastViceColumnStart
+										for (int j = lastViceTableStart; j < joinList.size(); j++) {  // 查找副表 @column，定位字段所在表
+											Join join = joinList.get(j);
+											SQLConfig cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
+											List<String> c = cfg == null ? null : cfg.getColumn();
+											
+											nextViceColumnStart += (
+													c != null && ! c.isEmpty() ? c.size()
+															: (Objects.equals(sqlTable, lastTableName) || sqlTable.equalsIgnoreCase(lastTableName) ? 1 : 0) 
+													);
+											if (i < nextViceColumnStart) {
+												sqlTable = cfg.getSQLTable();
+												lastViceTableStart = j;  // 避免后面的空 @column 表内字段被放到之前的空 @column 表
+												
+												curJoin = join;
+												curConfig = cfg;
+												curColumn = c;
+												
+												toFindJoin = false;
+												isMain = false;
+												break;
+											}
+										}
+									}
+
+									// 没有 @column，仍然定位不了，用前一个 table 名。FIXME 如果刚好某个表内第一个字段是就是 SQL 函数？
+									if (StringUtil.isEmpty(sqlTable, true)) {
+										sqlTable = lastTableName;
+										toFindJoin = false;
+									}
+								}
 							}
-							if (column != null && column.isEmpty() == false) {
-								viceColumnStart = column.size() + 1;
+							else if (config.isClickHouse() && (sqlTable.startsWith("`") || sqlTable.startsWith("\""))){
+								sqlTable = sqlTable.substring(1, sqlTable.length() - 1);
 							}
-							else if (config.getSQLTable().equalsIgnoreCase(sqlTable) == false) {
-								viceColumnStart = i;
+							
+							if ((sqlTable == null && lastTableName != null) || (sqlTable != null && ! sqlTable.equalsIgnoreCase(lastTableName))) {
+								lastTableName = sqlTable;
+								lastViceColumnStart = i;
+								
+								if (toFindJoin) {  // 找到对应的副表 JOIN 配置
+									for (int j = lastViceTableStart; j < joinList.size(); j++) {  // 查找副表 @column，定位字段所在表
+										Join join = joinList.get(j);
+										SQLConfig cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
+
+										if (cfg != null && sqlTable != null && sqlTable.equalsIgnoreCase(cfg.getSQLTable())) {
+											lastViceTableStart = j;  // 避免后面的空 @column 表内字段被放到之前的空 @column 表
+											
+											curJoin = join;
+											curConfig = cfg;
+											curColumn = curConfig == null ? null : curConfig.getColumn();
+											
+											isMain = false;
+											break;
+										}
+									}
+								}
 							}
+							
+							if (isMain) {
+								lastViceColumnStart ++;
+							} 
+							else {
+								if (curJoin == null) {
+									curJoin = lastJoin;
+								} 
+								else {
+									lastJoin = curJoin;
+								}
+								
+								if (curColumn == null) {
+									curConfig = curJoin == null || ! curJoin.isSQLJoin() ? null : curJoin.getJoinConfig();
+									curColumn = curConfig == null ? null : curConfig.getColumn();
+								}
+								
+								// 解决后面的表内 SQL 函数被放到之前的空 @column 表
+								if (curColumn == null || curColumn.isEmpty()) {
+									lastViceColumnStart ++;
+								}
+							}
+							
+							columnIndexAndJoinMap[i - 1] = curJoin;  // columnIndexAndJoinMap.put(i, curJoin);  // TODO columnIndexAndTableMap[i] = sqlTable 提速? 
+							
+//							if (column != null && column.isEmpty() == false) {
+//								viceColumnStart = column.size() + 1;
+//							}
+//							else if (config.getSQLTable().equalsIgnoreCase(sqlTable) == false) {
+//								viceColumnStart = i;
+//							}
 						}
 
-						item = onPutColumn(config, rs, rsmd, index, item, i, isExplain == false && hasJoin && i >= viceColumnStart ? childMap : null);
+						item = onPutColumn(config, rs, rsmd, index, item, i, curJoin, childMap);  // isExplain == false && hasJoin && i >= viceColumnStart ? childMap : null);
 					}
 
 					resultList = onPutTable(config, rs, rsmd, resultList, index, item);
@@ -391,13 +500,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			SQLConfig jc;
 			SQLConfig cc;
 
-			for (Join j : joinList) {
-				if (j.isAppJoin() == false) {
+			for (Join join : joinList) {
+				if (join.isAppJoin() == false) {
 					Log.i(TAG, "executeAppJoin  for (Join j : joinList) >> j.isAppJoin() == false >>  continue;");
 					continue;
 				}
 
-				cc = j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+				cc = join.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
 				if (cc == null) {
 					if (Log.DEBUG) {
 						throw new NullPointerException("服务器内部错误, executeAppJoin cc == null ! 导致不能缓存 @ APP JOIN 的副表数据！");
@@ -405,7 +514,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					continue;
 				}
 
-				jc = j.getJoinConfig();
+				jc = join.getJoinConfig();
 
 				//取出 "id@": "@/User/userId" 中所有 userId 的值
 				List<Object> targetValueList = new ArrayList<>();
@@ -414,7 +523,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				for (int i = 0; i < resultList.size(); i++) {
 					mainTable = resultList.get(i);
-					targetValue = mainTable == null ? null : mainTable.get(j.getTargetKey());
+					targetValue = mainTable == null ? null : mainTable.get(join.getTargetKey());
 
 					if (targetValue != null && targetValueList.contains(targetValue) == false) {
 						targetValueList.add(targetValue);
@@ -423,8 +532,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 				//替换为 "id{}": [userId1, userId2, userId3...]
-				jc.putWhere(j.getOriginKey(), null, false);  // remove orginKey
-				jc.putWhere(j.getKey() + "{}", targetValueList, true);  // add orginKey{}
+				jc.putWhere(join.getOriginKey(), null, false);  // remove orginKey
+				jc.putWhere(join.getKey() + "{}", targetValueList, true);  // add orginKey{}
 
 				jc.setMain(true).setPreparedValueList(new ArrayList<>());
 
@@ -462,7 +571,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 						for (int i = 1; i <= length; i++) {
 
-							result = onPutColumn(jc, rs, rsmd, index, result, i, null);
+							result = onPutColumn(jc, rs, rsmd, index, result, i, null, null);
 						}
 
 						//每个 result 都要用新的 SQL 来存 childResultMap = onPutTable(config, rs, rsmd, childResultMap, index, result);
@@ -471,7 +580,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 								+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
 						//缓存到 childMap
-						cc.putWhere(j.getKey(), result.get(j.getKey()), true);
+						cc.putWhere(join.getKey(), result.get(join.getKey()), true);
 						cacheSql = cc.getSQL(false);
 						childMap.put(cacheSql, result);
 
@@ -512,7 +621,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 * @throws Exception
 	 */
 	protected JSONObject onPutColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Join join, Map<String, JSONObject> childMap) throws Exception {
 
 		if (isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap)) {
 			Log.i(TAG, "onPutColumn isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap) >> return table;");
@@ -524,13 +633,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		//		int dotIndex = lable.indexOf(".");
 		String lable = getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
 
-		String childTable = childMap == null ? null : rsmd.getTableName(columnIndex); //dotIndex < 0 ? null : lable.substring(0, dotIndex);
+//		String childTable = childMap == null ? null : sqlTableName;  // rsmd.getTableName(columnIndex); //dotIndex < 0 ? null : lable.substring(0, dotIndex);
 
 		JSONObject finalTable = null;
 		String childSql = null;
-		SQLConfig childConfig = null;
-
-		if (childTable == null) {
+		
+		SQLConfig childConfig = join == null || join.isSQLJoin() == false ? null : join.getCacheConfig();
+		if (childConfig == null) {
 			finalTable = table;
 		}
 		else {
@@ -538,15 +647,15 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 			//<sql, Table>
 
-			List<Join> joinList = config.getJoinList();
-			if (joinList != null) {
-				for (Join j : joinList) {
-					childConfig = j.isAppJoin() ? null : j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+//			List<Join> joinList = config.getJoinList();
+//			if (joinList != null) {
+//				for (Join j : joinList) {
+//					childConfig = j.isAppJoin() ? null : j.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
 					
 					// FIXME 副表的 SQL 函数，甚至普通字段都可能从 rsmd.getTableName(columnIndex) 拿到 ""
-					if (childConfig != null && childTable.equalsIgnoreCase(childConfig.getSQLTable())) {
+//					if (childConfig != null && childTable.equalsIgnoreCase(childConfig.getSQLTable())) {
 
-						childConfig.putWhere(j.getKey(), table.get(j.getTargetKey()), true);
+						childConfig.putWhere(join.getKey(), table.get(join.getTargetKey()), true);
 						childSql = childConfig.getSQL(false);
 
 						if (StringUtil.isEmpty(childSql, true)) {
@@ -554,10 +663,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						}
 
 						finalTable = (JSONObject) childMap.get(childSql);
-						break;
-					}
-				}
-			}
+//						break;
+//					}
+//				}
+//			}
 
 		}
 
