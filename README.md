@@ -467,10 +467,16 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 [FfApiJson](https://gitee.com/own_3_0/ff-api-json) 用 JSON 格式直接生成 SQL，借鉴 APIJSON 支持多数据源
 
 [APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) 一个简单的 todo 示例项目，精简数据，简化上手流程，带自定义鉴权逻辑 
-  
+
 [apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON 学习笔记和源码解析
 
 [apijson-practice](https://github.com/vcoolwind/apijson-practice) BAT 技术专家开源的 APIJSON 参数校验注解 Library 及相关 Demo
+
+[apijson-db2](https://github.com/andream7/apijson-db2) APIJSON 接入 IBM 数据库 DB2 的 Demo
+
+[APIJSONDemo](https://github.com/qiujunlin/APIJSONDemo) APIJSON 接入 ClickHouse 的 Demo
+  
+[APIJSONDemo_ClickHouse](https://github.com/chenyanlann/APIJSONDemo_ClickHouse) APIJSON + SpringBoot 连接 ClickHouse 使用的 Demo
 
 [apijson-sample](https://gitee.com/greyzeng/apijson-sample) APIJSON 简单使用 Demo 及教程
 
@@ -480,15 +486,11 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
 
-[apijson-examples](https://gitee.com/drone/apijson-examples) APIJSON 的前端、业务后端、管理后端 Demo
+[apijson_template](https://github.com/abliger/apijson_template) apijson java 模版，使用 gradle 管理依赖和构建应用
+  
+[api-json-demo](https://gitee.com/hxdwd/api-json-demo) 基于 APIJSON，实现低代码写 CURD 代码，代替传统 ORM 框架，适配 Oracle 事务
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
-
-[apijson-db2](https://github.com/andream7/apijson-db2) APIJSON 接入 IBM 数据库 DB2 的 Demo
-
-[APIJSONDemo](https://github.com/qiujunlin/APIJSONDemo) APIJSON 接入 ClickHouse 的 Demo
-  
-[APIJSONDemo_ClickHouse](https://github.com/chenyanlann/APIJSONDemo_ClickHouse) APIJSON + SpringBoot 连接 ClickHouse 使用的 Demo
 
 [apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
 
