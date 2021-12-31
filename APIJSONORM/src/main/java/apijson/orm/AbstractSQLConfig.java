@@ -2197,18 +2197,42 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					String userIdKey = getUserIdKey();
 					String userIdInKey = userIdKey + "{}";
 
-					if (andList.contains(idKey)) {
-						i ++;
+					int lastIndex;
+					if (key.equals(idKey)) {
+						lastIndex = -1;
 					}
-					if (andList.contains(idInKey)) {
-						i ++;
+					else if (key.equals(idInKey)) {
+						lastIndex = andList.lastIndexOf(idKey);
 					}
-					if (andList.contains(userIdKey)) {
-						i ++;
+					else if (key.equals(userIdKey)) {
+						lastIndex = andList.lastIndexOf(idInKey);
+						if (lastIndex < 0) {
+							lastIndex = andList.lastIndexOf(idKey);
+						}
 					}
-					if (andList.contains(userIdInKey)) {
-						i ++;
+					else if (key.equals(userIdInKey)) {
+						lastIndex = andList.lastIndexOf(userIdKey);
+						if (lastIndex < 0) {
+							lastIndex = andList.lastIndexOf(idInKey);
+						}
+						if (lastIndex < 0) {
+							lastIndex = andList.lastIndexOf(idKey);
+						}
 					}
+					else {
+						lastIndex = andList.lastIndexOf(userIdInKey);
+						if (lastIndex < 0) {
+							lastIndex = andList.lastIndexOf(userIdKey);
+						}
+						if (lastIndex < 0) {
+							lastIndex = andList.lastIndexOf(idInKey);
+						}
+						if (lastIndex < 0) {
+							lastIndex = andList.lastIndexOf(idKey);
+						}
+					}
+					
+					i = lastIndex + 1;
 				}
 
 				if (prior) {
@@ -2219,6 +2243,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			combine.put("&", andList);
 		}
+		
 		return this;
 	}
 
