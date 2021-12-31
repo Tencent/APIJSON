@@ -288,7 +288,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 									try {
 										String db = sqlConfig.getDatabase();
 										if (db == null) {
-											if (sqlConfig.isPostgreSQL()) {
+											if (sqlConfig.isMySQL()) {
+												db = SQLConfig.DATABASE_MYSQL;
+											}
+											else if (sqlConfig.isPostgreSQL()) {
 												db = SQLConfig.DATABASE_POSTGRESQL;
 											}
 											else if (sqlConfig.isSQLServer()) {
@@ -304,18 +307,18 @@ public abstract class AbstractObjectParser implements ObjectParser {
 												db = SQLConfig.DATABASE_CLICKHOUSE;
 											}
 											else {
-												db = SQLConfig.DATABASE_MYSQL;
+												db = AbstractSQLConfig.DEFAULT_DATABASE;
 											}
 										}
 
 										Class<? extends Exception> clazz = e.getClass();
 										e = clazz.getConstructor(String.class).newInstance(
 												e.getMessage()
-												+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n**环境信息** "
-												+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-												+ "\n数据库: " + db + " " + sqlConfig.getDBVersion()
-												+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
-												+ "\nAPIJSON: " + Log.VERSION
+												+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n **环境信息** "
+												+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+												+ " \n 数据库: " + db + " " + sqlConfig.getDBVersion()
+												+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
+												+ " \n APIJSON: " + Log.VERSION
 												);
 									} catch (Throwable e2) {}
 								}

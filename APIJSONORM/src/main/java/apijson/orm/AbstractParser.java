@@ -94,6 +94,16 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		setMethod(method);
 		setNeedVerify(needVerify);
 	}
+	
+	protected boolean isRoot = true;
+	public boolean isRoot() {
+		return isRoot;
+	}
+	public AbstractParser<T> setRoot(boolean isRoot) {
+		this.isRoot = isRoot;
+		return this;
+	}
+	
 
 	@NotNull
 	protected Visitor<T> visitor;
@@ -336,7 +346,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		try {
 			requestObject = parseRequest(request);
 		} catch (Exception e) {
-			return newErrorResult(e);
+			return newErrorResult(e, isRoot);
 		}
 
 		return parseResponse(requestObject);
@@ -368,7 +378,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					onVerifyContent();
 				}
 			} catch (Exception e) {
-				return extendErrorResult(requestObject, e, requestMethod, getRequestURL());
+				return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 			}
 		}
 
@@ -378,7 +388,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				setGlobleRole(requestObject.getString(JSONRequest.KEY_ROLE));
 				requestObject.remove(JSONRequest.KEY_ROLE);
 			} catch (Exception e) {
-				return extendErrorResult(requestObject, e, requestMethod, getRequestURL());
+				return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 			}
 		}
 
@@ -397,7 +407,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			requestObject.remove(JSONRequest.KEY_EXPLAIN);
 			requestObject.remove(JSONRequest.KEY_CACHE);
 		} catch (Exception e) {
-			return extendErrorResult(requestObject, e, requestMethod, getRequestURL());
+			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 		}
 
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
@@ -421,7 +431,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			onRollback();
 		}
 
-		requestObject = error == null ? extendSuccessResult(requestObject) : extendErrorResult(requestObject, error, requestMethod, getRequestURL());
+		requestObject = error == null ? extendSuccessResult(requestObject, isRoot) : extendErrorResult(requestObject, error, requestMethod, getRequestURL(), isRoot);
 
 		JSONObject res = (globleFormat != null && globleFormat) && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 
@@ -432,26 +442,26 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			requestObject.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
 			requestObject.put("time:start|duration|end", startTime + "|" + duration + "|" + endTime);
-// TODO 放在 msg 中的调试和提示信息应该单独放一个字段，避免 APIAuto 异常分支不显示提示语或太长，以及 DEBUG 和非 DEBUG 模式下提示语不一致			requestObject.put("debug", debugStr);
+
 			if (error != null) {
-				requestObject.put("throw", error.getClass().getName());
-				requestObject.put("trace", error.getStackTrace());
+				requestObject.put("trace:throw", error.getClass().getName());
+				requestObject.put("trace:stack", error.getStackTrace());
 			}
 		}
 
 		onClose();
 
 		//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/232
-		if (IS_PRINT_REQUEST_STRING_LOG||Log.DEBUG||error != null) {
-			Log.sl("\n\n\n",'<',"");
-			Log.fd(TAG , requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
+		if (IS_PRINT_REQUEST_STRING_LOG || Log.DEBUG || error != null) {
+			Log.sl("\n\n\n", '<', "");
+			Log.fd(TAG, requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
 		}
-		if (IS_PRINT_BIG_LOG||Log.DEBUG||error != null) {  // 日志仅存服务器，所以不太敏感，而且这些日志虽然量大但非常重要，对排查 bug 很关键
-			Log.fd(TAG,requestMethod + "/parseResponse return response = \n" + JSON.toJSONString(requestObject) + "\n\n");
+		if (IS_PRINT_BIG_LOG || Log.DEBUG || error != null) {  // 日志仅存服务器，所以不太敏感，而且这些日志虽然量大但非常重要，对排查 bug 很关键
+			Log.fd(TAG, requestMethod + "/parseResponse return response = \n" + JSON.toJSONString(requestObject) + "\n\n");
 		}
-		if (IS_PRINT_REQUEST_ENDTIME_LOG||Log.DEBUG||error != null) {
-			Log.fd(TAG , requestMethod + "/parseResponse  endTime = " + endTime + ";  duration = " + duration);
-			Log.sl("",'>',"\n\n\n");
+		if (IS_PRINT_REQUEST_ENDTIME_LOG || Log.DEBUG || error != null) {
+			Log.fd(TAG, requestMethod + "/parseResponse  endTime = " + endTime + ";  duration = " + duration);
+			Log.sl("", '>', "\n\n\n");
 		}
 		return res;
 	}
@@ -611,21 +621,44 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * @return
 	 */
 	public static JSONObject newResult(int code, String msg) {
-		return extendResult(null, code, msg);
+		return newResult(code, msg, false);
 	}
+	/**新建带状态内容的JSONObject
+	 * @param code
+	 * @param msg
+	 * @param isRoot
+	 * @return
+	 */
+	public static JSONObject newResult(int code, String msg, boolean isRoot) {
+		return extendResult(null, code, msg, isRoot);
+	}
+	
 	/**添加JSONObject的状态内容，一般用于错误提示结果
 	 * @param object
 	 * @param code
 	 * @param msg
 	 * @return
 	 */
-	public static JSONObject extendResult(JSONObject object, int code, String msg) {
+	public static JSONObject extendResult(JSONObject object, int code, String msg, boolean isRoot) {
+		int index = Log.DEBUG == false || isRoot == false || msg == null ? -1 : msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
+		String debug = Log.DEBUG == false || isRoot == false ? null : (index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
+				: " \n **环境信息** "
+				+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+				+ " \n 数据库: DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE
+				+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
+				+ " \n APIJSON: " + Log.VERSION
+				+ " \n   |   \n 常见问题：https://github.com/Tencent/APIJSON/issues/36"
+				+ " \n 通用文档：https://github.com/Tencent/APIJSON/blob/master/Document.md"
+				+ " \n 视频教程：https://search.bilibili.com/all?keyword=APIJSON");
+		
+		msg = index >= 0 ? msg.substring(0, index) : msg;
+		
 		if (object == null) {
 			object = new JSONObject(true);
 		}
-		boolean isOk = JSONResponse.isSuccess(code);
+		
 		if (object.containsKey(JSONResponse.KEY_OK) == false) {
-			object.put(JSONResponse.KEY_OK, isOk);
+			object.put(JSONResponse.KEY_OK, JSONResponse.isSuccess(code));
 		}
 		if (object.containsKey(JSONResponse.KEY_CODE) == false) {
 			object.put(JSONResponse.KEY_CODE, code);
@@ -635,8 +668,12 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		if (m.isEmpty() == false) {
 			msg = m + " ;\n " + StringUtil.getString(msg);
 		}
-
+		
 		object.put(JSONResponse.KEY_MSG, msg);
+		if (debug != null) {
+			object.put("debug:info|help", debug);
+		}
+		
 		return object;
 	}
 
@@ -646,37 +683,64 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * @return
 	 */
 	public static JSONObject extendSuccessResult(JSONObject object) {
-		return extendResult(object, JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED);
+		return extendSuccessResult(object, false);
+	}
+	/**添加请求成功的状态内容
+	 * @param object
+	 * @param isRoot
+	 * @return
+	 */
+	public static JSONObject extendSuccessResult(JSONObject object, boolean isRoot) {
+		return extendResult(object, JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED, isRoot);
 	}
 	/**获取请求成功的状态内容
 	 * @return
 	 */
 	public static JSONObject newSuccessResult() {
-		return newResult(JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED);
+		return newSuccessResult(false);
 	}
+	/**获取请求成功的状态内容
+	 * @param isRoot
+	 * @return
+	 */
+	public static JSONObject newSuccessResult(boolean isRoot) {
+		return newResult(JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED, isRoot);
+	}
+	
 	/**添加请求成功的状态内容
 	 * @param object
+	 * @param e
+	 * @param isRoot
 	 * @return
 	 */
 	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
-		return extendErrorResult(object, e, null, null);
+		return extendErrorResult(object, e, false);
+	}
+	/**添加请求成功的状态内容
+	 * @param object
+	 * @param e
+	 * @param isRoot
+	 * @return
+	 */
+	public static JSONObject extendErrorResult(JSONObject object, Exception e, boolean isRoot) {
+		return extendErrorResult(object, e, null, null, isRoot);
 	}
 	/**添加请求成功的状态内容
 	 * @param object
 	 * @return
 	 */
-	public static JSONObject extendErrorResult(JSONObject object, Exception e, RequestMethod requestMethod, String url) {
+	public static JSONObject extendErrorResult(JSONObject object, Exception e, RequestMethod requestMethod, String url, boolean isRoot) {
 		String msg = e.getMessage();
 
-		if (Log.DEBUG) {
+		if (Log.DEBUG && isRoot) {
 			try {
 				int index = msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
 				String info = index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
-						: "\n**环境信息** "
-						+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-						+ "\n数据库: <!-- 请填写，例如 MySQL 5.7 -->"
-						+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
-						+ "\nAPIJSON: " + Log.VERSION;
+						: " \n **环境信息** "
+						+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+						+ " \n 数据库: <!-- 请填写，例如 MySQL 5.7，DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE + " -->"
+						+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
+						+ " \n APIJSON: " + Log.VERSION;
 
 				msg = index < 0 ? msg : msg.substring(0, index).trim();
 				String encodedMsg = URLEncoder.encode(msg, "UTF-8");
@@ -711,30 +775,30 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				boolean isSQLException = e instanceof SQLException;  // SQL 报错一般都是通用问题，优先搜索引擎
 				String apiatuoAndGitHubLink = "\n【APIAuto】： \n http://apijson.cn/api?type=JSON&url=" + URLEncoder.encode(url, "UTF-8") + "&json=" + req
 						+ "        \n\n【GitHub】： \n https://www.google.com/search?q=site%3Agithub.com%2FTencent%2FAPIJSON+++" + encodedMsg;
-				
-				msg += "    \n\n\n浏览器打开以下链接查看解答"
+
+				msg += Log.KEY_SYSTEM_INFO_DIVIDER + " \n   |   \n 浏览器打开以下链接查看解答"
 						+ (isSQLException ? "" : apiatuoAndGitHubLink)
 						//	GitHub Issue 搜索貌似是精准包含，不易找到答案 	+ "        \n\nGitHub： \n https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
 						+ "        \n\n【Google】：\n https://www.google.com/search?q=" + encodedMsg
 						+ "        \n\n【百度】：\n https://www.baidu.com/s?ie=UTF-8&wd=" + encodedMsg
 						+ (isSQLException ? apiatuoAndGitHubLink : "")
 						+ "        \n\n都没找到答案？打开这个链接 \n https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
-						+ "\n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
-						+ "\n【标题】：" + msg
-						+ "\n【内容】：" + info + "\n\n**问题描述**\n" + msg
-						+ "\n\n<!-- 尽量完整截屏(至少包含请求和回包结果，还可以加上控制台报错日志)，然后复制粘贴到这里 -->"
-						+ "\n\nPOST " + url
-						+ "\n请求 Request JSON：\n ```js"
-						+ "\n 请填写，例如 { \"Users\":{} }"
-						+ "\n```"
-						+ "\n\n返回结果 Response JSON：\n ```js"
-						+ "\n 请填写，例如 { \"Users\": {}, \"code\": 401, \"msg\": \"Users 不允许 UNKNOWN 用户的 GET 请求！\" }"
-						+ "\n```";
+						+ " \n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
+						+ " \n【标题】：" + msg
+						+ " \n【内容】：" + info + "\n\n**问题描述**\n" + msg
+						+ " \n\n<!-- 尽量完整截屏(至少包含请求和回包结果，还可以加上控制台报错日志)，然后复制粘贴到这里 -->"
+						+ " \n\nPOST " + url
+						+ " \n请求 Request JSON：\n ```js"
+						+ " \n 请填写，例如 { \"Users\":{} }"
+						+ " \n```"
+						+ " \n\n返回结果 Response JSON：\n ```js"
+						+ " \n 请填写，例如 { \"Users\": {}, \"code\": 401, \"msg\": \"Users 不允许 UNKNOWN 用户的 GET 请求！\" }"
+						+ " \n```";
 			} catch (Throwable e2) {}
 		}
 
-		JSONObject error = newErrorResult(e);
-		return extendResult(object, error.getIntValue(JSONResponse.KEY_CODE), msg);
+		JSONObject error = newErrorResult(e, isRoot);
+		return extendResult(object, error.getIntValue(JSONResponse.KEY_CODE), msg, isRoot);
 	}
 
 	/**新建错误状态内容
@@ -742,6 +806,14 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * @return
 	 */
 	public static JSONObject newErrorResult(Exception e) {
+		return newErrorResult(e, false);
+	}
+	/**新建错误状态内容
+	 * @param e
+	 * @param isRoot
+	 * @return
+	 */
+	public static JSONObject newErrorResult(Exception e, boolean isRoot) {
 		if (e != null) {
 			e.printStackTrace();
 
@@ -786,10 +858,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				code = JSONResponse.CODE_SERVER_ERROR;
 			}
 
-			return newResult(code, e.getMessage());
+			return newResult(code, e.getMessage(), isRoot);
 		}
 
-		return newResult(JSONResponse.CODE_SERVER_ERROR, JSONResponse.MSG_SERVER_ERROR);
+		return newResult(JSONResponse.CODE_SERVER_ERROR, JSONResponse.MSG_SERVER_ERROR, isRoot);
 	}
 
 
@@ -1261,7 +1333,6 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 
-
 		List<Join> joinList = new ArrayList<>();
 
 
@@ -1375,6 +1446,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 				tableObj = newTableObj;
 				request.put(tableKey, tableObj);
+
+//				tableObj.clear();
+//				tableObj.putAll(newTableObj);
 			}
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 >>>>>>>>>
 
@@ -1763,7 +1837,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 						result.put(KEY_EXPLAIN, explainResult);
 						result.putAll(res);
 					}
-				}else{//如果是更新请求，不执行explain，但可以返回sql
+				}
+				else {//如果是更新请求，不执行explain，但可以返回sql
 					result = new JSONObject(true);
 					result.put(KEY_SQL, config.getSQL(false));
 					result.putAll(res);
@@ -1780,7 +1855,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				try {
 					String db = config.getDatabase();
 					if (db == null) {
-						if (config.isPostgreSQL()) {
+						if (config.isMySQL()) {
+							db = SQLConfig.DATABASE_MYSQL;
+						}
+						else if (config.isPostgreSQL()) {
 							db = SQLConfig.DATABASE_POSTGRESQL;
 						}
 						else if (config.isSQLServer()) {
@@ -1796,18 +1874,18 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 							db = SQLConfig.DATABASE_CLICKHOUSE;
 						}
 						else {
-							db = SQLConfig.DATABASE_MYSQL;
+							db = AbstractSQLConfig.DEFAULT_DATABASE;
 						}
 					}
 
 					Class<? extends Exception> clazz = e.getClass();
 					e = clazz.getConstructor(String.class).newInstance(
 							e.getMessage()
-							+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n**环境信息** "
-							+ "\n系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-							+ "\n数据库: " + db + " " + config.getDBVersion()
-							+ "\nJDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
-							+ "\nAPIJSON: " + Log.VERSION
+							+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n **环境信息** "
+							+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+							+ " \n 数据库: " + db + " " + config.getDBVersion()
+							+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
+							+ " \n APIJSON: " + Log.VERSION
 							);
 				} catch (Throwable e2) {}
 			}
