@@ -126,6 +126,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_ORACLE);
 		DATABASE_LIST.add(DATABASE_DB2);
 		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
+		DATABASE_LIST.add(DATABASE_HIVE);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -902,6 +903,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	public static boolean isClickHouse(String db) {
 		return DATABASE_CLICKHOUSE.equals(db);
+	}
+	@Override
+	public boolean isHive() {
+		return isHive(getSQLDatabase());
+	}
+	public static boolean isHive(String db) {
+		return DATABASE_HIVE.equals(db);
 	}
 
 	@Override
@@ -2751,6 +2759,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		if (isClickHouse()) {
 			return "match(" + (ignoreCase ? "lower(" : "") + getKey(key) + (ignoreCase ? ")" : "") + ", " + (ignoreCase ? "lower(" : "") + getValue(value) + (ignoreCase ? ")" : "") + ")";
+		}
+		if (isHive()) {
+			return (ignoreCase ? "lower(" : "") + getKey(key) + (ignoreCase ? ")" : "") + " REGEXP " + (ignoreCase ? "lower(" : "") + getValue(value) + (ignoreCase ? ")" : "");
 		}
 		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
 	}
