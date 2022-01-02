@@ -1851,7 +1851,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			return result;
 		}
 		catch (Exception e) {
-			if (Log.DEBUG && e.getMessage().contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
+			String msg = e.getMessage();
+			if (Log.DEBUG && msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
 				try {
 					String db = config.getDatabase();
 					if (db == null) {
@@ -1880,7 +1881,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 					Class<? extends Exception> clazz = e.getClass();
 					e = clazz.getConstructor(String.class).newInstance(
-							e.getMessage()
+							msg
 							+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n **环境信息** "
 							+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
 							+ " \n 数据库: " + db + " " + config.getDBVersion()

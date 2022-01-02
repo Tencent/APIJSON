@@ -8,6 +8,7 @@ package apijson;
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**通用字符串(String)相关类,为null时返回""
@@ -890,5 +891,19 @@ public class StringUtil {
 	}
 
 	//校正（自动补全等）字符串>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	public static boolean equals(Object s1, Object s2) {
+		return Objects.equals(s1, s2);
+	}
+	public static boolean equalsIgnoreCase(String s1, String s2) {
+		if (s1 == s2) {
+			return true;
+		}
+		if (s1 == null || s2 == null) {
+			return false;
+		}
+		return s1.equalsIgnoreCase(s2);
+	}
 
 }

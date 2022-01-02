@@ -198,12 +198,13 @@ public class Join {
 		String jt = getJoinType();
 		return "<".equals(jt) || ">".equals(jt);
 	}
-	
+
 	public boolean canCacheViceTable() {
 		String jt = getJoinType();
 		return "@".equals(jt) || "<".equals(jt) || ">".equals(jt) || "&".equals(jt) || "*".equals(jt) || ")".equals(jt);
+		// 副表是按常规条件查询，缓存会导致其它同表同条件对象查询结果集为空		return ! isFullJoin();  // ! - OUTER, ( - FOREIGN 都需要缓存空副表数据，避免多余的查询
 	}
-	
+
 	public boolean isSQLJoin() {
 		return ! isAppJoin();
 	}
@@ -215,7 +216,7 @@ public class Join {
 	public static boolean isAppJoin(Join j) {
 		return j != null && j.isAppJoin();
 	}
-	
+
 	public static boolean isLeftOrRightJoin(Join j) {
 		return j != null && j.isLeftOrRightJoin();
 	}
