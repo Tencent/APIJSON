@@ -711,10 +711,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		String key = rsmd.getColumnLabel(columnIndex);// dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
 		if (config.isHive()) {
 			String table_name = config.getTable();
-			if (AbstractSQLConfig.TABLE_KEY_MAP.containsKey(table_name)) table_name = AbstractSQLConfig.TABLE_KEY_MAP.get(table_name);
+			if (AbstractSQLConfig.TABLE_KEY_MAP.containsKey(table_name)) {
+				table_name = AbstractSQLConfig.TABLE_KEY_MAP.get(table_name);
+			}
 			String pattern = "^" + table_name + "\\." + "[a-zA-Z]+$";
 			boolean isMatch = Pattern.matches(pattern, key);
-			if (isMatch) key = key.split("\\.")[1];
+			if (isMatch) {
+				key = key.split("\\.")[1];
+			}
 		}
 		return key;
 	}
@@ -972,7 +976,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
 		PreparedStatement s = getStatement(config);
 		int count = s.executeUpdate(); //PreparedStatement 不用传 SQL
-		if (config.isHive() && count==0) count = 1;
+		if (config.isHive() && count==0) {
+			count = 1;
+		}
 
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
 			ResultSet rs = s.getGeneratedKeys();
