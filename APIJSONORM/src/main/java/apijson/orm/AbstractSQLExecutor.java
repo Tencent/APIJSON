@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -312,9 +313,57 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 			else {
 				//		final boolean cache = config.getCount() != 1;
-				// TODO 设置初始容量为查到的数据量，解决频繁扩容导致的延迟，貌似只有 rs.last 取 rs.getRow() ? 然后又得 rs.beforeFirst 重置位置以便下方取值
-				resultList = new ArrayList<>(config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount());
 				//		Log.d(TAG, "select  cache = " + cache + "; resultList" + (resultList == null ? "=" : "!=") + "null");
+				try {  // 设置初始容量为查到的数据量，解决频繁扩容导致的延迟，貌似只有 rs.last 取 rs.getRow() ? 然后又得 rs.beforeFirst 重置位置以便下方取值
+					rs.last();  //移到最后一行
+					resultList = new ArrayList<>(rs.getRow());
+					rs.beforeFirst();
+				}
+				catch (Throwable e) {
+					Log.e(TAG, "try { rs.last(); resultList = new ArrayList<>(rs.getRow()); rs.beforeFirst(); >> } catch (Throwable e) = " + e.getMessage());
+					int capacity;
+					if (config.getId() != null) {  // id:Object 一定是 AND 条件，最终返回数据最多就这么多
+						capacity = 1;
+					}
+					else {
+						Object idIn = config.getWhere(config.getIdKey() + "{}", true);
+						if (idIn instanceof Collection<?>) {  // id{}:[] 一定是 AND 条件，最终返回数据最多就这么多
+							capacity = ((Collection<?>) idIn).size();
+						}
+						else {  // 预估容量
+							capacity = config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount();
+							if (capacity > 100) {
+								// 有条件，条件越多过滤数据越多
+								Map<String, List<String>> combine = config.getCombine();
+								
+								List<String> andList = combine == null ? null : combine.get("&");
+								int andCondCount = andList == null ? (config.getWhere() == null ? 0 : config.getWhere().size()) : andList.size();
+								
+								List<String> orList = combine == null ? null : combine.get("|");
+								int orCondCount = orList == null ? 0 : orList.size();
+								
+								List<String> notList = combine == null ? null : combine.get("|");
+								int notCondCount = notList == null ? 0 : notList.size();
+								
+								
+								// 有分组，分组字段越少过滤数据越多
+								String[] group = StringUtil.split(config.getGroup());
+								int groupCount = group == null ? 0 : group.length;
+								if (groupCount > 0 && Arrays.asList(group).contains(config.getIdKey())) {
+									groupCount = 0;
+								}
+								
+								capacity /= Math.pow(1.5, Math.log10(capacity) + andCondCount
+										+ (orCondCount <= 0 ? 0 : 2/orCondCount)  // 1: 2.3, 2: 1.5, 3: 1.3, 4: 1.23, 5: 1.18
+										+ (notCondCount/5)  // 1: 1.08, 2: 1.18, 3: 1.28, 4: 1.38, 1.50
+										+ (groupCount <= 0 ? 0 : 10/groupCount)  // 1: 57.7, 7.6, 3: 3.9, 4: 2.8, 5: 2.3
+										);
+								capacity += 1;  // 避免正好比需要容量少一点点导致多一次扩容，大量数据 System.arrayCopy
+							}
+						}
+					}
+					resultList = new ArrayList<>(capacity);
+				}
 
 				int index = -1;
 
@@ -785,16 +834,16 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		sqlResultDuration += System.currentTimeMillis() - startTime;
 		
 		if (config.isHive()) {
-			String table_name = config.getTable();
-			if (AbstractSQLConfig.TABLE_KEY_MAP.containsKey(table_name)) {
-				table_name = AbstractSQLConfig.TABLE_KEY_MAP.get(table_name);
-			}
-			String pattern = "^" + table_name + "\\." + "[a-zA-Z]+$";
+			String tableName = config.getTable();
+			String realTableName = AbstractSQLConfig.TABLE_KEY_MAP.get(tableName);
+
+			String pattern = "^" + (StringUtil.isEmpty(realTableName, true) ? tableName : realTableName) + "\\." + "[a-zA-Z]+$";
 			boolean isMatch = Pattern.matches(pattern, key);
 			if (isMatch) {
 				key = key.split("\\.")[1];
 			}
 		}
+		
 		return key;
 	}
 
@@ -912,9 +961,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
 			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()), Statement.RETURN_GENERATED_KEYS);
 		}
+		else if (RequestMethod.isGetMethod(config.getMethod(), true)) {
+			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		}
 		else {
 			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()));
 		}
+		
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
 
 		if (valueList != null && valueList.isEmpty() == false) {
