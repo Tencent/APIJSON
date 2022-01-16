@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -37,7 +36,6 @@ import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.orm.AbstractSQLConfig;
 
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
@@ -66,6 +64,33 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public int getExecutedSQLCount() {
 		return executedSQLCount;
+	}
+	
+	// 只要不是并发执行且执行完立刻获取，就不会是错的，否则需要一并返回，可以 JSONObject.put("@EXECUTED_SQL_TIME:START|DURATION|END", )
+	private long executedSQLStartTime;
+	private long executedSQLEndTime;
+	private long executedSQLDuration;
+	private long sqlResultDuration;
+	
+	public long getExecutedSQLStartTime() {
+		return executedSQLStartTime;
+	}
+	public long getExecutedSQLEndTime() {
+		return executedSQLEndTime;
+	}
+	@Override
+	public long getExecutedSQLDuration() {
+		if (executedSQLDuration <= 0) {
+			long startTime = getExecutedSQLStartTime();
+			long endTime = getExecutedSQLEndTime();
+			executedSQLDuration = startTime <= 0 || endTime <= 0 ? 0 : endTime - startTime;  // FIXME 有时莫名其妙地算出来是负数
+		}
+		return executedSQLDuration < 0 ? 0 : executedSQLDuration;
+	}
+	
+	@Override
+	public long getSqlResultDuration() {
+		return sqlResultDuration;
 	}
 
 	/**
@@ -127,16 +152,25 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception {
-		return statement.executeQuery(sql);
+//		executedSQLStartTime = System.currentTimeMillis();
+		ResultSet rs = statement.executeQuery(sql);
+//		executedSQLEndTime = System.currentTimeMillis();
+		return rs;
 	}
 	@Override
 	public int executeUpdate(@NotNull Statement statement, String sql) throws Exception {
-		return statement.executeUpdate(sql);
+//		executedSQLStartTime = System.currentTimeMillis();
+		int c = statement.executeUpdate(sql);
+//		executedSQLEndTime = System.currentTimeMillis();
+		return c;
 	}
 	@Override
 	public ResultSet execute(@NotNull Statement statement, String sql) throws Exception {
+//		executedSQLStartTime = System.currentTimeMillis();
 		statement.execute(sql);
-		return statement.getResultSet();
+		ResultSet rs = statement.getResultSet();
+//		executedSQLEndTime = System.currentTimeMillis();
+		return rs;
 	}
 
 	/**执行SQL
@@ -146,6 +180,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 */
 	@Override
 	public JSONObject execute(@NotNull SQLConfig config, boolean unknowType) throws Exception {
+//		executedSQLDuration = 0;
+		executedSQLStartTime = System.currentTimeMillis();
+		executedSQLEndTime = executedSQLStartTime;
+//		sqlResultDuration = 0;
+		
 		boolean isPrepared = config.isPrepared();
 
 		final String sql = config.getSQL(false);
@@ -182,15 +221,19 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		try {
 			if (unknowType) {
-				Statement statement = getStatement(config);
-				
 				if (isExplain == false) { //只有 SELECT 才能 EXPLAIN
 					executedSQLCount ++;
+					executedSQLStartTime = System.currentTimeMillis();
 				}
+				Statement statement = getStatement(config);
 				rs = execute(statement, sql);
-
-				result = new JSONObject(true);
 				int updateCount = statement.getUpdateCount();
+				if (isExplain == false) {
+					executedSQLEndTime = System.currentTimeMillis();
+					executedSQLDuration += executedSQLEndTime - executedSQLStartTime;
+				}
+				
+				result = new JSONObject(true);
 				result.put(JSONResponse.KEY_COUNT, updateCount);
 				result.put("update", updateCount >= 0);
 				//导致后面 rs.getMetaData() 报错 Operation not allowed after ResultSet closed		result.put("moreResults", statement.getMoreResults());
@@ -202,8 +245,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				case DELETE:
 					if (isExplain == false) { //只有 SELECT 才能 EXPLAIN
 						executedSQLCount ++;
+						executedSQLStartTime = System.currentTimeMillis();
 					}
 					int updateCount = executeUpdate(config);
+					if (isExplain == false) {
+						executedSQLEndTime = System.currentTimeMillis();
+						executedSQLDuration += executedSQLEndTime - executedSQLStartTime;
+					}
+
 					if (updateCount <= 0) {
 						throw new IllegalAccessException("没权限访问或对象不存在！");  // NotExistException 会被 catch 转为成功状态
 					}
@@ -235,8 +284,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					if (isExplain == false) { //只有 SELECT 才能 EXPLAIN
 						executedSQLCount ++;
+						executedSQLStartTime = System.currentTimeMillis();
 					}
 					rs = executeQuery(config);  //FIXME SQL Server 是一次返回两个结果集，包括查询结果和执行计划，需要 moreResults 
+					if (isExplain == false) {
+						executedSQLEndTime = System.currentTimeMillis();
+						executedSQLDuration += executedSQLEndTime - executedSQLStartTime;
+					}
 					break;
 
 				default://OPTIONS, TRACE等
@@ -264,8 +318,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				int index = -1;
 
+				long startTime2 = System.currentTimeMillis();
 				ResultSetMetaData rsmd = rs.getMetaData();
 				final int length = rsmd.getColumnCount();
+				sqlResultDuration += System.currentTimeMillis() - startTime2;
 
 				//<SELECT * FROM Comment WHERE momentId = '470', { id: 1, content: "csdgs" }>
 				childMap = new HashMap<>(); //要存到cacheMap
@@ -286,7 +342,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				Join[] columnIndexAndJoinMap = isExplain || ! hasJoin ? null : new Join[length]; 
 				
 //				int viceColumnStart = length + 1; //第一个副表字段的index
+				
+//				FIXME 统计游标查找的时长？可能 ResultSet.next() 及 getTableName, getColumnName, getObject 比较耗时，因为不是一次加载到内存，而是边读边发
+				
+				long lastCursorTime = System.currentTimeMillis();
 				while (rs.next()) {
+					sqlResultDuration += System.currentTimeMillis() - lastCursorTime;
+					lastCursorTime = System.currentTimeMillis();
+					
 					index ++;
 					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
 
@@ -318,8 +381,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 							
 							if (StringUtil.isEmpty(sqlTable, true)) {
 								if (toFindJoin) {  // 在主表字段数量内的都归属主表
+									long startTime3 = System.currentTimeMillis();
 									sqlTable = rsmd.getTableName(i);  // SQL 函数甚至部分字段都不返回表名，当然如果没传 @column 生成的 Table.* 则返回的所有字段都会带表名
-
+									sqlResultDuration += System.currentTimeMillis() - startTime3;
+									
 									if (StringUtil.isEmpty(sqlTable, true)) {  // hasJoin 已包含这个判断 && joinList != null) {
 										
 										int nextViceColumnStart = lastViceColumnStart;  // 主表没有 @column 时会偏小 lastViceColumnStart
@@ -588,12 +653,19 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					int index = -1;
 
+					long startTime2 = System.currentTimeMillis();
 					ResultSetMetaData rsmd = rs.getMetaData();
 					final int length = rsmd.getColumnCount();
-
+					sqlResultDuration += System.currentTimeMillis() - startTime2;
+					
 					JSONObject result;
 					String cacheSql;
+					
+					long lastCursorTime = System.currentTimeMillis();
 					while (rs.next()) { //FIXME 同时有 @ APP JOIN 和 < 等 SQL JOIN 时，next = false 总是无法进入循环，导致缓存失效，可能是连接池或线程问题
+						sqlResultDuration += System.currentTimeMillis() - lastCursorTime;
+						lastCursorTime = System.currentTimeMillis();
+						
 						index ++;
 						Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n executeAppJoin while (rs.next()){  index = " + index + "\n\n");
 
@@ -708,13 +780,20 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	protected String getKey(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
 			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap) throws Exception {
-		String key = rsmd.getColumnLabel(columnIndex);// dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
+		long startTime = System.currentTimeMillis();
+		String key = rsmd.getColumnLabel(columnIndex);  // dotIndex < 0 ? lable : lable.substring(dotIndex + 1);
+		sqlResultDuration += System.currentTimeMillis() - startTime;
+		
 		if (config.isHive()) {
 			String table_name = config.getTable();
-			if(AbstractSQLConfig.TABLE_KEY_MAP.containsKey(table_name)) table_name = AbstractSQLConfig.TABLE_KEY_MAP.get(table_name);
+			if (AbstractSQLConfig.TABLE_KEY_MAP.containsKey(table_name)) {
+				table_name = AbstractSQLConfig.TABLE_KEY_MAP.get(table_name);
+			}
 			String pattern = "^" + table_name + "\\." + "[a-zA-Z]+$";
 			boolean isMatch = Pattern.matches(pattern, key);
-			if(isMatch) key = key.split("\\.")[1];
+			if (isMatch) {
+				key = key.split("\\.")[1];
+			}
 		}
 		return key;
 	}
@@ -722,7 +801,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	protected Object getValue(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
 			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
 
+		long startTime = System.currentTimeMillis();
 		Object value = rs.getObject(columnIndex);
+		sqlResultDuration += System.currentTimeMillis() - startTime;
+		
 		//					Log.d(TAG, "name:" + rsmd.getColumnName(i));
 		//					Log.d(TAG, "lable:" + rsmd.getColumnLabel(i));
 		//					Log.d(TAG, "type:" + rsmd.getColumnType(i));
@@ -799,7 +881,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public boolean isJSONType(@NotNull SQLConfig config, ResultSetMetaData rsmd, int position, String lable) {
 		try {
+			long startTime = System.currentTimeMillis();
 			String column = rsmd.getColumnTypeName(position);
+			sqlResultDuration += System.currentTimeMillis() - startTime;
+			
 			//TODO CHAR和JSON类型的字段，getColumnType返回值都是1	，如果不用CHAR，改用VARCHAR，则可以用上面这行来提高性能。
 			//return rsmd.getColumnType(position) == 1;
 
@@ -965,19 +1050,28 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
-		return getStatement(config).executeQuery(); //PreparedStatement 不用传 SQL
+		PreparedStatement s = getStatement(config);
+// 不准，getStatement 有时比 execute sql 更耗时		executedSQLStartTime = System.currentTimeMillis();
+		ResultSet rs = s.executeQuery();  //PreparedStatement 不用传 SQL
+//		executedSQLEndTime = System.currentTimeMillis();
+		return rs;
 	}
 
 	@Override
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
 		PreparedStatement s = getStatement(config);
-		int count = s.executeUpdate(); //PreparedStatement 不用传 SQL
-		if (config.isHive() && count==0) count = 1;
-
-		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
+// 不准，getStatement 有时比 execute sql 更耗时		executedSQLStartTime = System.currentTimeMillis();
+		int count = s.executeUpdate();  // PreparedStatement 不用传 SQL
+//		executedSQLEndTime = System.currentTimeMillis();
+		
+		if (count <= 0 && config.isHive()) {
+			count = 1;
+		}
+		
+		if (config.getId() == null && config.getMethod() == RequestMethod.POST) {  // 自增id
 			ResultSet rs = s.getGeneratedKeys();
 			if (rs != null && rs.next()) {
-				config.setId(rs.getLong(1));//返回插入的主键id
+				config.setId(rs.getLong(1));  //返回插入的主键id  FIXME Oracle 拿不到
 			}
 		}
 

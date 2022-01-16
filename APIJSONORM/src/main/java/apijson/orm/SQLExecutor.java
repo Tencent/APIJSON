@@ -115,5 +115,8 @@ public interface SQLExecutor {
 
 	int getExecutedSQLCount();
 
-	
+	long getExecutedSQLDuration();
+
+	long getSqlResultDuration();
+
 }

@@ -353,6 +353,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	}
 
 	private int queryDepth;
+	private long executedSQLDuration;
 
 	/**解析请求json并获取对应结果
 	 * @param request
@@ -420,6 +421,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		onBegin();
 		try {
 			queryDepth = 0;
+			executedSQLDuration = 0;
+			
 			requestObject = onObjectParse(request, null, null, null, false);
 
 			onCommit();
@@ -441,7 +444,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		if (Log.DEBUG) {
 			requestObject.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
-			requestObject.put("time:start|duration|end", startTime + "|" + duration + "|" + endTime);
+			
+			executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
+			long parseDuration = duration - executedSQLDuration;
+			requestObject.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + executedSQLDuration);
 
 			if (error != null) {
 				requestObject.put("trace:throw", error.getClass().getName());
@@ -1845,7 +1851,10 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				}
 			}
 			else {
-				result = getSQLExecutor().execute(config, false);
+				sqlExecutor = getSQLExecutor();
+				result = sqlExecutor.execute(config, false);
+				// FIXME 改为直接在 sqlExecutor 内加好，最后 Parser 取结果，可以解决并发执行导致内部计算出错
+//				executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
 			}
 
 			return result;
