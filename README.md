@@ -244,7 +244,11 @@ https://github.com/Tencent/APIJSON/issues/187
 <br />
   
  * [腾讯科技有限公司](https://www.tencent.com)
-
+ * [腾讯音乐娱乐集团](https://www.tencentmusic.com)
+ * [华能贵成信托有限公司](https://www.hngtrust.com)
+ * [投投科技](https://www.toutou.com.cn)
+ * [圆通科技](https://www.tencentmusic.com)
+ * [乐拼科技](https://www.lepinyongche.com)
 
 ### 贡献者们
 主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个知乎基础研发架构师、1 个圆通工程师 等)：<br />
