@@ -245,7 +245,7 @@ https://github.com/Tencent/APIJSON/issues/187
   
  * [腾讯科技有限公司](https://www.tencent.com)
  * [腾讯音乐娱乐集团](https://www.tencentmusic.com)
- * [华能贵成信托有限公司](https://www.hngtrust.com)
+ * [华能贵诚信托有限公司](https://www.hngtrust.com)
  * [投投科技](https://www.toutou.com.cn)
  * [圆通科技](https://www.tencentmusic.com)
  * [乐拼科技](https://www.lepinyongche.com)
