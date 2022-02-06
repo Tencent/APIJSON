@@ -245,8 +245,8 @@ https://github.com/Tencent/APIJSON/issues/187
   
  * [腾讯科技有限公司](https://www.tencent.com)
  * [腾讯音乐娱乐集团](https://www.tencentmusic.com)
- * [深圳市传音通讯有限公司](http://www.transsion.com)
- * [社宝信息科技（上海）有限公司](http://shebaochina.com)
+ * [深圳市传音通讯有限公司](https://www.transsion.com)
+ * [社宝信息科技（上海）有限公司](https://shebaochina.com)
  * [华能贵诚信托有限公司](https://www.hngtrust.com)
  * [投投科技](https://www.toutou.com.cn)
  * [圆通速递](https://www.yto.net.cn)
