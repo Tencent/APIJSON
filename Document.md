@@ -52,6 +52,8 @@ https://github.com/Tencent/APIJSON
 }
 </code></pre>
 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_single.gif)
+  
 <br />
 
 #### 获取用户列表
@@ -95,6 +97,8 @@ https://github.com/Tencent/APIJSON
 }
 </code></pre>
 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_array.gif)
+
 <br />
 
 #### 获取动态及发布者用户
@@ -134,6 +138,8 @@ https://github.com/Tencent/APIJSON
   "msg":"success"
 }
 </code></pre>
+  
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_associate.gif)
 
 <br />
 
@@ -254,6 +260,29 @@ https://github.com/Tencent/APIJSON
 }
 </code></pre>
 
+<br />
+  
+<p align="center" >
+  <a >APIJSON 各种 JOIN：< LEFT, > RIGHT, & INNER 等</a>
+</p> 
+  
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_join.gif)
+  
+<br />
+  
+<p align="center" >
+  <a >APIJSON 各种子查询：@from@ 数据源, key@ =, key{}@ IN, key<>@ CONTAINS, key}{@ EXISTS 等 </a>
+</p> 
+    
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_subquery.gif)
+    
+<br />
+    
+<p align="center" >
+  <a >APIJSON 部分功能演示集合，由浅入深、由简单到复杂 </a>
+</p> 
+    
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif)
 
 <br />
 
