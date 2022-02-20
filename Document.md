@@ -52,6 +52,10 @@ https://github.com/Tencent/APIJSON
 }
 </code></pre>
 
+<p align="center" >
+  <a >APIJSON 各种单表对象查询：简单查询、统计、分组、排序、聚合、比较、筛选字段、字段别名 等</a>
+</p> 
+  
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_single.gif)
   
 <br />
@@ -97,6 +101,10 @@ https://github.com/Tencent/APIJSON
 }
 </code></pre>
 
+<p align="center" >
+  <a >APIJSON 各种单表数组查询：简单查询、统计、分组、排序、聚合、分页、比较、搜索、正则、条件组合 等</a>
+</p> 
+
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_array.gif)
 
 <br />
@@ -139,8 +147,6 @@ https://github.com/Tencent/APIJSON
 }
 </code></pre>
   
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_associate.gif)
-
 <br />
 
 #### 获取类似微信朋友圈的动态列表
@@ -260,20 +266,26 @@ https://github.com/Tencent/APIJSON
 }
 </code></pre>
 
+<p align="center" >
+  <a >APIJSON 各种多表关联查询：一对一、一对多、多对一、各种条件 等</a>
+</p> 
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_associate.gif)
+
 <br />
   
 <p align="center" >
-  <a >APIJSON 各种 JOIN：< LEFT, > RIGHT, & INNER 等</a>
+  <a >APIJSON 各种 JOIN：< LEFT JOIN, & INNER JOIN 等</a>
 </p> 
-  
+
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_join.gif)
   
 <br />
   
 <p align="center" >
-  <a >APIJSON 各种子查询：@from@ 数据源, key@ =, key{}@ IN, key<>@ CONTAINS, key}{@ EXISTS 等 </a>
+  <a >APIJSON 各种子查询：@from@ FROM, key@ =, key>@ >, key{}@ IN, key}{@ EXISTS 等 </a>
 </p> 
-    
+
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_subquery.gif)
     
 <br />
@@ -281,7 +293,7 @@ https://github.com/Tencent/APIJSON
 <p align="center" >
   <a >APIJSON 部分功能演示集合，由浅入深、由简单到复杂 </a>
 </p> 
-    
+
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif)
 
 <br />
