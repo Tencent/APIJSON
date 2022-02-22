@@ -244,6 +244,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="http://www.hec-bang.com"><img src="http://apijson.cn/images/users/www.hec-bang.com.png" height="75"></a>
   <a href="https://www.toutou.com.cn"><img src="http://apijson.cn/images/users/www.toutou.com.cn.jpg" height="75"></a>
   <a href="https://www.yto.net.cn"><img src="http://apijson.cn/images/users/www.yto.net.cn.png" height="75"></a>
+  <a href="https://www.aupup.com">珠海采筑电子商务有限公司</a>
 <br />
   
  * [腾讯科技有限公司](https://www.tencent.com)
