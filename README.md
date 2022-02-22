@@ -244,6 +244,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <a href="http://www.hec-bang.com"><img src="http://apijson.cn/images/users/www.hec-bang.com.png" height="75"></a>
   <a href="https://www.toutou.com.cn"><img src="http://apijson.cn/images/users/www.toutou.com.cn.jpg" height="75"></a>
   <a href="https://www.yto.net.cn"><img src="http://apijson.cn/images/users/www.yto.net.cn.png" height="75"></a>
+  <a href="https://www.aupup.com"><img src="https://b2b-a-szzb-pub.oss-cn-shenzhen.aliyuncs.com/2021/07/26/c354486b-42f5-4aaa-9046-8b4c99c98e74.png"  height="75"></a>
 <br />
   
  * [腾讯科技有限公司](https://www.tencent.com)
