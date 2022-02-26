@@ -5,6 +5,8 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
+import java.util.Map;
+
 /**自定义Entry
  * *java.util.Map.Entry是interface，new Entry(...)不好用，其它的Entry也不好用
  * @author Lemon
@@ -13,7 +15,7 @@ package apijson.orm;
  * @use new Entry<K, V>(...)
  * @warn K,V都需要基本类型时不建议使用，判空麻烦，不如新建一个Model
  */
-public class Entry<K, V> {
+public class Entry<K, V> implements Map.Entry<K, V> {
 
 	public K key;
 	public V value;
@@ -39,8 +41,9 @@ public class Entry<K, V> {
 	public V getValue() {
 		return value;
 	}
-	public void setValue(V value) {
+	public V setValue(V value) {
 		this.value = value;
+		return value;
 	}
 
 	public boolean isEmpty() {

@@ -18,6 +18,7 @@ import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1307,8 +1308,25 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		return response;
 	}
 
-	/**多表同时筛选
-	 * @param join "&/User/id@,</User[]/User/id{}@,</[]/Comment/momentId@"
+
+
+	private static final List<String> JOIN_COPY_KEY_LIST;
+	static {  // TODO 不全
+		JOIN_COPY_KEY_LIST = new ArrayList<String>();
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ROLE);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATABASE);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_SCHEMA);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATASOURCE);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COLUMN);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COMBINE);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_GROUP);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_RAW);
+	}
+	
+	/**JOIN 多表同时筛选
+	 * @param join "&/User,</Moment/id@",@/Comment/toId@" 或 "&/User":{}, "</Moment/id@":{}, "@/Comment/toId@": {}
 	 * @param request
 	 * @return 
 	 * @throws Exception 
@@ -1338,33 +1356,22 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			return null;
 		}
 
-
 		List<Join> joinList = new ArrayList<>();
 
-
-		JSONObject tableObj;
-		String targetPath;
-
-		JSONObject targetObj;
-		String targetTable;
-		String targetKey;
-
-		String path;
-
-		//		List<String> onList = new ArrayList<>();
-		for (Entry<String, Object> e : set) {//User/id@
-			if (e.getValue() instanceof JSONObject == false) {
+		for (Entry<String, Object> e : set) {  // { &/User:{}, </Moment/id@":{}, @/Comment/toId@:{} }
+			// 分割 /Table/key
+			String path = e == null ? null : e.getKey();
+			Object outer = path == null ? null : e.getValue();
+			
+			if (outer instanceof JSONObject == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
 						+ "必须为 &/Table0/key0,</Table1/key1,... 或 { '&/Table0/key0':{}, '</Table1/key1':{},... } 这种形式！");
 			}
 
-			//分割 /Table/key
-			path = "" + e.getKey();
-
-			int index = path.indexOf("/");
+			int index = path == null ? -1 : path.indexOf("/");
 			if (index < 0) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 值 " + path + " 不合法！"
-						+ "必须为 &/Table0/key0,</Table1/key1,... 或 { '&/Table0/key0':{}, '</Table1/key1':{},... } 这种形式！");
+						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种形式！");
 			}
 			String joinType = path.substring(0, index); //& | ! < > ( ) <> () *
 			//			if (StringUtil.isEmpty(joinType, true)) {
@@ -1373,191 +1380,222 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			path = path.substring(index + 1);
 
 			index = path.indexOf("/");
-			String tableKey = index < 0 ? null : path.substring(0, index); //User:owner
+			String tableKey = index < 0 ? path : path.substring(0, index); // User:owner
 			apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
-			String table = entry.getKey(); //User
+			String table = entry.getKey(); // User
 			if (StringUtil.isName(table) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 Table 值 " + table + " 不合法！"
-						+ "必须为 &/Table0/key0,</Table1:alias1/key1,... 这种形式！且 Table0 必须满足大写字母开头的表对象英文单词 key 格式！");
+						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
+						+ "且 Table 必须满足大写字母开头的表对象英文单词 key 格式！");
 			}
 
-			String alias = entry.getValue(); //owner
+			String alias = entry.getValue(); // owner
 			if (StringUtil.isNotEmpty(alias, true) && StringUtil.isName(alias) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 alias 值 " + alias + " 不合法！"
-						+ "必须为 &/Table0/key0,</Table1:alias1/key1,... 这种形式！且 Table:alias 的 alias 必须满足英文单词变量名格式！");
+						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
+						+ "且 Table:alias 的 alias 必须满足英文单词变量名格式！");
 			}
 
-			String key = StringUtil.isEmpty(table, true) ? null : path.substring(index + 1);//id@
-
-			//取出Table对应的JSONObject，及内部引用赋值 key:value
+			// 取出Table对应的JSONObject，及内部引用赋值 key:value
+			JSONObject tableObj;
 			try {
 				tableObj = request.getJSONObject(tableKey);
+				if (tableObj == null) {
+					throw new NullPointerException("tableObj == null");
+				}
 			}
 			catch (Exception e2) {
-				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + path + "' 对应的 " + tableKey + ":value 中 value 类型不合法！必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
+				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + tableKey + ":value 中 value 类型不合法！必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
+			}
+			
+
+			JSONObject refObj = new JSONObject(tableObj.size(), true);
+
+			String key = index < 0 ? null : path.substring(index + 1); // id@
+			if (key != null) {  // 指定某个 key 为 JOIN ON 条件
+				if (key.indexOf("@") != key.length() - 1) {
+					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + " 中 " + key + " 不合法！"
+							+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
+							+ "且 Table:alias 的 alias 必须满足英文单词变量名格式！");
+				}
+				
+				if (tableObj.get(key) instanceof String == false) {
+					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + "' 对应的 " + tableKey + ":{ " + key + ": value } 中 value 类型不合法！必须为同层级引用赋值路径 String！");
+				}
+
+				refObj.put(key, tableObj.getString(key));
 			}
 
-			targetPath = tableObj == null ? null : tableObj.getString(key);
-			if (StringUtil.isEmpty(targetPath, true)) {
-				throw new IllegalArgumentException("/" + path + ":value 中 value 值 " + targetPath + " 不合法！必须为引用赋值的路径 '/targetTable/targetKey' ！");
+			
+			Set<Entry<String, Object>> tableSet = tableObj.entrySet();
+			// 取出所有 join 条件
+			JSONObject requestObj = new JSONObject(true); // (JSONObject) obj.clone();
+
+			boolean matchSingle = false;
+			for (Entry<String, Object> tableEntry : tableSet) {
+				String k = tableEntry.getKey();
+				Object v = k == null ? null : tableEntry.getValue();
+				if (v == null) {
+					continue;
+				}
+
+				matchSingle = matchSingle == false && k.equals(key);
+				if (matchSingle) {
+					continue;
+				}
+
+				if (k.length() > 1 && k.indexOf("@") == k.length() - 1 && v instanceof String) {
+					String sv = (String) v;
+					int ind = sv.endsWith("@") ? -1 : sv.indexOf("/");
+					if (ind == 0 && key == null) {  // 指定了某个就只允许一个 ON 条件
+						String p = sv.substring(1);
+						int ind2 = p.indexOf("/");
+						String tk = ind2 < 0 ? null : p.substring(0, ind2);
+
+						apijson.orm.Entry<String, String> te = tk == null || p.substring(ind2 + 1).indexOf("/") >= 0 ? null : Pair.parseEntry(tk, true);
+
+						if (te != null && JSONRequest.isTableKey(te.getKey()) && request.get(tk) instanceof JSONObject) {
+							refObj.put(k, v);
+							continue;
+						}
+					}
+
+					Object rv = getValueByPath(sv);
+					if (rv != null && rv.equals(sv) == false) {
+						requestObj.put(k.substring(0, k.length() - 1), rv);
+						continue;
+					}
+
+					throw new UnsupportedOperationException(table + "/" + k + " 不合法！" + JSONRequest.KEY_JOIN + " 关联的 Table 中，"
+							+ "join: ?/Table/key 时只能有 1 个 key@:value；join: ?/Table 时所有 key@:value 要么是符合 join 格式，要么能直接解析成具体值！");  // TODO 支持 join on
+				}
+
+				if (k.startsWith("@")) {
+					if (JOIN_COPY_KEY_LIST.contains(k)) {
+						requestObj.put(k, v); // 保留
+					}
+				}
+				else {
+					if (k.endsWith("@")) {
+						throw new UnsupportedOperationException(table + "/" + k + " 不合法！" + JSONRequest.KEY_JOIN + " 关联的 Table 中，"
+								+ "join: ?/Table/key 时只能有 1 个 key@:value；join: ?/Table 时所有 key@:value 要么是符合 join 格式，要么能直接解析成具体值！");  // TODO 支持 join on
+					}
+
+					if (k.contains("()") == false) { // 不需要远程函数
+						requestObj.put(k, v); // 保留
+					}
+				}
 			}
 
-			//取出引用赋值路径targetPath对应的Table和key
-			index = targetPath.lastIndexOf("/");
-			targetKey = index < 0 ? null : targetPath.substring(index + 1);
-			if (StringUtil.isName(targetKey) == false) {
-				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中 targetKey 值 " + targetKey + " 不合法！必须满足英文单词变量名格式！");
+			Set<Entry<String, Object>> refSet = refObj.entrySet();
+			if (refSet.isEmpty()) {
+				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 alias 值 " + alias + " 不合法！"
+						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
+						+ "且 Table:alias 的 alias 必须满足英文单词变量名格式！");
 			}
 
-			targetPath = targetPath.substring(0, index);
-			index = targetPath.lastIndexOf("/");
-			String targetTableKey = index < 0 ? targetPath : targetPath.substring(index + 1);
 
-			// 主表不允许别名
-			//			apijson.orm.Entry<String, String> targetEntry = Pair.parseEntry(targetTableKey, true);
-			//			targetTable = targetEntry.getKey(); //User
-			//			if (StringUtil.isName(targetTable) == false) {
-			//				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中 targetTable 值 " + targetTable + " 不合法！必须满足大写字母开头的表对象英文单词 key 格式！");
-			//			}
-			//			
-			//			String targetAlias = targetEntry.getValue(); //owner
-			//			if (StringUtil.isNotEmpty(targetAlias, true) && StringUtil.isName(targetAlias) == false) {
-			//				throw new IllegalArgumentException("/" + path + ":'/targetTable:targetAlias/targetKey' 中 targetAlias 值 " + targetAlias + " 不合法！必须满足英文单词变量名格式！");
-			//			}
+			Join j = new Join();
+			j.setPath(e.getKey());
+			j.setJoinType(joinType);
+			j.setTable(table);
+			j.setAlias(alias);
+			j.setOuter((JSONObject) outer);
+			j.setRequest(requestObj);
 
-			targetTable = targetTableKey;  // 主表不允许别名
-			if (StringUtil.isName(targetTable) == false) {
-				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中 targetTable 值 " + targetTable + " 不合法！必须满足大写字母开头的表对象英文单词 key 格式！");
-			}
+			List<Join.On> onList = new ArrayList<>();
+			for (Entry<String, Object> refEntry : refSet) {
+				String originKey = refEntry.getKey();
 
-			//对引用的JSONObject添加条件
-			try {
-				targetObj = request.getJSONObject(targetTableKey);
-			}
-			catch (Exception e2) {
-				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中路径对应的 '" + targetTableKey + "':value 中 value 类型不合法！必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
-			}
+				String targetPath = (String) refEntry.getValue();
+				if (StringUtil.isEmpty(targetPath, true)) {
+					throw new IllegalArgumentException(e.getKey() + ":value 中 value 值 " + targetPath + " 不合法！必须为引用赋值的路径 '/targetTable/targetKey' ！");
+				}
 
-			if (targetObj == null) {
-				throw new IllegalArgumentException("/" + path + ":'/targetTable/targetKey' 中路径对应的对象 '" + targetTableKey + "':{} 不存在或值为 null ！必须是 {} 这种 JSONObject 格式！");
+				// 取出引用赋值路径 targetPath 对应的 Table 和 key 
+				index = targetPath.lastIndexOf("/");
+				String targetKey = index < 0 ? null : targetPath.substring(index + 1);
+				if (StringUtil.isName(targetKey) == false) {
+					throw new IllegalArgumentException(e.getKey() + ":'/targetTable/targetKey' 中 targetKey 值 " + targetKey + " 不合法！必须满足英文单词变量名格式！");
+				}
+
+				targetPath = targetPath.substring(0, index);
+				index = targetPath.lastIndexOf("/");
+				String targetTableKey = index < 0 ? targetPath : targetPath.substring(index + 1);
+
+				// 主表允许别名
+				apijson.orm.Entry<String, String> targetEntry = Pair.parseEntry(targetTableKey, true);
+				String targetTable = targetEntry.getKey(); //User
+				if (StringUtil.isName(targetTable) == false) {
+					throw new IllegalArgumentException(e.getKey() + ":'/targetTable/targetKey' 中 targetTable 值 " + targetTable + " 不合法！必须满足大写字母开头的表对象英文单词 key 格式！");
+				}
+
+				String targetAlias = targetEntry.getValue(); //owner
+				if (StringUtil.isNotEmpty(targetAlias, true) && StringUtil.isName(targetAlias) == false) {
+					throw new IllegalArgumentException(e.getKey() + ":'/targetTable:targetAlias/targetKey' 中 targetAlias 值 " + targetAlias + " 不合法！必须满足英文单词变量名格式！");
+				}
+
+				targetTable = targetTableKey;  // 主表允许别名
+				if (StringUtil.isName(targetTable) == false) {
+					throw new IllegalArgumentException(e.getKey() + ":'/targetTable/targetKey' 中 targetTable 值 " + targetTable + " 不合法！必须满足大写字母开头的表对象英文单词 key 格式！");
+				}
+
+				//对引用的JSONObject添加条件
+				JSONObject targetObj;
+				try {
+					targetObj = request.getJSONObject(targetTableKey);
+				}
+				catch (Exception e2) {
+					throw new IllegalArgumentException(e.getKey() + ":'/targetTable/targetKey' 中路径对应的 '" + targetTableKey + "':value 中 value 类型不合法！必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
+				}
+
+				if (targetObj == null) {
+					throw new IllegalArgumentException(e.getKey() + ":'/targetTable/targetKey' 中路径对应的对象 '" + targetTableKey + "':{} 不存在或值为 null ！必须是 {} 这种 JSONObject 格式！");
+				}
+				
+				Join.On on = new Join.On();
+				on.setKeyAndType(j.getJoinType(), j.getTable(), originKey);
+				if (StringUtil.isName(on.getKey()) == false) {
+					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 key@ 中 key 值 " + on.getKey() + " 不合法！必须满足英文单词变量名格式！");
+				}
+				
+				on.setOriginKey(originKey);
+				on.setOriginValue((String) refEntry.getValue());
+				on.setTargetTable(targetTable);
+				on.setTargetAlias(targetAlias);
+				on.setTargetKey(targetKey);
+				
+				onList.add(on);
 			}
+			
+			j.setOnList(onList);
+			
+			joinList.add(j);
+			//			onList.add(table + "." + key + " = " + targetTable + "." + targetKey); // ON User.id = Moment.userId
 
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 <<<<<<<<<
 			// AbstractSQLConfig.newSQLConfig 中强制把 id, id{}, userId, userId{} 放到了最前面		tableObj.put(key, tableObj.remove(key));
 
-			if (tableObj.size() > 1) {  // 把 key 强制放最前，AbstractSQLExcecutor 中 config.putWhere 也是放尽可能最前
-				JSONObject newTableObj = new JSONObject(tableObj.size(), true);
-				newTableObj.put(key, tableObj.remove(key));
-				newTableObj.putAll(tableObj);
-
-				tableObj = newTableObj;
-				request.put(tableKey, tableObj);
+			if (refObj.size() != tableObj.size()) {  // 把 key 强制放最前，AbstractSQLExcecutor 中 config.putWhere 也是放尽可能最前
+				refObj.putAll(tableObj);
+				request.put(tableKey, refObj);
 
 //				tableObj.clear();
-//				tableObj.putAll(newTableObj);
+//				tableObj.putAll(refObj);
 			}
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 >>>>>>>>>
-
-
-			Join j = new Join();
-			j.setPath(path);
-			j.setOriginKey(key);
-			j.setOriginValue(targetPath);
-			j.setJoinType(joinType);
-			j.setTable(table);
-			j.setAlias(alias);
-			j.setTargetTable(targetTable);
-			//			j.setTargetAlias(targetAlias);
-			j.setTargetKey(targetKey);
-			j.setKeyAndType(key);
-			j.setRequest(getJoinObject(table, tableObj, key));
-			j.setOuter((JSONObject) e.getValue());
-
-			if (StringUtil.isName(j.getKey()) == false) {
-				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 key@ 中 key 值 " + j.getKey() + " 不合法！必须满足英文单词变量名格式！");
-			}
-
-			joinList.add(j);
-
-			//			onList.add(table + "." + key + " = " + targetTable + "." + targetKey); // ON User.id = Moment.userId
-
 		}
-
 
 		//拼接多个 SQLConfig 的SQL语句，然后执行，再把结果分别缓存(Moment, User等)到 SQLExecutor 的 cacheMap
 		//		AbstractSQLConfig config0 = null;
 		//		String sql = "SELECT " + config0.getColumnString() + " FROM " + config0.getTable() + " INNER JOIN " + targetTable + " ON "
 		//				+ onList.get(0) + config0.getGroupString() + config0.getHavingString() + config0.getOrderString();
 
-
 		return joinList;
 	}
 
 
 
-	private static final List<String> JOIN_COPY_KEY_LIST;
-	static { // TODO 不全
-		JOIN_COPY_KEY_LIST = new ArrayList<String>();
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ROLE);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATABASE);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_SCHEMA);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATASOURCE);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COLUMN);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COMBINE);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_GROUP);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
-		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_RAW);
-	}
-
-	/**取指定 JSON 对象的 id 集合
-	 * @param table
-	 * @param key
-	 * @param obj
-	 * @return null ? 全部 : 有限的数组
-	 */
-	private JSONObject getJoinObject(String table, JSONObject obj, String key) {
-		if (obj == null || obj.isEmpty()) {
-			Log.e(TAG, "getIdList  obj == null || obj.isEmpty() >> return null;");
-			return null;
-		}
-		if (StringUtil.isEmpty(key, true)) {
-			Log.e(TAG, "getIdList  StringUtil.isEmpty(key, true) >> return null;");
-			return null;
-		}
-
-		// 取出所有 join 条件
-		JSONObject requestObj = new JSONObject(true); // (JSONObject) obj.clone();
-		Set<String> set = new LinkedHashSet<>(obj.keySet());
-		for (String k : set) {
-			if (StringUtil.isEmpty(k, true)) {
-				continue;
-			}
-
-			if (k.startsWith("@")) {
-				if (JOIN_COPY_KEY_LIST.contains(k)) {
-					requestObj.put(k, obj.get(k)); //保留
-				}
-			}
-			else {
-				if (k.endsWith("@")) {
-					if (k.equals(key)) {
-						continue;
-					}
-					throw new UnsupportedOperationException(table + "." + k + " 不合法！" + JSONRequest.KEY_JOIN
-							+ " 关联的Table中只能有1个 key@:value ！");  // TODO 支持 join on
-				}
-
-				if (k.contains("()") == false) { //不需要远程函数
-					//					requestObj.put(k, obj.remove(k)); //remove是为了避免重复查询副表
-					requestObj.put(k, obj.get(k)); //remove是为了避免重复查询副表
-				}
-			}
-		}
-
-
-		return requestObj;
-	}
 
 	@Override
 	public int getDefaultQueryCount() {

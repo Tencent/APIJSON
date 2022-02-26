@@ -56,6 +56,7 @@ import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.SQL;
 import apijson.StringUtil;
+import apijson.orm.Join.On;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.model.Access;
 import apijson.orm.model.Column;
@@ -83,7 +84,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static final Pattern PATTERN_RANGE;
 	private static final Pattern PATTERN_FUNCTION;
-	private static final Pattern PATTERN_STRING;
 
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -97,10 +97,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	// 允许调用的 SQL 函数：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
 	public static final Map<String, String> SQL_FUNCTION_MAP;
 
-	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- ，以免拼接 SQL 时被注入意外可执行指令
+	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- /**/ ，以免拼接 SQL 时被注入意外可执行指令
 		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
 		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~`!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\(\\)\\$]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
-		PATTERN_STRING = Pattern.compile("^[,#;\"`]+$");
 
 		TABLE_KEY_MAP = new HashMap<String, String>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
@@ -3378,10 +3377,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			List<Object> pvl = new ArrayList<>();
 			boolean changed = false;
 
-			String sql = null;
-			SQLConfig jc;
-			String jt;
-			String tt;
 			//  主表不用别名			String ta;
 			for (Join j : joinList) {
 				if (j.isAppJoin()) { // APP JOIN，只是作为一个标记，执行完主表的查询后自动执行副表的查询 User.id IN($commentIdList)
@@ -3391,18 +3386,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				//LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
 				// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
-				jc = j.getJoinConfig();
+				SQLConfig jc = j.getJoinConfig();
 				jc.setPrepared(isPrepared());
 
-				jt = StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
-				tt = j.getTargetTable();
+				String jt = StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
+				List<On> onList = j.getOnList();
 
 				//如果要强制小写，则可在子类重写这个方法再 toLowerCase
 				//				if (DATABASE_POSTGRESQL.equals(getDatabase())) {
 				//					jt = jt.toLowerCase();
 				//					tn = tn.toLowerCase();
 				//				}
-
+				
+				String sql;
+				
 				switch (type) {
 				//前面已跳过				case "@": // APP JOIN
 				//					continue;
@@ -3413,9 +3410,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case ">": // RIGHT JOIN
 					jc.setMain(true).setKeyPrefix(false);
 					sql = ( "<".equals(type) ? " LEFT" : (">".equals(type) ? " RIGHT" : " CROSS") )
-							+ " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS "
-							+ quote + jt + quote + " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = "
-							+ quote + tt + quote + "." + quote + j.getTargetKey() + quote;
+							+ " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS " + quote + jt + quote;
+					
+					if (onList != null) {
+						boolean first = true;
+						for (On on : onList) {
+							sql += (first ? " ON " : " AND ") + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
+									+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							first = false;
+						}
+					}
+					
 					jc.setMain(false).setKeyPrefix(true);
 
 					pvl.addAll(jc.getPreparedValueList());
@@ -3429,8 +3434,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "^": // SIDE JOIN: ! (A & B)
 				case "(": // ANTI JOIN: A & ! B
 				case ")": // FOREIGN JOIN: B & ! A
-					sql = " INNER JOIN " + jc.getTablePath()
-					+ " ON " + quote + jt + quote + "." + quote + j.getKey() + quote + " = " + quote + tt + quote + "." + quote + j.getTargetKey() + quote;
+					sql = " INNER JOIN " + jc.getTablePath();
+					if (onList != null) {
+						boolean first = true;
+						for (On on : onList) {
+							sql += (first ? " ON " : " AND ") + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
+									+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							first = false;
+						}
+					}
 					break;
 				default:
 					throw new UnsupportedOperationException(
@@ -3451,7 +3463,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		}
 
-		return joinOns;
+		return StringUtil.isEmpty(joinOns, true) ? "" : joinOns + "  \n";
 	}
 
 	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
@@ -3924,12 +3936,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			/* SELECT  count(*)  AS count  FROM sys.Moment AS Moment  
 			   LEFT JOIN ( SELECT count(*)  AS count FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
 			if (RequestMethod.isHeadMethod(method, true)) {
-				joinConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
-				joinConfig.setColumn(Arrays.asList(j.getKey())); //优化性能，不取非必要的字段
+				List<On> onList = j.getOnList();
+				List<String> column = onList == null ? null : new ArrayList<>(onList.size());
+				if (column != null) {
+					for (On on : onList) {
+						column.add(on.getKey());
+					}
+				}
+				
+				joinConfig.setMethod(GET);  // 子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
+				joinConfig.setColumn(column);  // 优化性能，不取非必要的字段
 
 				if (cacheConfig != null) {
-					cacheConfig.setMethod(GET); //子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
-					cacheConfig.setColumn(Arrays.asList(j.getKey())); //优化性能，不取非必要的字段
+					cacheConfig.setMethod(GET);  // 子查询不能为 SELECT count(*) ，而应该是 SELECT momentId
+					cacheConfig.setColumn(column);  // 优化性能，不取非必要的字段
 				}
 			}
 

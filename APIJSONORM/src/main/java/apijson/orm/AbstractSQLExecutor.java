@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,6 +38,7 @@ import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import apijson.orm.Join.On;
 
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
@@ -531,7 +533,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						if (curJoin != prevJoin) {  // 前后字段不在同一个表对象，即便后面出现 null，也不该是主表数据，而是逻辑 bug 导致
 							SQLConfig viceConfig = curJoin != null && curJoin.isSQLJoin() ? curJoin.getCacheConfig() : null;
 							if (viceConfig != null) {  //FIXME 只有和主表关联才能用 item，否则应该从 childMap 查其它副表数据
-								viceConfig.putWhere(curJoin.getKey(), item.get(curJoin.getTargetKey()), true);
+								List<On> onList = curJoin.getOnList();
+								if (onList != null) {
+									for (On on : onList) {
+										if (on != null) {
+											viceConfig.putWhere(on.getKey(), item.get(on.getTargetKey()), true);
+										}
+									}
+								}
 							}
 							String viceSql = viceConfig == null ? null : viceConfig.getSQL(false);  //TODO 在 SQLConfig 缓存 SQL，减少大量的重复生成
 
@@ -660,24 +669,26 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				jc = join.getJoinConfig();
 
-				//取出 "id@": "@/User/userId" 中所有 userId 的值
-				List<Object> targetValueList = new ArrayList<>();
-				JSONObject mainTable;
-				Object targetValue;
+				List<On> onList = join.getOnList();
+				if (onList != null) {
+					for (On on : onList) {
+						//取出 "id@": "@/User/userId" 中所有 userId 的值
+						List<Object> targetValueList = new ArrayList<>();
 
-				for (int i = 0; i < resultList.size(); i++) {
-					mainTable = resultList.get(i);
-					targetValue = mainTable == null ? null : mainTable.get(join.getTargetKey());
+						for (int i = 0; i < resultList.size(); i++) {
+							JSONObject mainTable = resultList.get(i);
+							Object targetValue = mainTable == null ? null : mainTable.get(on.getTargetKey());
 
-					if (targetValue != null && targetValueList.contains(targetValue) == false) {
-						targetValueList.add(targetValue);
+							if (targetValue != null && targetValueList.contains(targetValue) == false) {
+								targetValueList.add(targetValue);
+							}
+						}
+
+						//替换为 "id{}": [userId1, userId2, userId3...]
+						jc.putWhere(on.getOriginKey(), null, false);  // remove orginKey
+						jc.putWhere(on.getKey() + "{}", targetValueList, true);  // add orginKey{}
 					}
 				}
-
-
-				//替换为 "id{}": [userId1, userId2, userId3...]
-				jc.putWhere(join.getOriginKey(), null, false);  // remove orginKey
-				jc.putWhere(join.getKey() + "{}", targetValueList, true);  // add orginKey{}
 
 				jc.setMain(true).setPreparedValueList(new ArrayList<>());
 
@@ -721,7 +732,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						result = new JSONObject(true);
 
 						for (int i = 1; i <= length; i++) {
-
 							result = onPutColumn(jc, rs, rsmd, index, result, i, null, null);
 						}
 
@@ -731,7 +741,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 								+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
 						//缓存到 childMap
-						cc.putWhere(join.getKey(), result.get(join.getKey()), true);
+						if (onList != null) {
+							for (On on : onList) {
+								cc.putWhere(on.getKey(), result.get(on.getKey()), true);
+							}
+						}
 						cacheSql = cc.getSQL(false);
 						childMap.put(cacheSql, result);
 
