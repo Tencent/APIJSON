@@ -1036,25 +1036,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//加上子表的 group
 		String joinGroup = "";
 		if (joinList != null) {
-			SQLConfig cfg;
-			String c;
 			boolean first = true;
 			for (Join j : joinList) {
 				if (j.isAppJoin()) {
 					continue;
 				}
 
-				cfg = j.isLeftOrRightJoin() ? j.getOuterConfig() : j.getJoinConfig();
-				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-					cfg.setAlias(cfg.getTable());
-				}
+				SQLConfig ocfg = j.getOuterConfig();
+				SQLConfig cfg = (ocfg != null && ocfg.getGroup() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
-				c = ((AbstractSQLConfig) cfg).getGroupString(false);
-				if (StringUtil.isEmpty(c, true) == false) {
-					joinGroup += (first ? "" : ", ") + c;
-					first = false;
-				}
+				if (cfg != null) {
+					cfg.setMain(false).setKeyPrefix(true);
+					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+						cfg.setAlias(cfg.getTable());
+					}
+					String c = ((AbstractSQLConfig) cfg).getGroupString(false);
 
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinGroup += (first ? "" : ", ") + c;
+						first = false;
+					}
+				}
 			}
 		}
 
@@ -1098,25 +1100,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//加上子表的 having
 		String joinHaving = "";
 		if (joinList != null) {
-			SQLConfig cfg;
-			String c;
 			boolean first = true;
 			for (Join j : joinList) {
 				if (j.isAppJoin()) {
 					continue;
 				}
 
-				cfg = j.isLeftOrRightJoin() ? j.getOuterConfig() : j.getJoinConfig();
-				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-					cfg.setAlias(cfg.getTable());
-				}
+				SQLConfig ocfg = j.getOuterConfig();
+				SQLConfig cfg = (ocfg != null && ocfg.getHaving() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				
+				if (cfg != null) {
+					cfg.setMain(false).setKeyPrefix(true);
+					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+						cfg.setAlias(cfg.getTable());
+					}
+					String c = ((AbstractSQLConfig) cfg).getHavingString(false);
 
-				c = ((AbstractSQLConfig) cfg).getHavingString(false);
-				if (StringUtil.isEmpty(c, true) == false) {
-					joinHaving += (first ? "" : ", ") + c;
-					first = false;
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinHaving += (first ? "" : ", ") + c;
+						first = false;
+					}
 				}
-
 			}
 		}
 
@@ -1255,25 +1259,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//加上子表的 order
 		String joinOrder = "";
 		if (joinList != null) {
-			SQLConfig cfg;
-			String c;
 			boolean first = true;
 			for (Join j : joinList) {
 				if (j.isAppJoin()) {
 					continue;
 				}
 
-				cfg = j.isLeftOrRightJoin() ? j.getOuterConfig() : j.getJoinConfig();
-				if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-					cfg.setAlias(cfg.getTable());
-				}
+				SQLConfig ocfg = j.getOuterConfig();
+				SQLConfig cfg = (ocfg != null && ocfg.getOrder() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
-				c = ((AbstractSQLConfig) cfg).getOrderString(false);
-				if (StringUtil.isEmpty(c, true) == false) {
-					joinOrder += (first ? "" : ", ") + c;
-					first = false;
-				}
+				if (cfg != null) {
+					cfg.setMain(false).setKeyPrefix(true);
+					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+						cfg.setAlias(cfg.getTable());
+					}
+					String c = ((AbstractSQLConfig) cfg).getOrderString(false);
 
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinOrder += (first ? "" : ", ") + c;
+						first = false;
+					}
+				}
 			}
 		}
 
@@ -1499,41 +1505,38 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case GETS:
 			String joinColumn = "";
 			if (joinList != null) {
-				SQLConfig ecfg;
-				SQLConfig cfg;
-				String c;
 				boolean first = true;
 				for (Join j : joinList) {
 					if (j.isAppJoin()) {
 						continue;
 					}
 					
-					if (j.isLeftOrRightJoin()) {
+					SQLConfig ocfg = j.getOuterConfig();
+					boolean isEmpty = ocfg == null || ocfg.getColumn() == null;
+					boolean isLeftOrRightJoin = j.isLeftOrRightJoin();
+					
+					if (isEmpty && isLeftOrRightJoin) {
 						// 改为 SELECT  ViceTable.* 解决 SELECT sum(ViceTable.id) LEFT/RIGHT JOIN (SELECT sum(id) FROM ViceTable...) AS ViceTable
 						// 不仅导致 SQL 函数重复计算，还有时导致 SQL 报错或对应字段未返回
 						String quote = getQuote();
 						joinColumn += (first ? "" : ", ") + quote + (StringUtil.isEmpty(j.getAlias(), true) ? j.getTable() : j.getAlias()) + quote + ".*";
 						first = false;
 					} else {
-						ecfg = j.getOuterConfig();
-						if (ecfg != null && ecfg.getColumn() != null) { //优先级更高
-							cfg = ecfg;
-						}
-						else {
-							cfg = j.getJoinConfig();
-						}
-	
-						if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-							cfg.setAlias(cfg.getTable());
-						}
-	
-						c = ((AbstractSQLConfig) cfg).getColumnString(true);
-						if (StringUtil.isEmpty(c, true) == false) {
-							joinColumn += (first ? "" : ", ") + c;
-							first = false;
+						SQLConfig cfg = isLeftOrRightJoin == false && isEmpty ? j.getJoinConfig() : ocfg;
+						if (cfg != null) {
+							cfg.setMain(false).setKeyPrefix(true);
+							if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+								cfg.setAlias(cfg.getTable());
+							}
+
+							String c = ((AbstractSQLConfig) cfg).getColumnString(true);
+							if (StringUtil.isEmpty(c, true) == false) {
+								joinColumn += (first ? "" : ", ") + c;
+								first = false;
+							}
 						}
 					}
-
+					
 					inSQLJoin = true;
 				}
 			}
