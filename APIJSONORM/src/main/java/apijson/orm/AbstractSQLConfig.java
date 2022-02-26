@@ -3451,8 +3451,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
 							);
 				}
+				
+				SQLConfig oc = j.getOuterConfig();
+				String ow = null;
+				if (oc != null) {
+					oc.setPrepared(isPrepared());
+					oc.setPreparedValueList(new ArrayList<>());
+					oc.setMain(false).setKeyPrefix(true);
+					ow = oc.getWhereString(false);
+					
+					pvl.addAll(oc.getPreparedValueList());
+					changed = true;
+				}
 
-				joinOns += "  \n  " + sql;
+				joinOns += "  \n  " + sql + (StringUtil.isEmpty(ow, true) ? "" : " AND ( " + ow + " ) ");
 			}
 
 
@@ -3925,7 +3937,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				joinConfig.setMain(false).setKeyPrefix(true);
 
-				if (j.isLeftOrRightJoin()) {
+				if (j.getOuter() != null) {
 					SQLConfig outterConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
 					outterConfig.setMain(false).setKeyPrefix(true).setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 					j.setOuterConfig(outterConfig);
