@@ -1,5 +1,5 @@
 # APIJSON 通用文档 
-本文是通用文档，只和 APIJSON 协议有关，和 C#, Go, Java, JavaScript, Python, PHP 等开发语言无关。 <br />
+本文是通用文档，只和 APIJSON 协议有关，和 C#, Go, Java, JavaScript, PHP, Python, TypeScript 等开发语言无关。 <br />
 具体开发语言相关的 配置、运行、部署 等文档见各个相关项目的文档，可以在首页点击对应语言的入口来查看。<br />
 https://github.com/Tencent/APIJSON
 ![image](https://user-images.githubusercontent.com/5738175/134520081-a63d3817-321c-4e7b-9e03-73c6827a19c1.png)
@@ -53,7 +53,7 @@ https://github.com/Tencent/APIJSON
 </code></pre>
 
 <p align="center" >
-  <a >APIJSON 各种单表对象查询：简单查询、统计、分组、排序、聚合、比较、筛选字段、字段别名 等</a>
+  <a >[GIF] APIJSON 各种单表对象查询：简单查询、统计、分组、排序、聚合、比较、筛选字段、字段别名 等</a>
 </p> 
   
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_single.gif)
@@ -102,7 +102,7 @@ https://github.com/Tencent/APIJSON
 </code></pre>
 
 <p align="center" >
-  <a >APIJSON 各种单表数组查询：简单查询、统计、分组、排序、聚合、分页、比较、搜索、正则、条件组合 等</a>
+  <a >[GIF] APIJSON 各种单表数组查询：简单查询、统计、分组、排序、聚合、分页、比较、搜索、正则、条件组合 等</a>
 </p> 
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_array.gif)
@@ -267,7 +267,7 @@ https://github.com/Tencent/APIJSON
 </code></pre>
 
 <p align="center" >
-  <a >APIJSON 各种多表关联查询：一对一、一对多、多对一、各种条件 等</a>
+  <a >[GIF] APIJSON 各种多表关联查询：一对一、一对多、多对一、各种条件 等</a>
 </p> 
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_associate.gif)
@@ -275,7 +275,7 @@ https://github.com/Tencent/APIJSON
 <br />
   
 <p align="center" >
-  <a >APIJSON 各种 JOIN：< LEFT JOIN, & INNER JOIN 等</a>
+  <a >[GIF] APIJSON 各种 JOIN：< LEFT JOIN, & INNER JOIN 等</a>
 </p> 
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_join.gif)
@@ -283,7 +283,7 @@ https://github.com/Tencent/APIJSON
 <br />
   
 <p align="center" >
-  <a >APIJSON 各种子查询：@from@ FROM, key@ =, key>@ >, key{}@ IN, key}{@ EXISTS 等 </a>
+  <a >[GIF] APIJSON 各种子查询：@from@ FROM, key@ =, key>@ >, key{}@ IN, key}{@ EXISTS 等 </a>
 </p> 
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_subquery.gif)
@@ -291,7 +291,7 @@ https://github.com/Tencent/APIJSON
 <br />
     
 <p align="center" >
-  <a >APIJSON 部分功能演示集合，由浅入深、由简单到复杂 </a>
+  <a >[GIF] APIJSON 部分功能演示集合，由浅入深、由简单到复杂 </a>
 </p> 
 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif)
