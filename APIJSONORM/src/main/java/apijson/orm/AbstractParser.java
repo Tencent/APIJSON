@@ -649,7 +649,11 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	public static JSONObject extendResult(JSONObject object, int code, String msg, boolean isRoot) {
 		int index = Log.DEBUG == false || isRoot == false || msg == null ? -1 : msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
 		String debug = Log.DEBUG == false || isRoot == false ? null : (index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
-				: " \n **环境信息** "
+				: " \n 提 bug 请发请求和响应的【完整截屏】，没图的自行解决！"
+						+ " \n 开发者有限的时间和精力主要放在【维护项目源码和文档】上！"
+						+ " \n 【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！"
+						+ " \n 【态度 不文明/不友善】的可能会被踢出群，问题也可能不予解答！！！"
+				+ " \n\n **环境信息** "
 				+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
 				+ " \n 数据库: DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE
 				+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
