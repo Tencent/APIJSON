@@ -226,26 +226,26 @@ https://github.com/Tencent/APIJSON/issues/36
 如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(按登记顺序排列)：<br />
 https://github.com/Tencent/APIJSON/issues/187 
 <div style="float:left">
-  <a href="https://ieg.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75"></a>
-  <a href="https://cloud.tencent.com"><img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75"></a>
-  <a href="https://www.tencentmusic.com"><img src="https://user-images.githubusercontent.com/5738175/126524713-b38a8f02-3086-45d4-91db-6f5389811d51.png" height="75"></a>
+  <img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75">
+  <img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75">
+  <img src="https://user-images.githubusercontent.com/5738175/126524713-b38a8f02-3086-45d4-91db-6f5389811d51.png" height="75">
   <br />
 
-  <a href="http://www.transsion.com"><img src="http://apijson.cn/images/users/www.transsion.com.jpeg" height="75"></a>
-  <a href="http://shebaochina.com"><img src="http://apijson.cn/images/users/shebaochina.com.png" height="75"></a>
-  <a href="http://www.xmfish.com"><img src="http://apijson.cn/images/users/www.xmfish.com.gif" height="75"></a>
-  <a href="http://www.xxwolo.com"><img src="http://apijson.cn/images/users/www.xxwolo.com.jpeg" height="75"></a>
-  <a href="http://t-think.com"><img src="http://apijson.cn/images/t-think.com.png" height="75"></a>
-  <a href="http://xm.juhu.com"><img src="http://apijson.cn/images/users/xm.juhu.com.png" height="75"></a>
-  <a href="http://www.aipaipai-inc.com"><img src="http://apijson.cn/images/users/www.aipaipai-inc.com.png" height="75"></a>
-  <a href="http://www.8soo.com"><img src="http://apijson.cn/images/users/www.8sso.com.jpeg" height="75"></a>
-  <a href="https://www.shulian8.com"><img src="http://apijson.cn/images/users/www.shulian8.com.png" height="75"></a>
-  <a href="http://www.hngtrust.com"><img src="http://apijson.cn/images/users/www.hngtrust.com.png" height="75"></a>
-  <a href="http://www.hec-bang.com"><img src="http://apijson.cn/images/users/www.hec-bang.com.png" height="75"></a>
-  <a href="https://www.toutou.com.cn"><img src="http://apijson.cn/images/users/www.toutou.com.cn.jpg" height="75"></a>
-  <a href="https://www.yto.net.cn"><img src="http://apijson.cn/images/users/www.yto.net.cn.png" height="75"></a>
-  <a href="https://www.lepinyongche.com"><img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.lepinyongche.com.jpg"  height="75"></a>
-  <a href="https://www.aupup.com"><img src="https://b2b-a-szzb-pub.oss-cn-shenzhen.aliyuncs.com/2021/07/26/c354486b-42f5-4aaa-9046-8b4c99c98e74.png"  height="75"></a>
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.transsion.com.jpeg" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/shebaochina.com.png" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.xmfish.com.gif" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.xxwolo.com.jpeg" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/t-think.com.png" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/xm.juhu.com.png" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.aipaipai-inc.com.png" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.8sso.com.jpeg" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.shulian8.com.png" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.hngtrust.com.png" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.hec-bang.com.png" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.toutou.com.cn.jpg" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.yto.net.cn.jpg" height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.lepinyongche.com.jpg"  height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.aupup.com.png"  height="75">
 <br />
   
  * [腾讯科技有限公司](https://www.tencent.com)
