@@ -37,11 +37,8 @@ import static apijson.SQL.OR;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -81,7 +78,13 @@ import apijson.orm.model.TestRecord;
  */
 public abstract class AbstractSQLConfig implements SQLConfig {
 	private static final String TAG = "AbstractSQLConfig";
-
+	
+	public static int MAX_COMBINE_DEPTH = 2;
+	public static int MAX_WHERE_COUNT = 3;
+	public static int MAX_COMBINE_COUNT = 5;
+	public static int MAX_COMBINE_KEY_COUNT = 2;
+	public static float MAX_COMBINE_RATIO = 1.0f;
+	
 	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
 	public static String DEFAULT_SCHEMA = "sys";
 	public static String PREFFIX_DISTINCT = "DISTINCT ";
@@ -101,6 +104,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static final Map<String, String> RAW_MAP;
 	// 允许调用的 SQL 函数：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
 	public static final Map<String, String> SQL_FUNCTION_MAP;
+
 
 	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- /**/ ，以免拼接 SQL 时被注入意外可执行指令
 		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
@@ -2140,6 +2144,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	
 	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	
+	protected int getMaxWhereCount() {
+		return MAX_WHERE_COUNT;
+	}
+	protected int getMaxCombineDepth() {
+		return MAX_COMBINE_DEPTH;
+	}
+	protected int getMaxCombineCount() {
+		return MAX_COMBINE_COUNT;
+	}
+	protected int getMaxCombineKeyCount() {
+		return MAX_COMBINE_KEY_COUNT;
+	}
+	protected float getMaxCombineRatio() {
+		return MAX_COMBINE_RATIO;
+	}
+
+
 	@Override
 	public String getCombineExpression() {
 		return combineExpression;
@@ -2329,10 +2350,26 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			+ "逻辑连接符 & | 左右必须各一个相邻空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
 		}
 		
+		if (where == null) {
+			where = new HashMap<>();
+		}
+		int whereSize = where.size();
+		
+		int maxWhereCount = getMaxWhereCount();
+		if (maxWhereCount > 0 && whereSize > maxWhereCount) {
+			throw new IllegalArgumentException(table + ":{ key0:value0, key1:value1... } 中条件 key:value 数量 " + whereSize + " 已超过最大数量，必须在 0-" + maxWhereCount + " 内！");
+		}
 
 		String whereString = "";
 		
+		int maxDepth = getMaxCombineDepth();
+		int maxCombineCount = getMaxCombineCount();
+		int maxCombineKeyCount = getMaxCombineKeyCount();
+		float maxCombineRatio = getMaxCombineRatio();
+		
 		int depth = 0;
+		int allCount = 0;
+		
 		int n = s.length();
 		int i = 0;
 		
@@ -2341,7 +2378,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		boolean first = true;
 		
 		String key = "";
-		Set<String> usedKeySet = new HashSet<>(where.size());
+		Map<String, Integer> usedKeyCountMap = new HashMap<>(whereSize);
 		while (i <= n) {  // "date> | (contactIdList<> & (name*~ | tag&$))"
 			boolean isOver = i >= n;
 			char c = isOver ? 0 : s.charAt(i);
@@ -2359,6 +2396,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i - key.length() - (isOver ? 1 : 0))
 						+ "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
 					}
+				
+					allCount ++;
+					if (allCount > maxCombineCount && maxCombineCount > 0) {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！"
+								+ "其中 key 数量 " + allCount + " 已超过最大值，必须在条件键值对数量 0-" + maxCombineCount + " 内！");
+					}
+					if (1.0f*allCount/whereSize > maxCombineRatio && maxCombineRatio > 0) {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！"
+								+ "其中 key 数量 " + allCount + " / 条件键值对数量 " + whereSize + " = " + (1.0f*allCount/whereSize)
+								+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
+					}
 					
 					Object value = where.get(key);
 					if (value == null) {
@@ -2370,7 +2418,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key + "' 对应的 " + key + ":value 不是有效条件键值对！");
 					}
 					
-					usedKeySet.add(key);
+					Integer count = usedKeyCountMap.get(key);
+					count = count == null ? 1 : count + 1;
+					if (count > maxCombineKeyCount && maxCombineKeyCount > 0) {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！其中 '" + key
+								+ "' 重复引用，次数 " + count + " 已超过最大值，必须在 0-" + maxCombineKeyCount + " 内！");
+					}
+					
+					usedKeyCountMap.put(key, count);
+					
+					
 					whereString += "( " + wi + " )";
 					first = false;
 				}
@@ -2422,6 +2479,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 				
 				depth ++;
+				if (depth > maxDepth && maxDepth > 0) {
+					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1) + "' 不合法！括号 (()) 嵌套层级 " + depth + " 已超过最大值，必须在 0-" + maxDepth + " 内！");
+				}
+				
 				whereString += c;
 				lastLogic = 0;
 				first = true;
@@ -2454,7 +2515,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		
 		for (Entry<String, Object> entry : set) {
 			key = entry == null ? null : entry.getKey();
-			if (key == null || usedKeySet.contains(key)) {
+			if (key == null || usedKeyCountMap.containsKey(key)) {
 				continue;
 			}
 			
@@ -2608,6 +2669,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		return result;
 	}
+
+
 
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
 		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
