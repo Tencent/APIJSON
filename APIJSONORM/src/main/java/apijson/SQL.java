@@ -14,8 +14,11 @@ public class SQL {
 	public static final String AND = " AND ";
 	public static final String NOT = " NOT ";
 	public static final String AS = " AS ";
-	public static final String IS = " is ";
-	public static final String NULL = " null ";
+	public static final String IS = " IS ";
+	public static final String NULL = " NULL ";
+	public static final String IS_NOT = " IS NOT ";
+	public static final String IS_NULL = " IS NULL ";
+	public static final String IS_NOT_NULL = " IS NOT NULL ";
 	
 	//括号必须紧跟函数名！ count (...) 报错！
 	public static final String COUNT = "count";

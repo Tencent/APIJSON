@@ -131,6 +131,9 @@ public interface SQLConfig {
 
 	String getQuote();
 
+	List<String> getJson();
+	SQLConfig setJson(List<String> json);
+	
 	/**请求传进来的Table名
 	 * @return
 	 * @see {@link #getSQLTable()}
@@ -150,7 +153,6 @@ public interface SQLConfig {
 	List<String> getRaw();
 	SQLConfig setRaw(List<String> raw);
 
-
 	String getGroup();
 	SQLConfig setGroup(String group);
 
@@ -160,9 +162,6 @@ public interface SQLConfig {
 	String getOrder();
 	SQLConfig setOrder(String order);
 
-	List<String> getJson();
-	SQLConfig setJson(List<String> json);
-	
 	Subquery getFrom();
 	SQLConfig setFrom(Subquery from);
 
@@ -175,13 +174,17 @@ public interface SQLConfig {
 	Map<String, Object> getContent();
 	SQLConfig setContent(Map<String, Object> content);
 
-	Map<String, Object> getWhere();
-	SQLConfig setWhere(Map<String, Object> where);
-
 	Map<String, List<String>> getCombine();
 	SQLConfig setCombine(Map<String, List<String>> combine);
-
-
+	
+	Map<String, String> getCast();
+	SQLConfig setCast(Map<String, String> cast);
+	
+	List<String> getNull();
+	SQLConfig setNull(List<String> nulls);
+	
+	Map<String, Object> getWhere();
+	SQLConfig setWhere(Map<String, Object> where);
 
 	/**
 	 * exactMatch = false

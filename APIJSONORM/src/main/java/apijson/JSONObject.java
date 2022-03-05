@@ -134,6 +134,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	//	public static final String KEY_KEEP = "@keep"; //一定会返回，为 null 或 空对象时，会使用默认值(非空)，解决其它对象因为不关联的第一个对为空导致也不返回
 	public static final String KEY_DEFULT = "@default"; //TODO 自定义默认值 { "@default":true }，@default 可完全替代 @keep
 	public static final String KEY_NULL = "@null"; //TODO 值为 null 的键值对 "@null":"tag,pictureList"，允许 is NULL 条件判断， SET tag = NULL 修改值为 NULL 等
+	public static final String KEY_CAST = "@cast"; //TODO 类型转换 cast(date AS DATE)
 
 	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	public static final String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
@@ -161,6 +162,8 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_CACHE);
 		TABLE_KEY_LIST.add(KEY_COLUMN);
 		TABLE_KEY_LIST.add(KEY_FROM);
+		TABLE_KEY_LIST.add(KEY_NULL);
+		TABLE_KEY_LIST.add(KEY_CAST);
 		TABLE_KEY_LIST.add(KEY_COMBINE);
 		TABLE_KEY_LIST.add(KEY_GROUP);
 		TABLE_KEY_LIST.add(KEY_HAVING);
@@ -275,15 +278,45 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return puts(KEY_COLUMN, keys);
 	}
 
+	/**set keys whose value is null
+	 * @param keys  key0, key1, key2 ...
+	 * @return {@link #setNull(String)}
+	 */
+	public JSONObject setNull(String... keys) {
+		return setNull(StringUtil.getString(keys, true));
+	}
+	/**set keys whose value is null
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setNull(String keys) {
+		return puts(KEY_NULL, keys);
+	}
+	
+	/**set keys and types whose value should be cast to type, cast(value AS DATE)
+	 * @param keyTypes  key0:type0, key1:type1, key2:type2 ...
+	 * @return {@link #setCast(String)}
+	 */
+	public JSONObject setCast(String... keyTypes) {
+		return setCast(StringUtil.getString(keyTypes, true));
+	}
+	/**set keys and types whose value should be cast to type, cast(value AS DATE)
+	 * @param keyTypes  "key0:type0,key1:type1,key2:type2..."
+	 * @return
+	 */
+	public JSONObject setCast(String keyTypes) {
+		return puts(KEY_CAST, keyTypes);
+	}
+
 	/**set combination of keys for conditions
-	 * @param keys  key0,&key1,|key2,!kye3 ...
+	 * @param keys  key0,&key1,|key2,!key3 ...  TODO or key0> | (key1{} & !key2)...
 	 * @return {@link #setColumn(String)}
 	 */
 	public JSONObject setCombine(String... keys) {
 		return setCombine(StringUtil.getString(keys, true));
 	}
 	/**set combination of keys for conditions
-	 * @param keys  key0,&key1,|key2,!kye3 ...
+	 * @param keys  key0,&key1,|key2,!key3 ...  TODO or key0> | (key1{} & !key2)...
 	 * @return
 	 */
 	public JSONObject setCombine(String keys) {

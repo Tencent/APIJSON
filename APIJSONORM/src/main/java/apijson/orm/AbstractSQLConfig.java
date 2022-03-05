@@ -8,6 +8,8 @@ package apijson.orm;
 import static apijson.JSONObject.KEY_CACHE;
 import static apijson.JSONObject.KEY_COLUMN;
 import static apijson.JSONObject.KEY_COMBINE;
+import static apijson.JSONObject.KEY_NULL;
+import static apijson.JSONObject.KEY_CAST;
 import static apijson.JSONObject.KEY_DATABASE;
 import static apijson.JSONObject.KEY_DATASOURCE;
 import static apijson.JSONObject.KEY_EXPLAIN;
@@ -32,6 +34,11 @@ import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.OR;
 
+import java.math.BigDecimal;
+import java.sql.Array;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -738,6 +745,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private Subquery from; //子查询临时表
 	private List<String> column; //表内字段名(或函数名，仅查询操作可用)的字符串数组，','分隔
 	private List<List<Object>> values; //对应表内字段的值的字符串数组，','分隔
+	private List<String> nulls;
+	private Map<String, String> cast;
 	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
 	private Map<String, Object> where; //筛选条件，key:value形式
 	private Map<String, List<String>> combine; //条件组合，{ "&":[key], "|":[key], "!":[key] }
@@ -1376,6 +1385,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@Override
 	public String getRawSQL(String key, Object value) throws Exception {
+		if (value == null) {
+			return null;
+		}
+		
 		List<String> rawList = getRaw();
 		boolean containRaw = rawList != null && rawList.contains(key);
 		if (containRaw && value instanceof String == false) {
@@ -1582,7 +1595,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					throw new UnsupportedOperationException("@column:value 的 value 中字符串 " + expression + " 不合法！"
 							+ "不允许传超过 100 个字符的函数或表达式！请用 @raw 简化传参！");
 				}
-				keys[i] = getColumnPrase(expression, containRaw);
+				keys[i] = parseColumn(expression, containRaw);
 			}
 
 			String c = StringUtil.getString(keys);
@@ -1602,7 +1615,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param expression
 	 * @return
 	 */
-	public String getColumnPrase(String expression, boolean containRaw) {
+	public String parseColumn(String expression, boolean containRaw) {
 		String quote = getQuote();
 		int start = expression.indexOf('(');
 		if (start < 0) {
@@ -2106,17 +2119,29 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		return " LIMIT " + count + (offset <= 0 ? "" : " OFFSET " + offset);  // DELETE, UPDATE 不支持 OFFSET
 	}
-
-	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	
 	@Override
-	public Map<String, Object> getWhere() {
-		return where;
+	public List<String> getNull() {
+		return nulls;
 	}
 	@Override
-	public AbstractSQLConfig setWhere(Map<String, Object> where) {
-		this.where = where;
+	public SQLConfig setNull(List<String> nulls) {
+		this.nulls = nulls;
 		return this;
 	}
+
+	@Override
+	public Map<String, String> getCast() {
+		return cast;
+	}
+	@Override
+	public SQLConfig setCast(Map<String, String> cast) {
+		this.cast = cast;
+		return this;
+	}
+	
+	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	
 	@NotNull
 	@Override
 	public Map<String, List<String>> getCombine() {
@@ -2135,6 +2160,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.combine = combine;
 		return this;
 	}
+	
+	@Override
+	public Map<String, Object> getWhere() {
+		return where;
+	}
+	@Override
+	public AbstractSQLConfig setWhere(Map<String, Object> where) {
+		this.where = where;
+		return this;
+	}
+
 	/**
 	 * noFunctionChar = false
 	 * @param key
@@ -2307,7 +2343,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				logic = Logic.TYPE_AND;
 			}
 
-
 			isItemFirst = true;
 			cs = "";
 			for (String key : keyList) {
@@ -2477,9 +2512,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	protected String getWhereItem(String key, Object value, RequestMethod method, boolean verifyName) throws Exception {
 		Log.d(TAG, "getWhereItem  key = " + key);
 		//避免筛选到全部	value = key == null ? null : where.get(key);
-		if (key == null || value == null || key.endsWith("()") || key.startsWith("@")) { //关键字||方法, +或-直接报错
-			Log.d(TAG, "getWhereItem  key == null || value == null"
-					+ " || key.startsWith(@) || key.endsWith(()) >> continue;");
+		if (key == null || key.endsWith("()") || key.startsWith("@")) { //关键字||方法, +或-直接报错
+			Log.d(TAG, "getWhereItem  key == null || key.endsWith(()) || key.startsWith(@) >> continue;");
 			return null;
 		}
 		if (key.endsWith("@")) {//引用
@@ -2524,63 +2558,64 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			keyType = 0;
 		}
 
-		key = getRealKey(method, key, false, true, verifyName);
+		String column = getRealKey(method, key, false, true, verifyName);
 
 		switch (keyType) {
 		case 1:
-			return getSearchString(key, value, rawSQL);
+			return getSearchString(key, column, value, rawSQL);
 		case -2:
 		case 2:
-			return getRegExpString(key, value, keyType < 0, rawSQL);
+			return getRegExpString(key, column, value, keyType < 0, rawSQL);
 		case 3:
-			return getBetweenString(key, value, rawSQL);
+			return getBetweenString(key, column, value, rawSQL);
 		case 4:
-			return getRangeString(key, value, rawSQL);
+			return getRangeString(key, column, value, rawSQL);
 		case 5:
-			return getExistsString(key, value, rawSQL);
+			return getExistsString(key, column, value, rawSQL);
 		case 6:
-			return getContainString(key, value, rawSQL);
+			return getContainString(key, column, value, rawSQL);
 		case 7:
-			return getCompareString(key, value, ">=", rawSQL);
+			return getCompareString(key, column, value, ">=", rawSQL);
 		case 8:
-			return getCompareString(key, value, "<=", rawSQL);
+			return getCompareString(key, column, value, "<=", rawSQL);
 		case 9:
-			return getCompareString(key, value, ">", rawSQL);
+			return getCompareString(key, column, value, ">", rawSQL);
 		case 10:
-			return getCompareString(key, value, "<", rawSQL);
+			return getCompareString(key, column, value, "<", rawSQL);
 		default:  // TODO MySQL JSON类型的字段对比 key='[]' 会无结果！ key LIKE '[1, 2, 3]'  //TODO MySQL , 后面有空格！
-			return getEqualString(key, value, rawSQL);
+			return getEqualString(key, column, value, rawSQL);
 		}
 	}
 
 
 	@JSONField(serialize = false)
-	public String getEqualString(String key, Object value, String rawSQL) throws Exception {
-		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
+	public String getEqualString(String key, String column, Object value, String rawSQL) throws Exception {
+		if (value != null && JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
 			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
 		}
 
-		boolean not = key.endsWith("!"); // & | 没有任何意义，写法多了不好控制 
+		boolean not = column.endsWith("!"); // & | 没有任何意义，写法多了不好控制 
 		if (not) {
-			key = key.substring(0, key.length() - 1);
+			column = column.substring(0, column.length() - 1);
 		}
-		if (StringUtil.isName(key) == false) {
+		if (StringUtil.isName(column) == false) {
 			throw new IllegalArgumentException(key + ":value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
-
-		return getKey(key) + (not ? " != " : " = ") + (value instanceof Subquery ? getSubqueryString((Subquery) value) : (rawSQL != null ? rawSQL : getValue(value)));
+		
+		String logic = value == null && rawSQL == null ? (not ? SQL.IS_NOT : SQL.IS) : (not ? " != " : " = ");
+		return getKey(column) + logic + (value instanceof Subquery ? getSubqueryString((Subquery) value) : (rawSQL != null ? rawSQL : getValue(key, column, value)));
 	}
 
 	@JSONField(serialize = false)
-	public String getCompareString(String key, Object value, String type, String rawSQL) throws Exception {
-		if (JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
-			throw new IllegalArgumentException(key + type + ":value 中value不合法！比较运算 [>, <, >=, <=] 只支持 [Boolean, Number, String] 内的类型 ！");
+	public String getCompareString(String key, String column, Object value, String type, String rawSQL) throws Exception {
+		if (value != null && JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
+			throw new IllegalArgumentException(key + ":value 中 value 不合法！比较运算 [>, <, >=, <=] 只支持 [Boolean, Number, String] 内的类型 ！");
 		}
-		if (StringUtil.isName(key) == false) {
-			throw new IllegalArgumentException(key + type + ":value 中key不合法！比较运算 [>, <, >=, <=] 不支持 [&, !, |] 中任何逻辑运算符 ！");
+		if (StringUtil.isName(column) == false) {
+			throw new IllegalArgumentException(key + ":value 中 key 不合法！比较运算 [>, <, >=, <=] 不支持 [&, !, |] 中任何逻辑运算符 ！");
 		}
 
-		return getKey(key) + " " + type + " " + (value instanceof Subquery ? getSubqueryString((Subquery) value) : (rawSQL != null ? rawSQL : getValue(value)));
+		return getKey(column) + " " + type + " " + (value instanceof Subquery ? getSubqueryString((Subquery) value) : (rawSQL != null ? rawSQL : getValue(key, column, value)));
 	}
 
 	public String getKey(String key) {
@@ -2601,17 +2636,56 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**
 	 * 使用prepareStatement预编译，值为 ? ，后续动态set进去
 	 */
-	protected List<Object> preparedValueList = new ArrayList<>();
 	protected Object getValue(@NotNull Object value) {
+		return getValue(null, null, value);
+	}
+
+	protected List<Object> preparedValueList = new ArrayList<>();
+	protected Object getValue(String key, String column, Object value) {
 		if (isPrepared()) {
+			if (value == null) {
+				return null;
+			}
+			
+			Map<String, String> castMap = getCast();
+			String type = key == null || castMap == null ? null : castMap.get(key);
+			
+//			if ("DATE".equalsIgnoreCase(type) && value instanceof Date == false) {
+//				value = value instanceof Number ? new Date(((Number) value).longValue()) : Date.valueOf((String) value);
+//			}
+//			else if ("TIME".equalsIgnoreCase(type) && value instanceof Time == false) {
+//				value = value instanceof Number ? new Time(((Number) value).longValue()) : Time.valueOf((String) value);
+//			}
+//			else if ("TIMESTAMP".equalsIgnoreCase(type) && value instanceof Timestamp == false) {
+//				value = value instanceof Number ? new Timestamp(((Number) value).longValue()) : Timestamp.valueOf((String) value);
+//			}
+//			else if ("ARRAY".equalsIgnoreCase(type) && value instanceof Array == false) {
+//				value = ((Collection<?>) value).toArray();
+//			}
+//			else if (StringUtil.isEmpty(type, true) == false) {
+//				preparedValueList.add(value);
+//				return "cast(?" + SQL.AS + type + ")";
+//			}
+			
 			preparedValueList.add(value);
-			return "?";
+			return StringUtil.isEmpty(type, true) ? "?" : "cast(?" + SQL.AS + type + ")";
 		}
-		return getSQLValue(value);
+		
+		return key == null ? getSQLValue(value) : getSQLValue(key, column, value);
+	}
+	
+	public Object getSQLValue(String key, String column, @NotNull Object value) {
+		Map<String, String> castMap = getCast();
+		String type = key == null || castMap == null ? null : castMap.get(key);
+		Object val = getSQLValue(value);
+		return StringUtil.isEmpty(type, true) ? val : "cast(" + val + SQL.AS + type + ")";
 	}
 	public Object getSQLValue(@NotNull Object value) {
+		if (value == null) {
+			return SQL.NULL;
+		}
 		//		return (value instanceof Number || value instanceof Boolean) && DATABASE_POSTGRESQL.equals(getDatabase()) ? value :  "'" + value + "'";
-		return (value instanceof Number || value instanceof Boolean) ? value :  "'" + value + "'"; //MySQL 隐式转换用不了索引
+		return (value instanceof Number || value instanceof Boolean) ? value :  "'" + value.toString().replaceAll("'", "\\'") + "'"; //MySQL 隐式转换用不了索引
 	}
 
 	@Override
@@ -2631,7 +2705,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getSearchString(String key, Object value, String rawSQL) throws IllegalArgumentException {
+	public String getSearchString(String key, String column, Object value, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key$ 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
 		}
@@ -2639,15 +2713,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return "";
 		}
 
-		Logic logic = new Logic(key);
-		key = logic.getKey();
-		Log.i(TAG, "getSearchString key = " + key);
+		Logic logic = new Logic(column);
+		column = logic.getKey();
+		Log.i(TAG, "getSearchString column = " + column);
 
 		JSONArray arr = newJSONArray(value);
 		if (arr.isEmpty()) {
 			return "";
 		}
-		return getSearchString(key, arr.toArray(), logic.getType());
+		return getSearchString(key, column, arr.toArray(), logic.getType());
 	}
 	/**search key match values
 	 * @param in
@@ -2655,7 +2729,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getSearchString(String key, Object[] values, int type) throws IllegalArgumentException {
+	public String getSearchString(String key, String column, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
 		}
@@ -2664,16 +2738,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		for (int i = 0; i < values.length; i++) {
 			Object v = values[i];
 			if (v instanceof String == false) {
-				throw new IllegalArgumentException(key + "$:value 中 value 的类型只能为 String 或 String[]！");
+				throw new IllegalArgumentException(key + ":value 中 value 的类型只能为 String 或 String[]！");
 			}
 			if (((String) v).isEmpty()) {  // 允许查空格 StringUtil.isEmpty((String) v, true)
-				throw new IllegalArgumentException(key + "$:value 中 value 值 " + v + "是空字符串，没有意义，不允许这样传！");
+				throw new IllegalArgumentException(key + ":value 中 value 值 " + v + "是空字符串，没有意义，不允许这样传！");
 			}
 			//			if (((String) v).contains("%%")) {  // 需要通过 %\%% 来模糊搜索 %
 			//				throw new IllegalArgumentException(key + "$:value 中 value 值 " + v + " 中包含 %% ！不允许有连续的 % ！");
 			//			}
 
-			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, v);
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, column, v);
 		}
 
 		return getCondition(Logic.isNot(type), condition);
@@ -2681,12 +2755,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	/**WHERE key LIKE 'value'
 	 * @param key
+	 * @param column
 	 * @param value
 	 * @return key LIKE 'value'
 	 */
 	@JSONField(serialize = false)
-	public String getLikeString(String key, Object value) {
-		return getKey(key) + " LIKE "  + getValue(value);
+	public String getLikeString(String key, String column, Object value) {
+		return getKey(column) + " LIKE "  + getValue(key, column, value);
 	}
 
 	//$ search >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -2696,13 +2771,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	//~ regexp <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**search key match RegExp values
 	 * @param key
+	 * @param column
 	 * @param value
 	 * @param ignoreCase 
 	 * @return {@link #getRegExpString(String, Object[], int, boolean)}
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getRegExpString(String key, Object value, boolean ignoreCase, String rawSQL) throws IllegalArgumentException {
+	public String getRegExpString(String key, String column, Object value, boolean ignoreCase, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key~ 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
 		}
@@ -2710,15 +2786,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return "";
 		}
 
-		Logic logic = new Logic(key);
-		key = logic.getKey();
-		Log.i(TAG, "getRegExpString key = " + key);
+		Logic logic = new Logic(column);
+		column = logic.getKey();
+		Log.i(TAG, "getRegExpString column = " + column);
 
 		JSONArray arr = newJSONArray(value);
 		if (arr.isEmpty()) {
 			return "";
 		}
-		return getRegExpString(key, arr.toArray(), logic.getType(), ignoreCase);
+		return getRegExpString(key, column, arr.toArray(), logic.getType(), ignoreCase);
 	}
 	/**search key match RegExp values
 	 * @param key
@@ -2729,7 +2805,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getRegExpString(String key, Object[] values, int type, boolean ignoreCase) throws IllegalArgumentException {
+	public String getRegExpString(String key, String column, Object[] values, int type, boolean ignoreCase) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
 		}
@@ -2737,9 +2813,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String condition = "";
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] instanceof String == false) {
-				throw new IllegalArgumentException(key + "$:value 中value的类型只能为String或String[]！");
+				throw new IllegalArgumentException(key + ":value 中value的类型只能为String或String[]！");
 			}
-			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getRegExpString(key, (String) values[i], ignoreCase);
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getRegExpString(key, column, (String) values[i], ignoreCase);
 		}
 
 		return getCondition(Logic.isNot(type), condition);
@@ -2752,20 +2828,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return key REGEXP 'value'
 	 */
 	@JSONField(serialize = false)
-	public String getRegExpString(String key, String value, boolean ignoreCase) {
+	public String getRegExpString(String key, String column, String value, boolean ignoreCase) {
 		if (isPostgreSQL()) {
-			return getKey(key) + " ~" + (ignoreCase ? "* " : " ") + getValue(value);
+			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
 		}
 		if (isOracle()) {
-			return "regexp_like(" + getKey(key) + ", " + getValue(value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
+			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
 		if (isClickHouse()) {
-			return "match(" + (ignoreCase ? "lower(" : "") + getKey(key) + (ignoreCase ? ")" : "") + ", " + (ignoreCase ? "lower(" : "") + getValue(value) + (ignoreCase ? ")" : "") + ")";
+			return "match(" + (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
+					+ ", " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "") + ")";
 		}
 		if (isHive()) {
-			return (ignoreCase ? "lower(" : "") + getKey(key) + (ignoreCase ? ")" : "") + " REGEXP " + (ignoreCase ? "lower(" : "") + getValue(value) + (ignoreCase ? ")" : "");
+			return (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
+					+ " REGEXP " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "");
 		}
-		return getKey(key) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(value);
+		return getKey(column) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(key, column, value);
 	}
 	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -2780,7 +2858,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getBetweenString(String key, Object value, String rawSQL) throws IllegalArgumentException {
+	public String getBetweenString(String key, String column, Object value, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key% 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
 		}
@@ -2788,15 +2866,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return "";
 		}
 
-		Logic logic = new Logic(key);
-		key = logic.getKey();
-		Log.i(TAG, "getBetweenString key = " + key);
+		Logic logic = new Logic(column);
+		column = logic.getKey();
+		Log.i(TAG, "getBetweenString column = " + column);
 
 		JSONArray arr = newJSONArray(value);
 		if (arr.isEmpty()) {
 			return "";
 		}
-		return getBetweenString(key, arr.toArray(), logic.getType());
+		return getBetweenString(key, column, arr.toArray(), logic.getType());
 	}
 
 	/**WHERE key BETWEEN 'start' AND 'end'
@@ -2806,7 +2884,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getBetweenString(String key, Object[] values, int type) throws IllegalArgumentException {
+	public String getBetweenString(String key, String column, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
 		}
@@ -2815,15 +2893,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String[] vs;
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] instanceof String == false) {
-				throw new IllegalArgumentException(key + "%:value 中 value 的类型只能为 String 或 String[] ！");
+				throw new IllegalArgumentException(key + ":value 中 value 的类型只能为 String 或 String[] ！");
 			}
 
 			vs = StringUtil.split((String) values[i]);
 			if (vs == null || vs.length != 2) {
-				throw new IllegalArgumentException(key + "%:value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
+				throw new IllegalArgumentException(key + ":value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
 			}
 
-			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + "(" + getBetweenString(key, (Object) vs[0], (Object) vs[1]) + ")";
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + "(" + getBetweenString(key, column, (Object) vs[0], (Object) vs[1]) + ")";
 		}
 
 		return getCondition(Logic.isNot(type), condition);
@@ -2836,11 +2914,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getBetweenString(String key, Object start, Object end) throws IllegalArgumentException {
+	public String getBetweenString(String key, String column, Object start, Object end) throws IllegalArgumentException {
 		if (JSON.isBooleanOrNumberOrString(start) == false || JSON.isBooleanOrNumberOrString(end) == false) {
-			throw new IllegalArgumentException(key + "%:value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
+			throw new IllegalArgumentException(key + ":value 中 value 不合法！类型为 String 时必须包括1个逗号 , 且左右两侧都有值！类型为 String[] 里面每个元素要符合前面类型为 String 的规则 ！");
 		}
-		return getKey(key) + " BETWEEN " + getValue(start) + AND + getValue(end);
+		return getKey(column) + " BETWEEN " + getValue(key, column, start) + AND + getValue(key, column, end);
 	}
 
 
@@ -2858,20 +2936,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
-	public String getRangeString(String key, Object range, String rawSQL) throws Exception {
-		Log.i(TAG, "getRangeString key = " + key);
+	public String getRangeString(String key, String column, Object range, String rawSQL) throws Exception {
+		Log.i(TAG, "getRangeString column = " + column);
 		if (range == null) {//依赖的对象都没有给出有效值，这个存在无意义。如果是客户端传的，那就能在客户端确定了。
-			throw new NotExistException(TAG + "getRangeString(" + key + ", " + range
-					+ ") range == null");
+			throw new NotExistException(TAG + "getRangeString(" + column + ", " + range + ") range == null");
 		}
 
-		Logic logic = new Logic(key);
+		Logic logic = new Logic(column);
 		String k = logic.getKey();
 		Log.i(TAG, "getRangeString k = " + k);
 
 		if (range instanceof List) {
 			if (rawSQL != null) {
-				throw new UnsupportedOperationException("@raw:value 的 value 中 " + key + "{} 不合法！"
+				throw new UnsupportedOperationException("@raw:value 的 value 中 " + key + " 不合法！"
 						+ "Raw SQL 不支持 key{}:[] 这种键值对！");
 			}
 
@@ -2880,9 +2957,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (logic.isNot() && l.isEmpty()) {
 					return ""; // key!{}: [] 这个条件无效，加到 SQL 语句中 key IN() 会报错，getInString 里不好处理
 				}
-				return getKey(k) + getInString(k, l.toArray(), logic.isNot());
+				return getKey(k) + getInString(k, column, l.toArray(), logic.isNot());
 			}
-			throw new IllegalArgumentException(key + "{}\":[] 中 {} 前面的逻辑运算符错误！只能用'|','!'中的一种 ！");
+			throw new IllegalArgumentException(key + ":[] 中 {} 前面的逻辑运算符错误！只能用'|','!'中的一种 ！");
 		}
 		else if (range instanceof String) {//非Number类型需要客户端拼接成 < 'value0', >= 'value1'这种
 			String condition = "";
@@ -2929,7 +3006,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						c = SQL.isNull(false);
 					}
 					else if (isPrepared() && (c.contains("--") || PATTERN_RANGE.matcher(c).matches() == false)) {
-						throw new UnsupportedOperationException(key + "{}:value 的 value 中 " + c + " 不合法！"
+						throw new UnsupportedOperationException(key + ":value 的 value 中 " + c + " 不合法！"
 								+ "预编译模式下 key{}:\"condition\" 中 condition 必须 为 =null 或 !=null 或 符合正则表达式 " + PATTERN_RANGE + " ！不允许连续减号 -- ！不允许空格！");
 					}
 
@@ -2949,7 +3026,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return getKey(k) + (logic.isNot() ? NOT : "") + " IN " + getSubqueryString((Subquery) range);
 		}
 
-		throw new IllegalArgumentException(key + "{}:range 类型为" + range.getClass().getSimpleName()
+		throw new IllegalArgumentException(key + ":range 类型为" + range.getClass().getSimpleName()
 				+ "！range 只能是 用','分隔条件的字符串 或者 可取选项JSONArray！");
 	}
 	/**WHERE key IN ('key0', 'key1', ... )
@@ -2958,16 +3035,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws NotExistException 
 	 */
 	@JSONField(serialize = false)
-	public String getInString(String key, Object[] in, boolean not) throws NotExistException {
+	public String getInString(String key, String column, Object[] in, boolean not) throws NotExistException {
 		String condition = "";
 		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
 			for (int i = 0; i < in.length; i++) {
-				condition += ((i > 0 ? "," : "") + getValue(in[i]));
+				condition += ((i > 0 ? "," : "") + getValue(key, column, in[i]));
 			}
 		}
 		if (condition.isEmpty()) {//条件如果存在必须执行，不能忽略。条件为空会导致出错，又很难保证条件不为空(@:条件)，所以还是这样好
-			throw new NotExistException(TAG + ".getInString(" + key + ", [], " + not
-					+ ") >> condition.isEmpty() >> IN()");
+			throw new NotExistException(TAG + ".getInString(" + key + "," + column + ", [], " + not + ") >> condition.isEmpty() >> IN()");
 		}
 		return (not ? NOT : "") + " IN (" + condition + ")";
 	}
@@ -2983,7 +3059,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws NotExistException
 	 */
 	@JSONField(serialize = false)
-	public String getExistsString(String key, Object value, String rawSQL) throws Exception {
+	public String getExistsString(String key, String column, Object value, String rawSQL) throws Exception {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key}{ 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
 		}
@@ -2991,13 +3067,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return "";
 		}
 		if (value instanceof Subquery == false) {
-			throw new IllegalArgumentException(key + "}{:subquery 类型为" + value.getClass().getSimpleName()
+			throw new IllegalArgumentException(key + ":subquery 类型为" + value.getClass().getSimpleName()
 					+ "！subquery 只能是 子查询JSONObejct！");
 		}
 
-		Logic logic = new Logic(key);
-		key = logic.getKey();
-		Log.i(TAG, "getExistsString key = " + key);
+		Logic logic = new Logic(column);
+		column = logic.getKey();
+		Log.i(TAG, "getExistsString column = " + column);
 
 		return (logic.isNot() ? NOT : "") + " EXISTS " + getSubqueryString((Subquery) value);
 	}
@@ -3011,21 +3087,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws NotExistException
 	 */
 	@JSONField(serialize = false)
-	public String getContainString(String key, Object value, String rawSQL) throws IllegalArgumentException {
+	public String getContainString(String key, String column, Object value, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key<> 这种功能符 ！只支持 key, key!, key<, key{} 等比较运算 和 @column, @having ！");
 		}
-		if (value == null) {
-			return "";
-		}
 
-		Logic logic = new Logic(key);
-		key = logic.getKey();
-		Log.i(TAG, "getContainString key = " + key);
+		Logic logic = new Logic(column);
+		column = logic.getKey();
+		Log.i(TAG, "getContainString column = " + column);
 
-		return getContainString(key, newJSONArray(value).toArray(), logic.getType());
+		return getContainString(key, column, newJSONArray(value).toArray(), logic.getType());
 	}
-	/**WHERE key contains childs
+	/**WHERE key contains childs TODO 支持 key<>: { "path":"$[0].name", "value": 82001 }  或者  key<$[0].name>:82001 或者  key$[0].name<>:82001 ？ 还是前者好，key 一旦复杂了，包含 , ; : / [] 等就容易和 @combine 其它功能等冲突
 	 * @param key
 	 * @param childs null ? "" : (empty ? no child : contains childs)
 	 * @param type |, &, !
@@ -3034,42 +3107,55 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException 
 	 */
 	@JSONField(serialize = false)
-	public String getContainString(String key, Object[] childs, int type) throws IllegalArgumentException {
+	public String getContainString(String key, String column, Object[] childs, int type) throws IllegalArgumentException {
 		boolean not = Logic.isNot(type);
 		String condition = "";
 		if (childs != null) {
 			for (int i = 0; i < childs.length; i++) {
 				Object c = childs[i];
-				if (c != null) {
-					if (c instanceof JSON) {
-						throw new IllegalArgumentException(key + "<>:value 中value类型不能为JSON！");
+				if (c instanceof Collection) {
+					throw new IllegalArgumentException(key + ":value 中 value 类型不能为 [JSONArray, Collection] 中的任何一个 ！");
+				}
+				
+				Object path = "";
+				if (c instanceof Map) {
+					path = ((Map<?, ?>) c).get("path");
+					if (path != null && path instanceof String == false) {
+						throw new IllegalArgumentException(key + ":{ path:path, value:value } 中 path 类型错误，只能是 $, $.key1, $[0].key2 等符合 SQL 中 JSON 路径的 String ！");
 					}
+					
+					c = ((Map<?, ?>) c).get("value");
+					if (c instanceof Collection || c instanceof Map) {
+						throw new IllegalArgumentException(key + ":{ path:path, value:value } 中 value 类型不能为 [JSONObject, JSONArray, Collection, Map] 中的任何一个 ！");
+					}
+				}
 
-					condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
-					if (isPostgreSQL()) {
-						condition += (getKey(key) + " @> " + getValue(newJSONArray(c))); //operator does not exist: jsonb @> character varying  "[" + c + "]"); 
-					}
-					else if (isOracle()) {
-						condition += ("json_textcontains(" + getKey(key) + ", '$', " + getValue(c.toString()) + ")");
+				condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
+				if (isPostgreSQL()) {
+					condition += (getKey(column) + " @> " + getValue(key, column, newJSONArray(c))); //operator does not exist: jsonb @> character varying  "[" + c + "]"); 
+				}
+				else if (isOracle()) {
+					condition += ("json_textcontains(" + getKey(column) + ", " + (StringUtil.isEmpty(path, true) ? "'$'" : getValue(key, column, path)) + ", " + getValue(key, column, c == null ? null : c.toString()) + ")");
+				}
+				else {
+					String v = c == null ? "null" : (c instanceof Boolean || c instanceof Number ? c.toString() : "\"" + c + "\"");
+					if (isClickHouse()) {
+						condition += (condition + "has(JSONExtractArrayRaw(assumeNotNull(" + getKey(column) + "))" + ", " + getValue(key, column, v) + (StringUtil.isEmpty(path, true) ? "" : ", " + getValue(key, column, path)) + ")");
 					}
 					else {
-						boolean isNum = c instanceof Number;
-						String v = (isNum ? "" : "\"") + childs[i] + (isNum ? "" : "\"");
-						if (isClickHouse()) {
-							condition += condition + "has(JSONExtractArrayRaw(assumeNotNull(" + getKey(key) + "))" + ", " + getValue(v) + ")";
-						}
-						else {
-							condition += ("json_contains(" + getKey(key) + ", " +  getValue(v) + ")");
-						}
+						condition += ("json_contains(" + getKey(column) + ", " +  getValue(key, column, v) + (StringUtil.isEmpty(path, true) ? "" : ", " + getValue(key, column, path)) + ")");
 					}
 				}
 			}
+			
 			if (condition.isEmpty()) {
-				condition = (getKey(key) + SQL.isNull(true) + OR + getLikeString(key, "[]")); // key = '[]' 无结果！
-			} else {
-				condition = (getKey(key) + SQL.isNull(false) + AND + "(" + condition + ")");
+				condition = getKey(column) + SQL.isNull(true) + OR + getLikeString(key, column, "[]"); // key = '[]' 无结果！
+			} 
+			else {
+				condition = getKey(column) + SQL.isNull(false) + AND + "(" + condition + ")";
 			}
 		}
+		
 		if (condition.isEmpty()) {
 			return "";
 		}
@@ -3083,6 +3169,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@Override
 	public String getSubqueryString(Subquery subquery) throws Exception {
+		if (subquery == null) {
+			return "";
+		}
+		
 		String range = subquery.getRange();
 		SQLConfig cfg = subquery.getConfig();
 
@@ -3171,10 +3261,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					keyType = 0; //注意重置类型，不然不该加减的字段会跟着加减
 				}
 				value = entry.getValue();
-				key = getRealKey(method, key, false, true, verifyName);
+				String column = getRealKey(method, key, false, true, verifyName);
 
-				setString += (isFirst ? "" : ", ") + (getKey(key) + " = " + (keyType == 1 ? getAddString(key, value) : (keyType == 2
-						? getRemoveString(key, value) : getValue(value)) ) );
+				setString += (isFirst ? "" : ", ") + (getKey(column) + " = " + (keyType == 1 ? getAddString(key, column, value) : (keyType == 2
+						? getRemoveString(key, column, value) : getValue(key, column, value)) ) );
 
 				isFirst = false;
 			}
@@ -3193,14 +3283,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException
 	 */
 	@JSONField(serialize = false)
-	public String getAddString(String key, Object value) throws IllegalArgumentException {
+	public String getAddString(String key, String column, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
-			return getKey(key) + " + " + value;
+			return getKey(column) + " + " + value;
 		}
 		if (value instanceof String) {
-			return SQL.concat(getKey(key), (String) getValue(value));
+			return SQL.concat(getKey(column), (String) getValue(key, column, value));
 		}
-		throw new IllegalArgumentException(key + "+ 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
+		throw new IllegalArgumentException(key + ":value 中 value 类型错误，必须是 Number,String,Array 中的任何一种！");
 	}
 	/**SET key = replace(key, 'value', '')
 	 * @param key
@@ -3209,14 +3299,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws IllegalArgumentException
 	 */
 	@JSONField(serialize = false)
-	public String getRemoveString(String key, Object value) throws IllegalArgumentException {
+	public String getRemoveString(String key, String column, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
-			return getKey(key) + " - " + value;
+			return getKey(column) + " - " + value;
 		}
 		if (value instanceof String) {
-			return SQL.replace(getKey(key), (String) getValue(value), "''");// " replace(" + key + ", '" + value + "', '') ";
+			return SQL.replace(getKey(column), (String) getValue(key, column, value), "''");// " replace(" + column + ", '" + value + "', '') ";
 		}
-		throw new IllegalArgumentException(key + "- 对应的值 " + value + " 不是Number,String,Array中的任何一种！");
+		throw new IllegalArgumentException(key + ":value 中 value 类型错误，必须是 Number,String,Array 中的任何一种！");
 	}
 	//SET >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -3359,6 +3449,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		//		return table + " AS t0 INNER JOIN (SELECT id FROM " + condition + ") AS t1 ON t0.id = t1.id";
 	}
 
+	
 	private boolean keyPrefix;
 	@Override
 	public boolean isKeyPrefix() {
@@ -3369,7 +3460,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.keyPrefix = keyPrefix;
 		return this;
 	}
-
 
 
 	public String getJoinString() throws Exception {
@@ -3604,9 +3694,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String role = request.getString(KEY_ROLE);
 		String cache = request.getString(KEY_CACHE);
-		String combine = request.getString(KEY_COMBINE);
 		Subquery from = (Subquery) request.get(KEY_FROM);
 		String column = request.getString(KEY_COLUMN);
+		String nulls = request.getString(KEY_NULL);
+		String cast = request.getString(KEY_CAST);
+		String combine = request.getString(KEY_COMBINE);
 		String group = request.getString(KEY_GROUP);
 		String having = request.getString(KEY_HAVING);
 		String order = request.getString(KEY_ORDER);
@@ -3624,14 +3716,52 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.remove(KEY_DATASOURCE);
 			request.remove(KEY_DATABASE);
 			request.remove(KEY_SCHEMA);
-			request.remove(KEY_COMBINE);
 			request.remove(KEY_FROM);
 			request.remove(KEY_COLUMN);
+			request.remove(KEY_NULL);
+			request.remove(KEY_CAST);
+			request.remove(KEY_COMBINE);
 			request.remove(KEY_GROUP);
 			request.remove(KEY_HAVING);
 			request.remove(KEY_ORDER);
 			request.remove(KEY_RAW);
 			request.remove(KEY_JSON);
+			
+			String[] nullKeys = StringUtil.split(nulls);
+			if (nullKeys != null && nullKeys.length > 0) {
+				for (String nk : nullKeys) {
+					if (StringUtil.isEmpty(nk, true)) {
+						throw new IllegalArgumentException(table + ":{} 里的 @null: value 中的字符 '" + nk + "' 不合法！不允许为空！");
+					}
+					if (request.get(nk) != null) {
+						throw new IllegalArgumentException(table + ":{} 里的 @null: value 中的字符 '" + nk + "' 已在当前对象有非 null 值！不允许对同一个 JSON key 设置不同值！");
+					}
+					
+					request.put(nk, null);
+				}
+			}
+			
+			String[] casts = StringUtil.split(cast);
+			Map<String, String> castMap = null;
+			if (casts != null && casts.length > 0) {
+				castMap = new HashMap<>(casts.length);
+				for (String c : casts) {
+					apijson.orm.Entry<String, String> p = Pair.parseEntry(c);
+					
+					if (StringUtil.isEmpty(p.getKey(), true)) {
+						throw new IllegalArgumentException(table + ":{} 里的 @cast: 'key0:type0,key1:type1..' 中 '" + c +  "' 对应的 key 的字符 '" + p.getKey() + "' 不合法！不允许为空！");
+					}
+					if (StringUtil.isName(p.getValue()) == false) {
+						throw new IllegalArgumentException(table + ":{} 里的 @cast: 'key0:type0,key1:type1..' 中 '" + c +  "' 对应的 type 的字符 '" + p.getValue() + "' 不合法！必须符合类型名称格式！");
+					}
+					if (castMap.get(p.getKey()) != null) {
+						throw new IllegalArgumentException(table + ":{} 里的 @cast: 'key0:type0,key1:type1..' 中 '" + c +  "' 对应的 key 的字符 '" + p.getKey() + "' 已存在！不允许重复设置类型！");
+					}
+					
+					castMap.put(p.getKey(), p.getValue());
+				}
+			}
+
 
 			String[] rawArr = StringUtil.split(raw);
 			config.setRaw(rawArr == null || rawArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(rawArr)));
@@ -3642,7 +3772,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			Set<String> set = request.keySet(); //前面已经判断request是否为空
 			if (method == POST) { //POST操作
 				if (idIn != null) {
-					throw new IllegalArgumentException("POST 请求中不允许传 " + idInKey + " !");
+					throw new IllegalArgumentException(table + ":{} 里的 " + idInKey + ": value 不合法！POST 请求中不允许传 " + idInKey + " !");
 				}
 
 				if (set != null && set.isEmpty() == false) { //不能直接return，要走完下面的流程
@@ -3841,26 +3971,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 				}
 			}
+			
 
 			config.setExplain(explain);
 			config.setCache(getCache(cache));
-			config.setFrom(from);
 			config.setDistinct(distinct);
 			config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
-			config.setWhere(tableWhere);					
+			config.setFrom(from);
 
+			config.setRole(role);
 			config.setId(id);
 			//在	tableWhere 第0个		config.setIdIn(idIn);
 
-			config.setRole(role);
+			config.setNull(nullKeys == null || nullKeys.length <= 0 ? null : new ArrayList<>(Arrays.asList(nullKeys)));
+			config.setCast(castMap);
+			config.setWhere(tableWhere);
 			config.setGroup(group);
 			config.setHaving(having);
 			config.setOrder(order);
 
-			String[] jsonArr = StringUtil.split(json);
-			config.setJson(jsonArr == null || jsonArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(jsonArr)));
-
-			//TODO 解析JOIN，包括 @column，@group 等要合并
+			String[] jsons = StringUtil.split(json);
+			config.setJson(jsons == null || jsons.length <= 0 ? null : new ArrayList<>(Arrays.asList(jsons)));
 
 		}
 		finally {//后面还可能用到，要还原
@@ -3876,9 +4007,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.put(KEY_CACHE, cache);
 			request.put(KEY_DATASOURCE, datasource);
 			request.put(KEY_SCHEMA, schema);
-			request.put(KEY_COMBINE, combine);
 			request.put(KEY_FROM, from);
 			request.put(KEY_COLUMN, column);
+			request.put(KEY_NULL, nulls);
+			request.put(KEY_CAST, cast);
+			request.put(KEY_COMBINE, combine);
 			request.put(KEY_GROUP, group);
 			request.put(KEY_HAVING, having);
 			request.put(KEY_ORDER, order);

@@ -1322,6 +1322,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_SCHEMA);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATASOURCE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COLUMN);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_NULL);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_CAST);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COMBINE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_GROUP);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
@@ -1330,7 +1332,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	}
 	
 	/**JOIN 多表同时筛选
-	 * @param join "&/User,</Moment/id@",@/Comment/toId@" 或 "&/User":{}, "</Moment/id@":{}, "@/Comment/toId@": {}
+	 * @param join "&/User,</Moment/id@",@/Comment/toId@" 或 "&/User":{}, "</Moment/id@":{"@column":"id"}, "@/Comment/toId@": {"@group":"toId", "@having":"toId>0"}
 	 * @param request
 	 * @return 
 	 * @throws Exception 
