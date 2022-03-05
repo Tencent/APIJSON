@@ -2342,25 +2342,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		
 		String key = "";
 		Set<String> usedKeySet = new HashSet<>(where.size());
-		while (i < n) {  // "date> | (contactIdList<> & (name*~ | tag&$))"
-			char c = s.charAt(i);
-			boolean isLast = i >= n - 1;
+		while (i <= n) {  // "date> | (contactIdList<> & (name*~ | tag&$))"
+			boolean isOver = i >= n;
+			char c = isOver ? 0 : s.charAt(i);
 			boolean isBlankOrRightParenthesis = c == ' ' || c == ')';
-			if (isLast || isBlankOrRightParenthesis) {
-				if (isBlankOrRightParenthesis == false) {
-					key += c;
-				}
-				
+			if (isOver || isBlankOrRightParenthesis) {
 				boolean isEmpty = StringUtil.isEmpty(key, true);
 				if (isEmpty && last != ')') {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i)
+					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + (isOver ? s : s.substring(i))
 					+ "' 不合法！" + (c == ' ' ? "空格 ' ' " : "右括号 ')'") + " 左边缺少条件 key ！逻辑连接符 & | 左右必须各一个相邻空格！"
 					+ "空格不能多也不能少！不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
 				}
 				
 				if (isEmpty == false) {
 					if (first == false && lastLogic <= 0) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i - key.length()) + "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i - key.length() - (isOver ? 1 : 0))
+						+ "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
 					}
 					
 					Object value = where.get(key);
@@ -2380,7 +2377,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				
 				key = "";
 				
-				if (isLast) {
+				if (isOver) {
 					break;
 				}
 			}
@@ -2389,8 +2386,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			else if (c == '&') {
 				if (last == ' ') {
-					if (i >= n || s.charAt(i + 1) != ' ') {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
+					if (i >= n - 1 || s.charAt(i + 1) != ' ') {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + (i >= n - 1 ? s : s.substring(0, i + 1))
 						+ "' 不合法！逻辑连接符 & 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
 						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
 					}
@@ -2399,14 +2396,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					lastLogic = c;
 					i ++;
 				} 
-				else if (isLast == false) {
+				else {
 					key += c;
 				}
 			}
 			else if (c == '|') {
 				if (last == ' ') {
-					if (i >= n || s.charAt(i + 1) != ' ') {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
+					if (i >= n - 1 || s.charAt(i + 1) != ' ') {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + (i >= n - 1 ? s : s.substring(0, i + 1))
 						+ "' 不合法！逻辑连接符 | 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
 						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
 					}
@@ -2415,7 +2412,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					lastLogic = c;
 					i ++;
 				}
-				else if (isLast == false) {
+				else {
 					key += c;
 				}
 			}
@@ -2438,16 +2435,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				whereString += c;
 				lastLogic = 0;
 			} 
-			else if (isLast == false) {
+			else {
 				key += c;
 			}
 			
 			last = c;
 			i ++;
-			
-			if (i >= n) {
-				i = n - 1;
-			}
 		}
 
 		if (depth != 0) {
@@ -2477,8 +2470,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (StringUtil.isEmpty(whereString, true)) {
 			whereString = andWhere;
 		}
-		else if (StringUtil.isNotEmpty(andWhere, true)) {
-			whereString = andWhere + AND + "( " + whereString + " )";
+		else if (StringUtil.isNotEmpty(andWhere, true)) {  // andWhere 必须放后面，否则 prepared 值顺序错误
+			whereString = "( " + whereString + " )" + AND + andWhere;
 		}
 
 		if (joinList != null) {
@@ -4127,7 +4120,24 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				List<String> orList = combineMap == null ? null : new ArrayList<>();
 				List<String> notList = combineMap == null ? null : new ArrayList<>();
 				
-				if (combineMap != null) {
+				if (combineMap == null) {
+					if (StringUtil.isNotEmpty(combineExpression, true)) {
+						List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
+						
+						for (String key : banKeyList) {
+							int index = combineExpression.indexOf(key);
+							if (index >= 0) {
+								char left = index <= 0 ? ' ' : combineExpression.charAt(index - 1);
+								char right = index >= combineExpression.length() - key.length() ? ' ' : combineExpression.charAt(index + key.length());
+								if ((left == ' ' || left == '(') && (right == ' ' || right == ')')) {
+									throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
+											+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
+								}
+							}
+						}
+					}
+				} 
+				else {
 					//强制作为条件且放在最前面优化性能
 					if (id != null) {
 						tableWhere.put(idKey, id);
@@ -4178,7 +4188,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								}
 								else {
 									if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
-										throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 不合法！"
+										throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + ws[i] + " 不合法！"
 												+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
 									}
 								}
