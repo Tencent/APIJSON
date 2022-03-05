@@ -176,6 +176,9 @@ public interface SQLConfig {
 
 	Map<String, List<String>> getCombine();
 	SQLConfig setCombine(Map<String, List<String>> combine);
+
+	String getCombineExpression();
+	SQLConfig setCombineExpression(String combineExpression);
 	
 	Map<String, String> getCast();
 	SQLConfig setCast(Map<String, String> cast);

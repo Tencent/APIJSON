@@ -6,10 +6,9 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import static apijson.JSONObject.KEY_CACHE;
+import static apijson.JSONObject.KEY_CAST;
 import static apijson.JSONObject.KEY_COLUMN;
 import static apijson.JSONObject.KEY_COMBINE;
-import static apijson.JSONObject.KEY_NULL;
-import static apijson.JSONObject.KEY_CAST;
 import static apijson.JSONObject.KEY_DATABASE;
 import static apijson.JSONObject.KEY_DATASOURCE;
 import static apijson.JSONObject.KEY_EXPLAIN;
@@ -18,6 +17,7 @@ import static apijson.JSONObject.KEY_GROUP;
 import static apijson.JSONObject.KEY_HAVING;
 import static apijson.JSONObject.KEY_ID;
 import static apijson.JSONObject.KEY_JSON;
+import static apijson.JSONObject.KEY_NULL;
 import static apijson.JSONObject.KEY_ORDER;
 import static apijson.JSONObject.KEY_RAW;
 import static apijson.JSONObject.KEY_ROLE;
@@ -34,16 +34,14 @@ import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.OR;
 
-import java.math.BigDecimal;
-import java.sql.Array;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -750,7 +748,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
 	private Map<String, Object> where; //筛选条件，key:value形式
 	private Map<String, List<String>> combine; //条件组合，{ "&":[key], "|":[key], "!":[key] }
-
+	private String combineExpression;
 
 	//array item <<<<<<<<<<
 	private int count; //Table数量
@@ -2142,6 +2140,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	
 	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	
+	@Override
+	public String getCombineExpression() {
+		return combineExpression;
+	}
+	@Override
+	public AbstractSQLConfig setCombineExpression(String combineExpression) {
+		this.combineExpression = combineExpression;
+		return this;
+	}
+	
 	@NotNull
 	@Override
 	public Map<String, List<String>> getCombine() {
@@ -2300,7 +2308,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getWhereString(boolean hasPrefix) throws Exception {
-		return getWhereString(hasPrefix, getMethod(), getWhere(), getCombine(), getJoinList(), ! isTest());
+		String ce = getCombineExpression();
+		if (StringUtil.isEmpty(ce, true)) {
+			return getWhereString(hasPrefix, getMethod(), getWhere(), getCombine(), getJoinList(), ! isTest());
+		}
+		return getWhereString(hasPrefix, getMethod(), getWhere(), ce, getJoinList(), ! isTest());
 	}
 	/**获取WHERE
 	 * @param method
@@ -2309,6 +2321,301 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
+	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, String combine, List<Join> joinList, boolean verifyName) throws Exception {
+		String s = StringUtil.getString(combine);
+		if (s.startsWith(" ") || s.endsWith(" ") ) {
+			throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s
+			+ "' 不合法！不允许首尾有空格，也不允许连续空格！空格不能多也不能少！"
+			+ "逻辑连接符 & | 左右必须各一个相邻空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
+		}
+		
+
+		String whereString = "";
+		
+		int depth = 0;
+		int n = s.length();
+		int i = 0;
+		
+		char lastLogic = 0;
+		char last = 0;
+		boolean first = true;
+		
+		String key = "";
+		Set<String> usedKeySet = new HashSet<>(where.size());
+		while (i < n) {  // "date> | (contactIdList<> & (name*~ | tag&$))"
+			char c = s.charAt(i);
+			boolean isLast = i >= n - 1;
+			boolean isBlankOrRightParenthesis = c == ' ' || c == ')';
+			if (isLast || isBlankOrRightParenthesis) {
+				if (isBlankOrRightParenthesis == false) {
+					key += c;
+				}
+				
+				boolean isEmpty = StringUtil.isEmpty(key, true);
+				if (isEmpty && last != ')') {
+					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i)
+					+ "' 不合法！" + (c == ' ' ? "空格 ' ' " : "右括号 ')'") + " 左边缺少条件 key ！逻辑连接符 & | 左右必须各一个相邻空格！"
+					+ "空格不能多也不能少！不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+				}
+				
+				if (isEmpty == false) {
+					if (first == false && lastLogic <= 0) {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i - key.length()) + "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
+					}
+					
+					Object value = where.get(key);
+					if (value == null) {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key + "' 对应的条件键值对 " + key + ":value 不存在！");
+					}
+					
+					String wi = getWhereItem(key, value, method, verifyName);
+					if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key + "' 对应的 " + key + ":value 不是有效条件键值对！");
+					}
+					
+					usedKeySet.add(key);
+					whereString += "( " + wi + " )";
+					first = false;
+				}
+				
+				key = "";
+				
+				if (isLast) {
+					break;
+				}
+			}
+			
+			if (c == ' ') {
+			}
+			else if (c == '&') {
+				if (last == ' ') {
+					if (i >= n || s.charAt(i + 1) != ' ') {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
+						+ "' 不合法！逻辑连接符 & 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
+						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+					}
+					
+					whereString += SQL.AND;
+					lastLogic = c;
+					i ++;
+				} 
+				else if (isLast == false) {
+					key += c;
+				}
+			}
+			else if (c == '|') {
+				if (last == ' ') {
+					if (i >= n || s.charAt(i + 1) != ' ') {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
+						+ "' 不合法！逻辑连接符 | 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
+						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
+					}
+					
+					whereString += SQL.OR;
+					lastLogic = c;
+					i ++;
+				}
+				else if (isLast == false) {
+					key += c;
+				}
+			}
+			else if (c == '(') {
+				if (key.isEmpty() == false || (i > 0 && lastLogic <= 0)) {
+					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i) + "' 不合法！左边缺少 & | 逻辑连接符！");
+				}
+				
+				depth ++;
+				whereString += c;
+				lastLogic = 0;
+				first = true;
+			}
+			else if (c == ')') {
+				depth --;
+				if (depth < 0) {
+					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1) + "' 不合法！左括号 ( 比 右括号 ) 少！数量必须相等从而完整闭合 (...) ！");
+				}
+				
+				whereString += c;
+				lastLogic = 0;
+			} 
+			else if (isLast == false) {
+				key += c;
+			}
+			
+			last = c;
+			i ++;
+			
+			if (i >= n) {
+				i = n - 1;
+			}
+		}
+
+		if (depth != 0) {
+			throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！左括号 ( 比 右括号 ) 多！数量必须相等从而完整闭合 (...) ！");
+		}
+		
+		Set<Entry<String, Object>> set = where.entrySet();
+
+		String andWhere = "";
+		boolean isItemFirst = true;
+		
+		for (Entry<String, Object> entry : set) {
+			key = entry == null ? null : entry.getKey();
+			if (key == null || usedKeySet.contains(key)) {
+				continue;
+			}
+			
+			String wi = getWhereItem(key, where.get(key), method, verifyName);
+			if (StringUtil.isEmpty(wi, true)) {//避免SQL条件连接错误
+				continue;
+			}
+
+			andWhere += (isItemFirst ? "" : AND) + "(" + wi + ")";
+			isItemFirst = false;
+		}
+		
+		if (StringUtil.isEmpty(whereString, true)) {
+			whereString = andWhere;
+		}
+		else if (StringUtil.isNotEmpty(andWhere, true)) {
+			whereString = andWhere + AND + "( " + whereString + " )";
+		}
+
+		if (joinList != null) {
+
+			String newWs = "";
+			String ws = whereString;
+
+			List<Object> newPvl = new ArrayList<>();
+			List<Object> pvl = new ArrayList<>(preparedValueList);
+
+			SQLConfig jc;
+			String js;
+
+			boolean changed = false;
+			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
+			for (Join j : joinList) {
+				String jt = j.getJoinType();
+
+				switch (jt) {
+				case "*": // CROSS JOIN
+				case "@": // APP JOIN
+				case "<": // LEFT JOIN
+				case ">": // RIGHT JOIN
+					break;
+
+				case "&": // INNER JOIN: A & B 
+				case "":  // FULL JOIN: A | B 
+				case "|": // FULL JOIN: A | B 
+				case "!": // OUTER JOIN: ! (A | B)
+				case "^": // SIDE JOIN: ! (A & B)
+				case "(": // ANTI JOIN: A & ! B
+				case ")": // FOREIGN JOIN: B & ! A
+					jc = j.getJoinConfig();
+					boolean isMain = jc.isMain();
+					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
+					js = jc.getWhereString(false);
+					jc.setMain(isMain);
+
+					boolean isOuterJoin = "!".equals(jt);
+					boolean isSideJoin = "^".equals(jt);
+					boolean isAntiJoin = "(".equals(jt);
+					boolean isForeignJoin = ")".equals(jt);
+					boolean isWsEmpty = StringUtil.isEmpty(ws, true);
+
+					if (isWsEmpty) {
+						if (isOuterJoin) { // ! OUTER JOIN: ! (A | B)
+							throw new NotExistException("no result for ! OUTER JOIN( ! (A | B) ) when A or B is empty!");
+						}
+						if (isForeignJoin) { // ) FOREIGN JOIN: B & ! A
+							throw new NotExistException("no result for ) FOREIGN JOIN( B & ! A ) when A is empty!");
+						}
+					}
+
+					if (StringUtil.isEmpty(js, true)) {
+						if (isOuterJoin) { // ! OUTER JOIN: ! (A | B)
+							throw new NotExistException("no result for ! OUTER JOIN( ! (A | B) ) when A or B is empty!");
+						}
+						if (isAntiJoin) { // ( ANTI JOIN: A & ! B
+							throw new NotExistException("no result for ( ANTI JOIN( A & ! B ) when B is empty!");
+						}
+
+						if (isWsEmpty) {
+							if (isSideJoin) {
+								throw new NotExistException("no result for ^ SIDE JOIN( ! (A & B) ) when both A and B are empty!");
+							}
+						}
+						else {
+							if (isSideJoin || isForeignJoin) {
+								newWs += " ( " + getCondition(true, ws) + " ) ";
+
+								newPvl.addAll(pvl);
+								newPvl.addAll(jc.getPreparedValueList());
+								changed = true;
+							}
+						}
+
+						continue;
+					}
+
+					if (StringUtil.isEmpty(newWs, true) == false) {
+						newWs += AND;
+					}
+
+					if (isAntiJoin) { // ( ANTI JOIN: A & ! B  
+						newWs += " ( " + ( isWsEmpty ? "" : ws + AND ) + NOT + " ( " + js + " ) " + " ) ";
+					}
+					else if (isForeignJoin) { // ) FOREIGN JOIN: (! A) & B  // preparedValueList.add 不好反过来  B & ! A
+						newWs += " ( " + NOT + " ( " + ws + " ) ) " + AND + " ( " + js + " ) ";
+					}
+					else if (isSideJoin) { // ^ SIDE JOIN:  ! (A & B)
+						//MySQL 因为 NULL 值处理问题，(A & ! B) | (B & ! A) 与 ! (A & B) 返回结果不一样，后者往往更多
+						newWs += " ( " + getCondition(
+								true, 
+								( isWsEmpty ? "" : ws + AND ) + " ( " + js + " ) "
+								) + " ) ";
+					}
+					else {  // & INNER JOIN: A & B; | FULL JOIN: A | B; OUTER JOIN: ! (A | B)
+						int logic = Logic.getType(jt);
+						newWs += " ( "
+								+ getCondition(
+										Logic.isNot(logic), 
+										ws
+										+ ( isWsEmpty ? "" : (Logic.isAnd(logic) ? AND : OR) )
+										+ " ( " + js + " ) "
+										)
+								+ " ) ";
+					}
+
+					newPvl.addAll(pvl);
+					newPvl.addAll(jc.getPreparedValueList());
+
+					changed = true;
+					break;
+				default:
+					throw new UnsupportedOperationException(
+							"join:value 中 value 里的 " + jt + "/" + j.getPath()
+							+ "错误！不支持 " + jt + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
+							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
+							);
+				}
+			}
+
+			if (changed) {
+				whereString = newWs;
+				preparedValueList = newPvl;
+			}
+		}
+
+		String result = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
+
+		if (result.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
+			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
+		}
+
+		return result;
+	}
+
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
 		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
 		if (combineSet == null || combineSet.isEmpty()) {
@@ -2353,7 +2660,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				cs += (isItemFirst ? "" : (Logic.isAnd(logic) ? AND : OR)) + "(" + c + ")";
-
 				isItemFirst = false;
 			}
 
@@ -3813,74 +4119,80 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				//条件<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				List<String> whereList = null;
 
-				Map<String, List<String>> combineMap = new LinkedHashMap<>();
-				List<String> andList = new ArrayList<>();
-				List<String> orList = new ArrayList<>();
-				List<String> notList = new ArrayList<>();
-
-				//强制作为条件且放在最前面优化性能
-				if (id != null) {
-					tableWhere.put(idKey, id);
-					andList.add(idKey);
-				}
-				if (idIn != null) {
-					tableWhere.put(idInKey, idIn);
-					andList.add(idInKey);
-				}
-
 				String[] ws = StringUtil.split(combine);
-				if (ws != null) {
-					if (method == DELETE || method == GETS || method == HEADS) {
-						throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:value !");
+				String combineExpression = ws == null || ws.length != 1 ? null : ws[0];
+				
+				Map<String, List<String>> combineMap = StringUtil.isNotEmpty(combineExpression, true) ? null : new LinkedHashMap<>();
+				List<String> andList = combineMap == null ? null : new ArrayList<>();
+				List<String> orList = combineMap == null ? null : new ArrayList<>();
+				List<String> notList = combineMap == null ? null : new ArrayList<>();
+				
+				if (combineMap != null) {
+					//强制作为条件且放在最前面优化性能
+					if (id != null) {
+						tableWhere.put(idKey, id);
+						andList.add(idKey);
 					}
-					whereList = new ArrayList<>();
+					if (idIn != null) {
+						tableWhere.put(idInKey, idIn);
+						andList.add(idInKey);
+					}
 
-					String w;
-					for (int i = 0; i < ws.length; i++) { //去除 &,|,! 前缀
-						w = ws[i];
-						if (w != null) {
-							if (w.startsWith("&")) {
-								w = w.substring(1);
-								andList.add(w);
-							}
-							else if (w.startsWith("|")) {
-								if (method == PUT) {
-									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
-											+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+
+					if (ws != null) {
+						if (method == DELETE || method == GETS || method == HEADS) {
+							throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:value !");
+						}
+						whereList = new ArrayList<>();
+
+						String w;
+						for (int i = 0; i < ws.length; i++) { //去除 &,|,! 前缀
+							w = ws[i];
+							if (w != null) {
+								if (w.startsWith("&")) {
+									w = w.substring(1);
+									andList.add(w);
 								}
-								w = w.substring(1);
-								orList.add(w);
-							}
-							else if (w.startsWith("!")) {
-								if (method == PUT) {
-									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
-											+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+								else if (w.startsWith("|")) {
+									if (method == PUT) {
+										throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+												+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+									}
+									w = w.substring(1);
+									orList.add(w);
 								}
-								w = w.substring(1);
-								notList.add(w);
-							}
-							else {
-								orList.add(w);
+								else if (w.startsWith("!")) {
+									if (method == PUT) {
+										throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+												+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+									}
+									w = w.substring(1);
+									notList.add(w);
+								}
+								else {
+									orList.add(w);
+								}
+
+								if (w.isEmpty()) {
+									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
+								}
+								else {
+									if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
+										throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 不合法！"
+												+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
+									}
+								}
+
+								whereList.add(w);
 							}
 
-							if (w.isEmpty()) {
-								throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
+							// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
+							if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
+								//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
+								callback.onMissingKey4Combine(table, request, combine, ws[i], w);
 							}
-							else {
-								if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
-									throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 不合法！"
-											+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
-								}
-							}
-
-							whereList.add(w);
 						}
 
-						// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
-						if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
-							//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
-							callback.onMissingKey4Combine(table, request, combine, ws[i], w);
-						}
 					}
 
 				}
@@ -3900,7 +4212,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false)) {
 						tableWhere.put(key, value);
 						if (whereList == null || whereList.contains(key) == false) {
-							andList.add(key);
+							if (andList != null) {
+								andList.add(key);
+							}
 						}
 					}
 					else if (whereList != null && whereList.contains(key)) {
@@ -3911,10 +4225,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 				}
 
-				combineMap.put("&", andList);
-				combineMap.put("|", orList);
-				combineMap.put("!", notList);
+				if (combineMap != null) {
+					combineMap.put("&", andList);
+					combineMap.put("|", orList);
+					combineMap.put("!", notList);
+				}
 				config.setCombine(combineMap);
+				config.setCombineExpression(combineExpression);
 
 				config.setContent(tableContent);
 			}
