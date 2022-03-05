@@ -80,7 +80,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private static final String TAG = "AbstractSQLConfig";
 	
 	public static int MAX_COMBINE_DEPTH = 2;
-	public static int MAX_WHERE_COUNT = 3;
+	public static int MAX_WHERE_COUNT = 10;
 	public static int MAX_COMBINE_COUNT = 5;
 	public static int MAX_COMBINE_KEY_COUNT = 2;
 	public static float MAX_COMBINE_RATIO = 1.0f;
