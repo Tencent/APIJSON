@@ -2585,6 +2585,87 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			setPreparedValueList(prepreadValues);
 		}
 
+		whereString = concatJoinWhereString(whereString);
+		
+		String result = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
+
+		if (result.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
+			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
+		}
+
+		return result;
+	}
+
+
+	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
+		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
+		if (combineSet == null || combineSet.isEmpty()) {
+			Log.w(TAG, "getWhereString  combineSet == null || combineSet.isEmpty() >> return \"\";");
+			return "";
+		}
+
+		List<String> keyList;
+
+		String whereString = "";
+
+		boolean isCombineFirst = true;
+		int logic;
+
+		boolean isItemFirst;
+		String c;
+		String cs;
+
+		for (Entry<String, List<String>> ce : combineSet) {
+			keyList = ce == null ? null : ce.getValue();
+			if (keyList == null || keyList.isEmpty()) {
+				continue;
+			}
+
+			if ("|".equals(ce.getKey())) {
+				logic = Logic.TYPE_OR;
+			}
+			else if ("!".equals(ce.getKey())) {
+				logic = Logic.TYPE_NOT;
+			}
+			else {
+				logic = Logic.TYPE_AND;
+			}
+
+			isItemFirst = true;
+			cs = "";
+			for (String key : keyList) {
+				c = getWhereItem(key, where.get(key), method, verifyName);
+
+				if (StringUtil.isEmpty(c, true)) {//避免SQL条件连接错误
+					continue;
+				}
+
+				cs += (isItemFirst ? "" : (Logic.isAnd(logic) ? AND : OR)) + "(" + c + ")";
+				isItemFirst = false;
+			}
+
+			if (StringUtil.isEmpty(cs, true)) {//避免SQL条件连接错误
+				continue;
+			}
+
+			whereString += (isCombineFirst ? "" : AND) + (Logic.isNot(logic) ? NOT : "") + " (  " + cs + "  ) ";
+			isCombineFirst = false;
+		}
+		
+		whereString = concatJoinWhereString(whereString);
+
+		String s = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
+
+		if (s.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
+			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
+		}
+
+		return s;
+	}
+	
+
+	protected String concatJoinWhereString(String whereString) throws Exception {
+		List<Join> joinList = getJoinList();
 		if (joinList != null) {
 
 			String newWs = "";
@@ -2711,207 +2792,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-		String result = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
-
-		if (result.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
-			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
-		}
-
-		return result;
+		return whereString;
 	}
 
-
-
-	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
-		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
-		if (combineSet == null || combineSet.isEmpty()) {
-			Log.w(TAG, "getWhereString  combineSet == null || combineSet.isEmpty() >> return \"\";");
-			return "";
-		}
-
-		List<String> keyList;
-
-		String whereString = "";
-
-		boolean isCombineFirst = true;
-		int logic;
-
-		boolean isItemFirst;
-		String c;
-		String cs;
-
-		for (Entry<String, List<String>> ce : combineSet) {
-			keyList = ce == null ? null : ce.getValue();
-			if (keyList == null || keyList.isEmpty()) {
-				continue;
-			}
-
-			if ("|".equals(ce.getKey())) {
-				logic = Logic.TYPE_OR;
-			}
-			else if ("!".equals(ce.getKey())) {
-				logic = Logic.TYPE_NOT;
-			}
-			else {
-				logic = Logic.TYPE_AND;
-			}
-
-			isItemFirst = true;
-			cs = "";
-			for (String key : keyList) {
-				c = getWhereItem(key, where.get(key), method, verifyName);
-
-				if (StringUtil.isEmpty(c, true)) {//避免SQL条件连接错误
-					continue;
-				}
-
-				cs += (isItemFirst ? "" : (Logic.isAnd(logic) ? AND : OR)) + "(" + c + ")";
-				isItemFirst = false;
-			}
-
-			if (StringUtil.isEmpty(cs, true)) {//避免SQL条件连接错误
-				continue;
-			}
-
-			whereString += (isCombineFirst ? "" : AND) + (Logic.isNot(logic) ? NOT : "") + " (  " + cs + "  ) ";
-			isCombineFirst = false;
-		}
-
-
-		if (joinList != null) {
-
-			String newWs = "";
-			String ws = whereString;
-
-			List<Object> newPvl = new ArrayList<>();
-			List<Object> pvl = new ArrayList<>(preparedValueList);
-
-			SQLConfig jc;
-			String js;
-
-			boolean changed = false;
-			//各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
-			for (Join j : joinList) {
-				String jt = j.getJoinType();
-
-				switch (jt) {
-				case "*": // CROSS JOIN
-				case "@": // APP JOIN
-				case "<": // LEFT JOIN
-				case ">": // RIGHT JOIN
-					break;
-
-				case "&": // INNER JOIN: A & B 
-				case "":  // FULL JOIN: A | B 
-				case "|": // FULL JOIN: A | B 
-				case "!": // OUTER JOIN: ! (A | B)
-				case "^": // SIDE JOIN: ! (A & B)
-				case "(": // ANTI JOIN: A & ! B
-				case ")": // FOREIGN JOIN: B & ! A
-					jc = j.getJoinConfig();
-					boolean isMain = jc.isMain();
-					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
-					js = jc.getWhereString(false);
-					jc.setMain(isMain);
-
-					boolean isOuterJoin = "!".equals(jt);
-					boolean isSideJoin = "^".equals(jt);
-					boolean isAntiJoin = "(".equals(jt);
-					boolean isForeignJoin = ")".equals(jt);
-					boolean isWsEmpty = StringUtil.isEmpty(ws, true);
-
-					if (isWsEmpty) {
-						if (isOuterJoin) { // ! OUTER JOIN: ! (A | B)
-							throw new NotExistException("no result for ! OUTER JOIN( ! (A | B) ) when A or B is empty!");
-						}
-						if (isForeignJoin) { // ) FOREIGN JOIN: B & ! A
-							throw new NotExistException("no result for ) FOREIGN JOIN( B & ! A ) when A is empty!");
-						}
-					}
-
-					if (StringUtil.isEmpty(js, true)) {
-						if (isOuterJoin) { // ! OUTER JOIN: ! (A | B)
-							throw new NotExistException("no result for ! OUTER JOIN( ! (A | B) ) when A or B is empty!");
-						}
-						if (isAntiJoin) { // ( ANTI JOIN: A & ! B
-							throw new NotExistException("no result for ( ANTI JOIN( A & ! B ) when B is empty!");
-						}
-
-						if (isWsEmpty) {
-							if (isSideJoin) {
-								throw new NotExistException("no result for ^ SIDE JOIN( ! (A & B) ) when both A and B are empty!");
-							}
-						}
-						else {
-							if (isSideJoin || isForeignJoin) {
-								newWs += " ( " + getCondition(true, ws) + " ) ";
-
-								newPvl.addAll(pvl);
-								newPvl.addAll(jc.getPreparedValueList());
-								changed = true;
-							}
-						}
-
-						continue;
-					}
-
-					if (StringUtil.isEmpty(newWs, true) == false) {
-						newWs += AND;
-					}
-
-					if (isAntiJoin) { // ( ANTI JOIN: A & ! B  
-						newWs += " ( " + ( isWsEmpty ? "" : ws + AND ) + NOT + " ( " + js + " ) " + " ) ";
-					}
-					else if (isForeignJoin) { // ) FOREIGN JOIN: (! A) & B  // preparedValueList.add 不好反过来  B & ! A
-						newWs += " ( " + NOT + " ( " + ws + " ) ) " + AND + " ( " + js + " ) ";
-					}
-					else if (isSideJoin) { // ^ SIDE JOIN:  ! (A & B)
-						//MySQL 因为 NULL 值处理问题，(A & ! B) | (B & ! A) 与 ! (A & B) 返回结果不一样，后者往往更多
-						newWs += " ( " + getCondition(
-								true, 
-								( isWsEmpty ? "" : ws + AND ) + " ( " + js + " ) "
-								) + " ) ";
-					}
-					else {  // & INNER JOIN: A & B; | FULL JOIN: A | B; OUTER JOIN: ! (A | B)
-						logic = Logic.getType(jt);
-						newWs += " ( "
-								+ getCondition(
-										Logic.isNot(logic), 
-										ws
-										+ ( isWsEmpty ? "" : (Logic.isAnd(logic) ? AND : OR) )
-										+ " ( " + js + " ) "
-										)
-								+ " ) ";
-					}
-
-					newPvl.addAll(pvl);
-					newPvl.addAll(jc.getPreparedValueList());
-
-					changed = true;
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							"join:value 中 value 里的 " + jt + "/" + j.getPath()
-							+ "错误！不支持 " + jt + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
-							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
-							);
-				}
-			}
-
-			if (changed) {
-				whereString = newWs;
-				preparedValueList = newPvl;
-			}
-		}
-
-		String s = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
-
-		if (s.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
-			throw new UnsupportedOperationException("写操作请求必须带条件！！！");
-		}
-
-		return s;
-	}
 
 	/**
 	 * @param key
