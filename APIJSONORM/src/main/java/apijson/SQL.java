@@ -10,6 +10,8 @@ package apijson;
  */
 public class SQL {
 
+	public static final String JOIN = " JOIN ";
+	public static final String ON = " ON ";
 	public static final String OR = " OR ";
 	public static final String AND = " AND ";
 	public static final String NOT = " NOT ";

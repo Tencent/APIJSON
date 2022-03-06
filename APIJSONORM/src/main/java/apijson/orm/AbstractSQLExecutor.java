@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -537,7 +536,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 								if (onList != null) {
 									for (On on : onList) {
 										if (on != null) {
-											viceConfig.putWhere(on.getKey(), item.get(on.getTargetKey()), true);
+											String ok = on.getOriginKey();
+											viceConfig.putWhere(ok.substring(0, ok.length() - 1), item.get(on.getTargetKey()), true);
 										}
 									}
 								}
@@ -743,6 +743,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						//缓存到 childMap
 						if (onList != null) {
 							for (On on : onList) {
+								String ok = on.getOriginKey();
+								String vk = ok.substring(0, ok.length() - 1);
 								cc.putWhere(on.getKey(), result.get(on.getKey()), true);
 							}
 						}

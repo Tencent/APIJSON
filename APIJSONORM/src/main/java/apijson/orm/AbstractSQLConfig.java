@@ -33,6 +33,7 @@ import static apijson.RequestMethod.PUT;
 import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.OR;
+import static apijson.SQL.ON;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3803,8 +3804,25 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (onList != null) {
 						boolean first = true;
 						for (On on : onList) {
-							sql += (first ? " ON " : " AND ") + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
-									+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							String rt = on.getRelateType();
+							if (StringUtil.isEmpty(rt, false)) {
+								sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
+										+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							}
+							else if ("{}".equals(rt)) {
+								sql += (first ? ON : AND) + "json_contains(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote
+										//	+ ", concat('\\'', " + quote + jt + quote + "." + quote + on.getKey() + quote + ", '\\''), '$')";
+										+ ", cast(" + quote + jt + quote + "." + quote + on.getKey() + quote + " AS CHAR), '$')";
+							}
+							else if ("<>".equals(rt)) {
+								sql += (first ? ON : AND) + "json_contains(" + quote + jt + quote + "." + quote + on.getKey() + quote
+										//	+ ", concat('\\'', " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ", '\\''), '$')";
+										+ ", cast(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + " AS CHAR), '$')";
+							}
+							else {
+								throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+								+ " 中 JOIN ON 条件关联类型 " + rt + " 不合法！只支持 =, {}, <> 这几种！");
+							}
 							first = false;
 						}
 					}
@@ -3826,8 +3844,26 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (onList != null) {
 						boolean first = true;
 						for (On on : onList) {
-							sql += (first ? " ON " : " AND ") + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
-									+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							String rt = on.getRelateType();
+							if (StringUtil.isEmpty(rt, false)) {
+								sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
+										+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							}
+							else if ("{}".equals(rt)) {
+								sql += (first ? ON : AND) + "json_contains(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote
+										//	+ ", concat('\\'', " + quote + jt + quote + "." + quote + on.getKey() + quote + ", '\\''), '$')";
+										+ ", cast(" + quote + jt + quote + "." + quote + on.getKey() + quote + " AS CHAR), '$')";
+							}
+							else if ("<>".equals(rt)) {
+								sql += (first ? ON : AND) + "json_contains(" + quote + jt + quote + "." + quote + on.getKey() + quote
+										//	+ ", concat('\\'', " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ", '\\''), '$')";
+										+ ", cast(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + " AS CHAR), '$')";
+							}
+							else {
+								throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+								+ " 中 JOIN ON 条件关联类型 " + rt + " 不合法！只支持 =, {}, <> 这几种！");
+							}
+							
 							first = false;
 						}
 					}
