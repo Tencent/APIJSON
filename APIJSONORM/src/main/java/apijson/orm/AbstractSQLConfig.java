@@ -2376,6 +2376,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		char lastLogic = 0;
 		char last = 0;
 		boolean first = true;
+		boolean isNot = false;
 		
 		String key = "";
 		Map<String, Integer> usedKeyCountMap = new HashMap<>(whereSize);
@@ -2394,7 +2395,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if (isEmpty == false) {
 					if (first == false && lastLogic <= 0) {
 						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i - key.length() - (isOver ? 1 : 0))
-						+ "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
+						+ "' 不合法！左边缺少 & | ! 其中一个逻辑连接符！");
 					}
 				
 					allCount ++;
@@ -2408,27 +2409,28 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
 					}
 					
-					Object value = where.get(key);
+					String column = key;
+					
+					Object value = where.get(column);
 					if (value == null) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key + "' 对应的条件键值对 " + key + ":value 不存在！");
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key + "' 对应的条件键值对 " + column + ":value 不存在！");
 					}
 					
-					String wi = getWhereItem(key, value, method, verifyName);
+					String wi = getWhereItem(column, value, method, verifyName);
 					if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key + "' 对应的 " + key + ":value 不是有效条件键值对！");
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key + "' 对应的 " + column + ":value 不是有效条件键值对！");
 					}
 					
-					Integer count = usedKeyCountMap.get(key);
+					Integer count = usedKeyCountMap.get(column);
 					count = count == null ? 1 : count + 1;
 					if (count > maxCombineKeyCount && maxCombineKeyCount > 0) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！其中 '" + key
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！其中 '" + column
 								+ "' 重复引用，次数 " + count + " 已超过最大值，必须在 0-" + maxCombineKeyCount + " 内！");
 					}
+					usedKeyCountMap.put(column, count);
 					
-					usedKeyCountMap.put(key, count);
-					
-					
-					whereString += "( " + wi + " )";
+					whereString += "( " + getCondition(isNot, wi) + " )";
+					isNot = false;
 					first = false;
 				}
 				
@@ -2473,8 +2475,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					key += c;
 				}
 			}
+			else if (c == '!') {
+				last = i < 1 ? 0 : s.charAt(i - 1);  // & | 后面跳过了空格
+				if (i < n - 1 && s.charAt(i + 1) == '(') {
+					whereString += SQL.NOT;
+					lastLogic = c;
+				}
+				else if (last <= 0 || last == ' ' || last == '(') {
+					isNot = true;
+//					lastLogic = c;
+				}
+				else {
+					key += c;
+				}
+			}
 			else if (c == '(') {
-				if (key.isEmpty() == false || (i > 0 && lastLogic <= 0)) {
+				if (key.isEmpty() == false || (i > 0 && lastLogic <= 0 && last != '(')) {
 					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i) + "' 不合法！左边缺少 & | 逻辑连接符！");
 				}
 				
@@ -3555,7 +3571,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param condition
 	 * @return
 	 */
-	private static String getCondition(boolean not, String condition) {
+	public static String getCondition(boolean not, String condition) {
 		return not ? NOT + "(" + condition + ")" : condition;
 	}
 
