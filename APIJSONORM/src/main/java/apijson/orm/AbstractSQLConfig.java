@@ -3992,10 +3992,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-//		throw new UnsupportedOperationException("JOIN 已禁用 '!' 非逻辑连接符 ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
+		throw new UnsupportedOperationException("JOIN 已禁用 '!' 非逻辑连接符 ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}
 	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-//		throw new UnsupportedOperationException("JOIN 已禁用 {} 和 <> 等复杂关联 ！性能很差、需求极少，默认只允许等价关联，如要取消禁用可在后端重写相关方法！");
+		throw new UnsupportedOperationException("JOIN 已禁用 $, ~, {}, <>, >, <, >=, <= 等复杂关联 ！性能很差、需求极少，默认只允许等价关联，如要取消禁用可在后端重写相关方法！");
 	}
 	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("已禁用 * CROSS JOIN ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
