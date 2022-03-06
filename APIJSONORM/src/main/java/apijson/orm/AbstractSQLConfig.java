@@ -2441,6 +2441,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 				
 				key = "";
+				lastLogic = 0;
 				
 				if (isOver) {
 					break;
@@ -2482,21 +2483,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 			else if (c == '!') {
-				char next = i >= n - 1 ? 0 : s.charAt(i + 1);
-				if (next == ' ') {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
-							+ "' 不合法！非逻辑符 '!' 右边多了一个空格 ' ' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
-				}
-				if (next == ')' || next == '&' || next == '!') {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
-					+ "' 不合法！非逻辑符 '!' 右边多了一个字符 '" + next + "' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
-				}
-				
 				last = i <= 0 ? 0 : s.charAt(i - 1);  // & | 后面跳过了空格
-				if (i > 0 && lastLogic <= 0 && last != '(') {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i)
-					+ "' 不合法！左边缺少 & | 逻辑连接符！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
-					+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+				
+				char next = i >= n - 1 ? 0 : s.charAt(i + 1);
+				if (last == ' ' || last == '(') {
+					if (next == ' ') {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
+						+ "' 不合法！非逻辑符 '!' 右边多了一个空格 ' ' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
+					}
+					if (next == ')' || next == '&' || next == '!') {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
+						+ "' 不合法！非逻辑符 '!' 右边多了一个字符 '" + next + "' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
+					}
+					if (i > 0 && lastLogic <= 0 && last != '(') {
+						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i)
+						+ "' 不合法！左边缺少 & | 逻辑连接符！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
+						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+					}
 				}
 				
 				if (next == '(') {
