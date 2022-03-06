@@ -745,6 +745,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 							for (On on : onList) {
 								String ok = on.getOriginKey();
 								String vk = ok.substring(0, ok.length() - 1);
+								//TODO 兼容复杂关联
 								cc.putWhere(on.getKey(), result.get(on.getKey()), true);
 							}
 						}

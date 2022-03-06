@@ -430,6 +430,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("nullif", "");  // NULLIF(expr1, expr2)  比较两个字符串，如果字符串 expr1 与 expr2 相等 返回 NULL，否则返回 expr1
 		SQL_FUNCTION_MAP.put("group_concat", "");  // GROUP_CONCAT([DISTINCT], s1, s2...)  聚合拼接字符串
 		SQL_FUNCTION_MAP.put("match", "");  // MATCH (name,tag) AGAINST ('a b' IN NATURAL LANGUAGE MODE)  全文检索
+		SQL_FUNCTION_MAP.put("any_value", "");  // any_value(userId) 解决 ONLY_FULL_GROUP_BY 报错
 
 
 
@@ -3439,7 +3440,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						condition += (condition + "has(JSONExtractArrayRaw(assumeNotNull(" + getKey(column) + "))" + ", " + getValue(key, column, v) + (StringUtil.isEmpty(path, true) ? "" : ", " + getValue(key, column, path)) + ")");
 					}
 					else {
-						condition += ("json_contains(" + getKey(column) + ", " +  getValue(key, column, v) + (StringUtil.isEmpty(path, true) ? "" : ", " + getValue(key, column, path)) + ")");
+						condition += ("json_contains(" + getKey(column) + ", " + getValue(key, column, v) + (StringUtil.isEmpty(path, true) ? "" : ", " + getValue(key, column, path)) + ")");
 					}
 				}
 			}
@@ -3490,7 +3491,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 */
 	public static String getCondition(boolean not, String condition) {
-		return not ? NOT + "(" + condition + ")" : condition;
+		return getCondition(not, condition, false);
+	}
+	/**拼接条件
+	 * @param not
+	 * @param condition
+	 * @param outerBreaket 
+	 * @return
+	 */
+	public static String getCondition(boolean not, String condition, boolean addOuterBracket) {
+		String s = not ? NOT + "(" + condition + ")" : condition;
+		return addOuterBracket ? "( " + s + " )" : s;
 	}
 
 
@@ -3800,32 +3811,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					jc.setMain(true).setKeyPrefix(false);
 					sql = ( "<".equals(type) ? " LEFT" : (">".equals(type) ? " RIGHT" : " CROSS") )
 							+ " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS " + quote + jt + quote;
-					
-					if (onList != null) {
-						boolean first = true;
-						for (On on : onList) {
-							String rt = on.getRelateType();
-							if (StringUtil.isEmpty(rt, false)) {
-								sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
-										+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
-							}
-							else if ("{}".equals(rt)) {
-								sql += (first ? ON : AND) + "json_contains(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote
-										//	+ ", concat('\\'', " + quote + jt + quote + "." + quote + on.getKey() + quote + ", '\\''), '$')";
-										+ ", cast(" + quote + jt + quote + "." + quote + on.getKey() + quote + " AS CHAR), '$')";
-							}
-							else if ("<>".equals(rt)) {
-								sql += (first ? ON : AND) + "json_contains(" + quote + jt + quote + "." + quote + on.getKey() + quote
-										//	+ ", concat('\\'', " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ", '\\''), '$')";
-										+ ", cast(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + " AS CHAR), '$')";
-							}
-							else {
-								throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
-								+ " 中 JOIN ON 条件关联类型 " + rt + " 不合法！只支持 =, {}, <> 这几种！");
-							}
-							first = false;
-						}
-					}
+					sql = concatJoinOn(sql, quote, j, jt, onList);
 					
 					jc.setMain(false).setKeyPrefix(true);
 
@@ -3841,32 +3827,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				case "(": // ANTI JOIN: A & ! B
 				case ")": // FOREIGN JOIN: B & ! A
 					sql = " INNER JOIN " + jc.getTablePath();
-					if (onList != null) {
-						boolean first = true;
-						for (On on : onList) {
-							String rt = on.getRelateType();
-							if (StringUtil.isEmpty(rt, false)) {
-								sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " = "
-										+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
-							}
-							else if ("{}".equals(rt)) {
-								sql += (first ? ON : AND) + "json_contains(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote
-										//	+ ", concat('\\'', " + quote + jt + quote + "." + quote + on.getKey() + quote + ", '\\''), '$')";
-										+ ", cast(" + quote + jt + quote + "." + quote + on.getKey() + quote + " AS CHAR), '$')";
-							}
-							else if ("<>".equals(rt)) {
-								sql += (first ? ON : AND) + "json_contains(" + quote + jt + quote + "." + quote + on.getKey() + quote
-										//	+ ", concat('\\'', " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ", '\\''), '$')";
-										+ ", cast(" + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + " AS CHAR), '$')";
-							}
-							else {
-								throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
-								+ " 中 JOIN ON 条件关联类型 " + rt + " 不合法！只支持 =, {}, <> 这几种！");
-							}
-							
-							first = false;
-						}
-					}
+					sql = concatJoinOn(sql, quote, j, jt, onList);
 					break;
 				default:
 					throw new UnsupportedOperationException(
@@ -3902,6 +3863,140 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return StringUtil.isEmpty(joinOns, true) ? "" : joinOns + "  \n";
 	}
 
+	
+	protected String concatJoinOn(@NotNull String sql, @NotNull String quote, @NotNull Join j, @NotNull String jt, List<On> onList) {
+		if (onList != null) {
+			boolean first = true;
+			for (On on : onList) {
+				Logic logic = on.getLogic();
+				boolean isNot = logic == null ? false : logic.isNot();
+				if (isNot) {
+					onJoinNotRelation(sql, quote, j, jt, onList, on);
+				}
+				
+				String rt = on.getRelateType();
+				if (StringUtil.isEmpty(rt, false)) {
+					sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? " != " : " = ")
+							+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+				}
+				else {
+					onJoinComplextRelation(sql, quote, j, jt, onList, on);
+					
+					if (">=".equals(rt) || "<=".equals(rt) || ">".equals(rt) || "<".equals(rt)) {
+						if (isNot) {
+							throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+							+ " 中 JOIN ON 条件关联逻辑符 " + rt + " 不合法！ >, <, >=, <= 不支持与或非逻辑符 & | ! ！");
+						}
+						
+						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " " + rt + " "
+								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+					}
+					else if ("$".equals(rt)) {
+						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+								+ " LIKE concat('%', " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ", '%')";
+					}
+					else if (rt.endsWith("~")) {
+						boolean ignoreCase = "*~".equals(rt);
+						if (isPostgreSQL()) {
+							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+									+ " ~" + (ignoreCase ? "* " : " ") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+						}
+						else if (isOracle()) {
+							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
+									+ ", " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
+						}
+						else if (isClickHouse()) {
+							sql += (first ? ON : AND) + "match(" + (ignoreCase ? "lower(" : "") + quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
+									+ ", " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
+						}
+						else if (isHive()) {
+							sql += (first ? ON : AND) + (ignoreCase ? "lower(" : "") +  quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
+									+ " REGEXP " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "");
+						}
+						else {
+							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+									+ " REGEXP " + (ignoreCase ? "" : "BINARY ") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+						}
+					}
+					else if ("{}".equals(rt) || "<>".equals(rt)) {
+						String tt = on.getTargetTable();
+						String ta = on.getTargetAlias();
+
+						Map<String, String> cast = null;
+						if (tt.equals(getTable()) && ((ta == null && getAlias() == null) || ta.equals(getAlias()))) {
+							cast = getCast();
+						}
+						else {
+							boolean find = false;
+							for (Join jn : joinList) {
+								if (tt.equals(jn.getTable()) && ((ta == null && jn.getAlias() == null) || ta.equals(jn.getAlias()))) {
+									cast = getCast();
+									find = true;
+									break;
+								}
+							}
+
+							if (find == false) {
+								throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+								+ " 中 JOIN ON 条件中找不到对应的 " + rt + " 不合法！只支持 =, {}, <> 这几种！");
+							}
+						}
+
+						boolean isBoolOrNum = SQL.isBooleanOrNumber(cast == null ? null : cast.get(on.getTargetKey()));
+
+						String arrKeyPath;
+						String itemKeyPath;
+						if ("{}".equals(rt)) {
+							arrKeyPath = quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							itemKeyPath =  quote + jt + quote + "." + quote + on.getKey() + quote;
+						}
+						else {
+							arrKeyPath = quote + jt + quote + "." + quote + on.getKey() + quote;
+							itemKeyPath = quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+						}
+						
+						if (isPostgreSQL()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
+							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
+									+ " IS NOT NULL AND " + arrKeyPath + " @> " + itemKeyPath) + (isNot ? ") " : ""); 
+						}
+						else if (isOracle()) {
+							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
+									+ " IS NOT NULL AND json_textcontains(" + arrKeyPath
+									+ ", '$', " + itemKeyPath + ")") + (isNot ? ") " : "");
+						}
+						else if (isClickHouse()) {
+							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
+									+ " IS NOT NULL AND has(JSONExtractArrayRaw(assumeNotNull(" + arrKeyPath + "))"
+									+ ", " + itemKeyPath + ")") + (isNot ? ") " : "");
+						}
+						else {
+							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
+									+ " IS NOT NULL AND json_contains(" + arrKeyPath
+									+ (isBoolOrNum ? ", cast(" + itemKeyPath + " AS CHAR), '$')"
+											: ", concat('\"', " + itemKeyPath + ", '\"'), '$')"
+											)
+									) + (isNot ? ") " : "");
+						}
+					}
+					else {
+						throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+						+ " 中 JOIN ON 条件关联类型 " + rt + " 不合法！只支持 =, >, <, >=, <=, !=, $, ~, {}, <> 这几种！");
+					}
+				}
+				
+				first = false;
+			}
+		}
+		
+		return sql;
+	}
+
+	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+//		throw new UnsupportedOperationException("JOIN 已禁用 '!' 非逻辑连接符 ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
+	}
+	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+//		throw new UnsupportedOperationException("JOIN 已禁用 {} 和 <> 等复杂关联 ！性能很差、需求极少，默认只允许等价关联，如要取消禁用可在后端重写相关方法！");
+	}
 	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("已禁用 * CROSS JOIN ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}

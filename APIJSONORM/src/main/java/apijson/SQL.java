@@ -388,7 +388,16 @@ public class SQL {
 			return "%" + s + "%";
 		}
 	}
-	
+
 	//search>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+	
+	public static boolean isBooleanOrNumber(String type) {
+		type = StringUtil.toUpperCase(type, true);
+		return type.isEmpty() || (type.endsWith("INT") && type.endsWith("POINT") == false)
+				|| type.endsWith("BOOLEAN") || type.endsWith("ENUM")
+				|| type.endsWith("FLOAT") || type.endsWith("DOUBLE") || type.endsWith("DECIMAL");
+	}
+	
+	
 }

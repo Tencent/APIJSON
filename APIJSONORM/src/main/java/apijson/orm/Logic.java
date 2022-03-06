@@ -30,6 +30,7 @@ public class Logic {
 
 	private int type;
 	private String key;
+	private String originKey;
 
 	public Logic() {
 		super();
@@ -40,6 +41,7 @@ public class Logic {
 		this.type = type;
 	}
 	public Logic(String key) {
+		this.originKey = key;
 		key = StringUtil.getString(key);
 
 		int type = getType(key.isEmpty() ? "" : key.substring(key.length() - 1));
@@ -70,6 +72,9 @@ public class Logic {
 	}
 	public void setKey(String key) {
 		this.key = key;
+	}
+	public String getOriginKey() {
+		return originKey;
 	}
 
 

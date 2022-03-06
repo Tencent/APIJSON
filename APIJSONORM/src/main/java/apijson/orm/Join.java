@@ -10,6 +10,7 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.NotNull;
+import apijson.StringUtil;
 
 /**连表 配置
  * @author Lemon
@@ -163,7 +164,8 @@ public class Join {
 		private String originKey;
 		private String originValue;
 
-		private String relateType;  // "" - 一对一, "{}" - 一对多, "<>" - 多对一
+		private Logic logic; // & | !
+		private String relateType;  // "" - 一对一, "{}" - 一对多, "<>" - 多对一, > , <= , !=
 		private String key;  // id
 		private String targetTable;  // Moment
 		private String targetAlias;  // main
@@ -183,13 +185,18 @@ public class Join {
 		}
 
 
+		public Logic getLogic() {
+			return logic;
+		}
+		public void setLogic(Logic logic) {
+			this.logic = logic;
+		}
 		public String getRelateType() {
 			return relateType;
 		}
 		public void setRelateType(String relateType) {
 			this.relateType = relateType;
 		}
-
 
 		public String getKey() {
 			return key;
@@ -222,22 +229,63 @@ public class Join {
 				originKey = originKey.substring(0, originKey.length() - 1);
 			}
 			else { //TODO 暂时只允许 User.id = Moment.userId 字段关联，不允许 User.id = 82001 这种
-				throw new IllegalArgumentException(joinType + "/.../" + table + "/" + originKey + " 不合法！join:'.../refKey'" + " 中 refKey 必须以 @ 结尾！");
+				throw new IllegalArgumentException(joinType + "/.../" + table + "/" + originKey + " 中字符 " + originKey + " 不合法！join:'.../refKey'" + " 中 refKey 必须以 @ 结尾！");
 			}
 
+			String k;
+			
 			if (originKey.endsWith("{}")) {
 				setRelateType("{}");
-				setKey(originKey.substring(0, originKey.length() - 2));
+				k = originKey.substring(0, originKey.length() - 2);
 			}
 			else if (originKey.endsWith("<>")) {
 				setRelateType("<>");
-				setKey(originKey.substring(0, originKey.length() - 2));
+				k = originKey.substring(0, originKey.length() - 2);
+			}
+			else if (originKey.endsWith("$")) {
+				setRelateType("$");
+				k = originKey.substring(0, originKey.length() - 1);
+			}
+			else if (originKey.endsWith("~")) {
+				boolean ignoreCase = originKey.endsWith("*~");
+				setRelateType(ignoreCase ? "*~" : "~");
+				k = originKey.substring(0, originKey.length() - (ignoreCase ? 2 : 1));
+			}
+			else if (originKey.endsWith(">=")) {
+				setRelateType(">=");
+				k = originKey.substring(0, originKey.length() - 2);
+			}
+			else if (originKey.endsWith("<=")) {
+				setRelateType("<=");
+				k = originKey.substring(0, originKey.length() - 2);
+			}
+			else if (originKey.endsWith(">")) {
+				setRelateType(">");
+				k = originKey.substring(0, originKey.length() - 1);
+			}
+			else if (originKey.endsWith("<")) {
+				setRelateType("<");
+				k = originKey.substring(0, originKey.length() - 1);
 			}
 			else {
 				setRelateType("");
-				setKey(originKey);
+				k = originKey;
 			}
+			
+			if (k != null && (k.contains("&") || k.contains("|"))) {
+				throw new UnsupportedOperationException(joinType + "/.../" + table + "/" + originKey + " 中字符 " + k + " 不合法！与或非逻辑符仅支持 '!' 非逻辑符 ！");
+			}
+			
+			Logic l = new Logic(k);
+			setLogic(l);
+			
+			if (StringUtil.isName(l.getKey()) == false) {
+				throw new IllegalArgumentException(joinType + "/.../" + table + "/" + originKey + " 中字符 " + l.getKey() + " 不合法！必须符合字段命名格式！");
+			}
+			
+			setKey(l.getKey());
 		}
+		
 
 	}
 
