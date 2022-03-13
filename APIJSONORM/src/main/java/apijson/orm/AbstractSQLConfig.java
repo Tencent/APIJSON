@@ -2982,7 +2982,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return SQL.NULL;
 		}
 		//		return (value instanceof Number || value instanceof Boolean) && DATABASE_POSTGRESQL.equals(getDatabase()) ? value :  "'" + value + "'";
-		return (value instanceof Number || value instanceof Boolean) ? value :  "'" + value.toString().replaceAll("'", "\\'") + "'"; //MySQL 隐式转换用不了索引
+		return (value instanceof Number || value instanceof Boolean) ? value :  "'" + value.toString().replaceAll("\\'", "\\\\'") + "'"; //MySQL 隐式转换用不了索引
 	}
 
 	@Override
@@ -3044,7 +3044,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			//				throw new IllegalArgumentException(key + "$:value 中 value 值 " + v + " 中包含 %% ！不允许有连续的 % ！");
 			//			}
 
-			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, column, v);
+			condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR)) + getLikeString(key, column, (String) v);
 		}
 
 		return getCondition(Logic.isNot(type), condition);
@@ -3057,7 +3057,53 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return key LIKE 'value'
 	 */
 	@JSONField(serialize = false)
-	public String getLikeString(String key, String column, Object value) {
+	public String getLikeString(@NotNull String key, @NotNull String column, String value) {
+		String k = key.substring(0, key.length() - 1);
+		char r = k.charAt(k.length() - 1);
+		
+		char l;
+		if (r == '%' || r == '_' || r == '?') {
+			k = k.substring(0, k.length() - 1);
+
+			l = k.charAt(k.length() - 1);
+			if (l == '%' || l == '_' || l == '?') {
+				if (l == r) {
+					throw new IllegalArgumentException(key + ":value 中字符 " + k + " 不合法！key$:value 中不允许 key 中有连续相同的占位符！");
+				}
+
+				k = k.substring(0, k.length() - 1);
+			}
+			else if (l > 0 && StringUtil.isName(String.valueOf(l))) {
+				l = r;
+			}
+			
+			if (l == '?') {
+				l = 0;
+			}
+			if (r == '?') {
+				r = 0;
+			}
+		}
+		else {
+			l = r = 0;
+		}
+		
+		if (l > 0 || r > 0) {
+			if (value == null) {
+				throw new IllegalArgumentException(key + ":value 中 value 为 null！key$:value 中 value 不能为 null，且类型必须是 String ！");
+			}
+			
+			value = value.replaceAll("\\\\", "\\\\\\\\");
+			value = value.replaceAll("\\%", "\\\\%");
+			value = value.replaceAll("\\_", "\\\\_");
+			if (l > 0) {
+				value = l + value;
+			}
+			if (r > 0) {
+				value = value + r;
+			}
+		}
+		
 		return getKey(column) + " LIKE "  + getValue(key, column, value);
 	}
 
