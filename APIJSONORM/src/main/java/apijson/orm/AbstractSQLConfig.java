@@ -104,6 +104,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	// 自定义原始 SQL 片段 Map<key, substring>：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
 	public static final Map<String, String> RAW_MAP;
 	// 允许调用的 SQL 函数：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
+	public static final Map<String, String> SQL_AGGREGATE_FUNCTION_MAP;
 	public static final Map<String, String> SQL_FUNCTION_MAP;
 
 
@@ -242,6 +243,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		
 
+		SQL_AGGREGATE_FUNCTION_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
+		SQL_AGGREGATE_FUNCTION_MAP.put("max", "");
+		SQL_AGGREGATE_FUNCTION_MAP.put("min", "");
+		SQL_AGGREGATE_FUNCTION_MAP.put("avg", "");
+		SQL_AGGREGATE_FUNCTION_MAP.put("count", "");
+		SQL_AGGREGATE_FUNCTION_MAP.put("sum", "");
+		
 		SQL_FUNCTION_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
 
 		//窗口函数
@@ -761,6 +769,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private int page; //Table所在页码
 	private int position; //Table在[]中的位置
 	private int query; //JSONRequest.query
+	private Boolean compat; //JSONRequest.compat  query total
 	private int type; //ObjectParser.type
 	private int cache;
 	private boolean explain;
@@ -1458,14 +1467,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		case HEAD:
 		case HEADS: //StringUtil.isEmpty(column, true) || column.contains(",") 时SQL.count(column)会return "*"
 			if (isPrepared() && column != null) {
-
 				List<String> raw = getRaw();
 				boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
-
-				String origin;
-				String alias;
-				int index;
-
+				
 				for (String c : column) {
 					if (containRaw) {
 						// 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
@@ -1476,9 +1480,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						}
 					}
 
-					index = c.lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
-					origin = index < 0 ? c : c.substring(0, index);
-					alias = index < 0 ? null : c.substring(index + 1);
+					int index = c.lastIndexOf(":"); //StringUtil.split返回数组中，子项不会有null
+					String origin = index < 0 ? c : c.substring(0, index);
+					String alias = index < 0 ? null : c.substring(index + 1);
 
 					if (alias != null && StringUtil.isName(alias) == false) {
 						throw new IllegalArgumentException("HEAD请求: 字符 " + alias + " 不合法！预编译模式下 @column:value 中 value里面用 , 分割的每一项"
@@ -1499,8 +1503,41 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 				}
 			}
+			
+			boolean onlyOne = column != null && column.size() == 1;
+			String c0 = onlyOne ? column.get(0) : null;
+			
+			if (onlyOne) {
+				int index = c0 == null ? -1 : c0.lastIndexOf(":");
+				if (index > 0) {
+					c0 = c0.substring(0, index);
+				}
 
-			return SQL.count(column != null && column.size() == 1 && StringUtil.isName(column.get(0)) ? getKey(column.get(0)) : "*");
+				int start = c0 == null ? -1 : c0.indexOf("(");
+				int end = start <= 0 ? -1 : c0.lastIndexOf(")");
+				if (start > 0 && end > start) {
+					String fun = c0.substring(0, start);
+					
+					// Invalid use of group function  SELECT  count(max(`id`))  AS count  FROM `sys`.`Comment`
+					if (SQL_AGGREGATE_FUNCTION_MAP.containsKey(fun)) {
+						String group = getGroup();  // TODO 唯一 100% 兼容的可能只有 SELECT count(*) FROM (原语句) AS table
+						return StringUtil.isEmpty(group, true) ? "1" : "count(DISTINCT " + group + ")";
+					}
+					
+					String[] args = start == end - 1 ? null : StringUtil.split(c0.substring(start + 1, end));
+					if (args == null || args.length <= 0) {
+						return SQL.count(c0);
+					}
+
+					List<String> raw = getRaw();
+					boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
+
+					return SQL.count(parseColumn(c0, containRaw));
+				}
+			}
+
+			return SQL.count(onlyOne ? getKey(c0) : "*");
+			//			return SQL.count(onlyOne && StringUtil.isName(column.get(0)) ? getKey(column.get(0)) : "*");
 		case POST:
 			if (column == null || column.isEmpty()) {
 				throw new IllegalArgumentException("POST 请求必须在Table内设置要保存的 key:value ！");
@@ -1997,6 +2034,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		this.query = query;
 		return this;
 	}
+	@Override
+	public Boolean getCompat() {
+		return compat;
+	}
+	@Override
+	public AbstractSQLConfig setCompat(Boolean compat) {
+		this.compat = compat;
+		return this;
+	}
+	
 	@Override
 	public int getType() {
 		return type;
@@ -3753,14 +3800,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		//根据方法不同，聚合语句不同。GROUP  BY 和 HAVING 可以加在 HEAD 上, HAVING 可以加在 PUT, DELETE 上，GET 全加，POST 全都不加
 		String aggregation = "";
-		if (RequestMethod.isGetMethod(config.getMethod(), true)){
-			aggregation = config.getGroupString(true) + config.getHavingString(true) +
-					config.getOrderString(true);
+		if (RequestMethod.isGetMethod(config.getMethod(), true)) {
+			aggregation = config.getGroupString(true) + config.getHavingString(true) + config.getOrderString(true);
 		}
-		if (RequestMethod.isHeadMethod(config.getMethod(), true)){
+		if (RequestMethod.isHeadMethod(config.getMethod(), true)) {  // TODO 加参数 isPagenation 判断是 GET 内分页 query:2 查总数，不用加这些条件
 			aggregation = config.getGroupString(true) + config.getHavingString(true) ;
 		}
-		if (config.getMethod() == PUT || config.getMethod() == DELETE){
+		if (config.getMethod() == PUT || config.getMethod() == DELETE) {
 			aggregation = config.getHavingString(true) ;
 		}
 
@@ -3825,6 +3871,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			//  主表不用别名			String ta;
 			for (Join j : joinList) {
+				onGetJoinString(j);
+				
 				if (j.isAppJoin()) { // APP JOIN，只是作为一个标记，执行完主表的查询后自动执行副表的查询 User.id IN($commentIdList)
 					continue;
 				}
@@ -4088,6 +4136,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
 		throw new UnsupportedOperationException("JOIN 已禁用 $, ~, {}, <>, >, <, >=, <= 等复杂关联 ！性能很差、需求极少，默认只允许 = 等价关联，如要取消禁用可在后端重写相关方法！");
+	}
+	
+	protected void onGetJoinString(Join j) throws UnsupportedOperationException {
 	}
 	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("已禁用 * CROSS JOIN ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");

@@ -42,6 +42,7 @@ import apijson.JSONResponse;
 import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
+import apijson.SQL;
 import apijson.StringUtil;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
@@ -1051,9 +1052,33 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				//total 这里不能用arrayConfig.getType()，因为在createObjectParser.onChildParse传到onObjectParse时已被改掉
 				if (type == SQLConfig.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE && position == 0) {
 
-					RequestMethod method = op.getMethod();
-					JSONObject rp = op.setMethod(RequestMethod.HEAD).setSQLConfig().executeSQL().getSqlReponse();
-					op.setMethod(method);
+					JSONObject rp;
+					Boolean compat = arrayConfig.getCompat();
+					if (compat != null && compat) {
+						// 解决对聚合函数字段通过 query:2 分页查总数返回值错误
+						// 这里可能改变了内部的一些数据，下方通过 arrayConfig 还原
+						SQLConfig cfg = op.setSQLConfig(0, 0, 0).getSQLConfig();
+						boolean isExplain = cfg.isExplain();
+						cfg.setExplain(false);
+
+						Subquery subq = new Subquery();
+						subq.setFrom(cfg.getTable());
+						subq.setConfig(cfg);
+
+						SQLConfig countSQLCfg = createSQLConfig();
+						countSQLCfg.setColumn(Arrays.asList("count(*):count"));
+						countSQLCfg.setFrom(subq);
+
+						rp = executeSQL(countSQLCfg, false);
+
+						cfg.setExplain(isExplain);
+					}
+					else {
+						// 对聚合函数字段通过 query:2 分页查总数返回值错误
+						RequestMethod method = op.getMethod();
+						rp = op.setMethod(RequestMethod.HEAD).setSQLConfig().executeSQL().getSqlReponse();
+						op.setMethod(method);
+					}
 
 					if (rp != null) {
 						int index = parentPath.lastIndexOf("]/");
@@ -1147,6 +1172,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		//不能改变，因为后面可能继续用到，导致1以上都改变 []:{0:{Comment[]:{0:{Comment:{}},1:{...},...}},1:{...},...}
 		final String query = request.getString(JSONRequest.KEY_QUERY);
+		final Boolean compat = request.getBoolean(JSONRequest.KEY_COMPAT);
 		final Integer count = request.getInteger(JSONRequest.KEY_COUNT); //TODO 如果不想用默认数量可以改成 getIntValue(JSONRequest.KEY_COUNT);
 		final Integer page = request.getInteger(JSONRequest.KEY_PAGE);
 		final Object join = request.get(JSONRequest.KEY_JOIN);
@@ -1189,6 +1215,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		request.remove(JSONRequest.KEY_QUERY);
+		request.remove(JSONRequest.KEY_COMPAT);
 		request.remove(JSONRequest.KEY_COUNT);
 		request.remove(JSONRequest.KEY_PAGE);
 		request.remove(JSONRequest.KEY_JOIN);
@@ -1227,6 +1254,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 					.setCount(size)
 					.setPage(page2)
 					.setQuery(query2)
+					.setCompat(compat)
 					.setTable(arrTableKey)
 					.setJoinList(onJoinParse(join, request));
 
@@ -1301,6 +1329,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		} finally {
 			//后面还可能用到，要还原
 			request.put(JSONRequest.KEY_QUERY, query);
+			request.put(JSONRequest.KEY_COMPAT, compat);
 			request.put(JSONRequest.KEY_COUNT, count);
 			request.put(JSONRequest.KEY_PAGE, page);
 			request.put(JSONRequest.KEY_JOIN, join);

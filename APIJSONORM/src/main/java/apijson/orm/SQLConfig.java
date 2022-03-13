@@ -98,6 +98,9 @@ public interface SQLConfig {
 	int getQuery();
 	SQLConfig setQuery(int query);
 
+	Boolean getCompat();
+	SQLConfig setCompat(Boolean compat);
+
 	int getPosition();
 	SQLConfig setPosition(int position);
 

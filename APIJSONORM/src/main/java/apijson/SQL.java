@@ -21,7 +21,7 @@ public class SQL {
 	public static final String IS_NOT = " IS NOT ";
 	public static final String IS_NULL = " IS NULL ";
 	public static final String IS_NOT_NULL = " IS NOT NULL ";
-	
+
 	//括号必须紧跟函数名！ count (...) 报错！
 	public static final String COUNT = "count";
 	public static final String SUM = "sum";
@@ -191,7 +191,7 @@ public class SQL {
 	public static String replace(String s, String c1, String c2) {
 		return "replace(" + s + ", " + c1 + ", " + c2 + ")";
 	}
-	
+
 	/**
 	 * @param s1
 	 * @param s2
@@ -225,11 +225,11 @@ public class SQL {
 		return "lower(" + s + ")";
 	}
 
-	
-	
+
+
 
 	//column and function<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	
+
 	/**字段
 	 * @param column
 	 * @return column.isEmpty() ? "*" : column;
@@ -245,15 +245,16 @@ public class SQL {
 	public static String columnAs(String column) {
 		return count(column) + AS;
 	}
-	
+
 	/**函数
 	 * @param column if (StringUtil.isEmpty(column, true) || column.contains(",")) -> column = null;
 	 * @return " " + fun + "(" + {@link #column(String)} + ") ";
 	 */
 	public static String function(String fun, String column) {
-		if (StringUtil.isEmpty(column, true) || column.contains(",")) {
-			column = null; //解决 count(id,name) 这种多个字段导致的SQL异常
-		}
+		// 支持 fun(col1,col2..)  
+		//		if (StringUtil.isEmpty(column, true) || column.contains(",")) {
+		//			column = null; //解决 count(id,name) 这种多个字段导致的SQL异常
+		//		}
 		return " " + fun + "(" + column(column) + ") ";
 	}
 	/**有别名的函数
@@ -263,7 +264,7 @@ public class SQL {
 	public static String functionAs(String fun, String column) {
 		return function(fun, column) + AS + fun + " ";
 	}
-	
+
 	/**计数
 	 * column = null
 	 * @return {@link #count(String)}
@@ -313,9 +314,9 @@ public class SQL {
 	}
 
 	//column and function>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
-	
-	
+
+
+
 	//search<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	public static final int SEARCH_TYPE_CONTAIN_FULL = 0;
@@ -391,13 +392,13 @@ public class SQL {
 
 	//search>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	
+
 	public static boolean isBooleanOrNumber(String type) {
 		type = StringUtil.toUpperCase(type, true);
 		return type.isEmpty() || (type.endsWith("INT") && type.endsWith("POINT") == false)
 				|| type.endsWith("BOOLEAN") || type.endsWith("ENUM")
 				|| type.endsWith("FLOAT") || type.endsWith("DOUBLE") || type.endsWith("DECIMAL");
 	}
-	
-	
+
+
 }

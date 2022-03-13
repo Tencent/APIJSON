@@ -87,6 +87,7 @@ public class JSONRequest extends JSONObject {
 	public static final String SUBQUERY_RANGE_ANY = "ANY";
 	
 	public static final String KEY_QUERY = "query";
+	public static final String KEY_COMPAT = "compat";
 	public static final String KEY_COUNT = "count";
 	public static final String KEY_PAGE = "page";
 	public static final String KEY_JOIN = "join";
@@ -97,6 +98,7 @@ public class JSONRequest extends JSONObject {
 	static {
 		ARRAY_KEY_LIST = new ArrayList<String>();
 		ARRAY_KEY_LIST.add(KEY_QUERY);
+		ARRAY_KEY_LIST.add(KEY_COMPAT);
 		ARRAY_KEY_LIST.add(KEY_COUNT);
 		ARRAY_KEY_LIST.add(KEY_PAGE);
 		ARRAY_KEY_LIST.add(KEY_JOIN);
