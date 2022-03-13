@@ -1052,6 +1052,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				//total 这里不能用arrayConfig.getType()，因为在createObjectParser.onChildParse传到onObjectParse时已被改掉
 				if (type == SQLConfig.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE && position == 0) {
 
+					//TODO 应在这里判断 @column 中是否有聚合函数，而不是 AbstractSQLConfig.getColumnString
+					
 					JSONObject rp;
 					Boolean compat = arrayConfig.getCompat();
 					if (compat != null && compat) {
