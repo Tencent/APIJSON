@@ -1494,7 +1494,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			}
 
 			Set<Entry<String, Object>> refSet = refObj.entrySet();
-			if (refSet.isEmpty()) {
+			if (refSet.isEmpty() && "*".equals(joinType) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 alias 值 " + alias + " 不合法！"
 						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
 						+ "且 Table:alias 的 alias 必须满足英文单词变量名格式！");
