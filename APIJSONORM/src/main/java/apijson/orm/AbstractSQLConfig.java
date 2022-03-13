@@ -3891,9 +3891,55 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " " + rt + " "
 								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 					}
-					else if ("$".equals(rt)) {
-						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-								+ " LIKE concat('%', " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ", '%')";
+					else if (rt.endsWith("$")) {
+						String t = rt.substring(0, rt.length() - 1);
+						char r = t.isEmpty() ? 0 : t.charAt(t.length() - 1);
+						
+						char l;
+						if (r == '%' || r == '_' || r == '?') {
+							t = t.substring(0, t.length() - 1);
+							
+							if (t.isEmpty()) {
+								if (r == '?') {
+									throw new IllegalArgumentException(on.getOriginKey() + ":value 中字符 " + on.getOriginKey() + " 不合法！key$:value 中不允许只有单独的 '?'，必须和 '%', '_' 之一配合使用 ！");
+								}
+								
+								l = r;
+							}
+							else {
+								l = t.charAt(t.length() - 1);
+								if (l == '%' || l == '_' || l == '?') {
+									if (l == r) {
+										throw new IllegalArgumentException(on.getOriginKey() + ":value 中字符 " + t + " 不合法！key$:value 中不允许 key 中有连续相同的占位符！");
+									}
+
+									t = t.substring(0, t.length() - 1);
+								}
+								else if (l > 0 && StringUtil.isName(String.valueOf(l))) {
+									l = r;
+								}
+							}
+							
+							if (l == '?') {
+								l = 0;
+							}
+							if (r == '?') {
+								r = 0;
+							}
+						}
+						else {
+							l = r = 0;
+						}
+						
+						if (l <= 0 && r <= 0) {
+							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+									+ " LIKE " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+						}
+						else {
+							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+									+ (l <= 0 ? " LIKE concat(" : " LIKE concat('" + l + "', ") + quote + on.getTargetTable() + quote
+									+ "." + quote + on.getTargetKey() + quote + (r <= 0 ? ")" : ", '" + r + "')");
+						}
 					}
 					else if (rt.endsWith("~")) {
 						boolean ignoreCase = "*~".equals(rt);
@@ -3992,10 +4038,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		throw new UnsupportedOperationException("JOIN 已禁用 '!' 非逻辑连接符 ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
+//		throw new UnsupportedOperationException("JOIN 已禁用 '!' 非逻辑连接符 ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}
 	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		throw new UnsupportedOperationException("JOIN 已禁用 $, ~, {}, <>, >, <, >=, <= 等复杂关联 ！性能很差、需求极少，默认只允许等价关联，如要取消禁用可在后端重写相关方法！");
+//		throw new UnsupportedOperationException("JOIN 已禁用 $, ~, {}, <>, >, <, >=, <= 等复杂关联 ！性能很差、需求极少，默认只允许等价关联，如要取消禁用可在后端重写相关方法！");
 	}
 	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("已禁用 * CROSS JOIN ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
@@ -4599,7 +4645,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		String key = new String(originKey);
 		if (key.endsWith("$")) {//搜索 LIKE，查询时处理
-			key = key.substring(0, key.length() - 1);
+			String k = key.substring(0, key.length() - 1);
+			// key%$:"a" -> key LIKE '%a%'; key?%$:"a" -> key LIKE 'a%'; key_?$:"a" -> key LIKE '_a'; key_%$:"a" -> key LIKE '_a%'
+			char c = k.isEmpty() ? 0 : k.charAt(k.length() - 1);
+
+			if (c == '%' || c == '_' || c == '?') {
+				k = k.substring(0, k.length() - 1);
+
+				char c2 = k.isEmpty() ? 0 : k.charAt(k.length() - 1);
+				if (c2 == '%' || c2 == '_' || c2 == '?') {
+					if (c2 == c) {
+						throw new IllegalArgumentException(originKey + ":value 中字符 " + k + " 不合法！key$:value 中不允许 key 中有连续相同的占位符！");
+					}
+
+					k = k.substring(0, k.length() - 1);
+				}
+				else if (c == '?') {
+					throw new IllegalArgumentException(originKey + ":value 中字符 " + originKey + " 不合法！key$:value 中不允许只有单独的 '?'，必须和 '%', '_' 之一配合使用 ！");
+				}
+			}
+			
+			key = k;
 		}
 		else if (key.endsWith("~")) {//匹配正则表达式 REGEXP，查询时处理
 			key = key.substring(0, key.length() - 1);
@@ -4648,6 +4714,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
+		//TODO if (key.endsWith("-")) { // 表示 key 和 value 顺序反过来: value LIKE key
+		
 		String last = null;//不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
 		if (RequestMethod.isQueryMethod(method)) {//逻辑运算符仅供GET,HEAD方法使用
 			last = key.isEmpty() ? "" : key.substring(key.length() - 1);

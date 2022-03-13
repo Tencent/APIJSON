@@ -242,9 +242,30 @@ public class Join {
 				setRelateType("<>");
 				k = originKey.substring(0, originKey.length() - 2);
 			}
-			else if (originKey.endsWith("$")) {
-				setRelateType("$");
+			else if (originKey.endsWith("$")) {  // key%$:"a" -> key LIKE '%a%'; key?%$:"a" -> key LIKE 'a%'; key_?$:"a" -> key LIKE '_a'; key_%$:"a" -> key LIKE '_a%'
 				k = originKey.substring(0, originKey.length() - 1);
+				char c = k.isEmpty() ? 0 : k.charAt(k.length() - 1);
+				
+				String t = "$";
+				if (c == '%' || c == '_' || c == '?') {
+					t = c + t;
+					k = k.substring(0, k.length() - 1);
+					
+					char c2 = k.isEmpty() ? 0 : k.charAt(k.length() - 1);
+					if (c2 == '%' || c2 == '_' || c2 == '?') {
+						if (c2 == c) {
+							throw new IllegalArgumentException(originKey + ":value 中字符 " + k + " 不合法！key$:value 中不允许 key 中有连续相同的占位符！");
+						}
+						
+						t = c2 + t;
+						k = k.substring(0, k.length() - 1);
+					}
+					else if (c == '?') {
+						throw new IllegalArgumentException(originKey + ":value 中字符 " + originKey + " 不合法！key$:value 中不允许只有单独的 '?'，必须和 '%', '_' 之一配合使用 ！");
+					}
+				}
+				
+				setRelateType(t);
 			}
 			else if (originKey.endsWith("~")) {
 				boolean ignoreCase = originKey.endsWith("*~");
@@ -275,6 +296,8 @@ public class Join {
 			if (k != null && (k.contains("&") || k.contains("|"))) {
 				throw new UnsupportedOperationException(joinType + "/.../" + table + "/" + originKey + " 中字符 " + k + " 不合法！与或非逻辑符仅支持 '!' 非逻辑符 ！");
 			}
+			
+			//TODO if (c3 == '-') { // 表示 key 和 value 顺序反过来: value LIKE key
 			
 			Logic l = new Logic(k);
 			setLogic(l);
