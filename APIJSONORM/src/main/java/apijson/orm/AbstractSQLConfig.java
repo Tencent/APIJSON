@@ -4487,8 +4487,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				for (String key : set) {
 					value = request.get(key);
 
-					if (value instanceof Map) {//只允许常规Object
-						throw new IllegalArgumentException("不允许 " + key + " 等任何key的value类型为 {JSONObject} !");
+					if (key.endsWith("<>") == false && value instanceof Map) {//只允许常规Object
+						throw new IllegalArgumentException(table + ":{ " + key + ":value } 中 value 类型错误！除了 key<>:{} 外，不允许 " + key + " 等其它任何 key 对应 value 的类型为 JSONObject {} !");
 					}
 
 					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错

@@ -255,7 +255,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						key = entry.getKey();
 
 						try {
-							if (key.startsWith("@") || key.endsWith("@")) {
+							if (key.startsWith("@") || key.endsWith("@") || (key.endsWith("<>") && value instanceof JSONObject)) {
 								if (onParse(key, value) == false) {
 									invalidate();
 								}
