@@ -2463,8 +2463,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		int n = s.length();
 		if (n > 0) {
-			setPreparedValueList(new ArrayList<>());
-			
+			if (isHaving == false) {
+				setPreparedValueList(new ArrayList<>());  // 必须反过来，否则 JOIN ON 内部 @combine 拼接后顺序错误
+			}
+
 			int maxDepth = getMaxCombineDepth();
 			int maxCombineCount = getMaxCombineCount();
 			int maxCombineKeyCount = getMaxCombineKeyCount();
@@ -2675,13 +2677,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (StringUtil.isEmpty(result, true)) {
 			result = andCond;
 		}
-		else if (StringUtil.isNotEmpty(andCond, true)) {  // andWhere 必须放后面，否则 prepared 值顺序错误
-			//			result = "( " + result + " )" + AND + andCond;
-			result = andCond + AND + "( " + result + " )";  // 先暂存之前的 prepared 值，然后反向整合
-			if (n > 0) {
-				prepreadValues.addAll(getPreparedValueList());
-				setPreparedValueList(prepreadValues);
-			}
+		else if (StringUtil.isNotEmpty(andCond, true)) {  // andCond 必须放后面，否则 prepared 值顺序错误
+		    if (isHaving) {  // HAVING 前 WHERE 已经有条件 ? 占位，不能反过来，想优化 AND 连接在最前，需要多遍历一次内部的 key，也可以 newSQLConfig 时存到 andList
+		    	result = "( " + result + " )" + AND + andCond;
+			} 
+		    else {
+		    	result = andCond + AND + "( " + result + " )";  // 先暂存之前的 prepared 值，然后反向整合
+		    	if (n > 0) {
+		    		prepreadValues.addAll(getPreparedValueList());
+		    		setPreparedValueList(prepreadValues);
+		    	}
+		    }
 		}
 		
 		return result;
