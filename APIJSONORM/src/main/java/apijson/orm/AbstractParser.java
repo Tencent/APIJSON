@@ -1063,13 +1063,13 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 						boolean isExplain = cfg.isExplain();
 						cfg.setExplain(false);
 
-						Subquery subq = new Subquery();
-						subq.setFrom(cfg.getTable());
-						subq.setConfig(cfg);
+						Subquery subqy = new Subquery();
+						subqy.setFrom(cfg.getTable());
+						subqy.setConfig(cfg);
 
 						SQLConfig countSQLCfg = createSQLConfig();
 						countSQLCfg.setColumn(Arrays.asList("count(*):count"));
-						countSQLCfg.setFrom(subq);
+						countSQLCfg.setFrom(subqy);
 
 						rp = executeSQL(countSQLCfg, false);
 
@@ -1358,6 +1358,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COMBINE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_GROUP);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING_AND);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_RAW);
 	}

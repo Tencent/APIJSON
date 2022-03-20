@@ -159,8 +159,11 @@ public interface SQLConfig {
 	String getGroup();
 	SQLConfig setGroup(String group);
 
-	String getHaving();
-	SQLConfig setHaving(String having);
+	Map<String, Object> getHaving();
+	SQLConfig setHaving(Map<String, Object> having);
+	
+	String getHavingCombine();
+	SQLConfig setHavingCombine(String havingCombine);
 
 	String getOrder();
 	SQLConfig setOrder(String order);

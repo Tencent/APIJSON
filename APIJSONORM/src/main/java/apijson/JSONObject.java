@@ -147,6 +147,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_COMBINE = "@combine"; //条件组合，每个条件key前面可以放&,|,!逻辑关系  "id!{},&sex,!name&$"
 	public static final String KEY_GROUP = "@group"; //分组方式
 	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
+	public static final String KEY_HAVING_AND = "@having&"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_ORDER = "@order"; //排序方式
 	public static final String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
 	public static final String KEY_JSON = "@json"; //SQL Server 把字段转为 JSON 输出
@@ -167,6 +168,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_COMBINE);
 		TABLE_KEY_LIST.add(KEY_GROUP);
 		TABLE_KEY_LIST.add(KEY_HAVING);
+		TABLE_KEY_LIST.add(KEY_HAVING_AND);
 		TABLE_KEY_LIST.add(KEY_ORDER);
 		TABLE_KEY_LIST.add(KEY_RAW);
 		TABLE_KEY_LIST.add(KEY_JSON);
@@ -350,7 +352,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return
 	 */
 	public JSONObject setHaving(String keys) {
-		return puts(KEY_HAVING, keys);
+		return setHaving(keys, false);
+	}
+	/**set keys for having
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setHaving(String keys, boolean isAnd) {
+		return puts(isAnd ? KEY_HAVING_AND : KEY_HAVING, keys);
 	}
 
 	/**set keys for order by

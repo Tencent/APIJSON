@@ -15,6 +15,7 @@ import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.JSONObject.KEY_FROM;
 import static apijson.JSONObject.KEY_GROUP;
 import static apijson.JSONObject.KEY_HAVING;
+import static apijson.JSONObject.KEY_HAVING_AND;
 import static apijson.JSONObject.KEY_ID;
 import static apijson.JSONObject.KEY_JSON;
 import static apijson.JSONObject.KEY_NULL;
@@ -32,8 +33,8 @@ import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
 import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
-import static apijson.SQL.OR;
 import static apijson.SQL.ON;
+import static apijson.SQL.OR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,8 +81,20 @@ import apijson.orm.model.TestRecord;
 public abstract class AbstractSQLConfig implements SQLConfig {
 	private static final String TAG = "AbstractSQLConfig";
 	
-	public static int MAX_COMBINE_DEPTH = 2;
+	/**
+	 * 为 true 则兼容 5.0 之前 @having:"toId>0;avg(id)<100000" 默认 AND 连接，为 HAVING toId>0 AND avg(id)<100000；
+	 * 否则按 5.0+ 新版默认 OR 连接，为 HAVING toId>0 OR avg(id)<100000，使用 @having& 或 @having:{ @combine: null } 时才用 AND 连接
+	 */
+	public static boolean IS_HAVING_DEFAULT_AND = false;
+	/**
+	 * 为 true 则兼容 5.0 之前 @having:"toId>0" 这种不包含 SQL 函数的表达式；
+	 * 否则按 5.0+ 新版不允许，可以用 @having:"(toId)>0" 替代
+	 */
+	public static boolean IS_HAVING_ALLOW_NOT_FUNCTION = false;
+	
+	public static int MAX_HAVING_COUNT = 5;
 	public static int MAX_WHERE_COUNT = 10;
+	public static int MAX_COMBINE_DEPTH = 2;
 	public static int MAX_COMBINE_COUNT = 5;
 	public static int MAX_COMBINE_KEY_COUNT = 2;
 	public static float MAX_COMBINE_RATIO = 1.0f;
@@ -750,7 +763,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private String table; //表名
 	private String alias; //表别名
 	private String group; //分组方式的字符串数组，','分隔
-	private String having; //聚合函数的字符串数组，','分隔
+	private String havingCombine; //聚合函数的字符串数组，','分隔
+	private Map<String, Object> having; //聚合函数的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
 	private List<String> raw; //需要保留原始 SQL 的字段，','分隔
 	private List<String> json; //需要转为 JSON 的字段，','分隔
@@ -1101,24 +1115,36 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		return (hasPrefix ? " GROUP BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinGroup, ", ");
 	}
+	
+	@Override
+	public String getHavingCombine() {
+		return havingCombine;
+	}
+	@Override
+	public SQLConfig setHavingCombine(String havingCombine) {
+		this.havingCombine = havingCombine;
+		return this;
+	}
 
 	@Override
-	public String getHaving() {
+	public Map<String, Object> getHaving() {
 		return having;
+	}
+	@Override
+	public SQLConfig setHaving(Map<String, Object> having) {
+		this.having = having;
+		return this;
 	}
 	public AbstractSQLConfig setHaving(String... conditions) {
 		return setHaving(StringUtil.getString(conditions));
 	}
-	@Override
-	public AbstractSQLConfig setHaving(String having) {
-		this.having = having;
-		return this;
-	}
+	
 	/**TODO @having 改为默认 | 或连接，且支持 @having: { "key1>": 1, "key{}": "length(key2)>0", "@combine": "key1,key2" }
 	 * @return HAVING conditoin0 AND condition1 OR condition2 ...
+	 * @throws Exception 
 	 */
 	@JSONField(serialize = false)
-	public String getHavingString(boolean hasPrefix) {
+	public String getHavingString(boolean hasPrefix) throws Exception {
 		//加上子表的 having
 		String joinHaving = "";
 		if (joinList != null) {
@@ -1146,122 +1172,120 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-		String[] keys = StringUtil.split(getHaving(), ";");
-		if (keys == null || keys.length <= 0) {
+		Map<String, Object> map = getHaving();
+		Set<Entry<String, Object>> set = map == null ? null : map.entrySet();
+		if (set == null || set.isEmpty()) {
 			return StringUtil.isEmpty(joinHaving, true) ? "" : (hasPrefix ? " HAVING " : "") + joinHaving;
 		}
 
-		String quote = getQuote();
-		String tableAlias = getAliasWithQuote();
-
 		List<String> raw = getRaw();
+		//	提前把 @having& 转为 @having，或者干脆不允许 @raw:"@having&" 	boolean containRaw = raw != null && (raw.contains(KEY_HAVING) || raw.contains(KEY_HAVING_AND));
 		boolean containRaw = raw != null && raw.contains(KEY_HAVING);
-
-		String expression;
-		String method;
-		//暂时不允许 String prefix;
-		String suffix;
+		
+		// 直接把 having 类型从 Map<String, String> 定改为 Map<String, Object>，避免额外拷贝
+		//		Map<String, Object> newMap = new LinkedHashMap<>(map.size());
+		//		for (Entry<String, String> entry : set) {
+		//			newMap.put(entry.getKey(), entry.getValue());
+		//		}
 
 		//fun0(arg0,arg1,...);fun1(arg0,arg1,...)
-		for (int i = 0; i < keys.length; i++) {
+		String havingString = parseCombineExpression(getMethod(), getQuote(), getTable(), getAliasWithQuote(), map, getHavingCombine(), true, containRaw, true);
 
-			//fun(arg0,arg1,...)
-			expression = keys[i];
-			if (containRaw) {
-				try {
-					String rawSQL = getRawSQL(KEY_HAVING, expression);
-					if (rawSQL != null) {
-						keys[i] = rawSQL;
-						continue;
-					}
-				} catch (Exception e) {
-					Log.e(TAG, "newSQLConfig  rawColumnSQL == null >> try {  "
-							+ "  String rawSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, fk); ... "
-							+ "} catch (Exception e) = " + e.getMessage());
+		return (hasPrefix ? " HAVING " : "") + StringUtil.concat(havingString, joinHaving, AND);
+	}
+
+	protected String getHavingItem(String quote, String table, String alias, String key, String expression, boolean containRaw) {
+		//fun(arg0,arg1,...)
+		if (containRaw) {
+			try {
+				String rawSQL = getRawSQL(KEY_HAVING, expression);
+				if (rawSQL != null) {
+					return rawSQL;
 				}
+			} catch (Exception e) {
+				Log.e(TAG, "newSQLConfig  rawColumnSQL == null >> try {  "
+						+ "  String rawSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, fk); ... "
+						+ "} catch (Exception e) = " + e.getMessage());
 			}
-
-			if (expression.length() > 50) {
-				throw new UnsupportedOperationException("@having:value 的 value 中字符串 " + expression + " 不合法！"
-						+ "不允许传超过 50 个字符的函数或表达式！请用 @raw 简化传参！");
-			}
-
-			int start = expression.indexOf("(");
-			if (start < 0) {
-				if (isPrepared() && PATTERN_FUNCTION.matcher(expression).matches() == false) {
-					throw new UnsupportedOperationException("字符串 " + expression + " 不合法！"
-							+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-							+ " 中 column?value 必须符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！不允许空格！");
-				}
-				continue;
-			}
-
-			int end = expression.lastIndexOf(")");
-			if (start >= end) {
-				throw new IllegalArgumentException("字符 " + expression + " 不合法！"
-						+ "@having:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
-			}
-
-			method = expression.substring(0, start);
-			if (method.isEmpty() == false) {
-				if (SQL_FUNCTION_MAP == null || SQL_FUNCTION_MAP.isEmpty()) {
-					if (StringUtil.isName(method) == false) {
-						throw new IllegalArgumentException("字符 " + method + " 不合法！"
-								+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-								+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！");
-					}
-				}
-				else if (SQL_FUNCTION_MAP.containsKey(method) == false) {
-					throw new IllegalArgumentException("字符 " + method + " 不合法！"
-							+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
-							+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！且必须是后端允许调用的 SQL 函数!");
-				}
-			}
-
-			suffix = expression.substring(end + 1, expression.length());
-
-			if (isPrepared() && (((String) suffix).contains("--") || ((String) suffix).contains("/*") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
-				throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
-						+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-						+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
-			}
-
-			String[] ckeys = StringUtil.split(expression.substring(start + 1, end));
-
-			if (ckeys != null) {
-				for (int j = 0; j < ckeys.length; j++) {
-					String origin = ckeys[j];
-
-					if (isPrepared()) {
-						if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
-							throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
-									+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
-									+ " 中所有 column, arg 都必须是1个不以 _ 开头的单词 或者 符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！不允许多余的空格！");
-						}
-					}
-
-					//JOIN 副表不再在外层加副表名前缀 userId AS `Commet.userId`， 而是直接 userId AS `userId`
-					boolean isName = false;
-					if (StringUtil.isNumer(origin)) {
-						//do nothing
-					}
-					else if (StringUtil.isName(origin)) {
-						origin = quote + origin + quote;
-						isName = true;
-					} 
-					else {
-						origin = getValue(origin).toString();
-					}
-
-					ckeys[j] = (isName && isKeyPrefix() ? tableAlias + "." : "") + origin;
-				}
-			}
-
-			keys[i] = method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
 		}
 
-		//TODO 支持 OR, NOT 参考 @combine:"&key0,|key1,!key2"
-		return (hasPrefix ? " HAVING " : "") + StringUtil.concat(StringUtil.getString(keys, AND), joinHaving, AND);
+		if (expression.length() > 100) {
+			throw new UnsupportedOperationException("@having:value 的 value 中字符串 " + expression + " 不合法！"
+					+ "不允许传超过 100 个字符的函数或表达式！请用 @raw 简化传参！");
+		}
+
+		int start = expression.indexOf("(");
+		if (start < 0) {
+			if (isPrepared() && PATTERN_FUNCTION.matcher(expression).matches() == false) {
+				throw new UnsupportedOperationException("字符串 " + expression + " 不合法！"
+						+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+						+ " 中 column?value 必须符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！不允许空格！");
+			}
+			return expression;
+		}
+
+		int end = expression.lastIndexOf(")");
+		if (start >= end) {
+			throw new IllegalArgumentException("字符 " + expression + " 不合法！"
+					+ "@having:value 中 value 里的 SQL函数必须为 function(arg0,arg1,...) 这种格式！");
+		}
+
+		String method = expression.substring(0, start);
+		if (method.isEmpty() == false) {
+			if (SQL_FUNCTION_MAP == null || SQL_FUNCTION_MAP.isEmpty()) {
+				if (StringUtil.isName(method) == false) {
+					throw new IllegalArgumentException("字符 " + method + " 不合法！"
+							+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+							+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！");
+				}
+			}
+			else if (SQL_FUNCTION_MAP.containsKey(method) == false) {
+				throw new IllegalArgumentException("字符 " + method + " 不合法！"
+						+ "预编译模式下 @column:\"column0,column1:alias;function0(arg0,arg1,...);function1(...):alias...\""
+						+ " 中 function 必须符合小写英文单词的 SQL 函数名格式！且必须是后端允许调用的 SQL 函数!");
+			}
+		}
+
+		String suffix = expression.substring(end + 1, expression.length());
+
+		if (isPrepared() && (((String) suffix).contains("--") || ((String) suffix).contains("/*") || PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
+			throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！"
+					+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+					+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
+		}
+
+		String[] ckeys = StringUtil.split(expression.substring(start + 1, end));
+
+		if (ckeys != null) {
+			for (int j = 0; j < ckeys.length; j++) {
+				String origin = ckeys[j];
+
+				if (isPrepared()) {
+					if (origin.startsWith("_") || origin.contains("--") || PATTERN_FUNCTION.matcher(origin).matches() == false) {
+						throw new IllegalArgumentException("字符 " + ckeys[j] + " 不合法！"
+								+ "预编译模式下 @having:\"column?value;function(arg0,arg1,...)?value...\""
+								+ " 中所有 column, arg 都必须是1个不以 _ 开头的单词 或者 符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！不允许多余的空格！");
+					}
+				}
+
+				//JOIN 副表不再在外层加副表名前缀 userId AS `Commet.userId`， 而是直接 userId AS `userId`
+				boolean isName = false;
+				if (StringUtil.isNumer(origin)) {
+					//do nothing
+				}
+				else if (StringUtil.isName(origin)) {
+					origin = quote + origin + quote;
+					isName = true;
+				} 
+				else {
+					origin = getValue(origin).toString();
+				}
+
+				ckeys[j] = (isName && isKeyPrefix() ? alias + "." : "") + origin;
+			}
+		}
+
+		return method + "(" + StringUtil.getString(ckeys) + ")" + suffix;
 	}
 
 	@Override
@@ -2193,6 +2217,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	
 	//WHERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	
+	protected int getMaxHavingCount() {
+		return MAX_HAVING_COUNT;
+	}
 	protected int getMaxWhereCount() {
 		return MAX_WHERE_COUNT;
 	}
@@ -2392,247 +2419,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, String combine, List<Join> joinList, boolean verifyName) throws Exception {
-		String s = StringUtil.getString(combine);
-		if (s.startsWith(" ") || s.endsWith(" ") ) {
-			throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s
-			+ "' 不合法！不允许首尾有空格，也不允许连续空格！空格不能多也不能少！"
-			+ "逻辑连接符 & | 左右必须各一个相邻空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
-		}
-		
-		if (where == null) {
-			where = new HashMap<>();
-		}
-		int whereSize = where.size();
-		
-		int maxWhereCount = getMaxWhereCount();
-		if (maxWhereCount > 0 && whereSize > maxWhereCount) {
-			throw new IllegalArgumentException(table + ":{ key0:value0, key1:value1... } 中条件 key:value 数量 " + whereSize
-					+ " 已超过最大数量，必须在 0-" + maxWhereCount + " 内！");
-		}
-
-		String whereString = "";
-		
-		int maxDepth = getMaxCombineDepth();
-		int maxCombineCount = getMaxCombineCount();
-		int maxCombineKeyCount = getMaxCombineKeyCount();
-		float maxCombineRatio = getMaxCombineRatio();
-		
-		List<Object> prepreadValues = getPreparedValueList();
-		setPreparedValueList(new ArrayList<>());
-		
-		int depth = 0;
-		int allCount = 0;
-		
-		int n = s.length();
-		int i = 0;
-		
-		char lastLogic = 0;
-		char last = 0;
-		boolean first = true;
-		boolean isNot = false;
-		
-		String key = "";
-		Map<String, Integer> usedKeyCountMap = new HashMap<>(whereSize);
-		while (i <= n) {  // "date> | (contactIdList<> & (name*~ | tag&$))"
-			boolean isOver = i >= n;
-			char c = isOver ? 0 : s.charAt(i);
-			boolean isBlankOrRightParenthesis = c == ' ' || c == ')';
-			if (isOver || isBlankOrRightParenthesis) {
-				boolean isEmpty = StringUtil.isEmpty(key, true);
-				if (isEmpty && last != ')') {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + (isOver ? s : s.substring(i))
-					+ "' 不合法！" + (c == ' ' ? "空格 ' ' " : "右括号 ')'") + " 左边缺少条件 key ！逻辑连接符 & | 左右必须各一个相邻空格！"
-					+ "空格不能多也不能少！不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
-				}
-				
-				if (isEmpty == false) {
-					if (first == false && lastLogic <= 0) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 "
-								+ "'" + s.substring(i - key.length() - (isOver ? 1 : 0)) + "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
-					}
-				
-					allCount ++;
-					if (allCount > maxCombineCount && maxCombineCount > 0) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！"
-								+ "其中 key 数量 " + allCount + " 已超过最大值，必须在条件键值对数量 0-" + maxCombineCount + " 内！");
-					}
-					if (1.0f*allCount/whereSize > maxCombineRatio && maxCombineRatio > 0) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！"
-								+ "其中 key 数量 " + allCount + " / 条件键值对数量 " + whereSize + " = " + (1.0f*allCount/whereSize)
-								+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
-					}
-					
-					String column = key;
-					
-					Object value = where.get(column);
-					if (value == null) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key
-								+ "' 对应的条件键值对 " + column + ":value 不存在！");
-					}
-					
-					String wi = getWhereItem(column, value, method, verifyName);
-					if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + key
-								+ "' 对应的 " + column + ":value 不是有效条件键值对！");
-					}
-					
-					Integer count = usedKeyCountMap.get(column);
-					count = count == null ? 1 : count + 1;
-					if (count > maxCombineKeyCount && maxCombineKeyCount > 0) {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s + "' 不合法！"
-								+ "其中 '" + column + "' 重复引用，次数 " + count + " 已超过最大值，必须在 0-" + maxCombineKeyCount + " 内！");
-					}
-					usedKeyCountMap.put(column, count);
-					
-					whereString += "( " + getCondition(isNot, wi) + " )";
-					isNot = false;
-					first = false;
-				}
-				
-				key = "";
-				lastLogic = 0;
-				
-				if (isOver) {
-					break;
-				}
-			}
-			
-			if (c == ' ') {
-			}
-			else if (c == '&') {
-				if (last == ' ') {
-					if (i >= n - 1 || s.charAt(i + 1) != ' ') {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + (i >= n - 1 ? s : s.substring(0, i + 1))
-						+ "' 不合法！逻辑连接符 & 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
-						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
-					}
-					
-					whereString += SQL.AND;
-					lastLogic = c;
-					i ++;
-				} 
-				else {
-					key += c;
-				}
-			}
-			else if (c == '|') {
-				if (last == ' ') {
-					if (i >= n - 1 || s.charAt(i + 1) != ' ') {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + (i >= n - 1 ? s : s.substring(0, i + 1))
-						+ "' 不合法！逻辑连接符 | 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
-						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
-					}
-					
-					whereString += SQL.OR;
-					lastLogic = c;
-					i ++;
-				}
-				else {
-					key += c;
-				}
-			}
-			else if (c == '!') {
-				last = i <= 0 ? 0 : s.charAt(i - 1);  // & | 后面跳过了空格
-				
-				char next = i >= n - 1 ? 0 : s.charAt(i + 1);
-				if (last == ' ' || last == '(') {
-					if (next == ' ') {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
-						+ "' 不合法！非逻辑符 '!' 右边多了一个空格 ' ' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
-					}
-					if (next == ')' || next == '&' || next == '!') {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
-						+ "' 不合法！非逻辑符 '!' 右边多了一个字符 '" + next + "' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
-					}
-					if (i > 0 && lastLogic <= 0 && last != '(') {
-						throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i)
-						+ "' 不合法！左边缺少 & | 逻辑连接符！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
-						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
-					}
-				}
-				
-				if (next == '(') {
-					whereString += SQL.NOT;
-					lastLogic = c;
-				}
-				else if (last <= 0 || last == ' ' || last == '(') {
-					isNot = true;
-//					lastLogic = c;
-				}
-				else {
-					key += c;
-				}
-			}
-			else if (c == '(') {
-				if (key.isEmpty() == false || (i > 0 && lastLogic <= 0 && last != '(')) {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(i)
-					+ "' 不合法！左边缺少 & | 逻辑连接符！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
-					+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
-				}
-				
-				depth ++;
-				if (depth > maxDepth && maxDepth > 0) {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1) 
-					+ "' 不合法！括号 (()) 嵌套层级 " + depth + " 已超过最大值，必须在 0-" + maxDepth + " 内！");
-				}
-				
-				whereString += c;
-				lastLogic = 0;
-				first = true;
-			}
-			else if (c == ')') {
-				depth --;
-				if (depth < 0) {
-					throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s.substring(0, i + 1)
-					+ "' 不合法！左括号 ( 比 右括号 ) 少！数量必须相等从而完整闭合 (...) ！");
-				}
-				
-				whereString += c;
-				lastLogic = 0;
-			} 
-			else {
-				key += c;
-			}
-			
-			last = c;
-			i ++;
-		}
-
-		if (depth != 0) {
-			throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + s
-					+ "' 不合法！左括号 ( 比 右括号 ) 多！数量必须相等从而完整闭合 (...) ！");
-		}
-		
-		Set<Entry<String, Object>> set = where.entrySet();
-
-		String andWhere = "";
-		boolean isItemFirst = true;
-		
-		for (Entry<String, Object> entry : set) {
-			key = entry == null ? null : entry.getKey();
-			if (key == null || usedKeyCountMap.containsKey(key)) {
-				continue;
-			}
-			
-			String wi = getWhereItem(key, where.get(key), method, verifyName);
-			if (StringUtil.isEmpty(wi, true)) {//避免SQL条件连接错误
-				continue;
-			}
-
-			andWhere += (isItemFirst ? "" : AND) + "(" + wi + ")";
-			isItemFirst = false;
-		}
-		
-		if (StringUtil.isEmpty(whereString, true)) {
-			whereString = andWhere;
-		}
-		else if (StringUtil.isNotEmpty(andWhere, true)) {  // andWhere 必须放后面，否则 prepared 值顺序错误
-//			whereString = "( " + whereString + " )" + AND + andWhere;
-			
-			whereString = andWhere + AND + "( " + whereString + " )";  // 先暂存之前的 prepared 值，然后反向整合
-			prepreadValues.addAll(getPreparedValueList());
-			setPreparedValueList(prepreadValues);
-		}
+		String whereString = parseCombineExpression(method, getQuote(), getTable(), getAliasWithQuote(), where, combine, verifyName, false, false);
 
 		whereString = concatJoinWhereString(whereString);
 		
@@ -2645,6 +2432,260 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return result;
 	}
 
+
+	protected String parseCombineExpression(RequestMethod method, String quote, String table, String alias
+			, Map<String, Object> conditioinMap, String combine, boolean verifyName, boolean containRaw, boolean isHaving) throws Exception {
+		
+		String errPrefix = table + (isHaving ? ":{ @having:{ " : ":{ ") + "@combine:'" + combine + (isHaving ? "' } }" : "' }");
+		String s = StringUtil.getString(combine);
+		if (s.startsWith(" ") || s.endsWith(" ") ) {
+			throw new IllegalArgumentException(errPrefix + " 中字符 '" + s
+			+ "' 不合法！不允许首尾有空格，也不允许连续空格！空格不能多也不能少！"
+			+ "逻辑连接符 & | 左右必须各一个相邻空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
+		}
+		
+		if (conditioinMap == null) {
+			conditioinMap = new HashMap<>();
+		}
+		int size = conditioinMap.size();
+		
+		int maxCount = isHaving ? getMaxHavingCount() : getMaxWhereCount();
+		if (maxCount > 0 && size > maxCount) {
+			throw new IllegalArgumentException(table + (isHaving ? ":{ @having:{ " : ":{ ") + "key0:value0, key1:value1... " + combine
+					+ (isHaving ? " } }" : " }") + " 中条件 key:value 数量 " + size + " 已超过最大数量，必须在 0-" + maxCount + " 内！");
+		}
+		
+		String result = "";
+
+		List<Object> prepreadValues = getPreparedValueList();
+		
+		Map<String, Integer> usedKeyCountMap = new HashMap<>(size);
+
+		int n = s.length();
+		if (n > 0) {
+			setPreparedValueList(new ArrayList<>());
+			
+			int maxDepth = getMaxCombineDepth();
+			int maxCombineCount = getMaxCombineCount();
+			int maxCombineKeyCount = getMaxCombineKeyCount();
+			float maxCombineRatio = getMaxCombineRatio();
+
+			int depth = 0;
+			int allCount = 0;
+
+			int i = 0;
+
+			char lastLogic = 0;
+			char last = 0;
+			boolean first = true;
+			boolean isNot = false;
+
+			String key = "";
+			while (i <= n) {  // "date> | (contactIdList<> & (name*~ | tag&$))"
+				boolean isOver = i >= n;
+				char c = isOver ? 0 : s.charAt(i);
+				boolean isBlankOrRightParenthesis = c == ' ' || c == ')';
+				if (isOver || isBlankOrRightParenthesis) {
+					boolean isEmpty = StringUtil.isEmpty(key, true);
+					if (isEmpty && last != ')') {
+						throw new IllegalArgumentException(errPrefix + " 中字符 '" + (isOver ? s : s.substring(i))
+								+ "' 不合法！" + (c == ' ' ? "空格 ' ' " : "右括号 ')'") + " 左边缺少条件 key ！逻辑连接符 & | 左右必须各一个相邻空格！"
+								+ "空格不能多也不能少！不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+					}
+
+					if (isEmpty == false) {
+						if (first == false && lastLogic <= 0) {
+							throw new IllegalArgumentException(errPrefix + " 中字符 "
+									+ "'" + s.substring(i - key.length() - (isOver ? 1 : 0)) + "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
+						}
+
+						allCount ++;
+						if (allCount > maxCombineCount && maxCombineCount > 0) {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
+									+ "其中 key 数量 " + allCount + " 已超过最大值，必须在条件键值对数量 0-" + maxCombineCount + " 内！");
+						}
+						if (1.0f*allCount/size > maxCombineRatio && maxCombineRatio > 0) {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
+									+ "其中 key 数量 " + allCount + " / 条件键值对数量 " + size + " = " + (1.0f*allCount/size)
+									+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
+						}
+
+						String column = key;
+
+						Object value = conditioinMap.get(column);
+						if (value == null) {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
+									+ "' 对应的条件键值对 " + column + ":value 不存在！");
+						}
+
+						String wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
+						if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
+									+ "' 对应的 " + column + ":value 不是有效条件键值对！");
+						}
+
+						Integer count = usedKeyCountMap.get(column);
+						count = count == null ? 1 : count + 1;
+						if (count > maxCombineKeyCount && maxCombineKeyCount > 0) {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
+									+ "其中 '" + column + "' 重复引用，次数 " + count + " 已超过最大值，必须在 0-" + maxCombineKeyCount + " 内！");
+						}
+						usedKeyCountMap.put(column, count);
+
+						result += "( " + getCondition(isNot, wi) + " )";
+						isNot = false;
+						first = false;
+					}
+
+					key = "";
+					lastLogic = 0;
+
+					if (isOver) {
+						break;
+					}
+				}
+
+				if (c == ' ') {
+				}
+				else if (c == '&') {
+					if (last == ' ') {
+						if (i >= n - 1 || s.charAt(i + 1) != ' ') {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + (i >= n - 1 ? s : s.substring(0, i + 1))
+									+ "' 不合法！逻辑连接符 & 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
+									+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+						}
+
+						result += SQL.AND;
+						lastLogic = c;
+						i ++;
+					} 
+					else {
+						key += c;
+					}
+				}
+				else if (c == '|') {
+					if (last == ' ') {
+						if (i >= n - 1 || s.charAt(i + 1) != ' ') {
+							throw new IllegalArgumentException(table + ":{ @combine: '" + combine + "' } 中字符 '" + (i >= n - 1 ? s : s.substring(0, i + 1))
+									+ "' 不合法！逻辑连接符 | 右边缺少一个空格 ！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
+									+ "不允许首尾有空格，也不允许连续空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
+						}
+
+						result += SQL.OR;
+						lastLogic = c;
+						i ++;
+					}
+					else {
+						key += c;
+					}
+				}
+				else if (c == '!') {
+					last = i <= 0 ? 0 : s.charAt(i - 1);  // & | 后面跳过了空格
+
+					char next = i >= n - 1 ? 0 : s.charAt(i + 1);
+					if (last == ' ' || last == '(') {
+						if (next == ' ') {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s.substring(0, i + 1)
+							+ "' 不合法！非逻辑符 '!' 右边多了一个空格 ' ' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
+						}
+						if (next == ')' || next == '&' || next == '!') {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s.substring(0, i + 1)
+							+ "' 不合法！非逻辑符 '!' 右边多了一个字符 '" + next + "' ！非逻辑符 '!' 右边不允许任何相邻空格 ' '，也不允许 ')' '&' '|' 中任何一个！");
+						}
+						if (i > 0 && lastLogic <= 0 && last != '(') {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s.substring(i)
+							+ "' 不合法！左边缺少 & | 逻辑连接符！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
+							+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+						}
+					}
+
+					if (next == '(') {
+						result += SQL.NOT;
+						lastLogic = c;
+					}
+					else if (last <= 0 || last == ' ' || last == '(') {
+						isNot = true;
+						//					lastLogic = c;
+					}
+					else {
+						key += c;
+					}
+				}
+				else if (c == '(') {
+					if (key.isEmpty() == false || (i > 0 && lastLogic <= 0 && last != '(')) {
+						throw new IllegalArgumentException(errPrefix + " 中字符 '" + s.substring(i)
+						+ "' 不合法！左边缺少 & | 逻辑连接符！逻辑连接符 & | 左右必须各一个相邻空格！空格不能多也不能少！"
+						+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
+					}
+
+					depth ++;
+					if (depth > maxDepth && maxDepth > 0) {
+						throw new IllegalArgumentException(errPrefix + " 中字符 '" + s.substring(0, i + 1) 
+						+ "' 不合法！括号 (()) 嵌套层级 " + depth + " 已超过最大值，必须在 0-" + maxDepth + " 内！");
+					}
+
+					result += c;
+					lastLogic = 0;
+					first = true;
+				}
+				else if (c == ')') {
+					depth --;
+					if (depth < 0) {
+						throw new IllegalArgumentException(errPrefix + " 中字符 '" + s.substring(0, i + 1)
+						+ "' 不合法！左括号 ( 比 右括号 ) 少！数量必须相等从而完整闭合 (...) ！");
+					}
+
+					result += c;
+					lastLogic = 0;
+				} 
+				else {
+					key += c;
+				}
+
+				last = c;
+				i ++;
+			}
+
+			if (depth != 0) {
+				throw new IllegalArgumentException(errPrefix + " 中字符 '" + s
+						+ "' 不合法！左括号 ( 比 右括号 ) 多！数量必须相等从而完整闭合 (...) ！");
+			}
+		}
+
+		Set<Entry<String, Object>> set = conditioinMap.entrySet();
+
+		String andCond = "";
+		boolean isItemFirst = true;
+		
+		for (Entry<String, Object> entry : set) {
+			String key = entry == null ? null : entry.getKey();
+			if (key == null || usedKeyCountMap.containsKey(key)) {
+				continue;
+			}
+			
+			String wi = isHaving ? getHavingItem(quote, table, alias, key, (String) entry.getValue(), containRaw) : getWhereItem(key, entry.getValue(), method, verifyName);
+			if (StringUtil.isEmpty(wi, true)) {//避免SQL条件连接错误
+				continue;
+			}
+
+			andCond += (isItemFirst ? "" : AND) + "(" + wi + ")";
+			isItemFirst = false;
+		}
+		
+		if (StringUtil.isEmpty(result, true)) {
+			result = andCond;
+		}
+		else if (StringUtil.isNotEmpty(andCond, true)) {  // andWhere 必须放后面，否则 prepared 值顺序错误
+			//			result = "( " + result + " )" + AND + andCond;
+			result = andCond + AND + "( " + result + " )";  // 先暂存之前的 prepared 值，然后反向整合
+			if (n > 0) {
+				prepreadValues.addAll(getPreparedValueList());
+				setPreparedValueList(prepreadValues);
+			}
+		}
+		
+		return result;
+	}
 
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
 		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
@@ -4269,7 +4310,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String cast = request.getString(KEY_CAST);
 		String combine = request.getString(KEY_COMBINE);
 		String group = request.getString(KEY_GROUP);
-		String having = request.getString(KEY_HAVING);
+		Object having = request.get(KEY_HAVING);
+		String havingAnd = request.getString(KEY_HAVING_AND);
 		String order = request.getString(KEY_ORDER);
 		String raw = request.getString(KEY_RAW);
 		String json = request.getString(KEY_JSON);
@@ -4292,24 +4334,29 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.remove(KEY_COMBINE);
 			request.remove(KEY_GROUP);
 			request.remove(KEY_HAVING);
+			request.remove(KEY_HAVING_AND);
 			request.remove(KEY_ORDER);
 			request.remove(KEY_RAW);
 			request.remove(KEY_JSON);
 			
+		
+			// @null <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			String[] nullKeys = StringUtil.split(nulls);
 			if (nullKeys != null && nullKeys.length > 0) {
 				for (String nk : nullKeys) {
 					if (StringUtil.isEmpty(nk, true)) {
-						throw new IllegalArgumentException(table + ":{} 里的 @null: value 中的字符 '" + nk + "' 不合法！不允许为空！");
+						throw new IllegalArgumentException(table + ":{ @null: value } 中的字符 '" + nk + "' 不合法！不允许为空！");
 					}
 					if (request.get(nk) != null) {
-						throw new IllegalArgumentException(table + ":{} 里的 @null: value 中的字符 '" + nk + "' 已在当前对象有非 null 值！不允许对同一个 JSON key 设置不同值！");
+						throw new IllegalArgumentException(table + ":{ @null: value } 中的字符 '" + nk + "' 已在当前对象有非 null 值！不允许对同一个 JSON key 设置不同值！");
 					}
 					
 					request.put(nk, null);
 				}
 			}
+			// @null >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			
+			// @cast <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			String[] casts = StringUtil.split(cast);
 			Map<String, String> castMap = null;
 			if (casts != null && casts.length > 0) {
@@ -4330,8 +4377,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					castMap.put(p.getKey(), p.getValue());
 				}
 			}
+			// @cast >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
+			
 			String[] rawArr = StringUtil.split(raw);
 			config.setRaw(rawArr == null || rawArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(rawArr)));
 
@@ -4523,8 +4571,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			List<String> cs = new ArrayList<>();
 
 			List<String> rawList = config.getRaw();
-			boolean containColumnRaw = rawList != null && rawList.contains(KEY_COLUMN);
+			boolean containColumnHavingAnd = rawList != null && rawList.contains(KEY_HAVING_AND);
 
+			if (containColumnHavingAnd) {
+				throw new IllegalArgumentException(table + ":{ @raw:value } 的 value 里字符 @having& 不合法！"
+						+ "@raw 不支持 @having&，请用 @having 替代！");
+			}
+
+			// TODO 这段是否必要？如果 @column 只支持分段后的 SQL 片段，也没问题
+			boolean containColumnRaw = rawList != null && rawList.contains(KEY_COLUMN);
 			String rawColumnSQL = null;
 			if (containColumnRaw) {
 				try {
@@ -4572,6 +4627,96 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 			
+			
+			// @having, @haivng& <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			Object newHaving = having;
+			boolean isHavingAnd = false;
+			
+			Map<String, Object> havingMap = new LinkedHashMap<>();
+			if (havingAnd != null) {
+				if (having != null) {
+					throw new IllegalArgumentException(table + ":{ @having: value1, @having&: value2 } "
+							+ "中 value1 与 value2 不合法！不允许同时传 @having 和 @having& ，两者最多传一个！");
+				}
+				
+				newHaving = havingAnd;
+				isHavingAnd = true;
+			}
+
+			String havingKey = (isHavingAnd ? KEY_HAVING_AND : KEY_HAVING);
+			String havingCombine = "";
+
+			if (newHaving instanceof String) {
+				String[] havingss = StringUtil.split((String) newHaving, ";");
+				if (havingss != null) {
+					int ind = -1;
+					for (int i = 0; i < havingss.length; i++) {
+						
+						String havingsStr = havingss[i];
+						int start = havingsStr == null ? -1 : havingsStr.indexOf("(");
+						int end = havingsStr == null ? -1 : havingsStr.lastIndexOf(")");
+						if (IS_HAVING_ALLOW_NOT_FUNCTION == false && (start < 0 || start >= end)) {
+							throw new IllegalArgumentException(table + ":{ " + havingKey +  ":value } 里的 value 中的第 " + i + 
+									" 个字符 '" + havingsStr + "' 不合法！里面没有包含 SQL 函数！必须为 fun(col1,col2..)?val 格式！");
+						}
+						
+						String[] havings = start >= 0 && end > start ? new String[]{havingsStr} : StringUtil.split(havingsStr);
+						if (havings != null) {
+							for (int j = 0; j < havings.length; j++) {
+								ind ++;
+								String h = havings[j];
+								if (StringUtil.isEmpty(h, true)) {
+									throw new IllegalArgumentException(table + ":{ " + havingKey +  ":value } 里的"
+											+ " value 中的第 " + ind + " 个字符 '" + h + "' 不合法！不允许为空！");
+								}
+
+								havingMap.put("having" + ind, h);
+
+								if (isHavingAnd == false && IS_HAVING_DEFAULT_AND == false) {
+									havingCombine += (ind <= 0 ? "" : " | ") + "having" + ind;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (newHaving instanceof JSONObject) {
+				if (isHavingAnd) {
+					throw new IllegalArgumentException(table + ":{ " + havingKey +  ":value } 里的 value 类型不合法！"
+							+ "@having&:value 中 value 只能是 String，@having:value 中 value 只能是 String 或 JSONObject ！");
+				}
+
+				JSONObject havingObj = (JSONObject) newHaving;
+				Set<Entry<String, Object>> havingSet = havingObj.entrySet();
+				for (Entry<String, Object> entry : havingSet) {
+					String k = entry == null ? null : entry.getKey();
+					Object v = k == null ? null : entry.getValue();
+					if (v == null) {
+						continue;
+					}
+					if (v instanceof String == false) {
+						throw new IllegalArgumentException(table + ":{ " + havingKey +  ":{ " + k + ":value } } 里的"
+								+ " value 不合法！类型只能是 String，且不允许为空！");
+					}
+
+					if (KEY_COMBINE.equals(k)) {
+						havingCombine = (String) v;
+					}
+					else if (StringUtil.isName(k) == false) {
+						throw new IllegalArgumentException(table + ":{ " + havingKey +  ":{ " + k + ":value } } 里的"
+								+ " key 对应字符 " + k + " 不合法！必须为 英文字母 开头，且只包含 英文字母、下划线、数字 的合法变量名！");
+					}
+					else {
+						havingMap.put(k, (String) v);
+					}
+				}
+			}
+			else if (newHaving != null) {
+				throw new IllegalArgumentException(table + ":{ " + havingKey +  ":value } 里的 value 类型不合法！"
+						+ "@having:value 中 value 只能是 String 或 JSONObject，@having&:value 中 value 只能是 String ！");
+			}
+			// @having, @haivng& >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			
 
 			config.setExplain(explain);
 			config.setCache(getCache(cache));
@@ -4587,7 +4732,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			config.setCast(castMap);
 			config.setWhere(tableWhere);
 			config.setGroup(group);
-			config.setHaving(having);
+			config.setHaving(havingMap);
+			config.setHavingCombine(havingCombine);
 			config.setOrder(order);
 
 			String[] jsons = StringUtil.split(json);
@@ -4614,6 +4760,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.put(KEY_COMBINE, combine);
 			request.put(KEY_GROUP, group);
 			request.put(KEY_HAVING, having);
+			request.put(KEY_HAVING_AND, havingAnd);
 			request.put(KEY_ORDER, order);
 			request.put(KEY_RAW, raw);
 			request.put(KEY_JSON, json);
