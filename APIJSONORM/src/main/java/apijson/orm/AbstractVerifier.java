@@ -240,6 +240,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @return
 	 * @throws Exception
 	 */
+	@Override
 	public boolean verifyAccess(SQLConfig config) throws Exception {
 		String table = config == null ? null : config.getTable();
 		if (table == null) {
@@ -249,7 +250,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		String role = config.getRole();
 		if (role == null) {
 			role = UNKNOWN;
-		} 
+		}
 		else { 
 			if (ROLE_MAP.containsKey(role) == false) {
 				Set<String> NAMES = ROLE_MAP.keySet();
@@ -262,14 +263,72 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		}
 
 		RequestMethod method = config.getMethod();
+		verifyRole(config, table, method, role);
+	
+		return true;
+	}
+	
+	@Override
+	public void verifyRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception {
+		verifyAllowRole(config, table, method, role); //验证允许的角色
+		verifyUseRole(config, table, method, role); //验证使用的角色
+	}
 
-		verifyRole(table, method, role);//验证允许的角色
+	/**允许请求使用的所以可能角色
+	 * @param config
+	 * @param table
+	 * @param method
+	 * @param role
+	 * @return
+	 * @throws Exception 
+	 * @see {@link apijson.JSONObject#KEY_ROLE} 
+	 */
+	public void verifyAllowRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception {
+		Log.d(TAG, "verifyAllowRole  table = " + table + "; method = " + method + "; role = " + role);
+		if (table == null) {
+			table = config == null ? null : config.getTable();
+		}
+		
+		if (table != null) {
+			if (method == null) {
+				method = config == null ? GET : config.getMethod();
+			}
+			if (role == null) {
+				role = config == null ? UNKNOWN : config.getRole();
+			}
+			
+			Map<RequestMethod, String[]> map = ACCESS_MAP.get(table);
 
+			if (map == null || Arrays.asList(map.get(method)).contains(role) == false) {
+				throw new IllegalAccessException(table + " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
+			}
+		}
+	}
 
+	/**校验请求使用的角色，角色不好判断，让访问者发过来角色名，OWNER,CONTACT,ADMIN等
+	 * @param config
+	 * @param table
+	 * @param method
+	 * @param role
+	 * @return
+	 * @throws Exception 
+	 * @see {@link apijson.JSONObject#KEY_ROLE} 
+	 */
+	public void verifyUseRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception {
+		Log.d(TAG, "verifyUseRole  table = " + table + "; method = " + method + "; role = " + role);
 		//验证角色，假定真实强制匹配<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 		String visitorIdKey = getVisitorIdKey(config);
-
+		if (table == null) {
+			table = config == null ? null : config.getTable();
+		}
+		if (method == null) {
+			method = config == null ? GET : config.getMethod();
+		}
+		if (role == null) {
+			role = config == null ? UNKNOWN : config.getRole();
+		}
+		
 		Object requestId;
 		switch (role) {
 		case LOGIN://verifyRole通过就行
@@ -366,39 +425,6 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		}
 
 		//验证角色，假定真实强制匹配>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-		return true;
-	}
-
-
-
-
-
-	/**允许请求，角色不好判断，让访问者发过来角色名，OWNER,CONTACT,ADMIN等
-	 * @param table
-	 * @param method
-	 * @param role
-	 * @return
-	 * @throws Exception 
-	 * @see {@link apijson.JSONObject#KEY_ROLE} 
-	 */
-	public void verifyRole(String table, RequestMethod method, String role) throws Exception {
-		Log.d(TAG, "verifyRole  table = " + table + "; method = " + method + "; role = " + role);
-		if (table != null) {
-			if (method == null) {
-				method = GET;
-			}
-			if (role == null) {
-				role = UNKNOWN;
-			}
-			
-			Map<RequestMethod, String[]> map = ACCESS_MAP.get(table);
-
-			if (map == null || Arrays.asList(map.get(method)).contains(role) == false) {
-				throw new IllegalAccessException(table + " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
-			}
-		}
 	}
 
 

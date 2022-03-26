@@ -24,7 +24,9 @@ public interface Verifier<T> {
 	 */
 	boolean verifyAccess(SQLConfig config) throws Exception;
 
-	/**允许请求，角色不好判断，让访问者发过来角色名，OWNER,CONTACT,ADMIN等
+
+	/**校验请求使用的角色，角色不好判断，让访问者发过来角色名，OWNER,CONTACT,ADMIN等
+	 * @param config
 	 * @param table
 	 * @param method
 	 * @param role
@@ -32,7 +34,7 @@ public interface Verifier<T> {
 	 * @throws Exception 
 	 * @see {@link apijson.JSONObject#KEY_ROLE} 
 	 */
-	void verifyRole(String table, RequestMethod method, String role) throws Exception;
+	void verifyRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception;
 
 	/**登录校验
 	 * @param config
@@ -93,5 +95,6 @@ public interface Verifier<T> {
 	Verifier<T> setVisitor(@NotNull Visitor<T> visitor);
 	
 	String getVisitorIdKey(SQLConfig config);
+
 
 }
