@@ -244,6 +244,7 @@ public interface SQLConfig {
 	String getWhereString(boolean hasPrefix) throws Exception;
 
 	String getRawSQL(String key, Object value) throws Exception;
+	String getRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception;
 
 	boolean isKeyPrefix();
 

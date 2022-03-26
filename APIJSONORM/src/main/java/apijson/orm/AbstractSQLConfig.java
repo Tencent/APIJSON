@@ -1230,18 +1230,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return (hasPrefix ? " HAVING " : "") + StringUtil.concat(havingString, joinHaving, AND);
 	}
 
-	protected String getHavingItem(String quote, String table, String alias, String key, String expression, boolean containRaw) {
+	protected String getHavingItem(String quote, String table, String alias, String key, String expression, boolean containRaw) throws Exception {
 		//fun(arg0,arg1,...)
 		if (containRaw) {
-			try {
-				String rawSQL = getRawSQL(KEY_HAVING, expression);
-				if (rawSQL != null) {
-					return rawSQL;
-				}
-			} catch (Exception e) {
-				Log.e(TAG, "newSQLConfig  rawColumnSQL == null >> try {  "
-						+ "  String rawSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, fk); ... "
-						+ "} catch (Exception e) = " + e.getMessage());
+			String rawSQL = getRawSQL(KEY_HAVING, expression);
+			if (rawSQL != null) {
+				return rawSQL;
 			}
 		}
 
@@ -1460,6 +1454,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@Override
 	public String getRawSQL(String key, Object value) throws Exception {
+		return getRawSQL(key, value, false);
+	}
+	/**获取原始 SQL 片段
+	 * @param key
+	 * @param value
+	 * @param throwWhenMissing
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public String getRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception {
 		if (value == null) {
 			return null;
 		}
@@ -1474,11 +1479,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String rawSQL = containRaw ? RAW_MAP.get(value) : null;
 		if (containRaw) {
 			if (rawSQL == null) {
-				throw new UnsupportedOperationException("@raw:value 的 value 中 " + key + " 不合法！"
-						+ "对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
+				if (throwWhenMissing) {
+					throw new UnsupportedOperationException("@raw:value 的 value 中 " + key + " 不合法！"
+							+ "对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
+				}
 			}
-
-			if (rawSQL.isEmpty()) {
+			else if (rawSQL.isEmpty()) {
 				return (String) value;
 			}
 		}
@@ -1824,14 +1830,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				String s2 = expression.substring(keyIndex + 1); // OVER 后半部分
 
 				int index1 = s1.indexOf("("); //  函数 "(" 的起始位置
-				String fun = s1.substring(0, index1); // 函数名称
 				int end = s2.lastIndexOf(")"); // 后半部分 “)” 的位置
 
-				if (index1 >= end) {
+				if (index1 >= end + s1.length()) {
 					throw new IllegalArgumentException("字符 " + expression + " 不合法！"
 							+ key + ":value 中 value 里的 SQL 函数必须为 function(arg0,arg1,...) 这种格式！");
 				}
 
+				String fun = s1.substring(0, index1); // 函数名称
 				if (fun.isEmpty() == false) {
 					if (SQL_FUNCTION_MAP == null || SQL_FUNCTION_MAP.isEmpty()) {
 						if (StringUtil.isName(fun) == false) {
@@ -1851,11 +1857,26 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				int index2 = s2.indexOf("("); // 后半部分 “(”的起始位置
 				String argString2 = s2.substring(index2 + 1, end); // 后半部分的参数
 				// 别名
-				String alias = allowAlias == false || s2.lastIndexOf(":") < s2.lastIndexOf(")") ? null : s2.substring(s2.lastIndexOf(":") + 1);
+				int aliasIndex = allowAlias == false ? -1 : s2.lastIndexOf(":");
+				String alias = aliasIndex < 0 ? "" : s2.substring(aliasIndex + 1);
+				if (alias.isEmpty() == false && StringUtil.isName(alias) == false) {
+					throw new IllegalArgumentException("字符串 " + alias + " 不合法！预编译模式下 "
+							+ key + ":value 中 value里面用 ; 分割的每一项"
+							+ " function(arg0,arg1,...):alias 中 alias 必须是1个单词！并且不要有多余的空格！");
+				}
+				
+				String suffix = s2.substring(end + 1, aliasIndex < 0 ? s2.length() : aliasIndex);
+				if (suffix.isEmpty() == false && (((String) suffix).contains("--") || ((String) suffix).contains("/*")
+						|| PATTERN_RANGE.matcher((String) suffix).matches() == false)) {
+					throw new UnsupportedOperationException("字符串 " + suffix + " 不合法！预编译模式下 " + key
+							+ ":\"column?value;function(arg0,arg1,...)?value...\""
+							+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
+				}
+				
 				// 获取后半部分的参数解析 (agr0 agr1 ...)
 				String argsString2[] = parseArgsSplitWithComma(argString2, false, containRaw, allowAlias); 
 				expression = fun + "(" + StringUtil.getString(agrsString1) + (containOver ? ") OVER (" : ") AGAINST (") // 传参不传空格，拼接带空格
-						+ StringUtil.getString(argsString2) + ")" + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);			}
+						+ StringUtil.getString(argsString2) + ")" + suffix + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);			}
 		}
 
 		return expression;
@@ -3016,8 +3037,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(TAG + ".getWhereItem: 字符 " + key + " 不合法！");
 		}
 
-		// 原始 SQL 片段
-		String rawSQL = getRawSQL(key, value);
 
 		int keyType;
 		if (key.endsWith("$")) {
@@ -3054,6 +3073,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		String column = getRealKey(method, key, false, true, verifyName);
+		
+		// 原始 SQL 片段
+		String rawSQL = getRawSQL(key, value, keyType != 4 || value instanceof String == false);
 
 		switch (keyType) {
 		case 1:
@@ -4747,15 +4769,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			boolean containColumnRaw = rawList != null && rawList.contains(KEY_COLUMN);
 			String rawColumnSQL = null;
 			if (containColumnRaw) {
-				try {
-					rawColumnSQL = config.getRawSQL(KEY_COLUMN, column);
-					if (rawColumnSQL != null) {
-						cs.add(rawColumnSQL);
-					}
-				} catch (Exception e) {
-					Log.e(TAG, "newSQLConfig  config instanceof AbstractSQLConfig >> try {  "
-							+ "  rawColumnSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, column); "
-							+ "} catch (Exception e) = " + e.getMessage());
+				rawColumnSQL = config.getRawSQL(KEY_COLUMN, column);
+				if (rawColumnSQL != null) {
+					cs.add(rawColumnSQL);
 				}
 			}
 
@@ -4766,16 +4782,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					String[] ks;
 					for (String fk : fks) {
 						if (containColumnRaw) {
-							try {
-								String rawSQL = config.getRawSQL(KEY_COLUMN, fk);
-								if (rawSQL != null) {
-									cs.add(rawSQL);
-									continue;
-								}
-							} catch (Exception e) {
-								Log.e(TAG, "newSQLConfig  rawColumnSQL == null >> try {  "
-										+ "  String rawSQL = ((AbstractSQLConfig) config).getRawSQL(KEY_COLUMN, fk); ... "
-										+ "} catch (Exception e) = " + e.getMessage());
+							String rawSQL = config.getRawSQL(KEY_COLUMN, fk);
+							if (rawSQL != null) {
+								cs.add(rawSQL);
+								continue;
 							}
 						}
 
