@@ -156,18 +156,6 @@ public interface SQLConfig {
 	List<String> getRaw();
 	SQLConfig setRaw(List<String> raw);
 
-	String getGroup();
-	SQLConfig setGroup(String group);
-
-	Map<String, Object> getHaving();
-	SQLConfig setHaving(Map<String, Object> having);
-	
-	String getHavingCombine();
-	SQLConfig setHavingCombine(String havingCombine);
-
-	String getOrder();
-	SQLConfig setOrder(String order);
-
 	Subquery getFrom();
 	SQLConfig setFrom(Subquery from);
 
@@ -180,11 +168,11 @@ public interface SQLConfig {
 	Map<String, Object> getContent();
 	SQLConfig setContent(Map<String, Object> content);
 
-	Map<String, List<String>> getCombine();
-	SQLConfig setCombine(Map<String, List<String>> combine);
+	Map<String, List<String>> getCombineMap();
+	SQLConfig setCombineMap(Map<String, List<String>> combineMap);
 
-	String getCombineExpression();
-	SQLConfig setCombineExpression(String combineExpression);
+	String getCombine();
+	SQLConfig setCombine(String combine);
 	
 	Map<String, String> getCast();
 	SQLConfig setCast(Map<String, String> cast);
@@ -194,6 +182,18 @@ public interface SQLConfig {
 	
 	Map<String, Object> getWhere();
 	SQLConfig setWhere(Map<String, Object> where);
+
+	String getGroup();
+	SQLConfig setGroup(String group);
+
+	Map<String, Object> getHaving();
+	SQLConfig setHaving(Map<String, Object> having);
+	
+	String getHavingCombine();
+	SQLConfig setHavingCombine(String havingCombine);
+
+	String getOrder();
+	SQLConfig setOrder(String order);
 
 	/**
 	 * exactMatch = false

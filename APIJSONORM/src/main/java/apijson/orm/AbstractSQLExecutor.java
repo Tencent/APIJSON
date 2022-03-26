@@ -335,7 +335,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 							capacity = config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount();
 							if (capacity > 100) {
 								// 有条件，条件越多过滤数据越多
-								Map<String, List<String>> combine = config.getCombine();
+								Map<String, List<String>> combine = config.getCombineMap();
 								
 								List<String> andList = combine == null ? null : combine.get("&");
 								int andCondCount = andList == null ? (config.getWhere() == null ? 0 : config.getWhere().size()) : andList.size();

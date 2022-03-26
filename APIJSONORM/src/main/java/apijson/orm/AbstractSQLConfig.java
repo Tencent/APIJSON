@@ -775,8 +775,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private Map<String, String> cast;
 	private Map<String, Object> content; //Request内容，key:value形式，column = content.keySet()，values = content.values()
 	private Map<String, Object> where; //筛选条件，key:value形式
-	private Map<String, List<String>> combine; //条件组合，{ "&":[key], "|":[key], "!":[key] }
-	private String combineExpression;
+	private String combine; //条件组合， a | (b & c & !(d | !e))
+	private Map<String, List<String>> combineMap; //条件组合，{ "&":[key], "|":[key], "!":[key] }
 
 	//array item <<<<<<<<<<
 	private int count; //Table数量
@@ -2238,31 +2238,31 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 
 	@Override
-	public String getCombineExpression() {
-		return combineExpression;
+	public String getCombine() {
+		return combine;
 	}
 	@Override
-	public AbstractSQLConfig setCombineExpression(String combineExpression) {
-		this.combineExpression = combineExpression;
+	public AbstractSQLConfig setCombine(String combine) {
+		this.combine = combine;
 		return this;
 	}
 	
 	@NotNull
 	@Override
-	public Map<String, List<String>> getCombine() {
-		List<String> andList = combine == null ? null : combine.get("&");
+	public Map<String, List<String>> getCombineMap() {
+		List<String> andList = combineMap == null ? null : combineMap.get("&");
 		if (andList == null) {
 			andList = where == null ? new ArrayList<String>() : new ArrayList<String>(where.keySet());
-			if (combine == null) {
-				combine = new HashMap<>();
+			if (combineMap == null) {
+				combineMap = new HashMap<>();
 			}
-			combine.put("&", andList);
+			combineMap.put("&", andList);
 		}
-		return combine;
+		return combineMap;
 	}
 	@Override
-	public AbstractSQLConfig setCombine(Map<String, List<String>> combine) {
-		this.combine = combine;
+	public AbstractSQLConfig setCombineMap(Map<String, List<String>> combineMap) {
+		this.combineMap = combineMap;
 		return this;
 	}
 	
@@ -2329,8 +2329,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				where.put(key, value);
 			}
 
-			combine = getCombine();
-			List<String> andList = combine.get("&");
+			Map<String, List<String>> combineMap = getCombineMap();
+			List<String> andList = combineMap.get("&");
 			if (value == null) {
 				if (andList != null) {
 					andList.remove(key);
@@ -2392,7 +2392,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					andList.add(key); //AbstractSQLExecutor.onPutColumn里getSQL，要保证缓存的SQL和查询的SQL里 where 的 key:value 顺序一致
 				}
 			}
-			combine.put("&", andList);
+			combineMap.put("&", andList);
 		}
 		
 		return this;
@@ -2405,11 +2405,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getWhereString(boolean hasPrefix) throws Exception {
-		String ce = getCombineExpression();
-		if (StringUtil.isEmpty(ce, true)) {
-			return getWhereString(hasPrefix, getMethod(), getWhere(), getCombine(), getJoinList(), ! isTest());
+		String combineExpr = getCombine();
+		if (StringUtil.isEmpty(combineExpr, true)) {
+			return getWhereString(hasPrefix, getMethod(), getWhere(), getCombineMap(), getJoinList(), ! isTest());
 		}
-		return getWhereString(hasPrefix, getMethod(), getWhere(), ce, getJoinList(), ! isTest());
+		return getWhereString(hasPrefix, getMethod(), getWhere(), combineExpr, getJoinList(), ! isTest());
 	}
 	/**获取WHERE
 	 * @param method
@@ -2432,7 +2432,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return result;
 	}
 
-
+	/**解析 @combine 条件 key 组合的与或非+括号的逻辑运算表达式为具体的完整条件组合
+	 * @param method
+	 * @param quote
+	 * @param table
+	 * @param alias
+	 * @param conditioinMap  where 或 having 对应条件的 Map
+	 * @param combine
+	 * @param verifyName
+	 * @param containRaw
+	 * @param isHaving
+	 * @return
+	 * @throws Exception
+	 */
 	protected String parseCombineExpression(RequestMethod method, String quote, String table, String alias
 			, Map<String, Object> conditioinMap, String combine, boolean verifyName, boolean containRaw, boolean isHaving) throws Exception {
 		
@@ -2693,6 +2705,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return result;
 	}
 
+	/**已废弃，最快 6.0 删除，请尽快把前端/客户端 @combine:"a,b" 这种旧方式改为 @combine:"a | b" 这种新方式
+	 * @param hasPrefix
+	 * @param method
+	 * @param where
+	 * @param combine
+	 * @param joinList
+	 * @param verifyName
+	 * @return
+	 * @throws Exception
+	 */
+	@Deprecated
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
 		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
 		if (combineSet == null || combineSet.isEmpty()) {
@@ -4437,9 +4460,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				List<String> whereList = null;
 
 				String[] ws = StringUtil.split(combine);
-				String combineExpression = ws == null || ws.length != 1 ? null : ws[0];
+				String combineExpr = ws == null || ws.length != 1 ? null : ws[0];
 				
-				Map<String, List<String>> combineMap = StringUtil.isNotEmpty(combineExpression, true) ? null : new LinkedHashMap<>();
+				Map<String, List<String>> combineMap = StringUtil.isNotEmpty(combineExpr, true) ? null : new LinkedHashMap<>();
 				List<String> andList = combineMap == null ? null : new ArrayList<>();
 				List<String> orList = combineMap == null ? null : new ArrayList<>();
 				List<String> notList = combineMap == null ? null : new ArrayList<>();
@@ -4459,14 +4482,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 				
 				if (combineMap == null) {
-					if (StringUtil.isNotEmpty(combineExpression, true)) {
+					if (StringUtil.isNotEmpty(combineExpr, true)) {
 						List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
 						
 						for (String key : banKeyList) {
-							int index = combineExpression.indexOf(key);
+							int index = combineExpr.indexOf(key);
 							if (index >= 0) {
-								char left = index <= 0 ? ' ' : combineExpression.charAt(index - 1);
-								char right = index >= combineExpression.length() - key.length() ? ' ' : combineExpression.charAt(index + key.length());
+								char left = index <= 0 ? ' ' : combineExpr.charAt(index - 1);
+								char right = index >= combineExpr.length() - key.length() ? ' ' : combineExpr.charAt(index + key.length());
 								if ((left == ' ' || left == '(' || left == '&' || left == '|' || left == '!') && (right == ' ' || right == ')')) {
 									throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
 											+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
@@ -4567,8 +4590,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					combineMap.put("|", orList);
 					combineMap.put("!", notList);
 				}
-				config.setCombine(combineMap);
-				config.setCombineExpression(combineExpression);
+				config.setCombineMap(combineMap);
+				config.setCombine(combineExpr);
 
 				config.setContent(tableContent);
 			}
