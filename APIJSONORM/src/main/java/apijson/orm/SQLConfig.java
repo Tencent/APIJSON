@@ -116,6 +116,15 @@ public interface SQLConfig {
 
 	Object getId();
 	SQLConfig setId(Object id);
+	
+	Object getIdIn();
+	SQLConfig setIdIn(Object idIn);
+	
+	Object getUserId();
+	SQLConfig setUserId(Object userId);
+
+	Object getUserIdIn();
+	SQLConfig setUserIdIn(Object userIdIn);
 
 	String getRole();
 	SQLConfig setRole(String role);

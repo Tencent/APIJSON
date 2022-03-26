@@ -225,13 +225,27 @@ public class StringUtil {
 
 	//判断字符是否为空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	/**判断字符是否为空 trim = true
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isEmpty(Object obj) {
+		return isEmpty(obj, true);
+	}
 	/**判断字符是否为空
-	 * @param object
+	 * @param obj
 	 * @param trim
 	 * @return
 	 */
-	public static boolean isEmpty(Object object, boolean trim) {
-		return isEmpty(getString(object), trim);
+	public static boolean isEmpty(Object obj, boolean trim) {
+		return isEmpty(getString(obj), trim);
+	}
+	/**判断字符是否为空 trim = true
+	 * @param cs
+	 * @return
+	 */
+	public static boolean isEmpty(CharSequence cs) {
+		return isEmpty(cs, true);
 	}
 	/**判断字符是否为空
 	 * @param cs
@@ -240,6 +254,13 @@ public class StringUtil {
 	 */
 	public static boolean isEmpty(CharSequence cs, boolean trim) {
 		return isEmpty(getString(cs), trim);
+	}
+	/**判断字符是否为空 trim = true
+	 * @param s
+	 * @return
+	 */
+	public static boolean isEmpty(String s) {
+		return isEmpty(s, true);
 	}
 	/**判断字符是否为空
 	 * @param s
@@ -267,13 +288,27 @@ public class StringUtil {
 
 	//判断字符是否非空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	/**判断字符是否非空
+	/**判断字符是否非空 trim = true
 	 * @param object
+	 * @return
+	 */
+	public static boolean isNotEmpty(Object obj) {
+		return ! isEmpty(obj);
+	}
+	/**判断字符是否非空
+	 * @param obj
 	 * @param trim
 	 * @return
 	 */
-	public static boolean isNotEmpty(Object object, boolean trim) {
-		return isNotEmpty(getString(object), trim);
+	public static boolean isNotEmpty(Object obj, boolean trim) {
+		return ! isEmpty(obj, trim);
+	}
+	/**判断字符是否非空 trim = true
+	 * @param cs
+	 * @return
+	 */
+	public static boolean isNotEmpty(CharSequence cs) {
+		return ! isEmpty(cs);
 	}
 	/**判断字符是否非空
 	 * @param cs
@@ -281,7 +316,14 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isNotEmpty(CharSequence cs, boolean trim) {
-		return isNotEmpty(getString(cs), trim);
+		return ! isEmpty(cs, trim);
+	}
+	/**判断字符是否非空  trim = true
+	 * @param s
+	 * @return
+	 */
+	public static boolean isNotEmpty(String s) {
+		return ! isEmpty(s);
 	}
 	/**判断字符是否非空
 	 * @param s

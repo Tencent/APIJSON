@@ -264,11 +264,15 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 					//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
 					result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
+					
+					String idKey = config.getIdKey();
 					if (config.getId() != null) {
-						result.put(config.getIdKey(), config.getId());
-					} else {
-						result.put(config.getIdKey() + "[]", config.getWhere(config.getIdKey() + "{}", true));
+						result.put(idKey, config.getId());
 					}
+					if (config.getIdIn() != null) {
+						result.put(idKey + "[]", config.getIdIn());
+					}
+					
 					return result;
 
 				case GET:
@@ -327,14 +331,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						capacity = 1;
 					}
 					else {
-						Object idIn = config.getWhere(config.getIdKey() + "{}", true);
+						Object idIn = config.getIdIn();
 						if (idIn instanceof Collection<?>) {  // id{}:[] 一定是 AND 条件，最终返回数据最多就这么多
 							capacity = ((Collection<?>) idIn).size();
 						}
 						else {  // 预估容量
 							capacity = config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount();
 							if (capacity > 100) {
-								// 有条件，条件越多过滤数据越多
+								// 有 WHERE 条件，条件越多过滤数据越多，暂时不考虑 @combine:"a | (b & !c)" 里面 | OR 和 ! NOT 条件，太复杂也不是很必要
 								Map<String, List<String>> combine = config.getCombineMap();
 								
 								List<String> andList = combine == null ? null : combine.get("&");
@@ -346,23 +350,29 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 								List<String> notList = combine == null ? null : combine.get("|");
 								int notCondCount = notList == null ? 0 : notList.size();
 								
-								
-								// 有分组，分组字段越少过滤数据越多
+								// 有 GROUP BY 分组，字段越少过滤数据越多
 								String[] group = StringUtil.split(config.getGroup());
 								int groupCount = group == null ? 0 : group.length;
 								if (groupCount > 0 && Arrays.asList(group).contains(config.getIdKey())) {
 									groupCount = 0;
 								}
 								
-								capacity /= Math.pow(1.5, Math.log10(capacity) + andCondCount
-										+ (orCondCount <= 0 ? 0 : 2/orCondCount)  // 1: 2.3, 2: 1.5, 3: 1.3, 4: 1.23, 5: 1.18
-										+ (notCondCount/5)  // 1: 1.08, 2: 1.18, 3: 1.28, 4: 1.38, 1.50
-										+ (groupCount <= 0 ? 0 : 10/groupCount)  // 1: 57.7, 7.6, 3: 3.9, 4: 2.8, 5: 2.3
+								// 有 HAVING 聚合函数，字段越多过滤数据越多，暂时不考虑 @combine:"a | (b & !c)" 里面 | OR 和 ! NOT 条件，太复杂也不是很必要
+								Map<String, Object> having = config.getHaving();
+								int havingCount = having == null ? 0 : having.size();
+
+								capacity /= Math.pow(1.5, Math.log10(capacity)
+										+ andCondCount
+										+ ((orCondCount <= 0 ? 0 : 2.0d/orCondCount)  // 1: 2.3, 2: 1.5, 3: 1.3, 4: 1.23, 5: 1.18
+										+ (notCondCount/5.0d)  // 1: 1.08, 2: 1.18, 3: 1.28, 4: 1.38, 1.50
+										+ (groupCount <= 0 ? 0 : 10.0d/groupCount))  // 1: 57.7, 7.6, 3: 3.9, 4: 2.8, 5: 2.3
+										+ havingCount
 										);
 								capacity += 1;  // 避免正好比需要容量少一点点导致多一次扩容，大量数据 System.arrayCopy
 							}
 						}
 					}
+					
 					resultList = new ArrayList<>(capacity);
 				}
 
