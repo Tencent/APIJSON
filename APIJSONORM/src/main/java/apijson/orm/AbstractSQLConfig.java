@@ -2303,18 +2303,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (key == null || where == null){
 			return null;
 		}
-		synchronized (where) {
-			if (where != null) {
-				int index;
-				for (Entry<String,Object> entry : where.entrySet()) {
-					String k = entry.getKey();
-					index = k.indexOf(key);
-					if (index >= 0 && StringUtil.isName(k.substring(index)) == false) {
-						return entry.getValue();
-					}
-				}
+		
+		int index;
+		for (Entry<String,Object> entry : where.entrySet()) {
+			String k = entry.getKey();
+			index = k.indexOf(key);
+			if (index >= 0 && StringUtil.isName(k.substring(index, index + 1)) == false) {
+				return entry.getValue();
 			}
 		}
+		
 		return null;
 	}
 	@Override

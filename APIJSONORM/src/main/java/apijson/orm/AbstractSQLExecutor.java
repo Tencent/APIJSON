@@ -1120,18 +1120,22 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
-		PreparedStatement s = getStatement(config);
-// 不准，getStatement 有时比 execute sql 更耗时		executedSQLStartTime = System.currentTimeMillis();
-		ResultSet rs = s.executeQuery();  //PreparedStatement 不用传 SQL
-//		executedSQLEndTime = System.currentTimeMillis();
+		PreparedStatement stt = getStatement(config);
+		// 不准，getStatement 有时比 execute sql 更耗时		executedSQLStartTime = System.currentTimeMillis();
+		ResultSet rs = stt.executeQuery();  //PreparedStatement 不用传 SQL
+		//		executedSQLEndTime = System.currentTimeMillis();
+		//		if (config.isExplain() && (config.isSQLServer() || config.isOracle())) {
+		// FIXME 返回的是 boolean 值			rs = stt.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+		//		}
+
 		return rs;
 	}
 
 	@Override
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
-		PreparedStatement s = getStatement(config);
+		PreparedStatement stt = getStatement(config);
 // 不准，getStatement 有时比 execute sql 更耗时		executedSQLStartTime = System.currentTimeMillis();
-		int count = s.executeUpdate();  // PreparedStatement 不用传 SQL
+		int count = stt.executeUpdate();  // PreparedStatement 不用传 SQL
 //		executedSQLEndTime = System.currentTimeMillis();
 		
 		if (count <= 0 && config.isHive()) {
@@ -1139,7 +1143,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 		
 		if (config.getId() == null && config.getMethod() == RequestMethod.POST) {  // 自增id
-			ResultSet rs = s.getGeneratedKeys();
+			ResultSet rs = stt.getGeneratedKeys();
 			if (rs != null && rs.next()) {
 				config.setId(rs.getLong(1));  //返回插入的主键id  FIXME Oracle 拿不到
 			}

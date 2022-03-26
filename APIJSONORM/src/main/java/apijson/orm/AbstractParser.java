@@ -1769,7 +1769,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * @param result 需要被关联的object
 	 */
 	@Override
-	public synchronized void putQueryResult(String path, Object result) {
+	public void putQueryResult(String path, Object result) {
 		Log.i(TAG, "\n putQueryResult  valuePath = " + path + "; result = " + result + "\n <<<<<<<<<<<<<<<<<<<<<<<");
 		//		if (queryResultMap.containsKey(valuePath)) {//只保存被关联的value
 		Log.d(TAG, "putQueryResult  queryResultMap.containsKey(valuePath) >> queryResultMap.put(path, result);");
