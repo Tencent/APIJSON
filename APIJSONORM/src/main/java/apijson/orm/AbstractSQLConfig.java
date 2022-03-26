@@ -748,10 +748,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
-	private Object id; //Table的id
 	private RequestMethod method; //操作方法
 	private boolean prepared = true; //预编译
 	private boolean main = true;
+
+	private Object id;  // Table 的 id
+	private Object idIn;  // User Table 的 id IN
+	private Object userId;  // Table 的 userId
+	private Object userIdIn;  // Table 的 userId IN
+	
 	/**
 	 * TODO 被关联的表通过就忽略关联的表？(这个不行 User:{"sex@":"/Comment/toId"})
 	 */
@@ -855,6 +860,37 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setId(Object id) {
 		this.id = id;
+		return this;
+	}
+	
+	@Override
+	public Object getIdIn() {
+		return idIn;
+	}
+	@Override
+	public AbstractSQLConfig setIdIn(Object idIn) {
+		this.idIn = idIn;
+		return this;
+	}
+	
+	
+	@Override
+	public Object getUserId() {
+		return userId;
+	}
+	@Override
+	public AbstractSQLConfig setUserId(Object userId) {
+		this.userId = userId;
+		return this;
+	}
+
+	@Override
+	public Object getUserIdIn() {
+		return userIdIn;
+	}
+	@Override
+	public AbstractSQLConfig setUserIdIn(Object userIdIn) {
+		this.userIdIn = userIdIn;
 		return this;
 	}
 
@@ -2348,18 +2384,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 					int lastIndex;
 					if (key.equals(idKey)) {
+						setId(value);
 						lastIndex = -1;
 					}
 					else if (key.equals(idInKey)) {
+						setIdIn(value);
 						lastIndex = andList.lastIndexOf(idKey);
 					}
 					else if (key.equals(userIdKey)) {
+						setUserId(value);
 						lastIndex = andList.lastIndexOf(idInKey);
 						if (lastIndex < 0) {
 							lastIndex = andList.lastIndexOf(idKey);
 						}
 					}
 					else if (key.equals(userIdInKey)) {
+						setUserIdIn(value);
 						lastIndex = andList.lastIndexOf(userIdKey);
 						if (lastIndex < 0) {
 							lastIndex = andList.lastIndexOf(idInKey);
@@ -2404,7 +2444,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public String getWhereString(boolean hasPrefix) throws Exception {
 		String combineExpr = getCombine();
-		if (StringUtil.isEmpty(combineExpr, true)) {
+		if (StringUtil.isEmpty(combineExpr, false)) {
 			return getWhereString(hasPrefix, getMethod(), getWhere(), getCombineMap(), getJoinList(), ! isTest());
 		}
 		return getWhereString(hasPrefix, getMethod(), getWhere(), combineExpr, getJoinList(), ! isTest());
@@ -2417,10 +2457,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where, String combine, List<Join> joinList, boolean verifyName) throws Exception {
-		String whereString = parseCombineExpression(method, getQuote(), getTable(), getAliasWithQuote(), where, combine, verifyName, false, false);
-
-		whereString = concatJoinWhereString(whereString);
 		
+		String whereString = parseCombineExpression(method, getQuote(), getTable(), getAliasWithQuote(), where, combine, verifyName, false, false);
+		whereString = concatJoinWhereString(whereString);
 		String result = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
 
 		if (result.isEmpty() && RequestMethod.isQueryMethod(method) == false) {
@@ -4256,23 +4295,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return config; //request.remove(key); 前都可以直接return，之后必须保证 put 回去
 		}
 
+		//对 id, id{}, userId, userId{} 处理，这些只要不为 null 就一定会作为 AND 条件 <<<<<<<<<<<<<<<<<<<<<<<<<
 
 		String idKey = callback.getIdKey(datasource, database, schema, table);
 		String idInKey = idKey + "{}";
 		String userIdKey = callback.getUserIdKey(datasource, database, schema, table);
 		String userIdInKey = userIdKey + "{}";
 
-		//对id和id{}处理，这两个一定会作为条件
-
 		Object idIn = request.get(idInKey); //可能是 id{}:">0"
-		if (idIn instanceof List) { // 排除掉 0, 负数, 空字符串 等无效 id 值
-			List<?> ids = ((List<?>) idIn);
+		if (idIn instanceof Collection) { // 排除掉 0, 负数, 空字符串 等无效 id 值
+			Collection<?> ids = (Collection<?>) idIn;
 			List<Object> newIdIn = new ArrayList<>();
-			Object d;
-			for (int i = 0; i < ids.size(); i++) { //不用 idIn.contains(id) 因为 idIn 里存到很可能是 Integer，id 又是 Long！
-				d = ids.get(i);
+			for (Object d : ids) { //不用 idIn.contains(id) 因为 idIn 里存到很可能是 Integer，id 又是 Long！
 				if ((d instanceof Number && ((Number) d).longValue() > 0) || (d instanceof String && StringUtil.isNotEmpty(d, true))) {
-					newIdIn.add(d);
+					if (newIdIn.contains(d) == false) {
+						newIdIn.add(d);
+					}
 				}
 			}
 			if (newIdIn.isEmpty()) {
@@ -4286,8 +4324,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		Object id = request.get(idKey);
-		boolean hasId = id != null;
-		if (method == POST && hasId == false) {
+		if (id == null && method == POST) {
 			id = callback.newId(method, database, schema, table); // null 表示数据库自增 id
 		}
 
@@ -4307,12 +4344,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				throw new IllegalArgumentException(idKey + ":value 中 value 的类型只能是 Long , String 或 Subquery ！");
 			}
 
-			if (idIn instanceof List) { //共用idIn场景少性能差
+			if (idIn instanceof Collection) { //共用idIn场景少性能差
 				boolean contains = false;
-				List<?> ids = ((List<?>) idIn);
-				Object d;
-				for (int i = 0; i < ids.size(); i++) { //不用 idIn.contains(id) 因为 idIn 里存到很可能是 Integer，id 又是 Long！
-					d = ids.get(i);
+				Collection<?> idList = ((Collection<?>) idIn);
+				for (Object d : idList) { //不用 idIn.contains(id) 因为 idIn 里存到很可能是 Integer，id 又是 Long！
 					if (d != null && id.toString().equals(d.toString())) {
 						contains = true;
 						break;
@@ -4328,7 +4363,59 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-
+		//对 userId 和 userId{} 处理，这两个一定会作为条件
+		Object userIdIn = request.get(userIdInKey); //可能是 userId{}:">0"
+		if (userIdIn instanceof Collection) { // 排除掉 0, 负数, 空字符串 等无效 userId 值
+			Collection<?> userIds = (Collection<?>) userIdIn;
+			List<Object> newUserIdIn = new ArrayList<>();
+			for (Object d : userIds) { //不用 userIdIn.contains(userId) 因为 userIdIn 里存到很可能是 Integer，userId 又是 Long！
+				if ((d instanceof Number && ((Number) d).longValue() > 0) || (d instanceof String && StringUtil.isNotEmpty(d, true))) {
+					if (newUserIdIn.contains(d) == false) {
+						newUserIdIn.add(d);
+					}
+				}
+			}
+			if (newUserIdIn.isEmpty()) {
+				throw new NotExistException(TAG + ": newSQLConfig userIdIn instanceof List >> 去掉无效 userId 后 newIdIn.isEmpty()");
+			}
+			userIdIn = newUserIdIn;
+		}
+		
+		Object userId = request.get(userIdKey);
+		if (userId != null) { //null无效
+			if (userId instanceof Number) { 
+				if (((Number) userId).longValue() <= 0) { //一定没有值
+					throw new NotExistException(TAG + ": newSQLConfig " + table + ".userId <= 0");
+				}
+			}
+			else if (userId instanceof String) {
+				if (StringUtil.isEmpty(userId, true)) { //一定没有值
+					throw new NotExistException(TAG + ": newSQLConfig StringUtil.isEmpty(" + table + ".userId, true)");
+				}
+			}
+			else if (userId instanceof Subquery) {}
+			else {
+				throw new IllegalArgumentException(userIdKey + ":value 中 value 的类型只能是 Long , String 或 Subquery ！");
+			}
+			
+			if (userIdIn instanceof Collection) { //共用userIdIn场景少性能差
+				boolean contains = false;
+				Collection<?> userIds = (Collection<?>) userIdIn;
+				for (Object d : userIds) { //不用 userIdIn.contains(userId) 因为 userIdIn 里存到很可能是 Integer，userId 又是 Long！
+					if (d != null && userId.toString().equals(d.toString())) {
+						contains = true;
+						break;
+					}
+				}
+				if (contains == false) {//empty有效  BaseModel.isEmpty(userIdIn) == false) {
+					throw new NotExistException(TAG + ": newSQLConfig  userIdIn != null && (((List<?>) userIdIn).contains(userId) == false");
+				}
+			}
+		}
+		
+		//对 id, id{}, userId, userId{} 处理，这些只要不为 null 就一定会作为 AND 条件 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		
+		
 		String role = request.getString(KEY_ROLE);
 		String cache = request.getString(KEY_CACHE);
 		Subquery from = (Subquery) request.get(KEY_FROM);
@@ -4347,6 +4434,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			//强制作为条件且放在最前面优化性能
 			request.remove(idKey);
 			request.remove(idInKey);
+			request.remove(userIdKey);
+			request.remove(userIdInKey);
 			//关键词
 			request.remove(KEY_ROLE);
 			request.remove(KEY_EXPLAIN);
@@ -4452,107 +4541,116 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			} 
 			else { //非POST操作
-				final boolean isWhere = method != PUT;//除了POST,PUT，其它全是条件！！！
+				final boolean isWhere = method != PUT; //除了POST,PUT，其它全是条件！！！
 
 				//条件<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				List<String> whereList = null;
 
 				String[] ws = StringUtil.split(combine);
+				if (ws != null && (method == DELETE || method == GETS || method == HEADS)) {
+					throw new IllegalArgumentException(table + ":{} 里的 @combine:value 不合法！DELETE,GETS,HEADS 请求不允许传 @combine:value !");
+				}
+				
 				String combineExpr = ws == null || ws.length != 1 ? null : ws[0];
 				
-				Map<String, List<String>> combineMap = StringUtil.isNotEmpty(combineExpr, true) ? null : new LinkedHashMap<>();
-				List<String> andList = combineMap == null ? null : new ArrayList<>();
-				List<String> orList = combineMap == null ? null : new ArrayList<>();
-				List<String> notList = combineMap == null ? null : new ArrayList<>();
+				Map<String, List<String>> combineMap = new LinkedHashMap<>();
+				List<String> andList = new ArrayList<>();
+				List<String> orList = new ArrayList<>();
+				List<String> notList = new ArrayList<>();
 				
 				//强制作为条件且放在最前面优化性能
 				if (id != null) {
 					tableWhere.put(idKey, id);
-					if (andList != null) {
-						andList.add(idKey);
-					}
+					andList.add(idKey);
 				}
 				if (idIn != null) {
 					tableWhere.put(idInKey, idIn);
-					if (andList != null) {
-						andList.add(idInKey);
+					andList.add(idInKey);
+				}
+				if (userId != null) {
+					tableWhere.put(userIdKey, userId);
+					andList.add(userIdKey);
+				}
+				if (userIdIn != null) {
+					tableWhere.put(userIdInKey, userIdIn);
+					andList.add(userIdInKey);
+				}
+
+				if (StringUtil.isNotEmpty(combineExpr, true)) {
+					List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
+					for (String key : banKeyList) {
+						String str = combineExpr;
+						while (str.isEmpty() == false) {
+							int index = str.indexOf(key);
+							if (index < 0) {
+								break;
+							}
+							
+							char left = index <= 0 ? ' ' : str.charAt(index - 1);
+							char right = index >= str.length() - key.length() ? ' ' : str.charAt(index + key.length());
+							if ((left == ' ' || left == '(' || left == '&' || left == '|' || left == '!') && (right == ' ' || right == ')')) {
+								throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
+										+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
+							}
+
+							int newIndex = index + key.length() + 1;
+							if (str.length() <= newIndex) {
+								break;
+							}
+							str = str.substring(newIndex);
+						}
 					}
 				}
-				
-				if (combineMap == null) {
-					if (StringUtil.isNotEmpty(combineExpr, true)) {
-						List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
-						
-						for (String key : banKeyList) {
-							int index = combineExpr.indexOf(key);
-							if (index >= 0) {
-								char left = index <= 0 ? ' ' : combineExpr.charAt(index - 1);
-								char right = index >= combineExpr.length() - key.length() ? ' ' : combineExpr.charAt(index + key.length());
-								if ((left == ' ' || left == '(' || left == '&' || left == '|' || left == '!') && (right == ' ' || right == ')')) {
-									throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
+				else if (ws != null) {
+					whereList = new ArrayList<>();
+
+					String w;
+					for (int i = 0; i < ws.length; i++) { //去除 &,|,! 前缀
+						w = ws[i];
+						if (w != null) {
+							if (w.startsWith("&")) {
+								w = w.substring(1);
+								andList.add(w);
+							}
+							else if (w.startsWith("|")) {
+								if (method == PUT) {
+									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+											+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+								}
+								w = w.substring(1);
+								orList.add(w);
+							}
+							else if (w.startsWith("!")) {
+								if (method == PUT) {
+									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
+											+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
+								}
+								w = w.substring(1);
+								notList.add(w);
+							}
+							else {
+								orList.add(w);
+							}
+
+							if (w.isEmpty()) {
+								throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
+							}
+							else {
+								if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
+									throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + ws[i] + " 不合法！"
 											+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
 								}
 							}
+
+							whereList.add(w);
+						}
+
+						// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
+						if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
+							//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
+							callback.onMissingKey4Combine(table, request, combine, ws[i], w);
 						}
 					}
-				} 
-				else {
-					if (ws != null) {
-						if (method == DELETE || method == GETS || method == HEADS) {
-							throw new IllegalArgumentException("DELETE,GETS,HEADS 请求不允许传 @combine:value !");
-						}
-						whereList = new ArrayList<>();
-
-						String w;
-						for (int i = 0; i < ws.length; i++) { //去除 &,|,! 前缀
-							w = ws[i];
-							if (w != null) {
-								if (w.startsWith("&")) {
-									w = w.substring(1);
-									andList.add(w);
-								}
-								else if (w.startsWith("|")) {
-									if (method == PUT) {
-										throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
-												+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
-									}
-									w = w.substring(1);
-									orList.add(w);
-								}
-								else if (w.startsWith("!")) {
-									if (method == PUT) {
-										throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！"
-												+ "PUT请求的 @combine:\"key0,key1,...\" 不允许传 |key 或 !key !");
-									}
-									w = w.substring(1);
-									notList.add(w);
-								}
-								else {
-									orList.add(w);
-								}
-
-								if (w.isEmpty()) {
-									throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里条件 " + ws[i] + " 不合法！不允许为空值！");
-								}
-								else {
-									if (idKey.equals(w) || idInKey.equals(w) || userIdKey.equals(w) || userIdInKey.equals(w)) {
-										throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + ws[i] + " 不合法！"
-												+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
-									}
-								}
-
-								whereList.add(w);
-							}
-
-							// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！//去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
-							if (request.containsKey(w) == false) {  //和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
-								//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
-								callback.onMissingKey4Combine(table, request, combine, ws[i], w);
-							}
-						}
-
-					}
-
 				}
 
 				//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -4753,7 +4851,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			config.setRole(role);
 			config.setId(id);
-			//在	tableWhere 第0个		config.setIdIn(idIn);
+			config.setIdIn(idIn);
+			config.setUserId(userId);
+			config.setUserIdIn(userIdIn);
 
 			config.setNull(nullKeys == null || nullKeys.length <= 0 ? null : new ArrayList<>(Arrays.asList(nullKeys)));
 			config.setCast(castMap);
@@ -4767,13 +4867,22 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			config.setJson(jsons == null || jsons.length <= 0 ? null : new ArrayList<>(Arrays.asList(jsons)));
 
 		}
-		finally {//后面还可能用到，要还原
-			//id或id{}条件
-			if (hasId) {
+		finally {  // 后面还可能用到，要还原
+			// id, id{}, userId, userIdIn 条件
+			if (id != null) {
 				request.put(idKey, id);
 			}
-			request.put(idInKey, idIn);
-			//关键词
+			if (idIn != null) {
+				request.put(idInKey, idIn);
+			}
+			if (userId != null) {
+				request.put(userIdKey, userId);
+			}
+			if (userIdIn != null) {
+				request.put(userIdInKey, userIdIn);
+			}
+			
+			// 关键词
 			request.put(KEY_DATABASE, database);
 			request.put(KEY_ROLE, role);
 			request.put(KEY_EXPLAIN, explain);
