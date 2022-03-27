@@ -5,7 +5,7 @@
 
 	<groupId>apijson.orm</groupId>
 	<artifactId>apijson-orm</artifactId>
-	<version>4.9.0</version>
+	<version>5.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>
@@ -18,11 +18,10 @@
 	</properties>
 
 	<dependencies>
-		<!-- 1.2.75 会导致编译报错，且忽略错误后启动报错找不到主类 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.74</version>
+			<version>1.2.79</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.activation</groupId>
