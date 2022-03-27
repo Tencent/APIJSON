@@ -332,22 +332,22 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				}
 
 				if (isTable) {
-					if (parser.getGlobleDatabase() != null && sqlRequest.get(JSONRequest.KEY_DATABASE) == null) {
-						sqlRequest.put(JSONRequest.KEY_DATABASE, parser.getGlobleDatabase());
+					if (parser.getGlobalDatabase() != null && sqlRequest.get(JSONRequest.KEY_DATABASE) == null) {
+						sqlRequest.put(JSONRequest.KEY_DATABASE, parser.getGlobalDatabase());
 					}
-					if (parser.getGlobleSchema() != null && sqlRequest.get(JSONRequest.KEY_SCHEMA) == null) {
-						sqlRequest.put(JSONRequest.KEY_SCHEMA, parser.getGlobleSchema());
+					if (parser.getGlobalSchema() != null && sqlRequest.get(JSONRequest.KEY_SCHEMA) == null) {
+						sqlRequest.put(JSONRequest.KEY_SCHEMA, parser.getGlobalSchema());
 					}
-					if (parser.getGlobleDatasource() != null && sqlRequest.get(JSONRequest.KEY_DATASOURCE) == null) {
-						sqlRequest.put(JSONRequest.KEY_DATASOURCE, parser.getGlobleDatasource());
+					if (parser.getGlobalDatasource() != null && sqlRequest.get(JSONRequest.KEY_DATASOURCE) == null) {
+						sqlRequest.put(JSONRequest.KEY_DATASOURCE, parser.getGlobalDatasource());
 					}
 
 					if (isSubquery == false) {  //解决 SQL 语法报错，子查询不能 EXPLAIN
-						if (parser.getGlobleExplain() != null && sqlRequest.get(JSONRequest.KEY_EXPLAIN) == null) {
-							sqlRequest.put(JSONRequest.KEY_EXPLAIN, parser.getGlobleExplain());
+						if (parser.getGlobalExplain() != null && sqlRequest.get(JSONRequest.KEY_EXPLAIN) == null) {
+							sqlRequest.put(JSONRequest.KEY_EXPLAIN, parser.getGlobalExplain());
 						}
-						if (parser.getGlobleCache() != null && sqlRequest.get(JSONRequest.KEY_CACHE) == null) {
-							sqlRequest.put(JSONRequest.KEY_CACHE, parser.getGlobleCache());
+						if (parser.getGlobalCache() != null && sqlRequest.get(JSONRequest.KEY_CACHE) == null) {
+							sqlRequest.put(JSONRequest.KEY_CACHE, parser.getGlobalCache());
 						}
 					}
 				}

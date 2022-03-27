@@ -118,13 +118,13 @@ public interface Parser<T> {
 	Verifier<T> getVerifier();
 	
 	
-	Boolean getGlobleFormat();
-	String getGlobleRole();
-	String getGlobleDatabase();
-	String getGlobleSchema();
-	String getGlobleDatasource();
-	Boolean getGlobleExplain();
-	String getGlobleCache();
+	Boolean getGlobalFormat();
+	String getGlobalRole();
+	String getGlobalDatabase();
+	String getGlobalSchema();
+	String getGlobalDatasource();
+	Boolean getGlobalExplain();
+	String getGlobalCache();
 
 	
 	int getTransactionIsolation();

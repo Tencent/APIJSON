@@ -187,69 +187,69 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		return this;
 	}
 
-	protected Boolean globleFormat;
-	public AbstractParser<T> setGlobleFormat(Boolean globleFormat) {
-		this.globleFormat = globleFormat;
+	protected Boolean globalFormat;
+	public AbstractParser<T> setGlobalFormat(Boolean globalFormat) {
+		this.globalFormat = globalFormat;
 		return this;
 	}
 	@Override
-	public Boolean getGlobleFormat() {
-		return globleFormat;
+	public Boolean getGlobalFormat() {
+		return globalFormat;
 	}
-	protected String globleRole;
-	public AbstractParser<T> setGlobleRole(String globleRole) {
-		this.globleRole = globleRole;
+	protected String globalRole;
+	public AbstractParser<T> setGlobalRole(String globalRole) {
+		this.globalRole = globalRole;
 		return this;
 	}
 	@Override
-	public String getGlobleRole() {
-		return globleRole;
+	public String getGlobalRole() {
+		return globalRole;
 	}
-	protected String globleDatabase;
-	public AbstractParser<T> setGlobleDatabase(String globleDatabase) {
-		this.globleDatabase = globleDatabase;
+	protected String globalDatabase;
+	public AbstractParser<T> setGlobalDatabase(String globalDatabase) {
+		this.globalDatabase = globalDatabase;
 		return this;
 	}
 	@Override
-	public String getGlobleDatabase() {
-		return globleDatabase;
+	public String getGlobalDatabase() {
+		return globalDatabase;
 	}
-	protected String globleSchema;
-	public AbstractParser<T> setGlobleSchema(String globleSchema) {
-		this.globleSchema = globleSchema;
+	protected String globalSchema;
+	public AbstractParser<T> setGlobalSchema(String globalSchema) {
+		this.globalSchema = globalSchema;
 		return this;
 	}
 	@Override
-	public String getGlobleSchema() {
-		return globleSchema;
+	public String getGlobalSchema() {
+		return globalSchema;
 	}
-	protected String globleDatasource;
+	protected String globalDatasource;
 	@Override
-	public String getGlobleDatasource() {
-		return globleDatasource;
+	public String getGlobalDatasource() {
+		return globalDatasource;
 	}
-	public AbstractParser<T> setGlobleDatasource(String globleDatasource) {
-		this.globleDatasource = globleDatasource;
+	public AbstractParser<T> setGlobalDatasource(String globalDatasource) {
+		this.globalDatasource = globalDatasource;
 		return this;
 	}
 
-	protected Boolean globleExplain;
-	public AbstractParser<T> setGlobleExplain(Boolean globleExplain) {
-		this.globleExplain = globleExplain;
+	protected Boolean globalExplain;
+	public AbstractParser<T> setGlobalExplain(Boolean globalExplain) {
+		this.globalExplain = globalExplain;
 		return this;
 	}
 	@Override
-	public Boolean getGlobleExplain() {
-		return globleExplain;
+	public Boolean getGlobalExplain() {
+		return globalExplain;
 	}
-	protected String globleCache;
-	public AbstractParser<T> setGlobleCache(String globleCache) {
-		this.globleCache = globleCache;
+	protected String globalCache;
+	public AbstractParser<T> setGlobalCache(String globalCache) {
+		this.globalCache = globalCache;
 		return this;
 	}
 	@Override
-	public String getGlobleCache() {
-		return globleCache;
+	public String getGlobalCache() {
+		return globalCache;
 	}
 
 	@Override
@@ -383,9 +383,9 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		//必须在parseCorrectRequest后面，因为parseCorrectRequest可能会添加 @role
-		if (isNeedVerifyRole() && globleRole == null) {
+		if (isNeedVerifyRole() && globalRole == null) {
 			try {
-				setGlobleRole(requestObject.getString(JSONRequest.KEY_ROLE));
+				setGlobalRole(requestObject.getString(JSONRequest.KEY_ROLE));
 				requestObject.remove(JSONRequest.KEY_ROLE);
 			} catch (Exception e) {
 				return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
@@ -393,12 +393,12 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		try {
-			setGlobleFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
-			setGlobleDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
-			setGlobleSchema(requestObject.getString(JSONRequest.KEY_SCHEMA));
-			setGlobleDatasource(requestObject.getString(JSONRequest.KEY_DATASOURCE));
-			setGlobleExplain(requestObject.getBoolean(JSONRequest.KEY_EXPLAIN));
-			setGlobleCache(requestObject.getString(JSONRequest.KEY_CACHE));
+			setGlobalFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
+			setGlobalDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
+			setGlobalSchema(requestObject.getString(JSONRequest.KEY_SCHEMA));
+			setGlobalDatasource(requestObject.getString(JSONRequest.KEY_DATASOURCE));
+			setGlobalExplain(requestObject.getBoolean(JSONRequest.KEY_EXPLAIN));
+			setGlobalCache(requestObject.getString(JSONRequest.KEY_CACHE));
 
 			requestObject.remove(JSONRequest.KEY_FORMAT);
 			requestObject.remove(JSONRequest.KEY_DATABASE);
@@ -435,7 +435,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		requestObject = error == null ? extendSuccessResult(requestObject, isRoot) : extendErrorResult(requestObject, error, requestMethod, getRequestURL(), isRoot);
 
-		JSONObject res = (globleFormat != null && globleFormat) && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
+		JSONObject res = (globalFormat != null && globalFormat) && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
@@ -493,8 +493,8 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		if (isNeedVerifyRole()) {
 			if (config.getRole() == null) {
-				if (globleRole != null) {
-					config.setRole(globleRole);
+				if (globalRole != null) {
+					config.setRole(globalRole);
 				} else {
 					config.setRole(getVisitor().getId() == null ? AbstractVerifier.UNKNOWN : AbstractVerifier.LOGIN);
 				}
@@ -548,7 +548,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		JSONObject target = wrapRequest(method, tag, object, true);
 
 		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
-		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobleDatabase(), getGlobleSchema(), creator);
+		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema(), creator);
 	}
 
 

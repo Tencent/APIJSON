@@ -74,7 +74,7 @@ public interface Verifier<T> {
 	 * @throws Exception
 	 */
 	JSONObject verifyRequest(RequestMethod method, String name, JSONObject target, JSONObject request,
-			int maxUpdateCount, String globleDatabase, String globleSchema, SQLCreator creator) throws Exception;
+			int maxUpdateCount, String globalDatabase, String globalSchema, SQLCreator creator) throws Exception;
 
 	/**验证返回结果的数据和结构
 	 * @param table
