@@ -4568,10 +4568,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			Set<String> set = request.keySet(); //前面已经判断request是否为空
 			if (method == POST) { //POST操作
 				if (idIn != null) {
-					throw new IllegalArgumentException(table + ":{} 里的 " + idInKey + ": value 不合法！POST 请求中不允许传 " + idInKey + " !");
-				}
+					throw new IllegalArgumentException(table + ":{" + idInKey + ": value} 里的 key 不合法！POST 请求中不允许传 " + idInKey
+							+ " 这种非字段命名 key ！必须为 英文字母 开头且只包含 英文字母、数字、下划线的 字段命名！");				}
+				if (userIdIn != null) {
+					throw new IllegalArgumentException(table + ":{" + userIdInKey + ": value} 里的 key 不合法！POST 请求中不允许传 " + userIdInKey
+							+ " 这种非字段命名 key ！必须为 英文字母 开头且只包含 英文字母、数字、下划线的 字段命名！");				}
 
 				if (set != null && set.isEmpty() == false) { //不能直接return，要走完下面的流程
+					for (String k : set) {
+						if (StringUtil.isName(k) == false) {
+							throw new IllegalArgumentException(table + ":{" + k + ": value} 里的 key 不合法！POST 请求中不允许传 " + k
+									+ " 这种非字段命名 key ！必须为 英文字母 开头且只包含 英文字母、数字、下划线的 字段命名！");
+						}
+					}
+					
 					String[] columns = set.toArray(new String[]{});
 
 					Collection<Object> valueCollection = request.values();
@@ -4581,24 +4591,25 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new Exception("服务器内部错误:\n" + TAG
 								+ " newSQLConfig  values == null || values.length != columns.length !");
 					}
-					column = (id == null ? "" : idKey + ",") + StringUtil.getString(columns); //set已经判断过不为空
+					
+					column = (id == null ? "" : idKey + ",") + (userId == null ? "" : userIdKey + ",") + StringUtil.getString(columns); //set已经判断过不为空
+
+					int idCount = id == null ? (userId == null ? 0 : 1) : (userId == null ? 1 : 2);
+					int size = idCount + columns.length; // 以 key 数量为准
+
+					List<Object> items = new ArrayList<>(size);  // VALUES(item0, item1, ...)
+					if (id != null) {
+						items.add(id); // idList.get(i)); // 第 0 个就是 id
+					}
+					if (userId != null) {
+						items.add(userId); // idList.get(i)); // 第 1 个就是 userId
+					}
+
+					for (int j = 0; j < values.length; j++) {
+						items.add(values[j]); // 从第 1 个开始，允许 "null" 
+					}
 
 					List<List<Object>> valuess = new ArrayList<>(1);
-					List<Object> items; //(item0, item1, ...)
-					if (id == null) { //数据库自增 id
-						items = Arrays.asList(values); //FIXME 是否还需要进行 add 或 remove 操作？Arrays.ArrayList 不允许修改，会抛异常
-					}
-					else {
-						int size = columns.length + (id == null ? 0 : 1); //以key数量为准
-
-						items = new ArrayList<>(size);
-						items.add(id); //idList.get(i)); //第0个就是id
-
-						for (int j = 1; j < size; j++) {
-							items.add(values[j-1]); //从第1个开始，允许"null"
-						}
-					}
-
 					valuess.add(items);
 					config.setValues(valuess);
 				}
