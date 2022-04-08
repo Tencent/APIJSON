@@ -7,7 +7,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
 
-<p align="center">零代码、全自动、强安全 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
+<p align="center">零代码、全功能、强安全 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
@@ -66,7 +66,7 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 * 数据和结构完全定制，要啥有啥
 * 看请求知结果，所求即所得
 * 可一次获取任何数据、任何结构
-* 能去除重复数据，节省流量提高速度
+* 能去除多余数据，节省流量提高速度
 
 #### 对于后端
 * 提供通用接口，大部分 API 不用再写
