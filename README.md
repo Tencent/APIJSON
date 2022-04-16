@@ -12,7 +12,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
   <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
-  <a href="https://search.bilibili.com/all?keyword=APIJSON&from_source=webtop_search&spm_id_from=333.999">视频教程</a>
+  <a href="https://search.bilibili.com/all?keyword=APIJSON">视频教程</a>
   <a href="http://apijson.cn/api">在线体验</a>
 </p>
 <p align="center" >
