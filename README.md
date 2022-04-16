@@ -10,6 +10,12 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <p align="center">零代码、全功能、强安全 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
+  <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
+  <a href="https://search.bilibili.com/all?keyword=APIJSON&from_source=webtop_search&spm_id_from=333.999">视频教程</a>
+  <a href="http://apijson.cn/api">在线体验</a>
+</p>
+<p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/SQLServer"><img src="https://img.shields.io/badge/SQLServer-2012%2B-brightgreen.svg?style=flat"></a>
@@ -29,16 +35,14 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://img.shields.io/badge/Python-3%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml"><img src="https://img.shields.io/badge/Spring-4.3.2%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml"><img src="https://img.shields.io/badge/SpringBoot-1.4.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONFinal/pom.xml"><img src="https://img.shields.io/badge/JFinal-3.5%2B-brightgreen.svg?style=flat"></a>
+</p>
+<p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
-</p>
-<p align="center" >
-  <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
-  <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
-  <a href="https://search.bilibili.com/all?keyword=APIJSON&from_source=webtop_search&spm_id_from=333.999">视频教程</a>
-  <a href="http://apijson.cn/api">在线体验</a>
-</p>
 
 <p align="center" >
   <img src="https://oscimg.oschina.net/oscnet/up-3299d6e53eb0534703a20e96807727fac63.png" />
