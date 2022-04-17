@@ -451,8 +451,10 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [apijson-orm](https://github.com/APIJSON/apijson-orm) APIJSON ORM 库，可通过 Maven, Gradle 等远程依赖
 
-[apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON 服务端框架，可通过 Maven, Gradle 等远程依赖
+[apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON 服务端框架，通过数据库表配置角色权限、参数校验等，简化使用
 
+[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，对外暴露类 RESTful 接口，内部转成 APIJSON 接口执行
+  
 [apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
 
 [APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释
