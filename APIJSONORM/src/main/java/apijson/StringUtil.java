@@ -348,6 +348,7 @@ public class StringUtil {
 	public static final Pattern PATTERN_NAME;
 	public static final Pattern PATTERN_ALPHA_BIG;
 	public static final Pattern PATTERN_ALPHA_SMALL;
+	public static final Pattern PATTERN_BRANCH_URL;
 	static {
 		PATTERN_NUMBER = Pattern.compile("^[0-9]+$");
 		PATTERN_ALPHA = Pattern.compile("^[a-zA-Z]+$");
@@ -359,6 +360,7 @@ public class StringUtil {
 		PATTERN_EMAIL = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$");
 		PATTERN_ID_CARD = Pattern.compile("(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}$)");
 		PATTERN_PASSWORD = Pattern.compile("^[0-9a-zA-Z]+$");
+		PATTERN_BRANCH_URL = Pattern.compile("^[0-9a-zA-Z-_/]+$");
 	}
 
 	/**判断手机格式是否正确
@@ -392,7 +394,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isEmail(String email) {
-		if (isNotEmpty(email, true) == false) {
+		if (isEmpty(email, true)) {
 			return false;
 		}
 
@@ -512,13 +514,23 @@ public class StringUtil {
 	public static boolean isUrl(String url) {
 		if (isNotEmpty(url, true) == false) {
 			return false;
-		} else if (! url.startsWith(URL_PREFIX) && ! url.startsWith(URL_PREFIXs)) {
+		} 
+		if (! url.startsWith(URL_PREFIX) && ! url.startsWith(URL_PREFIXs)) {
 			return false;
 		}
 
 		currentString = url;
 		return true;
 	}
+
+	public static boolean isBranchUrl(String branchUrl) {
+		if (isEmpty(branchUrl, false)) {
+			return false;
+		}
+		
+		return PATTERN_BRANCH_URL.matcher(branchUrl).matches();
+	}
+
 
 	public static final String FILE_PATH_PREFIX = "file://";
 	/**判断文件路径是否存在

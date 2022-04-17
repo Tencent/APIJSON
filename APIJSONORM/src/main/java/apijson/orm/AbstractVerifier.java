@@ -109,14 +109,14 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	// <TableName, <METHOD, allowRoles>>
 	// <User, <GET, [OWNER, ADMIN]>>
 	@NotNull
-	public static final Map<String, Map<RequestMethod, String[]>> SYSTEM_ACCESS_MAP;
+	public static Map<String, Map<RequestMethod, String[]>> SYSTEM_ACCESS_MAP;
 	@NotNull
-	public static final Map<String, Map<RequestMethod, String[]>> ACCESS_MAP;
+	public static Map<String, Map<RequestMethod, String[]>> ACCESS_MAP;
 
 	// <method tag, <version, Request>>
 	// <PUT Comment, <1, { "method":"PUT", "tag":"Comment", "structure":{ "MUST":"id"... }... }>>
 	@NotNull
-	public static final Map<String, SortedMap<Integer, JSONObject>> REQUEST_MAP;
+	public static Map<String, SortedMap<Integer, JSONObject>> REQUEST_MAP;
 
 	// 正则匹配的别名快捷方式，例如用 "PHONE" 代替 "^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$"
 	@NotNull
@@ -164,7 +164,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 		ACCESS_MAP = new HashMap<>(SYSTEM_ACCESS_MAP);
 
-		REQUEST_MAP = new HashMap<>(ACCESS_MAP.size()*6);  // 单个与批量增删改
+		REQUEST_MAP = new HashMap<>(ACCESS_MAP.size()*7);  // 单个与批量增删改
 
 		COMPILE_MAP = new HashMap<String, Pattern>();
 	}
@@ -1495,7 +1495,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	}
 
 	public static String getCacheKeyForRequest(String method, String tag) {
-		return method + " " + tag;
+		return method + "/" + tag;
 	}
 
 

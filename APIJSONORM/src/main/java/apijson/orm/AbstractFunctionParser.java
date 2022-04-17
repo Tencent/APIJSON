@@ -28,7 +28,7 @@ public class AbstractFunctionParser implements FunctionParser {
 
 	// <methodName, JSONObject>
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
-	public static final Map<String, JSONObject> FUNCTION_MAP;
+	public static Map<String, JSONObject> FUNCTION_MAP;
 	static {
 		FUNCTION_MAP = new HashMap<>();
 	}

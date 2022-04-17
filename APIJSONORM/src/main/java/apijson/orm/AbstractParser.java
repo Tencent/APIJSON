@@ -441,16 +441,16 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		long duration = endTime - startTime;
 
 		if (Log.DEBUG) {
-			requestObject.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
-			requestObject.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
+			res.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
+			res.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
 			
 			executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
 			long parseDuration = duration - executedSQLDuration;
-			requestObject.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + executedSQLDuration);
+			res.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + executedSQLDuration);
 
 			if (error != null) {
-				requestObject.put("trace:throw", error.getClass().getName());
-				requestObject.put("trace:stack", error.getStackTrace());
+				res.put("trace:throw", error.getClass().getName());
+				res.put("trace:stack", error.getStackTrace());
 			}
 		}
 
@@ -947,7 +947,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 		}
 
 		if (result == null) {
-			if (AbstractVerifier.REQUEST_MAP.isEmpty() == false) {
+			if (Log.DEBUG == false && AbstractVerifier.REQUEST_MAP.isEmpty() == false) {
 				return null;  // 已使用 REQUEST_MAP 缓存全部，但没查到
 			}
 
@@ -961,7 +961,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 			where.put(JSONRequest.KEY_TAG, tag);
 
 			if (version > 0) {
-				where.put(JSONRequest.KEY_VERSION + "{}", ">=" + version);
+				where.put(JSONRequest.KEY_VERSION + ">=", version);
 			}
 			config.setWhere(where);
 			config.setOrder(JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
