@@ -52,7 +52,7 @@ Zerounary 提交的 6 个 Commits, 对 APIJSON 做出了 1,104 增加和 1 处�
 <br/>
 APIJSON 持续招募贡献者，即使是在 Issue 中回答问题，或者做一些简单的 Bug Fix ，也会给 APIJSON 带来很大的帮助。 <br/>
 APIJSON 已开发近 4 年，在此感谢所有开发者对于 APIJSON 的喜欢和支持，希望你能够成为 APIJSON 的核心贡献者， <br/>
-加入 APIJSON ，共同打造一个更棒的自动化 ORM 库！🍾🎉
+加入 APIJSON ，共同打造一个更棒的零代码、全自动、强安全 ORM 库！🍾🎉
 
 ### 为什么一定要贡献代码？
 APIJSON 作为腾讯开源的知名热门项目，贡献代码除了可以给简历加亮点、为面试加分，还可以避免你碰到以下麻烦： <br/>
