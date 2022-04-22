@@ -435,6 +435,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 [新手搭建 APIJSON 项目指北](https://github.com/jerrylususu/apijson_todo_demo/blob/master/FULLTEXT.md)  
 
 [使用APIJSON写低代码Crud接口](https://blog.csdn.net/weixin_42375862/article/details/121654264)
+  
+[apijson在同一个接口调用中 使用远程函数写入更新时间和创建时间](https://blog.csdn.net/qietingfengsong/article/details/124097229)
 
 [APIJSON（一：综述）](https://blog.csdn.net/qq_50861917/article/details/120556168)
 
