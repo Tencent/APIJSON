@@ -599,8 +599,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		} else if (key.endsWith("-")) {//remove
 			putType = 2;
 		} else {//replace
-			//			throw new IllegalAccessException("PUT " + path + ", PUT Array不允许 " + key + 
-			//					" 这种没有 + 或 - 结尾的key！不允许整个替换掉原来的Array！");
+			sqlRequest.put(key, array);
+			return;
 		}
 		String realKey = AbstractSQLConfig.getRealKey(method, key, false, false);
 
