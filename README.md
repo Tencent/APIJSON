@@ -65,19 +65,19 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 
 ### 特点功能
 
-#### 对于前端
-* 不用再向后端催接口、求文档
-* 数据和结构完全定制，要啥有啥
-* 看请求知结果，所求即所得
-* 可一次获取任何数据、任何结构
-* 能去除多余数据，节省流量提高速度
-
 #### 对于后端
 * 提供通用接口，大部分 API 不用再写
 * 自动生成文档，不用再编写和维护
 * 自动校验权限、自动管理版本、自动防 SQL 注入
 * 开放 API 无需划分版本，始终保持兼容
 * 支持增删改查、复杂查询、跨库连表、远程函数等
+
+#### 对于前端
+* 不用再向后端催接口、求文档
+* 数据和结构完全定制，要啥有啥
+* 看请求知结果，所求即所得
+* 可一次获取任何数据、任何结构
+* 能去除多余数据，节省流量提高速度
 
 <br />
 
@@ -385,11 +385,15 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
-<b >QQ 技术群</b>： 734652054（新）、607020115（旧）
+<b >QQ 技术群</b>： 734652054（新）、607020115（旧）  <br >
+  
+**原则上优先解决 登记用户 和 贡献者 的问题，不解决 态度无礼 或 问题描述简陋 的问题！**
+
+如果你 [登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加专门的 企业用户支持群，作者亲自答疑。
 
 如果你为 APIJSON 做出了以下任何一个贡献： <br >
-[提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson) 或 [登记了你的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 <br >
-<b >贡献者微信群</b>，注意联系 LonelyExplorer，加好友描述中附上贡献链接，谢谢
+[提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
+可以加 贡献者交流群，注意联系 LonelyExplorer，加好友描述中附上贡献链接，谢谢
 
 
 ### 相关推荐
