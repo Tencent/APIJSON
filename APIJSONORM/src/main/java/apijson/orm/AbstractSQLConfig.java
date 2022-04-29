@@ -3952,7 +3952,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + config.getLimitString();
 		}
 	 }
-
+	
+	/**Oracle的分页获取
+	 * @param config
+	 * @param sql
+	 * @return
+	 */
 	 private String getOraclePageSql(AbstractSQLConfig config, String sql) {
 		int offset = getOffset(config.getPage(), config.getCount());
 		String pageSql;
