@@ -3946,13 +3946,25 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						&& StringUtil.isNotEmpty(config.getGroup(),true)){
 					return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
 				}
-				return explain + "SELECT * FROM (SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
+				String sql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
+                		return explain + config.getOraclePageSql(config, sql);
 			}
-
 			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + config.getLimitString();
 		}
-	}
-
+	 }
+	
+	/**Oracle的分页获取
+	 * @param config
+	 * @param sql
+	 * @return
+	 */
+	 private String getOraclePageSql(AbstractSQLConfig config, String sql) {
+		int offset = getOffset(config.getPage(), config.getCount());
+		String pageSql;
+		pageSql = "SELECT * FROM (SELECT t.*,ROWNUM RN FROM (" + sql + ") t  WHERE ROWNUM <= " + (offset + count) + ") WHERE RN > " + offset;
+		return pageSql;
+	 }
+	
 	/**获取条件SQL字符串
 	 * @param column
 	 * @param table
