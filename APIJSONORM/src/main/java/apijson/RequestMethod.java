@@ -52,8 +52,7 @@ public enum RequestMethod {
 	 * @return
 	 */
 	public static boolean isGetMethod(RequestMethod method, boolean containPrivate) {
-		boolean is = method == null || method == GET;
-		return containPrivate == false ? is : is || method == GETS;
+		return method == null || method == GET || (containPrivate && method == GETS);
 	}
 	
 	/**是否为HEAD请求方法
@@ -62,8 +61,7 @@ public enum RequestMethod {
 	 * @return
 	 */
 	public static boolean isHeadMethod(RequestMethod method, boolean containPrivate) {
-		boolean is = method == HEAD;
-		return containPrivate == false ? is : is || method == HEADS;
+		return method == HEAD || (containPrivate && method == HEADS);
 	}
 	
 	/**是否为查询的请求方法

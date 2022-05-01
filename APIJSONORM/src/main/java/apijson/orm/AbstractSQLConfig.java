@@ -27,7 +27,6 @@ import static apijson.JSONObject.KEY_USER_ID;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.GETS;
-import static apijson.RequestMethod.HEAD;
 import static apijson.RequestMethod.HEADS;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
@@ -3942,28 +3941,30 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if (config.isOracle()) {
 				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
 				//针对oracle分组后条数的统计
-				if ((config.getMethod() == HEAD || config.getMethod() == HEADS)
-						&& StringUtil.isNotEmpty(config.getGroup(),true)){
+				if (StringUtil.isNotEmpty(config.getGroup(),true) && RequestMethod.isHeadMethod(config.getMethod(), true)){
 					return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
 				}
+				
 				String sql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
-                		return explain + config.getOraclePageSql(config, sql);
+				return explain + config.getOraclePageSql(sql);
 			}
+			
 			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + config.getLimitString();
 		}
-	 }
-	
+	}
+
 	/**Oracle的分页获取
 	 * @param config
 	 * @param sql
 	 * @return
 	 */
-	 private String getOraclePageSql(AbstractSQLConfig config, String sql) {
-		int offset = getOffset(config.getPage(), config.getCount());
-		String pageSql;
-		pageSql = "SELECT * FROM (SELECT t.*,ROWNUM RN FROM (" + sql + ") t  WHERE ROWNUM <= " + (offset + count) + ") WHERE RN > " + offset;
-		return pageSql;
-	 }
+	protected String getOraclePageSql(String sql) {
+		int count = getCount();
+		int offset = getOffset(getPage(), count);
+		String alias = getAliasWithQuote();
+		
+		return "SELECT * FROM (SELECT " + alias + ".*, ROWNUM RN FROM (" + sql + ") " + alias + "  WHERE ROWNUM <= " + (offset + count) + ") WHERE RN > " + offset;
+	}
 	
 	/**获取条件SQL字符串
 	 * @param column
@@ -3981,15 +3982,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		//根据方法不同，聚合语句不同。GROUP  BY 和 HAVING 可以加在 HEAD 上, HAVING 可以加在 PUT, DELETE 上，GET 全加，POST 全都不加
-		String aggregation = "";
+		String aggregation;
 		if (RequestMethod.isGetMethod(config.getMethod(), true)) {
 			aggregation = config.getGroupString(true) + config.getHavingString(true) + config.getOrderString(true);
 		}
-		if (RequestMethod.isHeadMethod(config.getMethod(), true)) {  // TODO 加参数 isPagenation 判断是 GET 内分页 query:2 查总数，不用加这些条件
+		else if (RequestMethod.isHeadMethod(config.getMethod(), true)) {  // TODO 加参数 isPagenation 判断是 GET 内分页 query:2 查总数，不用加这些条件
 			aggregation = config.getGroupString(true) + config.getHavingString(true) ;
 		}
-		if (config.getMethod() == PUT || config.getMethod() == DELETE) {
+		else if (config.getMethod() == PUT || config.getMethod() == DELETE) {
 			aggregation = config.getHavingString(true) ;
+		}
+		else {
+			aggregation = "";
 		}
 
 		String condition = table + config.getJoinString() + where + aggregation;
