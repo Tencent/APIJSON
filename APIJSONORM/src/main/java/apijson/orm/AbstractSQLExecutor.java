@@ -45,6 +45,8 @@ import apijson.orm.Join.On;
 public abstract class AbstractSQLExecutor implements SQLExecutor {
 	private static final String TAG = "AbstractSQLExecutor";
 
+	public static String KEY_RAW_LIST = "@RAW@LIST";  // 避免和字段命名冲突，不用 $RAW@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
+
 	private int generatedSQLCount = 0;
 	private int cachedSQLCount = 0;
 	private int executedSQLCount = 0;
@@ -74,64 +76,66 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return sqlResultDuration;
 	}
 
+
 	/**
 	 * 缓存 Map
 	 */
 	protected Map<String, List<JSONObject>> cacheMap = new HashMap<>();
 
-
 	/**保存缓存
-	 * @param sql
-	 * @param list
-	 * @param type
+	 * @param sql  key
+	 * @param list  value
+	 * @param config  一般主表 SQLConfig 不为 null，JOIN 副表的为 null
 	 */
 	@Override
-	public void putCache(String sql, List<JSONObject> list, int type) {
-		if (sql == null || list == null) { //空map有效，说明查询过sql了  || list.isEmpty()) {
+	public void putCache(String sql, List<JSONObject> list, SQLConfig config) {
+		if (sql == null || list == null) { // 空 list 有效，说明查询过 sql 了  || list.isEmpty()) {
 			Log.i(TAG, "saveList  sql == null || list == null >> return;");
 			return;
 		}
+		
 		cacheMap.put(sql, list);
 	}
-	/**移除缓存
-	 * @param sql
-	 * @param type
+
+	/**获取缓存
+	 * @param sql  key
+	 * @param config  一般主表 SQLConfig 不为 null，JOIN 副表的为 null
 	 */
 	@Override
-	public void removeCache(String sql, int type) {
+	public List<JSONObject> getCache(String sql, SQLConfig config) {
+		return cacheMap.get(sql);
+	}
+
+	/**获取缓存
+	 * @param sql  key
+	 * @param position
+	 * @param config  一般主表 SQLConfig 不为 null，JOIN 副表的为 null
+	 * @return
+	 */
+	@Override
+	public JSONObject getCacheItem(String sql, int position, SQLConfig config) {
+		List<JSONObject> list = getCache(sql, config);
+		// 只要 list 不为 null，则如果 list.get(position) == null，则返回 {} ，避免再次 SQL 查询
+		if (list == null) {
+			return null;
+		}
+
+		JSONObject result = position >= list.size() ? null : list.get(position);
+		return result != null ? result : new JSONObject();
+	}
+
+	/**移除缓存
+	 * @param sql  key
+	 * @param config
+	 */
+	@Override
+	public void removeCache(String sql, SQLConfig config) {
 		if (sql == null) {
 			Log.i(TAG, "removeList  sql == null >> return;");
 			return;
 		}
 		cacheMap.remove(sql);
 	}
-	/**获取缓存
-	 * @param sql
-	 * @param type
-	 */
-	@Override
-	public List<JSONObject> getCache(String sql, int type) {
-		return cacheMap.get(sql);
-	}
-
-	/**获取缓存
-	 * @param sql
-	 * @param position
-	 * @param type
-	 * @return
-	 */
-	@Override
-	public JSONObject getCacheItem(String sql, int position, int type) {
-		List<JSONObject> list = getCache(sql, type);
-		//只要map不为null，则如果 list.get(position) == null，则返回 {} ，避免再次SQL查询
-		if (list == null) {
-			return null;
-		}
-		
-		JSONObject result = position >= list.size() ? null : list.get(position);
-		return result != null ? result : new JSONObject();
-	}
-
 
 
 	@Override
@@ -250,7 +254,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				case GETS:
 				case HEAD:
 				case HEADS:
-					result = isHead || isExplain ? null : getCacheItem(sql, position, config.getCache());
+					result = isHead || isExplain ? null : getCacheItem(sql, position, config);
 					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
 						cachedSQLCount ++;
@@ -306,7 +310,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 							capacity = ((Collection<?>) idIn).size();
 						}
 						else {  // 预估容量
-							capacity = config.getCount() <= 0 ? Parser.MAX_QUERY_COUNT : config.getCount();
+							capacity = config.getCount() <= 0 ? AbstractParser.MAX_QUERY_COUNT : config.getCount();
 							if (capacity > 100) {
 								// 有 WHERE 条件，条件越多过滤数据越多，暂时不考虑 @combine:"a | (b & !c)" 里面 | OR 和 ! NOT 条件，太复杂也不是很必要
 								Map<String, List<String>> combine = config.getCombineMap();
@@ -594,10 +598,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			for (Entry<String, JSONObject> entry : set) {
 				List<JSONObject> l = new ArrayList<>();
 				l.add(entry.getValue());
-				putCache(entry.getKey(), l, JSONRequest.CACHE_ROM);
+				putCache(entry.getKey(), l, null);
 			}
 
-			putCache(sql, resultList, config.getCache());
+			putCache(sql, resultList, config);
 			Log.i(TAG, ">>> execute  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
 			// 数组主表对象额外一次返回全部，方便 Parser 缓存来提高性能

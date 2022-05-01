@@ -45,6 +45,7 @@ public enum RequestMethod {
 	 */
 	DELETE;
 	
+	public static final RequestMethod[] ALL = new RequestMethod[]{ GET, HEAD, GETS, HEADS, POST, PUT, DELETE};
 	
 	/**是否为GET请求方法
 	 * @param method

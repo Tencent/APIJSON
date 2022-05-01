@@ -908,7 +908,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						&& (table.equals(arrayTable));
 
 				// 提取并缓存数组主表的列表数据
-				rawList = (List<JSONObject>) result.remove(SQLExecutor.KEY_RAW_LIST);
+				rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 				if (rawList != null) {
 					String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
@@ -936,7 +936,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				parser.putQueryResult(path, result);  // 解决获取关联数据时requestObject里不存在需要的关联数据
 
 				if (isSimpleArray && rawList != null) {
-					result.put(SQLExecutor.KEY_RAW_LIST, rawList);
+					result.put(AbstractSQLExecutor.KEY_RAW_LIST, rawList);
 				}
 			}
 		}

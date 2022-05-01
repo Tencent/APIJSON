@@ -73,7 +73,7 @@ import apijson.orm.model.TestRecord;
  * @author Lemon
  * @param <T> id 与 userId 的类型，一般为 Long
  */
-public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
+public abstract class AbstractVerifier<T extends Object> implements Verifier<T>, IdCallback<T> {
 	private static final String TAG = "AbstractVerifier";
 
 	/**未登录，不明身份的用户
@@ -102,9 +102,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 
 
 	// 共享 STRUCTURE_MAP 则不能 remove 等做任何变更，否则在并发情况下可能会出错，加锁效率又低，所以这里改为忽略对应的 key
-	public static final Map<String, Entry<String, Object>> ROLE_MAP;
+	public static Map<String, Entry<String, Object>> ROLE_MAP;
 	
-	public static final List<String> OPERATION_KEY_LIST;
+	public static List<String> OPERATION_KEY_LIST;
 
 	// <TableName, <METHOD, allowRoles>>
 	// <User, <GET, [OWNER, ADMIN]>>
@@ -205,9 +205,10 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 		return apijson.JSONObject.KEY_USER_ID;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object newId(RequestMethod method, String database, String schema, String table) {
-		return System.currentTimeMillis();
+	public T newId(RequestMethod method, String database, String schema, String datasource, String table) {
+		return (T) Long.valueOf(System.currentTimeMillis());
 	}
 
 
@@ -437,17 +438,17 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	public void verifyLogin() throws Exception {
 		//未登录没有权限操作
 		if (visitorId == null) {
-			throw new NotLoggedInException("未登录，请登录后再操作！");
+			throw new NotLoggedInException("未登录或登录超时，请登录后再操作！");
 		}
 
 		if (visitorId instanceof Number) {
 			if (((Number) visitorId).longValue() <= 0) {
-				throw new NotLoggedInException("未登录，请登录后再操作！");
+				throw new NotLoggedInException("未登录或登录超时，请登录后再操作！");
 			}
 		} 
 		else if (visitorId instanceof String) {
 			if (StringUtil.isEmpty(visitorId, true)) {
-				throw new NotLoggedInException("未登录，请登录后再操作！");
+				throw new NotLoggedInException("未登录或登录超时，请登录后再操作！");
 			}
 		}
 		else {
@@ -539,7 +540,7 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 */
 	public static JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request, final SQLCreator creator) throws Exception {
-		return verifyRequest(method, name, target, request, Parser.MAX_UPDATE_COUNT, creator);
+		return verifyRequest(method, name, target, request, AbstractParser.MAX_UPDATE_COUNT, creator);
 	}
 	/**从request提取target指定的内容
 	 * @param method
@@ -568,9 +569,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
+	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request, final int maxUpdateCount
-			, final String database, final String schema, final IdCallback idCallback, final SQLCreator creator) throws Exception {
+			, final String database, final String schema, final IdCallback<T> idCallback, final SQLCreator creator) throws Exception {
 		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, null, idCallback, creator);
 	}
 	/**从request提取target指定的内容
@@ -585,9 +586,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
+	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request, final int maxUpdateCount
-			, final String database, final String schema, final String datasource, final IdCallback idCallback, final SQLCreator creator) throws Exception {
+			, final String database, final String schema, final String datasource, final IdCallback<T> idCallback, final SQLCreator creator) throws Exception {
 
 		Log.i(TAG, "verifyRequest  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -782,9 +783,9 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject verifyResponse(@NotNull final RequestMethod method, final String name
+	public static <T extends Object> JSONObject verifyResponse(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject response, final String database, final String schema
-			, final IdCallback idKeyCallback, SQLCreator creator, OnParseCallback callback) throws Exception {
+			, final IdCallback<T> idKeyCallback, SQLCreator creator, OnParseCallback callback) throws Exception {
 
 		Log.i(TAG, "verifyResponse  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -832,8 +833,8 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
-			, final String database, final String schema, final IdCallback idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
+	public static <T extends Object> JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
+			, final String database, final String schema, final IdCallback<T> idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		return parse(method, name, target, real, database, schema, null, idCallback, creator, callback);
 	}
 	/**对request和response不同的解析用callback返回
@@ -850,8 +851,8 @@ public abstract class AbstractVerifier<T> implements Verifier<T>, IdCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
-			, final String database, final String schema, final String datasource, final IdCallback idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
+	public static <T extends Object> JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
+			, final String database, final String schema, final String datasource, final IdCallback<T> idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		if (target == null) {
 			return null;
 		}

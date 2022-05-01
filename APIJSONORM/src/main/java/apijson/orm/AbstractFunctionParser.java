@@ -178,7 +178,7 @@ public class AbstractFunctionParser implements FunctionParser {
 						+ "\n请检查函数名和参数数量是否与已定义的函数一致！"
 						+ "\n且必须为 function(key0,key1,...) 这种单函数格式！"
 						+ "\nfunction必须符合Java函数命名，key是用于在request内取值的键！"
-						+ "\n调用时不要有空格！");
+						+ "\n调用时不要有空格！" + e.getMessage());
 			}
 			if (e instanceof InvocationTargetException) {
 				Throwable te = ((InvocationTargetException) e).getTargetException();
@@ -186,7 +186,7 @@ public class AbstractFunctionParser implements FunctionParser {
 					throw te instanceof Exception ? (Exception) te : new Exception(te.getMessage());
 				}
 				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数传参类型错误！"
-						+ "\n请检查 key:value 中value的类型是否满足已定义的函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 的要求！");
+						+ "\n请检查 key:value 中value的类型是否满足已定义的函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 的要求！" + e.getMessage());
 			}
 			throw e;
 		}

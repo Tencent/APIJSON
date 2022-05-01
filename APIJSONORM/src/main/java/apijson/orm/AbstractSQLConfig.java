@@ -103,22 +103,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static String PREFFIX_DISTINCT = "DISTINCT ";
 
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
-	private static final Pattern PATTERN_RANGE;
-	private static final Pattern PATTERN_FUNCTION;
+	private static Pattern PATTERN_RANGE;
+	private static Pattern PATTERN_FUNCTION;
 
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
-	public static final Map<String, String> TABLE_KEY_MAP;
-	public static final List<String> CONFIG_TABLE_LIST;
-	public static final List<String> DATABASE_LIST;
+	public static Map<String, String> TABLE_KEY_MAP;
+	public static List<String> CONFIG_TABLE_LIST;
+	public static List<String> DATABASE_LIST;
 
 	// 自定义原始 SQL 片段 Map<key, substring>：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
-	public static final Map<String, String> RAW_MAP;
+	public static Map<String, String> RAW_MAP;
 	// 允许调用的 SQL 函数：当 substring 为 null 时忽略；当 substring 为 "" 时整个 value 是 raw SQL；其它情况则只是 substring 这段为 raw SQL
-	public static final Map<String, String> SQL_AGGREGATE_FUNCTION_MAP;
-	public static final Map<String, String> SQL_FUNCTION_MAP;
-
+	public static Map<String, String> SQL_AGGREGATE_FUNCTION_MAP;
+	public static Map<String, String> SQL_FUNCTION_MAP;
 
 	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- /**/ ，以免拼接 SQL 时被注入意外可执行指令
 		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
@@ -4339,7 +4338,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure, Callback callback) throws Exception {
+	public static <T extends Object> SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure, Callback<T> callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
@@ -4357,7 +4356,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String schema = request.getString(KEY_SCHEMA);
 		String datasource = request.getString(KEY_DATASOURCE);
 
-		SQLConfig config = callback.getSQLConfig(method, database, schema, table);
+		SQLConfig config = callback.getSQLConfig(method, database, schema, datasource, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); //不删，后面表对象还要用的，必须放在 parseJoin 前
@@ -4404,7 +4403,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		Object id = request.get(idKey);
 		if (id == null && method == POST) {
-			id = callback.newId(method, database, schema, table); // null 表示数据库自增 id
+			id = callback.newId(method, database, schema, datasource, table); // null 表示数据库自增 id
 		}
 
 		if (id != null) { //null无效
@@ -4992,7 +4991,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	public static SQLConfig parseJoin(RequestMethod method, SQLConfig config, List<Join> joinList, Callback callback) throws Exception {
+	public static <T extends Object> SQLConfig parseJoin(RequestMethod method, SQLConfig config, List<Join> joinList, Callback<T> callback) throws Exception {
 		boolean isQuery = RequestMethod.isQueryMethod(method);
 		config.setKeyPrefix(isQuery && config.isMain() == false);
 
@@ -5203,7 +5202,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
-	public static interface IdCallback {
+	public static interface IdCallback<T extends Object> {
 		/**为 post 请求新建 id， 只能是 Long 或 String
 		 * @param method
 		 * @param database
@@ -5211,7 +5210,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @param table
 		 * @return
 		 */
-		Object newId(RequestMethod method, String database, String schema, String table);
+		T newId(RequestMethod method, String database, String schema, String datasource, String table);
 
 
 		/**获取主键名
@@ -5231,7 +5230,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String getUserIdKey(String database, String schema, String datasource, String table);
 	}
 
-	public static interface Callback extends IdCallback {
+	public static interface Callback<T extends Object> extends IdCallback<T> {
 		/**获取 SQLConfig 的实例
 		 * @param method
 		 * @param database
@@ -5239,7 +5238,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @param table
 		 * @return
 		 */
-		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table);
+		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
 
 		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
 		 * @param combine
@@ -5249,12 +5248,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
 	}
 
-	public static abstract class SimpleCallback implements Callback {
+	public static Long LAST_ID;
+	static {
+		LAST_ID = System.currentTimeMillis();
+	}
 
+	public static abstract class SimpleCallback<T extends Object> implements Callback<T> {
 
+		@SuppressWarnings("unchecked")
 		@Override
-		public Object newId(RequestMethod method, String database, String schema, String table) {
-			return System.currentTimeMillis();
+		public T newId(RequestMethod method, String database, String schema, String datasource, String table) {
+			Long id = System.currentTimeMillis();
+			if (id <= LAST_ID) {
+				id = LAST_ID + 1; // 解决高并发下 id 冲突导致新增记录失败
+			}
+			LAST_ID = id;
+			
+			return (T) id;
 		}
 
 		@Override

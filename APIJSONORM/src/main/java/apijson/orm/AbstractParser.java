@@ -50,7 +50,7 @@ import apijson.orm.exception.OutOfRangeException;
 /**parser for parsing request to JSONObject
  * @author Lemon
  */
-public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
+public abstract class AbstractParser<T extends Object> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
 
 	/**
@@ -70,6 +70,49 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求结束时间。
 	 */
 	public static boolean IS_PRINT_REQUEST_ENDTIME_LOG = false;
+
+
+	public static int DEFAULT_QUERY_COUNT = 10;
+	public static int MAX_QUERY_PAGE = 100;
+	public static int MAX_QUERY_COUNT = 100;
+	public static int MAX_UPDATE_COUNT = 10;
+	public static int MAX_SQL_COUNT = 200;
+	public static int MAX_OBJECT_COUNT = 5;
+	public static int MAX_ARRAY_COUNT = 5;
+	public static int MAX_QUERY_DEPTH = 5;
+	
+	@Override
+	public int getDefaultQueryCount() {
+		return DEFAULT_QUERY_COUNT;
+	}
+	@Override
+	public int getMaxQueryPage() {
+		return MAX_QUERY_PAGE;
+	}
+	@Override
+	public int getMaxQueryCount() {
+		return MAX_QUERY_COUNT;
+	}
+	@Override
+	public int getMaxUpdateCount() {
+		return MAX_UPDATE_COUNT;
+	}
+	@Override
+	public int getMaxSQLCount() {
+		return MAX_SQL_COUNT;
+	}
+	@Override
+	public int getMaxObjectCount() {
+		return MAX_OBJECT_COUNT;
+	}
+	@Override
+	public int getMaxArrayCount() {
+		return MAX_ARRAY_COUNT;
+	}
+	@Override
+	public int getMaxQueryDepth() {
+		return MAX_QUERY_DEPTH;
+	}
 
 
 	/**
@@ -1276,7 +1319,7 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 				 */
 				JSONObject fo = i != 0 || arrTableKey == null ? null : parent.getJSONObject(arrTableKey);
 				@SuppressWarnings("unchecked")
-				List<JSONObject> list = fo == null ? null : (List<JSONObject>) fo.remove(SQLExecutor.KEY_RAW_LIST);
+				List<JSONObject> list = fo == null ? null : (List<JSONObject>) fo.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 
 				if (list != null && list.isEmpty() == false) {
 					isExtract = false;
@@ -1628,43 +1671,6 @@ public abstract class AbstractParser<T> implements Parser<T>, ParserCreator<T>, 
 
 		return joinList;
 	}
-
-
-
-
-	@Override
-	public int getDefaultQueryCount() {
-		return DEFAULT_QUERY_COUNT;
-	}
-	@Override
-	public int getMaxQueryPage() {
-		return MAX_QUERY_PAGE;
-	}
-	@Override
-	public int getMaxQueryCount() {
-		return MAX_QUERY_COUNT;
-	}
-	@Override
-	public int getMaxUpdateCount() {
-		return MAX_UPDATE_COUNT;
-	}
-	@Override
-	public int getMaxSQLCount() {
-		return MAX_SQL_COUNT;
-	}
-	@Override
-	public int getMaxObjectCount() {
-		return MAX_OBJECT_COUNT;
-	}
-	@Override
-	public int getMaxArrayCount() {
-		return MAX_ARRAY_COUNT;
-	}
-	@Override
-	public int getMaxQueryDepth() {
-		return MAX_QUERY_DEPTH;
-	}
-
 
 	/**根据路径取值
 	 * @param parent

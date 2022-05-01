@@ -18,7 +18,7 @@ public class Subquery {
 	private JSONObject originValue; // { "from": "Comment", "Comment": {...} }
 
 	private String from; // Comment
-	private String range; // any, all
+	private String range; // ANY, ALL
 	private String key; //id{}
 	private SQLConfig config;
 	

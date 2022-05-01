@@ -10,7 +10,7 @@ import apijson.NotNull;
 /**验证器相关创建器
  * @author Lemon
  */
-public interface VerifierCreator<T> {
+public interface VerifierCreator<T extends Object> {
 	
 	@NotNull
 	Verifier<T> createVerifier();

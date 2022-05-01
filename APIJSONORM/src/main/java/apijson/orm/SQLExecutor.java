@@ -22,31 +22,34 @@ import apijson.NotNull;
  */
 public interface SQLExecutor {
 
-	String KEY_RAW_LIST = "@RAW@LIST";  // 避免和字段命名冲突，不用 $RAW@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
-
 	/**保存缓存
 	 * @param sql
-	 * @param map
-	 * @param type
+	 * @param list
+	 * @param config
 	 */
-	void putCache(String sql, List<JSONObject> list, int type);;
-	
-	List<JSONObject> getCache(String sql, int type);
+	void putCache(String sql, List<JSONObject> list, SQLConfig config);
 
-	/**移除缓存
+	/**获取缓存
 	 * @param sql
-	 * @param type
+	 * @param config
+	 * @return
 	 */
-	void removeCache(String sql, int type);
+	List<JSONObject> getCache(String sql, SQLConfig config);
+
 	/**获取缓存
 	 * @param sql
 	 * @param position
-	 * @param type
+	 * @param config
 	 * @return
 	 */
-	JSONObject getCacheItem(String sql, int position, int type);
+	JSONObject getCacheItem(String sql, int position, SQLConfig config);
 
-
+	/**移除缓存
+	 * @param sql
+	 * @param config
+	 */
+	void removeCache(String sql, SQLConfig config);
+	
 	/**执行SQL
 	 * @param config
 	 * @return

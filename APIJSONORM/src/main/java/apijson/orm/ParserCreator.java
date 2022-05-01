@@ -10,7 +10,7 @@ import apijson.NotNull;
 /**SQL相关创建器
  * @author Lemon
  */
-public interface ParserCreator<T> {
+public interface ParserCreator<T extends Object> {
 	
 	@NotNull
 	Parser<T> createParser();

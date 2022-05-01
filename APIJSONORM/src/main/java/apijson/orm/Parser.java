@@ -17,18 +17,8 @@ import apijson.RequestMethod;
 /**解析器
  * @author Lemon
  */
-public interface Parser<T> {
+public interface Parser<T extends Object> {
 
-	int DEFAULT_QUERY_COUNT = 10;
-	int MAX_QUERY_PAGE = 100;
-	int MAX_QUERY_COUNT = 100;
-	int MAX_UPDATE_COUNT = 10;
-	int MAX_SQL_COUNT = 200;
-	int MAX_OBJECT_COUNT = 5;
-	int MAX_ARRAY_COUNT = 5;
-	int MAX_QUERY_DEPTH = 5;
-	
-	
 	@NotNull
 	Visitor<T> getVisitor();
 	Parser<T> setVisitor(@NotNull Visitor<T> visitor);
