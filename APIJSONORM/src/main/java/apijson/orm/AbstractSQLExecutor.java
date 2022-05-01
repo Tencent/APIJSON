@@ -45,15 +45,9 @@ import apijson.orm.Join.On;
 public abstract class AbstractSQLExecutor implements SQLExecutor {
 	private static final String TAG = "AbstractSQLExecutor";
 
-
-	private int generatedSQLCount;
-	private int cachedSQLCount;
-	private int executedSQLCount;
-	public AbstractSQLExecutor() {
-		generatedSQLCount = 0;
-		cachedSQLCount = 0;
-		executedSQLCount = 0;
-	}
+	private int generatedSQLCount = 0;
+	private int cachedSQLCount = 0;
+	private int executedSQLCount = 0;
 
 	@Override
 	public int getGeneratedSQLCount() {
@@ -68,26 +62,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return executedSQLCount;
 	}
 	
-	// 只要不是并发执行且执行完立刻获取，就不会是错的，否则需要一并返回，可以 JSONObject.put("@EXECUTED_SQL_TIME:START|DURATION|END", )
-	private long executedSQLStartTime;
-	private long executedSQLEndTime;
-	private long executedSQLDuration;
-	private long sqlResultDuration;
-	
-	public long getExecutedSQLStartTime() {
-		return executedSQLStartTime;
-	}
-	public long getExecutedSQLEndTime() {
-		return executedSQLEndTime;
-	}
+	private long executedSQLDuration = 0;
+	private long sqlResultDuration = 0;
 	@Override
 	public long getExecutedSQLDuration() {
-		if (executedSQLDuration <= 0) {
-			long startTime = getExecutedSQLStartTime();
-			long endTime = getExecutedSQLEndTime();
-			executedSQLDuration = startTime <= 0 || endTime <= 0 ? 0 : endTime - startTime;  // FIXME 有时莫名其妙地算出来是负数
-		}
-		return executedSQLDuration < 0 ? 0 : executedSQLDuration;
+		return executedSQLDuration;
 	}
 	
 	@Override
@@ -96,7 +75,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 	/**
-	 * 缓存map
+	 * 缓存 Map
 	 */
 	protected Map<String, List<JSONObject>> cacheMap = new HashMap<>();
 
@@ -104,7 +83,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	/**保存缓存
 	 * @param sql
 	 * @param list
-	 * @param isStatic
+	 * @param type
 	 */
 	@Override
 	public void putCache(String sql, List<JSONObject> list, int type) {
@@ -116,7 +95,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 	/**移除缓存
 	 * @param sql
-	 * @param isStatic
+	 * @param type
 	 */
 	@Override
 	public void removeCache(String sql, int type) {
@@ -126,7 +105,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 		cacheMap.remove(sql);
 	}
-
+	/**获取缓存
+	 * @param sql
+	 * @param type
+	 */
 	@Override
 	public List<JSONObject> getCache(String sql, int type) {
 		return cacheMap.get(sql);
@@ -154,24 +136,18 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception {
-//		executedSQLStartTime = System.currentTimeMillis();
 		ResultSet rs = statement.executeQuery(sql);
-//		executedSQLEndTime = System.currentTimeMillis();
 		return rs;
 	}
 	@Override
 	public int executeUpdate(@NotNull Statement statement, String sql) throws Exception {
-//		executedSQLStartTime = System.currentTimeMillis();
 		int c = statement.executeUpdate(sql);
-//		executedSQLEndTime = System.currentTimeMillis();
 		return c;
 	}
 	@Override
 	public ResultSet execute(@NotNull Statement statement, String sql) throws Exception {
-//		executedSQLStartTime = System.currentTimeMillis();
 		statement.execute(sql);
 		ResultSet rs = statement.getResultSet();
-//		executedSQLEndTime = System.currentTimeMillis();
 		return rs;
 	}
 
@@ -182,10 +158,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 */
 	@Override
 	public JSONObject execute(@NotNull SQLConfig config, boolean unknowType) throws Exception {
-//		executedSQLDuration = 0;
-		executedSQLStartTime = System.currentTimeMillis();
-		executedSQLEndTime = executedSQLStartTime;
-//		sqlResultDuration = 0;
+		long executedSQLStartTime = System.currentTimeMillis();
 		
 		boolean isPrepared = config.isPrepared();
 
@@ -231,8 +204,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				rs = execute(statement, sql);
 				int updateCount = statement.getUpdateCount();
 				if (isExplain == false) {
-					executedSQLEndTime = System.currentTimeMillis();
-					executedSQLDuration += executedSQLEndTime - executedSQLStartTime;
+					executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
 				}
 				
 				result = new JSONObject(true);
@@ -251,8 +223,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 					int updateCount = executeUpdate(config);
 					if (isExplain == false) {
-						executedSQLEndTime = System.currentTimeMillis();
-						executedSQLDuration += executedSQLEndTime - executedSQLStartTime;
+						executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
 					}
 
 					if (updateCount <= 0) {
@@ -294,8 +265,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 					rs = executeQuery(config);  //FIXME SQL Server 是一次返回两个结果集，包括查询结果和执行计划，需要 moreResults 
 					if (isExplain == false) {
-						executedSQLEndTime = System.currentTimeMillis();
-						executedSQLDuration += executedSQLEndTime - executedSQLStartTime;
+						executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
 					}
 					break;
 
@@ -1131,9 +1101,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
 		PreparedStatement stt = getStatement(config);
-		// 不准，getStatement 有时比 execute sql 更耗时		executedSQLStartTime = System.currentTimeMillis();
 		ResultSet rs = stt.executeQuery();  //PreparedStatement 不用传 SQL
-		//		executedSQLEndTime = System.currentTimeMillis();
 		//		if (config.isExplain() && (config.isSQLServer() || config.isOracle())) {
 		// FIXME 返回的是 boolean 值			rs = stt.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
 		//		}
@@ -1144,9 +1112,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
 		PreparedStatement stt = getStatement(config);
-// 不准，getStatement 有时比 execute sql 更耗时		executedSQLStartTime = System.currentTimeMillis();
 		int count = stt.executeUpdate();  // PreparedStatement 不用传 SQL
-//		executedSQLEndTime = System.currentTimeMillis();
 		
 		if (count <= 0 && config.isHive()) {
 			count = 1;
