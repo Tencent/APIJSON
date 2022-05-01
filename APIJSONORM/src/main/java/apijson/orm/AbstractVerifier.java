@@ -438,17 +438,17 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	public void verifyLogin() throws Exception {
 		//未登录没有权限操作
 		if (visitorId == null) {
-			throw new NotLoggedInException("未登录或登录超时，请登录后再操作！");
+			throw new NotLoggedInException("未登录或登录过期，请登录后再操作！");
 		}
 
 		if (visitorId instanceof Number) {
 			if (((Number) visitorId).longValue() <= 0) {
-				throw new NotLoggedInException("未登录或登录超时，请登录后再操作！");
+				throw new NotLoggedInException("未登录或登录过期，请登录后再操作！");
 			}
 		} 
 		else if (visitorId instanceof String) {
 			if (StringUtil.isEmpty(visitorId, true)) {
-				throw new NotLoggedInException("未登录或登录超时，请登录后再操作！");
+				throw new NotLoggedInException("未登录或登录过期，请登录后再操作！");
 			}
 		}
 		else {
