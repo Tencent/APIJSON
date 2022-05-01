@@ -103,7 +103,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 	// 共享 STRUCTURE_MAP 则不能 remove 等做任何变更，否则在并发情况下可能会出错，加锁效率又低，所以这里改为忽略对应的 key
 	public static Map<String, Entry<String, Object>> ROLE_MAP;
-	
+
 	public static List<String> OPERATION_KEY_LIST;
 
 	// <TableName, <METHOD, allowRoles>>
@@ -129,7 +129,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		ROLE_MAP.put(CIRCLE, new Entry<String, Object>("userId-()", "verifyCircle()")); // "userId{}", "circleIdList"));  // 还是 {"userId":"currentUserId", "userId{}": "contactIdList", "@combine": "userId,userId{}" } ? 
 		ROLE_MAP.put(OWNER, new Entry<String, Object>("userId", "userId"));
 		ROLE_MAP.put(ADMIN, new Entry<String, Object>("userId-()", "verifyAdmin()"));
-		
+
 		OPERATION_KEY_LIST = new ArrayList<>();
 		OPERATION_KEY_LIST.add(TYPE.name());
 		OPERATION_KEY_LIST.add(VERIFY.name());
@@ -204,7 +204,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	public String getUserIdKey(String database, String schema, String datasource, String table) {
 		return apijson.JSONObject.KEY_USER_ID;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public T newId(RequestMethod method, String database, String schema, String datasource, String table) {
@@ -247,7 +247,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (table == null) {
 			return true;
 		}
-		
+
 		String role = config.getRole();
 		if (role == null) {
 			role = UNKNOWN;
@@ -265,10 +265,10 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		RequestMethod method = config.getMethod();
 		verifyRole(config, table, method, role);
-	
+
 		return true;
 	}
-	
+
 	@Override
 	public void verifyRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception {
 		verifyAllowRole(config, table, method, role); //验证允许的角色
@@ -289,7 +289,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (table == null) {
 			table = config == null ? null : config.getTable();
 		}
-		
+
 		if (table != null) {
 			if (method == null) {
 				method = config == null ? GET : config.getMethod();
@@ -297,7 +297,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			if (role == null) {
 				role = config == null ? UNKNOWN : config.getRole();
 			}
-			
+
 			Map<RequestMethod, String[]> map = ACCESS_MAP.get(table);
 
 			if (map == null || Arrays.asList(map.get(method)).contains(role) == false) {
@@ -329,7 +329,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (role == null) {
 			role = config == null ? UNKNOWN : config.getRole();
 		}
-		
+
 		Object requestId;
 		switch (role) {
 		case LOGIN://verifyRole通过就行
@@ -882,11 +882,15 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		// 判断必要字段是否都有<<<<<<<<<<<<<<<<<<<
 		String[] musts = StringUtil.split(must);
-		List<String> mustList = musts == null ? new ArrayList<String>() : Arrays.asList(musts);
-		for (String s : mustList) {
-			if (real.get(s) == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
-				throw new IllegalArgumentException(method + "请求，" + name
-						+ " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
+		Set<String> mustSet = new HashSet<String>();
+		
+		if (musts != null && musts.length > 0) {
+			for (String s : musts) {
+				if (real.get(s) == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
+					throw new IllegalArgumentException(method + "请求，" + name + " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
+				}
+
+				mustSet.add(s);
 			}
 		}
 		//判断必要字段是否都有>>>>>>>>>>>>>>>>>>>
@@ -947,28 +951,61 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		Set<String> rkset = real.keySet(); //解析内容并没有改变rkset
 
 		//解析不允许的字段<<<<<<<<<<<<<<<<<<<
-		List<String> refuseList = new ArrayList<String>();
-		if ("!".equals(refuse)) {//所有非 must，改成 !must 更好
-			for (String key : rkset) {//对@key放行，@role,@column,自定义@position等
-				if (key != null && key.startsWith("@") == false
-						&& mustList.contains(key) == false && objKeySet.contains(key) == false) {
-					refuseList.add(key);
+		String[] refuses = StringUtil.split(refuse);
+		Set<String> refuseSet = new HashSet<String>();
+
+		if (refuses != null && refuses.length > 0) {
+			Set<String> notRefuseSet = new HashSet<String>();
+
+			for (String rfs : refuses) {
+				if (rfs == null) {  // StringUtil.isEmpty(rfs, true) {
+					continue;
+				}
+
+				if (rfs.startsWith("!")) {
+					rfs = rfs.substring(1);
+
+					if (notRefuseSet.contains(rfs)) {
+						throw new ConflictException(REFUSE.name() + ":value 中出现了重复的 !" + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+					}
+					if (refuseSet.contains(rfs)) {
+						throw new ConflictException(REFUSE.name() + ":value 中同时出现了 " + rfs + " 和 !" + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+					}
+
+					if (rfs.equals("")) { // 所有非 MUST
+						for (String key : rkset) { // 对@key放行，@role,@column,自定义@position等， @key:{ "Table":{} } 不会解析内部
+							if (key == null || key.startsWith("@") || notRefuseSet.contains(key) || mustSet.contains(key) || objKeySet.contains(key)) {
+								continue;
+							}
+
+							refuseSet.add(key);
+						}
+					}
+					else {  // 排除 !key 后再禁传其它的
+						notRefuseSet.add(rfs);
+					}
+				}
+				else {
+					if (refuseSet.contains(rfs)) {
+						throw new ConflictException(REFUSE.name() + ":value 中出现了重复的 " + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+					}
+					if (notRefuseSet.contains(rfs)) {
+						throw new ConflictException(REFUSE.name() + ":value 中同时出现了 " + rfs + " 和 !" + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+					}
+
+					refuseSet.add(rfs);
 				}
 			}
-		} else {
-			String[] refuses = StringUtil.split(refuse);
-			if (refuses != null && refuses.length > 0) {
-				refuseList.addAll(Arrays.asList(refuses));
-			}
 		}
+
 		//解析不允许的字段>>>>>>>>>>>>>>>>>>>
 
 
 		//判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
-			if (refuseList.contains(rk)) { //不允许的字段
+			if (refuseSet.contains(rk)) { //不允许的字段
 				throw new IllegalArgumentException(method + "请求，" + name
-						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(refuseList) + "内的任何字段！");
+						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(refuseSet) + "内的任何字段！");
 			}
 
 			if (rk == null) { //无效的key
@@ -1391,7 +1428,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		} finally {
 			executor.close();
 		}
-		
+
 		if (result != null && JSONResponse.isExist(result.getIntValue(JSONResponse.KEY_COUNT)) == false) {
 			throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 '" + tk + "': '" + tv + "' ！");
 		}
