@@ -12,7 +12,7 @@ about: Create a report to help us improve
 请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感，
 大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 设计规范 来调用 API #181
 
-1.尝试在 [常见问题](https://github.com/Tencent/APIJSON/issues/36) 和 [历史问题](https://github.com/TommyLemon/APIJSON/issues?q=is%3Aissue+is%3Aclosed) 搜索答案。
+1.尝试在 [常见问题](https://github.com/Tencent/APIJSON/issues/36) 和 [历史问题](https://github.com/TommyLemon/APIJSON/issues?q=is%3Aissue) 搜索答案。
 2.尝试阅读 [通用文档](https://github.com/TommyLemon/APIJSON/blob/master/Document.md) 或看 [视频教程](https://search.bilibili.com/all?keyword=APIJSON) 找到答案。
 3.尝试阅读 [Demo 示例代码](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/java/apijson/demo/DemoSQLConfig.java) 以找到答案。
 4.尝试自己 [检查或试验](http://apijson.cn/api) 以找到答案。
