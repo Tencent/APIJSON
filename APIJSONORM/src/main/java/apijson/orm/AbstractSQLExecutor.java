@@ -783,9 +783,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		String lable = getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
 		Object value = getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
 
-		//	必须 put 进去，否则某个字段为 null 可能导致中断后续正常返回值	if (value != null) {
-		table.put(lable, value);
-		//		}
+		// 主表必须 put 至少一个 null 进去，否则全部字段为 null 都不 put 会导致中断后续正常返回值
+		if (value != null || (join == null && table.isEmpty())) {
+			table.put(lable, value);
+		}
 
 		return table;
 	}
