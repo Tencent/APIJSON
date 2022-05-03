@@ -321,7 +321,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 								List<String> orList = combine == null ? null : combine.get("|");
 								int orCondCount = orList == null ? 0 : orList.size();
 								
-								List<String> notList = combine == null ? null : combine.get("|");
+								List<String> notList = combine == null ? null : combine.get("!");
 								int notCondCount = notList == null ? 0 : notList.size();
 								
 								// 有 GROUP BY 分组，字段越少过滤数据越多
