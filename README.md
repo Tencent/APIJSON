@@ -435,6 +435,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON对接分布式HTAP数据库TiDB](https://asktug.com/t/htap-tidb/395)
 
+[腾讯业务百万数据 6s 响应，APIJSON 性能优化背后的故事](https://my.oschina.net/tommylemon/blog/5375645)  
+
 [APIJSON教程（一）：上手apijson项目，学习apijson语法，并实现持久层配置](https://zhuanlan.zhihu.com/p/375681893)
 
 [apijson简单demo](https://blog.csdn.net/dmw412724/article/details/113558115)
