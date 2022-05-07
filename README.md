@@ -175,6 +175,31 @@ https://github.com/Tencent/APIJSON/wiki
 * **工程轻量小巧** (仅依赖 fastjson，Jar 仅 280KB，Java 文件仅 59 个共 13719 行代码，例如 APIJSONORM 4.3.1)
 * **多年持续迭代** (自 2016 年开源至今已连续维护 5 年多，累计 2000+ Commits、80+ Releases，不断更新迭代中...)
 
+![image](https://user-images.githubusercontent.com/5738175/167264836-9c5d8f8a-99e1-4e1e-9864-e8f906b8e704.png)
+
+### 用户反馈
+**腾讯 IEG 数据产品开发组负责人 xinlin：**
+“腾讯的 APIJSON 开源方案，它可以做到零代码生成接口和文档，并且整个生成过程是自动化。当企业有元数据的时候，马上就可以获得接口”
+
+**腾讯科技 后台开发高级工程师 雷大锤：**
+“可以抽出时间来看apijson了，这个可以为T10做准备，也是业界很火的东西，可以提升个人影响力！”
+
+**腾讯 bodian520：**
+“在调试GET、POST、PUT接口时遇到了一些问题，把个人的摸索经验分享一下，希望作者能梳理下文档，方便我们更好的接入”
+
+**华为 minshiwu：**
+“demo工程，默认使用apijson-framework，可以做到无任何配置即可体验apijson的各种能力。”
+
+**百度智慧城市研发 lpeng：**
+“很兴奋的发现APIJSON很适合我们的一个开发场景，作为我们协议定义的一部分” 
+
+**中兴工程师 duyijiang：**
+“感谢腾讯大大提供的框架，很好用”
+
+https://github.com/Tencent/APIJSON/issues/132#issuecomment-1106669540
+
+<br />
+
 ### 常见问题
 #### 1.如何定制业务逻辑？
 在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 <br />
