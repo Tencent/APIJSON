@@ -460,7 +460,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON 服务端框架，通过数据库表配置角色权限、参数校验等，简化使用
 
-[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，对外暴露类 RESTful 接口，内部转成 APIJSON 接口执行
+[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，可控地对公网暴露类 RESTful 简单接口，内部转成 APIJSON 格式请求来执行。
   
 [apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
 
