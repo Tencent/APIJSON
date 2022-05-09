@@ -19,6 +19,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -878,6 +879,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 		else if (value instanceof Time) {
 			value = ((Time) value).toString();
+		}
+		else if (value instanceof LocalDateTime) {
+			value = ((LocalDateTime) value).toString();
 		}
 		else if (value instanceof String && isJSONType(config, rsmd, columnIndex, lable)) { //json String
 			castToJson = true;
