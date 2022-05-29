@@ -64,7 +64,7 @@ public class JSON {
 	 * @param json
 	 * @return
 	 */
-	private static final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.AllowSingleQuotes, Feature.DisableCircularReferenceDetect, Feature.UseBigDecimal, Feature.UseObjectArray};
+	private static final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.AllowSingleQuotes, Feature.UseBigDecimal, Feature.UseObjectArray};
 	public static Object parse(Object obj) {
 		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
 		features |= Feature.OrderedField.getMask();

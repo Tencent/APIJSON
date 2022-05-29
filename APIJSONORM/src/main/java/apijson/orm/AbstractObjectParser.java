@@ -5,13 +5,19 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import static apijson.JSONObject.KEY_COMBINE;
-import static apijson.JSONObject.KEY_DROP;
-import static apijson.JSONObject.KEY_TRY;
-import static apijson.RequestMethod.POST;
-import static apijson.RequestMethod.PUT;
-import static apijson.orm.SQLConfig.TYPE_ITEM;
+import apijson.JSONResponse;
+import apijson.Log;
+import apijson.NotNull;
+import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.orm.AbstractFunctionParser.FunctionBean;
+import apijson.orm.exception.ConflictException;
+import apijson.orm.exception.NotExistException;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
+import javax.activation.UnsupportedDataTypeException;
 import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,20 +28,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.activation.UnsupportedDataTypeException;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import apijson.JSONResponse;
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
-import apijson.StringUtil;
-import apijson.orm.AbstractFunctionParser.FunctionBean;
-import apijson.orm.exception.ConflictException;
-import apijson.orm.exception.NotExistException;
+import static apijson.JSONObject.KEY_COMBINE;
+import static apijson.JSONObject.KEY_DROP;
+import static apijson.JSONObject.KEY_TRY;
+import static apijson.RequestMethod.POST;
+import static apijson.RequestMethod.PUT;
+import static apijson.orm.SQLConfig.TYPE_ITEM;
 
 
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
@@ -572,7 +570,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				invalidate();
 			}
 		}
-		Log.i(TAG, "onChildParse  ObjectParser.onParse  key = " + key + "; child = " + child);
+//		Log.i(TAG, "onChildParse  ObjectParser.onParse  key = " + key + "; child = " + child);
 
 		return isEmpty ? null : child;//只添加! isChildEmpty的值，可能数据库返回数据不够count
 	}
