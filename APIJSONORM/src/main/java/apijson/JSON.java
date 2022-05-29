@@ -6,8 +6,8 @@ package apijson;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSONReader;
 
 import java.util.List;
 
@@ -64,18 +64,18 @@ public class JSON {
 	 * @param json
 	 * @return
 	 */
+	private static final JSONReader.Feature[] DEFAULT_FASTJSON_FEATURES = {JSONReader.Feature.FieldBased, JSONReader.Feature.UseBigDecimalForDoubles};
 	public static Object parse(Object obj) {
-		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
-		features |= Feature.OrderedField.getMask();
 		try {
-			return com.alibaba.fastjson.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), features);
+			return com.alibaba.fastjson2.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), DEFAULT_FASTJSON_FEATURES);
 		} catch (Exception e) {
 			Log.i(TAG, "parse  catch \n" + e.getMessage());
 		}
 		return null;
 	}
+
 	/**obj转JSONObject
-	 * @param json
+	 * @param obj
 	 * @return
 	 */
 	public static JSONObject parseObject(Object obj) {
@@ -89,31 +89,7 @@ public class JSON {
 	 * @return
 	 */
 	public static JSONObject parseObject(String json) {
-		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
-		features |= Feature.OrderedField.getMask();
-		return parseObject(json, features);
-	}
-	/**json转JSONObject
-	 * @param json
-	 * @param features
-	 * @return
-	 */
-	public static JSONObject parseObject(String json, int features) {
-		try {
-			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), JSONObject.class, features);
-		} catch (Exception e) {
-			Log.i(TAG, "parseObject  catch \n" + e.getMessage());
-		}
-		return null;
-	}
-
-	/**JSONObject转实体类
-	 * @param object
-	 * @param clazz
-	 * @return
-	 */
-	public static <T> T parseObject(JSONObject object, Class<T> clazz) {
-		return parseObject(toJSONString(object), clazz);
+		return parseObject(json, JSONObject.class);
 	}
 	/**json转实体类
 	 * @param json
@@ -125,9 +101,7 @@ public class JSON {
 			Log.e(TAG, "parseObject  clazz == null >> return null;");
 		} else {
 			try {
-				int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
-				features |= Feature.OrderedField.getMask();
-				return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, features);
+				return com.alibaba.fastjson2.JSON.parseObject(getCorrectJson(json), clazz, DEFAULT_FASTJSON_FEATURES);
 			} catch (Exception e) {
 				Log.i(TAG, "parseObject  catch \n" + e.getMessage());
 			}
