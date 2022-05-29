@@ -64,18 +64,20 @@ public class JSON {
 	 * @param json
 	 * @return
 	 */
+	private static final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.AllowSingleQuotes, Feature.DisableCircularReferenceDetect, Feature.UseBigDecimal, Feature.UseObjectArray};
 	public static Object parse(Object obj) {
 		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
 		features |= Feature.OrderedField.getMask();
 		try {
-			return com.alibaba.fastjson.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), features);
+			return com.alibaba.fastjson.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), DEFAULT_FASTJSON_FEATURES);
 		} catch (Exception e) {
 			Log.i(TAG, "parse  catch \n" + e.getMessage());
 		}
 		return null;
 	}
+
 	/**obj转JSONObject
-	 * @param json
+	 * @param obj
 	 * @return
 	 */
 	public static JSONObject parseObject(Object obj) {
@@ -89,16 +91,17 @@ public class JSON {
 	 * @return
 	 */
 	public static JSONObject parseObject(String json) {
-		int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
-		features |= Feature.OrderedField.getMask();
-		return parseObject(json, features);
+		return parseObject(json, DEFAULT_FASTJSON_FEATURES);
 	}
-	/**json转JSONObject
+
+	/**
+	 * json转JSONObject
+	 *
 	 * @param json
 	 * @param features
 	 * @return
 	 */
-	public static JSONObject parseObject(String json, int features) {
+	public static JSONObject parseObject(String json, Feature... features) {
 		try {
 			return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), JSONObject.class, features);
 		} catch (Exception e) {
@@ -127,7 +130,7 @@ public class JSON {
 			try {
 				int features = com.alibaba.fastjson.JSON.DEFAULT_PARSER_FEATURE;
 				features |= Feature.OrderedField.getMask();
-				return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, features);
+				return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, DEFAULT_FASTJSON_FEATURES);
 			} catch (Exception e) {
 				Log.i(TAG, "parseObject  catch \n" + e.getMessage());
 			}
