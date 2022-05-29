@@ -425,7 +425,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				String replaceKey = key.substring(0, key.length() - 1);
 
 				//						System.out.println("getObject  key.endsWith(@) >> parseRelation = " + parseRelation);
-				String targetPath = AbstractParser.getValuePath(type == TYPE_ITEM ? path : parentPath, new String((String) value));
+				String targetPath = AbstractParser.getValuePath(type == TYPE_ITEM ? path : parentPath, (String) value);
 
 				//先尝试获取，尽量保留缺省依赖路径，这样就不需要担心路径改变
 				Object target = onReferenceParse(targetPath);
