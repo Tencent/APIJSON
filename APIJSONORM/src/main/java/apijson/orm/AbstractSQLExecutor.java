@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -519,6 +520,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 							if (viceConfig != null) {  //FIXME 只有和主表关联才能用 item，否则应该从 childMap 查其它副表数据
 								List<On> onList = curJoin.getOnList();
 								if (onList != null) {
+									Collections.reverse(onList);
 									for (On on : onList) {
 										if (on != null) {
 											String ok = on.getOriginKey();
