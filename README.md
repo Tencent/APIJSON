@@ -2,6 +2,7 @@ Tencent is pleased to support the open source community by making APIJSON availa
 Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
 This source code is licensed under the Apache License Version 2.0 <br/>
 
+[APIJSON 已加入 腾源会开源摘星计划（WeOpen Star），该计划提供奖励以鼓励你加入我们的社区](https://github.com/weopenprojects/WeOpen-Star/issues/79)
 
 <h1 align="center" style="text-align:center;">
   APIJSON
