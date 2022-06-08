@@ -61,21 +61,6 @@ APIJSON 作为腾讯开源的知名热门项目，贡献代码除了可以给简
 3.你需要自己维护你的代码，每次升级 APIJSON 版本时，你都需要下载 APIJSON 新代码再合并你自己的更改 <br/>
 #### 所以为了让你自己的更改始终能跟上项目版本，得到他人给予的可靠且持续的维护，强烈建议 [提交 Pull Request](/CONTRIBUTING.md#pull-request) 来贡献代码。
 
-​                       
-
-## Issue 提交
-
-#### 对于贡献者
-
-在提 Issue 前请确保满足一下条件：
-
-- 必须是一个 Bug 或者功能新增。
-- 必须是 APIJSON 相关问题。
-- 已经在 Issue 中搜索过，并且没有找到相似的 Issue 或者解决方案。
-- 完善下面模板中的信息
-
-如果已经满足以上条件，我们提供了 Issue 的标准模版，请按照模板填写。
-
 ​             
 
 ##  Pull Request
@@ -145,3 +130,19 @@ https://www.jianshu.com/p/00cf29d2d66c
 <br/><br/>
 如何在 Github 上给别人的项目贡献代码 <br/>
 https://git-scm.com/book/zh/v2/GitHub-%E5%AF%B9%E9%A1%B9%E7%9B%AE%E5%81%9A%E5%87%BA%E8%B4%A1%E7%8C%AE
+
+
+​                       
+
+## Issue 提交
+
+#### 对于贡献者
+
+在提 Issue 前请确保满足一下条件：
+
+- 必须是一个 Bug 或者功能新增。
+- 必须是 APIJSON 相关问题。
+- 已经在 Issue 中搜索过，并且没有找到相似的 Issue 或者解决方案。
+- 完善下面模板中的信息
+
+如果已经满足以上条件，我们提供了 Issue 的标准模版，请按照模板填写。
