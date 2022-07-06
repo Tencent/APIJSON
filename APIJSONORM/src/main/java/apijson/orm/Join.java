@@ -22,6 +22,7 @@ public class Join {
 	private String joinType;  // "@" - APP, "<" - LEFT, ">" - RIGHT, "*" - CROSS, "&" - INNER, "|" - FULL, "!" - OUTER, "^" - SIDE, "(" - ANTI, ")" - FOREIGN
 	private String table;  // User
 	private String alias;  // owner
+	private int count = 1;	// 当app join子表，需要返回子表的行数，默认1行；
 	private List<On> onList;  // ON User.id = Moment.userId AND ...
 	
 	private JSONObject request;  // { "id@":"/Moment/userId" }
@@ -37,6 +38,13 @@ public class Join {
 	}
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public int getCount() {
+		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
 	}
 
 	public String getJoinType() {

@@ -5008,7 +5008,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			alias = j.getAlias();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
 			SQLConfig joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
-			SQLConfig cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias, j.getRequest(), null, false, callback).setCount(1);
+			SQLConfig cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias, j.getRequest(), null, false, callback).setCount(j.getCount());
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
 				if (joinConfig.getDatabase() == null) {
