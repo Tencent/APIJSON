@@ -1457,10 +1457,11 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			//			}
 			path = path.substring(index + 1);
 
-			index = path.indexOf("/");
+			index = path.lastIndexOf("/");
 			String tableKey = index < 0 ? path : path.substring(0, index); // User:owner
 			apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
-			String table = entry.getKey(); // User
+			String[] tablePath = entry.getKey().split("/"); // User
+			String table = tableKey = tablePath[tablePath.length - 1];	// path最后一级为真实table；如：@/A/b/id@，b为目录最后一级
 			if (StringUtil.isName(table) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 Table 值 " + table + " 不合法！"
 						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
@@ -1475,9 +1476,13 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			}
 
 			// 取出Table对应的JSONObject，及内部引用赋值 key:value
-			JSONObject tableObj;
+			JSONObject tableObj = request;
+			JSONObject parentPathObj = null;	// 保留
 			try {
-				tableObj = request.getJSONObject(tableKey);
+				for (String tableKeyPath : tablePath) {
+					parentPathObj = tableObj;
+					tableObj = tableObj.getJSONObject(tableKeyPath);
+				}
 				if (tableObj == null) {
 					throw new NullPointerException("tableObj == null");
 				}
@@ -1580,6 +1585,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			j.setAlias(alias);
 			j.setOuter((JSONObject) outer);
 			j.setRequest(requestObj);
+			if (parentPathObj != null) {
+				j.setCount(parentPathObj.getInteger("count") != null ? parentPathObj.getInteger("count") : 1);
+			}
 
 			List<Join.On> onList = new ArrayList<>();
 			for (Entry<String, Object> refEntry : refSet) {
@@ -1656,7 +1664,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 			if (refObj.size() != tableObj.size()) {  // 把 key 强制放最前，AbstractSQLExcecutor 中 config.putWhere 也是放尽可能最前
 				refObj.putAll(tableObj);
-				request.put(tableKey, refObj);
+				parentPathObj.put(tableKey, refObj);
 
 //				tableObj.clear();
 //				tableObj.putAll(refObj);

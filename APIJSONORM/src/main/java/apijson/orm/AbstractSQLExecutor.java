@@ -260,7 +260,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
 						cachedSQLCount ++;
-
+						if (getCache(sql,config).size() > 1) {
+							result.put(KEY_RAW_LIST, getCache(sql,config));
+						}
 						Log.d(TAG, "\n\n execute  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 						return result;
 					}
@@ -589,19 +591,17 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		if (isHead == false) {
 			// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-			executeAppJoin(config, resultList, childMap);
+			Map<String,List<JSONObject>> appJoinChildMap = new HashMap<>();
+			executeAppJoin(config, resultList, appJoinChildMap);
 
 			// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 			//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
-			Set<Entry<String, JSONObject>> set = childMap.entrySet();
+			Set<Entry<String, List<JSONObject>>> set = appJoinChildMap.entrySet();
 
 			//<sql, Table>
-			for (Entry<String, JSONObject> entry : set) {
-				List<JSONObject> l = new ArrayList<>();
-				l.add(entry.getValue());
-				putCache(entry.getKey(), l, null);
+			for (Entry<String, List<JSONObject>> entry : set) {
+				putCache(entry.getKey(), entry.getValue(), null);
 			}
 
 			putCache(sql, resultList, config);
@@ -633,7 +633,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	 * @param childMap
 	 * @throws Exception 
 	 */
-	protected void executeAppJoin(SQLConfig config, List<JSONObject> resultList, Map<String, JSONObject> childMap) throws Exception {
+	protected void executeAppJoin(SQLConfig config, List<JSONObject> resultList, Map<String, List<JSONObject>> childMap) throws Exception {
 		List<Join> joinList = config.getJoinList();
 		if (joinList != null) {
 
@@ -737,8 +737,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 							}
 						}
 						cacheSql = cc.getSQL(false);
-						childMap.put(cacheSql, result);
-
+						List<JSONObject> results = childMap.get(cacheSql);
+						if (results == null) {
+							results = new ArrayList<>();
+							childMap.put(cacheSql,results);
+						}
+						results.add(result);
 						Log.d(TAG, ">>> executeAppJoin childMap.put('" + cacheSql + "', result);  childMap.size() = " + childMap.size());
 					}
 				}
