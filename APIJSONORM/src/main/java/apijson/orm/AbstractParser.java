@@ -6,6 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import static apijson.JSONObject.KEY_EXPLAIN;
+import static apijson.JSONObject.KEY_JSON;
 import static apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
@@ -80,7 +81,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public static int MAX_OBJECT_COUNT = 5;
 	public static int MAX_ARRAY_COUNT = 5;
 	public static int MAX_QUERY_DEPTH = 5;
-	
+
 	@Override
 	public int getDefaultQueryCount() {
 		return DEFAULT_QUERY_COUNT;
@@ -122,13 +123,13 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		this(null);
 	}
 	/**needVerify = true
-	 * @param requestMethod null ? requestMethod = GET
+	 * @param method null ? requestMethod = GET
 	 */
 	public AbstractParser(RequestMethod method) {
 		this(method, true);
 	}
 	/**
-	 * @param requestMethod null ? requestMethod = GET
+	 * @param method null ? requestMethod = GET
 	 * @param needVerify 仅限于为服务端提供方法免验证特权，普通请求不要设置为 false ！ 如果对应Table有权限也建议用默认值 true，保持和客户端权限一致
 	 */
 	public AbstractParser(RequestMethod method, boolean needVerify) {
@@ -136,7 +137,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		setMethod(method);
 		setNeedVerify(needVerify);
 	}
-	
+
 	protected boolean isRoot = true;
 	public boolean isRoot() {
 		return isRoot;
@@ -145,7 +146,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		this.isRoot = isRoot;
 		return this;
 	}
-	
+
 
 	@NotNull
 	protected Visitor<T> visitor;
@@ -464,7 +465,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		try {
 			queryDepth = 0;
 			executedSQLDuration = 0;
-			
+
 			requestObject = onObjectParse(request, null, null, null, false);
 
 			onCommit();
@@ -486,7 +487,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		if (Log.DEBUG) {
 			res.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			res.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
-			
+
 			executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
 			long parseDuration = duration - executedSQLDuration;
 			res.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + executedSQLDuration);
@@ -551,7 +552,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	/**解析请求JSONObject
 	 * @param request => URLDecoder.decode(request, UTF_8);
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@NotNull
 	public static JSONObject parseRequest(String request) throws Exception {
@@ -624,7 +625,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					String arrKey = key + "[]";
 
 					if (target.containsKey(arrKey) == false) {
-						target.put(arrKey, new JSONArray()); 
+						target.put(arrKey, new JSONArray());
 					}
 
 					try {
@@ -680,7 +681,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public static JSONObject newResult(int code, String msg, boolean isRoot) {
 		return extendResult(null, code, msg, isRoot);
 	}
-	
+
 	/**添加JSONObject的状态内容，一般用于错误提示结果
 	 * @param object
 	 * @param code
@@ -702,13 +703,13 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				+ " \n   |   \n 常见问题：https://github.com/Tencent/APIJSON/issues/36"
 				+ " \n 通用文档：https://github.com/Tencent/APIJSON/blob/master/Document.md"
 				+ " \n 视频教程：https://search.bilibili.com/all?keyword=APIJSON");
-		
+
 		msg = index >= 0 ? msg.substring(0, index) : msg;
-		
+
 		if (object == null) {
 			object = new JSONObject(true);
 		}
-		
+
 		if (object.containsKey(JSONResponse.KEY_OK) == false) {
 			object.put(JSONResponse.KEY_OK, JSONResponse.isSuccess(code));
 		}
@@ -720,12 +721,12 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		if (m.isEmpty() == false) {
 			msg = m + " ;\n " + StringUtil.getString(msg);
 		}
-		
+
 		object.put(JSONResponse.KEY_MSG, msg);
 		if (debug != null) {
 			object.put("debug:info|help", debug);
 		}
-		
+
 		return object;
 	}
 
@@ -758,7 +759,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public static JSONObject newSuccessResult(boolean isRoot) {
 		return newResult(JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED, isRoot);
 	}
-	
+
 	/**添加请求成功的状态内容
 	 * @param object
 	 * @param e
@@ -872,7 +873,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			int code;
 			if (e instanceof UnsupportedEncodingException) {
 				code = JSONResponse.CODE_UNSUPPORTED_ENCODING;
-			} 
+			}
 			else if (e instanceof IllegalAccessException) {
 				code = JSONResponse.CODE_ILLEGAL_ACCESS;
 			}
@@ -890,7 +891,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			}
 			else if (e instanceof TimeoutException) {
 				code = JSONResponse.CODE_TIME_OUT;
-			} 
+			}
 			else if (e instanceof ConflictException) {
 				code = JSONResponse.CODE_CONFLICT;
 			}
@@ -921,10 +922,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 	//TODO 启动时一次性加载Request所有内容，作为初始化。
 	/**获取正确的请求，非GET请求必须是服务器指定的
-	 * @param method
-	 * @param request
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@Override
 	public JSONObject parseCorrectRequest() throws Exception {
@@ -1027,13 +1026,14 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 	//	protected SQLConfig itemConfig;
 	/**获取单个对象，该对象处于parentObject内
-	 * @param parentPath parentObject的路径
-	 * @param name parentObject的key
-	 * @param request parentObject的value
-	 * @param config for array item
-	 * @return
-	 * @throws Exception 
-	 */
+   * @param request parentObject 的 value
+   * @param parentPath parentObject 的路径
+   * @param name parentObject 的 key
+   * @param arrayConfig config for array item
+   * @param isSubquery 是否为子查询
+   * @return
+   * @throws Exception
+   */
 	@Override
 	public JSONObject onObjectParse(final JSONObject request
 			, String parentPath, String name, final SQLConfig arrayConfig, boolean isSubquery) throws Exception {
@@ -1093,7 +1093,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				if (type == SQLConfig.TYPE_ITEM_CHILD_0 && query != JSONRequest.QUERY_TABLE && position == 0) {
 
 					//TODO 应在这里判断 @column 中是否有聚合函数，而不是 AbstractSQLConfig.getColumnString
-					
+
 					JSONObject rp;
 					Boolean compat = arrayConfig.getCompat();
 					if (compat != null && compat) {
@@ -1192,7 +1192,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @param parentPath parentObject的路径
 	 * @param name parentObject的key
 	 * @param request parentObject的value
-	 * @return 
+	 * @return
 	 * @throws Exception
 	 */
 	@Override
@@ -1283,7 +1283,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			String[] childKeys = StringUtil.split(childPath, "-", false);
 			if (childKeys == null || childKeys.length <= 0 || request.containsKey(childKeys[0]) == false) {
 				childKeys = null;
-			} 
+			}
 			else if (childKeys.length == 1 && JSONRequest.isTableKey(childKeys[0])) {  // 可能无需提取，直接返回 rawList 即可
 				arrTableKey = childKeys[0];
 			}
@@ -1402,12 +1402,12 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_RAW);
 	}
-	
+
 	/**JOIN 多表同时筛选
 	 * @param join "&/User,</Moment/id@",@/Comment/toId@" 或 "&/User":{}, "</Moment/id@":{"@column":"id"}, "@/Comment/toId@": {"@group":"toId", "@having":"toId>0"}
 	 * @param request
-	 * @return 
-	 * @throws Exception 
+	 * @return
+	 * @throws Exception
 	 */
 	private List<Join> onJoinParse(Object join, JSONObject request) throws Exception {
 		JSONObject joinMap = null;
@@ -1440,7 +1440,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			// 分割 /Table/key
 			String path = e == null ? null : e.getKey();
 			Object outer = path == null ? null : e.getValue();
-			
+
 			if (outer instanceof JSONObject == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中value不合法！"
 						+ "必须为 &/Table0/key0,</Table1/key1,... 或 { '&/Table0/key0':{}, '</Table1/key1':{},... } 这种形式！");
@@ -1459,9 +1459,17 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 			index = path.lastIndexOf("/");
 			String tableKey = index < 0 ? path : path.substring(0, index); // User:owner
-			apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
-			String[] tablePath = entry.getKey().split("/"); // User
-			String table = tableKey = tablePath[tablePath.length - 1];	// path最后一级为真实table；如：@/A/b/id@，b为目录最后一级
+      int index2 = tableKey.lastIndexOf("/");
+      String arrKey = index2 < 0 ? null : tableKey.substring(0, index2);
+      if (arrKey != null && JSONRequest.isArrayKey(arrKey) == false) {
+        throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + " 不是合法的数组 key[] ！" +
+          "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
+      }
+
+      tableKey = index2 < 0 ? tableKey : tableKey.substring(index2+1);
+
+      apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
+      String table = entry.getKey(); // User
 			if (StringUtil.isName(table) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 Table 值 " + table + " 不合法！"
 						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
@@ -1476,21 +1484,34 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			}
 
 			// 取出Table对应的JSONObject，及内部引用赋值 key:value
-			JSONObject tableObj = request;
-			JSONObject parentPathObj = null;	// 保留
+			JSONObject tableObj;
+			JSONObject parentPathObj;	// 保留
 			try {
-				for (String tableKeyPath : tablePath) {
-					parentPathObj = tableObj;
-					tableObj = tableObj.getJSONObject(tableKeyPath);
-				}
-				if (tableObj == null) {
+        parentPathObj = arrKey == null ? request : request.getJSONObject(arrKey);	// 保留
+        tableObj = parentPathObj == null ? null : parentPathObj.getJSONObject(tableKey);
+        if (tableObj == null) {
 					throw new NullPointerException("tableObj == null");
 				}
 			}
 			catch (Exception e2) {
-				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + tableKey + ":value 中 value 类型不合法！必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
+				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + tableKey + ":value 中 value 类型不合法！" +
+          "必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
 			}
-			
+
+      if (arrKey != null) {
+        if (parentPathObj.get(JSONRequest.KEY_JOIN) != null) {
+          throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ join: value } 中 value 不合法！" +
+            "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
+        }
+
+        Integer subPage = parentPathObj.getInteger(JSONRequest.KEY_PAGE);
+        if (subPage != null && subPage != 0) {
+          throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ page: value } 中 value 不合法！" +
+            "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中 page 值只能为 null 或 0 ！");
+        }
+      }
+
+      boolean isAppJoin = "@".equals(joinType);
 
 			JSONObject refObj = new JSONObject(tableObj.size(), true);
 
@@ -1501,15 +1522,21 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 							+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
 							+ "且 Table:alias 的 alias 必须满足英文单词变量名格式！");
 				}
-				
+
 				if (tableObj.get(key) instanceof String == false) {
-					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + "' 对应的 " + tableKey + ":{ " + key + ": value } 中 value 类型不合法！必须为同层级引用赋值路径 String！");
+					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + "' 对应的 "
+            + tableKey + ":{ " + key + ": value } 中 value 类型不合法！必须为同层级引用赋值路径 String！");
 				}
+
+        if (isAppJoin && StringUtil.isName(key.substring(0, key.length() - 1)) == false) {
+          throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + key + " 不合法 ！" +
+            "@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
+        }
 
 				refObj.put(key, tableObj.getString(key));
 			}
 
-			
+
 			Set<Entry<String, Object>> tableSet = tableObj.entrySet();
 			// 取出所有 join 条件
 			JSONObject requestObj = new JSONObject(true); // (JSONObject) obj.clone();
@@ -1538,7 +1565,19 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						apijson.orm.Entry<String, String> te = tk == null || p.substring(ind2 + 1).indexOf("/") >= 0 ? null : Pair.parseEntry(tk, true);
 
 						if (te != null && JSONRequest.isTableKey(te.getKey()) && request.get(tk) instanceof JSONObject) {
-							refObj.put(k, v);
+              if (isAppJoin) {
+                if (refObj.size() >= 1) {
+                  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + " 中 " + k + " 不合法！"
+                    + "@ APP JOIN 必须有且只有一个引用赋值键值对！");
+                }
+
+                if (StringUtil.isName(k.substring(0, k.length() - 1)) == false) {
+                  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + k + " 不合法 ！" +
+                    "@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
+                }
+              }
+
+              refObj.put(k, v);
 							continue;
 						}
 					}
@@ -1585,8 +1624,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			j.setAlias(alias);
 			j.setOuter((JSONObject) outer);
 			j.setRequest(requestObj);
-			if (parentPathObj != null) {
-				j.setCount(parentPathObj.getInteger("count") != null ? parentPathObj.getInteger("count") : 1);
+			if (arrKey != null) {
+        Integer count = parentPathObj.getInteger(JSONRequest.KEY_COUNT);
+        j.setCount(count == null ? getDefaultQueryCount() : count);
 			}
 
 			List<Join.On> onList = new ArrayList<>();
@@ -1598,7 +1638,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					throw new IllegalArgumentException(e.getKey() + ":value 中 value 值 " + targetPath + " 不合法！必须为引用赋值的路径 '/targetTable/targetKey' ！");
 				}
 
-				// 取出引用赋值路径 targetPath 对应的 Table 和 key 
+				// 取出引用赋值路径 targetPath 对应的 Table 和 key
 				index = targetPath.lastIndexOf("/");
 				String targetKey = index < 0 ? null : targetPath.substring(index + 1);
 				if (StringUtil.isName(targetKey) == false) {
@@ -1638,24 +1678,24 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				if (targetObj == null) {
 					throw new IllegalArgumentException(e.getKey() + ":'/targetTable/targetKey' 中路径对应的对象 '" + targetTableKey + "':{} 不存在或值为 null ！必须是 {} 这种 JSONObject 格式！");
 				}
-				
+
 				Join.On on = new Join.On();
 				on.setKeyAndType(j.getJoinType(), j.getTable(), originKey);
 				if (StringUtil.isName(on.getKey()) == false) {
 					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 key@ 中 key 值 " + on.getKey() + " 不合法！必须满足英文单词变量名格式！");
 				}
-				
+
 				on.setOriginKey(originKey);
 				on.setOriginValue((String) refEntry.getValue());
 				on.setTargetTable(targetTable);
 				on.setTargetAlias(targetAlias);
 				on.setTargetKey(targetKey);
-				
+
 				onList.add(on);
 			}
-			
+
 			j.setOnList(onList);
-			
+
 			joinList.add(j);
 			//			onList.add(table + "." + key + " = " + targetTable + "." + targetKey); // ON User.id = Moment.userId
 
@@ -1762,7 +1802,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					pos = ps[i+1].contains("/") == false ? ps[i+1]
 							: ps[i+1].substring(0, ps[i+1].indexOf("/"));
 					if (
-							//StringUtil.isNumer(pos) && 
+							//StringUtil.isNumer(pos) &&
 							vs[i+1].startsWith(pos + "/") == false) {
 						vs[i+1] = pos + "/" + vs[i+1];
 					}

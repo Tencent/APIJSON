@@ -6,8 +6,9 @@ package apijson;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson.JSONReader;
 
 import java.util.List;
 
@@ -64,10 +65,10 @@ public class JSON {
 	 * @param json
 	 * @return
 	 */
-	private static final JSONReader.Feature[] DEFAULT_FASTJSON_FEATURES = {JSONReader.Feature.FieldBased, JSONReader.Feature.UseBigDecimalForDoubles};
+	private static final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.UseBigDecimal};
 	public static Object parse(Object obj) {
 		try {
-			return com.alibaba.fastjson2.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), DEFAULT_FASTJSON_FEATURES);
+			return com.alibaba.fastjson.JSON.parse(obj instanceof String ? (String) obj : toJSONString(obj), DEFAULT_FASTJSON_FEATURES);
 		} catch (Exception e) {
 			Log.i(TAG, "parse  catch \n" + e.getMessage());
 		}
@@ -101,7 +102,7 @@ public class JSON {
 			Log.e(TAG, "parseObject  clazz == null >> return null;");
 		} else {
 			try {
-				return com.alibaba.fastjson2.JSON.parseObject(getCorrectJson(json), clazz, DEFAULT_FASTJSON_FEATURES);
+				return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, DEFAULT_FASTJSON_FEATURES);
 			} catch (Exception e) {
 				Log.i(TAG, "parseObject  catch \n" + e.getMessage());
 			}

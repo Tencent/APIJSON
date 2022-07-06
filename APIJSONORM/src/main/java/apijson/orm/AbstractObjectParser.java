@@ -71,7 +71,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 * @param parentPath
 	 * @param request
 	 * @param name
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public AbstractObjectParser(@NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
 			, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
@@ -400,7 +400,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				if (arrObj == null) {
 					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ from:value } 中 value 对应的主表对象 " + from + ":{} 不存在！");
 				}
-				//				
+				//
 				SQLConfig cfg = (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
 				if (cfg == null) {
 					throw new NotExistException(TAG + ".onParse  cfg == null");
@@ -453,7 +453,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						Log.d(TAG, "onParse  isTable(table) == false >> return true;");
 						return true;//舍去，对Table无影响
 					}
-				} 
+				}
 
 				//直接替换原来的key@:path为key:target
 				Log.i(TAG, "onParse    >>  key = replaceKey; value = target;");
@@ -517,7 +517,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	/**
 	 * @param key
 	 * @param value
-	 * @param isFirst 
+	 * @param isFirst
 	 * @return
 	 * @throws Exception
 	 */
@@ -553,7 +553,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
 			}
 
-			if ( //避免使用 "test":{"Test":{}} 绕过限制，实现查询爆炸   isTableKey && 
+			if ( //避免使用 "test":{"Test":{}} 绕过限制，实现查询爆炸   isTableKey &&
 					(arrayConfig == null || arrayConfig.getPosition() == 0)) {
 				objectCount ++;
 				int maxObjectCount = parser.getMaxObjectCount();
@@ -577,7 +577,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 
 
-	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！ 
+	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！
 	/**PUT key:[]
 	 * @param key
 	 * @param array
@@ -757,7 +757,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		//执行SQL操作数据库
 		if (isTable == false) {//提高性能
 			sqlReponse = new JSONObject(sqlRequest);
-		} 
+		}
 		else {
 			try {
 				sqlReponse = onSQLExecute();
@@ -896,7 +896,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			result = parser.executeSQL(sqlConfig, isSubquery);
 
 			boolean isSimpleArray = false;
-			List<JSONObject> rawList = null;
+      // 提取并缓存数组主表的列表数据
+      List<JSONObject> rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 
 			if (isArrayMainTable && position == 0 && result != null) {
 
@@ -905,8 +906,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						&& (childMap == null || childMap.isEmpty())
 						&& (table.equals(arrayTable));
 
-				// 提取并缓存数组主表的列表数据
-				rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
+				// APP JOIN 副表时副表返回了这个字段   rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 				if (rawList != null) {
 					String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
