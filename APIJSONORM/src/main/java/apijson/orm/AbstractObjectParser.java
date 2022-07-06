@@ -897,38 +897,36 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 			boolean isSimpleArray = false;
       // 提取并缓存数组主表的列表数据
-      List<JSONObject> rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
+      List<JSONObject> rawList = result == null ? null : (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 
-			if (isArrayMainTable && position == 0 && result != null) {
+      if (isArrayMainTable && position == 0 && rawList != null) {
 
-				isSimpleArray = (functionMap == null || functionMap.isEmpty())
-						&& (customMap == null || customMap.isEmpty())
-						&& (childMap == null || childMap.isEmpty())
-						&& (table.equals(arrayTable));
+        isSimpleArray = (functionMap == null || functionMap.isEmpty())
+          && (customMap == null || customMap.isEmpty())
+          && (childMap == null || childMap.isEmpty())
+          && (table.equals(arrayTable));
 
-				// APP JOIN 副表时副表返回了这个字段   rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
-				if (rawList != null) {
-					String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
+        // APP JOIN 副表时副表返回了这个字段   rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
+        String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
-					if (isSimpleArray == false) {
-						long startTime = System.currentTimeMillis();
+        if (isSimpleArray == false) {
+          long startTime = System.currentTimeMillis();
 
-						for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
-							JSONObject obj = rawList.get(i);
+          for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
+            JSONObject obj = rawList.get(i);
 
-							if (obj != null) {
-								parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
-							}
-						}
+            if (obj != null) {
+              parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
+            }
+          }
 
-						long endTime = System.currentTimeMillis();  // 3ms - 8ms
-						Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
-								+ "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
-					}
+          long endTime = System.currentTimeMillis();  // 3ms - 8ms
+          Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
+            + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
+        }
 
-					parser.putArrayMainCache(arrayPath, rawList);
-				}
-			}
+        parser.putArrayMainCache(arrayPath, rawList);
+      }
 
 			if (isSubquery == false && result != null) {
 				parser.putQueryResult(path, result);  // 解决获取关联数据时requestObject里不存在需要的关联数据
