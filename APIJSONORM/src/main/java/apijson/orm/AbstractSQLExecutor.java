@@ -172,9 +172,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		long executedSQLStartTime = System.currentTimeMillis();
 
 		boolean isPrepared = config.isPrepared();
-
 		final String sql = config.getSQL(false);
-
 		config.setPrepared(isPrepared);
 
 		if (StringUtil.isEmpty(sql, true)) {
@@ -265,8 +263,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
 						cachedSQLCount ++;
-						if (getCache(sql,config).size() > 1) {
-							result.put(KEY_RAW_LIST, getCache(sql,config));
+            List<JSONObject> cache = getCache(sql, config);
+						if (cache != null && cache.size() > 1) {
+							result.put(KEY_RAW_LIST, cache);
 						}
 						Log.d(TAG, "\n\n execute  result != null >> return result;"  + "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
 						return result;
@@ -282,7 +281,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					}
 					break;
 
-				default://OPTIONS, TRACE等
+				default: //OPTIONS, TRACE等
 					Log.e(TAG, "execute  sql = " + sql + " ; method = " + config.getMethod() + " >> return null;");
 					return null;
 				}
@@ -663,46 +662,78 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
         SQLConfig jc = join.getJoinConfig();
 
 				List<On> onList = join.getOnList();
-        int size = onList == null ? 0 : onList.size();
-        if (size > 0) {
-          for (int j = size - 1; j >= 0; j--) {
-            On on = onList.get(j);
-            String ok = on == null ? null : on.getOriginKey();
-            if (ok == null) {
-              throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[" + j + (on == null ? "] = null！" : ".getOriginKey() = null！"));
-            }
+        On on = onList == null || onList.isEmpty() ? null : onList.get(0);  // APP JOIN 应该有且只有一个 ON 条件
+        String originKey = on == null ? null : on.getOriginKey();
+        if (originKey == null) {
+          throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[0" + (on == null ? "] = null！" : ".getOriginKey() = null！"));
+        }
+        String key = on.getKey();
+        if (key == null) {
+          throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[0" + (on == null ? "] = null！" : ".getKey() = null！"));
+        }
 
-            // 取出 "id@": "@/User/userId" 中所有 userId 的值
-            List<Object> targetValueList = new ArrayList<>();
+        // 取出 "id@": "@/User/userId" 中所有 userId 的值
+        List<Object> targetValueList = new ArrayList<>();
 
-            for (int i = 0; i < resultList.size(); i++) {
-              JSONObject mainTable = resultList.get(i);
-              Object targetValue = mainTable == null ? null : mainTable.get(on.getTargetKey());
+        for (int i = 0; i < resultList.size(); i++) {
+          JSONObject mainTable = resultList.get(i);
+          Object targetValue = mainTable == null ? null : mainTable.get(on.getTargetKey());
 
-              if (targetValue != null && targetValueList.contains(targetValue) == false) {
-                targetValueList.add(targetValue);
-              }
-            }
-
-            if (targetValueList.isEmpty() && config.isExplain() == false) {
-              throw new NotExistException("targetValueList.isEmpty() && config.isExplain() == false");
-            }
-
-            // 替换为 "id{}": [userId1, userId2, userId3...]
-            jc.putWhere(ok, null, false);  // remove originKey
-            jc.putWhere(on.getKey() + "{}", targetValueList, true);  // add originKey{}          }
+          if (targetValue != null && targetValueList.contains(targetValue) == false) {
+            targetValueList.add(targetValue);
           }
         }
 
+        if (targetValueList.isEmpty() && config.isExplain() == false) {
+          throw new NotExistException("targetValueList.isEmpty() && config.isExplain() == false");
+        }
+
+        // 替换为 "id{}": [userId1, userId2, userId3...]
+        jc.putWhere(originKey, null, false);  // remove originKey
+        jc.putWhere(key + "{}", targetValueList, true);  // add originKey{}          }
+
 				jc.setMain(true).setPreparedValueList(new ArrayList<>());
 
+        // 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销
+//        String q = jc.getQuote();
+//        if (allChildCount > 0 && jc.getCount() <= 0) {
+//          List<String> column = jc.getColumn();
+//          if (column == null || column.isEmpty()) {
+//            column = Arrays.asList("*;row_number()OVER(PARTITION BY " + q + key + q + " ORDER BY " + q + key + q + " ASC):_row_num_");
+//          }
+//          else {
+//            column.add("row_number()OVER(PARTITION BY " + q + key + q + " ORDER BY " + q + key + q + " ASC):_row_num_");
+//          }
+//          jc.setColumn(column);
+//        }
+
 				boolean prepared = jc.isPrepared();
-				final String sql = jc.getSQL(false);
+        String sql = jc.getSQL(false);
 				jc.setPrepared(prepared);
 
 				if (StringUtil.isEmpty(sql, true)) {
 					throw new NullPointerException(TAG + ".executeAppJoin  StringUtil.isEmpty(sql, true) >> return null;");
 				}
+
+        int childCount = cc.getCount();
+        int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
+
+        String sql2 = null;
+        if (childCount > 0 && (childCount != 1 || join.isOne2Many())) {  // TODO 判断 MySQL >= 8.0
+          String q = jc.getQuote();
+          sql2 = prepared ? jc.getSQL(true) : sql;
+
+          String prefix = "SELECT * FROM(";
+          String rnStr = ", row_number() OVER (PARTITION BY " + q + key + q + ((AbstractSQLConfig) jc).getOrderString(true) + ") _row_num_ FROM ";
+          String suffix = ") _t WHERE ( (_row_num_ <= " + childCount + ") ) LIMIT " + allChildCount;
+
+          sql2 = prefix
+            // 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销  + sql
+            + sql2.replaceFirst(" FROM ", rnStr)  // * 居然只能放在 row_number() 前面，放后面就报错 "SELECT ", rnStr)
+            + suffix;
+
+          sql = prepared ? (prefix + sql.replaceFirst(" FROM ", rnStr) + suffix) : sql2;
+        }
 
         boolean isExplain = jc.isExplain();
         if (isExplain == false) {
@@ -723,13 +754,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
             executedSQLCount ++;
             executedSQLStartTime = System.currentTimeMillis();
           }
-					rs = executeQuery(jc);
+					rs = executeQuery(jc, sql2);
           if (isExplain == false) {
             executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
           }
 
-          int childCount = cc.getCount();
-          int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
           int count = 0;
 
 					int index = -1;
@@ -760,15 +789,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultList.put( " + index + ", result); "
 								+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
-						if (onList != null) {
-							for (On on : onList) {  // APP JOIN 应该有且只有一个 ON 条件
-								String ok = on.getOriginKey();
-								String vk = ok.substring(0, ok.length() - 1);
-								//TODO 兼容复杂关联
-								cc.putWhere(on.getKey(), result.get(on.getKey()), true);
-							}
-						}
-
+            //TODO 兼容复杂关联
+            cc.putWhere(key, result.get(key), true);  // APP JOIN 应该有且只有一个 ON 条件
             String cacheSql = cc.getSQL(false);
             List<JSONObject> results = childMap.get(cacheSql);
 
@@ -1010,22 +1032,25 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 
 
-	/**
-	 * @param config
-	 * @return
-	 * @throws Exception
-	 */
-	@Override
+	@Override  // 重写是为了返回类型从 Statement 改为 PreparedStatement，避免其它方法出错
 	public PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
+    return getStatement(config, null);
+  }
+	@Override
+	public PreparedStatement getStatement(@NotNull SQLConfig config, String sql) throws Exception {
+    if (StringUtil.isEmpty(sql)) {
+      sql = config.getSQL(config.isPrepared());
+    }
+
 		PreparedStatement statement; //创建Statement对象
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
-			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()), Statement.RETURN_GENERATED_KEYS);
+			statement = getConnection(config).prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		}
 		else if (RequestMethod.isGetMethod(config.getMethod(), true)) {
-			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		}
 		else {
-			statement = getConnection(config).prepareStatement(config.getSQL(config.isPrepared()));
+			statement = getConnection(config).prepareStatement(sql);
 		}
 
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
@@ -1162,8 +1187,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 	@Override
-	public ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
-		PreparedStatement stt = getStatement(config);
+	public ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception {
+		PreparedStatement stt = getStatement(config, sql);
 		ResultSet rs = stt.executeQuery();  //PreparedStatement 不用传 SQL
 		//		if (config.isExplain() && (config.isSQLServer() || config.isOracle())) {
 		// FIXME 返回的是 boolean 值			rs = stt.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
@@ -1173,7 +1198,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	}
 
 	@Override
-	public int executeUpdate(@NotNull SQLConfig config) throws Exception {
+	public int executeUpdate(@NotNull SQLConfig config, String sql) throws Exception {
 		PreparedStatement stt = getStatement(config);
 		int count = stt.executeUpdate();  // PreparedStatement 不用传 SQL
 

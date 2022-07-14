@@ -64,14 +64,20 @@ public interface SQLExecutor {
 	 * @return
 	 * @throws SQLException
 	 */
-	ResultSet executeQuery(@NotNull SQLConfig config) throws Exception;
+	default ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
+    return executeQuery(config, null);
+  }
+	ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception;
 
 	/**执行增、删、改
 	 * @param config
 	 * @return
 	 * @throws SQLException
 	 */
-	int executeUpdate(@NotNull SQLConfig config) throws Exception;
+  default int executeUpdate(@NotNull SQLConfig config) throws Exception {
+    return executeUpdate(config, null);
+  }
+	int executeUpdate(@NotNull SQLConfig config, String sql) throws Exception;
 
 
 	/**判断是否为JSON类型
@@ -85,7 +91,10 @@ public interface SQLExecutor {
 
 
 	Connection getConnection(@NotNull SQLConfig config) throws Exception;
-	Statement getStatement(@NotNull SQLConfig config) throws Exception;
+	default Statement getStatement(@NotNull SQLConfig config) throws Exception {
+    return getStatement(config, null);
+  }
+	Statement getStatement(@NotNull SQLConfig config, String sql) throws Exception;
 
 	int getTransactionIsolation();
 	void setTransactionIsolation(int transactionIsolation);
