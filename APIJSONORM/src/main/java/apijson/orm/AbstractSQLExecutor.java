@@ -10,7 +10,7 @@ import java.rmi.ServerError;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.Date;
+import java.util.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +20,10 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -548,7 +551,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 								// 副表是按常规条件查询，缓存会导致其它同表同条件对象查询结果集为空		childMap.put(viceSql, new JSONObject());  // 缓存固定空数据，避免后续多余查询
 							}
 							else {
-								curItem = (JSONObject) childMap.get(viceSql);
+								curItem = childMap.get(viceSql);
 								if (curItem == null) {
 									curItem = new JSONObject(true);
 									childMap.put(viceSql, curItem);
@@ -596,8 +599,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		if (isHead == false) {
 			// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-			Map<String,List<JSONObject>> appJoinChildMap = new HashMap<>();
-			childMap.forEach((viceSql,item) -> appJoinChildMap.put(viceSql,Arrays.asList(item)));
+			Map<String, List<JSONObject>> appJoinChildMap = new HashMap<>();
+			childMap.forEach((viceSql, item) -> appJoinChildMap.put(viceSql, Arrays.asList(item)));
 			executeAppJoin(config, resultList, appJoinChildMap);
 
 			// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -643,16 +646,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		List<Join> joinList = config.getJoinList();
 		if (joinList != null) {
 
-			SQLConfig jc;
-			SQLConfig cc;
-
 			for (Join join : joinList) {
 				if (join.isAppJoin() == false) {
 					Log.i(TAG, "executeAppJoin  for (Join j : joinList) >> j.isAppJoin() == false >>  continue;");
 					continue;
 				}
 
-				cc = join.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+        SQLConfig cc = join.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
 				if (cc == null) {
 					if (Log.DEBUG) {
 						throw new NullPointerException("服务器内部错误, executeAppJoin cc == null ! 导致不能缓存 @ APP JOIN 的副表数据！");
@@ -660,7 +660,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					continue;
 				}
 
-				jc = join.getJoinConfig();
+        SQLConfig jc = join.getJoinConfig();
 
 				List<On> onList = join.getOnList();
         int size = onList == null ? 0 : onList.size();
@@ -689,8 +689,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
             }
 
             // 替换为 "id{}": [userId1, userId2, userId3...]
-            jc.putWhere(ok, null, false);  // remove orginKey
-            jc.putWhere(on.getKey() + "{}", targetValueList, true);  // add orginKey{}          }
+            jc.putWhere(ok, null, false);  // remove originKey
+            jc.putWhere(on.getKey() + "{}", targetValueList, true);  // add originKey{}          }
           }
         }
 
@@ -728,6 +728,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
             executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
           }
 
+          int childCount = cc.getCount();
+          int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
+          int count = 0;
+
 					int index = -1;
 
 					long startTime2 = System.currentTimeMillis();
@@ -735,18 +739,17 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					final int length = rsmd.getColumnCount();
 					sqlResultDuration += System.currentTimeMillis() - startTime2;
 
-					JSONObject result;
-					String cacheSql;
+          Map<String, Boolean> skipMap = new HashMap<>();
 
 					long lastCursorTime = System.currentTimeMillis();
-					while (rs.next()) { //FIXME 同时有 @ APP JOIN 和 < 等 SQL JOIN 时，next = false 总是无法进入循环，导致缓存失效，可能是连接池或线程问题
+					while ((allChildCount <= 0 || count < allChildCount) && rs.next()) { //FIXME 同时有 @ APP JOIN 和 < 等 SQL JOIN 时，next = false 总是无法进入循环，导致缓存失效，可能是连接池或线程问题
 						sqlResultDuration += System.currentTimeMillis() - lastCursorTime;
 						lastCursorTime = System.currentTimeMillis();
 
 						index ++;
 						Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n executeAppJoin while (rs.next()){  index = " + index + "\n\n");
 
-						result = new JSONObject(true);
+            JSONObject result = new JSONObject(true);
 
 						for (int i = 1; i <= length; i++) {
 							result = onPutColumn(jc, rs, rsmd, index, result, i, null, null);
@@ -757,24 +760,33 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultList.put( " + index + ", result); "
 								+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
-						//缓存到 childMap
 						if (onList != null) {
-							for (On on : onList) {
+							for (On on : onList) {  // APP JOIN 应该有且只有一个 ON 条件
 								String ok = on.getOriginKey();
 								String vk = ok.substring(0, ok.length() - 1);
 								//TODO 兼容复杂关联
 								cc.putWhere(on.getKey(), result.get(on.getKey()), true);
 							}
 						}
-						cacheSql = cc.getSQL(false);
-						List<JSONObject> results = childMap.get(cacheSql);
-						if (results == null) {
-							results = new ArrayList<>();
-							childMap.put(cacheSql, results);
-						}
-						results.add(result);
-						Log.d(TAG, ">>> executeAppJoin childMap.put('" + cacheSql + "', result);  childMap.size() = " + childMap.size());
-					}
+
+            String cacheSql = cc.getSQL(false);
+            List<JSONObject> results = childMap.get(cacheSql);
+
+            if (results == null || skipMap.get(cacheSql) == null) {  // 避免添加重复数据
+              results = new ArrayList<>(childCount);
+              childMap.put(cacheSql, results);
+              skipMap.put(cacheSql, Boolean.TRUE);
+            }
+
+            if (childCount <= 0 || results.size() < childCount) {  // 避免超过子数组每页数量
+              //              if (count == 1 && results.isEmpty() == false) {  // 避免添加重复数据
+              //                results.clear();
+              //              }
+              results.add(result);  //缓存到 childMap
+              count ++;
+              Log.d(TAG, ">>> executeAppJoin childMap.put('" + cacheSql + "', result);  childMap.size() = " + childMap.size());
+            }
+          }
 				}
 				finally {
 					if (rs != null) {
@@ -910,14 +922,20 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		else if (value instanceof Timestamp) {
 			value = ((Timestamp) value).toString();
 		}
-		else if (value instanceof Date) {
+		else if (value instanceof Date) {  // java.sql.Date 和 java.sql.Time 都继承 java.util.Date
 			value = ((Date) value).toString();
 		}
-		else if (value instanceof Time) {
-			value = ((Time) value).toString();
+    else if (value instanceof LocalDateTime) {
+      value = ((LocalDateTime) value).toString();
+    }
+		else if (value instanceof Year) {
+			value = ((Year) value).getValue();
 		}
-		else if (value instanceof LocalDateTime) {
-			value = ((LocalDateTime) value).toString();
+		else if (value instanceof Month) {
+			value = ((Month) value).getValue();
+		}
+		else if (value instanceof DayOfWeek) {
+			value = ((DayOfWeek) value).getValue();
 		}
 		else if (value instanceof String && isJSONType(config, rsmd, columnIndex, lable)) { //json String
 			castToJson = true;
