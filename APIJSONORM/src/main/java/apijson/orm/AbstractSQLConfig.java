@@ -728,8 +728,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	}
 
+  private int[] dbVersionNums = null;
+  @Override
+  public int[] getDBVersionNums() {
+    if (dbVersionNums == null || dbVersionNums.length <= 0) {
+      dbVersionNums = SQLConfig.super.getDBVersionNums();
+    }
+    return dbVersionNums;
+  }
 
-	@Override
+  @Override
 	public boolean limitSQLCount() {
 		return Log.DEBUG == false || AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
 	}
@@ -3412,7 +3420,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (isPostgreSQL()) {
 			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
 		}
-		if (isOracle()) {
+		if (isOracle() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
 			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
 		if (isClickHouse()) {
@@ -3425,7 +3433,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		return getKey(column) + " REGEXP " + (ignoreCase ? "" : "BINARY ") + getValue(key, column, value);
 	}
-	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+  //~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 

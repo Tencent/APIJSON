@@ -719,7 +719,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
         int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
 
         String sql2 = null;
-        if (childCount > 0 && (childCount != 1 || join.isOne2Many())) {  // TODO 判断 MySQL >= 8.0
+        if (childCount > 0 && (childCount != 1 || join.isOne2Many()) && (jc.isMySQL() == false || jc.getDBVersionNums()[0] >= 8)) {
           String q = jc.getQuote();
           sql2 = prepared ? jc.getSQL(true) : sql;
 

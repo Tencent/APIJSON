@@ -10,6 +10,7 @@ import java.util.Map;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
+import apijson.StringUtil;
 
 /**SQL配置
  * @author Lemon
@@ -46,8 +47,8 @@ public interface SQLConfig {
 	//	boolean isPLSQL();
 	//	boolean isAnsiSQL();
 
-	boolean limitSQLCount(); //用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制 
-	
+	boolean limitSQLCount(); //用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
+
 	@NotNull
 	String getIdKey();
 	@NotNull
@@ -59,6 +60,27 @@ public interface SQLConfig {
 	 * @return
 	 */
 	String getDBVersion();
+
+  @NotNull
+  default int[] getDBVersionNums() {
+    String dbVersion = StringUtil.getNoBlankString(getDBVersion());
+    if (dbVersion.isEmpty()) {
+      return new int[]{0};
+    }
+
+    int index = dbVersion.indexOf("-");
+    if (index > 0) {
+      dbVersion = dbVersion.substring(0, index);
+    }
+
+    String[] ss = dbVersion.split("[.]");
+    int[] nums = new int[Math.max(1, ss.length)];
+    for (int i = 0; i < ss.length; i++) {
+      nums[i] = Integer.valueOf(ss[i]);
+    }
+
+    return nums;
+  }
 
 	/**获取数据库地址
 	 * @return
@@ -116,10 +138,10 @@ public interface SQLConfig {
 
 	Object getId();
 	SQLConfig setId(Object id);
-	
+
 	Object getIdIn();
 	SQLConfig setIdIn(Object idIn);
-	
+
 	Object getUserId();
 	SQLConfig setUserId(Object userId);
 
@@ -137,7 +159,7 @@ public interface SQLConfig {
 
 	String getSchema();
 	SQLConfig setSchema(String schema);
-	
+
 	String getDatasource();
 	SQLConfig setDatasource(String datasource);
 
@@ -145,13 +167,13 @@ public interface SQLConfig {
 
 	List<String> getJson();
 	SQLConfig setJson(List<String> json);
-	
+
 	/**请求传进来的Table名
 	 * @return
 	 * @see {@link #getSQLTable()}
 	 */
 	String getTable();
-	
+
 	SQLConfig setTable(String table);
 
 	/**数据库里的真实Table名
@@ -182,13 +204,13 @@ public interface SQLConfig {
 
 	String getCombine();
 	SQLConfig setCombine(String combine);
-	
+
 	Map<String, String> getCast();
 	SQLConfig setCast(Map<String, String> cast);
-	
+
 	List<String> getNull();
 	SQLConfig setNull(List<String> nulls);
-	
+
 	Map<String, Object> getWhere();
 	SQLConfig setWhere(Map<String, Object> where);
 
@@ -197,7 +219,7 @@ public interface SQLConfig {
 
 	Map<String, Object> getHaving();
 	SQLConfig setHaving(Map<String, Object> having);
-	
+
 	String getHavingCombine();
 	SQLConfig setHavingCombine(String havingCombine);
 
