@@ -109,7 +109,7 @@ public class Join {
     return ! isOne2Many();
   }
   public boolean isOne2Many() {
-    return path != null && path.contains("[]");  // TODO 必须保证一对一时不会传包含 [] 的 path
+    return count != 1 || (path != null && path.contains("[]"));  // TODO 必须保证一对一时不会传包含 [] 的 path
   }
 
 	public boolean isAppJoin() {
