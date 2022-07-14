@@ -592,6 +592,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (isHead == false) {
 			// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			Map<String,List<JSONObject>> appJoinChildMap = new HashMap<>();
+			childMap.forEach((viceSql,item) -> appJoinChildMap.put(viceSql,Arrays.asList(item)));
 			executeAppJoin(config, resultList, appJoinChildMap);
 
 			// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
