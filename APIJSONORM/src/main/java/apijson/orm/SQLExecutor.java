@@ -49,41 +49,44 @@ public interface SQLExecutor {
 	 * @param config
 	 */
 	void removeCache(String sql, SQLConfig config);
-	
+
 	/**执行SQL
 	 * @param config
+	 * @param unknownType
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject execute(@NotNull SQLConfig config, boolean unknowType) throws Exception;
-	
+	JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception;
+
 	//executeQuery和executeUpdate这两个函数因为返回类型不同，所以不好合并
 	/**执行查询
-	 * @param sql
+	 * @param config
 	 * @return
 	 * @throws SQLException
 	 */
 	ResultSet executeQuery(@NotNull SQLConfig config) throws Exception;
-	
+
 	/**执行增、删、改
-	 * @param sql
+	 * @param config
 	 * @return
 	 * @throws SQLException
 	 */
 	int executeUpdate(@NotNull SQLConfig config) throws Exception;
-	
+
 
 	/**判断是否为JSON类型
-	 * @param rsmd
-	 * @param position
-	 * @return
-	 */
+   * @param config
+   * @param rsmd
+   * @param position
+   * @param lable
+   * @return
+   */
 	boolean isJSONType(@NotNull SQLConfig config, ResultSetMetaData rsmd, int position, String lable);
 
-	
+
 	Connection getConnection(@NotNull SQLConfig config) throws Exception;
 	Statement getStatement(@NotNull SQLConfig config) throws Exception;
-	
+
 	int getTransactionIsolation();
 	void setTransactionIsolation(int transactionIsolation);
 	/**开始事务
@@ -105,11 +108,11 @@ public interface SQLExecutor {
 	/**关闭连接，释放资源
 	 */
 	void close();
-	
+
 	ResultSet executeQuery(@NotNull Statement statement, String sql) throws Exception;
-	
+
 	int executeUpdate(@NotNull Statement statement, String sql) throws Exception;
-	
+
 	ResultSet execute(@NotNull Statement statement, String sql) throws Exception;
 
 	int getGeneratedSQLCount();
