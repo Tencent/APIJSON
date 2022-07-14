@@ -725,6 +725,24 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
         String sql2 = null;
         if (childCount > 0 && isOne2Many && (jc.isMySQL() == false || jc.getDBVersionNums()[0] >= 8)) {
+//          加 row_number 字段并不会导致 count 等聚合函数统计出错，结果偏大，SQL JOIN 才会，之前没发现是因为缓存失效 bug
+//          boolean noAggrFun = true;
+//          List<String> column = jc.getColumn();
+//          if (column != null) {
+//            for (String c : column) {
+//              int start = c == null ? -1 : c.indexOf("(");
+//              int end = start <= 0 ? -1 : c.lastIndexOf(")");
+//              if (start > 0 && end > start) {
+//                String fun = c.substring(0, start);
+//                if (AbstractSQLConfig.SQL_AGGREGATE_FUNCTION_MAP.containsKey(fun)) {
+//                  noAggrFun = false;
+//                  break;
+//                }
+//              }
+//            }
+//          }
+//
+//          if (noAggrFun) { // 加 row_number 字段会导致 count 等聚合函数统计出错，结果偏大？
           String q = jc.getQuote();
           sql2 = prepared ? jc.getSQL(true) : sql;
 
@@ -738,6 +756,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
             + suffix;
 
           sql = prepared ? (prefix + sql.replaceFirst(" FROM ", rnStr) + suffix) : sql2;
+//          }
         }
 
         boolean isExplain = jc.isExplain();
