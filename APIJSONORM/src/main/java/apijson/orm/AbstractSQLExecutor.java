@@ -707,6 +707,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 //          jc.setColumn(column);
 //        }
 
+        int childCount = cc.getCount();
+        int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
+        boolean isOne2Many = childCount != 1 || join.isOne2Many();
+        // 一对多会漏副表数据  TODO 似乎一对一走以下优化 row_number() <= childCount 逻辑也没问题
+//        if (isOne2Many == false && allChildCount > 0 && jc.getCount() < allChildCount) {
+//          jc.setCount(allChildCount);
+//        }
+
 				boolean prepared = jc.isPrepared();
         String sql = jc.getSQL(false);
 				jc.setPrepared(prepared);
@@ -715,17 +723,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					throw new NullPointerException(TAG + ".executeAppJoin  StringUtil.isEmpty(sql, true) >> return null;");
 				}
 
-        int childCount = cc.getCount();
-        int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
-
         String sql2 = null;
-        if (childCount > 0 && (childCount != 1 || join.isOne2Many()) && (jc.isMySQL() == false || jc.getDBVersionNums()[0] >= 8)) {
+        if (childCount > 0 && isOne2Many && (jc.isMySQL() == false || jc.getDBVersionNums()[0] >= 8)) {
           String q = jc.getQuote();
           sql2 = prepared ? jc.getSQL(true) : sql;
 
           String prefix = "SELECT * FROM(";
           String rnStr = ", row_number() OVER (PARTITION BY " + q + key + q + ((AbstractSQLConfig) jc).getOrderString(true) + ") _row_num_ FROM ";
-          String suffix = ") _t WHERE ( (_row_num_ <= " + childCount + ") ) LIMIT " + allChildCount;
+          String suffix = ") _t WHERE ( (_row_num_ <= " + childCount + ") )" + (allChildCount > 0 ? " LIMIT " + allChildCount : "");
 
           sql2 = prefix
             // 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销  + sql
@@ -786,7 +791,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 						//每个 result 都要用新的 SQL 来存 childResultMap = onPutTable(config, rs, rsmd, childResultMap, index, result);
 
-						Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultList.put( " + index + ", result); "
+						Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultList.put(" + index + ", result); "
 								+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
             //TODO 兼容复杂关联
