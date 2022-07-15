@@ -414,14 +414,17 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 <b >QQ 技术群</b>： 734652054（新）、607020115（旧）  <br >
   
 **开发者时间精力有限，原则上优先解决 登记用户 和 贡献者 的问题，**<br >
-**不解决 文档/视频/常见问题 已明确说明、描述简陋 或 态度无礼 的问题！**
+**不解决 文档/视频/常见问题 已明确说明、描述简陋 或 态度无礼 的问题！**<br >
+**如果你已经多次得到帮助，却仍然只索取不贡献，那就别指望大家再帮你！**
 
-如果你 [登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加专门的 企业用户支持群，作者亲自答疑。
+如果你 [登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加专门的 **企业用户支持群**，作者亲自且优先答疑，<br >
+只有解答了这个群里的全部问题，才看情况解答其它群里的问题(其它群不保证解答、更不保证及时)。
 
 如果你为 APIJSON 做出了以下任何一个贡献： <br >
 [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
-可以加 贡献者交流群，注意联系 LonelyExplorer，加好友描述中附上贡献链接，谢谢
-
+可以在群里发出贡献链接并附带说明，管理员将设置关注你一段时间，优先答疑解惑。 <br >
+一般解答顺序：贡献者 > 帮助他人的群友 > 带企业名昵称 > 带岗位名昵称 > 其他群友。
+  
 
 ### 相关推荐
 [APIJSON, 让接口和文档见鬼去吧！](https://my.oschina.net/tommylemon/blog/805459)
