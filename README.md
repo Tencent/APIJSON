@@ -423,7 +423,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 如果你为 APIJSON 做出了以下任何一个贡献： <br >
 [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
 可以在群里发出贡献链接并附带说明，管理员将设置关注你一段时间，优先答疑解惑。 <br >
-一般解答顺序：贡献者 > 帮助他人的群友 > 带企业名昵称 > 带岗位名昵称 > 其他群友。
+其它群一般解答顺序：贡献者 > 帮助他人的群友 > 带企业名昵称 > 带岗位名昵称 > 其他群友。
   
 
 ### 相关推荐
