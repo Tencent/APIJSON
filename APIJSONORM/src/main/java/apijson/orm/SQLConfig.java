@@ -24,6 +24,7 @@ public interface SQLConfig {
 	String DATABASE_DB2 = "DB2";
 	String DATABASE_CLICKHOUSE = "CLICKHOUSE";
 	String DATABASE_HIVE = "HIVE";
+	String DATABASE_TDENGINE = "TDENGINE";
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -41,7 +42,15 @@ public interface SQLConfig {
 	boolean isDb2();
 	boolean isClickHouse();
 	boolean isHive();
-	//暂时只兼容以上 5 种
+  default boolean isTDengine() {
+    return isTDengine(getDatabase());
+  }
+
+  static boolean isTDengine(String db) {
+    return DATABASE_TDENGINE.equals(db);
+  }
+
+  //暂时只兼容以上几种
 	//	boolean isSQL();
 	//	boolean isTSQL();
 	//	boolean isPLSQL();
@@ -177,7 +186,7 @@ public interface SQLConfig {
 	SQLConfig setTable(String table);
 
 	/**数据库里的真实Table名
-	 * 通过 {@link #TABLE_KEY_MAP} 映射
+	 * 通过 {@link AbstractSQLConfig.TABLE_KEY_MAP} 映射
 	 * @return
 	 */
 	String getSQLTable();
@@ -283,6 +292,7 @@ public interface SQLConfig {
 	String getSubqueryString(Subquery subquery) throws Exception;
 
 	SQLConfig setProcedure(String procedure);
+
 
 
 }

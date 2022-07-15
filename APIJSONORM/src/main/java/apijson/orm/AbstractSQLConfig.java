@@ -148,6 +148,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_DB2);
 		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
 		DATABASE_LIST.add(DATABASE_HIVE);
+		DATABASE_LIST.add(DATABASE_TDENGINE);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -726,6 +727,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("bitAnd", ""); //bitAnd(a,b)
 		SQL_FUNCTION_MAP.put("bitOr", ""); //bitOr(a,b)
 
+    // PostgreSQL 表结构相关 SQL 函数
+    SQL_FUNCTION_MAP.put("obj_description", "");
+    SQL_FUNCTION_MAP.put("col_description", "");
+
+    // SQLServer 相关 SQL 函数
+    SQL_FUNCTION_MAP.put("datalength", "");
+
 	}
 
   private int[] dbVersionNums = null;
@@ -991,7 +999,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@Override
 	public String getQuote() {
-		return isMySQL()||isClickHouse() ? "`" : "\"";
+		return isMySQL() || isClickHouse() || isTDengine() ? "`" : "\"";
 	}
 
 	@Override

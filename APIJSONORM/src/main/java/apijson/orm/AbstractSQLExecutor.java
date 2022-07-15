@@ -1114,7 +1114,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			connectionMap.put(connectionKey, connection);
 		}
 
-		int ti = getTransactionIsolation();
+    // TDengine 驱动内部事务处理方法都是空实现，手动 commit 无效
+		int ti = config.isTDengine() ? Connection.TRANSACTION_NONE : getTransactionIsolation();
 		if (ti != Connection.TRANSACTION_NONE) { //java.sql.SQLException: Transaction isolation level NONE not supported by MySQL
 			begin(ti);
 		}
@@ -1143,7 +1144,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		//		}
 		if (! isIsolationStatusSet) { //只设置一次Isolation等级 PG重复设置事务等级会报错
 			isIsolationStatusSet = true;
-			connection.setTransactionIsolation(transactionIsolation);
+			connection.setTransactionIsolation(transactionIsolation);  // 这句导致 TDengine 驱动报错
 		}
 		connection.setAutoCommit(false); //java.sql.SQLException: Can''t call commit when autocommit=true
 	}
@@ -1212,6 +1213,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception {
+    if (config.isTDengine()) {
+      Connection conn = getConnection(config);
+      Statement stt = conn.createStatement();
+      return executeQuery(stt, StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
+    }
+
 		PreparedStatement stt = getStatement(config, sql);
 		ResultSet rs = stt.executeQuery();  //PreparedStatement 不用传 SQL
 		//		if (config.isExplain() && (config.isSQLServer() || config.isOracle())) {
@@ -1221,10 +1228,20 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		return rs;
 	}
 
+
 	@Override
 	public int executeUpdate(@NotNull SQLConfig config, String sql) throws Exception {
-		PreparedStatement stt = getStatement(config);
-		int count = stt.executeUpdate();  // PreparedStatement 不用传 SQL
+    Statement stt;
+    int count;
+    if (config.isTDengine()) {
+      Connection conn = getConnection(config);
+      stt = conn.createStatement();
+      count = stt.executeUpdate(StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
+    }
+    else {
+      stt = getStatement(config);
+      count = ((PreparedStatement) stt).executeUpdate();  // PreparedStatement 不用传 SQL
+    }
 
 		if (count <= 0 && config.isHive()) {
 			count = 1;
