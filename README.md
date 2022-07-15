@@ -252,7 +252,7 @@ https://github.com/Tencent/APIJSON/issues/36
 使用 [Apache License 2.0](/LICENSE)，对 公司、团队、个人 等 商用、非商用 都自由免费且非常友好，请放心使用和登记
 
 ### 使用登记
-如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(按登记顺序排列)：<br />
+如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(新的按登记顺序排列、专群优先答疑解惑)：<br />
 https://github.com/Tencent/APIJSON/issues/187 
 <div style="float:left">
   <img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75">
@@ -417,7 +417,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 **不解决 文档/视频/常见问题 已明确说明、描述简陋 或 态度无礼 的问题！**<br >
 **如果你已经多次得到帮助，却仍然只索取不贡献，那就别指望大家再帮你！**
 
-如果你 [登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加专门的 **企业用户支持群**，作者亲自且优先答疑，<br >
+如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持群**，作者亲自且优先答疑，<br >
 只有解答了这个群里的全部问题，才看情况解答其它群里的问题(其它群不保证解答、更不保证及时)。
 
 如果你为 APIJSON 做出了以下任何一个贡献： <br >
