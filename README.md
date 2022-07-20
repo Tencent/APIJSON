@@ -165,7 +165,7 @@ https://github.com/Tencent/APIJSON/wiki
 * **开发提速很大** (CRUD 零代码热更新全自动，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
 * **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
 * **社区影响力大** (GitHub 1W+ Star 在 350W Java 项目中排名前 120，远超 FLAG, BAT 等国内外绝大部分开源项目)
-* **多样用户案例** (腾讯内用户有互娱、音乐、云与智慧，外部用户包含华为、华能、百度、圆通、传音、万科采筑)
+* **多样用户案例** (腾讯内有互娱、音乐、微信、云与智慧等，外部有华为、华能、百度、快手、中兴、圆通、传音等)
 * **适用场景广泛** (社交聊天、阅读资讯、影音视频、办公学习 等各种 App、网站、公众号、小程序 等非金融类项目)
 * **周边生态丰富** (Android, iOS, Web 等各种 Demo、继承 JSON 的海量生态、零代码 接口测试 和 单元测试 工具等)
 * **文档视频齐全** (项目介绍、快速上手、安装部署 等后端、前端、客户端的 图文解说、视频教程、代码注释 等)
@@ -412,7 +412,7 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
-<b >QQ 技术群</b>： 734652054（新）、607020115（旧）  <br >
+<b >QQ 技术群</b>： 请在常见问题 Issue 中查找  <br >
   
 **开发者时间精力有限，原则上优先解决 登记用户 和 贡献者 的问题，**<br >
 **不解决 文档/视频/常见问题 已明确说明、描述简陋 或 态度无礼 的问题！**<br >
