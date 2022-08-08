@@ -13,8 +13,8 @@ import java.text.SimpleDateFormat;
 public class Log {
 
 	public static boolean DEBUG = true;
-	
-	public static final String VERSION = "5.1.0";
+
+	public static final String VERSION = "5.2.0";
 	public static final String KEY_SYSTEM_INFO_DIVIDER = "---|-----APIJSON SYSTEM INFO-----|---";
 
 	//默认的时间格式

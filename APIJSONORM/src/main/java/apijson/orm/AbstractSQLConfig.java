@@ -997,7 +997,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return DATABASE_HIVE.equals(db);
 	}
 
-	@Override
+  @Override
+  public boolean isTDengine() {
+    return isTDengine(getSQLDatabase());
+  }
+  public static boolean isTDengine(String db) {
+    return DATABASE_TDENGINE.equals(db);
+  }
+
+
+  @Override
 	public String getQuote() {
 		return isMySQL() || isClickHouse() || isTDengine() ? "`" : "\"";
 	}

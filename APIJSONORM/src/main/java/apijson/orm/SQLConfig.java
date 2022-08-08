@@ -42,13 +42,8 @@ public interface SQLConfig {
 	boolean isDb2();
 	boolean isClickHouse();
 	boolean isHive();
-  default boolean isTDengine() {
-    return isTDengine(getDatabase());
-  }
+  boolean isTDengine();
 
-  static boolean isTDengine(String db) {
-    return DATABASE_TDENGINE.equals(db);
-  }
 
   //暂时只兼容以上几种
 	//	boolean isSQL();
