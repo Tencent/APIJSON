@@ -3979,7 +3979,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
 		default:
-			String explain = (config.isExplain() ? (config.isSQLServer() || config.isOracle() ? "SET STATISTICS PROFILE ON  " : "EXPLAIN ") : "");
+			String explain = config.isExplain() ? (config.isSQLServer() ? "SET STATISTICS PROFILE ON  " : (config.isOracle() ? "EXPLAIN PLAN FOR " : "EXPLAIN ")) : "";
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
 				String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
 				return explain + "SELECT " + config.getWhereString(false) + " AS " + q + JSONResponse.KEY_COUNT + q + config.getLimitString();
