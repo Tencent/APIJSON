@@ -1068,7 +1068,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 		PreparedStatement statement; //创建Statement对象
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
-			statement = getConnection(config).prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			if (config.isOracle()) {
+				// 解决 oracle 使用自增主键 插入获取不到id问题
+				String[] generatedColumns = {config.getIdKey()};
+				statement = getConnection(config).prepareStatement(sql, generatedColumns);
+			} else {
+				statement = getConnection(config).prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			}
 		}
 		else if (RequestMethod.isGetMethod(config.getMethod(), true)) {
 			statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -1250,7 +1256,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (config.getId() == null && config.getMethod() == RequestMethod.POST) {  // 自增id
 			ResultSet rs = stt.getGeneratedKeys();
 			if (rs != null && rs.next()) {
-				config.setId(rs.getLong(1));  //返回插入的主键id  FIXME Oracle 拿不到
+				config.setId(rs.getLong(1));
 			}
 		}
 
