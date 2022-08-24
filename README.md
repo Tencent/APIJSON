@@ -454,6 +454,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON 接口调试实践](https://github.com/Tencent/APIJSON/issues/189)
 
+[APIJSON-零代码接口和文档 JSON 协议 与 ORM 库](https://cloud.tencent.com/developer/article/2077042)
+
 [APIJSON使用例子总结](https://blog.csdn.net/weixin_41077841/article/details/110518007)
 
 [APIJSON 自动化接口和文档的快速开发神器 （一）](https://blog.csdn.net/qq_41829492/article/details/88670940)
