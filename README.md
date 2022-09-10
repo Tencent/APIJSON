@@ -453,6 +453,12 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 [学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
 
 [APIJSON 接口调试实践](https://github.com/Tencent/APIJSON/issues/189)
+  
+[关于APIJSON远程函数](https://mp.weixin.qq.com/s?__biz=Mzg3NTc1NDUyNA==&mid=2247483950&idx=1&sn=b11e70bdf083c55d72238e107449ae2e&chksm=cf3de75df84a6e4b3a4acd0846531b0bd12bc90379523fbaf6b4f900fc3cdc1b1ce3eff97fd9&scene=178&cur_album_id=2548737392338354178#rd)
+  
+[APIJSON新增方法实例](https://mp.weixin.qq.com/s?__biz=Mzg3NTc1NDUyNA==&mid=2247483931&idx=1&sn=0e44ba7ba5613ad533c00c56cd8b2192&chksm=cf3de768f84a6e7e93ac20c26b7a4553d638d6ceb3edbdfaf0b05b80d28c1f3973860c4ac30b&scene=178&cur_album_id=2548737392338354178#rd)
+  
+[APIJSON-APIJSON的那些事儿](https://mp.weixin.qq.com/s?__biz=Mzg3NTc1NDUyNA==&mid=2247483901&idx=2&sn=679f37ec3421956b2b191abfe3437c6b&chksm=cf3de48ef84a6d98d338f9eaec25c01c0dec559ae149f62c3823b076a966fc0898dc0f004a16&token=422905191&lang=zh_CN#rd)
 
 [APIJSON-零代码接口和文档 JSON 协议 与 ORM 库](https://cloud.tencent.com/developer/article/2077042)
 
