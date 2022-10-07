@@ -3787,7 +3787,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		cfg.setPreparedValueList(new ArrayList<>());
 		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + cfg.getSQL(isPrepared()) + ") ";
 
-		preparedValueList.addAll(cfg.getPreparedValueList());
+		List<Object> origPreparedValueList = preparedValueList;
+		preparedValueList = cfg.getPreparedValueList();
+		preparedValueList.addAll(origPreparedValueList);
 
 		return sql;
 	}
