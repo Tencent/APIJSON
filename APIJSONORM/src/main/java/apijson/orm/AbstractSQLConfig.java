@@ -3808,11 +3808,33 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		cfg.setPreparedValueList(new ArrayList<>());
 		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + cfg.getSQL(isPrepared()) + ") ";
 
-		List<Object> origPreparedValueList = preparedValueList;
-		preparedValueList = cfg.getPreparedValueList();
-		preparedValueList.addAll(origPreparedValueList);
+    //// SELECT .. FROM(SELECT ..) ..  WHERE .. 格式需要把子查询中的预编译值提前
+    //// 如果外查询 SELECT concat(`name`,?)  这种 SELECT 里也有预编译值，那就不能这样简单反向
+    //List<Object> subPvl = cfg.getPreparedValueList();
+    //if (subPvl != null && subPvl.isEmpty() == false) {
+    //  List<Object> pvl = getPreparedValueList();
+    //
+    //  if (pvl != null && pvl.isEmpty() == false) {
+    //    subPvl.addAll(pvl);
+    //  }
+    //  setPreparedValueList(subPvl);
+    //}
 
-		return sql;
+    List<Object> subPvl = cfg.getPreparedValueList();
+    if (subPvl != null && subPvl.isEmpty() == false) {
+      List<Object> pvl = getPreparedValueList();
+
+      if (pvl == null || pvl.isEmpty()) {
+        pvl = subPvl;
+      }
+      else {
+        pvl.addAll(subPvl);
+      }
+
+      setPreparedValueList(pvl);
+    }
+
+    return sql;
 	}
 
 	//key@:{} Subquery >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -3830,7 +3852,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**拼接条件
 	 * @param not
 	 * @param condition
-	 * @param outerBreaket
+	 * @param addOuterBracket
 	 * @return
 	 */
 	public static String getCondition(boolean not, String condition, boolean addOuterBracket) {
@@ -3974,7 +3996,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		//TODO procedure 改为 List<Procedure>  procedureList; behind : true; function: callFunction(); String key; ...
 		// for (...) { Call procedure1();\n SQL \n; Call procedure2(); ... }
-		// 貌似不需要，因为 ObjecParser 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
+		// 貌似不需要，因为 ObjectParser 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
 
 		String sch = config.getSQLSchema();
 		if (StringUtil.isNotEmpty(config.getProcedure(), true)) {
@@ -4014,14 +4036,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
 				//针对oracle分组后条数的统计
 				if (StringUtil.isNotEmpty(config.getGroup(),true) && RequestMethod.isHeadMethod(config.getMethod(), true)){
-					return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + ") " + config.getLimitString();
+					return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + ") " + config.getLimitString();
 				}
 
-				String sql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config);
+				String sql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config);
 				return explain + config.getOraclePageSql(sql);
 			}
 
-			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(column, tablePath, config) + config.getLimitString();
+			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + config.getLimitString();
 		}
 	}
 
@@ -4044,13 +4066,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	private static String getConditionString(String column, String table, AbstractSQLConfig config) throws Exception {
-		String where = config.getWhereString(true);
+	private static String getConditionString(String table, AbstractSQLConfig config) throws Exception {
+    Subquery from = config.getFrom();
+    if (from != null) {
+      table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
+    }
 
-		Subquery from = config.getFrom();
-		if (from != null) {
-			table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
-		}
+    String join = config.getJoinString();
+
+    String where = config.getWhereString(true);
 
 		//根据方法不同，聚合语句不同。GROUP  BY 和 HAVING 可以加在 HEAD 上, HAVING 可以加在 PUT, DELETE 上，GET 全加，POST 全都不加
 		String aggregation;
@@ -4067,7 +4091,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			aggregation = "";
 		}
 
-		String condition = table + config.getJoinString() + where + aggregation;
+		String condition = table + join + where + aggregation;
 		; //+ config.getLimitString();
 
 		//no need to optimize
@@ -4123,8 +4147,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		if (joinList != null) {
 			String quote = getQuote();
-			List<Object> pvl = new ArrayList<>();
-			boolean changed = false;
+			List<Object> pvl = getPreparedValueList();  // new ArrayList<>();
+			//boolean changed = false;
 
 			//  主表不用别名			String ta;
 			for (Join j : joinList) {
@@ -4167,7 +4191,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					jc.setMain(false).setKeyPrefix(true);
 
 					pvl.addAll(jc.getPreparedValueList());
-					changed = true;
+					//changed = true;
 					break;
 
 				case "&": // INNER JOIN: A & B
@@ -4197,17 +4221,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					ow = oc.getWhereString(false);
 
 					pvl.addAll(oc.getPreparedValueList());
-					changed = true;
+					//changed = true;
 				}
 
 				joinOns += "  \n  " + sql + (StringUtil.isEmpty(ow, true) ? "" : " AND ( " + ow + " ) ");
 			}
 
 
-			if (changed) {
-				pvl.addAll(preparedValueList);
-				preparedValueList = pvl;
-			}
+			//if (changed) {
+      //  List<Object> opvl = getPreparedValueList();
+      //  if (opvl != null && opvl.isEmpty() == false) {
+      //    pvl.addAll(opvl);
+      //  }
+				setPreparedValueList(pvl);
+			//}
 
 		}
 
