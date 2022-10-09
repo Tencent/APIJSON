@@ -12,6 +12,7 @@ import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.orm.AbstractFunctionParser.FunctionBean;
 import apijson.orm.exception.ConflictException;
+import apijson.orm.exception.CommonException;
 import apijson.orm.exception.NotExistException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -19,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.rmi.ServerException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -282,46 +284,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 							}
 						} catch (Exception e) {
 							if (tri == false) {
-								if (Log.DEBUG && sqlConfig != null && e.getMessage().contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
-									try {
-										String db = sqlConfig.getDatabase();
-										if (db == null) {
-											if (sqlConfig.isMySQL()) {
-												db = SQLConfig.DATABASE_MYSQL;
-											}
-											else if (sqlConfig.isPostgreSQL()) {
-												db = SQLConfig.DATABASE_POSTGRESQL;
-											}
-											else if (sqlConfig.isSQLServer()) {
-												db = SQLConfig.DATABASE_SQLSERVER;
-											}
-											else if (sqlConfig.isOracle()) {
-												db = SQLConfig.DATABASE_ORACLE;
-											}
-											else if (sqlConfig.isDb2()) {
-												db = SQLConfig.DATABASE_DB2;
-											}
-											else if (sqlConfig.isClickHouse()) {
-												db = SQLConfig.DATABASE_CLICKHOUSE;
-											}
-											else {
-												db = AbstractSQLConfig.DEFAULT_DATABASE;
-											}
-										}
-
-										Class<? extends Exception> clazz = e.getClass();
-										e = clazz.getConstructor(String.class).newInstance(
-												e.getMessage()
-												+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n **环境信息** "
-												+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-												+ " \n 数据库: " + db + " " + sqlConfig.getDBVersion()
-												+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
-												+ " \n APIJSON: " + Log.VERSION
-												);
-									} catch (Throwable e2) {}
-								}
-
-								throw e;  // 不忽略错误，抛异常
+								throw CommonException.wrap(e, sqlConfig);  // 不忽略错误，抛异常
 							}
 							invalidate();  // 忽略错误，还原request
 						}
@@ -515,9 +478,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 
 	/**
+	 * @param index
 	 * @param key
 	 * @param value
-	 * @param isFirst
 	 * @return
 	 * @throws Exception
 	 */
@@ -746,9 +709,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	protected SQLConfig sqlConfig = null;//array item复用
 	/**SQL查询，for array item
-	 * @param count
-	 * @param page
-	 * @param position
 	 * @return this
 	 * @throws Exception
 	 */

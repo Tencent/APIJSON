@@ -63,6 +63,8 @@ import apijson.orm.Join.On;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.model.Access;
 import apijson.orm.model.Column;
+import apijson.orm.model.DbaColumn;
+import apijson.orm.model.DbaTable;
 import apijson.orm.model.Document;
 import apijson.orm.model.ExtendedProperty;
 import apijson.orm.model.Function;
@@ -131,6 +133,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		TABLE_KEY_MAP.put(SysTable.class.getSimpleName(), SysTable.TABLE_NAME);
 		TABLE_KEY_MAP.put(SysColumn.class.getSimpleName(), SysColumn.TABLE_NAME);
 		TABLE_KEY_MAP.put(ExtendedProperty.class.getSimpleName(), ExtendedProperty.TABLE_NAME);
+		TABLE_KEY_MAP.put(DbaTable.class.getSimpleName(), DbaTable.TABLE_NAME);
+		TABLE_KEY_MAP.put(DbaColumn.class.getSimpleName(), DbaColumn.TABLE_NAME);
 
 		CONFIG_TABLE_LIST = new ArrayList<>();  // Table, Column 等是系统表 AbstractVerifier.SYSTEM_ACCESS_MAP.keySet());
 		CONFIG_TABLE_LIST.add(Function.class.getSimpleName());
@@ -146,6 +150,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
 		DATABASE_LIST.add(DATABASE_DB2);
+		DATABASE_LIST.add(DATABASE_DAMENG);
 		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
 		DATABASE_LIST.add(DATABASE_HIVE);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
@@ -982,6 +987,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isDb2(String db) {
 		return DATABASE_DB2.equals(db);
 	}
+
+	@Override
+	public boolean isDameng() {
+		return isDameng(getSQLDatabase());
+	}
+	public static boolean isDameng(String db) {
+		return DATABASE_DAMENG.equals(db);
+	}
 	@Override
 	public boolean isClickHouse() {
 		return isClickHouse(getSQLDatabase());
@@ -1029,6 +1042,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (SysTable.TAG.equals(table) || SysColumn.TAG.equals(table) || ExtendedProperty.TAG.equals(table)) {
 			return SCHEMA_SYS; //SQL Server 在 sys 中的属性比 information_schema 中的要全，能拿到注释
 		}
+		if (DbaTable.TAG.equals(table) || DbaColumn.TAG.equals(table)) {
+			return ""; //Oracle, Dameng 的 dba_tables 和 all_tab_columns 表好像不属于任何 Schema
+		}
 
 		String sch = getSchema();
 		return sch == null ? DEFAULT_SCHEMA : sch;
@@ -1071,9 +1087,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getSQLTable() {
-		//		String t = TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
-		//如果要强制小写，则可在子类重写这个方法再 toLowerCase		return DATABASE_POSTGRESQL.equals(getDatabase()) ? t.toLowerCase() : t;
-		return TABLE_KEY_MAP.containsKey(table) ? TABLE_KEY_MAP.get(table) : table;
+		// 如果要强制小写，则可在子类重写这个方法再 toLowerCase		return DATABASE_POSTGRESQL.equals(getDatabase()) ? t.toLowerCase() : t;
+		String ot = getTable();
+		String nt = TABLE_KEY_MAP.get(ot);
+		return StringUtil.isEmpty(nt) ? ot : nt;
 	}
 	@JSONField(serialize = false)
 	@Override

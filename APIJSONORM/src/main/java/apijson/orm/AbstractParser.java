@@ -6,7 +6,6 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import static apijson.JSONObject.KEY_EXPLAIN;
-import static apijson.JSONObject.KEY_JSON;
 import static apijson.RequestMethod.GET;
 
 import java.io.UnsupportedEncodingException;
@@ -44,6 +43,7 @@ import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
+import apijson.orm.exception.CommonException;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.NotLoggedInException;
 import apijson.orm.exception.OutOfRangeException;
@@ -493,14 +493,18 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			res.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + executedSQLDuration);
 
 			if (error != null) {
-				res.put("trace:throw", error.getClass().getName());
-				res.put("trace:stack", error.getStackTrace());
+        //        String msg = error.getMessage();
+        //        if (msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER)) {
+        //        }
+        Throwable t = error instanceof CommonException && error.getCause() != null ? error.getCause() : error;
+				res.put("trace:throw", t.getClass().getName());
+				res.put("trace:stack", t.getStackTrace());
 			}
 		}
 
 		onClose();
 
-		//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/232
+		// CS304 Issue link: https://github.com/Tencent/APIJSON/issues/232
 		if (IS_PRINT_REQUEST_STRING_LOG || Log.DEBUG || error != null) {
 			Log.sl("\n\n\n", '<', "");
 			Log.fd(TAG, requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
@@ -691,18 +695,18 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public static JSONObject extendResult(JSONObject object, int code, String msg, boolean isRoot) {
 		int index = Log.DEBUG == false || isRoot == false || msg == null ? -1 : msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
 		String debug = Log.DEBUG == false || isRoot == false ? null : (index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
-				: " \n 提 bug 请发请求和响应的【完整截屏】，没图的自行解决！"
-						+ " \n 开发者有限的时间和精力主要放在【维护项目源码和文档】上！"
-						+ " \n 【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！"
-						+ " \n 【态度 不文明/不友善】的可能会被踢出群，问题也可能不予解答！！！"
+				: " \n提 bug 请发请求和响应的【完整截屏】，没图的自行解决！"
+						+ " \n开发者有限的时间和精力主要放在【维护项目源码和文档】上！"
+						+ " \n【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！"
+						+ " \n【态度 不文明/不友善】的可能会被踢出群，问题也可能不予解答！！！"
 				+ " \n\n **环境信息** "
-				+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-				+ " \n 数据库: DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE
-				+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
-				+ " \n APIJSON: " + Log.VERSION
-				+ " \n   |   \n 常见问题：https://github.com/Tencent/APIJSON/issues/36"
-				+ " \n 通用文档：https://github.com/Tencent/APIJSON/blob/master/Document.md"
-				+ " \n 视频教程：https://search.bilibili.com/all?keyword=APIJSON");
+				+ " \n系统: " + Log.OS_NAME + " " + Log.OS_VERSION
+				+ " \n数据库: DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE
+				+ " \nJDK: " + Log.JAVA_VERSION + " " + Log.OS_ARCH
+				+ " \nAPIJSON: " + Log.VERSION
+				+ " \n   \n【常见问题】：https://github.com/Tencent/APIJSON/issues/36"
+				+ " \n【通用文档】：https://github.com/Tencent/APIJSON/blob/master/Document.md"
+				+ " \n【视频教程】：https://search.bilibili.com/all?keyword=APIJSON");
 
 		msg = index >= 0 ? msg.substring(0, index) : msg;
 
@@ -710,10 +714,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			object = new JSONObject(true);
 		}
 
-		if (object.containsKey(JSONResponse.KEY_OK) == false) {
+		if (object.get(JSONResponse.KEY_OK) == null) {
 			object.put(JSONResponse.KEY_OK, JSONResponse.isSuccess(code));
 		}
-		if (object.containsKey(JSONResponse.KEY_CODE) == false) {
+		if (object.get(JSONResponse.KEY_CODE) == null) {
 			object.put(JSONResponse.KEY_CODE, code);
 		}
 
@@ -763,7 +767,6 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	/**添加请求成功的状态内容
 	 * @param object
 	 * @param e
-	 * @param isRoot
 	 * @return
 	 */
 	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
@@ -783,20 +786,25 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @return
 	 */
 	public static JSONObject extendErrorResult(JSONObject object, Exception e, RequestMethod requestMethod, String url, boolean isRoot) {
-		String msg = e.getMessage();
+		String msg = CommonException.getMsg(e);
 
 		if (Log.DEBUG && isRoot) {
 			try {
-				int index = msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
-				String info = index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
-						: " \n **环境信息** "
-						+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-						+ " \n 数据库: <!-- 请填写，例如 MySQL 5.7，DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE + " -->"
-						+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
-						+ " \n APIJSON: " + Log.VERSION;
+        boolean isCommon = e instanceof CommonException;
+        String env = isCommon ? ((CommonException) e).getEnvironment() : null;
+				if (StringUtil.isEmpty(env)) {
+          //int index = msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
+          //env = index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
+          env = " \n **环境信息** "
+            + " \n 系统: " + Log.OS_NAME + " " + Log.OS_VERSION
+            + " \n 数据库: <!-- 请填写，例如 MySQL 5.7。默认数据库为 " + AbstractSQLConfig.DEFAULT_DATABASE + " -->"
+            + " \n JDK: " + Log.JAVA_VERSION + " " + Log.OS_ARCH
+            + " \n APIJSON: " + Log.VERSION;
 
-				msg = index < 0 ? msg : msg.substring(0, index).trim();
-				String encodedMsg = URLEncoder.encode(msg, "UTF-8");
+          //msg = index < 0 ? msg : msg.substring(0, index).trim();
+        }
+
+        String encodedMsg = URLEncoder.encode(msg, "UTF-8");
 
 				if (StringUtil.isEmpty(url, true)) {
 					String host = "localhost";
@@ -824,12 +832,12 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					req = URLEncoder.encode(req, "UTF-8");
 				} catch (Throwable e2) {}
 
-
-				boolean isSQLException = e instanceof SQLException;  // SQL 报错一般都是通用问题，优先搜索引擎
-				String apiatuoAndGitHubLink = "\n【APIAuto】： \n http://apijson.cn/api?type=JSON&url=" + URLEncoder.encode(url, "UTF-8") + "&json=" + req
+        Throwable t = isCommon ? e.getCause() : e;
+				boolean isSQLException = t instanceof SQLException;  // SQL 报错一般都是通用问题，优先搜索引擎
+				String apiatuoAndGitHubLink = "\n\n【APIAuto】： \n http://apijson.cn/api?type=JSON&url=" + URLEncoder.encode(url, "UTF-8") + "&json=" + req
 						+ "        \n\n【GitHub】： \n https://www.google.com/search?q=site%3Agithub.com%2FTencent%2FAPIJSON+++" + encodedMsg;
 
-				msg += Log.KEY_SYSTEM_INFO_DIVIDER + " \n   |   \n 浏览器打开以下链接查看解答"
+				msg += Log.KEY_SYSTEM_INFO_DIVIDER + "    浏览器打开以下链接查看解答"
 						+ (isSQLException ? "" : apiatuoAndGitHubLink)
 						//	GitHub Issue 搜索貌似是精准包含，不易找到答案 	+ "        \n\nGitHub： \n https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
 						+ "        \n\n【Google】：\n https://www.google.com/search?q=" + encodedMsg
@@ -838,10 +846,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						+ "        \n\n都没找到答案？打开这个链接 \n https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
 						+ " \n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
 						+ " \n【标题】：" + msg
-						+ " \n【内容】：" + info + "\n\n**问题描述**\n" + msg
+						+ " \n【内容】：" + env + "\n\n**问题描述**\n" + msg
 						+ " \n\n<!-- 尽量完整截屏(至少包含请求和回包结果，还可以加上控制台报错日志)，然后复制粘贴到这里 -->"
 						+ " \n\nPOST " + url
-						+ " \n请求 Request JSON：\n ```js"
+						+ " \n发送请求 Request JSON：\n ```js"
 						+ " \n 请填写，例如 { \"Users\":{} }"
 						+ " \n```"
 						+ " \n\n返回结果 Response JSON：\n ```js"
@@ -850,8 +858,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			} catch (Throwable e2) {}
 		}
 
-		JSONObject error = newErrorResult(e, isRoot);
-		return extendResult(object, error.getIntValue(JSONResponse.KEY_CODE), msg, isRoot);
+    int code = CommonException.getCode(e);
+		return extendResult(object, code, msg, isRoot);
 	}
 
 	/**新建错误状态内容
@@ -868,50 +876,14 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	public static JSONObject newErrorResult(Exception e, boolean isRoot) {
 		if (e != null) {
-			e.printStackTrace();
+      //      if (Log.DEBUG) {
+      e.printStackTrace();
+      //      }
 
-			int code;
-			if (e instanceof UnsupportedEncodingException) {
-				code = JSONResponse.CODE_UNSUPPORTED_ENCODING;
-			}
-			else if (e instanceof IllegalAccessException) {
-				code = JSONResponse.CODE_ILLEGAL_ACCESS;
-			}
-			else if (e instanceof UnsupportedOperationException) {
-				code = JSONResponse.CODE_UNSUPPORTED_OPERATION;
-			}
-			else if (e instanceof NotExistException) {
-				code = JSONResponse.CODE_NOT_FOUND;
-			}
-			else if (e instanceof IllegalArgumentException) {
-				code = JSONResponse.CODE_ILLEGAL_ARGUMENT;
-			}
-			else if (e instanceof NotLoggedInException) {
-				code = JSONResponse.CODE_NOT_LOGGED_IN;
-			}
-			else if (e instanceof TimeoutException) {
-				code = JSONResponse.CODE_TIME_OUT;
-			}
-			else if (e instanceof ConflictException) {
-				code = JSONResponse.CODE_CONFLICT;
-			}
-			else if (e instanceof ConditionErrorException) {
-				code = JSONResponse.CODE_CONDITION_ERROR;
-			}
-			else if (e instanceof UnsupportedDataTypeException) {
-				code = JSONResponse.CODE_UNSUPPORTED_TYPE;
-			}
-			else if (e instanceof OutOfRangeException) {
-				code = JSONResponse.CODE_OUT_OF_RANGE;
-			}
-			else if (e instanceof NullPointerException) {
-				code = JSONResponse.CODE_NULL_POINTER;
-			}
-			else {
-				code = JSONResponse.CODE_SERVER_ERROR;
-			}
+      String msg = CommonException.getMsg(e);
+			Integer code = CommonException.getCode(e);
 
-			return newResult(code, e.getMessage(), isRoot);
+			return newResult(code, msg, isRoot);
 		}
 
 		return newResult(JSONResponse.CODE_SERVER_ERROR, JSONResponse.MSG_SERVER_ERROR, isRoot);
@@ -1987,50 +1959,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			return result;
 		}
 		catch (Exception e) {
-			String msg = e.getMessage();
-			if (Log.DEBUG && msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
-				try {
-					String db = config.getDatabase();
-					if (db == null) {
-						if (config.isMySQL()) {
-							db = SQLConfig.DATABASE_MYSQL;
-						}
-						else if (config.isPostgreSQL()) {
-							db = SQLConfig.DATABASE_POSTGRESQL;
-						}
-						else if (config.isSQLServer()) {
-							db = SQLConfig.DATABASE_SQLSERVER;
-						}
-						else if (config.isOracle()) {
-							db = SQLConfig.DATABASE_ORACLE;
-						}
-						else if (config.isDb2()) {
-							db = SQLConfig.DATABASE_DB2;
-						}
-						else if (config.isClickHouse()) {
-							db = SQLConfig.DATABASE_CLICKHOUSE;
-						}
-						else {
-							db = AbstractSQLConfig.DEFAULT_DATABASE;
-						}
-					}
-
-					Class<? extends Exception> clazz = e.getClass();
-					e = clazz.getConstructor(String.class).newInstance(
-							msg
-							+ "       " + Log.KEY_SYSTEM_INFO_DIVIDER + "       \n **环境信息** "
-							+ " \n 系统: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-							+ " \n 数据库: " + db + " " + config.getDBVersion()
-							+ " \n JDK: " + System.getProperty("java.version") + " " + System.getProperty("os.arch")
-							+ " \n APIJSON: " + Log.VERSION
-							);
-				} catch (Throwable e2) {}
-			}
-
-			if (Log.DEBUG == false && e instanceof SQLException) {
-				throw new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);
-			}
-			throw e;
+      throw CommonException.wrap(e, config);
 		}
 		finally {
 			if (config.getPosition() == 0 && config.limitSQLCount()) {

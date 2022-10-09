@@ -22,6 +22,7 @@ public interface SQLConfig {
 	String DATABASE_SQLSERVER = "SQLSERVER";
 	String DATABASE_ORACLE = "ORACLE";
 	String DATABASE_DB2 = "DB2";
+	String DATABASE_DAMENG = "DAMENG";
 	String DATABASE_CLICKHOUSE = "CLICKHOUSE";
 	String DATABASE_HIVE = "HIVE";
 	String DATABASE_TDENGINE = "TDENGINE";
@@ -40,6 +41,7 @@ public interface SQLConfig {
 	boolean isSQLServer();
 	boolean isOracle();
 	boolean isDb2();
+	boolean isDameng();
 	boolean isClickHouse();
 	boolean isHive();
   boolean isTDengine();

@@ -14,18 +14,30 @@ public class Log {
 
 	public static boolean DEBUG = true;
 
-	public static final String VERSION = "5.2.0";
-	public static final String KEY_SYSTEM_INFO_DIVIDER = "---|-----APIJSON SYSTEM INFO-----|---";
+	public static final String VERSION = "5.3.0";
+	public static final String KEY_SYSTEM_INFO_DIVIDER = "\n---|-----APIJSON SYSTEM INFO-----|---\n";
 
-	//默认的时间格式
-	public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+  public static final String OS_NAME;
+  public static final String OS_VERSION;
+  public static final String OS_ARCH;
+  public static final String JAVA_VERSION;
+  static {
+    OS_NAME = System.getProperty("os.name");
+    OS_VERSION = System.getProperty("os.version");
+    OS_ARCH = System.getProperty("os.arch");
+    JAVA_VERSION = System.getProperty("java.version");
+  }
+
+
+  //默认的时间格式
+	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 
 	/**
 	 * modify date format
 	 * @param dateFormatString
 	 */
 	public static void setDateFormat(String dateFormatString) {
-		dateFormat = new SimpleDateFormat(dateFormatString);
+		DATE_FORMAT = new SimpleDateFormat(dateFormatString);
 	}
 
 	/**
@@ -36,10 +48,10 @@ public class Log {
 	 */
 	public static void logInfo(String TAG, String msg, String level){
 	    if(level.equals("DEBUG") || level .equals("ERROR") ||level.equals("WARN")){
-			System.err.println(dateFormat.format(System.currentTimeMillis()) + ": " + TAG + "." + level + ": " + msg);
+			System.err.println(DATE_FORMAT.format(System.currentTimeMillis()) + ": " + TAG + "." + level + ": " + msg);
 		}
 	    else if(level.equals("VERBOSE") || level .equals("INFO") ){
-			System.out.println(dateFormat.format(System.currentTimeMillis()) + ": " + TAG + "." + level + ": " + msg);
+			System.out.println(DATE_FORMAT.format(System.currentTimeMillis()) + ": " + TAG + "." + level + ": " + msg);
 		}
 	}
 
