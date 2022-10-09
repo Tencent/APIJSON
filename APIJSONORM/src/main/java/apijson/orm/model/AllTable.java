@@ -11,8 +11,8 @@ import apijson.MethodAccess;
  * @author Lemon
  */
 @MethodAccess(POST = {}, PUT = {}, DELETE = {})
-public class DbaTable {
-	public static final String TAG = "DbaTable";
-	public static final String TABLE_NAME = "dba_tables";
+public class AllTable {
+	public static final String TAG = "AllTable";
+	public static final String TABLE_NAME = "ALL_TABLES";
 
 }

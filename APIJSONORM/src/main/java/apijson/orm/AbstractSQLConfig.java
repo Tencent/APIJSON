@@ -5,6 +5,49 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import javax.activation.UnsupportedDataTypeException;
+
+import apijson.JSON;
+import apijson.JSONResponse;
+import apijson.Log;
+import apijson.NotNull;
+import apijson.RequestMethod;
+import apijson.SQL;
+import apijson.StringUtil;
+import apijson.orm.Join.On;
+import apijson.orm.exception.NotExistException;
+import apijson.orm.model.Access;
+import apijson.orm.model.AllColumn;
+import apijson.orm.model.AllColumnComment;
+import apijson.orm.model.AllTable;
+import apijson.orm.model.AllTableComment;
+import apijson.orm.model.Column;
+import apijson.orm.model.Document;
+import apijson.orm.model.ExtendedProperty;
+import apijson.orm.model.Function;
+import apijson.orm.model.PgAttribute;
+import apijson.orm.model.PgClass;
+import apijson.orm.model.Request;
+import apijson.orm.model.SysColumn;
+import apijson.orm.model.SysTable;
+import apijson.orm.model.Table;
+import apijson.orm.model.TestRecord;
+
 import static apijson.JSONObject.KEY_CACHE;
 import static apijson.JSONObject.KEY_CAST;
 import static apijson.JSONObject.KEY_COLUMN;
@@ -34,47 +77,6 @@ import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.ON;
 import static apijson.SQL.OR;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import javax.activation.UnsupportedDataTypeException;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
-
-import apijson.JSON;
-import apijson.JSONResponse;
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
-import apijson.SQL;
-import apijson.StringUtil;
-import apijson.orm.Join.On;
-import apijson.orm.exception.NotExistException;
-import apijson.orm.model.Access;
-import apijson.orm.model.Column;
-import apijson.orm.model.DbaColumn;
-import apijson.orm.model.DbaTable;
-import apijson.orm.model.Document;
-import apijson.orm.model.ExtendedProperty;
-import apijson.orm.model.Function;
-import apijson.orm.model.PgAttribute;
-import apijson.orm.model.PgClass;
-import apijson.orm.model.Request;
-import apijson.orm.model.SysColumn;
-import apijson.orm.model.SysTable;
-import apijson.orm.model.Table;
-import apijson.orm.model.TestRecord;
 
 /**config sql for JSON Request
  * @author Lemon
@@ -133,8 +135,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		TABLE_KEY_MAP.put(SysTable.class.getSimpleName(), SysTable.TABLE_NAME);
 		TABLE_KEY_MAP.put(SysColumn.class.getSimpleName(), SysColumn.TABLE_NAME);
 		TABLE_KEY_MAP.put(ExtendedProperty.class.getSimpleName(), ExtendedProperty.TABLE_NAME);
-		TABLE_KEY_MAP.put(DbaTable.class.getSimpleName(), DbaTable.TABLE_NAME);
-		TABLE_KEY_MAP.put(DbaColumn.class.getSimpleName(), DbaColumn.TABLE_NAME);
+		TABLE_KEY_MAP.put(AllTable.class.getSimpleName(), AllTable.TABLE_NAME);
+		TABLE_KEY_MAP.put(AllColumn.class.getSimpleName(), AllColumn.TABLE_NAME);
+		TABLE_KEY_MAP.put(AllTableComment.class.getSimpleName(), AllTableComment.TABLE_NAME);
+		TABLE_KEY_MAP.put(AllColumnComment.class.getSimpleName(), AllColumnComment.TABLE_NAME);
 
 		CONFIG_TABLE_LIST = new ArrayList<>();  // Table, Column 等是系统表 AbstractVerifier.SYSTEM_ACCESS_MAP.keySet());
 		CONFIG_TABLE_LIST.add(Function.class.getSimpleName());
@@ -1042,8 +1046,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (SysTable.TAG.equals(table) || SysColumn.TAG.equals(table) || ExtendedProperty.TAG.equals(table)) {
 			return SCHEMA_SYS; //SQL Server 在 sys 中的属性比 information_schema 中的要全，能拿到注释
 		}
-		if (DbaTable.TAG.equals(table) || DbaColumn.TAG.equals(table)) {
-			return ""; //Oracle, Dameng 的 dba_tables 和 all_tab_columns 表好像不属于任何 Schema
+		if (AllTable.TAG.equals(table) || AllColumn.TAG.equals(table) || AllTableComment.TAG.equals(table) || AllTableComment.TAG.equals(table)) {
+			return ""; //Oracle, Dameng 的 all_tables, dba_tables 和 all_tab_columns, dba_columns 表好像不属于任何 Schema
 		}
 
 		String sch = getSchema();

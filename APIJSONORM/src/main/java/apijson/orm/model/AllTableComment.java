@@ -7,12 +7,12 @@ package apijson.orm.model;
 
 import apijson.MethodAccess;
 
-/**SQL Server 在 sys 下的字段(列名)
+/**SQL Server 表属性
  * @author Lemon
  */
 @MethodAccess(POST = {}, PUT = {}, DELETE = {})
-public class DbaColumn {
-	public static final String TAG = "DbaColumn";
-	public static final String TABLE_NAME = "all_tab_columns";
+public class AllTableComment {
+	public static final String TAG = "AllTableComment";
+	public static final String TABLE_NAME = "ALL_TAB_COMMENTS";
 
 }
