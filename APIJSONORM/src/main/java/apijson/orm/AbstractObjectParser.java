@@ -692,9 +692,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			try {
 				sqlConfig = newSQLConfig(false);
 			}
-			catch (NotExistException e) {
-				e.printStackTrace();
-				return this;
+			catch (Exception e) {
+        if (e instanceof NotExistException || (e instanceof CommonException && e.getCause() instanceof NotExistException)) {
+          return this;
+        }
+        throw e;
 			}
 		}
 		sqlConfig.setCount(sqlConfig.getCount() <= 0 ? count : sqlConfig.getCount()).setPage(page).setPosition(position);
@@ -722,18 +724,23 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			try {
 				sqlReponse = onSQLExecute();
 			}
-			catch (NotExistException e) {
-				//				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
-				//				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
-				//					//						e.printStackTrace();
-				sqlReponse = null;//内部吃掉异常，put到最外层
-				//						requestObject.put(JSONResponse.KEY_MSG
-				//								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MSG)
-				//										+ "; query " + path + " cath NotExistException:"
-				//										+ newErrorResult(e).getString(JSONResponse.KEY_MSG)));
-				//				} else {
-				//					throw e;
-				//				}
+			catch (Exception e) {
+        if (e instanceof NotExistException || (e instanceof CommonException && e.getCause() instanceof NotExistException)) {
+          //				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
+          //				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
+          //					//						e.printStackTrace();
+          sqlReponse = null;//内部吃掉异常，put到最外层
+          //						requestObject.put(JSONResponse.KEY_MSG
+          //								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MSG)
+          //										+ "; query " + path + " cath NotExistException:"
+          //										+ newErrorResult(e).getString(JSONResponse.KEY_MSG)));
+          //				} else {
+          //					throw e;
+          //				}
+        }
+        else {
+          throw e;
+        }
 			}
 		}
 
