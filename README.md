@@ -276,6 +276,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.yto.net.cn.jpg" height="75">
   <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.lepinyongche.com.jpg"  height="75">
   <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.aupup.com.png"  height="75">
+  <img src="https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/User/www.aupup.com.png"  height="75">
 <br />
   
  * [腾讯科技有限公司](https://www.tencent.com)
@@ -287,6 +288,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [圆通速递](https://www.yto.net.cn)
  * [乐拼科技](https://www.lepinyongche.com)
  * [珠海采筑电子商务有限公司](https://www.aupup.com)
+ * [上海信息出奇科技有限公司](https://www.masscms.com)
 
 ### 贡献者们
 主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个知乎基础研发架构师、1 个圆通工程师 等)：<br />
@@ -330,6 +332,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/295"><img src="https://avatars.githubusercontent.com/u/11210385?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/311"><img src="https://avatars.githubusercontent.com/u/22066942?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/325"><img src="https://avatars.githubusercontent.com/u/33931153?v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/443"><img src="https://avatars.githubusercontent.com/u/95326431?s=40&v=4"  height="54" width="54" ></a>
 </div>
 <br />
 
