@@ -43,6 +43,10 @@
 - [Dalezee](https://github.com/Dalezee)(还开源了 apijson_camp)
 - [aaronlinv](https://github.com/aaronlinv)
 - [sy-records](https://github.com/sy-records)
+- [Finkyky](https://github.com/Finkyky)
+- [ifooling](https://github.com/ifooling)
+- [transtone](https://github.com/transtone)
+- [AwenJackson](https://github.com/AwenJackson)(上海信息出奇科技有限公司工程师，发布了 3 篇文章）
 
 #### 其中特别致谢: <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
