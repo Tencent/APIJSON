@@ -35,7 +35,7 @@
 - [kenlig](https://github.com/kenlig)(还开源了 apijsondocs)
 - [andream7](https://github.com/andream7)(微软工程师，还开源了 apijson-db2)
 - [qiujunlin](https://github.com/qiujunlin)(还开源了 APIJSONDemo)
-- [HANXU2018](https://github.com/HANXU2018)(还开源了 APIJSON-DOC)
+- [HANXU2018](https://github.com/HANXU2018)(网易工程师，还开源了 APIJSON-DOC)
 - [hclown9804](https://github.com/hclown9804)
 - [chenyanlann](https://github.com/chenyanlann)(还开源了 APIJSONDemo_ClickHouse)
 - [haolingzhang1](https://github.com/haolingzhang1)(腾讯工程师，还开源了 APIJson--demo)
