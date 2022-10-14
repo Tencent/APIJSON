@@ -295,7 +295,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [上海信息出奇科技有限公司](https://www.masscms.com)
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个知乎基础研发架构师、1 个 Zoom 工程师、1 个圆通工程师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
+主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个知乎基础研发架构师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
