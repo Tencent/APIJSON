@@ -41,6 +41,8 @@
 
 ### [贡献者们](/README.md#%E8%B4%A1%E7%8C%AE%E8%80%85%E4%BB%AC)
 
+### [统计分析](/README.md#%E7%BB%9F%E8%AE%A1%E5%88%86%E6%9E%90)
+
 ### [规划及路线图](/README.md#%E8%A7%84%E5%88%92%E5%8F%8A%E8%B7%AF%E7%BA%BF%E5%9B%BE)
 
 ### [我要赞赏](/README.md#%E6%88%91%E8%A6%81%E8%B5%9E%E8%B5%8F)
