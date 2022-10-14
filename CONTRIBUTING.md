@@ -28,7 +28,7 @@
 - [Rkyzzy](https://github.com/Rkyzzy)(SUSTech, University of California, Berkeley)
 - [kxlv2000](https://github.com/kxlv2000)(SUSTech)
 - [caohao-php](https://github.com/caohao-php)(腾讯工程师)
-- [Wscats](https://github.com/Wscats)(腾讯工程师)
+- [Wscats](https://github.com/Wscats)(腾讯工程师、腾讯 AlloyTeam 成员、Tencent Creation Camp 成员)
 - [jun0315](https://github.com/jun0315)(腾讯工程师)
 - [JieJo](https://github.com/JieJo)
 - [yeyuezhishou](https://github.com/yeyuezhishou)(圆通工程师)
