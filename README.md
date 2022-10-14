@@ -398,6 +398,13 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 
 感谢大家的贡献。
 
+### 统计分析 
+[![Stargazers over time](https://starchart.cc/Tencent/APIJSON.svg)](https://starchart.cc/Tencent/APIJSON)
+<img width="945" alt="image" src="https://user-images.githubusercontent.com/5738175/195752361-fffc1d38-148b-4c50-8e5e-e3116787d50d.png">
+<img width="947" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
+<img width="949" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
+
+
 
 ### 规划及路线图
 新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
@@ -408,11 +415,6 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
-
-[![Stargazers over time](https://starchart.cc/Tencent/APIJSON.svg)](https://starchart.cc/Tencent/APIJSON)
-<img width="945" alt="image" src="https://user-images.githubusercontent.com/5738175/195752361-fffc1d38-148b-4c50-8e5e-e3116787d50d.png">
-<img width="947" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
-<img width="949" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
 <br />
 <br />
