@@ -313,6 +313,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [乐拼科技](https://www.lepinyongche.com)
  * [珠海采筑电子商务有限公司](https://www.aupup.com)
  * [上海信息出奇科技有限公司](https://www.masscms.com)
+ * [爱投斯智能技术（深圳）有限公司](http://www.aiotos.net)
 
 ### 贡献者们
 主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个知乎基础研发架构师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
