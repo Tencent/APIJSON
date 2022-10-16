@@ -457,12 +457,13 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持QQ专群**，作者亲自且优先答疑，<br >
 作者只有解答完了这个专群里的全部问题，才看情况解答 Issue 里的问题(对 Issue 不保证解答、更不保证及时)；<br >
 其它群为互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
-甚至有白嫖还把自己当大爷的伸手党输出情绪，作者不再解答互助群问题，由群友互助解答，建议未登记企业的用户填问卷或提 Issue。
+甚至有白嫖还把自己当大爷的伸手党输出情绪，作者不再解答互助群问题，由群友互助解答，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues)。<br >
+另外 私聊作者请教技术问题 或者 频繁在互助群 @ 作者 可能会被拉黑/禁言/踢群，请尊重和理解，谢谢。
 
 如果你为 APIJSON 做出了以下任何一个贡献： <br >
 [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
 可以在群里发出贡献链接并附带说明，管理员将设置关注你一段时间，优先答疑解惑。 <br >
-其它群一般解答顺序：贡献者 > 帮助他人的群友 > 带企业名昵称 > 带岗位名昵称 > 其他群友。
+互助群一般解答顺序：贡献者 > 帮助他人的群友 > 带企业名昵称 > 带岗位名昵称 > 其他群友。
   
 
 ### 相关推荐
