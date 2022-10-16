@@ -489,8 +489,8 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 <br />
 
 ### Statistics
-Hundreds of employees from big famous companies(Tencent, Google, Microsoft, Amazon, Huawei, Alibaba, Paypal, Meituan, Bytedance, IBM, Baidu, JD, NetEase, Kuaishou, Shopee, etc) starred, <br >
-a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, etc) created PR/Issue, thank you all~ <br >
+Hundreds of employees from big famous companies(Tencent, Google, Microsoft, Amazon, Huawei, Alibaba, Paypal, Meituan, Bytedance, IBM, Baidu, JD, NetEase, Kuaishou, Shopee, etc.) starred, <br >
+a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, etc.) created PR/Issue, thank you all~ <br >
 [![Stargazers over time](https://starchart.cc/Tencent/APIJSON.svg)](https://starchart.cc/Tencent/APIJSON)
 <img width="945" alt="image" src="https://user-images.githubusercontent.com/5738175/195752361-fffc1d38-148b-4c50-8e5e-e3116787d50d.png">
 <img width="947" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
