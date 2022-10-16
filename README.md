@@ -444,7 +444,7 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 <b >导航目录：</b> [项目简介](#--apijson) [上手使用](#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B) 社区生态  &nbsp;&nbsp;&nbsp;&nbsp;  完整详细的导航目录 [点这里查看](/Navigation.md)<br />
 
 ### 技术交流
-如果有什么问题或建议可以 [提ISSUE](https://github.com/Tencent/APIJSON/issues) 或 加群，交流技术，分享经验。 <br >
+如果有什么问题或建议可以 [提ISSUE](https://github.com/Tencent/APIJSON/issues)、[填问卷](https://wj.qq.com/s2/10971431/2a09) 或 加群，交流技术，分享经验。 <br >
 如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
