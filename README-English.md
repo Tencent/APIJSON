@@ -488,6 +488,10 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 </div>
 <br />
 
+Thanks to all contributers of APIJSON!
+
+<br />
+
 ### Statistics
 Hundreds of employees from big famous companies(Tencent, Google, Microsoft, Amazon, Huawei, Alibaba, Paypal, Meituan, Bytedance, IBM, Baidu, JD, NetEase, Kuaishou, Shopee, etc.) starred, <br >
 a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, etc.) created PR/Issue, thank you all~ <br >
@@ -497,8 +501,4 @@ a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, e
 <img width="949" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
 
-	
-<br />
-Thanks to all contributers of APIJSON!
-	
 <br />
