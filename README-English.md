@@ -326,9 +326,9 @@ Fork the project and send a pull request.<br />
 Please also ⭐Star the project!
 <br />
 
-## <h2 id="5">5. Versioning<h2/> 
+## <h2 id="5">5. Releases<h2/> 
 	
-See the latest version [here](https://github.com/Tencent/APIJSON/commits/master).
+See the latest release [here](https://github.com/Tencent/APIJSON/releases/tag/5.2.0).
 
 <br />
 
