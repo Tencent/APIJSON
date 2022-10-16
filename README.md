@@ -420,8 +420,8 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 感谢大家的贡献。
 
 ### 统计分析 
-国内腾讯、华为、阿里巴巴、美团、字节跳动、百度、京东、网易、快手等 和 国外 Google, Microsoft, Amazon, Paypal 等 <br >
-数百名大厂员工点了 Star，也有腾讯、华为、Microsoft、Zoom 等不少大厂员工提了 PR/Issue，非常感谢大家的支持~ <br >
+国内腾讯、华为、阿里巴巴、美团、字节跳动、百度、京东、网易、快手等 和 国外 Google, Microsoft, Amazon, Paypal, Shopee 等 <br >
+数百名知名大厂员工点了 Star，也有腾讯、华为、Microsoft、Zoom 等不少知名大厂员工提了 PR/Issue，非常感谢大家的支持~ <br >
 [![Stargazers over time](https://starchart.cc/Tencent/APIJSON.svg)](https://starchart.cc/Tencent/APIJSON)
 <img width="945" alt="image" src="https://user-images.githubusercontent.com/5738175/195752361-fffc1d38-148b-4c50-8e5e-e3116787d50d.png">
 <img width="947" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
