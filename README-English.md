@@ -341,7 +341,7 @@ If you have any questions or suggestions, you can [create an issue](https://gith
 <br />
 <br />
 
-### Users of this project:
+### Users of APIJSON:
 
 https://github.com/Tencent/APIJSON/issues/187 
 <div style="float:left">
