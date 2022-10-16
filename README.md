@@ -445,7 +445,7 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 ### 技术交流
 如果有什么问题或建议可以 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues)，交流技术，分享经验。 <br >
-如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
+如果你解决了某些 bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
   
 **QQ 技术群**： 请在常见问题 Issue 中查找
@@ -453,12 +453,12 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 **开发者时间精力有限，原则上优先解决 登记用户 和 贡献者 的问题，**<br >
 **不解决 文档/视频/常见问题 已明确说明、描述简陋 或 态度无礼 的问题！**<br >
 **如果你已经多次得到帮助，却仍然只索取不贡献，那就别指望大家再帮你！**
+**私聊作者请教技术问题 或者 频繁在互助群 @ 作者 可能会被拉黑/禁言/踢群，请尊重和理解，谢谢！**
 
-如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持QQ专群**，作者亲自且优先答疑，<br >
+如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
 作者只有解答完了这个专群里的全部问题，才看情况解答 Issue 里的问题(对 Issue 不保证解答、更不保证及时)；<br >
 其它群为互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
 甚至有白嫖还把自己当大爷的伸手党输出情绪，作者不再解答互助群问题，由群友互助解答，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues)。<br >
-另外 私聊作者请教技术问题 或者 频繁在互助群 @ 作者 可能会被拉黑/禁言/踢群，请尊重和理解，谢谢。
 
 如果你为 APIJSON 做出了以下任何一个贡献： <br >
 [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
