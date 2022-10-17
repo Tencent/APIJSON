@@ -65,8 +65,8 @@ public interface SQLExecutor {
 	 * @throws SQLException
 	 */
 	default ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
-    return executeQuery(config, null);
-  }
+		return executeQuery(config, null);
+	}
 	ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception;
 
 	/**执行增、删、改
@@ -74,26 +74,26 @@ public interface SQLExecutor {
 	 * @return
 	 * @throws SQLException
 	 */
-  default int executeUpdate(@NotNull SQLConfig config) throws Exception {
-    return executeUpdate(config, null);
-  }
+	default int executeUpdate(@NotNull SQLConfig config) throws Exception {
+		return executeUpdate(config, null);
+	}
 	int executeUpdate(@NotNull SQLConfig config, String sql) throws Exception;
 
 
 	/**判断是否为JSON类型
-   * @param config
-   * @param rsmd
-   * @param position
-   * @param lable
-   * @return
-   */
+	* @param config
+	* @param rsmd
+	* @param position
+	* @param lable
+	* @return
+	*/
 	boolean isJSONType(@NotNull SQLConfig config, ResultSetMetaData rsmd, int position, String lable);
 
 
 	Connection getConnection(@NotNull SQLConfig config) throws Exception;
 	default Statement getStatement(@NotNull SQLConfig config) throws Exception {
-    return getStatement(config, null);
-  }
+		return getStatement(config, null);
+	}
 	Statement getStatement(@NotNull SQLConfig config, String sql) throws Exception;
 
 	int getTransactionIsolation();
