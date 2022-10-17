@@ -1,3 +1,289 @@
+### Examples:
+
+#### Get a User
+Request:
+<pre><code class="language-json">{
+  "User":{
+  }
+}
+</code></pre>
+
+[Click here to test](http://apijson.cn:8080/get/{"User":{}})
+
+Response:
+<pre><code class="language-json">{
+  "User":{
+    "id":38710,
+    "sex":0,
+    "name":"TommyLemon",
+    "certified":true,
+    "tag":"Android&Java",
+    "phone":13000038710,
+    "head":"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
+    "date":1485948110000,
+    "pictureList":[
+      "http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
+      "http://common.cnblogs.com/images/icon_weibo_24.png"
+    ]
+  },
+  "code":200,
+  "msg":"success"
+}
+</code></pre>
+
+<br />
+
+<p align="center" >
+  <a >[GIF] APIJSON single objects: simple queries, statistics, groups, orders, aggregations, comparisons, filters, aliases, etc.</a>
+</p> 
+  
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_single.gif)
+
+#### Get an Array of Users
+
+Request:
+<pre><code class="language-json">{
+  "[]":{
+    "count":3,             //just get 3 results
+    "User":{
+      "@column":"id,name"  //just get ids and names
+    }
+  }
+}
+</code></pre>
+
+[Click here to test](http://apijson.cn:8080/get/{"[]":{"count":3,"User":{"@column":"id,name"}}})
+
+Response:
+<pre><code class="language-json">{
+  "[]":[
+    {
+      "User":{
+        "id":38710,
+        "name":"TommyLemon"
+      }
+    },
+    {
+      "User":{
+        "id":70793,
+        "name":"Strong"
+      }
+    },
+    {
+      "User":{
+        "id":82001,
+        "name":"Android"
+      }
+    }
+  ],
+  "code":200,
+  "msg":"success"
+}
+</code></pre>
+
+<br />
+
+<p align="center" >
+  <a >[GIF] APIJSON single arrays: simple queries, statistics, groups, orders, aggregations, paginations, searches, regexps, combinations, etc.</a>
+</p> 
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_array.gif)
+
+
+#### Get a Moment and its publisher
+Request:
+<pre><code class="language-json">{
+  "Moment":{
+  },
+  "User":{
+    "id@":"Moment/userId"  //User.id = Moment.userId
+  }
+}
+</code></pre>
+
+[Click here to test](http://apijson.cn:8080/get/{"Moment":{},"User":{"id@":"Moment%252FuserId"}})
+
+Response:
+<pre><code class="language-json">{
+  "Moment":{
+    "id":12,
+    "userId":70793,
+    "date":"2017-02-08 16:06:11.0",
+    "content":"1111534034"
+  },
+  "User":{
+    "id":70793,
+    "sex":0,
+    "name":"Strong",
+    "tag":"djdj",
+    "head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000",
+    "contactIdList":[
+      38710,
+      82002
+    ],
+    "date":"2017-02-01 19:21:50.0"
+  },
+  "code":200,
+  "msg":"success"
+}
+</code></pre>
+  
+<br />
+
+#### Get a Moment list like Twitter tweets
+Request:
+<pre><code class="language-json">{
+  "[]":{                             //get an array
+    "page":0,                        //pagination
+    "count":2,
+    "Moment":{                       //get a Moment
+      "content$":"%a%"               //filter condition: content contains 'a'
+    },
+    "User":{
+      "id@":"/Moment/userId",        //User.id = Moment.userId, short referrence path，starts from grandparents path
+      "@column":"id,name,head"       //get specified keys with the written order 
+    },
+    "Comment[]":{                    //get a Comment array, and unwrap Comment object
+      "count":2,
+      "Comment":{
+        "momentId@":"[]/Moment/id"   //Comment.momentId = Moment.id, full referrence path
+      }
+    }
+  }
+}
+</code></pre>
+
+[Click here to test](http://apijson.cn:8080/get/{"[]":{"page":0,"count":2,"Moment":{"content$":"%2525a%2525"},"User":{"id@":"%252FMoment%252FuserId","@column":"id,name,head"},"Comment[]":{"count":2,"Comment":{"momentId@":"[]%252FMoment%252Fid"}}}})
+
+Response:
+<pre><code class="language-json">{
+  "[]":[
+    {
+      "Moment":{
+        "id":15,
+        "userId":70793,
+        "date":1486541171000,
+        "content":"APIJSON is a JSON Transmission Structure Protocol…",
+        "praiseUserIdList":[
+          82055,
+          82002,
+          82001
+        ],
+        "pictureList":[
+          "http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
+          "http://common.cnblogs.com/images/icon_weibo_24.png"
+        ]
+      },
+      "User":{
+        "id":70793,
+        "name":"Strong",
+        "head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000"
+      },
+      "Comment[]":[
+        {
+          "id":176,
+          "toId":166,
+          "userId":38710,
+          "momentId":15,
+          "date":1490444883000,
+          "content":"thank you"
+        },
+        {
+          "id":1490863469638,
+          "toId":0,
+          "userId":82002,
+          "momentId":15,
+          "date":1490863469000,
+          "content":"Just do it"
+        }
+      ]
+    },
+    {
+      "Moment":{
+        "id":58,
+        "userId":90814,
+        "date":1485947671000,
+        "content":"This is a Content...-435",
+        "praiseUserIdList":[
+          38710,
+          82003,
+          82005,
+          93793,
+          82006,
+          82044,
+          82001
+        ],
+        "pictureList":[
+          "http://static.oschina.net/uploads/img/201604/22172507_aMmH.jpg"
+        ]
+      },
+      "User":{
+        "id":90814,
+        "name":7,
+        "head":"http://static.oschina.net/uploads/user/51/102723_50.jpg?t=1449212504000"
+      },
+      "Comment[]":[
+        {
+          "id":13,
+          "toId":0,
+          "userId":82005,
+          "momentId":58,
+          "date":1485948050000,
+          "content":"This is a Content...-13"
+        },
+        {
+          "id":77,
+          "toId":13,
+          "userId":93793,
+          "momentId":58,
+          "date":1485948050000,
+          "content":"This is a Content...-77"
+        }
+      ]
+    }
+  ],
+  "code":200,
+  "msg":"success"
+}
+</code></pre>
+
+<p align="center" >
+  <a >[GIF] APIJSON query multi related tables: one to one, one to many, many to one, various conditions, etc.</a>
+</p> 
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_associate.gif)
+
+<br />
+  
+<p align="center" >
+  <a >[GIF] APIJSON joins: < LEFT JOIN, & INNER JOIN, etc.</a>
+</p> 
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_join.gif)
+  
+<br />
+  
+<p align="center" >
+  <a >[GIF] APIJSON subqueries：@from@ FROM, key@ =, key>@ >, key{}@ IN, key}{@ EXISTS, etc.</a>
+</p> 
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_subquery.gif)
+    
+<br />
+    
+<p align="center" >
+  <a >[GIF] APIJSON: a set of some features, simple to complex</a>
+</p> 
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif)
+
+<br />
+
+[Test it online](http://apijson.cn/api) 
+
+<br />
+<br />
+
 ## API Design Rules
 
 ### 1. Methods and API endpoints
