@@ -44,10 +44,10 @@ public interface SQLConfig {
 	boolean isDameng();
 	boolean isClickHouse();
 	boolean isHive();
-  boolean isTDengine();
+	boolean isTDengine();
 
 
-  //暂时只兼容以上几种
+	//暂时只兼容以上几种
 	//	boolean isSQL();
 	//	boolean isTSQL();
 	//	boolean isPLSQL();
@@ -67,26 +67,26 @@ public interface SQLConfig {
 	 */
 	String getDBVersion();
 
-  @NotNull
-  default int[] getDBVersionNums() {
-    String dbVersion = StringUtil.getNoBlankString(getDBVersion());
-    if (dbVersion.isEmpty()) {
-      return new int[]{0};
-    }
+	@NotNull
+	default int[] getDBVersionNums() {
+		String dbVersion = StringUtil.getNoBlankString(getDBVersion());
+		if (dbVersion.isEmpty()) {
+			return new int[]{0};
+		}
 
-    int index = dbVersion.indexOf("-");
-    if (index > 0) {
-      dbVersion = dbVersion.substring(0, index);
-    }
+		int index = dbVersion.indexOf("-");
+		if (index > 0) {
+			dbVersion = dbVersion.substring(0, index);
+		}
 
-    String[] ss = dbVersion.split("[.]");
-    int[] nums = new int[Math.max(1, ss.length)];
-    for (int i = 0; i < ss.length; i++) {
-      nums[i] = Integer.valueOf(ss[i]);
-    }
+		String[] ss = dbVersion.split("[.]");
+		int[] nums = new int[Math.max(1, ss.length)];
+		for (int i = 0; i < ss.length; i++) {
+			nums[i] = Integer.valueOf(ss[i]);
+		}
 
-    return nums;
-  }
+		return nums;
+	}
 
 	/**获取数据库地址
 	 * @return
