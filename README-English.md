@@ -82,6 +82,7 @@ APIJSON largely reduces API developers' workload by reducing most api design and
 With APIJSON, client developers will no longer be suffered from possible errors in documents, and it saves communication between server developers and client developers about APIs or documentations .<br />
 Server developers no longer need to worry about compatibility of APIs and documents with legacy apps.
 
+![0F85206E116CCEE74DB68E5B9A3AEDAE](https://user-images.githubusercontent.com/5738175/196148099-d3a9e0ba-93e5-4e1a-a4f8-a714083c6f7e.jpg)
 #### Song Firework-Katy Parry(Modified for APIJSON)
 Do you ever feel like a backend slave <br />
 Repeating CRUD, wanting to make a change? <br />
