@@ -78,7 +78,7 @@ It also allows users to get data more quickly with self-defined form and fewer e
 You can get any data by defining the specific information you want and send it to the server. <br />
 You can get different types of data by making just one request to the server. <br />
 It's very convenient and flexible, and dosen't require different API endpoints with multiple requests. <br />
-It provides CRUD(read and write), Fuzzy Search, Remote Function Calls，etc. <br />
+It provides CRUD(read and write), Fuzzy Search, Remote Function Calls, etc. <br />
 You can also save duplicate data, see request history, etc. <br />
 
 #### For API design:
