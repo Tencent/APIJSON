@@ -85,7 +85,7 @@ Server developers no longer need to worry about compatibility of APIs and docume
 #### Song Firework-Katy Parry(Modified for APIJSON)
 Do you ever feel like a backend slave <br />
 Repeating CRUD, wanting to make a change? <br />
-Do you ever feel, APIs so paper thin <br />
+Do you ever feel, APIs' so paper thin <br />
 Like a house of cards, one blow from cavin' in? <br />
 Do you ever feel they always complain? <br />
 Urging doc and feedback bugs, even ask your refactoring <br />
@@ -106,7 +106,7 @@ You're gonna leave 'em all in awe, awe, awe. <br />
 
 <br/>
 	
-**Tired with endless arguments about API dev and API calling?** <br/>
+**Tired with endless arguments about HTTP API dev or API use?** <br/>
 **Use APIJSON-the ORM for providing infinity codeless CRUD APIs that fit almost all your needs.**
 
 	
