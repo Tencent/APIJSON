@@ -74,13 +74,16 @@ APIJSON is a JSON based internet communication protocol and an ORM library that 
 ### Features:
 #### For getting data:
 You can get any data by defining the specific information you want and send it to the server.<br />
-You can get different types of data by making just one request to the server. It's very convenient and flexible, and dosen't require different API endpoints with multiple requests.<br />
-It provides CRUD(read and write), Fuzzy Search, Remote Function Calls，etc. You can also save duplicate data, see request history,etc.<br />
+You can get different types of data by making just one request to the server. <br />
+It's very convenient and flexible, and dosen't require different API endpoints with multiple requests. <br />
+It provides CRUD(read and write), Fuzzy Search, Remote Function Calls，etc. <br />
+You can also save duplicate data, see request history,etc. <br />
 
 #### For API design:
-APIJSON largely reduces API developers' workload by reducing most api design and documentation work.<br />
-With APIJSON, client developers will no longer be suffered from possible errors in documents, and it saves communication between server developers and client developers about APIs or documentations .<br />
-Server developers no longer need to worry about compatibility of APIs and documents with legacy apps.
+APIJSON largely reduces API developers' workload by reducing most api design and documentation work. <br />
+With APIJSON, client developers will no longer be suffered from possible errors in documents,  <br />
+and it saves communication between server developers and client developers about APIs or documentations .<br />
+Server developers no longer need to worry about compatibility of APIs and documents with legacy apps. <br />
 
 ![0F85206E116CCEE74DB68E5B9A3AEDAE](https://user-images.githubusercontent.com/5738175/196148099-d3a9e0ba-93e5-4e1a-a4f8-a714083c6f7e.jpg)
 #### Song Firework-Katy Parry(Modified for APIJSON)
