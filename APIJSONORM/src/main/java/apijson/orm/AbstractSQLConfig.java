@@ -736,25 +736,26 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("bitAnd", ""); //bitAnd(a,b)
 		SQL_FUNCTION_MAP.put("bitOr", ""); //bitOr(a,b)
 
-    // PostgreSQL 表结构相关 SQL 函数
-    SQL_FUNCTION_MAP.put("obj_description", "");
-    SQL_FUNCTION_MAP.put("col_description", "");
+		// PostgreSQL 表结构相关 SQL 函数
+		SQL_FUNCTION_MAP.put("obj_description", "");
+		SQL_FUNCTION_MAP.put("col_description", "");
 
-    // SQLServer 相关 SQL 函数
-    SQL_FUNCTION_MAP.put("datalength", "");
+		// SQLServer 相关 SQL 函数
+		SQL_FUNCTION_MAP.put("len", "");
+		SQL_FUNCTION_MAP.put("datalength", "");
 
 	}
 
-  private int[] dbVersionNums = null;
-  @Override
-  public int[] getDBVersionNums() {
-    if (dbVersionNums == null || dbVersionNums.length <= 0) {
-      dbVersionNums = SQLConfig.super.getDBVersionNums();
-    }
-    return dbVersionNums;
-  }
+	private int[] dbVersionNums = null;
+	@Override
+	public int[] getDBVersionNums() {
+		if (dbVersionNums == null || dbVersionNums.length <= 0) {
+			dbVersionNums = SQLConfig.super.getDBVersionNums();
+		}
+		return dbVersionNums;
+	}
 
-  @Override
+	@Override
 	public boolean limitSQLCount() {
 		return Log.DEBUG == false || AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
 	}
@@ -1014,16 +1015,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return DATABASE_HIVE.equals(db);
 	}
 
-  @Override
-  public boolean isTDengine() {
-    return isTDengine(getSQLDatabase());
-  }
-  public static boolean isTDengine(String db) {
-    return DATABASE_TDENGINE.equals(db);
-  }
+	@Override
+	public boolean isTDengine() {
+		return isTDengine(getSQLDatabase());
+	}
+	public static boolean isTDengine(String db) {
+		return DATABASE_TDENGINE.equals(db);
+	}
 
 
-  @Override
+	@Override
 	public String getQuote() {
 		return isMySQL() || isClickHouse() || isTDengine() ? "`" : "\"";
 	}
@@ -1033,7 +1034,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return schema;
 	}
 
-  @NotNull
+	@NotNull
 	public String getSQLSchema() {
 		String table = getTable();
 		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
@@ -2322,12 +2323,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer() || isDb2(), isOracle());
 	}
 	/**获取限制数量及偏移量
-   * @param page
-   * @param count
-   * @param isTSQL
-   * @param isOracle
-   * @return
-   */
+	* @param page
+	* @param count
+	* @param isTSQL
+	* @param isOracle
+	* @return
+	*/
 	public static String getLimitString(int page, int count, boolean isTSQL, boolean isOracle) {
 		int offset = getOffset(page, count);
 
@@ -2614,9 +2615,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String result = "";
 
 		List<Object> preparedValues = getPreparedValueList();
-    if (preparedValues == null && isHaving == false) {
-      preparedValues = new ArrayList<>();
-    }
+		if (preparedValues == null && isHaving == false) {
+			preparedValues = new ArrayList<>();
+		}
 
 		Map<String, Integer> usedKeyCountMap = new HashMap<>(size);
 
@@ -2813,10 +2814,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-    List<Object> exprPreparedValues = getPreparedValueList();
-    if (isHaving == false) {  // 只收集 AND 条件值
-      setPreparedValueList(new ArrayList<>());
-    }
+		List<Object> exprPreparedValues = getPreparedValueList();
+		if (isHaving == false) {  // 只收集 AND 条件值
+			setPreparedValueList(new ArrayList<>());
+		}
 
 		Set<Entry<String, Object>> set = conditionMap.entrySet();
 
@@ -2838,9 +2839,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			isItemFirst = false;
 		}
 
-    if (isHaving == false) {  // 优先存放 AND 条件值
-      preparedValues.addAll(getPreparedValueList());
-    }
+		if (isHaving == false) {  // 优先存放 AND 条件值
+			preparedValues.addAll(getPreparedValueList());
+		}
 
 		if (StringUtil.isEmpty(result, true)) {
 			result = andCond;
@@ -2854,12 +2855,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 		}
 
-    if (isHaving == false) {
-      if (exprPreparedValues != null && exprPreparedValues.isEmpty() == false) {
-        preparedValues.addAll(exprPreparedValues);  // 在 AND 条件值后存放表达式内的条件值
-      }
-      setPreparedValueList(preparedValues);
-    }
+		if (isHaving == false) {
+			if (exprPreparedValues != null && exprPreparedValues.isEmpty() == false) {
+				preparedValues.addAll(exprPreparedValues);  // 在 AND 条件值后存放表达式内的条件值
+			}
+			setPreparedValueList(preparedValues);
+		}
 
 		return result;
 	}
@@ -2875,7 +2876,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception
 	 */
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where
-    , Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
+		, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
 		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
 		if (combineSet == null || combineSet.isEmpty()) {
 			Log.w(TAG, "getWhereString  combineSet == null || combineSet.isEmpty() >> return \"\";");
@@ -3274,13 +3275,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	//$ search <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	/**search key match value
-   * @param key
-   * @param column
-   * @param value
-   * @param rawSQL
-   * @return {@link #getSearchString(String, String, Object[], int)}
-   * @throws IllegalArgumentException
-   */
+	* @param key
+	* @param column
+	* @param value
+	* @param rawSQL
+	* @return {@link #getSearchString(String, String, Object[], int)}
+	* @throws IllegalArgumentException
+	*/
 	@JSONField(serialize = false)
 	public String getSearchString(String key, String column, Object value, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
@@ -3301,13 +3302,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return getSearchString(key, column, arr.toArray(), logic.getType());
 	}
 	/**search key match values
-   * @param key
-   * @param column
-   * @param values
-   * @param type
-   * @return LOGIC [  key LIKE 'values[i]' ]
-   * @throws IllegalArgumentException
-   */
+	* @param key
+	* @param column
+	* @param values
+	* @param type
+	* @return LOGIC [  key LIKE 'values[i]' ]
+	* @throws IllegalArgumentException
+	*/
 	@JSONField(serialize = false)
 	public String getSearchString(String key, String column, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
@@ -3473,7 +3474,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 
-  //~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//~ regexp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
@@ -3509,8 +3510,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param key
 	 * @param column
 	 * @param values ['start,end'] TODO 在 '1,2' 和 ['1,2', '3,4'] 基础上新增支持 [1, 2] 和 [[1,2], [3,4]] ？
-   * @param type
-   * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
+	 * @param type
+	 * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
 	 * @throws IllegalArgumentException
 	 */
 	@JSONField(serialize = false)
@@ -3538,13 +3539,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	/**WHERE key BETWEEN 'start' AND 'end'
-   * @return key
-   * @param column
-   * @param start
-   * @param end
-   * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
-   * @throws IllegalArgumentException
-   */
+	* @return key
+	* @param column
+	* @param start
+	* @param end
+	* @return LOGIC [ key BETWEEN 'start' AND 'end' ]
+	* @throws IllegalArgumentException
+	*/
 	@JSONField(serialize = false)
 	public String getBetweenString(String key, String column, Object start, Object end) throws IllegalArgumentException {
 		if (JSON.isBooleanOrNumberOrString(start) == false || JSON.isBooleanOrNumberOrString(end) == false) {
@@ -3808,33 +3809,33 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		cfg.setPreparedValueList(new ArrayList<>());
 		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + cfg.getSQL(isPrepared()) + ") ";
 
-    //// SELECT .. FROM(SELECT ..) ..  WHERE .. 格式需要把子查询中的预编译值提前
-    //// 如果外查询 SELECT concat(`name`,?)  这种 SELECT 里也有预编译值，那就不能这样简单反向
-    //List<Object> subPvl = cfg.getPreparedValueList();
-    //if (subPvl != null && subPvl.isEmpty() == false) {
-    //  List<Object> pvl = getPreparedValueList();
-    //
-    //  if (pvl != null && pvl.isEmpty() == false) {
-    //    subPvl.addAll(pvl);
-    //  }
-    //  setPreparedValueList(subPvl);
-    //}
+		//// SELECT .. FROM(SELECT ..) ..  WHERE .. 格式需要把子查询中的预编译值提前
+		//// 如果外查询 SELECT concat(`name`,?)  这种 SELECT 里也有预编译值，那就不能这样简单反向
+		//List<Object> subPvl = cfg.getPreparedValueList();
+		//if (subPvl != null && subPvl.isEmpty() == false) {
+		//  List<Object> pvl = getPreparedValueList();
+		//
+		//  if (pvl != null && pvl.isEmpty() == false) {
+		//    subPvl.addAll(pvl);
+		//  }
+		//  setPreparedValueList(subPvl);
+		//}
 
-    List<Object> subPvl = cfg.getPreparedValueList();
-    if (subPvl != null && subPvl.isEmpty() == false) {
-      List<Object> pvl = getPreparedValueList();
+		List<Object> subPvl = cfg.getPreparedValueList();
+		if (subPvl != null && subPvl.isEmpty() == false) {
+			List<Object> pvl = getPreparedValueList();
 
-      if (pvl == null || pvl.isEmpty()) {
-        pvl = subPvl;
-      }
-      else {
-        pvl.addAll(subPvl);
-      }
+			if (pvl == null || pvl.isEmpty()) {
+				pvl = subPvl;
+			}
+			else {
+				pvl.addAll(subPvl);
+			}
 
-      setPreparedValueList(pvl);
-    }
+			setPreparedValueList(pvl);
+		}
 
-    return sql;
+		return sql;
 	}
 
 	//key@:{} Subquery >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -4067,14 +4068,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception
 	 */
 	private static String getConditionString(String table, AbstractSQLConfig config) throws Exception {
-    Subquery from = config.getFrom();
-    if (from != null) {
-      table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
-    }
+		Subquery from = config.getFrom();
+		if (from != null) {
+			table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
+		}
 
-    String join = config.getJoinString();
+		String join = config.getJoinString();
 
-    String where = config.getWhereString(true);
+		String where = config.getWhereString(true);
 
 		//根据方法不同，聚合语句不同。GROUP  BY 和 HAVING 可以加在 HEAD 上, HAVING 可以加在 PUT, DELETE 上，GET 全加，POST 全都不加
 		String aggregation;
