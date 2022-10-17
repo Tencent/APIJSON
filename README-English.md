@@ -154,7 +154,7 @@ Note: The UI is APIAuto, the URL+JSON is APIJSON<br/>
 
 <br />
 <p align="center" >
-  <a >A picture is worth a thousand words - some base features show for APIJSON</a>
+  <a >A picture is worth a thousand words - some basic features show for APIJSON</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-e21240ef3770326ee6015e052226d0da184.JPEG) 
