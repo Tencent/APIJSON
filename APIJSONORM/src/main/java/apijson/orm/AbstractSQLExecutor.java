@@ -263,7 +263,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
 						cachedSQLCount ++;
-            List<JSONObject> cache = getCache(sql, config);
+						List<JSONObject> cache = getCache(sql, config);
 						if (cache != null && cache.size() > 1) {
 							result.put(KEY_RAW_LIST, cache);
 						}
@@ -525,17 +525,17 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 							SQLConfig viceConfig = curJoin != null && curJoin.isSQLJoin() ? curJoin.getCacheConfig() : null;
 							if (viceConfig != null) {  //FIXME 只有和主表关联才能用 item，否则应该从 childMap 查其它副表数据
 								List<On> onList = curJoin.getOnList();
-                int size = onList == null ? 0 : onList.size();
+								int size = onList == null ? 0 : onList.size();
 								if (size > 0) {
-                  for (int j = size - 1; j >= 0; j--) {
-                    On on = onList.get(j);
-                    String ok = on == null ? null : on.getOriginKey();
-                    if (ok == null) {
-                      throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[" + j + (on == null ? "] = null！" : ".getOriginKey() = null！"));
+									for (int j = size - 1; j >= 0; j--) {
+										On on = onList.get(j);
+										String ok = on == null ? null : on.getOriginKey();
+										if (ok == null) {
+											throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[" + j + (on == null ? "] = null！" : ".getOriginKey() = null！"));
 										}
 
-                    viceConfig.putWhere(ok.substring(0, ok.length() - 1), item.get(on.getTargetKey()), true);
-                  }
+										viceConfig.putWhere(ok.substring(0, ok.length() - 1), item.get(on.getTargetKey()), true);
+									}
 								}
 							}
 							String viceSql = viceConfig == null ? null : viceConfig.getSQL(false);  //TODO 在 SQLConfig 缓存 SQL，减少大量的重复生成
@@ -651,7 +651,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					continue;
 				}
 
-        SQLConfig cc = join.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+				SQLConfig cc = join.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
 				if (cc == null) {
 					if (Log.DEBUG) {
 						throw new NullPointerException("服务器内部错误, executeAppJoin cc == null ! 导致不能缓存 @ APP JOIN 的副表数据！");
@@ -659,110 +659,110 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					continue;
 				}
 
-        SQLConfig jc = join.getJoinConfig();
+				SQLConfig jc = join.getJoinConfig();
 
 				List<On> onList = join.getOnList();
-        On on = onList == null || onList.isEmpty() ? null : onList.get(0);  // APP JOIN 应该有且只有一个 ON 条件
-        String originKey = on == null ? null : on.getOriginKey();
-        if (originKey == null) {
-          throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[0" + (on == null ? "] = null！" : ".getOriginKey() = null！"));
-        }
-        String key = on.getKey();
-        if (key == null) {
-          throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[0" + (on == null ? "] = null！" : ".getKey() = null！"));
-        }
+				On on = onList == null || onList.isEmpty() ? null : onList.get(0);  // APP JOIN 应该有且只有一个 ON 条件
+				String originKey = on == null ? null : on.getOriginKey();
+				if (originKey == null) {
+				throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[0" + (on == null ? "] = null！" : ".getOriginKey() = null！"));
+				}
+				String key = on.getKey();
+				if (key == null) {
+				throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[0" + (on == null ? "] = null！" : ".getKey() = null！"));
+				}
 
-        // 取出 "id@": "@/User/userId" 中所有 userId 的值
-        List<Object> targetValueList = new ArrayList<>();
+				// 取出 "id@": "@/User/userId" 中所有 userId 的值
+				List<Object> targetValueList = new ArrayList<>();
 
-        for (int i = 0; i < resultList.size(); i++) {
-          JSONObject mainTable = resultList.get(i);
-          Object targetValue = mainTable == null ? null : mainTable.get(on.getTargetKey());
+				for (int i = 0; i < resultList.size(); i++) {
+				  JSONObject mainTable = resultList.get(i);
+				  Object targetValue = mainTable == null ? null : mainTable.get(on.getTargetKey());
 
-          if (targetValue != null && targetValueList.contains(targetValue) == false) {
-            targetValueList.add(targetValue);
-          }
-        }
+				  if (targetValue != null && targetValueList.contains(targetValue) == false) {
+				    targetValueList.add(targetValue);
+				  }
+				}
 
-        if (targetValueList.isEmpty() && config.isExplain() == false) {
-          throw new NotExistException("targetValueList.isEmpty() && config.isExplain() == false");
-        }
+				if (targetValueList.isEmpty() && config.isExplain() == false) {
+				  throw new NotExistException("targetValueList.isEmpty() && config.isExplain() == false");
+				}
 
-        // 替换为 "id{}": [userId1, userId2, userId3...]
-        jc.putWhere(originKey, null, false);  // remove originKey
-        jc.putWhere(key + "{}", targetValueList, true);  // add originKey{}          }
+				// 替换为 "id{}": [userId1, userId2, userId3...]
+				jc.putWhere(originKey, null, false);  // remove originKey
+				jc.putWhere(key + "{}", targetValueList, true);  // add originKey{}          }
 
-				jc.setMain(true).setPreparedValueList(new ArrayList<>());
+							jc.setMain(true).setPreparedValueList(new ArrayList<>());
 
-        // 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销
-//        String q = jc.getQuote();
-//        if (allChildCount > 0 && jc.getCount() <= 0) {
-//          List<String> column = jc.getColumn();
-//          if (column == null || column.isEmpty()) {
-//            column = Arrays.asList("*;row_number()OVER(PARTITION BY " + q + key + q + " ORDER BY " + q + key + q + " ASC):_row_num_");
-//          }
-//          else {
-//            column.add("row_number()OVER(PARTITION BY " + q + key + q + " ORDER BY " + q + key + q + " ASC):_row_num_");
-//          }
-//          jc.setColumn(column);
-//        }
+				// 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销
+				//        String q = jc.getQuote();
+				//        if (allChildCount > 0 && jc.getCount() <= 0) {
+				//          List<String> column = jc.getColumn();
+				//          if (column == null || column.isEmpty()) {
+				//            column = Arrays.asList("*;row_number()OVER(PARTITION BY " + q + key + q + " ORDER BY " + q + key + q + " ASC):_row_num_");
+				//          }
+				//          else {
+				//            column.add("row_number()OVER(PARTITION BY " + q + key + q + " ORDER BY " + q + key + q + " ASC):_row_num_");
+				//          }
+				//          jc.setColumn(column);
+				//        }
 
-        int childCount = cc.getCount();
-        int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
-        boolean isOne2Many = childCount != 1 || join.isOne2Many();
-        // 一对多会漏副表数据  TODO 似乎一对一走以下优化 row_number() <= childCount 逻辑也没问题
-//        if (isOne2Many == false && allChildCount > 0 && jc.getCount() < allChildCount) {
-//          jc.setCount(allChildCount);
-//        }
+				int childCount = cc.getCount();
+				int allChildCount = childCount*config.getCount();  // 所有分组子项数量总和
+				boolean isOne2Many = childCount != 1 || join.isOne2Many();
+				// 一对多会漏副表数据  TODO 似乎一对一走以下优化 row_number() <= childCount 逻辑也没问题
+				//        if (isOne2Many == false && allChildCount > 0 && jc.getCount() < allChildCount) {
+				//          jc.setCount(allChildCount);
+				//        }
 
 				boolean prepared = jc.isPrepared();
-        String sql = jc.getSQL(false);
+				String sql = jc.getSQL(false);
 				jc.setPrepared(prepared);
 
 				if (StringUtil.isEmpty(sql, true)) {
 					throw new NullPointerException(TAG + ".executeAppJoin  StringUtil.isEmpty(sql, true) >> return null;");
 				}
 
-        String sql2 = null;
-        if (childCount > 0 && isOne2Many && (jc.isMySQL() == false || jc.getDBVersionNums()[0] >= 8)) {
-//          加 row_number 字段并不会导致 count 等聚合函数统计出错，结果偏大，SQL JOIN 才会，之前没发现是因为缓存失效 bug
-//          boolean noAggrFun = true;
-//          List<String> column = jc.getColumn();
-//          if (column != null) {
-//            for (String c : column) {
-//              int start = c == null ? -1 : c.indexOf("(");
-//              int end = start <= 0 ? -1 : c.lastIndexOf(")");
-//              if (start > 0 && end > start) {
-//                String fun = c.substring(0, start);
-//                if (AbstractSQLConfig.SQL_AGGREGATE_FUNCTION_MAP.containsKey(fun)) {
-//                  noAggrFun = false;
-//                  break;
-//                }
-//              }
-//            }
-//          }
-//
-//          if (noAggrFun) { // 加 row_number 字段会导致 count 等聚合函数统计出错，结果偏大？
-          String q = jc.getQuote();
-          sql2 = prepared ? jc.getSQL(true) : sql;
+				String sql2 = null;
+				if (childCount > 0 && isOne2Many && (jc.isMySQL() == false || jc.getDBVersionNums()[0] >= 8)) {
+				//          加 row_number 字段并不会导致 count 等聚合函数统计出错，结果偏大，SQL JOIN 才会，之前没发现是因为缓存失效 bug
+				//          boolean noAggrFun = true;
+				//          List<String> column = jc.getColumn();
+				//          if (column != null) {
+				//            for (String c : column) {
+				//              int start = c == null ? -1 : c.indexOf("(");
+				//              int end = start <= 0 ? -1 : c.lastIndexOf(")");
+				//              if (start > 0 && end > start) {
+				//                String fun = c.substring(0, start);
+				//                if (AbstractSQLConfig.SQL_AGGREGATE_FUNCTION_MAP.containsKey(fun)) {
+				//                  noAggrFun = false;
+				//                  break;
+				//                }
+				//              }
+				//            }
+				//          }
+				//
+				//          if (noAggrFun) { // 加 row_number 字段会导致 count 等聚合函数统计出错，结果偏大？
+				  String q = jc.getQuote();
+				  sql2 = prepared ? jc.getSQL(true) : sql;
 
-          String prefix = "SELECT * FROM(";
-          String rnStr = ", row_number() OVER (PARTITION BY " + q + key + q + ((AbstractSQLConfig) jc).getOrderString(true) + ") _row_num_ FROM ";
-          String suffix = ") _t WHERE ( (_row_num_ <= " + childCount + ") )" + (allChildCount > 0 ? " LIMIT " + allChildCount : "");
+				  String prefix = "SELECT * FROM(";
+				  String rnStr = ", row_number() OVER (PARTITION BY " + q + key + q + ((AbstractSQLConfig) jc).getOrderString(true) + ") _row_num_ FROM ";
+				  String suffix = ") _t WHERE ( (_row_num_ <= " + childCount + ") )" + (allChildCount > 0 ? " LIMIT " + allChildCount : "");
 
-          sql2 = prefix
-            // 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销  + sql
-            + sql2.replaceFirst(" FROM ", rnStr)  // * 居然只能放在 row_number() 前面，放后面就报错 "SELECT ", rnStr)
-            + suffix;
+				  sql2 = prefix
+				    // 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销  + sql
+				    + sql2.replaceFirst(" FROM ", rnStr)  // * 居然只能放在 row_number() 前面，放后面就报错 "SELECT ", rnStr)
+				    + suffix;
 
-          sql = prepared ? (prefix + sql.replaceFirst(" FROM ", rnStr) + suffix) : sql2;
-//          }
-        }
+				  sql = prepared ? (prefix + sql.replaceFirst(" FROM ", rnStr) + suffix) : sql2;
+				//          }
+				}
 
-        boolean isExplain = jc.isExplain();
-        if (isExplain == false) {
-          generatedSQLCount ++;
-        }
+				boolean isExplain = jc.isExplain();
+				if (isExplain == false) {
+					generatedSQLCount ++;
+				}
 
 				long startTime = System.currentTimeMillis();
 				Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -773,17 +773,17 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				//执行副表的批量查询 并 缓存到 childMap
 				ResultSet rs = null;
 				try {
-          long executedSQLStartTime = 0;
-          if (isExplain == false) { //只有 SELECT 才能 EXPLAIN
-            executedSQLCount ++;
-            executedSQLStartTime = System.currentTimeMillis();
-          }
-					rs = executeQuery(jc, sql2);
-          if (isExplain == false) {
-            executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
-          }
+					long executedSQLStartTime = 0;
+					if (isExplain == false) { //只有 SELECT 才能 EXPLAIN
+					    executedSQLCount ++;
+					    executedSQLStartTime = System.currentTimeMillis();
+					}
+									rs = executeQuery(jc, sql2);
+					if (isExplain == false) {
+					    executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
+					}
 
-          int count = 0;
+					int count = 0;
 
 					int index = -1;
 
@@ -792,7 +792,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					final int length = rsmd.getColumnCount();
 					sqlResultDuration += System.currentTimeMillis() - startTime2;
 
-          Map<String, Boolean> skipMap = new HashMap<>();
+					Map<String, Boolean> skipMap = new HashMap<>();
 
 					long lastCursorTime = System.currentTimeMillis();
 					while ((allChildCount <= 0 || count < allChildCount) && rs.next()) { //FIXME 同时有 @ APP JOIN 和 < 等 SQL JOIN 时，next = false 总是无法进入循环，导致缓存失效，可能是连接池或线程问题
@@ -802,7 +802,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						index ++;
 						Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n executeAppJoin while (rs.next()){  index = " + index + "\n\n");
 
-            JSONObject result = new JSONObject(true);
+						JSONObject result = new JSONObject(true);
 
 						for (int i = 1; i <= length; i++) {
 							result = onPutColumn(jc, rs, rsmd, index, result, i, null, null);
@@ -813,26 +813,26 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						Log.d(TAG, "\n executeAppJoin  while (rs.next()) { resultList.put(" + index + ", result); "
 								+ "\n >>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n");
 
-            //TODO 兼容复杂关联
-            cc.putWhere(key, result.get(key), true);  // APP JOIN 应该有且只有一个 ON 条件
-            String cacheSql = cc.getSQL(false);
-            List<JSONObject> results = childMap.get(cacheSql);
+						//TODO 兼容复杂关联
+						cc.putWhere(key, result.get(key), true);  // APP JOIN 应该有且只有一个 ON 条件
+						String cacheSql = cc.getSQL(false);
+						List<JSONObject> results = childMap.get(cacheSql);
 
-            if (results == null || skipMap.get(cacheSql) == null) {  // 避免添加重复数据
-              results = new ArrayList<>(childCount);
-              childMap.put(cacheSql, results);
-              skipMap.put(cacheSql, Boolean.TRUE);
-            }
+						if (results == null || skipMap.get(cacheSql) == null) {  // 避免添加重复数据
+						      results = new ArrayList<>(childCount);
+						      childMap.put(cacheSql, results);
+						      skipMap.put(cacheSql, Boolean.TRUE);
+						}
 
-            if (childCount <= 0 || results.size() < childCount) {  // 避免超过子数组每页数量
-              //              if (count == 1 && results.isEmpty() == false) {  // 避免添加重复数据
-              //                results.clear();
-              //              }
-              results.add(result);  //缓存到 childMap
-              count ++;
-              Log.d(TAG, ">>> executeAppJoin childMap.put('" + cacheSql + "', result);  childMap.size() = " + childMap.size());
-            }
-          }
+						if (childCount <= 0 || results.size() < childCount) {  // 避免超过子数组每页数量
+						      //              if (count == 1 && results.isEmpty() == false) {  // 避免添加重复数据
+						      //                results.clear();
+						      //              }
+						      results.add(result);  //缓存到 childMap
+						      count ++;
+						      Log.d(TAG, ">>> executeAppJoin childMap.put('" + cacheSql + "', result);  childMap.size() = " + childMap.size());
+						}
+					  }
 				}
 				finally {
 					if (rs != null) {
@@ -971,9 +971,9 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		else if (value instanceof Date) {  // java.sql.Date 和 java.sql.Time 都继承 java.util.Date
 			value = ((Date) value).toString();
 		}
-    else if (value instanceof LocalDateTime) {
-      value = ((LocalDateTime) value).toString();
-    }
+		else if (value instanceof LocalDateTime) {
+			value = ((LocalDateTime) value).toString();
+		}
 		else if (value instanceof Year) {
 			value = ((Year) value).getValue();
 		}
@@ -1058,13 +1058,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override  // 重写是为了返回类型从 Statement 改为 PreparedStatement，避免其它方法出错
 	public PreparedStatement getStatement(@NotNull SQLConfig config) throws Exception {
-    return getStatement(config, null);
-  }
+		return getStatement(config, null);
+	}
 	@Override
 	public PreparedStatement getStatement(@NotNull SQLConfig config, String sql) throws Exception {
-    if (StringUtil.isEmpty(sql)) {
-      sql = config.getSQL(config.isPrepared());
-    }
+		if (StringUtil.isEmpty(sql)) {
+			sql = config.getSQL(config.isPrepared());
+		}
 
 		PreparedStatement statement; //创建Statement对象
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
@@ -1120,7 +1120,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			connectionMap.put(connectionKey, connection);
 		}
 
-    // TDengine 驱动内部事务处理方法都是空实现，手动 commit 无效
+		// TDengine 驱动内部事务处理方法都是空实现，手动 commit 无效
 		int ti = config.isTDengine() ? Connection.TRANSACTION_NONE : getTransactionIsolation();
 		if (ti != Connection.TRANSACTION_NONE) { //java.sql.SQLException: Transaction isolation level NONE not supported by MySQL
 			begin(ti);
@@ -1219,11 +1219,11 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception {
-    if (config.isTDengine()) {
-      Connection conn = getConnection(config);
-      Statement stt = conn.createStatement();
-      return executeQuery(stt, StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
-    }
+		if (config.isTDengine()) {
+			Connection conn = getConnection(config);
+			Statement stt = conn.createStatement();
+			return executeQuery(stt, StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
+		}
 
 		PreparedStatement stt = getStatement(config, sql);
 		ResultSet rs = stt.executeQuery();  //PreparedStatement 不用传 SQL
@@ -1237,17 +1237,17 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public int executeUpdate(@NotNull SQLConfig config, String sql) throws Exception {
-    Statement stt;
-    int count;
-    if (config.isTDengine()) {
-      Connection conn = getConnection(config);
-      stt = conn.createStatement();
-      count = stt.executeUpdate(StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
-    }
-    else {
-      stt = getStatement(config);
-      count = ((PreparedStatement) stt).executeUpdate();  // PreparedStatement 不用传 SQL
-    }
+		Statement stt;
+		int count;
+		if (config.isTDengine()) {
+			Connection conn = getConnection(config);
+			stt = conn.createStatement();
+			count = stt.executeUpdate(StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
+		}
+		else {
+			stt = getStatement(config);
+			count = ((PreparedStatement) stt).executeUpdate();  // PreparedStatement 不用传 SQL
+		}
 
 		if (count <= 0 && config.isHive()) {
 			count = 1;
