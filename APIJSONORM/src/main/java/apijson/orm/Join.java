@@ -105,12 +105,12 @@ public class Join {
 		this.outerConfig = outerConfig;
 	}
 
-  public boolean isOne2One() {
-    return ! isOne2Many();
-  }
-  public boolean isOne2Many() {
-    return count != 1 || (path != null && path.contains("[]"));  // TODO 必须保证一对一时不会传包含 [] 的 path
-  }
+	public boolean isOne2One() {
+		return ! isOne2Many();
+	}
+	public boolean isOne2Many() {
+		return count != 1 || (path != null && path.contains("[]"));  // TODO 必须保证一对一时不会传包含 [] 的 path
+	}
 
 	public boolean isAppJoin() {
 		return "@".equals(getJoinType());
