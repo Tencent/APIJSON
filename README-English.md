@@ -180,7 +180,8 @@ Complex production App like Twitter tweets<br />
 	
 ## <h2 id="4">4. Contributing<h2/> 
 	
-We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/Tencent/APIJSON/issues) before opening a new one.<br />
+We are always looking for more developers to help implementing new features, fix bugs, etc. <br />
+Please have a look at the [open issues](https://github.com/Tencent/APIJSON/issues) before opening a new one. <br />
 
 Fork the project and send a pull request.<br />
 
