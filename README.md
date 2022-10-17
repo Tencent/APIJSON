@@ -192,10 +192,13 @@ https://github.com/Tencent/APIJSON/wiki
 **华为 minshiwu：**
 “demo工程，默认使用apijson-framework，可以做到无任何配置即可体验apijson的各种能力。”
 
+**字节跳动 qiujunlin：**
+“初次见到这个项目，觉得太惊艳了，眼前一亮。给我的感受是，项目大大简化了开发流程，开发效率提升了很多倍。”
+
 **百度智慧城市研发 lpeng：**
 “很兴奋的发现APIJSON很适合我们的一个开发场景，作为我们协议定义的一部分” 
 
-**中兴工程师 duyijiang：**
+**中兴 duyijiang：**
 “感谢腾讯大大提供的框架，很好用”
 
 https://github.com/Tencent/APIJSON/issues/132#issuecomment-1106669540
@@ -316,7 +319,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [爱投斯智能技术（深圳）有限公司](http://www.aiotos.net)
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个知乎基础研发架构师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
+主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个知乎基础研发架构师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -361,7 +364,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 </div>
 <br />
 
-生态周边项目的作者们(2 个腾讯工程师、1 个 BAT 技术专家、1 个微软工程师、1 个字节跳动工程师 等)：<br />
+生态周边项目的作者们(2 个腾讯工程师、1 个 BAT 技术专家、1 个微软工程师、2 个字节跳动工程师 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">
