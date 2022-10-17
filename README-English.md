@@ -22,9 +22,11 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-12C%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/andream7/apijson-db2"><img src="https://img.shields.io/badge/DB2-7.1%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TiDB-2.1%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Dameng"><img src="https://img.shields.io/badge/Dameng-7.6%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/qiujunlin/APIJSONDemo"><img src="https://img.shields.io/badge/ClickHouse-21.1%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hive-3.1.2%2B-brightgreen.svg?style=flat"></a>  
   <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hadoop-3.1.3%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/TDengine"><img src="https://img.shields.io/badge/TDengine-2.6.0%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server"><img src="https://img.shields.io/badge/Java-1.8%2B-brightgreen.svg?style=flat"></a>
@@ -45,9 +47,10 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 
 <p align="center" >
-  <img src="https://raw.githubusercontent.com/Tencent/APIJSON/master/logo.png" />
+  <img src="https://oscimg.oschina.net/oscnet/up-3299d6e53eb0534703a20e96807727fac63.png" />
 </p>
-<br />
+
+---
 
 #### A better online document is available at https://apijsondocs.readthedocs.io/
 
