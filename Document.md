@@ -1,3 +1,6 @@
+[English](https://github.com/Tencent/APIJSON/blob/master/Document-English.md)
+<br />
+
 # APIJSON 通用文档 
 本文是通用文档，只和 APIJSON 协议有关，和 C#, Go, Java, JavaScript, PHP, Python, TypeScript 等开发语言无关。 <br />
 具体开发语言相关的 配置、运行、部署 等文档见各个相关项目的文档，可以在首页点击对应语言的入口来查看。<br />
