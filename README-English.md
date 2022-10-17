@@ -113,8 +113,8 @@ You're gonna leave 'em all in awe, awe, awe. <br />
 <br/>
 	
 **Tired with endless arguments about HTTP API dev or API use?** <br/>
-**Use APIJSON-the ORM for providing infinity codeless CRUD APIs that fit almost all your needs.**
-
+**Use APIJSON-the ORM for providing infinity codeless CRUD APIs that fit almost all your needs.** <br />
+**Unfold the Power(In Your Soul) with ⭐Star & Clone.**
 	
 ### Examples:
 
