@@ -54,9 +54,9 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 
 #### A better online document is available at https://apijsondocs.readthedocs.io/
 
-* ### [1. About](#1)
-* ### [2. Backend usage]#2)
-* ### [3. Frontend usage](#3)
+* ### [1.About](#1)
+* ### [2.Backend usage](#2)
+* ### [3.Frontend usage](#3)
 * ### [4.Contributing](#4)
 * ### [5.Versioning](#5)
 * ### [6.Author](#6)
