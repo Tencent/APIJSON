@@ -58,7 +58,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 * ### [2.Backend usage](#2)
 * ### [3.Frontend usage](#3)
 * ### [4.Contributing](#4)
-* ### [5.Versioning](#5)
+* ### [5.Releases](#5)
 * ### [6.Author](#6)
 * ### [7.Donating](#7)
 
