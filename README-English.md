@@ -196,6 +196,7 @@ See the latest release [here](https://github.com/Tencent/APIJSON/releases/tag/5.
 ## <h2 id="6">6. Auhtor<h2/> 	
 	
 Check out the author's [github account](https://github.com/TommyLemon) to see more related projects.<br>
+<img width="1279" alt="image" src="https://user-images.githubusercontent.com/5738175/196243428-da8abbbb-9622-4f26-a109-db5d17ab8b40.png">
 
 If you have any questions or suggestions, you can [create an issue](https://github.com/Tencent/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
 
