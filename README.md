@@ -38,9 +38,14 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://img.shields.io/badge/Python-3%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
-  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L41-L46"><img src="https://img.shields.io/badge/Spring-4.3.2%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L41-L46"><img src="https://img.shields.io/badge/SpringBoot-1.4.0%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONFinal/pom.xml#L51-L61"><img src="https://img.shields.io/badge/JFinal-3.5%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L48-L52"><img src="https://img.shields.io/badge/Spring-4.3.2%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L48-L52"><img src="https://img.shields.io/badge/SpringBoot-1.4.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONFinal/pom.xml#L59-L68"><img src="https://img.shields.io/badge/JFinal-3.5%2B-brightgreen.svg?style=flat"></a>
+</p>
+<p align="center" >
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
