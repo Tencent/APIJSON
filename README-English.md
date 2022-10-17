@@ -106,7 +106,7 @@ Come on, show 'em what you're worth <br />
 Make 'em go, "Oh, oh, oh" <br />
 As you give 'em an A-T-M <br />
 Baby, you're a firework <br />
-Come on, let let them serve themselves <br />
+Come on, let them serve themselves <br />
 Make 'em go, "Oh, oh, oh" <br />
 You're gonna leave 'em all in awe, awe, awe. <br />
 
