@@ -1,6 +1,6 @@
 ### Examples:
 
-#### Get a User
+#### Get an User
 Request:
 <pre><code class="language-json">{
   "User":{
