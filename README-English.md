@@ -53,13 +53,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 
 * ### [1. About](#1)
 * ### [2. Server-side deployment](#2)
-* [2.1 Installing with Eclipse](#2.1)
-* [2.2 Import MySQL table files](#2.2)
-* [2.3 Installing with IntellIJ IDEA Ultimate](#2.3)`
 * ### [3. Client-side deployment](#3)
-* [3.1 For Android](#3.1)
-* [3.2 For iOS](#3.2)
-* [3.3 For Javascript](#3.3)
 * ### [4.Contributing](#4)
 * ### [5.Versioning](#5)
 * ### [6.Author](#6)
@@ -168,35 +162,19 @@ See https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/READ
 <br />
 
 ## <h2 id="3">3. Client-side deployment<h2/> 
+You can skip this step and use [APIAuto](https://github.com/TommyLemon/APIAuto) or download App.<br />
+See [Android](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Android/README-English.md), [iOS](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-iOS/README-English.md) or [JavaScript](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-JavaScript/README-English.md)<br />
+
+### Download App
+
+Simple demo App for testing APIJSON<br />
+[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 	
-### <h3 id="3.1">3.1 For Android<h3/>
+Complex production App like Twitter tweets<br />
+[APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
+
+<br />
 	
-Make sure you have either [ADT Bundle](https://stuff.mit.edu/afs/sipb/project/android/docs/sdk/installing/bundle.html) or [Android Studio](https://developer.android.com/studio) installed.<br />
-
-My config:  Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + (JDK 1.7.0_71 + ADT Bundle 20140702) + (JDK 1.8.0_91 + Android Studio 2.1.2). All the systems and software are 64 bit.<br />
-
-* 1.Importing<br />
-*Open an existing Android Studio project > Select the path of APIJSON-Master/APIJSON-Android/APIJSONApp(or APIJSONTest） > OK*
-
-* 2.Running<br />
-*Run > Run app*
-
-* 3.Testing <br />
-In the browser, send a request to the server. It should return with the result.
-If the default url is not available, change it to an available one, such as an IPV4 address that is running the server of the APIJSON project. Then click the request button again.
-
-### <h3 id="3.2">3.2 For iOS<h3/>
-	
-Open xCode, then *APIJSON-Master/APIJSON-iOS/APIJSON-Swift > Open*<br/>
-
-In xCode, *Product > Run* 
-
-### <h3 id="3.3">3.3 For Javascript<h3/>
-
-You can use either an IDE or text editor like sublime, Atom, etc. Webstorm is recommended.<br/>
-While using a text editor, you just open the .html file in the APIJSON-JS folder.<br/>
-You can also open it with Vue javascript framework. Click [here](https://vuejs.org/) to learn more.
-
 ## <h2 id="4">4. Contributing<h2/> 
 	
 We are always looking for more developers to help implementing new features, fix bugs, etc. Please have a look at the [open issues](https://github.com/Tencent/APIJSON/issues) before opening a new one.<br />
