@@ -69,7 +69,9 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 
 ## <h2 id= "1">1. About <h2/>
 
-APIJSON is a JSON based internet communication protocol and an ORM library that largely simplifies the process of back-end API development. It also allows users to get data more quickly with self-defined form and fewer endpoints requests.
+APIJSON is a JSON based internet communication protocol and an ORM library  <br />
+that largely simplifies the process of back-end API development.  <br />
+It also allows users to get data more quickly with self-defined form and fewer endpoints requests.
 
 ### Features:
 #### For getting data:
