@@ -97,7 +97,7 @@ Do you ever feel they always complain? <br />
 Urging doc and feedback bugs, even ask your refactoring <br />
 Do you know that there's still a chance for you? <br />
 'Cause there's a powerful tool <br />
-You just gotta depend and cofig <br />
+You just gotta depend and configure <br />
 And let it init <br />
 Just start APIs <br />
 They are so easy to try <br />
