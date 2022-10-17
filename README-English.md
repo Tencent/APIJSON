@@ -55,8 +55,8 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 #### A better online document is available at https://apijsondocs.readthedocs.io/
 
 * ### [1. About](#1)
-* ### [2. Server-side deployment](#2)
-* ### [3. Client-side deployment](#3)
+* ### [2. Backend usage]#2)
+* ### [3. Frontend usage](#3)
 * ### [4.Contributing](#4)
 * ### [5.Versioning](#5)
 * ### [6.Author](#6)
@@ -158,13 +158,13 @@ Note: The UI is APIAuto, the URL+JSON is APIJSON<br/>
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif) 
 
 
-## <h2 id="2">2.Server-side deployment<h2/>
+## <h2 id="2">2.Backend usage<h2/>
 You can skip this step and use 'apijson.cn:8080'. <br />
 See https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/README-English.md
 
 <br />
 
-## <h2 id="3">3. Client-side deployment<h2/> 
+## <h2 id="3">3. Frontend usage<h2/> 
 You can skip this step and use [APIAuto](https://github.com/TommyLemon/APIAuto) or download App.<br />
 See [Android](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Android/README-English.md), [iOS](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-iOS/README-English.md) or [JavaScript](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-JavaScript/README-English.md)<br />
 
