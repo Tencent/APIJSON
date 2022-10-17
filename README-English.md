@@ -111,11 +111,56 @@ Make 'em go, "Oh, oh, oh" <br />
 You're gonna leave 'em all in awe, awe, awe. <br />
 
 <br/>
-	
+
 **Tired with endless arguments about HTTP API dev or use?** <br/>
 **Use APIJSON-the ORM for providing infinity codeless CRUD APIs that fit almost all your needs.** <br />
 **Unfold the Power(In Your Soul) with ⭐Star & Clone.**
-	
+
+### APIJSON Show
+#### Postman test APIJSON
+![](https://static.oschina.net/uploads/img/201711/12230359_f7fQ.jpg)
+<br/>
+
+#### APIAuto test APIJSON
+Note: The UI is APIAuto, the URL+JSON is APIJSON<br/>
+<br />
+<p align="center" >
+  <a >APIJSON: query multi related tables, flexible data structures. APIAuto: multi test accounts, easily share test cases</a>
+</p> 
+
+![](https://oscimg.oschina.net/oscnet/up-bbbec4fc5edc472be127c02a4f3cd8f4ec2.JPEG) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_associate.gif) 
+
+<br />
+<p align="center" >
+  <a >APIAuto: generate request code for frontend/clients or Python test cases, easily download code</a>
+</p> 
+
+![](https://oscimg.oschina.net/oscnet/up-637193bbd89b41c3264827786319e842aee.JPEG) 
+
+<br />
+<p align="center" >
+  <a >APIAuto: auto save test records, auto generate API doc, requests shortcut, easily replay</a>
+</p> 
+
+![](https://oscimg.oschina.net/oscnet/up-7dcb4ae71bd3892a909e4ffa37ba7c1d92a.JPEG) 
+
+<br />
+<p align="center" >
+  <a >APIAuto: auto regression test without coding(annotations, comments, etc.)</a>
+</p> 
+
+![](https://oscimg.oschina.net/oscnet/up-c1ba774f8e7fcc5adcdb05cad5bd414d766.JPEG) 
+
+<br />
+<p align="center" >
+  <a >A picture is worth a thousand words - some base functions show for APIJSON</a>
+</p> 
+
+![](https://oscimg.oschina.net/oscnet/up-e21240ef3770326ee6015e052226d0da184.JPEG) 
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif) 
+
+
 ### Examples:
 
 #### Get a User
