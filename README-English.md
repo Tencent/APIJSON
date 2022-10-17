@@ -147,112 +147,18 @@ Note: The UI is APIAuto, the URL+JSON is APIJSON<br/>
 
 <br />
 <p align="center" >
-  <a >APIAuto: auto regression test without coding(annotations, comments, etc.)</a>
+  <a >APIAuto: auto regression test without code, annotation, comment, etc.)</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-c1ba774f8e7fcc5adcdb05cad5bd414d766.JPEG) 
 
 <br />
 <p align="center" >
-  <a >A picture is worth a thousand words - some base functions show for APIJSON</a>
+  <a >A picture is worth a thousand words - some base features show for APIJSON</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-e21240ef3770326ee6015e052226d0da184.JPEG) 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif) 
-
-
-### Examples:
-
-#### Get a User
-Request:
-
-```js
-{
-  "User":{
-  }
-}
-```
-
-[Click here to test](http://apijson.cn:8080/get/{"User":{}})
-
-Response:
-
-```js
-{
-  "User":{
-    "id":38710,
-    "sex":0,
-    "name":"TommyLemon",
-    "certified":true,
-    "tag":"Android&Java",
-    "phone":13000038710,
-    "head":"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
-    "date":1485948110000,
-    "pictureList":[
-      "http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
-      "http://common.cnblogs.com/images/icon_weibo_24.png"
-    ]
-  },
-  "code":200,
-  "msg":"success"
-}
-```
-<br />
-
-#### Get an Array of Users
-
-Request:
-
-```js
-{
-  "[]":{
-    "count":3,             //just get 3 results
-    "User":{
-      "@column":"id,name"  //just get ids and names
-    }
-  }
-}
-```
-
-[Click here to test](http://apijson.cn:8080/get/{"[]":{"count":3,"User":{"@column":"id,name"}}})
-
-Response:
-
-```js
-{
-  "[]":[
-    {
-      "User":{
-        "id":38710,
-        "name":"TommyLemon"
-      }
-    },
-    {
-      "User":{
-        "id":70793,
-        "name":"Strong"
-      }
-    },
-    {
-      "User":{
-        "id":82001,
-        "name":"Android"
-      }
-    }
-  ],
-  "code":200,
-  "msg":"success"
-}
-```
-
-<br />
-
-[Test it online](http://apijson.cn/api)<br />
-
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_get.jpg) 
-
-![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Auto_code.jpg) 
-<p align="center" >
 
 
 ## <h2 id="2">2.Server-side deployment<h2/>
@@ -281,26 +187,35 @@ In the menu at the right, click libs, right click apijson-orm.jar,click add as l
 Open apijson.demo.server.DemoSQLConfig. In line 40-61, change return values of `getDBUri`,`getDBAccount`,`getDBPassword`,`getSchema` to your own database.<br/>
 
 ```java
-@Override
-public String getDBUri() {
-    //TODO: Change the return value to your own
-    return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "jdbc:postgresql://localhost:5432/postgres" : "jdbc:mysql://192.168.71.146:3306/";
-}
-@Override
-public String getDBAccount() {
-    //TODO: Change the return value to your own
-    return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? "postgres" : "root";
-}
-@Override
-public String getDBPassword() {
-    //TODO: Change the return value to your own
-    return DATABASE_POSTGRESQL.equalsIgnoreCase(getDatabase()) ? null : "root"; 
-}
-@Override
-public String getSchema() {
-    String s = super.getSchema();
-    return StringUtil.isEmpty(s, true) ? "thea" : s; //TODO: Change the return value to your own. For here,change "thea" to "your database's name"
-}
+	static {
+		DEFAULT_DATABASE = DATABASE_MYSQL;  // TODO
+		DEFAULT_SCHEMA = "sys";  // TODO  defaults: MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
+	}
+	
+	@Override
+	public String getDBVersion() {
+		return "5.7.22";  // "8.0.11";  // TODO
+	}
+	
+	@JSONField(serialize = false)
+	@Override
+	public String getDBUri() {
+		// add userSSL=false for MySQL 8.0+  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
+		// for MySQL not greater than 5.7
+		return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; // TODO TiDB can be used as MySQL, its defaut port is 4000
+	}
+	
+	@JSONField(serialize = false)
+	@Override
+	public String getDBAccount() {
+		return "root";  // TODO
+	}
+	
+	@JSONField(serialize = false)
+	@Override
+	public String getDBPassword() {
+		return "apijson"; // TODO TiDB can be used as MySQL, its defaut password is an empty string ""
+	}
 ```
 
 **Note**: Instead of this step, you can also [import your database](#2.2).
