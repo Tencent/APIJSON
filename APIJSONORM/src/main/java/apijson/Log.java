@@ -29,7 +29,7 @@ public class Log {
 	}
 
 
-  //默认的时间格式
+	//默认的时间格式
 	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 
 	/**
