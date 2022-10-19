@@ -370,7 +370,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 </div>
 <br />
 
-生态周边项目的作者们(2 个腾讯工程师、1 个 BAT 技术专家、1 个微软工程师、2 个字节跳动工程师、1 个神州数码工程师&Apache Dubbo-js 作者 等)：<br />
+生态周边项目的作者们(2 个腾讯工程师、1 个 BAT 技术专家、1 个微软工程师、2 个字节跳动工程师、1 个神州数码工程师&Apache dubbo2js 作者 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">
