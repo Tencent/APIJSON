@@ -700,7 +700,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				jc.putWhere(originKey, null, false);  // remove originKey
 				jc.putWhere(key + "{}", targetValueList, true);  // add originKey{}          }
 
-							jc.setMain(true).setPreparedValueList(new ArrayList<>());
+                jc.setMain(true).setPreparedValueList(new ArrayList<>());
 
 				// 放一块逻辑更清晰，也避免解析 * 等不支持或性能开销
 				//        String q = jc.getQuote();
@@ -752,7 +752,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				//
 				//          if (noAggrFun) { // 加 row_number 字段会导致 count 等聚合函数统计出错，结果偏大？
 				  String q = jc.getQuote();
-				  sql2 = prepared ? jc.getSQL(true) : sql;
+				  sql2 = prepared && jc.isTDengine() == false ? jc.getSQL(true) : sql;
 
 				  String prefix = "SELECT * FROM(";
 				  String rnStr = ", row_number() OVER (PARTITION BY " + q + key + q + ((AbstractSQLConfig) jc).getOrderString(true) + ") _row_num_ FROM ";
@@ -786,7 +786,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 					    executedSQLCount ++;
 					    executedSQLStartTime = System.currentTimeMillis();
 					}
-									rs = executeQuery(jc, sql2);
+                    rs = executeQuery(jc, sql2);
 					if (isExplain == false) {
 					    executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
 					}
@@ -1085,7 +1085,16 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			}
 		}
 		else if (RequestMethod.isGetMethod(config.getMethod(), true)) {
-			statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            //if (config.isPresto() || config.isTrino()) {
+            //    statement = getConnection(config).prepareStatement(sql); // , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            //} else {
+            //    statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            //}
+            if (config.isMySQL() || config.isPostgreSQL() || config.isOracle() || config.isSQLServer() || config.isDb2()) {
+                statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            } else {
+                statement = getConnection(config).prepareStatement(sql);
+            }
 		}
 		else {
 			statement = getConnection(config).prepareStatement(sql);
@@ -1227,15 +1236,19 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception {
-		if (config.isPresto() || config.isTrino() || config.isTDengine()) {
-			Connection conn = getConnection(config);
-            Statement stt = config.isTDengine()
-                    ? conn.createStatement() // fix Presto: ResultSet: Exception: set type is TYPE_FORWARD_ONLY, Result set concurrency must be CONCUR_READ_ONLY
-                    : conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		if (config.isPrepared() == false || config.isTDengine() // TDengine JDBC 不支持 PreparedStatement
+            || (config.isExplain() && (config.isPresto() || config.isTrino()))) { // Presto JDBC 0.277 在 EXPLAIN 模式下预编译值不会替代 ? 占位导致报错
+
+            Connection conn = getConnection(config);
+            Statement stt = conn.createStatement();
+            //Statement stt = config.isTDengine()
+            //        ? conn.createStatement() // fix Presto: ResultSet: Exception: set type is TYPE_FORWARD_ONLY, Result set concurrency must be CONCUR_READ_ONLY
+            //        : conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
 
             return executeQuery(stt, StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
 		}
 
+        // Presto JDBC 0.277 在 EXPLAIN 模式下预编译值不会替代 ? 占位导致报错
 		PreparedStatement stt = getStatement(config, sql);
 		ResultSet rs = stt.executeQuery();  //PreparedStatement 不用传 SQL
 		//		if (config.isExplain() && (config.isSQLServer() || config.isOracle())) {
@@ -1252,8 +1265,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		int count;
 		if (config.isTDengine()) {
 			Connection conn = getConnection(config);
-			stt = conn.createStatement();
-			count = stt.executeUpdate(StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
+            stt = conn.createStatement();
+			//stt = config.isTDengine()
+            //        ? conn.createStatement() // fix Presto: ResultSet: Exception: set type is TYPE_FORWARD_ONLY, Result set concurrency must be CONCUR_READ_ONLY
+            //        : conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+
+            count = stt.executeUpdate(StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
 		}
 		else {
 			stt = getStatement(config);

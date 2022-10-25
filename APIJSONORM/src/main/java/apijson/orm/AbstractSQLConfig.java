@@ -3561,12 +3561,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (isPostgreSQL() || isInfluxDB()) {
 			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
 		}
-		if (isPresto() || isTrino()) {
-			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + ")";
-		}
 		if (isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
 			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
+        if (isPresto() || isTrino()) {
+            return "regexp_like(" + (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
+                    + ", " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "") + ")";
+        }
 		if (isClickHouse()) {
 			return "match(" + (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
 					+ ", " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "") + ")";
@@ -4436,14 +4437,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
 									+ " ~" + (ignoreCase ? "* " : " ") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 						}
-						else if (isPresto() || isTrino()) {
-							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
-									+ ", " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ")";
-						}
 						else if (isOracle() || isDameng() || isKingBase()) {
 							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
 									+ ", " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 						}
+                        else if (isPresto() || isTrino()) {
+                            sql += (first ? ON : AND) + "regexp_like(" + (ignoreCase ? "lower(" : "") + quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
+                                    + ", " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
+                        }
 						else if (isClickHouse()) {
 							sql += (first ? ON : AND) + "match(" + (ignoreCase ? "lower(" : "") + quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
 									+ ", " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
