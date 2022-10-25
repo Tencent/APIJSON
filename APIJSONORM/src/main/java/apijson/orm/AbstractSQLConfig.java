@@ -423,13 +423,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("json_array", "");  // JSON_ARRAY(val1, val2...) 创建JSON数组
 		SQL_FUNCTION_MAP.put("json_array_append", "");  // JSON_ARRAY_APPEND(json_doc, val) 将数据附加到JSON文档
 		SQL_FUNCTION_MAP.put("json_array_insert", "");  // JSON_ARRAY_INSERT(json_doc, val) 插入JSON数组
+		SQL_FUNCTION_MAP.put("json_array_get", "");  // JSON_ARRAY_GET(json_doc, position) 从JSON数组提取指定位置的元素
 		SQL_FUNCTION_MAP.put("json_contains", "");  // JSON_CONTAINS(json_doc, val) JSON文档是否在路径中包含特定对象
-		SQL_FUNCTION_MAP.put("json_contains_path", "");  // JSON_CONTAINS_PATH(json_doc, path) JSON文档是否在路径中包含任何数据
+        SQL_FUNCTION_MAP.put("json_array_contains", "");  // JSON_ARRAY_CONTAINS(json_doc, path) JSON文档是否在路径中包含特定对象
+        SQL_FUNCTION_MAP.put("json_contains_path", "");  // JSON_CONTAINS_PATH(json_doc, path) JSON文档是否在路径中包含任何数据
 		SQL_FUNCTION_MAP.put("json_depth", "");  // JSON_DEPTH(json_doc) JSON文档的最大深度
 		SQL_FUNCTION_MAP.put("json_extract", "");  // JSON_EXTRACT(json_doc, path) 从JSON文档返回数据
+		SQL_FUNCTION_MAP.put("json_extract_scalar", "");  // JSON_EXTRACT_SCALAR(json_doc, path) 从JSON文档返回基础类型数据，例如 Boolean, Number, String
 		SQL_FUNCTION_MAP.put("json_insert", "");  // JSON_INSERT(json_doc, val) 将数据插入JSON文档
 		SQL_FUNCTION_MAP.put("json_keys", "");  // JSON_KEYS(json_doc[, path]) JSON文档中的键数组
 		SQL_FUNCTION_MAP.put("json_length", "");  // JSON_LENGTH(json_doc) JSON文档中的元素数
+		SQL_FUNCTION_MAP.put("json_size", "");  // JSON_SIZE(json_doc) JSON文档中的元素数
+		SQL_FUNCTION_MAP.put("json_array_length", "");  // JSON_ARRAY_LENGTH(json_doc) JSON文档中的元素数
+		SQL_FUNCTION_MAP.put("json_format", "");  // JSON_FORMAT(json_doc) 格式化 JSON
+		SQL_FUNCTION_MAP.put("json_parse", "");  // JSON_PARSE(val) 转换为 JSON
 		SQL_FUNCTION_MAP.put("json_merge", "");  // JSON_MERGE(json_doc1, json_doc2) （已弃用） 合并JSON文档，保留重复的键。JSON_MERGE_PRESERVE（）的已弃用同义词
 		SQL_FUNCTION_MAP.put("json_merge_patch", "");  // JSON_MERGE_PATCH(json_doc1, json_doc2) 合并JSON文档，替换重复键的值
 		SQL_FUNCTION_MAP.put("json_merge_preserve", "");  // JSON_MERGE_PRESERVE(json_doc1, json_doc2) 合并JSON文档，保留重复的键
@@ -451,6 +458,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQL_FUNCTION_MAP.put("json_valid", "");  // JSON_VALID(json_doc) JSON值是否有效
 		SQL_FUNCTION_MAP.put("json_arrayagg", "");  // JSON_ARRAYAGG(key) 将每个表达式转换为 JSON 值，然后返回一个包含这些 JSON 值的 JSON 数组
 		SQL_FUNCTION_MAP.put("json_objectagg", "");  // JSON_OBJECTAGG(key, val))  将每个表达式转换为 JSON 值，然后返回一个包含这些 JSON 值的 JSON 对象
+		SQL_FUNCTION_MAP.put("is_json_scalar", "");  // IS_JSON_SCALAR(val))  是否为JSON基本类型，例如 Boolean, Number, String
 
 		// MySQL 高级函数
 		//		SQL_FUNCTION_MAP.put("bin", "");  // BIN(x)	返回 x 的二进制编码
@@ -3553,7 +3561,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (isPostgreSQL() || isInfluxDB()) {
 			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
 		}
-		if (isPresto() || isTrino() || isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
+		if (isPresto() || isTrino()) {
+			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + ")";
+		}
+		if (isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
 			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
 		if (isClickHouse()) {
@@ -3864,6 +3875,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				else if (isOracle() || isDameng() || isKingBase()) {
 					condition += ("json_textcontains(" + getKey(column) + ", " + (StringUtil.isEmpty(path, true) ? "'$'" : getValue(key, column, path)) + ", " + getValue(key, column, c == null ? null : c.toString()) + ")");
 				}
+                else if (isPresto() || isTrino()) {
+                    condition += ("json_array_contains(cast(" + getKey(column) + " AS VARCHAR), " + getValue(key, column, c) + (StringUtil.isEmpty(path, true) ? "" : ", " + getValue(key, column, path)) + ")");
+                }
 				else {
 					String v = c == null ? "null" : (c instanceof Boolean || c instanceof Number ? c.toString() : "\"" + c + "\"");
 					if (isClickHouse()) {
@@ -4158,7 +4172,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	/**获取条件SQL字符串
-	 * @param column
 	 * @param table
 	 * @param config
 	 * @return
@@ -4423,7 +4436,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
 									+ " ~" + (ignoreCase ? "* " : " ") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 						}
-						else if (isPresto() || isTrino() || isOracle() || isDameng() || isKingBase()) {
+						else if (isPresto() || isTrino()) {
+							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
+									+ ", " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + ")";
+						}
+						else if (isOracle() || isDameng() || isKingBase()) {
 							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
 									+ ", " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 						}
@@ -4489,6 +4506,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
 									+ " IS NOT NULL AND json_textcontains(" + arrKeyPath
 									+ ", '$', " + itemKeyPath + ")") + (isNot ? ") " : "");
+						}
+						else if (isPresto() || isTrino()) {
+							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
+									+ " IS NOT NULL AND json_array_contains(cast(" + arrKeyPath
+									+ " AS VARCHAR), " + itemKeyPath + ")") + (isNot ? ") " : "");
 						}
 						else if (isClickHouse()) {
 							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath

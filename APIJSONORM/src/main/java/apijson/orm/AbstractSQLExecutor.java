@@ -427,6 +427,14 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 									sqlTable = rsmd.getTableName(i);  // SQL 函数甚至部分字段都不返回表名，当然如果没传 @column 生成的 Table.* 则返回的所有字段都会带表名
 									sqlResultDuration += System.currentTimeMillis() - startTime3;
 
+                                    if (StringUtil.isEmpty(sqlTable, true)) {
+                                        boolean isEmpty = curItem == null || curItem.isEmpty();
+                                        String label = isEmpty ? null : getKey(config, rs, rsmd, index, curItem, i, childMap);
+                                        if (isEmpty || curItem.containsKey(label) == false) {  // 重复字段几乎肯定不是一张表的，尤其是主副表同名主键 id
+                                            sqlTable = i <= 1 ? config.getSQLTable() : lastTableName; // Presto 等引擎 JDBC 返回 rsmd.getTableName(i) 为空，主表如果一个字段都没有会导致 APISJON 主副表所有字段都不返回
+                                        }
+                                    }
+
 									if (StringUtil.isEmpty(sqlTable, true)) {  // hasJoin 已包含这个判断 && joinList != null) {
 
 										int nextViceColumnStart = lastViceColumnStart;  // 主表没有 @column 时会偏小 lastViceColumnStart
@@ -1219,10 +1227,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 	@Override
 	public ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception {
-		if (config.isTDengine()) {
+		if (config.isPresto() || config.isTrino() || config.isTDengine()) {
 			Connection conn = getConnection(config);
-			Statement stt = conn.createStatement();
-			return executeQuery(stt, StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
+            Statement stt = config.isTDengine()
+                    ? conn.createStatement() // fix Presto: ResultSet: Exception: set type is TYPE_FORWARD_ONLY, Result set concurrency must be CONCUR_READ_ONLY
+                    : conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+
+            return executeQuery(stt, StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
 		}
 
 		PreparedStatement stt = getStatement(config, sql);
