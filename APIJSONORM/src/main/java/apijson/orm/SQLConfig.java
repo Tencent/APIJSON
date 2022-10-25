@@ -17,15 +17,23 @@ import apijson.StringUtil;
  */
 public interface SQLConfig {
 
-	String DATABASE_MYSQL = "MYSQL";
-	String DATABASE_POSTGRESQL = "POSTGRESQL";
-	String DATABASE_SQLSERVER = "SQLSERVER";
-	String DATABASE_ORACLE = "ORACLE";
-	String DATABASE_DB2 = "DB2";
-	String DATABASE_DAMENG = "DAMENG";
-	String DATABASE_CLICKHOUSE = "CLICKHOUSE";
-	String DATABASE_HIVE = "HIVE";
-	String DATABASE_TDENGINE = "TDENGINE";
+	String DATABASE_MYSQL = "MYSQL"; // https://www.mysql.com
+	String DATABASE_POSTGRESQL = "POSTGRESQL"; // https://www.postgresql.org
+	String DATABASE_SQLSERVER = "SQLSERVER"; // https://www.microsoft.com/en-us/sql-server
+	String DATABASE_ORACLE = "ORACLE"; // https://www.oracle.com/database
+	String DATABASE_DB2 = "DB2"; // https://www.ibm.com/products/db2
+    String DATABASE_MARIADB = "MARIADB"; // https://mariadb.org
+    String DATABASE_TIDB = "TIDB"; // https://www.pingcap.com/tidb
+    String DATABASE_DAMENG = "DAMENG"; // https://www.dameng.com
+    String DATABASE_KINGBASE = "KINGBASE"; // https://www.kingbase.com.cn
+    String DATABASE_ELASTICSEARCH = "ELASTICSEARCH"; // https://www.elastic.co/guide/en/elasticsearch/reference/7.4/xpack-sql.html
+    String DATABASE_CLICKHOUSE = "CLICKHOUSE"; // https://clickhouse.com
+	String DATABASE_HIVE = "HIVE"; // https://hive.apache.org
+	String DATABASE_PRESTO = "PRESTO"; // Facebook PrestoDB  https://prestodb.io
+	String DATABASE_TRINO = "TRINO"; // PrestoSQL  https://trino.io
+	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
+	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
+
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -41,9 +49,16 @@ public interface SQLConfig {
 	boolean isSQLServer();
 	boolean isOracle();
 	boolean isDb2();
+	boolean isMariaDB();
+	boolean isTiDB();
 	boolean isDameng();
+	boolean isKingBase();
+	boolean isElasticsearch();
 	boolean isClickHouse();
 	boolean isHive();
+	boolean isPresto();
+	boolean isTrino();
+	boolean isInfluxDB();
 	boolean isTDengine();
 
 

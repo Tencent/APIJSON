@@ -154,9 +154,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_SQLSERVER);
 		DATABASE_LIST.add(DATABASE_ORACLE);
 		DATABASE_LIST.add(DATABASE_DB2);
+		DATABASE_LIST.add(DATABASE_MARIADB);
+		DATABASE_LIST.add(DATABASE_TIDB);
 		DATABASE_LIST.add(DATABASE_DAMENG);
+		DATABASE_LIST.add(DATABASE_KINGBASE);
+		DATABASE_LIST.add(DATABASE_ELASTICSEARCH);
 		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
 		DATABASE_LIST.add(DATABASE_HIVE);
+		DATABASE_LIST.add(DATABASE_PRESTO);
+		DATABASE_LIST.add(DATABASE_TRINO);
+		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
 
 
@@ -964,13 +971,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isMySQL(String db) {
 		return DATABASE_MYSQL.equals(db);
 	}
-	@Override
+
+    @Override
 	public boolean isPostgreSQL() {
 		return isPostgreSQL(getSQLDatabase());
 	}
 	public static boolean isPostgreSQL(String db) {
 		return DATABASE_POSTGRESQL.equals(db);
 	}
+
 	@Override
 	public boolean isSQLServer() {
 		return isSQLServer(getSQLDatabase());
@@ -978,19 +987,37 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isSQLServer(String db) {
 		return DATABASE_SQLSERVER.equals(db);
 	}
-	@Override
+
+    @Override
 	public boolean isOracle() {
 		return isOracle(getSQLDatabase());
 	}
 	public static boolean isOracle(String db) {
 		return DATABASE_ORACLE.equals(db);
 	}
+
 	@Override
 	public boolean isDb2() {
 		return isDb2(getSQLDatabase());
 	}
 	public static boolean isDb2(String db) {
 		return DATABASE_DB2.equals(db);
+	}
+
+    @Override
+	public boolean isMariaDB() {
+		return isMariaDB(getSQLDatabase());
+	}
+	public static boolean isMariaDB(String db) {
+		return DATABASE_MARIADB.equals(db);
+	}
+
+    @Override
+	public boolean isTiDB() {
+		return isTiDB(getSQLDatabase());
+	}
+	public static boolean isTiDB(String db) {
+		return DATABASE_TIDB.equals(db);
 	}
 
 	@Override
@@ -1000,6 +1027,23 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isDameng(String db) {
 		return DATABASE_DAMENG.equals(db);
 	}
+
+	@Override
+	public boolean isKingBase() {
+		return isKingBase(getSQLDatabase());
+	}
+	public static boolean isKingBase(String db) {
+		return DATABASE_KINGBASE.equals(db);
+	}
+
+	@Override
+	public boolean isElasticsearch() {
+		return isElasticsearch(getSQLDatabase());
+	}
+	public static boolean isElasticsearch(String db) {
+		return DATABASE_ELASTICSEARCH.equals(db);
+	}
+
 	@Override
 	public boolean isClickHouse() {
 		return isClickHouse(getSQLDatabase());
@@ -1007,12 +1051,37 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static boolean isClickHouse(String db) {
 		return DATABASE_CLICKHOUSE.equals(db);
 	}
+
 	@Override
 	public boolean isHive() {
 		return isHive(getSQLDatabase());
 	}
 	public static boolean isHive(String db) {
 		return DATABASE_HIVE.equals(db);
+	}
+
+	@Override
+	public boolean isPresto() {
+		return isPresto(getSQLDatabase());
+	}
+	public static boolean isPresto(String db) {
+		return DATABASE_PRESTO.equals(db);
+	}
+
+	@Override
+	public boolean isTrino() {
+		return isTrino(getSQLDatabase());
+	}
+	public static boolean isTrino(String db) {
+		return DATABASE_TRINO.equals(db);
+	}
+
+	@Override
+	public boolean isInfluxDB() {
+		return isInfluxDB(getSQLDatabase());
+	}
+	public static boolean isInfluxDB(String db) {
+		return DATABASE_INFLUXDB.equals(db);
 	}
 
 	@Override
@@ -1026,7 +1095,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@Override
 	public String getQuote() {
-		return isMySQL() || isClickHouse() || isTDengine() ? "`" : "\"";
+		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() ? "`" : "\"";
 	}
 
 	@Override
@@ -2320,7 +2389,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
 			return "";
 		}
-		return getLimitString(getPage(), getCount(), isOracle() || isSQLServer() || isDb2(), isOracle());
+		return getLimitString(
+                getPage()
+                , getCount()
+                , isOracle() || isSQLServer() || isDb2()
+                , isOracle() || isDameng() || isKingBase()
+                , isPresto() || isTrino()
+        );
 	}
 	/**获取限制数量及偏移量
 	* @param page
@@ -2330,11 +2405,30 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	* @return
 	*/
 	public static String getLimitString(int page, int count, boolean isTSQL, boolean isOracle) {
+        return getLimitString(page, count, isTSQL, isOracle, false);
+    }
+	/**获取限制数量及偏移量
+	* @param page
+	* @param count
+	* @param isTSQL
+	* @param isOracle
+	* @param isPresto
+	* @return
+	*/
+	public static String getLimitString(int page, int count, boolean isTSQL, boolean isOracle, boolean isPresto) {
 		int offset = getOffset(page, count);
 
+        if (isOracle) {  // TODO 判断版本，高版本可以用 OFFSET FETCH
+            return " WHERE ROWNUM BETWEEN " + offset + " AND " + (offset + count);
+        }
+
 		if (isTSQL) {  // OFFSET FECTH 中所有关键词都不可省略, 另外 Oracle 数据库使用子查询加 where 分页
-			return isOracle ? " WHERE ROWNUM BETWEEN "+ offset +" AND "+ (offset + count) : " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
+			return " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
 		}
+
+        if (isPresto) {  // https://prestodb.io/docs/current/sql/select.html
+            return (offset <= 0 ? "" : " OFFSET " + offset) + " LIMIT " + count;
+        }
 
 		return " LIMIT " + count + (offset <= 0 ? "" : " OFFSET " + offset);  // DELETE, UPDATE 不支持 OFFSET
 	}
@@ -3456,16 +3550,19 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	@JSONField(serialize = false)
 	public String getRegExpString(String key, String column, String value, boolean ignoreCase) {
-		if (isPostgreSQL()) {
+		if (isPostgreSQL() || isInfluxDB()) {
 			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
 		}
-		if (isOracle() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
+		if (isPresto() || isTrino() || isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
 			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
 		if (isClickHouse()) {
 			return "match(" + (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
 					+ ", " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "") + ")";
 		}
+        if (isElasticsearch()) {
+            return getKey(column) + " RLIKE " + getValue(key, column, value);
+        }
 		if (isHive()) {
 			return (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
 					+ " REGEXP " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "");
@@ -3761,10 +3858,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
-				if (isPostgreSQL()) {
+				if (isPostgreSQL() || isInfluxDB()) {
 					condition += (getKey(column) + " @> " + getValue(key, column, newJSONArray(c))); //operator does not exist: jsonb @> character varying  "[" + c + "]");
 				}
-				else if (isOracle()) {
+				else if (isOracle() || isDameng() || isKingBase()) {
 					condition += ("json_textcontains(" + getKey(column) + ", " + (StringUtil.isEmpty(path, true) ? "'$'" : getValue(key, column, path)) + ", " + getValue(key, column, c == null ? null : c.toString()) + ")");
 				}
 				else {
@@ -4025,7 +4122,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			}
 			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
 		default:
-			String explain = config.isExplain() ? (config.isSQLServer() ? "SET STATISTICS PROFILE ON  " : (config.isOracle() ? "EXPLAIN PLAN FOR " : "EXPLAIN ")) : "";
+			String explain = config.isExplain() ? (config.isSQLServer() ? "SET STATISTICS PROFILE ON  " : (config.isOracle() || config.isDameng() || config.isKingBase() ? "EXPLAIN PLAN FOR " : "EXPLAIN ")) : "";
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
 				String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
 				return explain + "SELECT " + config.getWhereString(false) + " AS " + q + JSONResponse.KEY_COUNT + q + config.getLimitString();
@@ -4033,7 +4130,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			config.setPreparedValueList(new ArrayList<Object>());
 			String column = config.getColumnString();
-			if (config.isOracle()) {
+			if (config.isOracle() || config.isDameng() || config.isKingBase()) {
 				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
 				//针对oracle分组后条数的统计
 				if (StringUtil.isNotEmpty(config.getGroup(),true) && RequestMethod.isHeadMethod(config.getMethod(), true)){
@@ -4322,11 +4419,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 					else if (rt.endsWith("~")) {
 						boolean ignoreCase = "*~".equals(rt);
-						if (isPostgreSQL()) {
+						if (isPostgreSQL() || isInfluxDB()) {
 							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
 									+ " ~" + (ignoreCase ? "* " : " ") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 						}
-						else if (isOracle()) {
+						else if (isPresto() || isTrino() || isOracle() || isDameng() || isKingBase()) {
 							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
 									+ ", " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 						}
@@ -4334,12 +4431,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							sql += (first ? ON : AND) + "match(" + (ignoreCase ? "lower(" : "") + quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
 									+ ", " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
 						}
+						else if (isElasticsearch()) {
+                            sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+                                    + " RLIKE " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+                        }
 						else if (isHive()) {
-							sql += (first ? ON : AND) + (ignoreCase ? "lower(" : "") +  quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
+                            sql += (first ? ON : AND) + (ignoreCase ? "lower(" : "") +  quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
 									+ " REGEXP " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "");
-						}
+                        }
 						else {
-							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+                            sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
 									+ " REGEXP " + (ignoreCase ? "" : "BINARY ") + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 						}
 					}
@@ -4380,11 +4481,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							itemKeyPath = quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 						}
 
-						if (isPostgreSQL()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
+						if (isPostgreSQL() || isInfluxDB()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
 							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
 									+ " IS NOT NULL AND " + arrKeyPath + " @> " + itemKeyPath) + (isNot ? ") " : "");
 						}
-						else if (isOracle()) {
+						else if (isOracle() || isDameng() || isKingBase()) {
 							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
 									+ " IS NOT NULL AND json_textcontains(" + arrKeyPath
 									+ ", '$', " + itemKeyPath + ")") + (isNot ? ") " : "");

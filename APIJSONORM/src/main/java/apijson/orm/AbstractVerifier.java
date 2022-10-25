@@ -66,6 +66,10 @@ import apijson.orm.model.Request;
 import apijson.orm.model.SysColumn;
 import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
+import apijson.orm.model.AllTable;
+import apijson.orm.model.AllColumn;
+import apijson.orm.model.AllTableComment;
+import apijson.orm.model.AllColumnComment;
 import apijson.orm.model.TestRecord;
 
 /**校验器(权限、请求参数、返回结果等)
@@ -151,10 +155,14 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		if (Log.DEBUG) {
 			SYSTEM_ACCESS_MAP.put(Table.class.getSimpleName(), getAccessMap(Table.class.getAnnotation(MethodAccess.class)));
-			SYSTEM_ACCESS_MAP.put(Column.class.getSimpleName(), getAccessMap(Column.class.getAnnotation(MethodAccess.class)));
+            SYSTEM_ACCESS_MAP.put(Column.class.getSimpleName(), getAccessMap(Column.class.getAnnotation(MethodAccess.class)));
 			SYSTEM_ACCESS_MAP.put(PgAttribute.class.getSimpleName(), getAccessMap(PgAttribute.class.getAnnotation(MethodAccess.class)));
-			SYSTEM_ACCESS_MAP.put(PgClass.class.getSimpleName(), getAccessMap(PgClass.class.getAnnotation(MethodAccess.class)));
-			SYSTEM_ACCESS_MAP.put(SysTable.class.getSimpleName(), getAccessMap(SysTable.class.getAnnotation(MethodAccess.class)));
+            SYSTEM_ACCESS_MAP.put(PgClass.class.getSimpleName(), getAccessMap(PgClass.class.getAnnotation(MethodAccess.class)));
+            SYSTEM_ACCESS_MAP.put(AllTable.class.getSimpleName(), getAccessMap(AllTable.class.getAnnotation(MethodAccess.class)));
+            SYSTEM_ACCESS_MAP.put(AllTableComment.class.getSimpleName(), getAccessMap(AllTableComment.class.getAnnotation(MethodAccess.class)));
+            SYSTEM_ACCESS_MAP.put(AllColumn.class.getSimpleName(), getAccessMap(AllColumn.class.getAnnotation(MethodAccess.class)));
+            SYSTEM_ACCESS_MAP.put(AllColumnComment.class.getSimpleName(), getAccessMap(AllColumnComment.class.getAnnotation(MethodAccess.class)));
+            SYSTEM_ACCESS_MAP.put(SysTable.class.getSimpleName(), getAccessMap(SysTable.class.getAnnotation(MethodAccess.class)));
 			SYSTEM_ACCESS_MAP.put(SysColumn.class.getSimpleName(), getAccessMap(SysColumn.class.getAnnotation(MethodAccess.class)));
 			SYSTEM_ACCESS_MAP.put(ExtendedProperty.class.getSimpleName(), getAccessMap(ExtendedProperty.class.getAnnotation(MethodAccess.class)));
 
