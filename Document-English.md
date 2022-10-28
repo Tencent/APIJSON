@@ -1,6 +1,6 @@
 ### Examples:
 
-#### Get an User
+#### Get a User
 Request:
 <pre><code class="language-json">{
   "User":{
@@ -39,7 +39,7 @@ Response:
   
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_single.gif)
 
-#### Get an Array of Users
+#### Get an array of Users
 
 Request:
 <pre><code class="language-json">{
