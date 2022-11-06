@@ -156,7 +156,7 @@ public interface ObjectParser {
 	SQLConfig getSQLConfig();
 	JSONObject getResponse();
 	JSONObject getSqlRequest();
-	JSONObject getSqlReponse();
+	JSONObject getSqlResponse();
 
 	Map<String, Object> getCustomMap();
 	Map<String, Map<String, String>> getFunctionMap();

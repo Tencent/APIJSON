@@ -1084,7 +1084,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					else {
 						// 对聚合函数字段通过 query:2 分页查总数返回值错误
 						RequestMethod method = op.getMethod();
-						rp = op.setMethod(RequestMethod.HEAD).setSQLConfig().executeSQL().getSqlReponse();
+						rp = op.setMethod(RequestMethod.HEAD).setSQLConfig().executeSQL().getSqlResponse();
 						op.setMethod(method);
 					}
 

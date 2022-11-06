@@ -20,7 +20,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.rmi.ServerException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -70,10 +69,6 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	protected final boolean drop;
 
 	/**for single object
-	 * @param parentPath
-	 * @param request
-	 * @param name
-	 * @throws Exception
 	 */
 	public AbstractObjectParser(@NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
 			, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
@@ -157,7 +152,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	protected JSONObject response;
 	protected JSONObject sqlRequest;
-	protected JSONObject sqlReponse;
+	protected JSONObject sqlResponse;
 	/**
 	 * 自定义关键词
 	 */
@@ -200,7 +195,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			breakParse = false;
 
 			response = new JSONObject(true);//must init
-			sqlReponse = null;//must init
+			sqlResponse = null;//must init
 
 			if (isReuse == false) {
 				sqlRequest = new JSONObject(true);//must init
@@ -239,23 +234,27 @@ public abstract class AbstractObjectParser implements ObjectParser {
 					}
 					//条件>>>>>>>>>>>>>>>>>>>
 
-					String key;
-					Object value;
 					int index = 0;
+                    //hasOtherKeyNotFun = false;
 
 					for (Entry<String, Object> entry : set) {
 						if (isBreakParse()) {
 							break;
 						}
 
-						value = entry.getValue();
+                        Object value = entry.getValue();
 						if (value == null) {
 							continue;
 						}
-						key = entry.getKey();
+                        String key = entry.getKey();
 
 						try {
-							if (key.startsWith("@") || key.endsWith("@") || (key.endsWith("<>") && value instanceof JSONObject)) {
+                            boolean startsWithAt = key.startsWith("@");
+                            //if (startsWithAt || (key.endsWith("()") == false)) {
+                            //    hasOtherKeyNotFun = true;
+                            //}
+
+							if (startsWithAt || key.endsWith("@") || (key.endsWith("<>") && value instanceof JSONObject)) {
 								if (onParse(key, value) == false) {
 									invalidate();
 								}
@@ -331,8 +330,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 
 
+    //private boolean hasOtherKeyNotFun = false;
 
-	/**解析普通成员
+    /**解析普通成员
 	 * @param key
 	 * @param value
 	 * @return whether parse succeed
@@ -438,15 +438,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 			String type; //远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里用 "-","0","+" 更直观，转用 -1,0,1 对性能提升不大。
 			boolean isMinus = k.endsWith("-");
+            boolean isPlus = isMinus == false && k.endsWith("+");
 			if (isMinus) { //不能封装到functionMap后批量执行，否则会导致非Table内的 key-():function() 在onChildParse后执行！
 				type = "-";
 				k = k.substring(0, k.length() - 1);
-
-				if (isTable == false) {
-					parseFunction(k, (String) value, parentPath, name, request);
-				}
 			}
-			else if (k.endsWith("+")) {
+			else if (isPlus) {
 				type = "+";
 				k = k.substring(0, k.length() - 1);
 			}
@@ -454,7 +451,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				type = "0";
 			}
 
-			if (isMinus == false || isTable) {
+            if (isPlus == false && isTable == false) {
+                parseFunction(k, (String) value, parentPath, name, request, isMinus);
+            }
+            else {
 				//远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里循环里new出来对性能影响不大。
 				Map<String, String> map = functionMap.get(type);
 				if (map == null) {
@@ -466,7 +466,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			}
 		}
 		else if (isTable && key.startsWith("@") && JSONRequest.TABLE_KEY_LIST.contains(key) == false) {
-			customMap.put(key, value);
+            customMap.put(key, value);
 		}
 		else {
 			sqlRequest.put(key, value);
@@ -718,37 +718,37 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	public AbstractObjectParser executeSQL() throws Exception {
 		//执行SQL操作数据库
 		if (isTable == false) {//提高性能
-			sqlReponse = new JSONObject(sqlRequest);
+			sqlResponse = new JSONObject(sqlRequest);
 		}
 		else {
-			try {
-				sqlReponse = onSQLExecute();
-			}
-			catch (Exception e) {
-        if (e instanceof NotExistException || (e instanceof CommonException && e.getCause() instanceof NotExistException)) {
-          //				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
-          //				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
-          //					//						e.printStackTrace();
-          sqlReponse = null;//内部吃掉异常，put到最外层
-          //						requestObject.put(JSONResponse.KEY_MSG
-          //								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MSG)
-          //										+ "; query " + path + " cath NotExistException:"
-          //										+ newErrorResult(e).getString(JSONResponse.KEY_MSG)));
-          //				} else {
-          //					throw e;
-          //				}
+            try {
+                sqlResponse = onSQLExecute();
+            }
+            catch (Exception e) {
+                if (e instanceof NotExistException || (e instanceof CommonException && e.getCause() instanceof NotExistException)) {
+                    //				Log.e(TAG, "getObject  try { response = getSQLObject(config2); } catch (Exception e) {");
+                    //				if (e instanceof NotExistException) {//非严重异常，有时候只是数据不存在
+                    //					//						e.printStackTrace();
+                    sqlResponse = null;//内部吃掉异常，put到最外层
+                    //						requestObject.put(JSONResponse.KEY_MSG
+                    //								, StringUtil.getString(requestObject.get(JSONResponse.KEY_MSG)
+                    //										+ "; query " + path + " cath NotExistException:"
+                    //										+ newErrorResult(e).getString(JSONResponse.KEY_MSG)));
+                    //				} else {
+                    //					throw e;
+                    //				}
+                }
+                else {
+                    throw e;
+                }
+            }
         }
-        else {
-          throw e;
+
+        if (drop) {//丢弃Table，只为了向下提供条件
+            sqlResponse = null;
         }
-			}
-		}
 
-		if (drop) {//丢弃Table，只为了向下提供条件
-			sqlReponse = null;
-		}
-
-		return this;
+        return this;
 	}
 
 	/**
@@ -757,12 +757,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	 */
 	@Override
 	public JSONObject response() throws Exception {
-		if (sqlReponse == null || sqlReponse.isEmpty()) {
+		if (sqlResponse == null || sqlResponse.isEmpty()) {
 			if (isTable) {//Table自身都获取不到值，则里面的Child都无意义，不需要再解析
 				return null;  // response;
 			}
 		} else {
-			response.putAll(sqlReponse);
+			response.putAll(sqlResponse);
 		}
 
 
@@ -791,17 +791,22 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		//解析函数function
 		Set<Entry<String, String>> functionSet = map == null ? null : map.entrySet();
 		if (functionSet != null && functionSet.isEmpty() == false) {
-			JSONObject json = "-".equals(type) ? request : response; // key-():function 是实时执行，而不是在这里批量执行
+            boolean isMinus = "-".equals(type);
+			JSONObject json = isMinus ? sqlRequest : response; // key-():function 是实时执行，而不是在这里批量执行
 
 			for (Entry<String, String> entry : functionSet) {
-				parseFunction(entry.getKey(), entry.getValue(), parentPath, name, json);
+                parseFunction(entry.getKey(), entry.getValue(), parentPath, name, json, isMinus);
 			}
 		}
 	}
 
-	public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject) throws Exception {
+	//public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject) throws Exception {
+    //    parseFunction(key, value, parentPath, currentName, currentObject, false);
+    //}
+	public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject, boolean isMinus) throws Exception {
 		Object result;
-		if (key.startsWith("@")) {
+        boolean isProcedure = key.startsWith("@");
+		if (isProcedure) {
 			FunctionBean fb = AbstractFunctionParser.parseFunction(value, currentObject, true);
 
 			SQLConfig config = newSQLConfig(true);
@@ -814,12 +819,23 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			result = parser.onFunctionParse(key, value, parentPath, currentName, currentObject);
 		}
 
-		if (result != null) {
-			String k = AbstractSQLConfig.getRealKey(method, key, false, false);
+		String k = AbstractSQLConfig.getRealKey(method, key, false, false);
 
-			response.put(k, result);
-			parser.putQueryResult(AbstractParser.getAbsPath(path, k), result);
-		}
+        if (isProcedure == false && isMinus) {
+            if (result != null) {
+                sqlRequest.put(k, result);
+            } else {
+                sqlRequest.remove(k);
+            }
+        }
+
+        if (result != null) {
+            response.put(k, result);
+        } else {
+            response.remove(k);
+        }
+
+        parser.putQueryResult(AbstractParser.getAbsPath(path, k), result);
 	}
 
 	@Override
@@ -863,46 +879,46 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			result = parser.executeSQL(sqlConfig, isSubquery);
 
 			boolean isSimpleArray = false;
-      // 提取并缓存数组主表的列表数据
-      List<JSONObject> rawList = result == null ? null : (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
+            // 提取并缓存数组主表的列表数据
+            List<JSONObject> rawList = result == null ? null : (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 
-      if (isArrayMainTable && position == 0 && rawList != null) {
+            if (isArrayMainTable && position == 0 && rawList != null) {
 
-        isSimpleArray = (functionMap == null || functionMap.isEmpty())
-          && (customMap == null || customMap.isEmpty())
-          && (childMap == null || childMap.isEmpty())
-          && (table.equals(arrayTable));
+                isSimpleArray = (functionMap == null || functionMap.isEmpty())
+                        && (customMap == null || customMap.isEmpty())
+                        && (childMap == null || childMap.isEmpty())
+                        && (table.equals(arrayTable));
 
-        // APP JOIN 副表时副表返回了这个字段   rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
-        String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
+                // APP JOIN 副表时副表返回了这个字段   rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
+                String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
-        if (isSimpleArray == false) {
-          long startTime = System.currentTimeMillis();
+                if (isSimpleArray == false) {
+                    long startTime = System.currentTimeMillis();
 
-          for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
-            JSONObject obj = rawList.get(i);
+                    for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
+                        JSONObject obj = rawList.get(i);
 
-            if (obj != null) {
-              parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
+                        if (obj != null) {
+                            parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
+                        }
+                    }
+
+                    long endTime = System.currentTimeMillis();  // 3ms - 8ms
+                    Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
+                            + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
+                }
+
+                parser.putArrayMainCache(arrayPath, rawList);
             }
-          }
 
-          long endTime = System.currentTimeMillis();  // 3ms - 8ms
-          Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
-            + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
+            if (isSubquery == false && result != null) {
+                parser.putQueryResult(path, result);  // 解决获取关联数据时requestObject里不存在需要的关联数据
+
+                if (isSimpleArray && rawList != null) {
+                    result.put(AbstractSQLExecutor.KEY_RAW_LIST, rawList);
+                }
+            }
         }
-
-        parser.putArrayMainCache(arrayPath, rawList);
-      }
-
-			if (isSubquery == false && result != null) {
-				parser.putQueryResult(path, result);  // 解决获取关联数据时requestObject里不存在需要的关联数据
-
-				if (isSimpleArray && rawList != null) {
-					result.put(AbstractSQLExecutor.KEY_RAW_LIST, rawList);
-				}
-			}
-		}
 
 		return result;
 	}
@@ -941,7 +957,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		request = null;
 		response = null;
 		sqlRequest = null;
-		sqlReponse = null;
+		sqlResponse = null;
 
 		functionMap = null;
 		customMap = null;
@@ -959,7 +975,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		if (this.method != method) {
 			this.method = method;
 			sqlConfig = null;
-			//TODO ?			sqlReponse = null;
+			//TODO ?			sqlResponse = null;
 		}
 		return this;
 	}
@@ -1007,8 +1023,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		return sqlRequest;
 	}
 	@Override
-	public JSONObject getSqlReponse() {
-		return sqlReponse;
+	public JSONObject getSqlResponse() {
+		return sqlResponse;
 	}
 
 	@Override

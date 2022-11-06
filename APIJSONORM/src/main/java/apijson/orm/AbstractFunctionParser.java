@@ -144,9 +144,9 @@ public class AbstractFunctionParser implements FunctionParser {
 	
 	/**反射调用
 	 * @param parser
-	 * @param request
 	 * @param function 例如get(Map:map,key)，参数只允许引用，不能直接传值
-	 * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
+     * @param currentObject
+     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
 	 */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String function, @NotNull JSONObject currentObject) throws Exception {
 
