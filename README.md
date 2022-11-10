@@ -8,7 +8,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
 
-<p align="center">零代码、全功能、强安全 ORM 库<br />🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
+<p align="center"> 🚀 零代码、全功能、强安全 ORM 库 🏆 <br />后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
@@ -445,7 +445,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 理论上所有支持 SQL 与 JDBC/ODBC 的软件，都可以用本项目对接 CRUD，待测试: <br />
-[Elasticsearch](https://www.elastic.co/cn/what-is/elasticsearch-sql), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Presto](https://prestodb.io/docs/current/admin/function-namespace-managers.html), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase), [Presto/Trino](https://prestodb.io/docs/current/sql/select.html)(延伸支持 Redis, Hive, Kafka, Elasticsearch, Thrift, Cassandra, MySQL, PostgreSQL, Oracle, MongoDB...)
+[Elasticsearch](https://www.elastic.co/cn/what-is/elasticsearch-sql), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
 
 ### 我要赞赏
 如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
