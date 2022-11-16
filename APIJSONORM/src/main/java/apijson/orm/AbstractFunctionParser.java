@@ -7,6 +7,7 @@ package apijson.orm;
 
 import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,13 @@ import apijson.StringUtil;
  */
 public class AbstractFunctionParser implements FunctionParser {
 	//	private static final String TAG = "AbstractFunctionParser";
+
+    /**开启支持远程函数
+     */
+    public static boolean ENABLE_REMOTE_FUNCTION = true;
+    /**开启支持远程函数中的 JavaScript 脚本形式
+     */
+    public static boolean ENABLE_SCRIPT_FUNCTION = true;
 
     public static final int TYPE_REMOTE_FUNCTION = 0;
     //public static final int TYPE_SQL_FUNCTION = 1;
@@ -160,6 +168,10 @@ public class AbstractFunctionParser implements FunctionParser {
      * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
 	 */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String function, @NotNull JSONObject currentObject) throws Exception {
+        if (ENABLE_REMOTE_FUNCTION == false) {
+            throw new UnsupportedOperationException("AbstractFunctionParser.ENABLE_REMOTE_FUNCTION" +
+                    " == false 时不支持远程函数！如需支持则设置 AbstractFunctionParser.ENABLE_REMOTE_FUNCTION = true ！");
+        }
 
 		FunctionBean fb = parseFunction(function, currentObject, false);
 
@@ -170,7 +182,11 @@ public class AbstractFunctionParser implements FunctionParser {
 
 		int type = row.getIntValue("type");
         if (type < TYPE_REMOTE_FUNCTION || type > TYPE_SCRIPT_FUNCTION) {
-            throw new UnsupportedOperationException("type = " + type + " 不合法！必须是 [0, 1, 2] 中的一个 !");
+            throw new UnsupportedOperationException("type = " + type + " 不合法！必须是 [0, 1] 中的一个 !");
+        }
+        if (ENABLE_SCRIPT_FUNCTION == false && type == TYPE_SCRIPT_FUNCTION) {
+            throw new UnsupportedOperationException("type = " + type + " 不合法！AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION" +
+                    " == false 时不支持远程函数中的脚本形式！如需支持则设置 AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION = true ！");
         }
 
 
@@ -178,7 +194,7 @@ public class AbstractFunctionParser implements FunctionParser {
 		if (parser.getVersion() < version) {
 			throw new UnsupportedOperationException("不允许 version = " + parser.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + version + " !");
 		}
-		String tag = row.getString("tag");
+		String tag = row.getString("tag");  // TODO 改为 tags，类似 methods 支持多个 tag。或者干脆不要？因为目前非开放请求全都只能后端指定
 		if (tag != null && tag.equals(parser.getTag()) == false) {
 			throw new UnsupportedOperationException("不允许 tag = " + parser.getTag() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 tag = " + tag + " !");
 		}
@@ -227,7 +243,13 @@ public class AbstractFunctionParser implements FunctionParser {
         if (type == TYPE_SCRIPT_FUNCTION) {
             return invokeScript(parser, methodName, parameterTypes, args, currentObject);
         }
-        return parser.getClass().getMethod(methodName, parameterTypes).invoke(parser, args);
+
+        Method m = parser.getClass().getMethod(methodName, parameterTypes);
+        //费性能，还是初始化时做更好
+        //if (m.getReturnType().getSimpleName().equals(returnType) == false) {
+        //  throw new IllegalArgumentTypeException("");
+        //}
+        return m.invoke(parser, args);
 	}
 
     public static Invocable INVOCABLE;

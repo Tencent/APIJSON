@@ -81,7 +81,14 @@ import apijson.orm.model.TestRecord;
 public abstract class AbstractVerifier<T extends Object> implements Verifier<T>, IdCallback<T> {
 	private static final String TAG = "AbstractVerifier";
 
-	/**未登录，不明身份的用户
+    /**开启校验请求角色权限
+     */
+    public static boolean ENABLE_VERIFY_ROLE = true;
+    /**开启校验请求传参内容
+     */
+    public static boolean ENABLE_VERIFY_CONTENT = true;
+
+    /**未登录，不明身份的用户
 	 */
 	public static final String UNKNOWN = "UNKNOWN";
 
@@ -253,6 +260,11 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 */
 	@Override
 	public boolean verifyAccess(SQLConfig config) throws Exception {
+        if (ENABLE_VERIFY_ROLE == false) {
+            throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_ROLE == false " +
+                    "时不支持校验角色权限！如需支持则设置 AbstractVerifier.ENABLE_VERIFY_ROLE = true ！");
+        }
+
 		String table = config == null ? null : config.getTable();
 		if (table == null) {
 			return true;
@@ -265,7 +277,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		else { 
 			if (ROLE_MAP.containsKey(role) == false) {
 				Set<String> NAMES = ROLE_MAP.keySet();
-				throw new IllegalArgumentException("角色 " + role + " 不存在！只能是[" + StringUtil.getString(NAMES.toArray()) + "]中的一种！");
+				throw new IllegalArgumentException("角色 " + role + " 不存在！" +
+                        "只能是[" + StringUtil.getString(NAMES.toArray()) + "]中的一种！");
 			}
 
 			if (role.equals(UNKNOWN) == false) { //未登录的角色
@@ -469,7 +482,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 	@Override
 	public void verifyAdmin() throws Exception {
-		throw new UnsupportedOperationException("不支持 ADMIN 角色！如果要支持就在子类重写这个方法来校验 ADMIN 角色，不通过则 throw IllegalAccessException!");
+		throw new UnsupportedOperationException("不支持 ADMIN 角色！如果要支持就在子类重写这个方法" +
+                "来校验 ADMIN 角色，不通过则 throw IllegalAccessException!");
 	}
 
 
@@ -563,8 +577,10 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @throws Exception
 	 */
 	public static JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
-			, final JSONObject target, final JSONObject request, final int maxUpdateCount, final SQLCreator creator) throws Exception {
-		return verifyRequest(method, name, target, request, maxUpdateCount, null, null, null, creator);
+			, final JSONObject target, final JSONObject request
+            , final int maxUpdateCount, final SQLCreator creator) throws Exception {
+		return verifyRequest(method, name, target, request, maxUpdateCount
+                , null, null, null, creator);
 	}
 
 	/**从request提取target指定的内容
@@ -579,10 +595,12 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
-			, final JSONObject target, final JSONObject request, final int maxUpdateCount
-			, final String database, final String schema, final IdCallback<T> idCallback, final SQLCreator creator) throws Exception {
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, null, idCallback, creator);
+	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method
+            , final String name, final JSONObject target, final JSONObject request
+            , final int maxUpdateCount, final String database, final String schema
+            , final IdCallback<T> idCallback, final SQLCreator creator) throws Exception {
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema
+                , null, idCallback, creator);
 	}
 	/**从request提取target指定的内容
 	 * @param method
@@ -596,9 +614,14 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
-			, final JSONObject target, final JSONObject request, final int maxUpdateCount
-			, final String database, final String schema, final String datasource, final IdCallback<T> idCallback, final SQLCreator creator) throws Exception {
+	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method
+            , final String name, final JSONObject target, final JSONObject request
+            , final int maxUpdateCount, final String database, final String schema, final String datasource
+            , final IdCallback<T> idCallback, final SQLCreator creator) throws Exception {
+        if (ENABLE_VERIFY_CONTENT == false) {
+            throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_CONTENT == false" +
+                    " 时不支持校验请求传参内容！如需支持则设置 AbstractVerifier.ENABLE_VERIFY_CONTENT = true ！");
+        }
 
 		Log.i(TAG, "verifyRequest  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -807,7 +830,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		}
 
 		//解析
-		return parse(method, name, target, response, database, schema, idKeyCallback, creator, callback != null ? callback : new OnParseCallback() {
+		return parse(method, name, target, response, database, schema
+                , idKeyCallback, creator, callback != null ? callback : new OnParseCallback() {
 			@Override
 			protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
 				return verifyResponse(method, key, tobj, robj, database, schema, idKeyCallback, creator, callback);
@@ -843,8 +867,9 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
-			, final String database, final String schema, final IdCallback<T> idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
+	public static <T extends Object> JSONObject parse(@NotNull final RequestMethod method, String name
+            , JSONObject target, JSONObject real, final String database, final String schema
+            , final IdCallback<T> idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		return parse(method, name, target, real, database, schema, null, idCallback, creator, callback);
 	}
 	/**对request和response不同的解析用callback返回
@@ -861,8 +886,9 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> JSONObject parse(@NotNull final RequestMethod method, String name, JSONObject target, JSONObject real
-			, final String database, final String schema, final String datasource, final IdCallback<T> idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
+	public static <T extends Object> JSONObject parse(@NotNull final RequestMethod method, String name
+            , JSONObject target, JSONObject real, final String database, final String schema, final String datasource
+            , final IdCallback<T> idCallback, SQLCreator creator, @NotNull OnParseCallback callback) throws Exception {
 		if (target == null) {
 			return null;
 		}
@@ -897,7 +923,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (musts != null && musts.length > 0) {
 			for (String s : musts) {
 				if (real.get(s) == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
-					throw new IllegalArgumentException(method + "请求，" + name + " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
+					throw new IllegalArgumentException(method + "请求，"
+                            + name + " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
 				}
 
 				mustSet.add(s);
@@ -976,15 +1003,19 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 					rfs = rfs.substring(1);
 
 					if (notRefuseSet.contains(rfs)) {
-						throw new ConflictException(REFUSE.name() + ":value 中出现了重复的 !" + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+						throw new ConflictException(REFUSE.name() + ":value 中出现了重复的 !"
+                                + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
 					}
 					if (refuseSet.contains(rfs)) {
-						throw new ConflictException(REFUSE.name() + ":value 中同时出现了 " + rfs + " 和 !" + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+						throw new ConflictException(REFUSE.name() + ":value 中同时出现了 "
+                                + rfs + " 和 !" + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
 					}
 
 					if (rfs.equals("")) { // 所有非 MUST
-						for (String key : rkset) { // 对@key放行，@role,@column,自定义@position等， @key:{ "Table":{} } 不会解析内部
-							if (key == null || key.startsWith("@") || notRefuseSet.contains(key) || mustSet.contains(key) || objKeySet.contains(key)) {
+                        // 对@key放行，@role,@column,自定义@position等， @key:{ "Table":{} } 不会解析内部
+						for (String key : rkset) {
+							if (key == null || key.startsWith("@") || notRefuseSet.contains(key)
+                                    || mustSet.contains(key) || objKeySet.contains(key)) {
 								continue;
 							}
 
@@ -997,10 +1028,12 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 				}
 				else {
 					if (refuseSet.contains(rfs)) {
-						throw new ConflictException(REFUSE.name() + ":value 中出现了重复的 " + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+						throw new ConflictException(REFUSE.name() + ":value 中出现了重复的 " + rfs + " ！" +
+                                "不允许重复，也不允许一个 key 和取反 !key 同时使用！");
 					}
 					if (notRefuseSet.contains(rfs)) {
-						throw new ConflictException(REFUSE.name() + ":value 中同时出现了 " + rfs + " 和 !" + rfs + " ！不允许重复，也不允许一个 key 和取反 !key 同时使用！");
+						throw new ConflictException(REFUSE.name() + ":value 中同时出现了 " + rfs + " 和 !" + rfs + " ！" +
+                                "不允许重复，也不允许一个 key 和取反 !key 同时使用！");
 					}
 
 					refuseSet.add(rfs);
@@ -1027,16 +1060,20 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 			//不允许传远程函数，只能后端配置
 			if (rk.endsWith("()") && rv instanceof String) {
-				throw new UnsupportedOperationException(method + " 请求，" + rk + " 不合法！非开放请求不允许传远程函数 key():\"fun()\" ！");
+				throw new UnsupportedOperationException(method + " 请求，" + rk + " 不合法！" +
+                        "非开放请求不允许传远程函数 key():\"fun()\" ！");
 			}
 
 			//不在target内的 key:{}
 			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false) {
 				if (rv instanceof JSONObject) {
-					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许传 " + rk + ":{} ！");
+					throw new UnsupportedOperationException(method + " 请求，"
+                            + name + " 里面不允许传 " + rk + ":{} ！");
 				}
-				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && rv instanceof JSONArray && JSONRequest.isArrayKey(rk)) {
-					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 " + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
+				if ((method == RequestMethod.POST || method == RequestMethod.PUT)
+                        && rv instanceof JSONArray && JSONRequest.isArrayKey(rk)) {
+					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 "
+                            + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
 				}
 			}
 		}
@@ -1106,7 +1143,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @return
 	 * @throws Exception
 	 */
-	private static JSONObject operate(Operation opt, JSONObject targetChild, JSONObject real, SQLCreator creator) throws Exception {
+	private static JSONObject operate(Operation opt, JSONObject targetChild
+            , JSONObject real, SQLCreator creator) throws Exception {
 		if (targetChild == null) {
 			return real;
 		}
@@ -1160,7 +1198,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @param real
 	 * @throws Exception
 	 */
-	public static void verifyType(@NotNull String tk, Object tv, @NotNull JSONObject real) throws UnsupportedDataTypeException {
+	public static void verifyType(@NotNull String tk, Object tv, @NotNull JSONObject real)
+            throws UnsupportedDataTypeException {
 		if (tv instanceof String == false) {
 			throw new UnsupportedDataTypeException("服务器内部错误，" + tk + ":value 的value不合法！"
 					+ "Request表校验规则中 TYPE:{ key:value } 中的value只能是String类型！");
@@ -1174,7 +1213,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @param rv
 	 * @throws Exception
 	 */
-	public static void verifyType(@NotNull String tk, @NotNull String tv, Object rv) throws UnsupportedDataTypeException {
+	public static void verifyType(@NotNull String tk, @NotNull String tv, Object rv)
+            throws UnsupportedDataTypeException {
 		verifyType(tk, tv, rv, false);
 	}
 	/**验证值类型
@@ -1184,7 +1224,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @param isInArray
 	 * @throws Exception
 	 */
-	public static void verifyType(@NotNull String tk, @NotNull String tv, Object rv, boolean isInArray) throws UnsupportedDataTypeException {
+	public static void verifyType(@NotNull String tk, @NotNull String tv, Object rv, boolean isInArray)
+            throws UnsupportedDataTypeException {
 		if (rv == null) {
 			return;
 		}
@@ -1218,50 +1259,58 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			try {
 				Double.parseDouble(rv.toString());
 			} catch (Exception e) {
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 DECIMAL" + (isInArray ? "[] !" : " !"));
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
+                        "类型必须是 DECIMAL" + (isInArray ? "[] !" : " !"));
 			}
 			break;
 		case "STRING":
 			if (rv instanceof String == false) { //JSONObject.getString 可转换任何类型
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 STRING" + (isInArray ? "[] !" : " !"));
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
+                        "类型必须是 STRING" + (isInArray ? "[] !" : " !"));
 			}
 			break;
 		case "URL": //网址，格式为 http://www.apijson.org, https://www.google.com 等
 			try {
 				new URL((String) rv);
 			} catch (Exception e) {
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 URL" + (isInArray ? "[] !" : " !"));
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
+                        "类型必须是 URL" + (isInArray ? "[] !" : " !"));
 			}
 			break;
 		case "DATE": //日期，格式为 YYYY-MM-DD（例如 2020-02-20）的 STRING
 			try {
 				LocalDate.parse((String) rv);
 			} catch (Exception e) {
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是格式为 YYYY-MM-DD（例如 2020-02-20）的 DATE" + (isInArray ? "[] !" : " !"));
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
+                        "类型必须是格式为 YYYY-MM-DD（例如 2020-02-20）的 DATE" + (isInArray ? "[] !" : " !"));
 			}
 			break;
 		case "TIME": //时间，格式为 HH:mm:ss（例如 12:01:30）的 STRING
 			try {
 				LocalTime.parse((String) rv);
 			} catch (Exception e) {
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是格式为 HH:mm:ss（例如 12:01:30）的 TIME" + (isInArray ? "[] !" : " !"));
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
+                        "类型必须是格式为 HH:mm:ss（例如 12:01:30）的 TIME" + (isInArray ? "[] !" : " !"));
 			}
 			break;
 		case "DATETIME": //日期+时间，格式为 YYYY-MM-DDTHH:mm:ss（例如 2020-02-20T12:01:30）的 STRING
 			try {
 				LocalDateTime.parse((String) rv);
 			} catch (Exception e) {
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是格式为 YYYY-MM-DDTHH:mm:ss（例如 2020-02-20T12:01:30）的 DATETIME" + (isInArray ? "[] !" : " !"));
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是格式为 " +
+                        "YYYY-MM-DDTHH:mm:ss（例如 2020-02-20T12:01:30）的 DATETIME" + (isInArray ? "[] !" : " !"));
 			}
 			break;
 		case "OBJECT":
 			if (rv instanceof Map == false) { //JSONObject.getJSONObject 可转换String类型
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 OBJECT" + (isInArray ? "[] !" : " !") + " OBJECT 结构为 {} !");
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
+                        "类型必须是 OBJECT" + (isInArray ? "[] !" : " !") + " OBJECT 结构为 {} !");
 			}
 			break;
 		case "ARRAY":
 			if (rv instanceof Collection == false) { //JSONObject.getJSONArray 可转换String类型
-				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 ARRAY" + (isInArray ? "[] !" : " !") + " ARRAY 结构为 [] !");
+				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
+                        "类型必须是 ARRAY" + (isInArray ? "[] !" : " !") + " ARRAY 结构为 [] !");
 			}
 			break;
 			//目前在业务表中还用不上，单一的类型校验已经够用
@@ -1428,7 +1477,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		config.setTest(true);
 		//		config.setTable(Test.class.getSimpleName());
 		//		config.setColumn(rv + logic.getChar() + funChar)
-		config.putWhere(rv + logic.getChar() + funChar, tv, false);  // 字符串可能 SQL 注入，目前的解决方式是加 TYPE 校验类型或者干脆不用 sqlVerify，而是通过远程函数来校验
+        // 字符串可能 SQL 注入，目前的解决方式是加 TYPE 校验类型或者干脆不用 sqlVerify，而是通过远程函数来校验
+		config.putWhere(rv + logic.getChar() + funChar, tv, false);
 		config.setCount(1);
 
 		SQLExecutor executor = creator.createSQLExecutor();
@@ -1510,7 +1560,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @param creator
 	 * @throws Exception
 	 */
-	public static void verifyRepeat(String table, String key, Object value, long exceptId, String idKey, @NotNull SQLCreator creator) throws Exception {
+	public static void verifyRepeat(String table, String key, Object value
+            , long exceptId, String idKey, @NotNull SQLCreator creator) throws Exception {
 		if (key == null || value == null) {
 			Log.e(TAG, "verifyRepeat  key == null || value == null >> return;");
 			return;

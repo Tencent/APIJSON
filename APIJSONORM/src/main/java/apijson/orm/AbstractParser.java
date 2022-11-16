@@ -120,7 +120,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @param method null ? requestMethod = GET
 	 */
 	public AbstractParser(RequestMethod method) {
-		this(method, true);
+        super();
+        setMethod(method);
+        setNeedVerifyRole(AbstractVerifier.ENABLE_VERIFY_ROLE);
+        setNeedVerifyContent(AbstractVerifier.ENABLE_VERIFY_CONTENT);
 	}
 	/**
 	 * @param method null ? requestMethod = GET
