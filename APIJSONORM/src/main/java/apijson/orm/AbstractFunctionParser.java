@@ -289,10 +289,9 @@ public class AbstractFunctionParser implements FunctionParser {
         }
 
         String script = row.getString("script");
-        //SCRIPT_ENGINE.eval(script);
-        //Object[] newArgs = args == null || args.length <= 0 ? null : new Object[args.length];
+        SCRIPT_ENGINE.eval(script); // 必要，未执行导致下方 INVOCABLE.invokeFunction 报错 NoSuchMethod
 
-        SCRIPT_ENGINE.eval(script);
+        //Object[] newArgs = args == null || args.length <= 0 ? null : new Object[args.length];
 
         // APIJSON 远程函数不应该支持
         //if (row.getBooleanValue("simple")) {
@@ -311,7 +310,7 @@ public class AbstractFunctionParser implements FunctionParser {
             //    newArgs[i] = a == null || apijson.JSON.isBooleanOrNumberOrString(a) ? a : JSON.toJSONString(a);
             //}
 
-            // TODO 先试试这个
+            // 支持 JSONObject
             result = INVOCABLE.invokeFunction(methodName, args);
             //result = INVOCABLE.invokeMethod(args[0], methodName, args);
 
@@ -348,7 +347,6 @@ public class AbstractFunctionParser implements FunctionParser {
             //        break;
             //}
         }
-
 
         if (Log.DEBUG && result != null) {
             Class<?> rt = result.getClass(); // 作为远程函数的 js 类型应该只有 JSON 的几种类型
