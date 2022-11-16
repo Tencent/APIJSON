@@ -10,6 +10,7 @@ import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,8 @@ import javax.script.ScriptEngineManager;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.util.TypeUtils;
 
 import apijson.Log;
 import apijson.NotNull;
@@ -33,6 +36,10 @@ import apijson.StringUtil;
  */
 public class AbstractFunctionParser implements FunctionParser {
     private static final String TAG = "AbstractFunctionParser";
+
+    /**是否解析参数 key 的对应的值，不用手动编码 curObj.getString(key)
+     */
+    public static boolean IS_PARSE_ARG_VALUE = false;
 
     /**开启支持远程函数
      */
@@ -155,11 +162,21 @@ public class AbstractFunctionParser implements FunctionParser {
 	/**反射调用
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
 	 * @param currentObject 不作为第一个参数，就不能远程调用invoke，避免死循环
-	 * @return {@link #invoke(AbstractFunctionParser, String, JSONObject)}
+	 * @return {@link #invoke(String, JSONObject, boolean)}
 	 */
 	@Override
 	public Object invoke(@NotNull String function, @NotNull JSONObject currentObject) throws Exception {
-		return invoke(this, function, currentObject);
+        return invoke(function, currentObject, false);
+    }
+	/**反射调用
+	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
+	 * @param currentObject 不作为第一个参数，就不能远程调用invoke，避免死循环
+	 * @param containRaw 包含原始 SQL 片段
+	 * @return {@link #invoke(AbstractFunctionParser, String, JSONObject, boolean)}
+	 */
+	@Override
+	public Object invoke(@NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception {
+		return invoke(this, function, currentObject, containRaw);
 	}
 	
 	/**反射调用
@@ -168,13 +185,13 @@ public class AbstractFunctionParser implements FunctionParser {
      * @param currentObject
      * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
 	 */
-	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String function, @NotNull JSONObject currentObject) throws Exception {
+	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception {
         if (ENABLE_REMOTE_FUNCTION == false) {
             throw new UnsupportedOperationException("AbstractFunctionParser.ENABLE_REMOTE_FUNCTION" +
                     " == false 时不支持远程函数！如需支持则设置 AbstractFunctionParser.ENABLE_REMOTE_FUNCTION = true ！");
         }
 
-		FunctionBean fb = parseFunction(function, currentObject, false);
+		FunctionBean fb = parseFunction(function, currentObject, false, containRaw);
 
 		JSONObject row = FUNCTION_MAP.get(fb.getMethod());
 		if (row == null) {
@@ -230,17 +247,31 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 	
 	/**反射调用
-	 * @param methodName
-	 * @param parameterTypes
-	 * @param args
-	 * @return
-	 */
+     * @param parser
+     * @param methodName
+     * @param parameterTypes
+     * @param args
+     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[], String, JSONObject, int)}
+     * @throws Exception
+     */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
         return invoke(parser, methodName, parameterTypes, args, null, null, TYPE_REMOTE_FUNCTION);
     }
+    /**反射调用
+     * @param parser
+     * @param methodName
+     * @param parameterTypes
+     * @param args
+     * @param returnType
+     * @param currentObject
+     * @param type
+     * @return
+     * @throws Exception
+     */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
-            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject, int type) throws Exception {
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType
+            , JSONObject currentObject, int type) throws Exception {
         if (type == TYPE_SCRIPT_FUNCTION) {
             return invokeScript(parser, methodName, parameterTypes, args, returnType, currentObject);
         }
@@ -276,11 +307,22 @@ public class AbstractFunctionParser implements FunctionParser {
             /*获取执行JavaScript的执行引擎*/
             SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("javascript");
             INVOCABLE = (Invocable) SCRIPT_ENGINE;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**Java 调用 JavaScript 函数
+     * @param parser
+     * @param methodName
+     * @param parameterTypes
+     * @param args
+     * @param returnType
+     * @param currentObject
+     * @return
+     * @throws Exception
+     */
     public static Object invokeScript(@NotNull AbstractFunctionParser parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject) throws Exception {
         JSONObject row = SCRIPT_MAP.get(methodName);
@@ -388,6 +430,17 @@ public class AbstractFunctionParser implements FunctionParser {
      */
 	@NotNull
 	public static FunctionBean parseFunction(@NotNull String function, @NotNull JSONObject request, boolean isSQLFunction) throws Exception {
+        return parseFunction(function, request, isSQLFunction, false);
+    }
+    /**解析函数，自动解析的值类型只支持 Boolean, Number, String, Map, List
+     * @param function
+     * @param request
+     * @param isSQLFunction
+     * @param containRaw
+     * @return
+     * @throws Exception
+     */
+	public static FunctionBean parseFunction(@NotNull String function, @NotNull JSONObject request, boolean isSQLFunction, boolean containRaw) throws Exception {
 
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
@@ -405,14 +458,14 @@ public class AbstractFunctionParser implements FunctionParser {
 		Class<?>[] types;
 		Object[] values;
 
-		if (isSQLFunction) {
+		if (isSQLFunction || IS_PARSE_ARG_VALUE) {
 			types = new Class<?>[length];
 			values = new Object[length];
 
 			//碰到null就挂了！！！Number还得各种转换不灵活！不如直接传request和对应的key到函数里，函数内实现时自己 getLongValue,getJSONObject ...
 			Object v;
 			for (int i = 0; i < length; i++) {
-				v = values[i] = request.get(keys[i]);
+				v = values[i] = getArgValue(request, keys[i], containRaw); // request.get(keys[i]);
 				if (v == null) {
 					types[i] = Object.class;
 					values[i] = null;
@@ -421,24 +474,29 @@ public class AbstractFunctionParser implements FunctionParser {
 
 				if (v instanceof Boolean) {
 					types[i] = Boolean.class; //只支持JSON的几种类型 
-				}
+				} // 怎么都有 bug，如果是引用的值，很多情况下无法指定  //  用 1L 指定为 Long ？ 其它的默认按长度分配为 Integer 或 Long？
+				//else if (v instanceof Long || v instanceof Integer || v instanceof Short) {
+				//	types[i] = Long.class;
+				//}
 				else if (v instanceof Number) {
 					types[i] = Number.class;
 				}
 				else if (v instanceof String) {
 					types[i] = String.class;
 				}
-				else if (v instanceof JSONObject) { // Map) {
-					types[i] = JSONObject.class;
-					//性能比较差	values[i] = request.getJSONObject(keys[i]);
+				else if (v instanceof Map) { // 泛型兼容？ // JSONObject
+					types[i] = Map.class;
+					//性能比较差
+                    //values[i] = TypeUtils.cast(v, Map.class, ParserConfig.getGlobalInstance());
 				}
-				else if (v instanceof JSONArray) { // Collection) {
-					types[i] = JSONArray.class;
-					//性能比较差	values[i] = request.getJSONArray(keys[i]);
+				else if (v instanceof Collection) { // 泛型兼容？ // JSONArray
+					types[i] = List.class;
+					//性能比较差
+                    values[i] = TypeUtils.cast(v, List.class, ParserConfig.getGlobalInstance());
 				}
-				else { //FIXME 碰到null就挂了！！！
-					throw new UnsupportedDataTypeException(keys[i] + ":value 中value不合法！远程函数 key():" + function + " 中的arg对应的值类型"
-							+ "只能是 [Boolean, Number, String, JSONObject, JSONArray] 中的一种！");
+				else {
+					throw new UnsupportedDataTypeException(keys[i] + ":value 中value不合法！远程函数 key():"
+                            + function + " 中的 arg 对应的值类型只能是 [Boolean, Number, String, JSONObject, JSONArray] 中的一种！");
 				}
 			}
 		}
@@ -485,6 +543,46 @@ public class AbstractFunctionParser implements FunctionParser {
 		return f;
 	}
 
+    public static <T> T getArgValue(@NotNull JSONObject currentObject, String keyOrValue) {
+        return getArgValue(currentObject, keyOrValue, false);
+    }
+    public static <T> T getArgValue(@NotNull JSONObject currentObject, String keyOrValue, boolean containRaw) {
+        if (keyOrValue == null) {
+            return null;
+        }
+
+        if (keyOrValue.endsWith("`") && keyOrValue.lastIndexOf("`") == 0) {
+            return (T) currentObject.get(keyOrValue.substring(1, keyOrValue.length() - 1));
+        }
+
+        if (keyOrValue.endsWith("'") && keyOrValue.lastIndexOf("'") == 0) {
+            return (T) keyOrValue.substring(1, keyOrValue.length() - 1);
+        }
+
+        if (StringUtil.isName(keyOrValue.startsWith("@") ? keyOrValue.substring(1) : keyOrValue)) {
+            return (T) currentObject.get(keyOrValue);
+        }
+
+        // 传参加上 @raw:"key()" 避免意外情况
+        Object val = containRaw ? AbstractSQLConfig.RAW_MAP.get(keyOrValue) : null;
+        if (val != null) {
+            return (T) ("".equals(val) ? keyOrValue : val);
+        }
+
+        try {
+            val = JSON.parse(keyOrValue);
+            if (apijson.JSON.isBooleanOrNumberOrString(val)) {
+                return (T) val;
+            }
+        }
+        catch (Throwable e) {
+            Log.d(TAG, "getArgValue  try {\n" +
+                    "            Object val = JSON.parse(keyOrValue);" +
+                    "} catch (Throwable e) = " + e.getMessage());
+        }
+
+        return (T) currentObject.get(keyOrValue);
+    }
 
 	public static class FunctionBean {
 		private String function;

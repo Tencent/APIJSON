@@ -105,6 +105,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			request.remove(KEY_DROP);
 		}
 
+        String raw = request.getString(JSONRequest.KEY_RAW);
+        String[] rks = StringUtil.split(raw);
+        rawKeyList = rks == null || rks.length <= 0 ? null : Arrays.asList(rks);
 	}
 
 	@Override
@@ -172,6 +175,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	private int objectCount;
 	private int arrayCount;
+
+    private List<String> rawKeyList;
 	/**解析成员
 	 * response重新赋值
 	 * @return null or this
@@ -452,7 +457,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			}
 
             if (isPlus == false && isTable == false) {
-                parseFunction(k, (String) value, parentPath, name, request, isMinus);
+                parseFunction(key, k, (String) value, parentPath, name, request, isMinus);
             }
             else {
 				//远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里循环里new出来对性能影响不大。
@@ -795,19 +800,22 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			JSONObject json = isMinus ? sqlRequest : response; // key-():function 是实时执行，而不是在这里批量执行
 
 			for (Entry<String, String> entry : functionSet) {
-                parseFunction(entry.getKey(), entry.getValue(), parentPath, name, json, isMinus);
+                parseFunction(entry.getKey(), entry.getKey(), entry.getValue(), parentPath, name, json, isMinus);
 			}
 		}
 	}
 
+
 	//public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject) throws Exception {
     //    parseFunction(key, value, parentPath, currentName, currentObject, false);
     //}
-	public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject, boolean isMinus) throws Exception {
+	public void parseFunction(String rawKey, String key, String value, String parentPath, String currentName, JSONObject currentObject, boolean isMinus) throws Exception {
 		Object result;
+        boolean containRaw = rawKeyList != null && rawKeyList.contains(rawKey);
+
         boolean isProcedure = key.startsWith("@");
 		if (isProcedure) {
-			FunctionBean fb = AbstractFunctionParser.parseFunction(value, currentObject, true);
+			FunctionBean fb = AbstractFunctionParser.parseFunction(value, currentObject, true, containRaw);
 
 			SQLConfig config = newSQLConfig(true);
 			config.setProcedure(fb.toFunctionCallString(true));
@@ -816,7 +824,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			key = key.substring(1);
 		}
 		else {
-			result = parser.onFunctionParse(key, value, parentPath, currentName, currentObject);
+			result = parser.onFunctionParse(key, value, parentPath, currentName, currentObject, containRaw);
 		}
 
 		String k = AbstractSQLConfig.getRealKey(method, key, false, false);

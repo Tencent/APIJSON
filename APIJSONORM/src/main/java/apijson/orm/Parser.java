@@ -79,7 +79,7 @@ public interface Parser<T extends Object> {
 	 * @return
 	 * @throws Exception
 	 */
-	Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject) throws Exception;
+	Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject, boolean containRaw) throws Exception;
 	
 	ObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception;
 

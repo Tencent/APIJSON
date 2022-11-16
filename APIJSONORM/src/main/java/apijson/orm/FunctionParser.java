@@ -17,7 +17,8 @@ import apijson.RequestMethod;
 public interface FunctionParser {
 
 	Object invoke(@NotNull String function, @NotNull JSONObject currentObject) throws Exception;
-	
+	Object invoke(@NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception;
+
 	RequestMethod getMethod();
 	FunctionParser setMethod(RequestMethod method);
 
