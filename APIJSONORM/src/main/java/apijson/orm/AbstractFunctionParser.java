@@ -6,6 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import java.io.FileReader;
+import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ import apijson.StringUtil;
  * @author Lemon
  */
 public class AbstractFunctionParser implements FunctionParser {
-	//	private static final String TAG = "AbstractFunctionParser";
+    private static final String TAG = "AbstractFunctionParser";
 
     /**开启支持远程函数
      */
@@ -205,7 +206,7 @@ public class AbstractFunctionParser implements FunctionParser {
 		}
 
 		try {
-            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), currentObject, type);
+            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), row.getString("returnType"), currentObject, type);
 		} catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
 				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 不在后端工程的DemoFunction内！"
@@ -236,19 +237,31 @@ public class AbstractFunctionParser implements FunctionParser {
 	 */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
-        return invoke(parser, methodName, parameterTypes, args, null, TYPE_REMOTE_FUNCTION);
+        return invoke(parser, methodName, parameterTypes, args, null, null, TYPE_REMOTE_FUNCTION);
     }
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
-            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, JSONObject currentObject, int type) throws Exception {
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject, int type) throws Exception {
         if (type == TYPE_SCRIPT_FUNCTION) {
-            return invokeScript(parser, methodName, parameterTypes, args, currentObject);
+            return invokeScript(parser, methodName, parameterTypes, args, returnType, currentObject);
         }
 
-        Method m = parser.getClass().getMethod(methodName, parameterTypes);
-        //费性能，还是初始化时做更好
-        //if (m.getReturnType().getSimpleName().equals(returnType) == false) {
-        //  throw new IllegalArgumentTypeException("");
-        //}
+        Method m = parser.getClass().getMethod(methodName, parameterTypes); // 不用判空，拿不到就会抛异常
+
+        if (Log.DEBUG) {
+            String rt = Log.DEBUG && m.getReturnType() != null ? m.getReturnType().getSimpleName() : null;
+
+            if ("void".equals(rt)) {
+                rt = null;
+            }
+            if ("void".equals(returnType)) {
+                returnType = null;
+            }
+
+            if (rt != returnType && (rt == null || rt.equals(returnType) == false)) {
+                throw new WrongMethodTypeException("远程函数 " + methodName + " 的实际返回值类型 " + rt + " 与 Function 表中的配置的 " + returnType + " 不匹配！");
+            }
+        }
+
         return m.invoke(parser, args);
 	}
 
@@ -269,7 +282,7 @@ public class AbstractFunctionParser implements FunctionParser {
     }
 
     public static Object invokeScript(@NotNull AbstractFunctionParser parser, @NotNull String methodName
-            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, JSONObject currentObject) throws Exception {
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject) throws Exception {
         JSONObject row = SCRIPT_MAP.get(methodName);
         if (row == null) {
             throw new UnsupportedOperationException("调用远程函数脚本 " + methodName + " 不存在!");
@@ -336,7 +349,34 @@ public class AbstractFunctionParser implements FunctionParser {
             //}
         }
 
-        System.out.println("invokeScript " + methodName + "(..) >>  result = " + result);
+
+        if (Log.DEBUG && result != null) {
+            Class<?> rt = result.getClass(); // 作为远程函数的 js 类型应该只有 JSON 的几种类型
+            String fullReturnType = (StringUtil.isSmallName(returnType)
+                    ? returnType : (returnType.startsWith("JSON") ? "com.alibaba.fastjson." : "java.lang.") + returnType);
+
+            if ((rt == null && returnType != null) || (rt != null && returnType == null)) {
+                throw new WrongMethodTypeException("远程函数 " + methodName + " 的实际返回值类型 "
+                        + (rt == null ? null : rt.getName()) + " 与 Function 表中的配置的 " + fullReturnType + " 不匹配！");
+            }
+
+            Class<?> cls;
+            try {
+                cls = Class.forName(fullReturnType);
+            }
+            catch (Exception e) {
+                throw new WrongMethodTypeException("远程函数 " + methodName + " 在 Function 表中的配置的类型 "
+                        + returnType + " 对应的 " + fullReturnType + " 错误！在 Java 中 Class.forName 找不到这个类型！");
+            }
+
+            if (cls.isAssignableFrom(rt) == false) {
+                throw new WrongMethodTypeException("远程函数 " + methodName + " 的实际返回值类型 "
+                        + (rt == null ? null : rt.getName()) + " 与 Function 表中的配置的 "
+                        + returnType + " 对应的 " + fullReturnType + " 不匹配！");
+            }
+        }
+
+        Log.d(TAG, "invokeScript " + methodName + "(..) >>  result = " + result);
         return result;
     }
 
