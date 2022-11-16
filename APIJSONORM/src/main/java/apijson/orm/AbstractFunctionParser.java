@@ -193,7 +193,7 @@ public class AbstractFunctionParser implements FunctionParser {
 
 		FunctionBean fb = parseFunction(function, currentObject, false, containRaw);
 
-		JSONObject row = FUNCTION_MAP.get(fb.getMethod());
+		JSONObject row = FUNCTION_MAP.get(fb.getMethod()); //FIXME  fb.getSchema() + "." + fb.getMethod()
 		if (row == null) {
 			throw new UnsupportedOperationException("不允许调用远程函数 " + fb.getMethod() + " !");
 		}
@@ -224,7 +224,8 @@ public class AbstractFunctionParser implements FunctionParser {
 
 		try {
             return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), row.getString("returnType"), currentObject, type);
-		} catch (Exception e) {
+		}
+        catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
 				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 不在后端工程的DemoFunction内！"
 						+ "\n请检查函数名和参数数量是否与已定义的函数一致！"
@@ -445,14 +446,28 @@ public class AbstractFunctionParser implements FunctionParser {
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
 		String method = (start <= 0 || end != function.length() - 1) ? null : function.substring(0, start);
-		if (StringUtil.isEmpty(method, true)) {
-			throw new IllegalArgumentException("字符 " + function + " 不合法！函数的名称 function 不能为空，"
-					+ "且必须为 function(key0,key1,...) 这种单函数格式！"
+
+        int dotInd = method == null ? -1 : method.indexOf(".");
+        String schema = dotInd < 0 ? null : method.substring(0, dotInd);
+        method = dotInd < 0 ? method : method.substring(dotInd + 1);
+
+        if (StringUtil.isName(method) == false) {
+			throw new IllegalArgumentException("字符 " + method + " 不合法！函数的名称 function 不能为空且必须符合方法命名规范！"
+					+ "总体必须为 function(key0,key1,...) 这种单函数格式！"
 					+ "\nfunction必须符合 " + (isSQLFunction ? "SQL 函数/SQL 存储过程" : "Java 函数") + " 命名，key 是用于在 request 内取值的键！");
 		}
+        if (isSQLFunction != true && StringUtil.isNotEmpty(schema, true)) {
+            throw new IllegalArgumentException("字符 " + schema + " 不合法！远程函数不允许指定类名！"
+                    + "且必须为 function(key0,key1,...) 这种单函数格式！"
+                    + "\nfunction必须符合 " + (isSQLFunction ? "SQL 函数/SQL 存储过程" : "Java 函数") + " 命名，key 是用于在 request 内取值的键！");
+        }
+        if (schema != null && StringUtil.isName(schema) == false) {
+            throw new IllegalArgumentException("字符 " + schema + " 不合法！数据库名/模式名 不能为空且必须符合命名规范！"
+                    + "且必须为 function(key0,key1,...) 这种单函数格式！"
+                    + "\nfunction必须符合 " + (isSQLFunction ? "SQL 函数/SQL 存储过程" : "Java 函数") + " 命名，key 是用于在 request 内取值的键！");
+        }
 
 		String[] keys = StringUtil.split(function.substring(start + 1, end));
-
 		int length = keys == null ? 0 : keys.length;
 
 		Class<?>[] types;
@@ -515,6 +530,7 @@ public class AbstractFunctionParser implements FunctionParser {
 
 		FunctionBean fb = new FunctionBean();
 		fb.setFunction(function);
+		fb.setSchema(schema);
 		fb.setMethod(method);
 		fb.setKeys(keys);
 		fb.setTypes(types);
@@ -551,16 +567,13 @@ public class AbstractFunctionParser implements FunctionParser {
             return null;
         }
 
-        if (keyOrValue.endsWith("`") && keyOrValue.lastIndexOf("`") == 0) {
+
+        if (keyOrValue.endsWith("`") && keyOrValue.substring(1).indexOf("`") == keyOrValue.length() - 2) {
             return (T) currentObject.get(keyOrValue.substring(1, keyOrValue.length() - 1));
         }
 
-        if (keyOrValue.endsWith("'") && keyOrValue.lastIndexOf("'") == 0) {
+        if (keyOrValue.endsWith("'") && keyOrValue.substring(1).indexOf("'") == keyOrValue.length() - 2) {
             return (T) keyOrValue.substring(1, keyOrValue.length() - 1);
-        }
-
-        if (StringUtil.isName(keyOrValue.startsWith("@") ? keyOrValue.substring(1) : keyOrValue)) {
-            return (T) currentObject.get(keyOrValue);
         }
 
         // 传参加上 @raw:"key()" 避免意外情况
@@ -569,15 +582,35 @@ public class AbstractFunctionParser implements FunctionParser {
             return (T) ("".equals(val) ? keyOrValue : val);
         }
 
+        if (StringUtil.isName(keyOrValue.startsWith("@") ? keyOrValue.substring(1) : keyOrValue)) {
+            return (T) currentObject.get(keyOrValue);
+        }
+
+        if ("true".equals(keyOrValue)) {
+            return (T) Boolean.TRUE;
+        }
+        if ("false".equals(keyOrValue)) {
+            return (T) Boolean.FALSE;
+        }
+
+        // 性能更好，但居然非法格式也不报错
+        //try {
+        //    val = Boolean.valueOf(keyOrValue); // JSON.parse(keyOrValue);
+        //    return (T) val;
+        //}
+        //catch (Throwable e) {
+        //    Log.d(TAG, "getArgValue  try {\n" +
+        //            "            val = Boolean.valueOf(keyOrValue);" +
+        //            "} catch (Throwable e) = " + e.getMessage());
+        //}
+
         try {
-            val = JSON.parse(keyOrValue);
-            if (apijson.JSON.isBooleanOrNumberOrString(val)) {
-                return (T) val;
-            }
+            val = Double.valueOf(keyOrValue); // JSON.parse(keyOrValue);
+            return (T) val;
         }
         catch (Throwable e) {
             Log.d(TAG, "getArgValue  try {\n" +
-                    "            Object val = JSON.parse(keyOrValue);" +
+                    "            val = Double.valueOf(keyOrValue);" +
                     "} catch (Throwable e) = " + e.getMessage());
         }
 
@@ -586,6 +619,7 @@ public class AbstractFunctionParser implements FunctionParser {
 
 	public static class FunctionBean {
 		private String function;
+		private String schema;
 		private String method;
 		private String[] keys;
 		private Class<?>[] types;
@@ -598,7 +632,14 @@ public class AbstractFunctionParser implements FunctionParser {
 			this.function = function;
 		}
 
-		public String getMethod() {
+        public String getSchema() {
+            return schema;
+        }
+        public void setSchema(String schema) {
+            this.schema = schema;
+        }
+
+        public String getMethod() {
 			return method;
 		}
 		public void setMethod(String method) {
@@ -640,6 +681,8 @@ public class AbstractFunctionParser implements FunctionParser {
 		 * @return
 		 */
 		public String toFunctionCallString(boolean useValue, String quote) {
+            //String sch = getSchema();
+			//String s = (StringUtil.isEmpty(sch) ? "" : sch + ".") + getMethod() + "(";
 			String s = getMethod() + "(";
 
 			Object[] args = useValue ? getValues() : getKeys();

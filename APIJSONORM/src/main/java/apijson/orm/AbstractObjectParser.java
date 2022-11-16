@@ -105,10 +105,12 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			request.remove(KEY_DROP);
 		}
 
-        String raw = request.getString(JSONRequest.KEY_RAW);
-        String[] rks = StringUtil.split(raw);
-        rawKeyList = rks == null || rks.length <= 0 ? null : Arrays.asList(rks);
-	}
+        if (isTable) {
+            String raw = request.getString(JSONRequest.KEY_RAW);
+            String[] rks = StringUtil.split(raw);
+            rawKeyList = rks == null || rks.length <= 0 ? null : Arrays.asList(rks);
+        }
+    }
 
 	@Override
 	public String getParentPath() {
@@ -818,6 +820,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			FunctionBean fb = AbstractFunctionParser.parseFunction(value, currentObject, true, containRaw);
 
 			SQLConfig config = newSQLConfig(true);
+            String sch = fb.getSchema();
+            if (StringUtil.isNotEmpty(sch, true)) {
+                config.setSchema(sch);
+            }
 			config.setProcedure(fb.toFunctionCallString(true));
 			result = parseResponse(config, true);
 
