@@ -60,6 +60,7 @@ import apijson.orm.model.Column;
 import apijson.orm.model.Document;
 import apijson.orm.model.ExtendedProperty;
 import apijson.orm.model.Function;
+import apijson.orm.model.Script;
 import apijson.orm.model.PgAttribute;
 import apijson.orm.model.PgClass;
 import apijson.orm.model.Request;
@@ -151,6 +152,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		SYSTEM_ACCESS_MAP.put(Access.class.getSimpleName(), getAccessMap(Access.class.getAnnotation(MethodAccess.class)));
 		SYSTEM_ACCESS_MAP.put(Function.class.getSimpleName(), getAccessMap(Function.class.getAnnotation(MethodAccess.class)));
+		SYSTEM_ACCESS_MAP.put(Script.class.getSimpleName(), getAccessMap(Script.class.getAnnotation(MethodAccess.class)));
 		SYSTEM_ACCESS_MAP.put(Request.class.getSimpleName(), getAccessMap(Request.class.getAnnotation(MethodAccess.class)));
 
 		if (Log.DEBUG) {

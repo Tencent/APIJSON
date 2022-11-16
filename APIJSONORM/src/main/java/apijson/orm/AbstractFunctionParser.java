@@ -5,6 +5,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
+import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -27,11 +32,17 @@ import apijson.StringUtil;
 public class AbstractFunctionParser implements FunctionParser {
 	//	private static final String TAG = "AbstractFunctionParser";
 
+    public static final int TYPE_REMOTE_FUNCTION = 0;
+    //public static final int TYPE_SQL_FUNCTION = 1;
+    public static final int TYPE_SCRIPT_FUNCTION = 1;
+
 	// <methodName, JSONObject>
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
 	public static Map<String, JSONObject> FUNCTION_MAP;
+	public static Map<String, JSONObject> SCRIPT_MAP;
 	static {
 		FUNCTION_MAP = new HashMap<>();
+		SCRIPT_MAP = new HashMap<>();
 	}
 
 	private RequestMethod method;
@@ -157,13 +168,19 @@ public class AbstractFunctionParser implements FunctionParser {
 			throw new UnsupportedOperationException("不允许调用远程函数 " + fb.getMethod() + " !");
 		}
 
-		int v = row.getIntValue("version");
-		if (parser.getVersion() < v) {
-			throw new UnsupportedOperationException("不允许 version = " + parser.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + v + " !");
+		int type = row.getIntValue("type");
+        if (type < TYPE_REMOTE_FUNCTION || type > TYPE_SCRIPT_FUNCTION) {
+            throw new UnsupportedOperationException("type = " + type + " 不合法！必须是 [0, 1, 2] 中的一个 !");
+        }
+
+
+		int version = row.getIntValue("version");
+		if (parser.getVersion() < version) {
+			throw new UnsupportedOperationException("不允许 version = " + parser.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + version + " !");
 		}
-		String t = row.getString("tag");
-		if (t != null && t.equals(parser.getTag()) == false) {
-			throw new UnsupportedOperationException("不允许 tag = " + parser.getTag() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 tag = " + t + " !");
+		String tag = row.getString("tag");
+		if (tag != null && tag.equals(parser.getTag()) == false) {
+			throw new UnsupportedOperationException("不允许 tag = " + parser.getTag() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 tag = " + tag + " !");
 		}
 		String[] methods = StringUtil.split(row.getString("methods"));
 		List<String> ml = methods == null || methods.length <= 0 ? null : Arrays.asList(methods);
@@ -172,7 +189,7 @@ public class AbstractFunctionParser implements FunctionParser {
 		}
 
 		try {
-			return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues()); 
+            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), currentObject, type);
 		} catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
 				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 不在后端工程的DemoFunction内！"
@@ -201,17 +218,114 @@ public class AbstractFunctionParser implements FunctionParser {
 	 * @param args
 	 * @return
 	 */
-	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName, @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
-		return parser.getClass().getMethod(methodName, parameterTypes).invoke(parser, args);
+	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
+        return invoke(parser, methodName, parameterTypes, args, null, TYPE_REMOTE_FUNCTION);
+    }
+	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, JSONObject currentObject, int type) throws Exception {
+        if (type == TYPE_SCRIPT_FUNCTION) {
+            return invokeScript(parser, methodName, parameterTypes, args, currentObject);
+        }
+        return parser.getClass().getMethod(methodName, parameterTypes).invoke(parser, args);
 	}
 
-	/**解析函数
-	 * @param function
-	 * @param request
-	 * @param isSQLFunction
-	 * @return
-	 * @throws Exception
-	 */
+    public static Invocable INVOCABLE;
+    public static ScriptEngine SCRIPT_ENGINE;
+    static {
+        try {
+            System.setProperty("Dnashorn.args", "language=es6");
+            System.setProperty("Dnashorn.args", "--language=es6");
+            System.setProperty("-Dnashorn.args", "--language=es6");
+
+            /*获取执行JavaScript的执行引擎*/
+            SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("javascript");
+            INVOCABLE = (Invocable) SCRIPT_ENGINE;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Object invokeScript(@NotNull AbstractFunctionParser parser, @NotNull String methodName
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, JSONObject currentObject) throws Exception {
+        JSONObject row = SCRIPT_MAP.get(methodName);
+        if (row == null) {
+            throw new UnsupportedOperationException("调用远程函数脚本 " + methodName + " 不存在!");
+        }
+
+        String script = row.getString("script");
+        //SCRIPT_ENGINE.eval(script);
+        //Object[] newArgs = args == null || args.length <= 0 ? null : new Object[args.length];
+
+        SCRIPT_ENGINE.eval(script);
+
+        // APIJSON 远程函数不应该支持
+        //if (row.getBooleanValue("simple")) {
+        //    return SCRIPT_ENGINE.eval(script);
+        //}
+
+        Object result;
+        if (args == null || args.length <= 0) {
+            result = INVOCABLE.invokeFunction(methodName);
+        }
+        else {
+            //args[0] = JSON.toJSONString(args[0]);  // Java 调 js 函数只支持传基本类型，改用 invokeMethod ？
+
+            //for (int i = 0; i < args.length; i++) {
+            //    Object a = currentObject == null ? null : currentObject.get(args[i]);
+            //    newArgs[i] = a == null || apijson.JSON.isBooleanOrNumberOrString(a) ? a : JSON.toJSONString(a);
+            //}
+
+            // TODO 先试试这个
+            result = INVOCABLE.invokeFunction(methodName, args);
+            //result = INVOCABLE.invokeMethod(args[0], methodName, args);
+
+            //switch (newArgs.length) {
+            //    case 1:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0]);
+            //        break;
+            //    case 2:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1]);
+            //        break;
+            //    case 3:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2]);
+            //        break;
+            //    case 4:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3]);
+            //        break;
+            //    case 5:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4]);
+            //        break;
+            //    case 6:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5]);
+            //        break;
+            //    case 7:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6]);
+            //        break;
+            //    case 8:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6], newArgs[7]);
+            //        break;
+            //    case 9:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6], newArgs[7], newArgs[8]);
+            //        break;
+            //    case 10:
+            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6], newArgs[7], newArgs[8], newArgs[9]);
+            //        break;
+            //}
+        }
+
+        System.out.println("invokeScript " + methodName + "(..) >>  result = " + result);
+        return result;
+    }
+
+
+    /**解析函数
+     * @param function
+     * @param request
+     * @param isSQLFunction
+     * @return
+     * @throws Exception
+     */
 	@NotNull
 	public static FunctionBean parseFunction(@NotNull String function, @NotNull JSONObject request, boolean isSQLFunction) throws Exception {
 
