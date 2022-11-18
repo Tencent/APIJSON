@@ -53,7 +53,7 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 <br />
 
 ### FASTJSON 2
-#### 开源代码
+#### Code
 https://github.com/Tencent/APIJSON/tree/fastjson2
 
 #### Maven
