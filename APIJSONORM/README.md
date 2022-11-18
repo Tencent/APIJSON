@@ -27,7 +27,6 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 
 <br />
 <br />
-<br />
 
 ### Gradle
 #### 1. 在项目根目录 build.gradle 中最后添加 JitPack 仓库
@@ -49,6 +48,9 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 	        implementation 'com.github.Tencent:APIJSON:latest'
 	}
 ```
+
+<br />
+<br />
 
 ### FASTJSON 2
 #### 开源代码
