@@ -49,3 +49,10 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 	        implementation 'com.github.Tencent:APIJSON:latest'
 	}
 ```
+
+### FASTJSON 2
+#### 开源代码
+https://github.com/Tencent/APIJSON
+
+#### Maven
+https://mvnrepository.com/artifact/com.github.linushp/zikai-apijson/1.0
