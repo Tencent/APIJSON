@@ -140,13 +140,13 @@ Request:
       "content$":"%a%"               //filter condition: content contains 'a'
     },
     "User":{
-      "id@":"/Moment/userId",        //User.id = Moment.userId, short referrence path，starts from grandparents path
+      "id@":"/Moment/userId",        //User.id = Moment.userId, short reference path，starts from grandparents path
       "@column":"id,name,head"       //get specified keys with the written order 
     },
     "Comment[]":{                    //get a Comment array, and unwrap Comment object
       "count":2,
       "Comment":{
-        "momentId@":"[]/Moment/id"   //Comment.momentId = Moment.id, full referrence path
+        "momentId@":"[]/Moment/id"   //Comment.momentId = Moment.id, full reference path
       }
     }
   }
