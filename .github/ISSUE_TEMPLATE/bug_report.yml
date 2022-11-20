@@ -1,0 +1,47 @@
+name: Bug Report/反馈 bug
+description: Report a bug to APIJSON/为 APIJSON 反馈 bug
+title: "[Bug] "
+labels: [kind/bug]
+body:
+- type: textarea
+  attributes:
+    label: Environment/环境信息
+    description: |
+      e.g.
+        - **OS/系统**: MacOS Monterey 12.6 (21G115) M1
+        - **JDK/基础库**: 1.8.0_17
+        - **DB/数据库**: 1.8.0_17
+        - **APIJSON**: 5.4.0
+    value: |
+        - OS/系统:
+        - JDK/基础库:
+        - DB/数据库:
+        - APIJSON:
+    render: markdown
+
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Current Behavior/问题描述
+    description: A concise description of what you're experiencing. Attach screenshots if needed.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Expected Behavior/期望结果
+    description: A concise description of what you expected to happen.
+  validations:
+    required: false
+
+
+- type: textarea
+  attributes:
+    label: Any additional comments?/其它补充说明？
+    description: |
+      e.g. some background/context of how you ran into this bug.
+
+  validations:
+    required: false
