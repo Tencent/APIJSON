@@ -39,7 +39,7 @@ body:
 - type: textarea
   attributes:
     label: Current Behavior/问题描述
-    description: A concise description of what you're experiencing. Attach screenshots if needed./\n\n**提 bug 请发请求和响应的【完整截屏】，没图的自行解决！\n开发者有限的时间和精力主要放在【维护项目源码和文档】上！\n【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！\n【态度 不文明/不友善】的可能会被拉黑，问题也可能不予解答！！！**\n\n请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感，\n大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 设计规范 来调用 API #181
+    description: "A concise description of what you're experiencing. Must contains screenshots./\n\n**提 bug 请发请求和响应的【完整截屏】，没图的自行解决！\n开发者有限的时间和精力主要放在【维护项目源码和文档】上！\n【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！\n【态度 不文明/不友善】的可能会被拉黑，问题也可能不予解答！！！**\n\n请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感，\n大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 设计规范 来调用 API #181 "
     render: markdown
 
   validations:
