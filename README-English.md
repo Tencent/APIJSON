@@ -7,7 +7,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 </h1>
 
 
-<p align="center">🏆 Tencent top 10 open source project, Achieved 5 awards inside & outside Tencent<br />🚀 A JSON Transmission Protocol and an ORM Library for providing APIs and Documents without writing any code. </p>
+<p align="center">🏆 Tencent Top 9 Open Source Project, Achieved 5 Awards Inside & Outside Tencent 🚀 <br />A JSON Transmission Protocol and an ORM Library for providing APIs and Documents without writing any code. </p>
 
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README.md">&nbsp;中文版&nbsp;</a>
@@ -257,7 +257,7 @@ https://github.com/Tencent/APIJSON/issues/187
 [More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
 
 ### Contributers of APIJSON:
-Contributers for the APIJSON core project(6 Tencent engineers, 1 Microsoft engineer, 1 Zhihu architect, 1 NetEase engineer, 1 Zoom engineer, 1 YTO Express engineer, 1 Zhilian engineer, 1 UC student、3 SUSTech student, etc.): <br />
+Contributers for the APIJSON core project(6 Tencent engineers, 1 Microsoft engineer, 1 Zhihu architect, 1 Bytedance(TikTok) engineer, 1 NetEase engineer, 1 Zoom engineer, 1 YTO Express engineer, 1 Zhilian engineer, 1 UC student、3 SUSTech students, etc.): <br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -302,7 +302,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 </div>
 <br />
 	
-Authors of other projects for ecosystem of APIJSON(2 Tencent engineers, 1 BAT(Baidu/Alibaba/Tencent) specialist, 1 Microsoft engineer, 1 Bytedance(TikTok) engineer, etc.): <br />
+Authors of other projects for ecosystem of APIJSON(2 Tencent engineers, 1 BAT(Baidu/Alibaba/Tencent) specialist, 1 Microsoft engineer, 2 Bytedance(TikTok) engineers,  1 Digital China engineer & Apache dubbo2js author, etc.): <br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">
