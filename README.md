@@ -182,7 +182,7 @@ https://github.com/Tencent/APIJSON/wiki
 * **高质可靠代码** (代码严谨规范，商业分析软件源伞 Pinpoint 代码扫描报告平均每行代码 Bug 率低至 0.15%)
 * **兼容各种项目** (协议不限 HTTP，与其它库无冲突，对各类 Web 框架集成友好且提供 SpringBoot, JFinal 的示例)
 * **工程轻量小巧** (仅依赖 fastjson，Jar 仅 280KB，Java 文件仅 59 个共 13719 行代码，例如 APIJSONORM 4.3.1)
-* **多年持续迭代** (自 2016 年至今连续维护 6 年，50+ 个贡献者、90+ 次发版、2900+ 次提交，不断更新迭代中...)
+* **多年持续迭代** (自 2016 年起已连续维护 6 年，50+ 个贡献者、90+ 次发版、2900+ 次提交，不断更新迭代中...)
 
 ![image](https://user-images.githubusercontent.com/5738175/167264836-9c5d8f8a-99e1-4e1e-9864-e8f906b8e704.png)
 
