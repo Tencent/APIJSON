@@ -71,7 +71,7 @@ body:
     
 - type: markdown
   attributes:
-    value:  |
+    value: |
     Please follow the rules to fulfil all required inputs./
     请按要求填写所有必填项！未填完将提交不了，如果随意填写敷衍了事，issue 将直接关闭，你不会得到解答！
     如果是网页 bug 等与你无关的原因导致提交不了，可以改为填问卷 https://wj.qq.com/s2/10971431/2a09
