@@ -3,29 +3,22 @@ description: Report a bug to APIJSON/为 APIJSON 反馈 bug
 title: "[Bug] "
 labels: [kind/bug]
 body:
-- type: textarea
+- type: input
   attributes:
     label: APIJSON Version/APIJSON 版本号
-    description: |
-      e.g./例如
-        - 5.4.0
-    value: |
-        - 
-    render: markdown
+    placeholder: |
+      e.g./例如 5.4.0
 
   validations:
     required: true
 
-- type: textarea
+- type: input
   attributes:
     label: DB type & Version/数据库类型及版本号
-    description: |
+    placeholder: |
       e.g./例如
         - MySQL 5.7.34
-    value: |
-        - 
-    render: markdown
-
+        
   validations:
     required: true
     
@@ -50,6 +43,8 @@ body:
   attributes:
     label: Current Behavior/问题描述
     description: A concise description of what you're experiencing. Attach screenshots if needed.
+    render: markdown
+
   validations:
     required: true
 
@@ -57,6 +52,8 @@ body:
   attributes:
     label: Expected Behavior/期望结果
     description: A concise description of what you expected to happen.
+    render: markdown
+
   validations:
     required: false
 
@@ -65,7 +62,8 @@ body:
   attributes:
     label: Any additional comments?/其它补充说明？
     description: |
-      e.g. some background/context of how you ran into this bug.
+      e.g. some background/context of how you ran into this bug./例如：一些背景或上下文信息，包括复现步骤、相关日志等
+    render: markdown
 
   validations:
     required: false
