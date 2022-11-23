@@ -29,12 +29,12 @@ body:
   attributes:
     label: Environment/环境信息
     description: |
-      e.g.
-        - **OS/系统**: MacOS Monterey 12.6 (21G115) M1
-        - **JDK/基础库**: 1.8.0_17
+      e.g./例如：
+         - **JDK/基础库**: 1.8.0_17
+         - **OS/系统**: MacOS Monterey 12.6 (21G115) M1
     value: |
-        - OS/系统:
         - JDK/基础库:
+        - OS/系统:
     render: markdown
 
   validations:
