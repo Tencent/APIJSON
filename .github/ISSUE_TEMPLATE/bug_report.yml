@@ -5,13 +5,37 @@ labels: [kind/bug]
 body:
 - type: textarea
   attributes:
+    label: APIJSON Version/APIJSON 版本号
+    description: |
+      e.g./例如
+        - 5.4.0
+    value: |
+        - 
+    render: markdown
+
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: DB type & Version/数据库类型及版本号
+    description: |
+      e.g./例如
+        - MySQL 5.7.34
+    value: |
+        - 
+    render: markdown
+
+  validations:
+    required: true
+    
+- type: textarea
+  attributes:
     label: Environment/环境信息
     description: |
       e.g.
         - **OS/系统**: MacOS Monterey 12.6 (21G115) M1
         - **JDK/基础库**: 1.8.0_17
-        - **DB/数据库**: 1.8.0_17
-        - **APIJSON**: 5.4.0
     value: |
         - OS/系统:
         - JDK/基础库:
