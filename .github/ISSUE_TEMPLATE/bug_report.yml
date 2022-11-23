@@ -80,4 +80,4 @@ body:
     
 - type: markdown
   attributes:
-    value: "Please follow the rules to fulfil all required inputs./\n请按要求填写所有必填项，未填完将提交不了！\n如果随意填写敷衍了事，将直接关闭 issue，问题不会得到解答！\n如果是网页 bug 等与你无关的原因导致提交不了，可以改为填问卷：\n https://wj.qq.com/s2/10971431/2a09 "
+    value: "Please follow the rules to fulfil all required inputs. You can add screenshots by comment after submit this issue./\n请按要求填写所有必填项，未填完将提交不了！\n如果随意填写敷衍了事，将直接关闭 issue，问题不会得到解答！\n可以提交后再通过回复评论来补充上传截屏图片(复制粘贴文件)。\n如果是网页 bug 等与你无关的原因导致提交不了，可以改为填问卷：\n https://wj.qq.com/s2/10971431/2a09 "
