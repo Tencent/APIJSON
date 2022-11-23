@@ -1,0 +1,13 @@
+name: Feature Request/期望新增功能
+description: Request a new feature/期望新增什么样的功能或特性，或者做哪些方面的改进？
+title: "[Feature] "
+labels: [kind/feature]
+body:
+- type: textarea
+  attributes:
+    label: Description
+    description: |
+      Please describe what this feature does./具体描述下是什么样的功能或特性，以及你为什么想要它，用在什么场景，碰到了什么痛点，有什么解决思路，尝试过哪些，效果怎样？
+
+  validations:
+    required: true
