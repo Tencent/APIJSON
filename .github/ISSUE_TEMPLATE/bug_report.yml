@@ -1,5 +1,6 @@
 name: Bug Report/反馈 bug
-description: Report a bug to APIJSON/为 APIJSON 反馈 bug。
+description: |
+Report a bug to APIJSON/为 APIJSON 反馈 bug。
 
 如果你已经知道问题所在、怎么解决，请直接 提交 Pull Request 为社区做贡献，非常感谢。
 开发者也是人，也需要工作、休息、恋爱、陪伴家人、走亲会友等，也有心情不好和身体病痛，
