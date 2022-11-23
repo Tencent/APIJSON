@@ -1,8 +1,12 @@
 name: Bug Report/反馈 bug
-description: "如果你已经知道问题所在、怎么解决，请直接 提交 Pull Request 为社区做贡献，非常感谢。\n开发者也是人，也需要工作、休息、恋爱、陪伴家人、走亲会友等，也有心情不好和身体病痛，\n往往没有额外的时间精力顾及一些小问题，请理解和支持，开源要大家参与贡献才会更美好~\n少数个人的热情终有被耗尽的一天，只有大家共同建设和繁荣社区，才能让开源可持续发展！ "
+description: "Create a report to help us improve, please read FAQ first./帮助我们更好地改进项目，但请先阅读常见问题与提问前必看，不要提已有的重复问题！"
 title: "[Bug] "
 labels: [kind/bug]
 body:
+- type: lable
+  attributes:
+    label: "如果你已经知道问题所在、怎么解决，请直接 提交 Pull Request 为社区做贡献，非常感谢。\n开发者也是人，也需要工作、休息、恋爱、陪伴家人、走亲会友等，也有心情不好和身体病痛，\n往往没有额外的时间精力顾及一些小问题，请理解和支持，开源要大家参与贡献才会更美好~\n少数个人的热情终有被耗尽的一天，只有大家共同建设和繁荣社区，才能让开源可持续发展！ "
+
 - type: input
   attributes:
     label: APIJSON Version/APIJSON 版本号
@@ -39,7 +43,7 @@ body:
 - type: textarea
   attributes:
     label: Current Behavior/问题描述
-    description: "A concise description of what you're experiencing. Must contains screenshots./\n\n**提 bug 请发请求和响应的【完整截屏】，没图的自行解决！\n开发者有限的时间和精力主要放在【维护项目源码和文档】上！\n【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！\n【态度 不文明/不友善】的可能会被拉黑，问题也可能不予解答！！！**\n\n请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感，\n大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 设计规范 来调用 API #181 "
+    description: "A concise description of what you're experiencing. Must contains screenshots./\n\n**提 bug 请发请求和响应的【完整截屏】，没图的自行解决！\n开发者有限的时间和精力主要放在【维护项目源码和文档】上！\n【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！\n【态度 不文明/不友善】的可能会被拉黑，问题也可能不予解答！！！**\n\n请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感，\n大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 设计规范 来调用 API \n https://github.com/Tencent/APIJSON/issues/181 "
     render: markdown
 
   validations:
@@ -48,7 +52,7 @@ body:
 - type: textarea
   attributes:
     label: Expected Behavior/期望结果
-    description: A concise description of what you expected to happen.
+    description: A concise description of what you expected to happen./具体描述你期望返回什么样的结果或者达到什么样的效果？
     render: markdown
 
   validations:
