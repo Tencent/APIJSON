@@ -448,7 +448,7 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 [Elasticsearch](https://www.elastic.co/cn/what-is/elasticsearch-sql), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
 
 ### 我要赞赏
-如果你喜欢 APIJSON，感觉 APIJSON 帮助到了你，可以点右上角 ⭐Star 支持一下，谢谢 ^_^ <br />
+创作不易，坚持更难，右上角点 ⭐Star 来支持/收藏下吧，谢谢 ^_^ <br />
 
 <br />
 <br />
