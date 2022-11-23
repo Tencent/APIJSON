@@ -11,3 +11,7 @@ body:
 
   validations:
     required: true
+    
+- type: markdown
+  attributes:
+    value: 推荐去建议收集箱提问，也方便 统一检索和管理、投票决定优先级、更新处理进度 等：    https://github.com/Tencent/APIJSON/issues/37
