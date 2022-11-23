@@ -11,14 +11,14 @@ body:
   attributes:
     label: APIJSON Version/APIJSON 版本号
     placeholder: |
-      e.g./例如 5.4.0
+      e.g./例如 5.4.0 ，如果不是最新版请用最新版，复现问题再来，原则上不更新旧版，而是只维护一个最新版
 
   validations:
     required: true
 
 - type: input
   attributes:
-    label: DB type & Version/数据库类型及版本号
+    label: Database Type & Version/数据库类型及版本号
     placeholder: |
       e.g./例如 MySQL 5.7.34
         
@@ -39,7 +39,17 @@ body:
 
   validations:
     required: true
+    
+- type: textarea
+  attributes:
+    label: APIAuto Screenshots/APIAuto 请求与结果完整截屏
+    description: "Upload by copy and paste./复制图片再粘贴到输入框(用 APIAuto 能静态检查出很多问题，甚至还有修复建议，不用浪费你我的时间)\n https://github.com/TommyLemon/APIAuto "
+    value: |
+    render: markdown
 
+  validations:
+    required: true
+    
 - type: textarea
   attributes:
     label: Current Behavior/问题描述
