@@ -1,0 +1,16 @@
+name: Other Issues/其它反馈
+description: For questions, suggestions, improvements and others./问题(非 bug)、建议(非新增功能) 或 其它
+title: "[xxx] "
+body:
+- type: textarea
+  attributes:
+    label: Description
+    description: |
+      Please describe the issue./请具体描述，包括是什么、为什么、如何做
+
+  validations:
+    required: true
+
+- type: markdown
+  attributes:
+    value: "Bug 反馈请使用正确的模板，用错模板将直接关闭 issue，不予解答：\n https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=kind%2Fbug&template=bug_report.yml&title=%5BBug%5D+ \n有建议请去建议收集箱提问，也方便 统一检索和管理、投票决定优先级、更新处理进度 等：\n https://github.com/Tencent/APIJSON/issues/37 "
