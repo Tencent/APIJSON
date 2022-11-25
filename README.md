@@ -628,6 +628,8 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [Android-ZBLibrary](https://github.com/TommyLemon/Android-ZBLibrary) Android MVP 快速开发框架，Demo 全面，注释详细，使用简单，代码严谨
   
+[apijson-dynamic-datasource](https://github.com/wb04307201/apijson-dynamic-datasource) 基于APIJSON，动态切换数据源、同一数据源批量操作事务一致性DEMO
+  
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
 
   
