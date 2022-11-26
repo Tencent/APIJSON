@@ -203,7 +203,7 @@ delete子查询,  druid wall 拦截器报错 sql injection violation
 
 #### 测试案例
 
-查询单个range ref引用
+#### 查询单个range ref引用
 
 ```
 // 测试 mysql8 with as表达式
@@ -272,12 +272,40 @@ mysql5.7执行结果:
 #### 查询多个range ref引用
 
 ```
-{	"sql@": {    	"@method": "GET",        "with": true,        "from": "Sys_role",        "Sys_role": {          "@column": "id",          "role_name": "角色1"        }    },    "sql_user@": {    	"@method": "GET",        "with": true,        "from": "Sys_user",        "Sys_user": {          "@column": "id",          "id": "f0894db2-6940-4d89-a5b2-4405d0ad0c8f"        }    },    "Sys_user_role:sur[]": {    	"@method": "GET",        "Sys_user_role": {            "role_id{}@": "sql",            "user_id{}@": "sql_user"        }    },    "Sys_role_permission:srp[]": {    	"@method": "GET",        "Sys_role_permission": {            "role_id{}@": "sql"        }    },    "@explain": true}  
-
-
-
-
-Plain Text
+{
+    "sql@": {
+        "@method": "GET", 
+        "with": true, 
+        "from": "Sys_role", 
+        "Sys_role": {
+            "@column": "id", 
+            "role_name": "角色1"
+        }
+    }, 
+    "sql_user@": {
+        "@method": "GET", 
+        "with": true, 
+        "from": "Sys_user", 
+        "Sys_user": {
+            "@column": "id", 
+            "id": "f0894db2-6940-4d89-a5b2-4405d0ad0c8f"
+        }
+    }, 
+    "Sys_user_role:sur[]": {
+        "@method": "GET", 
+        "Sys_user_role": {
+            "role_id{}@": "sql", 
+            "user_id{}@": "sql_user"
+        }
+    }, 
+    "Sys_role_permission:srp[]": {
+        "@method": "GET", 
+        "Sys_role_permission": {
+            "role_id{}@": "sql"
+        }
+    }, 
+    "@explain": true
+}
 ```
 
 mysql8执行结果:
@@ -385,6 +413,8 @@ mysql5.7执行结果:
 
 #### GETS 单条子查询
 
+会执行校验流程
+
 ```
 http://localhost:8675/lowCodePlatform/forms/api/gets
 
@@ -450,6 +480,8 @@ mysql5.7执行结果:
 
 #### GETS多条子查询
 
+会执行校验流程
+
 ```
 http://localhost:8675/lowCodePlatform/forms/api/gets
 
@@ -500,7 +532,7 @@ mysql5.7执行结果:
 
 #### head 单个子查询
 
-普通获取数量
+普通获取数量, get/head不执行校验流程
 
 ```
 http://localhost:8675/lowCodePlatform/forms/api/head
@@ -533,7 +565,7 @@ mysql5.7执行结果:
 
 #### head 多个子查询
 
-普通获取数量
+普通获取数量, get/head不执行校验流程
 
 ```
 {
@@ -581,7 +613,7 @@ mysql5.7执行结果:
 
 普通获取数量
 
-Access、Request需要配置鉴权信息:
+会执行校验流程, Access、Request需要配置鉴权信息:
 
 ![img](https://tcs-devops.aliyuncs.com/storage/112oe091e1d4376a6fcb62cbce0383cdddf9?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9lMDkxZTFkNDM3NmE2ZmNiNjJjYmNlMDM4M2NkZGRmOSJ9._BSyl8VzN15CTAxr_J1ud0tzYCBQwGQWqaiBRvmau8Q)
 
@@ -617,7 +649,7 @@ mysql5.7执行结果:
 
 #### heads 多个子查询
 
-Access、Request需要配置鉴权信息:
+会执行校验流程, Access、Request需要配置鉴权信息:
 
 ![img](https://tcs-devops.aliyuncs.com/storage/112od6c06bedd0338403de83a3da034862b6?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9kNmMwNmJlZGQwMzM4NDAzZGU4M2EzZGEwMzQ4NjJiNiJ9.c4OVSUGncl_anepEZN1jzHmk7FiIRY-UcRj6EOn0ySk)
 
@@ -667,7 +699,7 @@ mysql5.7执行结果:
 
 
 
-### delete 支持子查询
+### delete、put 支持子查询
 
 https://github.com/Tencent/APIJSON/issues/471
 
@@ -678,6 +710,8 @@ https://github.com/Tencent/APIJSON/issues/471
 1、全局配置 为 PUT, DELETE 强制要求必须有 id/id{}/id{}@ 条件
 
 AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = true; // true: 必须有
+
+![image-20221126145415115](/Users/xy/Library/Application Support/typora-user-images/image-20221126145415115.png)
 
 2、细粒度控制
 
@@ -774,6 +808,54 @@ http://localhost:8675/lowCodePlatform/forms/api/delete
 
 ![image-20221125161720199](/Users/xy/Library/Application Support/typora-user-images/image-20221125161720199.png)
 
+开启id删除、id引用 删除成功
+
+```
+{
+	"sql@": {
+		"@method": "GET",
+        "with": true,
+        "from": "Sys_user_role",
+        "Sys_user_role": {
+          "@column": "user_id",
+		  "role_id{}": ["0bb92d96-8ca6-469e-91e8-60308ce5b835"]
+        }
+    },
+    "Sys_user:aa": {
+    	"@method": "DELETE",
+        "id{}@": "sql"
+    },
+    "explan": true
+}
+```
+
+![image-20221126145714808](/Users/xy/Library/Application Support/typora-user-images/image-20221126145714808.png)
+
+PUT 子查询 修改
+
+```
+{
+   "sql@": {
+		"@method": "GET",
+        "with": true,
+        "from": "Sys_role_permission",
+        "Sys_role_permission": {
+          "@column": "role_id",
+		  "id{}": ["ba2634f8-0bdc-4b50-9c5e-47786b1536ef"]
+        }
+    },
+    "Sys_role": {
+    	"@method": "PUT",
+        "id{}@": "sql",
+        "role_code": "code-subrange-5",
+        "role_name": "角色-subrange-5"
+    },
+    "@explain": true
+}
+```
+
+![image-20221126151726450](/Users/xy/Library/Application Support/typora-user-images/image-20221126151726450.png)
+
 #### bug修复
 
 删除操作 主表 和 子查询 是同一张表
@@ -788,7 +870,7 @@ WHERE ( (`username` IN (SELECT * FROM (SELECT `username` FROM `housekeeping`.`Us
 
 ![image](https://user-images.githubusercontent.com/12228225/203517315-4ab11545-4285-4737-92a3-cfd1494e2652.png)
 
-### must判断、delete删除支持 ref
+### must、refuses判断、delete、PUT支持 ref
 
 ```
 {
