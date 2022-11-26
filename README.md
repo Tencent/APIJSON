@@ -83,6 +83,25 @@ key= Moment[]
 2) "@post","@put","@delete"
 3) 对于没有显式声明操作方法的，直接用 URL(/get, /post 等) 对应的默认操作方法
 
+#### tag自动生成规则
+
+/**
+ * { "xxx:aa":{ "@tag": "" }}
+ * 生成规则:
+ * 1、@tag存在,tag=@tag
+ * 2、@tag不存在
+ * 1)、存在别名
+ * key=对象: tag=key去除别名
+ * key=数组: tag=key去除别名 + []
+ * 2)、不存在别名
+ * tag=key
+ * tag=key + []
+ */
+
+
+![image](https://user-images.githubusercontent.com/12228225/204079184-06dd08a7-95a3-4a46-8e05-f062fa406847.png)
+
+
 #### 建议
 
 1. 一个json包含不同操作方法, url method 使用 /post, /put
@@ -105,8 +124,9 @@ PUT User_address[]  {"User_address[]": [{"MUST": "id","REFUSE": "userId"}], "UPD
 DELETE User_address   {"User_address":{ "MUST":"id{}","REFUSE": "!", "INSERT": {"@role": "OWNER,ADMIN"}} }
 
 ```
+![image](https://user-images.githubusercontent.com/12228225/204079438-8f352496-4b73-4b72-88c0-914894335074.png)
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o42fb67f3226bf1ba31143f8e3983d0d3?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk2MjcxMiwiaWF0IjoxNjY5MzU3OTEyLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm80MmZiNjdmMzIyNmJmMWJhMzExNDNmOGUzOTgzZDBkMyJ9.c0kLsYpkpHzkVchL8ZxzUiPf0uvD3G-dsrIc1_zxBl0)
+
 
 ### 别名
 
@@ -118,7 +138,7 @@ Comment:cArray[]
 
 #### 实现思路
 
-当时参考了作者的示例: 注册流程. 看到绕过校验, 可以将多条json语句组装在一起, 批量执行. 于是就想如何实现一个json支持不同操作,并支持事物. 
+当时参考了作者的示例: 注册流程. 看到绕过校验, 可以将多条json语句组装在一起, 批量执行. 于是就想如何实现一个json支持不同操作方法,并支持事物. 
 
 通过分析源码, 熟悉了校验流程、json解析执行流程、json解析生成sql语句流程、一些兼容、校验规则等
 
@@ -157,7 +177,7 @@ Comment:cArray[]
 2、最外层新增传参 "transaction": true 来指定开启事务
 目前是url put、post来控制开启事物, 以及提交的时候 在 AbstractParser onCommit 判断 transactionIsolation (4 : 开启事物, 0: 非事物请求) 
 
-![image](https://user-images.githubusercontent.com/12228225/202369747-396a4062-c70d-407e-abfa-c333d4c89bee.png)
+![image](https://user-images.githubusercontent.com/12228225/204079532-26d9cd4b-d2d7-4c73-9f78-f425bbbcf623.png)
 
 详细实现请参见: https://github.com/Tencent/APIJSON/issues/468
 
@@ -165,7 +185,7 @@ Comment:cArray[]
 
 如果没有执行计划,则返回sql语句. 能够在 reponse返回值中, 看到json中执行的每条sql,方便排错
 
-![img](https://tcs-devops.aliyuncs.com/storage/112oc4589a6d650755c05381097fe9f2294f?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9jNDU4OWE2ZDY1MDc1NWMwNTM4MTA5N2ZlOWYyMjk0ZiJ9.WySq2UEIS5fMySWRqtKiaXzR4wwtQVxrtbSp98vHmx4)
+![image](https://user-images.githubusercontent.com/12228225/204079543-be464f67-a80f-4a33-87ea-d1870908e642.png)
 
 4、@version支持
 
@@ -173,7 +193,7 @@ Comment:cArray[]
 
 Request表是通过tag、method、version来保证唯一.
 
-![image-20221125144359453](/Users/xy/Library/Application Support/typora-user-images/image-20221125144359453.png)
+![image](https://user-images.githubusercontent.com/12228225/204079562-00449c38-42b1-4d9c-b562-2d56c77e6218.png)
 
 5、前置函数
 
@@ -199,7 +219,7 @@ Request表是通过tag、method、version来保证唯一.
 
 delete子查询,  druid wall 拦截器报错 sql injection violation
 
-![image-20221125152519359](/Users/xy/Library/Application Support/typora-user-images/image-20221125152519359.png)
+![image](https://user-images.githubusercontent.com/12228225/204079572-19a4f50c-3bf3-4f9e-9677-6aa191276fef.png)
 
 #### 测试案例
 
@@ -263,11 +283,12 @@ delete子查询,  druid wall 拦截器报错 sql injection violation
 
 mysql8执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112oc4589a6d650755c05381097fe9f2294f?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9jNDU4OWE2ZDY1MDc1NWMwNTM4MTA5N2ZlOWYyMjk0ZiJ9.WySq2UEIS5fMySWRqtKiaXzR4wwtQVxrtbSp98vHmx4)
+![image](https://user-images.githubusercontent.com/12228225/204079581-bf835db2-30ae-4265-bda2-ebf34c0d9e77.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112oa2437cfa419471ebdb7ea62dec97ee21?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9hMjQzN2NmYTQxOTQ3MWViZGI3ZWE2MmRlYzk3ZWUyMSJ9.ulNYQKUnvWMIZCpsc-caImZMsF4h21Vq5WdJ03hwjgc)
+![image](https://user-images.githubusercontent.com/12228225/204079594-3ebc73a0-836e-4073-9aa4-acb665fe8d52.png)
+
 
 #### 查询多个range ref引用
 
@@ -310,11 +331,11 @@ mysql5.7执行结果:
 
 mysql8执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o8c94c21ab8f2f473337a53b369ea8db4?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm84Yzk0YzIxYWI4ZjJmNDczMzM3YTUzYjM2OWVhOGRiNCJ9.DoQZ7uoFEoUonbut23NPp_uzVTZ851PlzZ5FlSZWKGY)
+![image](https://user-images.githubusercontent.com/12228225/204079603-2ba224a3-3174-491a-a71b-7656c97d0146.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o9671ece47b1834ac147cc01cd3900ece?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm85NjcxZWNlNDdiMTgzNGFjMTQ3Y2MwMWNkMzkwMGVjZSJ9.EPqYf1F_RooQF2c5PtrzPdMYCkYZ8Tng4p0Nobgymgc)
+![image](https://user-images.githubusercontent.com/12228225/204079611-155f6a33-ad56-4d03-8e5d-6f44c3649051.png)
 
 #### delete子查询
 
@@ -338,7 +359,7 @@ mysql5.7执行结果:
 
 ```
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o12df4490ee563a2a5a36da580823528a?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm8xMmRmNDQ5MGVlNTYzYTJhNWEzNmRhNTgwODIzNTI4YSJ9.shAM0ABXqPJTlFYVMU8UjxngUE3jdWgficdNcHgp2Ho)
+![image](https://user-images.githubusercontent.com/12228225/204079615-25185be5-a296-488f-9a13-98fb2b99a9d5.png)
 
 mysql8执行sql语句:
 
@@ -405,11 +426,12 @@ Plain Text
 
 mysql8执行sql语句:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o69fb17f5eb1c109501063a0501e068ef?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm82OWZiMTdmNWViMWMxMDk1MDEwNjNhMDUwMWUwNjhlZiJ9.1lyjMFAM-y9l5Mu6vlgXRv6S0xRwxoMDdrPTzs8LTbQ)
+![image](https://user-images.githubusercontent.com/12228225/204079628-8536b4be-8078-42a5-b3f7-460159372a8a.png)
+
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112oe59ad49145a7d0a4f100ba717261ee91?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk0ODM1MiwiaWF0IjoxNjY5MzQzNTUyLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9lNTlhZDQ5MTQ1YTdkMGE0ZjEwMGJhNzE3MjYxZWU5MSJ9.bOOaskAmRczI9U87uNNIqB1pQxHlkmeZDzYAd_zmaMI)
+![image](https://user-images.githubusercontent.com/12228225/204079633-df9175bc-703f-4997-95f6-85bbc1134b0b.png)
 
 #### GETS 单条子查询
 
@@ -468,15 +490,16 @@ http://localhost:8675/lowCodePlatform/forms/api/gets
 
 Access、Request需要配置鉴权信息:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112oc0e2d9666d0e6ae5bba40dd10e86ff8b?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9jMGUyZDk2NjZkMGU2YWU1YmJhNDBkZDEwZTg2ZmY4YiJ9.WiHevTQ80WuelszQxRrsQYWQD4u_60rfj6tsZn9d4vY)
+![image](https://user-images.githubusercontent.com/12228225/204079649-510a047b-2b8e-44d2-a32a-f6ea0e7f6a74.png)
+
 
 mysql8执行sql语句:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o13624f7ea9b1bbbb31bc4cc83cd96ae6?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm8xMzYyNGY3ZWE5YjFiYmJiMzFiYzRjYzgzY2Q5NmFlNiJ9.ZSCMLnTzj7BCi4nxZXSYohKVfHWNR--G5WXv9qE4R1c)
+![image](https://user-images.githubusercontent.com/12228225/204079657-6e62872a-2f29-478e-a29b-bcb0a92781a6.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112oae3f5de5b703c6334747befb9ab05349?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk0ODc5OSwiaWF0IjoxNjY5MzQzOTk5LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9hZTNmNWRlNWI3MDNjNjMzNDc0N2JlZmI5YWIwNTM0OSJ9.xVaHGnOULNO4uec94RadSs5K8iG0QZVyGD-FvlNraOY)
+![image](https://user-images.githubusercontent.com/12228225/204079878-a9885b86-5a44-4ba2-b837-66adc43b07d3.png)
 
 #### GETS多条子查询
 
@@ -524,11 +547,11 @@ http://localhost:8675/lowCodePlatform/forms/api/gets
 
 mysql8执行sql语句:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112of22704b782cc932d4f51a144aaddbe76?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9mMjI3MDRiNzgyY2M5MzJkNGY1MWExNDRhYWRkYmU3NiJ9.ejWQb3yK60XBm3zRm4PU077l3lu2jsHjqX5ij0tvS7g)
+![image](https://user-images.githubusercontent.com/12228225/204079892-bc71eb65-cfbd-4c3c-bda9-4b31902058ba.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o331a15eb0b89f8788c2e1369e9ead38a?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk0ODg3MSwiaWF0IjoxNjY5MzQ0MDcxLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm8zMzFhMTVlYjBiODlmODc4OGMyZTEzNjllOWVhZDM4YSJ9.NZjO2ndpyIW5CdQ3giGL4ylkclWC4VRNtJePIB7hBTs)
+![image](https://user-images.githubusercontent.com/12228225/204079897-521a763f-bb08-44af-92c6-5e4117fe9d33.png)
 
 #### head 单个子查询
 
@@ -557,11 +580,11 @@ http://localhost:8675/lowCodePlatform/forms/api/head
 
 mysql8执行sql语句:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o97e7879481ef209d27cd689881ba2dae?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm85N2U3ODc5NDgxZWYyMDlkMjdjZDY4OTg4MWJhMmRhZSJ9.1FsB785CT9VOnKf-Z6NYu6Ouy3DiL0SJm5G0iSHnO94)
+![image](https://user-images.githubusercontent.com/12228225/204079903-e397a78a-1849-4678-ac41-0611165a1de1.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o7b2de6f66df479e2b38f53e25da56b04?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk0ODk1NywiaWF0IjoxNjY5MzQ0MTU3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm83YjJkZTZmNjZkZjQ3OWUyYjM4ZjUzZTI1ZGE1NmIwNCJ9.Nxi3u1TMTYE92FuAnz4srLBLeW8fHt-T0gXIOguAu-Q)
+![image](https://user-images.githubusercontent.com/12228225/204079908-1efb5b28-889d-4d9b-b4f9-5092925888c9.png)
 
 #### head 多个子查询
 
@@ -603,19 +626,18 @@ mysql5.7执行结果:
 
 mysql8执行sql语句:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o2da6826648bb92fe52d292e6f98194fe?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm8yZGE2ODI2NjQ4YmI5MmZlNTJkMjkyZTZmOTgxOTRmZSJ9.z9t8h2jF9HYrnr-86j61zQmIuzNquNZ1LWD-mKFyOa8)
+![image](https://user-images.githubusercontent.com/12228225/204079919-5fba8f87-56d8-4d7d-b457-4a2505f27d1e.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o0d8df9fbfdc94b6b6f338f080cd4bc19?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk0OTAwOCwiaWF0IjoxNjY5MzQ0MjA4LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm8wZDhkZjlmYmZkYzk0YjZiNmYzMzhmMDgwY2Q0YmMxOSJ9.3jOg9eJMTRZXIQh3ZFnTsuhu1N4CnoM3CR7t3I6rIn4)
+![image](https://user-images.githubusercontent.com/12228225/204079932-1e040caf-57fd-45a7-afa5-b26bdce83fba.png)
 
 #### heads 单个子查询
 
 普通获取数量
 
 会执行校验流程, Access、Request需要配置鉴权信息:
-
-![img](https://tcs-devops.aliyuncs.com/storage/112oe091e1d4376a6fcb62cbce0383cdddf9?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9lMDkxZTFkNDM3NmE2ZmNiNjJjYmNlMDM4M2NkZGRmOSJ9._BSyl8VzN15CTAxr_J1ud0tzYCBQwGQWqaiBRvmau8Q)
+![image](https://user-images.githubusercontent.com/12228225/204079942-d790a3c0-eb46-4512-bb58-45a16894608a.png)
 
 ```
 http://localhost:8675/lowCodePlatform/forms/api/heads
@@ -641,17 +663,17 @@ http://localhost:8675/lowCodePlatform/forms/api/heads
 
 mysql8执行sql语句:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112offc8ee52b3bd03af5012ae9832ed7800?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9mZmM4ZWU1MmIzYmQwM2FmNTAxMmFlOTgzMmVkNzgwMCJ9.aPpEd5GM5iTIs149Xc2kxovMu82HzbZUHd3L7yrtkQE)
+![image](https://user-images.githubusercontent.com/12228225/204079952-976fa9b6-4a11-40ad-a2c7-6f901b186670.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112o1ad0c28563c50c245ee39d399fcbf817?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk0OTE3MywiaWF0IjoxNjY5MzQ0MzczLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm8xYWQwYzI4NTYzYzUwYzI0NWVlMzlkMzk5ZmNiZjgxNyJ9.Wc4X-gAhJhKtFDIc15i8Y-JFb6BYy4EBVGNQ0fq2_SE)
+![image](https://user-images.githubusercontent.com/12228225/204079959-6bf95b45-5f35-474e-b428-b51bcb5b500d.png)
 
 #### heads 多个子查询
 
 会执行校验流程, Access、Request需要配置鉴权信息:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112od6c06bedd0338403de83a3da034862b6?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9kNmMwNmJlZGQwMzM4NDAzZGU4M2EzZGEwMzQ4NjJiNiJ9.c4OVSUGncl_anepEZN1jzHmk7FiIRY-UcRj6EOn0ySk)
+![image](https://user-images.githubusercontent.com/12228225/204079967-a48f4f50-6e6b-476b-a281-b072ef8a352d.png)
 
 普通获取数量
 
@@ -691,13 +713,11 @@ mysql5.7执行结果:
 
 mysql8执行sql语句:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112oa28b0fce57d06fea1386164f4183f4df?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTY2OTk0NTcwNiwiaWF0IjoxNjY5MzQwOTA2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9hMjhiMGZjZTU3ZDA2ZmVhMTM4NjE2NGY0MTgzZjRkZiJ9.7UtbXd2E6tU6aSicO_LoEhQfPvViN2SCrF2-UdhkHyk)
+![image](https://user-images.githubusercontent.com/12228225/204079980-c93ef595-0c4b-42a7-a3b3-1e7402d3cb13.png)
 
 mysql5.7执行结果:
 
-![img](https://tcs-devops.aliyuncs.com/storage/112od2bd40102e4250e79caeae832dcacd77?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9hcHBJZCI6IjVlNzQ4MmQ2MjE1MjJiZDVjN2Y5YjMzNSIsIl9vcmdhbml6YXRpb25JZCI6IjYxYmQ0MTk3YWM0MDEyNWFmMGY1ZmJlMyIsImV4cCI6MTY2OTk0OTIzMywiaWF0IjoxNjY5MzQ0NDMzLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzExMm9kMmJkNDAxMDJlNDI1MGU3OWNhZWFlODMyZGNhY2Q3NyJ9.0mgwZshZSKSxxkak2mJfj8LHrIyjVj2NTKghOVJ0-J0)
-
-
+![image](https://user-images.githubusercontent.com/12228225/204079987-878d5937-3f42-4f59-93dc-b5a840f5548c.png)
 
 ### delete、put 支持子查询
 
@@ -711,11 +731,11 @@ https://github.com/Tencent/APIJSON/issues/471
 
 AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = true; // true: 必须有
 
-![image-20221126145415115](/Users/xy/Library/Application Support/typora-user-images/image-20221126145415115.png)
+![image](https://user-images.githubusercontent.com/12228225/204080001-eef4ee65-0ad0-4a41-93ba-9b16cd1c2e0e.png)
 
 2、细粒度控制
 
-![image-20221125154603033](/Users/xy/Library/Application Support/typora-user-images/image-20221125154603033.png)
+![image](https://user-images.githubusercontent.com/12228225/204080012-f7d781e9-0a53-461f-84db-3d6ecb167e20.png)
 
 #### 使用说明
 
@@ -806,7 +826,7 @@ http://localhost:8675/lowCodePlatform/forms/api/delete
 }
 ```
 
-![image-20221125161720199](/Users/xy/Library/Application Support/typora-user-images/image-20221125161720199.png)
+![image](https://user-images.githubusercontent.com/12228225/204080043-6614457c-a0ed-45b3-a26a-e75126dbb486.png)
 
 开启id删除、id引用 删除成功
 
@@ -828,8 +848,7 @@ http://localhost:8675/lowCodePlatform/forms/api/delete
     "explan": true
 }
 ```
-
-![image-20221126145714808](/Users/xy/Library/Application Support/typora-user-images/image-20221126145714808.png)
+![image](https://user-images.githubusercontent.com/12228225/204080050-e6f04fe6-319e-45b7-b1b2-bf4cda4ab2db.png)
 
 PUT 子查询 修改
 
@@ -854,7 +873,7 @@ PUT 子查询 修改
 }
 ```
 
-![image-20221126151726450](/Users/xy/Library/Application Support/typora-user-images/image-20221126151726450.png)
+![image](https://user-images.githubusercontent.com/12228225/204080072-8f605595-cd8c-474b-975f-4ac97fb92a26.png)
 
 #### bug修复
 
@@ -866,9 +885,10 @@ mysql8以下 非with-as表达式 会报错:
 DELETE FROM `housekeeping`.`User`
 WHERE ( (`username` IN (SELECT * FROM (SELECT `username` FROM `housekeeping`.`User` WHERE ( (`username` = 'test1') )) as a) ) )
 
-![image](https://user-images.githubusercontent.com/12228225/203517122-3d5b3b90-9780-4e05-b633-b264c575757a.png)
+![image](https://user-images.githubusercontent.com/12228225/204080126-e1f7c82a-2f09-409d-b3f2-fe25badea180.png)
 
-![image](https://user-images.githubusercontent.com/12228225/203517315-4ab11545-4285-4737-92a3-cfd1494e2652.png)
+![image](https://user-images.githubusercontent.com/12228225/204080131-0c15404d-3045-4d01-bd89-d2a1f1fa0360.png)
+
 
 ### must、refuses判断、delete、PUT支持 ref
 
@@ -891,4 +911,4 @@ WHERE ( (`username` IN (SELECT * FROM (SELECT `username` FROM `housekeeping`.`Us
 }
 ```
 
-![image-20221125161821101](/Users/xy/Library/Application Support/typora-user-images/image-20221125161821101.png)
+![image](https://user-images.githubusercontent.com/12228225/204080150-28972226-37e0-4280-962a-83f7ac12d37c.png)
