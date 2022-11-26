@@ -2174,14 +2174,14 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	}
 
 	/**
-	 * { "xxx:aa":{ "@tag": "" }, "tag": "User" }
+	 * { "xxx:aa":{ "@tag": "" }}
+	 * 生成规则:
 	 * 1、@tag存在,tag=@tag
 	 * 2、@tag不存在
-	 * 生成规则:
-	 * 1、存在别名
+	 * 1)、存在别名
 	 * key=对象: tag=key去除别名
 	 * key=数组: tag=key去除别名 + []
-	 * 2、不存在别名
+	 * 2)、不存在别名
 	 * tag=key
 	 * tag=key + []
 	 * @param request
