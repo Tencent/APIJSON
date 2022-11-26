@@ -307,4 +307,6 @@ public interface SQLConfig {
 
 
 
+	List<Object> getWithAsExprePreparedValueList();
+	void setWithAsExprePreparedValueList(List<Object> withAsExprePreparedValueList);
 }

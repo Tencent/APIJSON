@@ -47,7 +47,7 @@ import static apijson.RequestMethod.GET;
  */
 public abstract class AbstractParser<T extends Object> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
-
+	protected Map<Object, RequestMethod> key_method_Map = new HashMap<>();
 	/**
 	 * 可以通过切换该变量来控制是否打印关键的接口请求内容。保守起见，该值默认为false。
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求内容。
@@ -572,28 +572,11 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
 
-		if (StringUtil.isEmpty(tag, true)) {
-			throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
-		}
+//		if (StringUtil.isEmpty(tag, true)) {
+//			throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
+//		}
 
-		//获取指定的JSON结构 <<<<<<<<<<<<
-		JSONObject object = null;
-		String error = "";
-		try {
-			object = getStructure("Request", method.name(), tag, version);
-		} catch (Exception e) {
-			error = e.getMessage();
-		}
-		if (object == null) { //empty表示随意操作  || object.isEmpty()) {
-			throw new UnsupportedOperationException("找不到 version: " + version + ", method: " + method.name() + ", tag: " + tag + " 对应的 structure ！"
-					+ "非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error + "\n如果需要则在 Request 表中新增配置！");
-		}
-
-		//获取指定的JSON结构 >>>>>>>>>>>>>>
-		JSONObject target = wrapRequest(method, tag, object, true);
-
-		//JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
-		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema(), creator);
+		return batchVerify(method, tag, version, name, request, maxUpdateCount, creator);
 	}
 
 
@@ -1047,6 +1030,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		if (op == null) {
 			op = createObjectParser(request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
 		}
+		// 对象 - 设置 method
+		setOpMethod(request, op, name);
 		op = op.parse(name, isReuse);
 
 		JSONObject response = null;
@@ -2022,7 +2007,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	protected void onCommit() {
 		//		Log.d(TAG, "onCommit >>");
-		if (RequestMethod.isQueryMethod(requestMethod)) {
+		// this.sqlExecutor.getTransactionIsolation() 只有json第一次执行才会设置, get请求=0
+		if (RequestMethod.isQueryMethod(requestMethod) && this.sqlExecutor.getTransactionIsolation() == Connection.TRANSACTION_NONE ) {
 			return;
 		}
 
@@ -2068,4 +2054,163 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		queryResultMap = null;
 	}
 
+	private void setOpMethod(JSONObject request,ObjectParser op, String key) {
+		if(key != null && request.getString(apijson.JSONObject.KEY_METHOD) != null) {
+			String _method = request.getString(apijson.JSONObject.KEY_METHOD);
+			if( _method != null) {
+				RequestMethod method = RequestMethod.valueOf(_method.toUpperCase());
+				this.setMethod(method);
+				op.setMethod(method);
+			}
+		}
+	}
+
+	protected JSONObject getRequestStructure(RequestMethod method, String tag, int version) throws Exception {
+		// 获取指定的JSON结构 <<<<<<<<<<<<
+		JSONObject object = null;
+		String error = "";
+		try {
+			object = getStructure("Request", method.name(), tag, version);
+		} catch (Exception e) {
+			error = e.getMessage();
+		}
+		if (object == null) { // empty表示随意操作 || object.isEmpty()) {
+			throw new UnsupportedOperationException("找不到 version: " + version + ", method: " + method.name() + ", tag: " + tag + " 对应的 structure ！" + "非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error + "\n如果需要则在 Request 表中新增配置！");
+		}
+		return object;
+	}
+
+	private JSONObject batchVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request, int maxUpdateCount, SQLCreator creator) throws Exception {
+		JSONObject jsonObject = new JSONObject(true);
+		if (request.keySet() == null || request.keySet().size() == 0) {
+			throw new IllegalArgumentException("json对象格式不正确 ！,例如 \"User\": {}");
+		}
+
+		for (String key : request.keySet()) {
+			// key重复直接抛错(xxx:alias, xxx:alias[])
+			if (jsonObject.containsKey(key) || jsonObject.containsKey(key + apijson.JSONObject.KEY_ARRAY)) {
+				throw new IllegalArgumentException("对象名重复,请添加别名区分 ! ,重复对象名为: " + key);
+			}
+
+			// @post、@get等RequestMethod
+			try {
+				if (key.startsWith("@")) {
+					try {
+						// 如果不匹配,不处理即可
+						RequestMethod l_method = RequestMethod.valueOf(key.substring(1).toUpperCase());
+						if (l_method != null) {
+							if (request.get(key) instanceof JSONArray) {
+								for (Object objKey : request.getJSONArray(key)) {
+									key_method_Map.put(objKey, l_method);
+								}
+								continue;
+							} else {
+								throw new IllegalArgumentException("参数 " + key + " 必须是数组格式 ! ,例如: [\"Moment\", \"Comment[]\"]");
+							}
+						}
+					} catch (Exception e) {
+					}
+				}
+
+				// 如果对象设置了@method, 优先使用 对象内部的@method
+				// 对于没有显式声明操作方法的，直接用 URL(/get, /post 等) 对应的默认操作方法
+				// 将method 设置到每个object, op执行会解析
+				if (request.get(key) instanceof JSONObject) {
+					if(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD) == null) {
+						if (key_method_Map.get(key) == null) {
+							// 数组会解析为对象进行校验,做一下兼容
+							if(key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
+								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, method);
+							}else {
+								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY));
+							}
+						} else {
+							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key));
+						}
+					}
+
+					// get请求不校验
+					RequestMethod  _method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
+					if (RequestMethod.isPublicMethod(_method)) {
+						jsonObject.put(key, request.getJSONObject(key));
+						continue;
+					}
+				}
+
+				if (key.startsWith("@") || key.endsWith("@")) {
+					jsonObject.put(key, request.get(key));
+					continue;
+				}
+
+
+				if (request.get(key) instanceof JSONObject || request.get(key) instanceof JSONArray) {
+					RequestMethod  _method = null;
+					if (request.get(key) instanceof JSONObject) {
+						_method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
+					} else {
+						if (key_method_Map.get(key) == null) {
+							_method = method;
+						} else {
+							_method = key_method_Map.get(key);
+						}
+					}
+
+					String _tag = buildTag(request, key);
+					JSONObject requestItem = new JSONObject();
+					requestItem.put(_tag, request.get(key));
+					JSONObject object = getRequestStructure(_method, _tag, version);
+					JSONObject ret = objectVerify(_method, _tag, version, name, requestItem, maxUpdateCount, creator, object);
+					jsonObject.put(key, ret.get(_tag));
+				} else {
+					jsonObject.put(key, request.get(key));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception(e);
+			}
+		}
+
+		return jsonObject;
+	}
+
+	/**
+	 * { "xxx:aa":{ "@tag": "" }, "tag": "User" }
+	 * 1、@tag存在,tag=@tag
+	 * 2、@tag不存在
+	 * 生成规则:
+	 * 1、存在别名
+	 * key=对象: tag=key去除别名
+	 * key=数组: tag=key去除别名 + []
+	 * 2、不存在别名
+	 * tag=key
+	 * tag=key + []
+	 * @param request
+	 * @param key
+	 * @return
+	 */
+	private String buildTag(JSONObject request, String key) {
+		String _tag = null;
+		if (request.get(key) instanceof JSONObject && request.getJSONObject(key).getString("@tag") != null) {
+			_tag = request.getJSONObject(key).getString("@tag");
+		} else {
+			int keyIndex = key.indexOf(":");
+			if (keyIndex != -1) {
+				_tag = key.substring(0, keyIndex);
+				if (apijson.JSONObject.isTableArray(key)) {
+					_tag += apijson.JSONObject.KEY_ARRAY;
+				}
+			} else {
+				// 不存在别名
+				_tag = key;
+			}
+		}
+		return _tag;
+	}
+
+	protected JSONObject objectVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request, int maxUpdateCount, SQLCreator creator, JSONObject object) throws Exception {
+		// 获取指定的JSON结构 >>>>>>>>>>>>>>
+		JSONObject target = wrapRequest(method, tag, object, true);
+		// JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
+		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema(), creator);
+	}
 }

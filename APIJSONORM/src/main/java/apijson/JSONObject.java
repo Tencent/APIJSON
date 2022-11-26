@@ -151,6 +151,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_ORDER = "@order"; //排序方式
 	public static final String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
 	public static final String KEY_JSON = "@json"; //SQL Server 把字段转为 JSON 输出
+	public static final String KEY_METHOD = "@method"; //json对象配置操作方法
 
 	public static final List<String> TABLE_KEY_LIST;
 	static {

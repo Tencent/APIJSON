@@ -81,6 +81,9 @@ import apijson.orm.model.TestRecord;
 public abstract class AbstractVerifier<T extends Object> implements Verifier<T>, IdCallback<T> {
 	private static final String TAG = "AbstractVerifier";
 
+	/**为 PUT, DELETE 强制要求必须有 id/id{} 条件
+	 */
+	public static boolean IS_UPDATE_MUST_HAVE_ID_CONDITION = true;
     /**开启校验请求角色权限
      */
     public static boolean ENABLE_VERIFY_ROLE = true;
@@ -673,7 +676,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 						}
 					} else {
 						if (RequestMethod.isQueryMethod(method) == false) {
-							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, true);
+							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, IS_UPDATE_MUST_HAVE_ID_CONDITION);
 
 							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, ds, key);
 							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? apijson.JSONObject.KEY_USER_ID : userIdKey;
@@ -724,7 +727,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		//批量修改或删除
 		String idInKey = idKey + "{}";
-
+		// id引用, 格式: "id{}@": "sql"
+		String idRefInKey = robj.getString(idKey + "{}@");
 		JSONArray idIn = null;
 		try {
 			idIn = robj.getJSONArray(idInKey); //如果必须传 id{} ，可在Request表中配置NECESSARY
@@ -733,9 +737,9 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 					+ " 里面的 " + idInKey + ":value 中value的类型只能是 [Long] ！");
 		}
 		if (idIn == null) {
-			if (atLeastOne && id == null) {
+			if (atLeastOne && id == null && idRefInKey == null) {
 				throw new IllegalArgumentException(method + "请求，" + name + "/" + key
-						+ " 里面 " + idKey + " 和 " + idInKey + " 至少传其中一个！");
+						+ " 里面 " + idKey + "," + idInKey  + "," + (idKey + "{}@") + " 至少传其中一个！");
 			}
 		} else {
 			if (idIn.size() > maxUpdateCount) { //不允许一次操作 maxUpdateCount 条以上记录
@@ -922,7 +926,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		
 		if (musts != null && musts.length > 0) {
 			for (String s : musts) {
-				if (real.get(s) == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
+				if (real.get(s) == null && real.get(s+"@") == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
 					throw new IllegalArgumentException(method + "请求，"
                             + name + " 里面不能缺少 " + s + " 等[" + must + "]内的任何字段！");
 				}
@@ -1018,7 +1022,10 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
                                     || mustSet.contains(key) || objKeySet.contains(key)) {
 								continue;
 							}
-
+							// 支持id ref: id{}@
+							if (key.endsWith("@") && mustSet.contains(key.substring(0, key.length() - 1))) {
+								continue;
+							}
 							refuseSet.add(key);
 						}
 					}

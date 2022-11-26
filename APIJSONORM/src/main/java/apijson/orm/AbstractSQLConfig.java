@@ -761,6 +761,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	}
 
+	// mysql8版本以上,子查询支持with as表达式
+	private List<String> withAsExpreSqlList = null;
+	protected List<Object> withAsExprePreparedValueList = new ArrayList<>();
 	private int[] dbVersionNums = null;
 	@Override
 	public int[] getDBVersionNums() {
@@ -3909,6 +3912,39 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	//key@:{} Subquery <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+	/**
+	 * 只要 method != RequestMethod.POST 就都支持 with-as表达式
+	 * @param cfg
+	 * @param subquery
+	 * @return
+	 * @throws Exception
+	 */
+	private String withAsExpreSubqueryString(SQLConfig cfg, Subquery subquery) throws Exception {
+		if(cfg.getMethod() != RequestMethod.POST && this.withAsExpreSqlList == null) {
+			this.setWithAsExpreList();
+		}
+		String withAsExpreSql;
+		if(this.withAsExpreSqlList != null) {
+			String withQuoteName = getQuote() + subquery.getKey() + getQuote();
+			this.withAsExpreSqlList.add(" " + withQuoteName + " AS " + "(" + cfg.getSQL(isPrepared()) + ") ");
+			withAsExpreSql = " SELECT * FROM " + withQuoteName;
+
+			// 预编译参数
+			List<Object> subPvl = cfg.getPreparedValueList();
+			if (subPvl != null && subPvl.isEmpty() == false) {
+				this.withAsExprePreparedValueList.addAll(subPvl);
+				cfg.setPreparedValueList(new ArrayList<>());
+			}
+		}else {
+			withAsExpreSql = cfg.getSQL(isPrepared());
+			// mysql 才存在这个问题, 主表和子表是一张表
+			if(this.isMySQL() && StringUtil.equals(this.getTable(), subquery.getFrom())) {
+				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql+") AS " + getQuote() + subquery.getKey() + getQuote();
+			}
+		}
+		return withAsExpreSql;
+	}
+
 	@Override
 	public String getSubqueryString(Subquery subquery) throws Exception {
 		if (subquery == null) {
@@ -3919,7 +3955,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		SQLConfig cfg = subquery.getConfig();
 
 		cfg.setPreparedValueList(new ArrayList<>());
-		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + cfg.getSQL(isPrepared()) + ") ";
+		String withAsExpreSql = withAsExpreSubqueryString(cfg, subquery);
+		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + withAsExpreSql + ") ";
 
 		//// SELECT .. FROM(SELECT ..) ..  WHERE .. 格式需要把子查询中的预编译值提前
 		//// 如果外查询 SELECT concat(`name`,?)  这种 SELECT 里也有预编译值，那就不能这样简单反向
@@ -4123,6 +4160,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return null;
 		}
 
+		String cSql = null;
 		switch (config.getMethod()) {
 		case POST:
 			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
@@ -4130,12 +4168,16 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			if(config.isClickHouse()){
 				return  "ALTER TABLE " +  tablePath + " UPDATE" + config.getSetString() + config.getWhereString(true);
 			}
-			return "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
+			cSql =  "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
+			cSql = buildWithAsExpreSql(config, cSql);
+			return cSql;
 		case DELETE:
 			if(config.isClickHouse()){
 				return  "ALTER TABLE " +  tablePath + " DELETE" + config.getWhereString(true);
 			}
-			return "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
+			cSql =  "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
+			cSql = buildWithAsExpreSql(config, cSql);
+			return cSql;
 		default:
 			String explain = config.isExplain() ? (config.isSQLServer() ? "SET STATISTICS PROFILE ON  " : (config.isOracle() || config.isDameng() || config.isKingBase() ? "EXPLAIN PLAN FOR " : "EXPLAIN ")) : "";
 			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
@@ -4156,8 +4198,32 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				return explain + config.getOraclePageSql(sql);
 			}
 
-			return explain + "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + config.getLimitString();
+			cSql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + config.getLimitString();
+			cSql = buildWithAsExpreSql(config, cSql);
+			return explain + cSql;
 		}
+	}
+
+	private static String buildWithAsExpreSql(@NotNull AbstractSQLConfig config, String cSql) throws Exception {
+		if(config.withAsExpreSqlList != null && config.withAsExpreSqlList.size() > 0) {
+			String withAsExpreSql = "WITH ";
+			// 只有一条
+			if(config.withAsExpreSqlList.size() == 1) {
+				withAsExpreSql += config.withAsExpreSqlList.get(0) + "\n" + cSql;
+			}else {
+				int lastIndex = config.withAsExpreSqlList.size() - 1;
+				for (int i = 0; i < config.withAsExpreSqlList.size(); i++) {
+					if(i == lastIndex) {
+						withAsExpreSql += config.withAsExpreSqlList.get(i) + "\n" + cSql;
+					}else {
+						withAsExpreSql += config.withAsExpreSqlList.get(i) + ",\n";
+					}
+				}
+			}
+			cSql = withAsExpreSql;
+			config.setWithAsExpreList();
+		}
+		return cSql;
 	}
 
 	/**Oracle的分页获取
@@ -5508,4 +5574,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	}
 
+	private void setWithAsExpreList() {
+		// mysql8版本以上,子查询支持with as表达式
+		if(this.isMySQL() && this.getDBVersionNums()[0] >= 8) {
+			this.withAsExpreSqlList = new ArrayList<>();
+		}
+	}
+
+	@Override
+	public List<Object> getWithAsExprePreparedValueList() {
+		return this.withAsExprePreparedValueList;
+	}
+
+	@Override
+	public void setWithAsExprePreparedValueList(List<Object> list) {
+		this.withAsExprePreparedValueList = list;
+	}
 }
