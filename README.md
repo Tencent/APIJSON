@@ -546,6 +546,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [APIJSON 代码分析（四）AbstractSQLExecutor—SQL执行器](https://blog.csdn.net/weixin_45767055/article/details/121069887)
 
+[APIJSON使用](https://juejin.cn/post/7148253873478565902)
   
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
