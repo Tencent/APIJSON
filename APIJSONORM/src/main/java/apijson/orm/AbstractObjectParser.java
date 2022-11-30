@@ -35,7 +35,7 @@ import static apijson.JSONObject.KEY_TRY;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
 import static apijson.orm.SQLConfig.TYPE_ITEM;
-
+import static apijson.RequestMethod.GET;
 
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
@@ -254,7 +254,14 @@ public abstract class AbstractObjectParser implements ObjectParser {
 							continue;
 						}
                         String key = entry.getKey();
-
+                        
+                        // 处理url crud, 将crud 转换为真实method
+                        RequestMethod _method = this.parser.getRealMethod(method, key, value);
+						// 没有执行校验流程的情况,比如url head, sql@子查询, sql@ method=GET 
+						if (key.endsWith("@") && request.get(key) instanceof JSONObject) {
+							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, GET);
+						}
+                        
 						try {
                             boolean startsWithAt = key.startsWith("@");
                             //if (startsWithAt || (key.endsWith("()") == false)) {
@@ -275,11 +282,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 									index ++;
 								}
 							}
-							else if ((method == POST || method == PUT) && value instanceof JSONArray
+							else if ((_method == POST || _method == PUT) && value instanceof JSONArray
 									&& JSONRequest.isTableArray(key)) {  // JSONArray，批量新增或修改，往下一级提取
 								onTableArrayParse(key, (JSONArray) value);
 							}
-							else if (method == PUT && value instanceof JSONArray && (whereList == null || whereList.contains(key) == false)
+							else if (_method == PUT && value instanceof JSONArray && (whereList == null || whereList.contains(key) == false)
 									&& StringUtil.isName(key.replaceFirst("[+-]$", ""))) {  // PUT JSONArray
 								onPUTArrayParse(key, (JSONArray) value);
 							}
