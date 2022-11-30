@@ -40,6 +40,7 @@ import apijson.StringUtil;
 import apijson.orm.exception.CommonException;
 
 import static apijson.JSONObject.KEY_EXPLAIN;
+import static apijson.RequestMethod.CRUD;
 import static apijson.RequestMethod.GET;
 
 /**parser for parsing request to JSONObject
@@ -2096,44 +2097,36 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			try {
 				if (key.startsWith("@")) {
 					try {
-						// 如果不匹配,不处理即可
+						// 如果不匹配,异常不处理即可
 						RequestMethod l_method = RequestMethod.valueOf(key.substring(1).toUpperCase());
-						if (l_method != null) {
-							if (request.get(key) instanceof JSONArray) {
-								for (Object objKey : request.getJSONArray(key)) {
-									key_method_Map.put(objKey, l_method);
-								}
-								continue;
-							} else {
-								throw new IllegalArgumentException("参数 " + key + " 必须是数组格式 ! ,例如: [\"Moment\", \"Comment[]\"]");
-							}
+						for(String objKey : StringUtil.split(request.getString(key))) {
+							key_method_Map.put(objKey, l_method);
 						}
 					} catch (Exception e) {
 					}
 				}
 
-				// 如果对象设置了@method, 优先使用 对象内部的@method
-				// 对于没有显式声明操作方法的，直接用 URL(/get, /post 等) 对应的默认操作方法
+				// 
+				// 1、非crud,对于没有显式声明操作方法的，直接用 URL(/get, /post 等) 对应的默认操作方法
+				// 2、crud, 没有声明就用 GET
+				// 3、兼容 sql@ JSONObject,设置 GET方法
 				// 将method 设置到每个object, op执行会解析
 				if (request.get(key) instanceof JSONObject) {
-					if(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD) == null) {
-						if (key_method_Map.get(key) == null) {
-							// 数组会解析为对象进行校验,做一下兼容
-							if(key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
+					if (key_method_Map.get(key) == null) {
+						// 数组会解析为对象进行校验,做一下兼容
+						if (key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
+							if (method == RequestMethod.CRUD || (key.endsWith("@") && request.get(key) instanceof JSONObject)) {
+								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, GET);
+								key_method_Map.put(key, GET);
+							} else {
 								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, method);
-							}else {
-								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY));
+								key_method_Map.put(key, method);
 							}
 						} else {
-							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key));
+							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY));
 						}
-					}
-
-					// get请求不校验
-					RequestMethod  _method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
-					if (RequestMethod.isPublicMethod(_method)) {
-						jsonObject.put(key, request.getJSONObject(key));
-						continue;
+					} else {
+						request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key));
 					}
 				}
 
@@ -2149,12 +2142,29 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						_method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
 					} else {
 						if (key_method_Map.get(key) == null) {
-							_method = method;
+							if (method == RequestMethod.CRUD) {
+								_method = GET;
+								key_method_Map.put(key, GET);
+							} else {
+								_method = method;
+								key_method_Map.put(key, method);
+							}
 						} else {
 							_method = key_method_Map.get(key);
 						}
 					}
 
+					// 非 CRUD 方法，都只能和 URL method 完全一致，避免意料之外的安全风险。
+					if (method != RequestMethod.CRUD && _method != method) {
+						throw new IllegalArgumentException("不支持在 " + method + " 中 " + _method + " ！");
+					}
+					
+					// get请求不校验
+					if (RequestMethod.isPublicMethod(_method)) {
+						jsonObject.put(key, request.get(key));
+						continue;
+					}
+					
 					String _tag = buildTag(request, key);
 					JSONObject requestItem = new JSONObject();
 					requestItem.put(_tag, request.get(key));
@@ -2212,5 +2222,18 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		JSONObject target = wrapRequest(method, tag, object, true);
 		// JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
 		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema(), creator);
+	}
+	
+	/***
+	 * 兼容url crud, 获取真实method
+	 * @param method = crud
+	 * @param key
+	 * @return
+	 */
+	public RequestMethod getRealMethod(RequestMethod method, String key, Object value) {
+		if(method == CRUD && (value instanceof JSONObject || value instanceof JSONArray)) {
+			return this.key_method_Map.get(key);
+		}
+		return method;
 	}
 }

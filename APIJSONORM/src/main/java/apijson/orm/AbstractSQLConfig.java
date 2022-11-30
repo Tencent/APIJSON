@@ -4208,14 +4208,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		if(config.withAsExpreSqlList != null && config.withAsExpreSqlList.size() > 0) {
 			String withAsExpreSql = "WITH ";
 			// 只有一条
-			if(config.withAsExpreSqlList.size() == 1) {
+			if (config.withAsExpreSqlList.size() == 1) {
 				withAsExpreSql += config.withAsExpreSqlList.get(0) + "\n" + cSql;
-			}else {
+			} else {
 				int lastIndex = config.withAsExpreSqlList.size() - 1;
 				for (int i = 0; i < config.withAsExpreSqlList.size(); i++) {
-					if(i == lastIndex) {
+					if (i == lastIndex) {
 						withAsExpreSql += config.withAsExpreSqlList.get(i) + "\n" + cSql;
-					}else {
+					} else {
 						withAsExpreSql += config.withAsExpreSqlList.get(i) + ",\n";
 					}
 				}

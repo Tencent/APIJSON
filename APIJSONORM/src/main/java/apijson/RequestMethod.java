@@ -41,11 +41,16 @@ public enum RequestMethod {
 	PUT,
 	
 	/**
+	 * json包含多条语句,支持增删改查,函数调用
+	 */
+	CRUD,
+	
+	/**
 	 * 删除数据
 	 */
 	DELETE;
 	
-	public static final RequestMethod[] ALL = new RequestMethod[]{ GET, HEAD, GETS, HEADS, POST, PUT, DELETE};
+	public static final RequestMethod[] ALL = new RequestMethod[]{ GET, HEAD, GETS, HEADS, POST, PUT, CRUD, DELETE};
 	
 	/**是否为GET请求方法
 	 * @param method
