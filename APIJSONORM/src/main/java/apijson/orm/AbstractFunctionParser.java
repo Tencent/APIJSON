@@ -5,7 +5,10 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import java.io.FileReader;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.util.TypeUtils;
+
 import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,12 +22,6 @@ import javax.activation.UnsupportedDataTypeException;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.util.TypeUtils;
 
 import apijson.Log;
 import apijson.NotNull;
@@ -47,10 +44,6 @@ public class AbstractFunctionParser implements FunctionParser {
     /**开启支持远程函数中的 JavaScript 脚本形式
      */
     public static boolean ENABLE_SCRIPT_FUNCTION = true;
-
-    public static final int TYPE_REMOTE_FUNCTION = 0;
-    //public static final int TYPE_SQL_FUNCTION = 1;
-    public static final int TYPE_SCRIPT_FUNCTION = 1;
 
 	// <methodName, JSONObject>
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
@@ -198,15 +191,27 @@ public class AbstractFunctionParser implements FunctionParser {
 			throw new UnsupportedOperationException("不允许调用远程函数 " + fb.getMethod() + " !");
 		}
 
-		int type = row.getIntValue("type");
-        if (type < TYPE_REMOTE_FUNCTION || type > TYPE_SCRIPT_FUNCTION) {
-            throw new UnsupportedOperationException("type = " + type + " 不合法！必须是 [0, 1] 中的一个 !");
-        }
-        if (ENABLE_SCRIPT_FUNCTION == false && type == TYPE_SCRIPT_FUNCTION) {
-            throw new UnsupportedOperationException("type = " + type + " 不合法！AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION" +
+        String language = row.getString("language");
+        String lang = "java".equalsIgnoreCase(language) ? null : language;
+
+        if (ENABLE_SCRIPT_FUNCTION == false && lang != null) {
+            throw new UnsupportedOperationException("language = " + language + " 不合法！AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION" +
                     " == false 时不支持远程函数中的脚本形式！如需支持则设置 AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION = true ！");
         }
+        ScriptEngine engine = lang == null ? null : SCRIPT_ENGINE_MAP.get(lang);
+        if (lang != null) {
+            if (engine == null) {
+                engine = new ScriptEngineManager().getEngineByName(lang);
+            }
+            if (engine == null) {
+                engine = new ScriptEngineManager(null).getEngineByName(lang);
+            }
+            if (engine == null) {
+                throw new ClassNotFoundException("找不到脚本语言 " + language + " 对应的执行引擎！请先依赖相关库并在后端 ScriptEngineManager 中注册！");
+            }
 
+            SCRIPT_ENGINE_MAP.put(lang, engine);
+        }
 
 		int version = row.getIntValue("version");
 		if (parser.getVersion() < version) {
@@ -223,14 +228,15 @@ public class AbstractFunctionParser implements FunctionParser {
 		}
 
 		try {
-            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), row.getString("returnType"), currentObject, type);
+            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), row.getString("returnType"), currentObject, engine);
 		}
         catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
-				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(fb.getMethod(), fb.getKeys()) + " 不在后端工程的DemoFunction内！"
+				throw new IllegalArgumentException("字符 " + function + " 对应的远程函数 " + getFunction(fb.getMethod(), fb.getKeys())
+                        + " 不在后端 " + parser.getClass().getName() + " 内，也不在父类中！如果需要则先新增对应方法！"
 						+ "\n请检查函数名和参数数量是否与已定义的函数一致！"
 						+ "\n且必须为 function(key0,key1,...) 这种单函数格式！"
-						+ "\nfunction必须符合Java函数命名，key是用于在request内取值的键！"
+						+ "\nfunction 必须符合 Java 函数命名，key 是用于在 curObj 内取值的键！"
 						+ "\n调用时不要有空格！" + (Log.DEBUG ? e.getMessage() : ""));
 			}
 			if (e instanceof InvocationTargetException) {
@@ -252,12 +258,12 @@ public class AbstractFunctionParser implements FunctionParser {
      * @param methodName
      * @param parameterTypes
      * @param args
-     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[], String, JSONObject, int)}
+     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[], String, JSONObject, ScriptEngine)}
      * @throws Exception
      */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
-        return invoke(parser, methodName, parameterTypes, args, null, null, TYPE_REMOTE_FUNCTION);
+        return invoke(parser, methodName, parameterTypes, args, null, null, null);
     }
     /**反射调用
      * @param parser
@@ -266,15 +272,15 @@ public class AbstractFunctionParser implements FunctionParser {
      * @param args
      * @param returnType
      * @param currentObject
-     * @param type
+     * @param engine
      * @return
      * @throws Exception
      */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType
-            , JSONObject currentObject, int type) throws Exception {
-        if (type == TYPE_SCRIPT_FUNCTION) {
-            return invokeScript(parser, methodName, parameterTypes, args, returnType, currentObject);
+            , JSONObject currentObject, ScriptEngine engine) throws Exception {
+        if (engine != null) {
+            return invokeScript(parser, methodName, parameterTypes, args, returnType, currentObject, engine);
         }
 
         Method m = parser.getClass().getMethod(methodName, parameterTypes); // 不用判空，拿不到就会抛异常
@@ -299,6 +305,7 @@ public class AbstractFunctionParser implements FunctionParser {
 
     public static Invocable INVOCABLE;
     public static ScriptEngine SCRIPT_ENGINE;
+    public static Map<String, ScriptEngine> SCRIPT_ENGINE_MAP;
     static {
         try {
             System.setProperty("Dnashorn.args", "language=es6");
@@ -308,6 +315,11 @@ public class AbstractFunctionParser implements FunctionParser {
             /*获取执行JavaScript的执行引擎*/
             SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("javascript");
             INVOCABLE = (Invocable) SCRIPT_ENGINE;
+
+            SCRIPT_ENGINE_MAP = new HashMap<>();
+            SCRIPT_ENGINE_MAP.put("JavaScript", SCRIPT_ENGINE);
+            SCRIPT_ENGINE_MAP.put("javascript", SCRIPT_ENGINE);
+            SCRIPT_ENGINE_MAP.put("js", SCRIPT_ENGINE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -325,14 +337,18 @@ public class AbstractFunctionParser implements FunctionParser {
      * @throws Exception
      */
     public static Object invokeScript(@NotNull AbstractFunctionParser parser, @NotNull String methodName
-            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject) throws Exception {
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject, ScriptEngine engine) throws Exception {
         JSONObject row = SCRIPT_MAP.get(methodName);
         if (row == null) {
-            throw new UnsupportedOperationException("调用远程函数脚本 " + methodName + " 不存在!");
+            throw new UnsupportedOperationException("调用的远程函数脚本 " + methodName + " 不存在!");
         }
 
         String script = row.getString("script");
-        SCRIPT_ENGINE.eval(script); // 必要，未执行导致下方 INVOCABLE.invokeFunction 报错 NoSuchMethod
+
+        if (engine == null) {
+            engine = SCRIPT_ENGINE;
+        }
+        engine.eval(script); // 必要，未执行导致下方 INVOCABLE.invokeFunction 报错 NoSuchMethod
 
         //Object[] newArgs = args == null || args.length <= 0 ? null : new Object[args.length];
 
@@ -341,9 +357,11 @@ public class AbstractFunctionParser implements FunctionParser {
         //    return SCRIPT_ENGINE.eval(script);
         //}
 
+        Invocable invocable = engine instanceof Invocable ? (Invocable) engine : null;
+
         Object result;
         if (args == null || args.length <= 0) {
-            result = INVOCABLE.invokeFunction(methodName);
+            result = invocable.invokeFunction(methodName);
         }
         else {
             //args[0] = JSON.toJSONString(args[0]);  // Java 调 js 函数只支持传基本类型，改用 invokeMethod ？
@@ -354,7 +372,7 @@ public class AbstractFunctionParser implements FunctionParser {
             //}
 
             // 支持 JSONObject
-            result = INVOCABLE.invokeFunction(methodName, args);
+            result = invocable.invokeFunction(methodName, args);
             //result = INVOCABLE.invokeMethod(args[0], methodName, args);
 
             //switch (newArgs.length) {
