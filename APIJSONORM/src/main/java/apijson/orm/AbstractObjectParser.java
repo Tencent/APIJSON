@@ -211,7 +211,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				functionMap = null;//must init
 				childMap = null;//must init
 
-				Set<Entry<String, Object>> set = request.isEmpty() ? null : new LinkedHashSet<Entry<String, Object>>(request.entrySet());
+				Set<Entry<String, Object>> set = request.isEmpty() ? null : new LinkedHashSet<>(request.entrySet());
 				if (set != null && set.isEmpty() == false) {//判断换取少几个变量的初始化是否值得？
 					if (isTable) {//非Table下必须保证原有顺序！否则 count,page 会丢, total@:"/[]/total" 会在[]:{}前执行！
 						customMap = new LinkedHashMap<String, Object>();
@@ -360,8 +360,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 				JSONObject subquery = (JSONObject) value;
 				String range = subquery.getString(JSONRequest.KEY_SUBQUERY_RANGE);
-				if (range != null && JSONRequest.SUBQUERY_RANGE_ALL.equals(range) == false && JSONRequest.SUBQUERY_RANGE_ANY.equals(range) == false) {
-					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 [" + JSONRequest.SUBQUERY_RANGE_ALL + ", " + JSONRequest.SUBQUERY_RANGE_ANY + "] 中的一个！");
+				if (range != null && JSONRequest.SUBQUERY_RANGE_ALL.equals(range) == false
+                        && JSONRequest.SUBQUERY_RANGE_ANY.equals(range) == false) {
+					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 ["
+                            + JSONRequest.SUBQUERY_RANGE_ALL + ", " + JSONRequest.SUBQUERY_RANGE_ANY + "] 中的一个！");
 				}
 
 
@@ -375,7 +377,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				String from = subquery.getString(JSONRequest.KEY_SUBQUERY_FROM);
 				JSONObject arrObj = from == null ? null : obj.getJSONObject(from);
 				if (arrObj == null) {
-					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ from:value } 中 value 对应的主表对象 " + from + ":{} 不存在！");
+					throw new IllegalArgumentException("子查询 " + path + "/"
+                            + key + ":{ from:value } 中 value 对应的主表对象 " + from + ":{} 不存在！");
 				}
 				//
 				SQLConfig cfg = (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
@@ -516,7 +519,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				arrayCount ++;
 				int maxArrayCount = parser.getMaxArrayCount();
 				if (arrayCount > maxArrayCount) {
-					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时数组对象 key[]:{} 的数量达到 " + arrayCount + " 已超限，必须在 0-" + maxArrayCount + " 内 !");
+					throw new IllegalArgumentException(path + " 内截至 " + key + ":{} 时数组对象 key[]:{} "
+                            + "的数量达到 " + arrayCount + " 已超限，必须在 0-" + maxArrayCount + " 内 !");
 				}
 			}
 
@@ -582,7 +586,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		//GET > add all 或 remove all > PUT > remove key
 
 		//GET <<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONObject rq = new JSONObject();
+		JSONObject rq = new JSONObject(true);
 		rq.put(JSONRequest.KEY_ID, request.get(JSONRequest.KEY_ID));
 		rq.put(JSONRequest.KEY_COLUMN, realKey);
 		JSONObject rp = parseResponse(RequestMethod.GET, table, null, rq, null, false);
@@ -621,9 +625,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 
 	@Override
-	public void onTableArrayParse(String key, JSONArray value) throws Exception {
+	public void onTableArrayParse(String key, JSONArray valueArray) throws Exception {
 		String childKey = key.substring(0, key.length() - JSONRequest.KEY_ARRAY.length());
-		JSONArray valueArray = (JSONArray) value;
 
 		int allCount = 0;
 		JSONArray ids = new JSONArray();
@@ -631,45 +634,121 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		int version = parser.getVersion();
 		int maxUpdateCount = parser.getMaxUpdateCount();
 
-		String idKey = parser.createSQLConfig().getIdKey(); //Table[]: [{}] arrayConfig 为 null
+        SQLConfig cfg = null; // 不能污染当前的配置 getSQLConfig();
+        if (cfg == null) { // TODO 每次都创建成本比较高，是否新增 defaultInstance 或者 configInstance 用来专门 getIdKey 等？
+            cfg = parser.createSQLConfig();
+        }
+
+		String idKey = cfg.getIdKey(); //Table[]: [{}] arrayConfig 为 null
 		boolean isNeedVerifyContent = parser.isNeedVerifyContent();
 
+        cfg.setTable(childKey); // Request 表 structure 中配置 "ALLOW_PARTIAL_UPDATE_FAILED": "Table[],key[],key:alias[]" 自动配置
+        boolean allowPartialFailed = cfg.allowPartialUpdateFailed();
+        JSONArray failedIds = allowPartialFailed ? new JSONArray() : null;
+
+        int firstFailIndex = -1;
+        JSONObject firstFailReq = null;
+        Throwable firstFailThrow = null;
 		for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
 			//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
 			JSONObject item;
 			try {
 				item = valueArray.getJSONObject(i);
+                if (item == null) {
+                    throw new NullPointerException();
+                }
 			}
 			catch (Exception e) {
-				throw new UnsupportedDataTypeException("批量新增/修改失败！" + key + "/" + i + ":value 中value不合法！类型必须是 OBJECT ，结构为 {} !");
-			}
-			JSONRequest req = new JSONRequest(childKey, item);
-
-			//parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
-			JSONObject result = (JSONObject) onChildParse(0, "" + i, isNeedVerifyContent == false ? req : parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser));
-			result = result.getJSONObject(childKey);
-			//
-			boolean success = JSONResponse.isSuccess(result);
-			int count = result == null ? null : result.getIntValue(JSONResponse.KEY_COUNT);
-
-			if (success == false || count != 1) { //如果 code = 200 但 count != 1，不能算成功，掩盖了错误不好排查问题
-				throw new ServerException("批量新增/修改失败！" + key + "/" +  i + "：" + (success ? "成功但 count != 1 ！" : (result == null ? "null" : result.getString(JSONResponse.KEY_MSG))));
+				throw new UnsupportedDataTypeException(
+                        "批量新增/修改失败！" + key + "/" + i + ":value 中value不合法！类型必须是 OBJECT ，结构为 {} !"
+                );
 			}
 
-			allCount += count;
-			ids.add(result.get(idKey));
+            Object id = item.get(idKey);
+			JSONObject req = new JSONRequest(childKey, item);
+            JSONObject result = null;
+            try {
+                if (isNeedVerifyContent) {
+                    req = parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser);
+                }
+                //parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
+                result = (JSONObject) onChildParse(0, "" + i, req);
+            }
+            catch (Exception e) {
+                if (allowPartialFailed == false) {
+                    throw e;
+                }
+
+                if (firstFailThrow == null) {
+                    firstFailThrow = e;
+                    firstFailReq = valueArray.getJSONObject(i); // item
+                }
+            }
+
+            result = result == null ? null : result.getJSONObject(childKey);
+
+            boolean success = JSONResponse.isSuccess(result);
+            int count = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);
+            if (id == null && result != null) {
+                id = result.get(idKey);
+            }
+
+            if (success == false || count != 1) { //如果 code = 200 但 count != 1，不能算成功，掩盖了错误不好排查问题
+                if (allowPartialFailed) {
+                    failedIds.add(id);
+                    if (firstFailIndex < 0) {
+                        firstFailIndex = i;
+                    }
+                }
+                else {
+                    throw new ServerException(
+                            "批量新增/修改失败！" + key + "/" + i + "：" + (success ? "成功但 count != 1 ！"
+                                    : (result == null ? "null" : result.getString(JSONResponse.KEY_MSG))
+                    ));
+                }
+            }
+
+			allCount += 1; // 加了 allowPartialFailed 后 count 可能为 0  allCount += count;
+			ids.add(id);
 		}
 
-		JSONObject allResult = AbstractParser.newSuccessResult();
-		allResult.put(JSONResponse.KEY_COUNT, allCount);
-		allResult.put(idKey + "[]", ids);
+        int failedCount = failedIds == null ? 0 : failedIds.size();
+        if (failedCount >= allCount) {
+            throw new ServerException("批量新增/修改 " + key + ":[] 中 " + allCount + " 个子项全部失败！"
+                    + "第 " + firstFailIndex + " 项失败原因：" + (firstFailThrow == null ? "" : firstFailThrow.getMessage()));
+        }
+
+        JSONObject allResult = AbstractParser.newSuccessResult();
+        if (failedCount > 0) {
+            allResult.put("failedCount", failedCount);
+            allResult.put("failedIdList", failedIds);
+            if (firstFailThrow != null) {
+                if (firstFailThrow instanceof CommonException && firstFailThrow.getCause() != null) {
+                    firstFailThrow = firstFailThrow.getCause();
+                }
+
+                JSONObject failObj = new JSONObject(true);
+                failObj.put("index", firstFailIndex);
+                failObj.put(childKey, firstFailReq);
+
+                JSONObject obj = AbstractParser.extendErrorResult(failObj, firstFailThrow, parser.isRoot());
+                if (Log.DEBUG) {
+                    obj.put("trace:throw", firstFailThrow.getClass().getName());
+                    obj.put("trace:stack", firstFailThrow.getStackTrace());
+                }
+                allResult.put("firstFailed", obj);
+            }
+        }
+        allResult.put(JSONResponse.KEY_COUNT, allCount);
+        allResult.put(idKey + "[]", ids);
 
 		response.put(childKey, allResult); //不按原样返回，避免数据量过大
 	}
 
 
 	@Override
-	public JSONObject parseResponse(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
+	public JSONObject parseResponse(RequestMethod method, String table, String alias
+            , JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
 		SQLConfig config = newSQLConfig(method, table, alias, request, joinList, isProcedure);
 		return parseResponse(config, isProcedure);
 	}
@@ -818,7 +897,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	//public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject) throws Exception {
     //    parseFunction(key, value, parentPath, currentName, currentObject, false);
     //}
-	public void parseFunction(String rawKey, String key, String value, String parentPath, String currentName, JSONObject currentObject, boolean isMinus) throws Exception {
+	public void parseFunction(String rawKey, String key, String value, String parentPath
+            , String currentName, JSONObject currentObject, boolean isMinus) throws Exception {
 		Object result;
         boolean containRaw = rawKeyList != null && rawKeyList.contains(rawKey);
 
@@ -925,8 +1005,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
                     }
 
                     long endTime = System.currentTimeMillis();  // 3ms - 8ms
-                    Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
-                            + "; endTime = " + endTime + "; duration = " + (endTime - startTime) + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
+                    Log.e(TAG, "\n onSQLExecute <<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+                            + "\n for (int i = 1; i < list.size(); i++)  startTime = " + startTime
+                            + "; endTime = " + endTime + "; duration = " + (endTime - startTime)
+                            + "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n ");
                 }
 
                 parser.putArrayMainCache(arrayPath, rawList);

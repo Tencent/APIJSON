@@ -109,6 +109,13 @@ public enum Operation {
 	 * 移除，当要被移除的对象存在时，结构是
 	 * "key0,key1,key2..."
 	 */
-	REMOVE;
-	
+	REMOVE,
+
+	/**
+	 * 允许批量增删改部分失败，结构是
+	 * "Table[],key[],key:alias[]"
+     * 自动 ALLOW_PARTIAL_UPDATE_FAILED_TABLE_MAP.put
+	 */
+    ALLOW_PARTIAL_UPDATE_FAIL;
+
 }

@@ -48,7 +48,7 @@ import static apijson.RequestMethod.GET;
  */
 public abstract class AbstractParser<T extends Object> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
-	protected Map<Object, RequestMethod> key_method_Map = new HashMap<>();
+	protected Map<Object, RequestMethod> keyMethodMap = new HashMap<>();
 	/**
 	 * 可以通过切换该变量来控制是否打印关键的接口请求内容。保守起见，该值默认为false。
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求内容。
@@ -491,10 +491,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			res.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + executedSQLDuration);
 
 			if (error != null) {
-        //        String msg = error.getMessage();
-        //        if (msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER)) {
-        //        }
-        Throwable t = error instanceof CommonException && error.getCause() != null ? error.getCause() : error;
+                //        String msg = error.getMessage();
+                //        if (msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER)) {
+                //        }
+                Throwable t = error instanceof CommonException && error.getCause() != null ? error.getCause() : error;
 				res.put("trace:throw", t.getClass().getName());
 				res.put("trace:stack", t.getStackTrace());
 			}
@@ -750,7 +750,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @param e
 	 * @return
 	 */
-	public static JSONObject extendErrorResult(JSONObject object, Exception e) {
+	public static JSONObject extendErrorResult(JSONObject object, Throwable e) {
 		return extendErrorResult(object, e, false);
 	}
 	/**添加请求成功的状态内容
@@ -759,89 +759,89 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @param isRoot
 	 * @return
 	 */
-	public static JSONObject extendErrorResult(JSONObject object, Exception e, boolean isRoot) {
+	public static JSONObject extendErrorResult(JSONObject object, Throwable e, boolean isRoot) {
 		return extendErrorResult(object, e, null, null, isRoot);
 	}
 	/**添加请求成功的状态内容
 	 * @param object
 	 * @return
 	 */
-	public static JSONObject extendErrorResult(JSONObject object, Exception e, RequestMethod requestMethod, String url, boolean isRoot) {
-		String msg = CommonException.getMsg(e);
+	public static JSONObject extendErrorResult(JSONObject object, Throwable e, RequestMethod requestMethod, String url, boolean isRoot) {
+        String msg = CommonException.getMsg(e);
 
-		if (Log.DEBUG && isRoot) {
-			try {
-        boolean isCommon = e instanceof CommonException;
-        String env = isCommon ? ((CommonException) e).getEnvironment() : null;
-				if (StringUtil.isEmpty(env)) {
-          //int index = msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
-          //env = index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
-          env = " \n **环境信息** "
-            + " \n 系统: " + Log.OS_NAME + " " + Log.OS_VERSION
-            + " \n 数据库: <!-- 请填写，例如 MySQL 5.7。默认数据库为 " + AbstractSQLConfig.DEFAULT_DATABASE + " -->"
-            + " \n JDK: " + Log.JAVA_VERSION + " " + Log.OS_ARCH
-            + " \n APIJSON: " + Log.VERSION;
+        if (Log.DEBUG && isRoot) {
+            try {
+                boolean isCommon = e instanceof CommonException;
+                String env = isCommon ? ((CommonException) e).getEnvironment() : null;
+                if (StringUtil.isEmpty(env)) {
+                    //int index = msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
+                    //env = index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
+                    env = " \n **环境信息** "
+                            + " \n 系统: " + Log.OS_NAME + " " + Log.OS_VERSION
+                            + " \n 数据库: <!-- 请填写，例如 MySQL 5.7。默认数据库为 " + AbstractSQLConfig.DEFAULT_DATABASE + " -->"
+                            + " \n JDK: " + Log.JAVA_VERSION + " " + Log.OS_ARCH
+                            + " \n APIJSON: " + Log.VERSION;
 
-          //msg = index < 0 ? msg : msg.substring(0, index).trim();
+                    //msg = index < 0 ? msg : msg.substring(0, index).trim();
+                }
+
+                String encodedMsg = URLEncoder.encode(msg, "UTF-8");
+
+                if (StringUtil.isEmpty(url, true)) {
+                    String host = "localhost";
+                    try {
+                        host = InetAddress.getLocalHost().getHostAddress();
+                    } catch (Throwable e2) {}
+
+                    String port = "8080";
+                    try {
+                        MBeanServer beanServer = ManagementFactory.getPlatformMBeanServer();
+
+                        Set<ObjectName> objectNames = beanServer.queryNames(
+                                new ObjectName("*:type=Connector,*"),
+                                Query.match(Query.attr("protocol"), Query.value("HTTP/1.1"))
+                        );
+                        String p = objectNames.iterator().next().getKeyProperty("port");
+                        port = StringUtil.isEmpty(p, true) ? port : p;
+                    } catch (Throwable e2) {}
+
+                    url = "http://" + host + ":" + port + "/" + (requestMethod == null ? RequestMethod.GET : requestMethod).name().toLowerCase();
+                }
+
+                String req = JSON.toJSONString(object);
+                try {
+                    req = URLEncoder.encode(req, "UTF-8");
+                } catch (Throwable e2) {}
+
+                Throwable t = isCommon ? e.getCause() : e;
+                boolean isSQLException = t instanceof SQLException;  // SQL 报错一般都是通用问题，优先搜索引擎
+                String apiatuoAndGitHubLink = "\n\n【APIAuto】： \n http://apijson.cn/api?type=JSON&url=" + URLEncoder.encode(url, "UTF-8") + "&json=" + req
+                        + "        \n\n【GitHub】： \n https://www.google.com/search?q=site%3Agithub.com%2FTencent%2FAPIJSON+++" + encodedMsg;
+
+                msg += Log.KEY_SYSTEM_INFO_DIVIDER + "    浏览器打开以下链接查看解答"
+                        + (isSQLException ? "" : apiatuoAndGitHubLink)
+                        //	GitHub Issue 搜索貌似是精准包含，不易找到答案 	+ "        \n\nGitHub： \n https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
+                        + "        \n\n【Google】：\n https://www.google.com/search?q=" + encodedMsg
+                        + "        \n\n【百度】：\n https://www.baidu.com/s?ie=UTF-8&wd=" + encodedMsg
+                        + (isSQLException ? apiatuoAndGitHubLink : "")
+                        + "        \n\n都没找到答案？打开这个链接 \n https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
+                        + " \n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
+                        + " \n【标题】：" + msg
+                        + " \n【内容】：" + env + "\n\n**问题描述**\n" + msg
+                        + " \n\n<!-- 尽量完整截屏(至少包含请求和回包结果，还可以加上控制台报错日志)，然后复制粘贴到这里 -->"
+                        + " \n\nPOST " + url
+                        + " \n发送请求 Request JSON：\n ```js"
+                        + " \n 请填写，例如 { \"Users\":{} }"
+                        + " \n```"
+                        + " \n\n返回结果 Response JSON：\n ```js"
+                        + " \n 请填写，例如 { \"Users\": {}, \"code\": 401, \"msg\": \"Users 不允许 UNKNOWN 用户的 GET 请求！\" }"
+                        + " \n```";
+            } catch (Throwable e2) {}
         }
 
-        String encodedMsg = URLEncoder.encode(msg, "UTF-8");
-
-				if (StringUtil.isEmpty(url, true)) {
-					String host = "localhost";
-					try {
-						host = InetAddress.getLocalHost().getHostAddress();
-					} catch (Throwable e2) {}
-
-					String port = "8080";
-					try {
-						MBeanServer beanServer = ManagementFactory.getPlatformMBeanServer();
-
-						Set<ObjectName> objectNames = beanServer.queryNames(
-								new ObjectName("*:type=Connector,*"),
-								Query.match(Query.attr("protocol"), Query.value("HTTP/1.1"))
-								);
-						String p = objectNames.iterator().next().getKeyProperty("port");
-						port = StringUtil.isEmpty(p, true) ? port : p;
-					} catch (Throwable e2) {}
-
-					url = "http://" + host + ":" + port + "/" + (requestMethod == null ? RequestMethod.GET : requestMethod).name().toLowerCase();
-				}
-
-				String req = JSON.toJSONString(object);
-				try {
-					req = URLEncoder.encode(req, "UTF-8");
-				} catch (Throwable e2) {}
-
-        Throwable t = isCommon ? e.getCause() : e;
-				boolean isSQLException = t instanceof SQLException;  // SQL 报错一般都是通用问题，优先搜索引擎
-				String apiatuoAndGitHubLink = "\n\n【APIAuto】： \n http://apijson.cn/api?type=JSON&url=" + URLEncoder.encode(url, "UTF-8") + "&json=" + req
-						+ "        \n\n【GitHub】： \n https://www.google.com/search?q=site%3Agithub.com%2FTencent%2FAPIJSON+++" + encodedMsg;
-
-				msg += Log.KEY_SYSTEM_INFO_DIVIDER + "    浏览器打开以下链接查看解答"
-						+ (isSQLException ? "" : apiatuoAndGitHubLink)
-						//	GitHub Issue 搜索貌似是精准包含，不易找到答案 	+ "        \n\nGitHub： \n https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
-						+ "        \n\n【Google】：\n https://www.google.com/search?q=" + encodedMsg
-						+ "        \n\n【百度】：\n https://www.baidu.com/s?ie=UTF-8&wd=" + encodedMsg
-						+ (isSQLException ? apiatuoAndGitHubLink : "")
-						+ "        \n\n都没找到答案？打开这个链接 \n https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
-						+ " \n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
-						+ " \n【标题】：" + msg
-						+ " \n【内容】：" + env + "\n\n**问题描述**\n" + msg
-						+ " \n\n<!-- 尽量完整截屏(至少包含请求和回包结果，还可以加上控制台报错日志)，然后复制粘贴到这里 -->"
-						+ " \n\nPOST " + url
-						+ " \n发送请求 Request JSON：\n ```js"
-						+ " \n 请填写，例如 { \"Users\":{} }"
-						+ " \n```"
-						+ " \n\n返回结果 Response JSON：\n ```js"
-						+ " \n 请填写，例如 { \"Users\": {}, \"code\": 401, \"msg\": \"Users 不允许 UNKNOWN 用户的 GET 请求！\" }"
-						+ " \n```";
-			} catch (Throwable e2) {}
-		}
-
-    int code = CommonException.getCode(e);
-		return extendResult(object, code, msg, isRoot);
-	}
+        int code = CommonException.getCode(e);
+        return extendResult(object, code, msg, isRoot);
+    }
 
 	/**新建错误状态内容
 	 * @param e
@@ -946,7 +946,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				return null;  // 已使用 REQUEST_MAP 缓存全部，但没查到
 			}
 
-			//获取指定的JSON结构 <<<<<<<<<<<<<<
+			// 获取指定的JSON结构 <<<<<<<<<<<<<<
 			SQLConfig config = createSQLConfig().setMethod(GET).setTable(table);
 			config.setPrepared(false);
 			config.setColumn(Arrays.asList("structure"));
@@ -962,7 +962,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			config.setOrder(JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
 			config.setCount(1);
 
-			//too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
+			// too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
 			result = getSQLExecutor().execute(config, false);
 
 			// version, method, tag 组合情况太多了，JDK 里又没有 LRUCache，所以要么启动时一次性缓存全部后面只用缓存，要么每次都查数据库
@@ -2100,7 +2100,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						// 如果不匹配,异常不处理即可
 						RequestMethod l_method = RequestMethod.valueOf(key.substring(1).toUpperCase());
 						for(String objKey : StringUtil.split(request.getString(key))) {
-							key_method_Map.put(objKey, l_method);
+							keyMethodMap.put(objKey, l_method);
 						}
 					} catch (Exception e) {
 					}
@@ -2112,21 +2112,21 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				// 3、兼容 sql@ JSONObject,设置 GET方法
 				// 将method 设置到每个object, op执行会解析
 				if (request.get(key) instanceof JSONObject) {
-					if (key_method_Map.get(key) == null) {
+					if (keyMethodMap.get(key) == null) {
 						// 数组会解析为对象进行校验,做一下兼容
-						if (key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
+						if (keyMethodMap.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
 							if (method == RequestMethod.CRUD || (key.endsWith("@") && request.get(key) instanceof JSONObject)) {
 								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, GET);
-								key_method_Map.put(key, GET);
+								keyMethodMap.put(key, GET);
 							} else {
 								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, method);
-								key_method_Map.put(key, method);
+								keyMethodMap.put(key, method);
 							}
 						} else {
-							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key + apijson.JSONObject.KEY_ARRAY));
+							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, keyMethodMap.get(key + apijson.JSONObject.KEY_ARRAY));
 						}
 					} else {
-						request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, key_method_Map.get(key));
+						request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, keyMethodMap.get(key));
 					}
 				}
 
@@ -2141,16 +2141,16 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					if (request.get(key) instanceof JSONObject) {
 						_method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
 					} else {
-						if (key_method_Map.get(key) == null) {
+						if (keyMethodMap.get(key) == null) {
 							if (method == RequestMethod.CRUD) {
 								_method = GET;
-								key_method_Map.put(key, GET);
+								keyMethodMap.put(key, GET);
 							} else {
 								_method = method;
-								key_method_Map.put(key, method);
+								keyMethodMap.put(key, method);
 							}
 						} else {
-							_method = key_method_Map.get(key);
+							_method = keyMethodMap.get(key);
 						}
 					}
 
@@ -2232,7 +2232,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	public RequestMethod getRealMethod(RequestMethod method, String key, Object value) {
 		if(method == CRUD && (value instanceof JSONObject || value instanceof JSONArray)) {
-			return this.key_method_Map.get(key);
+			return this.keyMethodMap.get(key);
 		}
 		return method;
 	}

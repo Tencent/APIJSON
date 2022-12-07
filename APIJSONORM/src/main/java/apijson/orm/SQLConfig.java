@@ -68,9 +68,16 @@ public interface SQLConfig {
 	//	boolean isPLSQL();
 	//	boolean isAnsiSQL();
 
-	boolean limitSQLCount(); //用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
+    /**用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
+     * @return
+     */
+	boolean limitSQLCount();
+    /**允许增删改部分失败
+     * @return
+     */
+    boolean allowPartialUpdateFailed();
 
-	@NotNull
+    @NotNull
 	String getIdKey();
 	@NotNull
 	String getUserIdKey();
@@ -309,4 +316,5 @@ public interface SQLConfig {
 
 	List<Object> getWithAsExprePreparedValueList();
 	void setWithAsExprePreparedValueList(List<Object> withAsExprePreparedValueList);
+
 }

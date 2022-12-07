@@ -114,6 +114,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
 	public static Map<String, String> TABLE_KEY_MAP;
+    /**
+     * 允许批量增删改部分记录失败的表
+     */
+	public static Map<String, String> ALLOW_PARTIAL_UPDATE_FAIL_TABLE_MAP;
 	public static List<String> CONFIG_TABLE_LIST;
 	public static List<String> DATABASE_LIST;
 
@@ -139,6 +143,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		TABLE_KEY_MAP.put(AllColumn.class.getSimpleName(), AllColumn.TABLE_NAME);
 		TABLE_KEY_MAP.put(AllTableComment.class.getSimpleName(), AllTableComment.TABLE_NAME);
 		TABLE_KEY_MAP.put(AllColumnComment.class.getSimpleName(), AllColumnComment.TABLE_NAME);
+
+        ALLOW_PARTIAL_UPDATE_FAIL_TABLE_MAP = new HashMap<>();
 
 		CONFIG_TABLE_LIST = new ArrayList<>();  // Table, Column 等是系统表 AbstractVerifier.SYSTEM_ACCESS_MAP.keySet());
 		CONFIG_TABLE_LIST.add(Function.class.getSimpleName());
@@ -777,6 +783,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public boolean limitSQLCount() {
 		return Log.DEBUG == false || AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
 	}
+	@Override
+	public boolean allowPartialUpdateFailed() {
+		return allowPartialUpdateFailed(getTable());
+	}
+    public static boolean allowPartialUpdateFailed(String table) {
+        return ALLOW_PARTIAL_UPDATE_FAIL_TABLE_MAP.containsKey(table);
+    }
 
 	@NotNull
 	@Override
