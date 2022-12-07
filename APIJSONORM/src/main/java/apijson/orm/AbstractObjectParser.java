@@ -722,22 +722,21 @@ public abstract class AbstractObjectParser implements ObjectParser {
         if (failedCount > 0) {
             allResult.put("failedCount", failedCount);
             allResult.put("failedIdList", failedIds);
-            if (firstFailThrow != null) {
-                if (firstFailThrow instanceof CommonException && firstFailThrow.getCause() != null) {
-                    firstFailThrow = firstFailThrow.getCause();
-                }
 
-                JSONObject failObj = new JSONObject(true);
-                failObj.put("index", firstFailIndex);
-                failObj.put(childKey, firstFailReq);
+            JSONObject failObj = new JSONObject(true);
+            failObj.put("index", firstFailIndex);
+            failObj.put(childKey, firstFailReq);
 
-                JSONObject obj = AbstractParser.extendErrorResult(failObj, firstFailThrow, parser.isRoot());
-                if (Log.DEBUG) {
-                    obj.put("trace:throw", firstFailThrow.getClass().getName());
-                    obj.put("trace:stack", firstFailThrow.getStackTrace());
-                }
-                allResult.put("firstFailed", obj);
+            if (firstFailThrow instanceof CommonException && firstFailThrow.getCause() != null) {
+                firstFailThrow = firstFailThrow.getCause();
             }
+            JSONObject obj = firstFailThrow == null ? failObj : AbstractParser.extendErrorResult(failObj, firstFailThrow, parser.isRoot());
+            if (Log.DEBUG && firstFailThrow != null) {
+                obj.put("trace:throw", firstFailThrow.getClass().getName());
+                obj.put("trace:stack", firstFailThrow.getStackTrace());
+            }
+
+            allResult.put("firstFailed", obj);
         }
         allResult.put(JSONResponse.KEY_COUNT, allCount);
         allResult.put(idKey + "[]", ids);
