@@ -713,7 +713,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		}
 
         int failedCount = failedIds == null ? 0 : failedIds.size();
-        if (failedCount >= allCount) {
+        if (failedCount > 0 && failedCount >= allCount) {
             throw new ServerException("批量新增/修改 " + key + ":[] 中 " + allCount + " 个子项全部失败！"
                     + "第 " + firstFailIndex + " 项失败原因：" + (firstFailThrow == null ? "" : firstFailThrow.getMessage()));
         }
