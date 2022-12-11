@@ -4660,7 +4660,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
 		if (explain && Log.DEBUG == false) { //不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
-			throw new UnsupportedOperationException("INFO 模式下不允许传 " + KEY_EXPLAIN + " ！");
+			throw new UnsupportedOperationException("非DEBUG模式, 不允许传 " + KEY_EXPLAIN + " ！");
 		}
 
 		String database = request.getString(KEY_DATABASE);
