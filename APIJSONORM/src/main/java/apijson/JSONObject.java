@@ -173,6 +173,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_ORDER);
 		TABLE_KEY_LIST.add(KEY_RAW);
 		TABLE_KEY_LIST.add(KEY_JSON);
+		TABLE_KEY_LIST.add(KEY_METHOD);
 	}
 
 	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>

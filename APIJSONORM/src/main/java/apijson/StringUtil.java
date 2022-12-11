@@ -354,7 +354,7 @@ public class StringUtil {
 		PATTERN_ALPHA = Pattern.compile("^[a-zA-Z]+$");
 		PATTERN_ALPHA_BIG = Pattern.compile("^[A-Z]+$");
 		PATTERN_ALPHA_SMALL = Pattern.compile("^[a-z]+$");
-		PATTERN_NAME = Pattern.compile("^[0-9a-zA-Z_:]+$");//已用55个中英字符测试通过
+		PATTERN_NAME = Pattern.compile("^[0-9a-zA-Z_.:]+$");//已用55个中英字符测试通过
 		//newest phone regex expression reference https://github.com/VincentSit/ChinaMobilePhoneNumberRegex
 		PATTERN_PHONE = Pattern.compile("^1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[0-35-9]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[0-35-9]\\d{2}|6[2567]\\d{2}|4(?:(?:10|4[01])\\d{3}|[68]\\d{4}|[579]\\d{2}))\\d{6}$");
 		PATTERN_EMAIL = Pattern.compile("^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$");
