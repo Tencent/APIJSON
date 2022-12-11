@@ -48,7 +48,11 @@ import static apijson.RequestMethod.GET;
  */
 public abstract class AbstractParser<T extends Object> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
 	protected static final String TAG = "AbstractParser";
-	protected Map<Object, RequestMethod> keyMethodMap = new HashMap<>();
+	
+	/**
+	 * json对象、数组对应的数据源、版本、角色、method等
+	 */
+	protected Map<Object, Map<String, Object>> keyObjectAttributesMap = new HashMap<>();
 	/**
 	 * 可以通过切换该变量来控制是否打印关键的接口请求内容。保守起见，该值默认为false。
 	 * 与 {@link Log#DEBUG} 任何一个为 true 都会打印关键的接口请求内容。
@@ -1158,7 +1162,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
-		if (isSubquery == false && RequestMethod.isGetMethod(requestMethod, true) == false) {
+		RequestMethod _method = request.get(apijson.JSONObject.KEY_METHOD) == null ? requestMethod : RequestMethod.valueOf(request.getString(apijson.JSONObject.KEY_METHOD));
+		if (isSubquery == false && RequestMethod.isGetMethod(_method, true) == false) {
 			throw new UnsupportedOperationException("key[]:{} 只支持 GET, GETS 方法！其它方法不允许传 " + name + ":{} 等这种 key[]:{} 格式！");
 		}
 		if (request == null || request.isEmpty()) { // jsonKey-jsonValue 条件
@@ -1913,7 +1918,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				JSONObject res = getSQLExecutor().execute(config, false);
 
 				//如果是查询方法，才能执行explain
-				if (RequestMethod.isQueryMethod(config.getMethod())){
+				if (RequestMethod.isQueryMethod(config.getMethod()) && config.isElasticsearch() == false){
 					config.setExplain(explain);
 					JSONObject explainResult = config.isMain() && config.getPosition() != 0 ? null : getSQLExecutor().execute(config, false);
 
@@ -2083,6 +2088,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 	private JSONObject batchVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request, int maxUpdateCount, SQLCreator creator) throws Exception {
 		JSONObject jsonObject = new JSONObject(true);
+		List<String> removeTmpKeys = new ArrayList<>(); // 请求json里面的临时变量,不需要带入后面的业务中,比如 @post、@get等
 		if (request.keySet() == null || request.keySet().size() == 0) {
 			throw new IllegalArgumentException("json对象格式不正确 ！,例如 \"User\": {}");
 		}
@@ -2098,59 +2104,117 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				if (key.startsWith("@")) {
 					try {
 						// 如果不匹配,异常不处理即可
-						RequestMethod l_method = RequestMethod.valueOf(key.substring(1).toUpperCase());
-						for(String objKey : StringUtil.split(request.getString(key))) {
-							keyMethodMap.put(objKey, l_method);
+						RequestMethod _method = RequestMethod.valueOf(key.substring(1).toUpperCase());
+						removeTmpKeys.add(key);
+						for (String objKey : request.getJSONObject(key).keySet()) {
+							Map<String, Object> object_attributes_map = new HashMap<>();
+							object_attributes_map.put(apijson.JSONObject.KEY_METHOD, _method);
+							keyObjectAttributesMap.put(objKey, object_attributes_map);
+							JSONObject objAttrJson = request.getJSONObject(key).getJSONObject(objKey);
+							for (String objAttr : objAttrJson.keySet()) {
+								switch (objAttr) {
+								case apijson.JSONObject.KEY_DATASOURCE:
+									object_attributes_map.put(apijson.JSONObject.KEY_DATASOURCE, objAttrJson.getString(objAttr));
+									break;
+								case apijson.JSONObject.KEY_SCHEMA:
+									object_attributes_map.put(apijson.JSONObject.KEY_SCHEMA, objAttrJson.getString(objAttr));
+									break;
+								case apijson.JSONObject.KEY_DATABASE:
+									object_attributes_map.put(apijson.JSONObject.KEY_DATABASE, objAttrJson.getString(objAttr));
+									break;
+								case apijson.JSONObject.VERSION:
+									object_attributes_map.put(apijson.JSONObject.VERSION, objAttrJson.getString(objAttr));
+									break;
+								case apijson.JSONObject.KEY_ROLE:
+									object_attributes_map.put(apijson.JSONObject.KEY_ROLE, objAttrJson.getString(objAttr));
+									break;
+								default:
+									break;
+								}
+							}
 						}
+						continue;
 					} catch (Exception e) {
 					}
 				}
-
-				// 
+				
 				// 1、非crud,对于没有显式声明操作方法的，直接用 URL(/get, /post 等) 对应的默认操作方法
 				// 2、crud, 没有声明就用 GET
 				// 3、兼容 sql@ JSONObject,设置 GET方法
 				// 将method 设置到每个object, op执行会解析
 				if (request.get(key) instanceof JSONObject) {
-					if (keyMethodMap.get(key) == null) {
+					if (keyObjectAttributesMap.get(key) == null) {
 						// 数组会解析为对象进行校验,做一下兼容
-						if (keyMethodMap.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
-							if (method == RequestMethod.CRUD || (key.endsWith("@") && request.get(key) instanceof JSONObject)) {
+						if (keyObjectAttributesMap.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
+							if (method == RequestMethod.CRUD || key.endsWith("@")) {
 								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, GET);
-								keyMethodMap.put(key, GET);
+								if(keyObjectAttributesMap.get(key) == null) {
+									Map<String, Object> object_attributes_map = new HashMap<>();
+									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, GET);
+									keyObjectAttributesMap.put(key, object_attributes_map);
+								}else {
+									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, GET);
+								}
 							} else {
 								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, method);
-								keyMethodMap.put(key, method);
+								if(keyObjectAttributesMap.get(key) == null) {
+									Map<String, Object> object_attributes_map = new HashMap<>();
+									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, method);
+									keyObjectAttributesMap.put(key, object_attributes_map);
+								}else {
+									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, method);
+								}
 							}
 						} else {
-							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, keyMethodMap.get(key + apijson.JSONObject.KEY_ARRAY));
+							setRequestAttribute(key, true, apijson.JSONObject.KEY_METHOD, request);
+							setRequestAttribute(key, true, apijson.JSONObject.KEY_DATASOURCE, request);
+							setRequestAttribute(key, true, apijson.JSONObject.KEY_SCHEMA, request);
+							setRequestAttribute(key, true, apijson.JSONObject.KEY_DATABASE, request);
+							setRequestAttribute(key, true, apijson.JSONObject.VERSION, request);
+							setRequestAttribute(key, true, apijson.JSONObject.KEY_ROLE, request);
 						}
 					} else {
-						request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, keyMethodMap.get(key));
+						setRequestAttribute(key, false, apijson.JSONObject.KEY_METHOD, request);
+						setRequestAttribute(key, false, apijson.JSONObject.KEY_DATASOURCE, request);
+						setRequestAttribute(key, false, apijson.JSONObject.KEY_SCHEMA, request);
+						setRequestAttribute(key, false, apijson.JSONObject.KEY_DATABASE, request);
+						setRequestAttribute(key, false, apijson.JSONObject.VERSION, request);
+						setRequestAttribute(key, false, apijson.JSONObject.KEY_ROLE, request);
 					}
 				}
-
+				
 				if (key.startsWith("@") || key.endsWith("@")) {
 					jsonObject.put(key, request.get(key));
 					continue;
 				}
-
 
 				if (request.get(key) instanceof JSONObject || request.get(key) instanceof JSONArray) {
 					RequestMethod  _method = null;
 					if (request.get(key) instanceof JSONObject) {
 						_method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
 					} else {
-						if (keyMethodMap.get(key) == null) {
+						if (keyObjectAttributesMap.get(key) == null) {
 							if (method == RequestMethod.CRUD) {
 								_method = GET;
-								keyMethodMap.put(key, GET);
+								if(keyObjectAttributesMap.get(key) == null) {
+									Map<String, Object> object_attributes_map = new HashMap<>();
+									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, GET);
+									keyObjectAttributesMap.put(key, object_attributes_map);
+								}else {
+									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, GET);
+								}
 							} else {
 								_method = method;
-								keyMethodMap.put(key, method);
+								if(keyObjectAttributesMap.get(key) == null) {
+									Map<String, Object> object_attributes_map = new HashMap<>();
+									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, method);
+									keyObjectAttributesMap.put(key, object_attributes_map);
+								}else {
+									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, method);
+								}
 							}
 						} else {
-							_method = keyMethodMap.get(key);
+							_method = (RequestMethod) keyObjectAttributesMap.get(key).get(apijson.JSONObject.KEY_METHOD);
 						}
 					}
 
@@ -2179,10 +2243,26 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				throw new Exception(e);
 			}
 		}
-
+		// 这里是requestObject ref request 的引用, 删除不需要的临时变量
+		for(String removeKey : removeTmpKeys) {
+			request.remove(removeKey);
+		}
 		return jsonObject;
 	}
 
+	private void setRequestAttribute(String key, boolean isArray, String attrKey, @NotNull JSONObject request) {
+		Object attrVal = null;
+		if(isArray) {
+			attrVal = keyObjectAttributesMap.get(key + apijson.JSONObject.KEY_ARRAY).get(attrKey);
+		}else {
+			attrVal = keyObjectAttributesMap.get(key).get(attrKey);
+		}
+		
+		if(attrVal != null && request.getJSONObject(key).get(attrKey) == null) {
+			// 如果对象内部已经包含该属性,不覆盖
+			request.getJSONObject(key).put(attrKey, attrVal);
+		}
+	}
 	/**
 	 * { "xxx:aa":{ "@tag": "" }}
 	 * 生成规则:
@@ -2231,8 +2311,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @return
 	 */
 	public RequestMethod getRealMethod(RequestMethod method, String key, Object value) {
-		if(method == CRUD && (value instanceof JSONObject || value instanceof JSONArray)) {
-			return this.keyMethodMap.get(key);
+		if(method == CRUD && key.startsWith("@") == false && (value instanceof JSONObject || value instanceof JSONArray)) {
+			return (RequestMethod)this.keyObjectAttributesMap.get(key).get(apijson.JSONObject.KEY_METHOD);
 		}
 		return method;
 	}

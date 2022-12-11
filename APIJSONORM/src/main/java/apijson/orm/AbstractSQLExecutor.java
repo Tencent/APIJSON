@@ -6,7 +6,6 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import java.io.BufferedReader;
-import java.rmi.ServerError;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -18,7 +17,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -27,7 +25,6 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -294,7 +291,12 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				}
 
 				result = AbstractParser.newSuccessResult();
-				result.put(JSONResponse.KEY_COUNT, rs.getLong(1));
+				// 兼容nosql,比如 elasticSearch-sql
+				if(config.isElasticsearch()) {
+					result.put(JSONResponse.KEY_COUNT, rs.getObject(1));
+				}else {
+					result.put(JSONResponse.KEY_COUNT, rs.getLong(1));
+				}
 				resultList = new ArrayList<>(1);
 				resultList.add(result);
 			}
@@ -1047,7 +1049,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 			long startTime = System.currentTimeMillis();
 			String column = rsmd.getColumnTypeName(position);
 			sqlResultDuration += System.currentTimeMillis() - startTime;
-
+			// nosql elasticSearch jdbc获取不到 字段类型
+			if(StringUtil.isEmpty(column)) {
+				return false;
+			}
 			//TODO CHAR和JSON类型的字段，getColumnType返回值都是1	，如果不用CHAR，改用VARCHAR，则可以用上面这行来提高性能。
 			//return rsmd.getColumnType(position) == 1;
 
@@ -1187,7 +1192,21 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (connection == null) { // || connection.isClosed()) {
 			return;
 		}
-		connection.rollback();
+		// 将所有连接进行回滚
+		Collection<Connection> connections = connectionMap.values();
+
+		if (connections != null) {
+			for (Connection connection : connections) {
+				try {
+					if (connection != null && connection.isClosed() == false) {
+						connection.rollback();
+					}
+				}
+				catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
@@ -1196,7 +1215,26 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (connection == null) { // || connection.isClosed()) {
 			return;
 		}
-		connection.rollback(savepoint);
+		
+		if(StringUtil.isEmpty(savepoint)) {
+			// 将所有连接进行回滚
+			Collection<Connection> connections = connectionMap.values();
+
+			if (connections != null) {
+				for (Connection connection : connections) {
+					try {
+						if (connection != null && connection.isClosed() == false) {
+							connection.rollback();
+						}
+					}
+					catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} else {
+			connection.rollback(savepoint);
+		}
 	}
 	@Override
 	public void commit() throws SQLException {
@@ -1205,7 +1243,22 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		if (connection == null) { // || connection.isClosed()) {
 			return;
 		}
-		connection.commit();
+		
+		// 将所有连接进行提交
+		Collection<Connection> connections = connectionMap.values();
+
+		if (connections != null) {
+			for (Connection connection : connections) {
+				try {
+					if (connection != null && connection.isClosed() == false) {
+						connection.commit();
+					}
+				}
+				catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	//事务处理 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
