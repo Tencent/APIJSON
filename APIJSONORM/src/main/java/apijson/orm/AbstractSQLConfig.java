@@ -73,6 +73,7 @@ import static apijson.RequestMethod.GETS;
 import static apijson.RequestMethod.HEADS;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
+import static apijson.JSONObject.KEY_METHOD;
 import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.ON;
@@ -1119,6 +1120,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	@Override
 	public String getQuote() {
+		if(isElasticsearch()) {
+			return "";
+		}
 		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() ? "`" : "\"";
 	}
 
@@ -3967,6 +3971,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		String range = subquery.getRange();
 		SQLConfig cfg = subquery.getConfig();
 
+		// 子查询  = 主语句 datasource
+		if(StringUtil.equals(this.getTable(), subquery.getFrom() )  == false  && cfg.hasJoin() == false) {
+			cfg.setDatasource(this.getDatasource());
+		}
 		cfg.setPreparedValueList(new ArrayList<>());
 		String withAsExpreSql = withAsExpreSubqueryString(cfg, subquery);
 		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + withAsExpreSql + ") ";
@@ -4213,6 +4221,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			cSql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + config.getLimitString();
 			cSql = buildWithAsExpreSql(config, cSql);
+			if(config.isElasticsearch()) { // elasticSearch 不支持 explain
+				return cSql;
+			}
 			return explain + cSql;
 		}
 	}
@@ -4354,7 +4365,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
 				SQLConfig jc = j.getJoinConfig();
 				jc.setPrepared(isPrepared());
-
+				// 将关联表所属数据源配置为主表数据源
+				jc.setDatasource(this.getDatasource());
 				String jt = StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
 				List<On> onList = j.getOnList();
 
@@ -4648,7 +4660,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
 		if (explain && Log.DEBUG == false) { //不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
-			throw new UnsupportedOperationException("DEBUG 模式下不允许传 " + KEY_EXPLAIN + " ！");
+			throw new UnsupportedOperationException("非DEBUG模式, 不允许传 " + KEY_EXPLAIN + " ！");
 		}
 
 		String database = request.getString(KEY_DATABASE);
@@ -4835,6 +4847,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			request.remove(KEY_ORDER);
 			request.remove(KEY_RAW);
 			request.remove(KEY_JSON);
+			request.remove(KEY_METHOD);
 
 
 			// @null <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
