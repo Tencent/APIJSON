@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.activation.UnsupportedDataTypeException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.Query;
@@ -38,6 +37,7 @@ import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.orm.exception.CommonException;
+import apijson.orm.exception.UnsupportedDataTypeException;
 
 import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.RequestMethod.CRUD;

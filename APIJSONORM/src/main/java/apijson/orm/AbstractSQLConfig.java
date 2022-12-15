@@ -20,8 +20,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import javax.activation.UnsupportedDataTypeException;
-
 import apijson.JSON;
 import apijson.JSONResponse;
 import apijson.Log;
@@ -31,6 +29,7 @@ import apijson.SQL;
 import apijson.StringUtil;
 import apijson.orm.Join.On;
 import apijson.orm.exception.NotExistException;
+import apijson.orm.exception.UnsupportedDataTypeException;
 import apijson.orm.model.Access;
 import apijson.orm.model.AllColumn;
 import apijson.orm.model.AllColumnComment;

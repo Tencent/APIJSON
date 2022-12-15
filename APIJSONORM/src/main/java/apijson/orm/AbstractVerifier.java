@@ -41,8 +41,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 
-import javax.activation.UnsupportedDataTypeException;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -56,6 +54,7 @@ import apijson.StringUtil;
 import apijson.orm.AbstractSQLConfig.IdCallback;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.NotLoggedInException;
+import apijson.orm.exception.UnsupportedDataTypeException;
 import apijson.orm.model.Access;
 import apijson.orm.model.Column;
 import apijson.orm.model.Document;
