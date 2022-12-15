@@ -14,11 +14,11 @@ import apijson.orm.AbstractFunctionParser.FunctionBean;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.CommonException;
 import apijson.orm.exception.NotExistException;
+import apijson.orm.exception.UnsupportedDataTypeException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -9,8 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.concurrent.TimeoutException;
 
-import javax.activation.UnsupportedDataTypeException;
-
 import apijson.JSONResponse;
 import apijson.Log;
 import apijson.StringUtil;

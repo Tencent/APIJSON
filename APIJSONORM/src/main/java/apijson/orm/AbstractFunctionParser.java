@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.UnsupportedDataTypeException;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -27,6 +26,7 @@ import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import apijson.orm.exception.UnsupportedDataTypeException;
 
 /**可远程调用的函数类
  * @author Lemon
