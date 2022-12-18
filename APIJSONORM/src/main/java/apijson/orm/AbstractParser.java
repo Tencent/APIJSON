@@ -577,14 +577,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			return request;//需要指定JSON结构的get请求可以改为post请求。一般只有对安全性要求高的才会指定，而这种情况用明文的GET方式几乎肯定不安全
 		}
 
-//		if (StringUtil.isEmpty(tag, true)) {
-//			throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
-//		}
-
 		return batchVerify(method, tag, version, name, request, maxUpdateCount, creator);
 	}
-
-
+	
 	/**自动根据 tag 是否为 TableKey 及是否被包含在 object 内来决定是否包装一层，改为 { tag: object, "tag": tag }
 	 * @param object
 	 * @param tag
@@ -884,7 +879,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	@Override
 	public JSONObject parseCorrectRequest() throws Exception {
-		setTag(requestObject.getString(JSONRequest.KEY_TAG));
+		if(this.getMethod() != RequestMethod.CRUD) {
+			setTag(requestObject.getString(JSONRequest.KEY_TAG));
+		}
 		setVersion(requestObject.getIntValue(JSONRequest.KEY_VERSION));
 		requestObject.remove(JSONRequest.KEY_TAG);
 		requestObject.remove(JSONRequest.KEY_VERSION);
@@ -2128,6 +2125,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 								case apijson.JSONObject.KEY_ROLE:
 									object_attributes_map.put(apijson.JSONObject.KEY_ROLE, objAttrJson.getString(objAttr));
 									break;
+								case JSONRequest.KEY_TAG:
+									object_attributes_map.put(JSONRequest.KEY_TAG, objAttrJson.getString(objAttr));
+									break;
 								default:
 									break;
 								}
@@ -2229,12 +2229,14 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						continue;
 					}
 					
-					String _tag = buildTag(request, key);
+					String _tag = buildTag(request, key, method, tag);
 					JSONObject requestItem = new JSONObject();
-					requestItem.put(_tag, request.get(key));
+					// key 处理别名
+					String _key = keyDelAliase(key);
+					requestItem.put(_key, request.get(key));
 					JSONObject object = getRequestStructure(_method, _tag, version);
 					JSONObject ret = objectVerify(_method, _tag, version, name, requestItem, maxUpdateCount, creator, object);
-					jsonObject.put(key, ret.get(_tag));
+					jsonObject.put(key, ret.get(_key));
 				} else {
 					jsonObject.put(key, request.get(key));
 				}
@@ -2249,7 +2251,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 		return jsonObject;
 	}
-
+	
 	private void setRequestAttribute(String key, boolean isArray, String attrKey, @NotNull JSONObject request) {
 		Object attrVal = null;
 		if(isArray) {
@@ -2263,39 +2265,62 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			request.getJSONObject(key).put(attrKey, attrVal);
 		}
 	}
-	/**
-	 * { "xxx:aa":{ "@tag": "" }}
-	 * 生成规则:
-	 * 1、@tag存在,tag=@tag
-	 * 2、@tag不存在
-	 * 1)、存在别名
-	 * key=对象: tag=key去除别名
-	 * key=数组: tag=key去除别名 + []
-	 * 2)、不存在别名
-	 * tag=key
-	 * tag=key + []
-	 * @param request
-	 * @param key
-	 * @return
-	 */
-	private String buildTag(JSONObject request, String key) {
-		String _tag = null;
-		if (request.get(key) instanceof JSONObject && request.getJSONObject(key).getString("@tag") != null) {
-			_tag = request.getJSONObject(key).getString("@tag");
-		} else {
-			int keyIndex = key.indexOf(":");
-			if (keyIndex != -1) {
-				_tag = key.substring(0, keyIndex);
-				if (apijson.JSONObject.isTableArray(key)) {
-					_tag += apijson.JSONObject.KEY_ARRAY;
+	
+	private String keyDelAliase(String key) {
+		int keyIndex = key.indexOf(":");
+		if (keyIndex != -1) {
+			String _key = key.substring(0, keyIndex);
+			if (apijson.JSONObject.isTableArray(key)) {
+				_key += apijson.JSONObject.KEY_ARRAY;
+			}
+			return _key;
+		}
+		return key;
+	}
+	
+	private String buildTag(JSONObject request, String key, RequestMethod method, String tag) {
+		if (method == RequestMethod.CRUD) {
+			if (keyObjectAttributesMap.get(key) != null && keyObjectAttributesMap.get(key).get(JSONRequest.KEY_TAG) != null) {
+				if (request.get(key) instanceof JSONArray) {
+					return keyObjectAttributesMap.get(key).get(JSONRequest.KEY_TAG).toString();
+				} else {
+					tag = keyObjectAttributesMap.get(key).get(JSONRequest.KEY_TAG).toString();
 				}
 			} else {
-				// 不存在别名
-				_tag = key;
+				// key 作为默认的 tag
+				if (StringUtil.isEmpty(tag)) {
+					if (request.get(key) instanceof JSONArray) {
+						return keyDelAliase(key);
+					} else {
+						tag = key;
+					}
+				} else {
+					if (request.get(key) instanceof JSONArray) {
+						return tag;
+					}
+				}
+			}
+		} else {
+			if (StringUtil.isEmpty(tag, true)) {
+				throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
+			}
+			if (request.get(key) instanceof JSONArray) {
+				return tag;
 			}
 		}
-		return _tag;
+		
+		// 通用判断
+		// 对象, 需处理别名
+		if (request.get(key) instanceof JSONObject && StringUtil.isNotEmpty(tag)) {
+			int keyIndex = tag.indexOf(":");
+			if (keyIndex != -1) {
+				return tag.substring(0, keyIndex);
+			}
+			return tag;
+		}
+		return tag;
 	}
+	
 
 	protected JSONObject objectVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request, int maxUpdateCount, SQLCreator creator, JSONObject object) throws Exception {
 		// 获取指定的JSON结构 >>>>>>>>>>>>>>
@@ -2311,7 +2336,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @return
 	 */
 	public RequestMethod getRealMethod(RequestMethod method, String key, Object value) {
-		if(method == CRUD && key.startsWith("@") == false && (value instanceof JSONObject || value instanceof JSONArray)) {
+		if(method == CRUD && (value instanceof JSONObject || value instanceof JSONArray)) {
+			if (this.keyObjectAttributesMap.get(key) == null || this.keyObjectAttributesMap.get(key).get(apijson.JSONObject.KEY_METHOD) == null) {
+				return method;
+			}
 			return (RequestMethod)this.keyObjectAttributesMap.get(key).get(apijson.JSONObject.KEY_METHOD);
 		}
 		return method;
