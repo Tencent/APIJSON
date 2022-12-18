@@ -324,7 +324,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [爱投斯智能技术（深圳）有限公司](http://www.aiotos.net)
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个知乎基础研发架构师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
+主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -366,6 +366,14 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/311"><img src="https://avatars.githubusercontent.com/u/22066942?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/325"><img src="https://avatars.githubusercontent.com/u/33931153?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/443"><img src="https://avatars.githubusercontent.com/u/95326431?s=40&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/447"><img src="https://avatars.githubusercontent.com/u/46688?s=60&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/452"><img src="https://avatars.githubusercontent.com/u/45644893?s=60&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/456"><img src="https://avatars.githubusercontent.com/u/14543369?s=60&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/472"><img src="https://avatars.githubusercontent.com/u/22633385?s=60&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/480"><img src="https://avatars.githubusercontent.com/u/35208417?s=60&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/481"><img src="https://avatars.githubusercontent.com/u/12228225?s=60&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/483"><img src="https://avatars.githubusercontent.com/u/46614808?s=60&v=4"  height="54" width="54" ></a>
+  <a href="https://github.com/Tencent/APIJSON/pull/489"><img src="https://avatars.githubusercontent.com/u/3324416?s=60&v=4"  height="54" width="54" ></a>
 </div>
 <br />
 
