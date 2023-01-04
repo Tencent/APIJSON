@@ -47,8 +47,14 @@
 - [ifooling](https://github.com/ifooling)
 - [transtone](https://github.com/transtone)
 - [AwenJackson](https://github.com/AwenJackson)(上海信息出奇科技有限公司工程师，发布了 3 篇文章）
+- [andy19055](https://github.com/andy19055)
+- [glennliao](https://github.com/glennliao)(还开源了 [apijson-go](https://github.com/glennliao/apijson-go) 和 [apijson-go-ui](https://github.com/glennliao/apijson-go-ui)）
+- [eltociear](https://github.com/eltociear)
+- [wb04307201](https://github.com/wb04307201)(还开源了 [apijson-dynamic-datasource](https://github.com/wb04307201/apijson-dynamic-datasource)）
+- [cloudAndMonkey](https://github.com/cloudAndMonkey)(还贡献了 apijson-framework, APIJSON-Demo）
 
 #### 其中特别致谢: <br/>
+cloudAndMonkey 提交的 11 个 Commits, 对 APIJSON 做出了 1,496 增加和 845 处删减(截止 2022/12/15 日)； <br/>
 justinfengchen 提交的 6 个 Commits, 对 APIJSON 做出了 3,130 增加和 0 处删减(截止 2020/11/04 日)； <br/>
 ruoranw 提交的 18 个 Commits, 对 APIJSON 做出了 328 增加和 520 处删减(截止 2020/11/04 日)； <br/>
 Zerounary 提交的 6 个 Commits, 对 APIJSON 做出了 1,104 增加和 1 处删减(截止 2020/11/04 日)。 <br/>
