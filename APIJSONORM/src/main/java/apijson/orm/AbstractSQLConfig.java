@@ -4151,7 +4151,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@JSONField(serialize = false)
 	@Override
 	public String getSQL(boolean prepared) throws Exception {
-		return getSQL(this.setPrepared(prepared));
+		boolean isPrepared = isPrepared();
+		if (isPrepared == prepared) {
+			return getSQL(this);
+		}
+
+		String sql = getSQL(this.setPrepared(prepared));
+		setPrepared(isPrepared);
+		return sql;
 	}
 	/**
 	 * @param config

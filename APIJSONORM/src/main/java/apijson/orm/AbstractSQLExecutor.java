@@ -119,6 +119,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public JSONObject getCacheItem(String sql, int position, SQLConfig config) {
 		List<JSONObject> list = getCache(sql, config);
+		return getCacheItem(list, position, config);
+	}
+
+	public JSONObject getCacheItem(List<JSONObject> list, int position, SQLConfig config) {
 		// 只要 list 不为 null，则如果 list.get(position) == null，则返回 {} ，避免再次 SQL 查询
 		if (list == null) {
 			return null;
@@ -127,6 +131,10 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		JSONObject result = position >= list.size() ? null : list.get(position);
 		return result != null ? result : new JSONObject();
 	}
+
+
+
+
 
 	/**移除缓存
 	 * @param sql  key
@@ -168,9 +176,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	public JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception {
 		long executedSQLStartTime = System.currentTimeMillis();
 
-		boolean isPrepared = config.isPrepared();
 		final String sql = config.getSQL(false);
-		config.setPrepared(isPrepared);
 
 		if (StringUtil.isEmpty(sql, true)) {
 			Log.e(TAG, "execute  StringUtil.isEmpty(sql, true) >> return null;");
@@ -219,7 +225,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				//导致后面 rs.getMetaData() 报错 Operation not allowed after ResultSet closed		result.put("moreResults", statement.getMoreResults());
 			}
 			else {
-				switch (config.getMethod()) {
+				RequestMethod method = config.getMethod();
+				switch (method) {
 				case POST:
 				case PUT:
 				case DELETE:
@@ -250,17 +257,26 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 						result.put(idKey + "[]", config.getIdIn());
 					}
 
+					if (method == RequestMethod.PUT || method == RequestMethod.DELETE) {
+						config.setMethod(RequestMethod.GET);
+						removeCache(config.getSQL(false), config);
+						config.setMethod(method);
+					}
+
 					return result;
 
 				case GET:
 				case GETS:
 				case HEAD:
 				case HEADS:
-					result = isHead || isExplain ? null : getCacheItem(sql, position, config);
+					List<JSONObject> cache = getCache(sql, config);
+					result = getCacheItem(cache, position, config);
 					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
-						cachedSQLCount ++;
-						List<JSONObject> cache = getCache(sql, config);
+						if (isExplain == false) {
+							cachedSQLCount ++;
+						}
+
 						if (cache != null && cache.size() > 1) {
 							result.put(KEY_RAW_LIST, cache);
 						}
@@ -600,9 +616,13 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				config.setExplain(false);
 				result.put("sql", config.getSQL(false));
 				config.setExplain(isExplain);
-				config.setPrepared(isPrepared);
 			}
 			result.put("list", resultList);
+
+			if (unknownType == false) {
+				putCache(sql, Arrays.asList(result), config);
+			}
+
 			return result;
 		}
 
@@ -622,7 +642,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				putCache(entry.getKey(), entry.getValue(), null);
 			}
 
-			putCache(sql, resultList, config);
 			Log.i(TAG, ">>> execute  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
 			// 数组主表对象额外一次返回全部，方便 Parser 缓存来提高性能
@@ -637,6 +656,8 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 				result.put(KEY_RAW_LIST, resultList);
 			}
 		}
+
+		putCache(sql, resultList, config);
 
 		long endTime = System.currentTimeMillis();
 		Log.d(TAG, "\n\n execute  endTime = " + endTime + "; duration = " + (endTime - startTime)
@@ -727,7 +748,6 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 
 				boolean prepared = jc.isPrepared();
 				String sql = jc.getSQL(false);
-				jc.setPrepared(prepared);
 
 				if (StringUtil.isEmpty(sql, true)) {
 					throw new NullPointerException(TAG + ".executeAppJoin  StringUtil.isEmpty(sql, true) >> return null;");
