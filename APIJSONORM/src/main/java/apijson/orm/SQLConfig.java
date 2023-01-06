@@ -33,7 +33,8 @@ public interface SQLConfig {
 	String DATABASE_TRINO = "TRINO"; // PrestoSQL  https://trino.io
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
-
+	String DATABASE_REDIS = "REDIS";
+	String DATABASE_MQ = "MQ";
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -60,6 +61,8 @@ public interface SQLConfig {
 	boolean isTrino();
 	boolean isInfluxDB();
 	boolean isTDengine();
+	boolean isRedis();
+	boolean isMQ();
 
 
 	//暂时只兼容以上几种
@@ -317,4 +320,7 @@ public interface SQLConfig {
 	List<Object> getWithAsExprePreparedValueList();
 	void setWithAsExprePreparedValueList(List<Object> withAsExprePreparedValueList);
 
+	boolean isFakeDelete();
+	
+	void onFakeDelete(Map<String, Object> map);
 }

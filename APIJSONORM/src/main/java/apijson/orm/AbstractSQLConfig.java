@@ -68,8 +68,6 @@ import static apijson.JSONObject.KEY_SCHEMA;
 import static apijson.JSONObject.KEY_USER_ID;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
-import static apijson.RequestMethod.GETS;
-import static apijson.RequestMethod.HEADS;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
 import static apijson.JSONObject.KEY_METHOD;
@@ -171,7 +169,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		DATABASE_LIST.add(DATABASE_TRINO);
 		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
-
+		DATABASE_LIST.add(DATABASE_REDIS);
+		DATABASE_LIST.add(DATABASE_MQ);
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
 
@@ -1116,6 +1115,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return DATABASE_TDENGINE.equals(db);
 	}
 
+	@Override
+	public boolean isRedis() {
+		return isRedis(getSQLDatabase());
+	}
+	public static boolean isRedis(String db) {
+		return DATABASE_REDIS.equals(db);
+	}
+
+	@Override
+	public boolean isMQ() {
+		return isMQ(getSQLDatabase());
+	}
+	public static boolean isMQ(String db) {
+		return DATABASE_MQ.equals(db);
+	}
 
 	@Override
 	public String getQuote() {
@@ -4956,10 +4970,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 				//条件<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				String[] ws = StringUtil.split(combine);
-				if (ws != null && (method == DELETE || method == GETS || method == HEADS)) {
-					throw new IllegalArgumentException(table + ":{} 里的 @combine:value 不合法！DELETE,GETS,HEADS 请求不允许传 @combine:value !");
-				}
-
 				String combineExpr = ws == null || ws.length != 1 ? null : ws[0];
 
 				Map<String, List<String>> combineMap = new LinkedHashMap<>();
@@ -4991,28 +5001,44 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					whereList.add(userIdInKey);
 				}
 
+				if(config.isFakeDelete()) {
+					// 查询Access假删除
+					Map<String, Object> accessFakeDeleteMap = AbstractVerifier.ACCESS_FAKE_DELETE_MAP.get(config.getTable());
+					if (StringUtil.isNotEmpty(accessFakeDeleteMap.get("deletedKey"), true)) {
+						Map<String, Object> fakeDeleteMap = new HashMap<>();
+						boolean isFakeDelete = true;
+						if(method != DELETE) {
+							if(from != null) {
+								// 兼容 join 外层select 重复生成deletedKey
+								if(StringUtil.equals(table, from.getConfig().getTable())) {
+									isFakeDelete = false;
+								}
+								
+								if(from.getConfig().getJoinList() != null) {
+									for(Join join : from.getConfig().getJoinList()) {
+										if(StringUtil.equals(table, join.getTable())) {
+											isFakeDelete = false;
+											break;
+										}
+									}
+								}
+							}
+							if(isFakeDelete) {
+								fakeDeleteMap.put(accessFakeDeleteMap.get("deletedKey").toString()+"!", accessFakeDeleteMap.get("deletedValue"));
+								tableWhere.putAll(fakeDeleteMap);
+								andList.addAll(fakeDeleteMap.keySet());
+								whereList.addAll(fakeDeleteMap.keySet());
+							}
+						}
+					} 
+				}
+				
 				if (StringUtil.isNotEmpty(combineExpr, true)) {
 					List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
 					for (String key : banKeyList) {
-						String str = combineExpr;
-						while (str.isEmpty() == false) {
-							int index = str.indexOf(key);
-							if (index < 0) {
-								break;
-							}
-
-							char left = index <= 0 ? ' ' : str.charAt(index - 1);
-							char right = index >= str.length() - key.length() ? ' ' : str.charAt(index + key.length());
-							if ((left == ' ' || left == '(' || left == '&' || left == '|' || left == '!') && (right == ' ' || right == ')')) {
-								throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
-										+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
-							}
-
-							int newIndex = index + key.length() + 1;
-							if (str.length() <= newIndex) {
-								break;
-							}
-							str = str.substring(newIndex);
+						if(keyInCombineExpr(combineExpr, key)) {
+							throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
+									+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
 						}
 					}
 				}
@@ -5066,7 +5092,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+				
 				Map<String, Object> tableContent = new LinkedHashMap<String, Object>();
 				Object value;
 				for (String key : set) {
@@ -5076,18 +5102,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						throw new IllegalArgumentException(table + ":{ " + key + ":value } 中 value 类型错误！除了 key<>:{} 外，不允许 " + key + " 等其它任何 key 对应 value 的类型为 JSONObject {} !");
 					}
 
+					//兼容 PUT @combine
 					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-					if (isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false)) {
+					if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false)) || (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && keyInCombineExpr(combineExpr, key))) {
 						tableWhere.put(key, value);
 						if (whereList.contains(key) == false) {
 							andList.add(key);
 						}
-					}
-					else if (whereList.contains(key)) {
+					} else if (whereList.contains(key)) {
 						tableWhere.put(key, value);
-					}
-					else {
-						tableContent.put(key, value);  //一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
+					} else {
+						tableContent.put(key, value); //一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 					}
 				}
 
@@ -5102,6 +5127,20 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				config.setContent(tableContent);
 			}
 
+			if(method == DELETE) {
+				if(config.isFakeDelete()) {
+					//查询Access假删除
+					Map<String, Object> accessFakeDeleteMap = AbstractVerifier.ACCESS_FAKE_DELETE_MAP.get(config.getTable());
+					if (StringUtil.isNotEmpty(accessFakeDeleteMap.get("deletedKey"), true)) {
+						//​假删除需要更新的其他字段，比如：删除时间 deletedTime 之类的
+						Map<String, Object> fakeDeleteMap = new HashMap<>();
+						config.onFakeDelete(fakeDeleteMap);
+						fakeDeleteMap.put(accessFakeDeleteMap.get("deletedKey").toString(), accessFakeDeleteMap.get("deletedValue"));
+						config.setMethod(PUT);
+						config.setContent(fakeDeleteMap);
+					} 
+				}
+			}
 
 			List<String> cs = new ArrayList<>();
 
@@ -5494,14 +5533,12 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 		//TODO if (key.endsWith("-")) { // 表示 key 和 value 顺序反过来: value LIKE key
 
-		String last = null;//不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
-		if (RequestMethod.isQueryMethod(method)) {//逻辑运算符仅供GET,HEAD方法使用
-			last = key.isEmpty() ? "" : key.substring(key.length() - 1);
-			if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
-				key = key.substring(0, key.length() - 1);
-			} else {
-				last = null;//避免key + StringUtil.getString(last)错误延长
-			}
+		//不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
+		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
+		if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
+			key = key.substring(0, key.length() - 1);
+		} else {
+			last = null;//避免key + StringUtil.getString(last)错误延长
 		}
 
 		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好
@@ -5606,6 +5643,27 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	}
 
+	private static boolean keyInCombineExpr(String combineExpr, String key) {
+		while (combineExpr.isEmpty() == false) {
+			int index = combineExpr.indexOf(key);
+			if (index < 0) {
+				return false;
+			}
+
+			char left = index <= 0 ? ' ' : combineExpr.charAt(index - 1);
+			char right = index >= combineExpr.length() - key.length() ? ' ' : combineExpr.charAt(index + key.length());
+			if ((left == ' ' || left == '(' || left == '&' || left == '|' || left == '!') && (right == ' ' || right == ')')) {
+				return true;
+			}
+			int newIndex = index + key.length() + 1;
+			if (combineExpr.length() <= newIndex) {
+				break;
+			}
+			combineExpr = combineExpr.substring(newIndex);
+		}
+		return false;
+	}
+	
 	private void setWithAsExpreList() {
 		// mysql8版本以上,子查询支持with as表达式
 		if(this.isMySQL() && this.getDBVersionNums()[0] >= 8) {

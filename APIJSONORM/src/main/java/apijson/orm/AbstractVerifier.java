@@ -127,6 +127,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	public static Map<String, Map<RequestMethod, String[]>> SYSTEM_ACCESS_MAP;
 	@NotNull
 	public static Map<String, Map<RequestMethod, String[]>> ACCESS_MAP;
+	@NotNull
+	public static Map<String, Map<String, Object>> ACCESS_FAKE_DELETE_MAP;
 
 	// <method tag, <version, Request>>
 	// <PUT Comment, <1, { "method":"PUT", "tag":"Comment", "structure":{ "MUST":"id"... }... }>>
