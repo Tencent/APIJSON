@@ -15,6 +15,9 @@ http://apijson.cn/api <br />
 3.不影响现有功能的使用，不能让现有功能不可用或者使用更复杂 <br />
 
 #### 新增支持假删除
+20230106 更新：已支持，感谢 @cloudAndMonkey 的贡献 <br />
+https://github.com/Tencent/APIJSON/pull/493
+
 一般对于互联网项目，数据非常重要，基本不会物理删除， <br />
 只是用 is_deleted 等字段来标记已删除，然后 CRUD 时默认过滤已标记的记录。 <br />
 这个功能非常必要，可以通过重写 SQLConfig.isFakeDelete() 来标记， <br />
@@ -30,6 +33,8 @@ POST:  用不上，不处理 <br />
 然后读表自动配置是否为假删除 StringUtil.isNotEmpty(deletedKey, true) ，是假删除时 put 相应键值对。 <br />
  
 #### 新增支持 @having& 
+20220328 更新：5.0.0 已支持 <br />
+https://github.com/Tencent/APIJSON/releases/tag/5.0.0
 
 来实现内部条件 AND 连接，原来的 @having 由 AND 连接变为 OR 连接，保持 横或纵与 的统一规则。<br />
 @having! 必须性不大，可通过反转内部条件来实现，但如果实现简单、且不影响原来的功能，则可以顺便加上。<br />
@@ -44,8 +49,10 @@ POST:  用不上，不处理 <br />
 如果有有重合字段，则抛异常，转为错误码和错误信息返回。<br />
 
 #### 新增支持 TSQL 的 @explain
+20220809 更新：已支持 Oracle 的 EXPLAIN，感谢 @ifooling 的贡献 <br />
+https://github.com/Tencent/APIJSON/pull/434
 
-目前 APIJSON 支持 [Oracle](https://github.com/APIJSON/APIJSON-Demo/tree/master/Oracle) 和 [SQL Server](https://github.com/APIJSON/APIJSON-Demo/tree/master/SQLServer) 这两种 TSQL 数据库（群友测试 IBM DB2 也行）。<br />
+目前 APIJSON 支持 [Oracle](https://github.com/APIJSON/APIJSON-Demo/tree/master/Oracle), [SQL Server](https://github.com/APIJSON/APIJSON-Demo/tree/master/SQLServer), DB2 这 3 种 TSQL 数据库。<br />
 但是 "@explain": true 使用的是 SET STATISTICS PROFILE ON(具体见 [AbstractSQLConfig](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLConfig.java) 和 [AbstrctSQLExecutor](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstrctSQLExecutor.java))  <br />
 执行后居然是 SELECT 查到的放在默认的 ResultSet，性能分析放在 moreResult，<br />
 因为这个问题目前以上两个数据库的性能分析 @explain 实际并不可用，需要改用其它方式或解决现有方式的 bug。<br />
@@ -110,6 +117,8 @@ LIMIT 10 OFFSET 0
 
 
 #### 新增支持 With
+20221126 更新：已支持，感谢 @cloudAndMonkey 的贡献 <br /> 
+https://github.com/Tencent/APIJSON/pull/481
 
 可以减少子查询执行次数，提高性能。
 ```js
@@ -164,52 +173,55 @@ SELECT * FROM `sys`.`Comment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DES
 暂时还没有想好如何设计。如果是 SQL 原来的写法，则有点繁琐。<br />
 
 
-#### 新增支持 id/userId 与其它字段同时作为增删改条件
-AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = false
-就同时支持 id、其它条件删除
+#### 新增支持 id 与其它字段同时作为增删改条件
+AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = false <br />
+就同时支持 id、其它条件删除 <br />
 https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java#L84-L86
 
-但因为 Operation 没有 AT_LEAST_ONE/ANY_ONE 这样的操作，
-所以如果只配置一条规则，只能允许 MUST 配置传一种条件，不能单独 传 id 和 其它字段都行。
-
-如果都传了，因为 id 强制作为 AND 条件，所以不能和其它条件 OR，
-可以配置两条不同规则，用不同的 tag 对应使用不同的条件。
-
-method: DELETE
-通过 id 删除
+但因为 Operation 没有 AT_LEAST_ONE/ANY_ONE 这样的操作， <br />
+所以如果只配置一条规则，只能允许 MUST 配置传一种条件，不能单独传 id/其它字段。 <br />
+ <br />
+如果都传了，因为 id 强制作为 AND 条件，所以不能和其它条件 OR， <br />
+可以配置两条不同规则，用不同的 tag 对应使用不同的条件。 <br />
+ <br />
+method: DELETE <br />
+通过 id 删除 <br />
 ```
 tag: Comment-by-id // 当然写成 Comment:id 等其它任何不符合表名格式的名称都可
 structure: ... "MUST":"id" ...
 ```
-
-通过 date 条件删除
+ <br />
+通过 date 条件删除 <br />
 ```
 tag: Comment-by-date
 structure: ... "MUST":"date" ...
 ```
-
-如果想只配置一条规则，则 Operation 加上 AT_LEAST_ONE/ANY_ONE ，然后配置
+ <br />
+如果想只配置一条规则，则 Operation 加上 AT_LEAST_ONE/ANY_ONE ，然后配置 <br />
 ```
 tag: Comment
 structure: ... "AT_LEAST_ONE":"id,date" ... // 至少传其中一个
 ```
-或
+或 <br />
 ```
 tag: Comment
 structure: ... "ANY_ONE":"id,date" ... // 必须传其中一个，不能同时传 2 个以上
 ```
-
-AT_LEAST_ONE/ANY_ONE 其中一个也可以通过扩展 MUST 来实现（目前看这种方式更好）
-"MUST":"id | date,其它" 通过 | 或来表示其中任何一个，注意左右一定要各有一个空格，因为可能有 "name|$" "id|{}" 等包含 "|" 的 key
+ <br />
+AT_LEAST_ONE/ANY_ONE 其中一个也可以通过扩展 MUST 来实现（目前看这种方式更好） <br />
+"MUST":"id | date,其它" 通过 | 或来表示其中任何一个，注意左右一定要各有一个空格，因为可能有 "name|$" "id|{}" 等包含 "|" 的 key <br />
 https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/Operation.java
 
+ <br />
 还可以设置更复杂的表达方式
-"MUST":"1:id | date,其它" // id,date 必须传其中一个，且不能多传
-"MUST":">=2:id | momentId | date,其它" // id,date 必须至少其中 2 个
-"MUST":"2+:id | momentId | date,其它" // id,date 必须至少其中 2 个，替代 >= 2
-"MUST":"2-:id | momentId | date,其它" // id,date 最多传其中 2 个，替代 <= 2
-
-这样的话就不用加 Operation 了，不过 AbstractVerifier 仍然要处理下 REFUSE 和 MUST 的互斥关系
+```
+"MUST":"1:id | date,其它" // id, date 必须传其中一个，且不能多传 <br />
+"MUST":">=2:id | momentId|{} | date>=,其它" // id, momentId|{}, date>= 必须至少其中 2 个
+"MUST":"2+:id | momentId|{} | date>=,其它" // id, momentId|{}, date>= 必须至少其中 2 个，替代 >= 2，更方便解析，并且不用考虑 >1, != 2 等其它各种不等式
+"MUST":"2-:id | momentId|{} | date>=,其它" // id, momentId|{}, date>= 最多传其中 2 个，替代 <= 2
+```
+ <br />
+这样的话就不用加 Operation 了，不过 AbstractVerifier 仍然要处理下 REFUSE 和 MUST 的互斥关系 <br />
 https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java#L1012-L1042
 <img width="1117" alt="image" src="https://user-images.githubusercontent.com/5738175/211016885-9e752b6c-94e5-46c0-b87d-a7be68387a9f.png">
 
@@ -222,6 +234,9 @@ https://github.com/Tencent/APIJSON/pull/493#issuecomment-1373376359
 
 ### 强化安全
 APIJSON 提供了各种安全机制，可在目前的基础上新增或改进。
+
+20220504 更新：新增插件 apijson-router，可控地对公网暴露类 RESTful 简单接口，内部转成 APIJSON 格式请求来执行。 <br />
+https://github.com/APIJSON/apijson-router
 
 #### 防越权操作
 
@@ -239,6 +254,7 @@ APIJSONORM 提供 [@MethodAccess](https://github.com/Tencent/APIJSON/blob/master
 
 目前有限流机制，getMaxQueryCount, getMaxUpdateCount, getMaxObjectCount, getMaxSQLCount, getMaxQueryDepth 等。 <br />
 https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/Parser.java <br />
+
 
 #### ...  //欢迎补充
 
@@ -263,6 +279,8 @@ https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/
 [完善功能](https://github.com/Tencent/APIJSON/blob/master/Roadmap.md#%E5%AE%8C%E5%96%84%E5%8A%9F%E8%83%BD) 中 Union 和 With 也是优化 SQL 性能的方式。 <br />
 
 #### 读写缓存
+20230105 更新：新增 Redis 缓存 Demo
+https://github.com/APIJSON/APIJSON-Demo/commit/060a10e56818b31ab332770815467af9f052c261
 
 在 [AbstractParser](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractParser.java) 使用了 HashMap<String, JSONObject> queryResultMap 存已解析的对象、总数等数据。<br />
 在 [AbstractSQLExecutor](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractSQLExecutor.java) 使用了 HashMap<String, JSONObject> cacheMap 存已通过 SQL 查出的结果集。<br />
@@ -325,8 +343,8 @@ https://github.com/ruoranw/APIJSONdocs <br />
 ### 丰富周边
 #### 新增或完善各种语言 ORM 库
 
-Go, Kotlin, Ruby 等。<br />
-https://github.com/APIJSON/APIJSON#%E7%94%9F%E6%80%81%E9%A1%B9%E7%9B%AE <br />
+Go, Node(js/ts), C#, PHP, Kotlin, Ruby 等。<br />
+https://github.com/Tencent/APIJSON#%E7%94%9F%E6%80%81%E9%A1%B9%E7%9B%AE <br />
 
 #### 新增或完善 Demo
 
@@ -336,6 +354,7 @@ Java, C#, PHP, Node, Python 等后端 Demo 及数据。<br />
 https://github.com/APIJSON/APIJSON-Demo <br />
 
 #### 新增扩展
+目前官方有 apijson-column, apijson-router 两个插件
 
 ##### 1.基于或整合 [APIJSONORM](https://github.com/Tencent/APIJSON/blob/master/APIJSONORM) 或 [apijson-framework](https://github.com/APIJSON/apijson-framework) 来实现的库/框架
 
