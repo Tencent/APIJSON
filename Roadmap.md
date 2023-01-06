@@ -164,6 +164,58 @@ SELECT * FROM `sys`.`Comment` WHERE ( (`userId` IN `sql` ) ) ORDER BY `date` DES
 暂时还没有想好如何设计。如果是 SQL 原来的写法，则有点繁琐。<br />
 
 
+#### 新增支持 id/userId 与其它字段同时作为增删改条件
+AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = false
+就同时支持 id、其它条件删除
+https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java#L84-L86
+
+但因为 Operation 没有 AT_LEAST_ONE/ANY_ONE 这样的操作，
+所以如果只配置一条规则，只能允许 MUST 配置传一种条件，不能单独 传 id 和 其它字段都行。
+
+如果都传了，因为 id 强制作为 AND 条件，所以不能和其它条件 OR，
+可以配置两条不同规则，用不同的 tag 对应使用不同的条件。
+
+method: DELETE
+通过 id 删除
+```
+tag: Comment-by-id // 当然写成 Comment:id 等其它任何不符合表名格式的名称都可
+structure: ... "MUST":"id" ...
+```
+
+通过 date 条件删除
+```
+tag: Comment-by-date
+structure: ... "MUST":"date" ...
+```
+
+如果想只配置一条规则，则 Operation 加上 AT_LEAST_ONE/ANY_ONE ，然后配置
+```
+tag: Comment
+structure: ... "AT_LEAST_ONE":"id,date" ... // 至少传其中一个
+```
+或
+```
+tag: Comment
+structure: ... "ANY_ONE":"id,date" ... // 必须传其中一个，不能同时传 2 个以上
+```
+
+AT_LEAST_ONE/ANY_ONE 其中一个也可以通过扩展 MUST 来实现（目前看这种方式更好）
+"MUST":"id | date,其它" 通过 | 或来表示其中任何一个，注意左右一定要各有一个空格，因为可能有 "name|$" "id|{}" 等包含 "|" 的 key
+https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/Operation.java
+
+还可以设置更复杂的表达方式
+"MUST":"1:id | date,其它" // id,date 必须传其中一个，且不能多传
+"MUST":">=2:id | momentId | date,其它" // id,date 必须至少其中 2 个
+"MUST":"2+:id | momentId | date,其它" // id,date 必须至少其中 2 个，替代 >= 2
+"MUST":"2-:id | momentId | date,其它" // id,date 最多传其中 2 个，替代 <= 2
+
+这样的话就不用加 Operation 了，不过 AbstractVerifier 仍然要处理下 REFUSE 和 MUST 的互斥关系
+https://github.com/Tencent/APIJSON/blob/master/APIJSONORM/src/main/java/apijson/orm/AbstractVerifier.java#L1012-L1042
+<img width="1117" alt="image" src="https://user-images.githubusercontent.com/5738175/211016885-9e752b6c-94e5-46c0-b87d-a7be68387a9f.png">
+
+##### 需求来源及具体讨论
+https://github.com/Tencent/APIJSON/pull/493#issuecomment-1373376359
+
 #### ...  //欢迎补充
 
 
