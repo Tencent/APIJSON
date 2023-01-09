@@ -39,6 +39,7 @@ import apijson.StringUtil;
 import apijson.orm.exception.CommonException;
 import apijson.orm.exception.UnsupportedDataTypeException;
 
+import static apijson.JSONObject.KEY_COMBINE;
 import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.RequestMethod.CRUD;
 import static apijson.RequestMethod.GET;
@@ -2192,6 +2193,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					RequestMethod  _method = null;
 					if (request.get(key) instanceof JSONObject) {
 						_method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
+						String combine = request.getJSONObject(key).getString(KEY_COMBINE);
+						if (combine != null && (_method == RequestMethod.DELETE || _method == RequestMethod.GETS || _method == RequestMethod.HEADS)) {
+							throw new IllegalArgumentException(key + ":{} 里的 @combine:value 不合法！DELETE,GETS,HEADS 请求不允许传 @combine:value !");
+						}
 					} else {
 						if (keyObjectAttributesMap.get(key) == null) {
 							if (method == RequestMethod.CRUD) {
