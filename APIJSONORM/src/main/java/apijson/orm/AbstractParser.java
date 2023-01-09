@@ -2194,8 +2194,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					if (request.get(key) instanceof JSONObject) {
 						_method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
 						String combine = request.getJSONObject(key).getString(KEY_COMBINE);
-						if (combine != null && (_method == RequestMethod.DELETE || _method == RequestMethod.GETS || _method == RequestMethod.HEADS)) {
-							throw new IllegalArgumentException(key + ":{} 里的 @combine:value 不合法！DELETE,GETS,HEADS 请求不允许传 @combine:value !");
+						if (combine != null && RequestMethod.isPublicMethod(_method) == false) {
+							throw new IllegalArgumentException(key + ":{} 里的 @combine:value 不合法！开放请求 GET、HEAD 才允许传 @combine:value !");
 						}
 					} else {
 						if (keyObjectAttributesMap.get(key) == null) {
