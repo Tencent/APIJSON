@@ -28,17 +28,8 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONArray;
@@ -134,6 +125,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	// <PUT Comment, <1, { "method":"PUT", "tag":"Comment", "structure":{ "MUST":"id"... }... }>>
 	@NotNull
 	public static Map<String, SortedMap<Integer, JSONObject>> REQUEST_MAP;
+	private static String VERIFY_LENGTH_RULE = "(?<first>[>=<]*)(?<second>[0-9]*)";
+	private static Pattern VERIFY_LENGTH_PATTERN = Pattern.compile(VERIFY_LENGTH_RULE);
 
 	// 正则匹配的别名快捷方式，例如用 "PHONE" 代替 "^((13[0-9])|(15[^4,\\D])|(18[0-2,5-9])|(17[0-9]))\\d{8}$"
 	@NotNull
@@ -1445,6 +1438,26 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 				throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
 			}
 		}
+		else if (tk.endsWith("{L}")) { //字符串长度
+			if (tv instanceof String) {
+				logic = new Logic(tk.substring(0, tk.length() - 3));
+
+				rk = logic.getKey();
+				rv = real.get(rk);
+				if (rv == null) {
+					return;
+				}
+				String[] tvs = tv.toString().split(",");
+				for (String tvItem : tvs) {
+					if (!verifyRV(tvItem,rv.toString())) {
+						throw new IllegalArgumentException(rk + ":value 中value长度不合法！必须匹配 " + tk + ":" + tv + " !");
+					}
+				}
+			}
+			else {
+				throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
+			}
+		}
 		else if (tk.endsWith("<>")) { //rv包含tv内的值
 			logic = new Logic(tk.substring(0, tk.length() - 2));
 			rk = logic.getKey();
@@ -1483,6 +1496,45 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		else {
 			throw new IllegalArgumentException("服务器Request表verify配置错误！");
 		}
+	}
+
+	/**
+	 * 校验字符串长度
+	 *
+	 * @param rule	规则
+	 * @param content	内容
+	 * @return
+	 * @throws UnsupportedDataTypeException
+	 */
+	private static boolean verifyRV(String rule,String content) throws UnsupportedDataTypeException {
+		String first = null;
+		String second = null;
+		Matcher matcher = VERIFY_LENGTH_PATTERN.matcher(rule);
+		while (matcher.find()) {
+			first = StringUtil.isEmpty(first)?matcher.group("first"):first;
+			second = StringUtil.isEmpty(second)?matcher.group("second"):second;
+		}
+		// first和second为空表示规则不合法
+		if(StringUtil.isEmpty(first) || StringUtil.isEmpty(second)){
+			throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
+		}
+
+		int secondNum = Integer.parseInt(second);
+		switch (Objects.requireNonNull(first)){
+			case ">":
+				return content.length() > secondNum;
+			case ">=":
+				return content.length() >= secondNum;
+			case "<":
+				return content.length() < secondNum;
+			case "<=":
+				return content.length() <= secondNum;
+			case "<>":
+				return content.length() != secondNum;
+			default:
+		}
+		// 出现不能识别的符号也认为规则不合法
+		throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
 	}
 
 	/**通过数据库执行SQL语句来验证条件

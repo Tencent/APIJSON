@@ -54,6 +54,7 @@ public enum Operation {
 	 * {
 	 *   "phone~": "PHONE",  //phone 必须满足 PHONE 的格式，配置见 {@link AbstractVerifier#COMPILE_MAP}
 	 *   "status{}": [1,2,3],  //status 必须在给出的范围内
+	 *   "content{L}": ">0,<=255",  //content的长度 必须在给出的范围内
 	 *   "balance&{}":">0,<=10000"  //必须满足 balance>0 & balance<=10000
 	 * }
 	 */
