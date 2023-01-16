@@ -11,9 +11,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.orm.AbstractFunctionParser;
@@ -22,9 +19,6 @@ import apijson.orm.AbstractFunctionParser;
  * JSR223 script engine的统一实现抽象类
  */
 public abstract class JSR223ScriptExecutor implements ScriptExecutor {
-
-	protected final Logger log = LoggerFactory.getLogger(this.getClass());
-
 	protected ScriptEngine scriptEngine;
 
 	private final Map<String, CompiledScript> compiledScriptMap = new ConcurrentHashMap<>();
