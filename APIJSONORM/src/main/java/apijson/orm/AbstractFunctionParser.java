@@ -26,7 +26,9 @@ import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import apijson.framework.APIJSONApplication;
 import apijson.orm.exception.UnsupportedDataTypeException;
+import apijson.orm.script.ScriptExecutor;
 
 /**可远程调用的函数类
  * @author Lemon
@@ -47,11 +49,11 @@ public class AbstractFunctionParser implements FunctionParser {
 
 	// <methodName, JSONObject>
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
+    public static Map<String, ScriptExecutor> SCRIPT_EXECUTOR_MAP;
 	public static Map<String, JSONObject> FUNCTION_MAP;
-	public static Map<String, JSONObject> SCRIPT_MAP;
 	static {
 		FUNCTION_MAP = new HashMap<>();
-		SCRIPT_MAP = new HashMap<>();
+		SCRIPT_EXECUTOR_MAP = new HashMap<>();
 	}
 
 	private RequestMethod method;
@@ -198,20 +200,10 @@ public class AbstractFunctionParser implements FunctionParser {
             throw new UnsupportedOperationException("language = " + language + " 不合法！AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION" +
                     " == false 时不支持远程函数中的脚本形式！如需支持则设置 AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION = true ！");
         }
-        ScriptEngine engine = lang == null ? null : SCRIPT_ENGINE_MAP.get(lang);
-        if (lang != null) {
-            if (engine == null) {
-                engine = new ScriptEngineManager().getEngineByName(lang);
-            }
-            if (engine == null) {
-                engine = new ScriptEngineManager(null).getEngineByName(lang);
-            }
-            if (engine == null) {
-                throw new ClassNotFoundException("找不到脚本语言 " + language + " 对应的执行引擎！请先依赖相关库并在后端 ScriptEngineManager 中注册！");
-            }
-
-            SCRIPT_ENGINE_MAP.put(lang, engine);
-        }
+        
+		if (lang != null && SCRIPT_EXECUTOR_MAP.get(lang) == null) {
+			throw new ClassNotFoundException("找不到脚本语言 " + lang + " 对应的执行引擎！请先依赖相关库并在后端 APIJSONFunctionParser 中注册！");
+		}
 
 		int version = row.getIntValue("version");
 		if (parser.getVersion() < version) {
@@ -228,7 +220,7 @@ public class AbstractFunctionParser implements FunctionParser {
 		}
 
 		try {
-            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), row.getString("returnType"), currentObject, engine);
+            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), row.getString("returnType"), currentObject, SCRIPT_EXECUTOR_MAP.get(lang));
 		}
         catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
@@ -278,9 +270,9 @@ public class AbstractFunctionParser implements FunctionParser {
      */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType
-            , JSONObject currentObject, ScriptEngine engine) throws Exception {
-        if (engine != null) {
-            return invokeScript(parser, methodName, parameterTypes, args, returnType, currentObject, engine);
+            , JSONObject currentObject, ScriptExecutor scriptExecutor) throws Exception {
+        if (scriptExecutor != null) {
+            return invokeScript(parser, methodName, parameterTypes, args, returnType, currentObject, scriptExecutor);
         }
 
         Method m = parser.getClass().getMethod(methodName, parameterTypes); // 不用判空，拿不到就会抛异常
@@ -303,29 +295,6 @@ public class AbstractFunctionParser implements FunctionParser {
         return m.invoke(parser, args);
 	}
 
-    public static Invocable INVOCABLE;
-    public static ScriptEngine SCRIPT_ENGINE;
-    public static Map<String, ScriptEngine> SCRIPT_ENGINE_MAP;
-    static {
-        try {
-            System.setProperty("Dnashorn.args", "language=es6");
-            System.setProperty("Dnashorn.args", "--language=es6");
-            System.setProperty("-Dnashorn.args", "--language=es6");
-
-            /*获取执行JavaScript的执行引擎*/
-            SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("javascript");
-            INVOCABLE = (Invocable) SCRIPT_ENGINE;
-
-            SCRIPT_ENGINE_MAP = new HashMap<>();
-            SCRIPT_ENGINE_MAP.put("JavaScript", SCRIPT_ENGINE);
-            SCRIPT_ENGINE_MAP.put("javascript", SCRIPT_ENGINE);
-            SCRIPT_ENGINE_MAP.put("js", SCRIPT_ENGINE);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     /**Java 调用 JavaScript 函数
      * @param parser
      * @param methodName
@@ -337,78 +306,8 @@ public class AbstractFunctionParser implements FunctionParser {
      * @throws Exception
      */
     public static Object invokeScript(@NotNull AbstractFunctionParser parser, @NotNull String methodName
-            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject, ScriptEngine engine) throws Exception {
-        JSONObject row = SCRIPT_MAP.get(methodName);
-        if (row == null) {
-            throw new UnsupportedOperationException("调用的远程函数脚本 " + methodName + " 不存在!");
-        }
-
-        String script = row.getString("script");
-
-        if (engine == null) {
-            engine = SCRIPT_ENGINE;
-        }
-        engine.eval(script); // 必要，未执行导致下方 INVOCABLE.invokeFunction 报错 NoSuchMethod
-
-        //Object[] newArgs = args == null || args.length <= 0 ? null : new Object[args.length];
-
-        // APIJSON 远程函数不应该支持
-        //if (row.getBooleanValue("simple")) {
-        //    return SCRIPT_ENGINE.eval(script);
-        //}
-
-        Invocable invocable = engine instanceof Invocable ? (Invocable) engine : null;
-
-        Object result;
-        if (args == null || args.length <= 0) {
-            result = invocable.invokeFunction(methodName);
-        }
-        else {
-            //args[0] = JSON.toJSONString(args[0]);  // Java 调 js 函数只支持传基本类型，改用 invokeMethod ？
-
-            //for (int i = 0; i < args.length; i++) {
-            //    Object a = currentObject == null ? null : currentObject.get(args[i]);
-            //    newArgs[i] = a == null || apijson.JSON.isBooleanOrNumberOrString(a) ? a : JSON.toJSONString(a);
-            //}
-
-            // 支持 JSONObject
-            result = invocable.invokeFunction(methodName, args);
-            //result = INVOCABLE.invokeMethod(args[0], methodName, args);
-
-            //switch (newArgs.length) {
-            //    case 1:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0]);
-            //        break;
-            //    case 2:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1]);
-            //        break;
-            //    case 3:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2]);
-            //        break;
-            //    case 4:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3]);
-            //        break;
-            //    case 5:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4]);
-            //        break;
-            //    case 6:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5]);
-            //        break;
-            //    case 7:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6]);
-            //        break;
-            //    case 8:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6], newArgs[7]);
-            //        break;
-            //    case 9:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6], newArgs[7], newArgs[8]);
-            //        break;
-            //    case 10:
-            //        result = INVOCABLE.invokeFunction(methodName, newArgs[0], newArgs[1], newArgs[2], newArgs[3], newArgs[4], newArgs[5], newArgs[6], newArgs[7], newArgs[8], newArgs[9]);
-            //        break;
-            //}
-        }
-
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject, ScriptExecutor scriptExecutor) throws Exception {
+    	Object result = scriptExecutor.execute(parser, currentObject, methodName, args);
         if (Log.DEBUG && result != null) {
             Class<?> rt = result.getClass(); // 作为远程函数的 js 类型应该只有 JSON 的几种类型
             String fullReturnType = (StringUtil.isSmallName(returnType)

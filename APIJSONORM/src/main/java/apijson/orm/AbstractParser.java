@@ -2120,8 +2120,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 								case apijson.JSONObject.KEY_DATABASE:
 									object_attributes_map.put(apijson.JSONObject.KEY_DATABASE, objAttrJson.getString(objAttr));
 									break;
-								case apijson.JSONObject.VERSION:
-									object_attributes_map.put(apijson.JSONObject.VERSION, objAttrJson.getString(objAttr));
+								case JSONRequest.KEY_VERSION:
+									object_attributes_map.put(JSONRequest.KEY_VERSION, objAttrJson.getString(objAttr));
 									break;
 								case apijson.JSONObject.KEY_ROLE:
 									object_attributes_map.put(apijson.JSONObject.KEY_ROLE, objAttrJson.getString(objAttr));

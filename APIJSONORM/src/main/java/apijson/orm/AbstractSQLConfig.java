@@ -5004,7 +5004,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				if(config.isFakeDelete()) {
 					// 查询Access假删除
 					Map<String, Object> accessFakeDeleteMap = AbstractVerifier.ACCESS_FAKE_DELETE_MAP.get(config.getTable());
-					if (StringUtil.isNotEmpty(accessFakeDeleteMap.get("deletedKey"), true)) {
+					if (accessFakeDeleteMap != null && StringUtil.isNotEmpty(accessFakeDeleteMap.get("deletedKey"), true)) {
 						Map<String, Object> fakeDeleteMap = new HashMap<>();
 						boolean isFakeDelete = true;
 						if(method != DELETE) {
