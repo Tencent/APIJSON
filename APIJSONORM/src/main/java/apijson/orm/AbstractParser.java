@@ -15,15 +15,8 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -51,7 +44,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	protected static final String TAG = "AbstractParser";
 	
 	/**
-	 * json对象、数组对应的数据源、版本、角色、method等
+	 * JSON 对象、数组对应的数据源、版本、角色、method等
 	 */
 	protected Map<Object, Map<String, Object>> keyObjectAttributesMap = new HashMap<>();
 	/**
@@ -1417,17 +1410,17 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 			index = path.lastIndexOf("/");
 			String tableKey = index < 0 ? path : path.substring(0, index); // User:owner
-      int index2 = tableKey.lastIndexOf("/");
-      String arrKey = index2 < 0 ? null : tableKey.substring(0, index2);
-      if (arrKey != null && JSONRequest.isArrayKey(arrKey) == false) {
-        throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + " 不是合法的数组 key[] ！" +
-          "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
-      }
+			  int index2 = tableKey.lastIndexOf("/");
+			  String arrKey = index2 < 0 ? null : tableKey.substring(0, index2);
+			  if (arrKey != null && JSONRequest.isArrayKey(arrKey) == false) {
+				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + " 不是合法的数组 key[] ！" +
+				  "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
+			  }
 
-      tableKey = index2 < 0 ? tableKey : tableKey.substring(index2+1);
+			  tableKey = index2 < 0 ? tableKey : tableKey.substring(index2+1);
 
-      apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
-      String table = entry.getKey(); // User
+			  apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
+			  String table = entry.getKey(); // User
 			if (StringUtil.isName(table) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 Table 值 " + table + " 不合法！"
 						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
@@ -1445,9 +1438,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			JSONObject tableObj;
 			JSONObject parentPathObj;	// 保留
 			try {
-        parentPathObj = arrKey == null ? request : request.getJSONObject(arrKey);	// 保留
-        tableObj = parentPathObj == null ? null : parentPathObj.getJSONObject(tableKey);
-        if (tableObj == null) {
+				parentPathObj = arrKey == null ? request : request.getJSONObject(arrKey);	// 保留
+				tableObj = parentPathObj == null ? null : parentPathObj.getJSONObject(tableKey);
+				if (tableObj == null) {
 					throw new NullPointerException("tableObj == null");
 				}
 			}
@@ -1456,20 +1449,20 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
           "必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
 			}
 
-      if (arrKey != null) {
-        if (parentPathObj.get(JSONRequest.KEY_JOIN) != null) {
-          throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ join: value } 中 value 不合法！" +
-            "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
-        }
+		  if (arrKey != null) {
+			if (parentPathObj.get(JSONRequest.KEY_JOIN) != null) {
+			  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ join: value } 中 value 不合法！" +
+				"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
+			}
 
-        Integer subPage = parentPathObj.getInteger(JSONRequest.KEY_PAGE);
-        if (subPage != null && subPage != 0) {
-          throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ page: value } 中 value 不合法！" +
-            "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中 page 值只能为 null 或 0 ！");
-        }
-      }
+			Integer subPage = parentPathObj.getInteger(JSONRequest.KEY_PAGE);
+			if (subPage != null && subPage != 0) {
+			  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ page: value } 中 value 不合法！" +
+				"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中 page 值只能为 null 或 0 ！");
+			}
+		  }
 
-      boolean isAppJoin = "@".equals(joinType);
+		  boolean isAppJoin = "@".equals(joinType);
 
 			JSONObject refObj = new JSONObject(tableObj.size(), true);
 
@@ -1486,10 +1479,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
             + tableKey + ":{ " + key + ": value } 中 value 类型不合法！必须为同层级引用赋值路径 String！");
 				}
 
-        if (isAppJoin && StringUtil.isName(key.substring(0, key.length() - 1)) == false) {
-          throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + key + " 不合法 ！" +
-            "@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
-        }
+				if (isAppJoin && StringUtil.isName(key.substring(0, key.length() - 1)) == false) {
+				  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + key + " 不合法 ！" +
+					"@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
+				}
 
 				refObj.put(key, tableObj.getString(key));
 			}
@@ -1523,20 +1516,20 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						apijson.orm.Entry<String, String> te = tk == null || p.substring(ind2 + 1).indexOf("/") >= 0 ? null : Pair.parseEntry(tk, true);
 
 						if (te != null && JSONRequest.isTableKey(te.getKey()) && request.get(tk) instanceof JSONObject) {
-              if (isAppJoin) {
-                if (refObj.size() >= 1) {
-                  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + " 中 " + k + " 不合法！"
-                    + "@ APP JOIN 必须有且只有一个引用赋值键值对！");
-                }
+						  if (isAppJoin) {
+							if (refObj.size() >= 1) {
+							  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + " 中 " + k + " 不合法！"
+								+ "@ APP JOIN 必须有且只有一个引用赋值键值对！");
+							}
 
-                if (StringUtil.isName(k.substring(0, k.length() - 1)) == false) {
-                  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + k + " 不合法 ！" +
-                    "@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
-                }
-              }
+							if (StringUtil.isName(k.substring(0, k.length() - 1)) == false) {
+							  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + k + " 不合法 ！" +
+								"@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
+							}
+						  }
 
-              refObj.put(k, v);
-							continue;
+						  refObj.put(k, v);
+						  continue;
 						}
 					}
 
@@ -1583,8 +1576,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			j.setOuter((JSONObject) outer);
 			j.setRequest(requestObj);
 			if (arrKey != null) {
-        Integer count = parentPathObj.getInteger(JSONRequest.KEY_COUNT);
-        j.setCount(count == null ? getDefaultQueryCount() : count);
+				Integer count = parentPathObj.getInteger(JSONRequest.KEY_COUNT);
+				j.setCount(count == null ? getDefaultQueryCount() : count);
 			}
 
 			List<Join.On> onList = new ArrayList<>();
@@ -2058,14 +2051,12 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		queryResultMap = null;
 	}
 
-	private void setOpMethod(JSONObject request,ObjectParser op, String key) {
-		if(key != null && request.getString(apijson.JSONObject.KEY_METHOD) != null) {
-			String _method = request.getString(apijson.JSONObject.KEY_METHOD);
-			if( _method != null) {
-				RequestMethod method = RequestMethod.valueOf(_method.toUpperCase());
-				this.setMethod(method);
-				op.setMethod(method);
-			}
+	private void setOpMethod(JSONObject request, ObjectParser op, String key) {
+		String _method = key == null ? null : request.getString(apijson.JSONObject.KEY_METHOD);
+		if (_method != null) {
+			RequestMethod method = RequestMethod.valueOf(_method.toUpperCase());
+			this.setMethod(method);
+			op.setMethod(method);
 		}
 	}
 
@@ -2081,17 +2072,20 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		if (object == null) { // empty表示随意操作 || object.isEmpty()) {
 			throw new UnsupportedOperationException("找不到 version: " + version + ", method: " + method.name() + ", tag: " + tag + " 对应的 structure ！" + "非开放请求必须是后端 Request 表中校验规则允许的操作！\n " + error + "\n如果需要则在 Request 表中新增配置！");
 		}
+
 		return object;
 	}
 
-	private JSONObject batchVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request, int maxUpdateCount, SQLCreator creator) throws Exception {
+	protected JSONObject batchVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request, int maxUpdateCount, SQLCreator creator) throws Exception {
 		JSONObject jsonObject = new JSONObject(true);
 		List<String> removeTmpKeys = new ArrayList<>(); // 请求json里面的临时变量,不需要带入后面的业务中,比如 @post、@get等
-		if (request.keySet() == null || request.keySet().size() == 0) {
-			throw new IllegalArgumentException("json对象格式不正确 ！,例如 \"User\": {}");
+
+		Set<String> reqSet = request == null ? null : request.keySet();
+		if (reqSet == null || request.isEmpty()) {
+			throw new IllegalArgumentException("JSON 对象格式不正确 ！正确示例例如 \"User\": {}");
 		}
 
-		for (String key : request.keySet()) {
+		for (String key : reqSet) {
 			// key重复直接抛错(xxx:alias, xxx:alias[])
 			if (jsonObject.containsKey(key) || jsonObject.containsKey(key + apijson.JSONObject.KEY_ARRAY)) {
 				throw new IllegalArgumentException("对象名重复,请添加别名区分 ! ,重复对象名为: " + key);
@@ -2104,67 +2098,71 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						// 如果不匹配,异常不处理即可
 						RequestMethod _method = RequestMethod.valueOf(key.substring(1).toUpperCase());
 						removeTmpKeys.add(key);
-						for (String objKey : request.getJSONObject(key).keySet()) {
-							Map<String, Object> object_attributes_map = new HashMap<>();
-							object_attributes_map.put(apijson.JSONObject.KEY_METHOD, _method);
-							keyObjectAttributesMap.put(objKey, object_attributes_map);
-							JSONObject objAttrJson = request.getJSONObject(key).getJSONObject(objKey);
-							for (String objAttr : objAttrJson.keySet()) {
-								switch (objAttr) {
+
+						JSONObject obj = request.getJSONObject(key);
+						Set<String> set = obj == null ? new HashSet<>() : obj.keySet();
+
+						for (String objKey : set) {
+							if (objKey == null) {
+								continue;
+							}
+
+							Map<String, Object> objAttrMap = new HashMap<>();
+							objAttrMap.put(apijson.JSONObject.KEY_METHOD, _method);
+							keyObjectAttributesMap.put(objKey, objAttrMap);
+							JSONObject objAttrJson = obj.getJSONObject(objKey);
+							Set<Entry<String, Object>> objSet = objAttrJson == null ? new HashSet<>() : objAttrJson.entrySet();
+
+							for (Entry<String, Object> entry : objSet) {
+								String objAttrKey = entry == null ? null : entry.getKey();
+								if (objAttrKey == null) {
+									continue;
+								}
+
+								switch (objAttrKey) {
 								case apijson.JSONObject.KEY_DATASOURCE:
-									object_attributes_map.put(apijson.JSONObject.KEY_DATASOURCE, objAttrJson.getString(objAttr));
-									break;
 								case apijson.JSONObject.KEY_SCHEMA:
-									object_attributes_map.put(apijson.JSONObject.KEY_SCHEMA, objAttrJson.getString(objAttr));
-									break;
 								case apijson.JSONObject.KEY_DATABASE:
-									object_attributes_map.put(apijson.JSONObject.KEY_DATABASE, objAttrJson.getString(objAttr));
-									break;
 								case JSONRequest.KEY_VERSION:
-									object_attributes_map.put(JSONRequest.KEY_VERSION, objAttrJson.getString(objAttr));
-									break;
 								case apijson.JSONObject.KEY_ROLE:
-									object_attributes_map.put(apijson.JSONObject.KEY_ROLE, objAttrJson.getString(objAttr));
-									break;
 								case JSONRequest.KEY_TAG:
-									object_attributes_map.put(JSONRequest.KEY_TAG, objAttrJson.getString(objAttr));
+									objAttrMap.put(objAttrKey, entry.getValue());
 									break;
 								default:
 									break;
 								}
 							}
 						}
+
 						continue;
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
-				
+
 				// 1、非crud,对于没有显式声明操作方法的，直接用 URL(/get, /post 等) 对应的默认操作方法
 				// 2、crud, 没有声明就用 GET
 				// 3、兼容 sql@ JSONObject,设置 GET方法
 				// 将method 设置到每个object, op执行会解析
-				if (request.get(key) instanceof JSONObject) {
-					if (keyObjectAttributesMap.get(key) == null) {
+				Object obj = request.get(key);
+
+				if (obj instanceof JSONObject) {
+					Map<String, Object> attrMap = keyObjectAttributesMap.get(key);
+
+					if (attrMap == null) {
 						// 数组会解析为对象进行校验,做一下兼容
 						if (keyObjectAttributesMap.get(key + apijson.JSONObject.KEY_ARRAY) == null) {
 							if (method == RequestMethod.CRUD || key.endsWith("@")) {
-								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, GET);
-								if(keyObjectAttributesMap.get(key) == null) {
-									Map<String, Object> object_attributes_map = new HashMap<>();
-									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, GET);
-									keyObjectAttributesMap.put(key, object_attributes_map);
-								}else {
-									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, GET);
-								}
+								((JSONObject) obj).put(apijson.JSONObject.KEY_METHOD, GET);
+								Map<String, Object> objAttrMap = new HashMap<>();
+								objAttrMap.put(apijson.JSONObject.KEY_METHOD, GET);
+								keyObjectAttributesMap.put(key, objAttrMap);
 							} else {
-								request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, method);
-								if(keyObjectAttributesMap.get(key) == null) {
-									Map<String, Object> object_attributes_map = new HashMap<>();
-									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, method);
-									keyObjectAttributesMap.put(key, object_attributes_map);
-								}else {
-									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, method);
-								}
+								((JSONObject) obj).put(apijson.JSONObject.KEY_METHOD, method);
+								Map<String, Object> objAttrMap = new HashMap<>();
+								objAttrMap.put(apijson.JSONObject.KEY_METHOD, method);
+								keyObjectAttributesMap.put(key, objAttrMap);
 							}
 						} else {
 							setRequestAttribute(key, true, apijson.JSONObject.KEY_METHOD, request);
@@ -2183,43 +2181,45 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						setRequestAttribute(key, false, apijson.JSONObject.KEY_ROLE, request);
 					}
 				}
-				
+
 				if (key.startsWith("@") || key.endsWith("@")) {
-					jsonObject.put(key, request.get(key));
+					jsonObject.put(key, obj);
 					continue;
 				}
 
-				if (request.get(key) instanceof JSONObject || request.get(key) instanceof JSONArray) {
+				if (obj instanceof JSONObject || obj instanceof JSONArray) {
 					RequestMethod  _method = null;
-					if (request.get(key) instanceof JSONObject) {
+					if (obj instanceof JSONObject) {
 						_method = RequestMethod.valueOf(request.getJSONObject(key).getString(apijson.JSONObject.KEY_METHOD).toUpperCase());
 						String combine = request.getJSONObject(key).getString(KEY_COMBINE);
 						if (combine != null && RequestMethod.isPublicMethod(_method) == false) {
 							throw new IllegalArgumentException(key + ":{} 里的 @combine:value 不合法！开放请求 GET、HEAD 才允许传 @combine:value !");
 						}
 					} else {
-						if (keyObjectAttributesMap.get(key) == null) {
+						Map<String, Object> attrMap = keyObjectAttributesMap.get(key);
+
+						if (attrMap == null) {
 							if (method == RequestMethod.CRUD) {
 								_method = GET;
-								if(keyObjectAttributesMap.get(key) == null) {
-									Map<String, Object> object_attributes_map = new HashMap<>();
-									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, GET);
-									keyObjectAttributesMap.put(key, object_attributes_map);
-								}else {
-									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, GET);
+								if (attrMap == null) {
+									Map<String, Object> objAttrMap = new HashMap<>();
+									objAttrMap.put(apijson.JSONObject.KEY_METHOD, GET);
+									keyObjectAttributesMap.put(key, objAttrMap);
+								} else {
+									attrMap.put(apijson.JSONObject.KEY_METHOD, GET);
 								}
 							} else {
 								_method = method;
-								if(keyObjectAttributesMap.get(key) == null) {
-									Map<String, Object> object_attributes_map = new HashMap<>();
-									object_attributes_map.put(apijson.JSONObject.KEY_METHOD, method);
-									keyObjectAttributesMap.put(key, object_attributes_map);
-								}else {
-									keyObjectAttributesMap.get(key).put(apijson.JSONObject.KEY_METHOD, method);
+								if (attrMap == null) {
+									Map<String, Object> objAttrMap = new HashMap<>();
+									objAttrMap.put(apijson.JSONObject.KEY_METHOD, method);
+									keyObjectAttributesMap.put(key, objAttrMap);
+								} else {
+									attrMap.put(apijson.JSONObject.KEY_METHOD, method);
 								}
 							}
 						} else {
-							_method = (RequestMethod) keyObjectAttributesMap.get(key).get(apijson.JSONObject.KEY_METHOD);
+							_method = (RequestMethod) attrMap.get(apijson.JSONObject.KEY_METHOD);
 						}
 					}
 
@@ -2227,51 +2227,50 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					if (method != RequestMethod.CRUD && _method != method) {
 						throw new IllegalArgumentException("不支持在 " + method + " 中 " + _method + " ！");
 					}
-					
+
 					// get请求不校验
 					if (RequestMethod.isPublicMethod(_method)) {
-						jsonObject.put(key, request.get(key));
+						jsonObject.put(key, obj);
 						continue;
 					}
-					
+
 					String _tag = buildTag(request, key, method, tag);
 					JSONObject requestItem = new JSONObject();
 					// key 处理别名
-					String _key = keyDelAliase(key);
-					requestItem.put(_key, request.get(key));
+					String _key = keyDelAlias(key);
+					requestItem.put(_key, obj);
 					JSONObject object = getRequestStructure(_method, _tag, version);
 					JSONObject ret = objectVerify(_method, _tag, version, name, requestItem, maxUpdateCount, creator, object);
 					jsonObject.put(key, ret.get(_key));
 				} else {
-					jsonObject.put(key, request.get(key));
+					jsonObject.put(key, obj);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new Exception(e);
 			}
 		}
+
 		// 这里是requestObject ref request 的引用, 删除不需要的临时变量
-		for(String removeKey : removeTmpKeys) {
+		for (String removeKey : removeTmpKeys) {
 			request.remove(removeKey);
 		}
+
 		return jsonObject;
 	}
-	
-	private void setRequestAttribute(String key, boolean isArray, String attrKey, @NotNull JSONObject request) {
-		Object attrVal = null;
-		if(isArray) {
-			attrVal = keyObjectAttributesMap.get(key + apijson.JSONObject.KEY_ARRAY).get(attrKey);
-		}else {
-			attrVal = keyObjectAttributesMap.get(key).get(attrKey);
-		}
-		
-		if(attrVal != null && request.getJSONObject(key).get(attrKey) == null) {
+
+	protected void setRequestAttribute(String key, boolean isArray, String attrKey, @NotNull JSONObject request) {
+		Map<String, Object> attrMap = keyObjectAttributesMap.get(isArray ? key + apijson.JSONObject.KEY_ARRAY : key);
+		Object attrVal = attrMap == null ? null : attrMap.get(attrKey);
+		JSONObject obj = attrVal == null ? null : request.getJSONObject(key);
+
+		if (obj != null && obj.get(attrKey) == null) {
 			// 如果对象内部已经包含该属性,不覆盖
-			request.getJSONObject(key).put(attrKey, attrVal);
+			obj.put(attrKey, attrVal);
 		}
 	}
-	
-	private String keyDelAliase(String key) {
+
+	protected String keyDelAlias(String key) {
 		int keyIndex = key.indexOf(":");
 		if (keyIndex != -1) {
 			String _key = key.substring(0, keyIndex);
@@ -2282,25 +2281,30 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 		return key;
 	}
-	
-	private String buildTag(JSONObject request, String key, RequestMethod method, String tag) {
+
+	protected String buildTag(JSONObject request, String key, RequestMethod method, String tag) {
+		Object val = request.get(key);
+
 		if (method == RequestMethod.CRUD) {
-			if (keyObjectAttributesMap.get(key) != null && keyObjectAttributesMap.get(key).get(JSONRequest.KEY_TAG) != null) {
-				if (request.get(key) instanceof JSONArray) {
-					return keyObjectAttributesMap.get(key).get(JSONRequest.KEY_TAG).toString();
-				} else {
-					tag = keyObjectAttributesMap.get(key).get(JSONRequest.KEY_TAG).toString();
+			Map<String, Object> attrMap = keyObjectAttributesMap.get(key);
+			Object _tag = attrMap == null ? null : attrMap.get(JSONRequest.KEY_TAG);
+
+			if (_tag != null) {
+				if (val instanceof JSONArray) {
+					return _tag.toString();
 				}
+
+				tag = _tag.toString();
 			} else {
 				// key 作为默认的 tag
 				if (StringUtil.isEmpty(tag)) {
-					if (request.get(key) instanceof JSONArray) {
-						return keyDelAliase(key);
-					} else {
-						tag = key;
+					if (val instanceof JSONArray) {
+						return keyDelAlias(key);
 					}
+
+					tag = key;
 				} else {
-					if (request.get(key) instanceof JSONArray) {
+					if (val instanceof JSONArray) {
 						return tag;
 					}
 				}
@@ -2309,25 +2313,27 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			if (StringUtil.isEmpty(tag, true)) {
 				throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
 			}
-			if (request.get(key) instanceof JSONArray) {
+			if (val instanceof JSONArray) {
 				return tag;
 			}
 		}
 		
 		// 通用判断
 		// 对象, 需处理别名
-		if (request.get(key) instanceof JSONObject && StringUtil.isNotEmpty(tag)) {
+		if (val instanceof JSONObject && StringUtil.isNotEmpty(tag)) {
 			int keyIndex = tag.indexOf(":");
 			if (keyIndex != -1) {
 				return tag.substring(0, keyIndex);
 			}
 			return tag;
 		}
+
 		return tag;
 	}
 	
 
-	protected JSONObject objectVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request, int maxUpdateCount, SQLCreator creator, JSONObject object) throws Exception {
+	protected JSONObject objectVerify(RequestMethod method, String tag, int version, String name, @NotNull JSONObject request
+			, int maxUpdateCount, SQLCreator creator, JSONObject object) throws Exception {
 		// 获取指定的JSON结构 >>>>>>>>>>>>>>
 		JSONObject target = wrapRequest(method, tag, object, true);
 		// JSONObject clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
@@ -2341,12 +2347,14 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @return
 	 */
 	public RequestMethod getRealMethod(RequestMethod method, String key, Object value) {
-		if(method == CRUD && (value instanceof JSONObject || value instanceof JSONArray)) {
-			if (this.keyObjectAttributesMap.get(key) == null || this.keyObjectAttributesMap.get(key).get(apijson.JSONObject.KEY_METHOD) == null) {
-				return method;
+		if (method == CRUD && (value instanceof JSONObject || value instanceof JSONArray)) {
+			Map<String, Object> attrMap = keyObjectAttributesMap.get(key);
+			Object _method = attrMap == null ? null : attrMap.get(apijson.JSONObject.KEY_METHOD);
+			if (_method instanceof RequestMethod) {
+				return (RequestMethod) _method;
 			}
-			return (RequestMethod)this.keyObjectAttributesMap.get(key).get(apijson.JSONObject.KEY_METHOD);
 		}
+
 		return method;
 	}
 }
