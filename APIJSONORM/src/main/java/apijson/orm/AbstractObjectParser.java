@@ -249,17 +249,19 @@ public abstract class AbstractObjectParser implements ObjectParser {
 							break;
 						}
 
-                        Object value = entry.getValue();
+						String key = entry == null ? null : entry.getKey();
+						Object value = key == null ? null : entry.getValue();
 						if (value == null) {
 							continue;
 						}
-                        String key = entry.getKey();
-                        
+
                         // 处理url crud, 将crud 转换为真实method
                         RequestMethod _method = this.parser.getRealMethod(method, key, value);
-						// 没有执行校验流程的情况,比如url head, sql@子查询, sql@ method=GET 
-						if (key.endsWith("@") && request.get(key) instanceof JSONObject) {
-							request.getJSONObject(key).put(apijson.JSONObject.KEY_METHOD, GET);
+						// 没有执行校验流程的情况,比如url head, sql@子查询, sql@ method=GET
+
+						Object obj = key.endsWith("@") ? request.get(key) : null;
+						if (obj instanceof JSONObject) {
+							((JSONObject) obj).put(apijson.JSONObject.KEY_METHOD, GET);
 						}
                         
 						try {
