@@ -5,6 +5,12 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
+import apijson.Log;
+import apijson.NotNull;
+import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.orm.exception.UnsupportedDataTypeException;
+import apijson.orm.script.ScriptExecutor;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.util.TypeUtils;
@@ -12,23 +18,7 @@ import com.alibaba.fastjson.util.TypeUtils;
 import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
-import apijson.StringUtil;
-import apijson.framework.APIJSONApplication;
-import apijson.orm.exception.UnsupportedDataTypeException;
-import apijson.orm.script.ScriptExecutor;
+import java.util.*;
 
 /**可远程调用的函数类
  * @author Lemon
@@ -250,7 +240,7 @@ public class AbstractFunctionParser implements FunctionParser {
      * @param methodName
      * @param parameterTypes
      * @param args
-     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[], String, JSONObject, ScriptEngine)}
+     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[], String, JSONObject, ScriptExecutor)}
      * @throws Exception
      */
 	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
@@ -264,7 +254,7 @@ public class AbstractFunctionParser implements FunctionParser {
      * @param args
      * @param returnType
      * @param currentObject
-     * @param engine
+     * @param scriptExecutor
      * @return
      * @throws Exception
      */
