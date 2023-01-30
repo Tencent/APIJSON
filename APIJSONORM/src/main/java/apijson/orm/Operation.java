@@ -60,15 +60,17 @@ public enum Operation {
 	 */
 	VERIFY,
 	
-	/**TODO 格式改为 id;version,tag 兼容多个字段联合主键。 ["id", "version,tag"] 也行
+	/**
 	 * 验证是否存在，结构是
 	 * "key0,key1,key2..."
+	 * 多个字段用逗号隔开，联合校验
 	 */
 	EXIST,
 	
-	/**TODO 格式改为 id;version,tag 兼容多个字段联合主键。 ["id", "version,tag"] 也行
+	/**
 	 * 验证是否不存在，除了本身的记录，结构是
 	 * "key0,key1,key2..."
+	 * 多个字段用逗号隔开，联合校验
 	 */
 	UNIQUE,
 	
