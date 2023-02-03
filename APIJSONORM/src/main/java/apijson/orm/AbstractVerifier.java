@@ -1113,24 +1113,28 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
 
 		// TODO 放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
-		// 校验存在<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
+		// 校验存在<<<<<<<<<<<<<<<<<<<
 		String[] exists = StringUtil.split(exist);
 		if (exists != null && exists.length > 0) {
 			long exceptId = real.getLongValue(finalIdKey);
+			Map<String,Object> map = new HashMap<>();
 			for (String e : exists) {
-				verifyExist(name, e, real.get(e), exceptId, creator);
+				map.put(e,real.get(e));
 			}
+			verifyExist(name, map, exceptId, creator);
 		}
 		// 校验存在>>>>>>>>>>>>>>>>>>>
 
 		// TODO 放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
-		// 校验重复<<<<<<<<<<<<<<<<<<< TODO 格式改为 id;version,tag 兼容多个字段联合主键
+		// 校验重复<<<<<<<<<<<<<<<<<<<
 		String[] uniques = StringUtil.split(unique);
 		if (uniques != null && uniques.length > 0) {
 			long exceptId = real.getLongValue(finalIdKey);
+			Map<String,Object> map = new HashMap<>();
 			for (String u : uniques) {
-				verifyRepeat(name, u, real.get(u), exceptId, finalIdKey, creator);
+				map.put(u,real.get(u));
 			}
+			verifyRepeat(name, map, exceptId, finalIdKey, creator);
 		}
 		// 校验重复>>>>>>>>>>>>>>>>>>>
 
@@ -1595,11 +1599,25 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (value instanceof JSON) {
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
+		Map<String,Object> map = new HashMap<>();
+		map.put(key,value);
+		verifyExist(table,map,exceptId,creator);
+	}
 
+	/**验证是否存在
+	 * @param table
+	 * @param param
+	 * @throws Exception
+	 */
+	public static void verifyExist(String table, Map<String,Object> param, long exceptId, @NotNull SQLCreator creator) throws Exception {
+		if (param.isEmpty()) {
+			Log.e(TAG, "verifyExist is empty >> return;");
+			return;
+		}
 
 		SQLConfig config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);
-		config.putWhere(key, value, false);
+		param.forEach((key,value) -> config.putWhere(key, value, false));
 
 		SQLExecutor executor = creator.createSQLExecutor();
 		try {
@@ -1608,7 +1626,9 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 				throw new Exception("服务器内部错误  verifyExist  result == null");
 			}
 			if (result.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
-				throw new ConflictException(key + ": " + value + " 不存在！如果必要请先创建！");
+				StringBuilder sb = new StringBuilder();
+				param.forEach((key,value) -> sb.append("key:").append(key).append(" value:").append(value).append(" "));
+				throw new ConflictException(sb + "的数据不存在！如果必要请先创建！");
 			}
 		} finally {
 			executor.close();
@@ -1655,6 +1675,25 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (value instanceof JSON) {
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
+		Map<String,Object> map = new HashMap<>();
+		map.put(key,value);
+		verifyRepeat(table,map,exceptId,idKey,creator);
+	}
+
+	/**验证是否重复
+	 * TODO 与 AbstractVerifier.verifyRepeat 代码重复，需要简化
+	 * @param table
+	 * @param param
+	 * @param exceptId 不包含id
+	 * @param idKey
+	 * @param creator
+	 * @throws Exception
+	 */
+	public static void verifyRepeat(String table, Map<String,Object> param, long exceptId, String idKey, @NotNull SQLCreator creator) throws Exception {
+		if (param.isEmpty()) {
+			Log.e(TAG, "verifyRepeat is empty >> return;");
+			return;
+		}
 
 		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
 
@@ -1663,7 +1702,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (exceptId > 0) { //允许修改自己的属性为该属性原来的值
 			config.putWhere(finalIdKey + "!", exceptId, false);
 		}
-		config.putWhere(key, value, false);
+		param.forEach((key,value) -> config.putWhere(key,value, false));
 
 		SQLExecutor executor = creator.createSQLExecutor();
 		try {
@@ -1672,12 +1711,15 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 				throw new Exception("服务器内部错误  verifyRepeat  result == null");
 			}
 			if (result.getIntValue(JSONResponse.KEY_COUNT) > 0) {
-				throw new ConflictException(key + ": " + value + " 已经存在，不能重复！");
+				StringBuilder sb = new StringBuilder();
+				param.forEach((key,value) -> sb.append("key:").append(key).append(" value:").append(value).append(" "));
+				throw new ConflictException(sb + "的数据已经存在，不能重复！");
 			}
 		} finally {
 			executor.close();
 		}
 	}
+
 
 	public static String getCacheKeyForRequest(String method, String tag) {
 		return method + "/" + tag;
