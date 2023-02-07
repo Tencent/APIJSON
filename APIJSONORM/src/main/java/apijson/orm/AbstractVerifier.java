@@ -136,7 +136,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		ROLE_MAP.put(UNKNOWN, new Entry<String, Object>());
 		ROLE_MAP.put(LOGIN, new Entry<String, Object>("userId>", 0));
 		ROLE_MAP.put(CONTACT, new Entry<String, Object>("userId{}", "contactIdList"));
-		ROLE_MAP.put(CIRCLE, new Entry<String, Object>("userId-()", "verifyCircle()")); // "userId{}", "circleIdList"));  // 还是 {"userId":"currentUserId", "userId{}": "contactIdList", "@combine": "userId,userId{}" } ? 
+		ROLE_MAP.put(CIRCLE, new Entry<String, Object>("userId-()", "verifyCircle()")); // "userId{}", "circleIdList"));  // 还是 {"userId":"currentUserId", "userId{}": "contactIdList", "@combine": "userId,userId{}" } ?
 		ROLE_MAP.put(OWNER, new Entry<String, Object>("userId", "userId"));
 		ROLE_MAP.put(ADMIN, new Entry<String, Object>("userId-()", "verifyAdmin()"));
 
@@ -183,7 +183,16 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		REQUEST_MAP = new HashMap<>(ACCESS_MAP.size()*7);  // 单个与批量增删改
 
 		COMPILE_MAP = new HashMap<String, Pattern>();
+
+		COMPILE_MAP.put("PHONE",Pattern.compile("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$"));
+		COMPILE_MAP.put("QQ",Pattern.compile("[1-9][0-9]{4,}"));
+		COMPILE_MAP.put("EMAIL",Pattern.compile("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"));
+        COMPILE_MAP.put("IDCARD",Pattern.compile("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)"));
+		COMPILE_MAP.put("TEL",Pattern.compile("(^\\(\\d{3,4}-)|\\d{3,4}-\\)?\\d{7,8}$"));
+		COMPILE_MAP.put("IDCARD",Pattern.compile("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)"));
+
 	}
+
 
 	/**获取权限Map，每种操作都只允许对应的角色
 	 * @param access
@@ -272,7 +281,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		if (role == null) {
 			role = UNKNOWN;
 		}
-		else { 
+		else {
 			if (ROLE_MAP.containsKey(role) == false) {
 				Set<String> NAMES = ROLE_MAP.keySet();
 				throw new IllegalArgumentException("角色 " + role + " 不存在！" +
@@ -302,8 +311,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @param method
 	 * @param role
 	 * @return
-	 * @throws Exception 
-	 * @see {@link apijson.JSONObject#KEY_ROLE} 
+	 * @throws Exception
+	 * @see {@link apijson.JSONObject#KEY_ROLE}
 	 */
 	public void verifyAllowRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception {
 		Log.d(TAG, "verifyAllowRole  table = " + table + "; method = " + method + "; role = " + role);
@@ -333,8 +342,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 * @param method
 	 * @param role
 	 * @return
-	 * @throws Exception 
-	 * @see {@link apijson.JSONObject#KEY_ROLE} 
+	 * @throws Exception
+	 * @see {@link apijson.JSONObject#KEY_ROLE}
 	 */
 	public void verifyUseRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception {
 		Log.d(TAG, "verifyUseRole  table = " + table + "; method = " + method + "; role = " + role);
@@ -367,7 +376,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 			//key!{}:[] 或 其它没有明确id的条件 等 可以和key{}:list组合。类型错误就报错
 			requestId = config.getWhere(visitorIdKey, true);//JSON里数值不能保证是Long，可能是Integer
-			@SuppressWarnings("unchecked") 
+			@SuppressWarnings("unchecked")
 			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdKey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
 			if (requestId != null) {
 				if (requestIdArray == null) {
@@ -378,7 +387,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 			if (requestIdArray == null) {//可能是@得到 || requestIdArray.isEmpty()) {//请求未声明key:id或key{}:[...]条件，自动补全
 				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); //key{}:[]有效，SQLConfig里throw NotExistException
-			} 
+			}
 			else {//请求已声明key:id或key{}:[]条件，直接验证
 				for (Object id : requestIdArray) {
 					if (id == null) {
@@ -463,7 +472,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			if (((Number) visitorId).longValue() <= 0) {
 				throw new NotLoggedInException("未登录或登录过期，请登录后再操作！");
 			}
-		} 
+		}
 		else if (visitorId instanceof String) {
 			if (StringUtil.isEmpty(visitorId, true)) {
 				throw new NotLoggedInException("未登录或登录过期，请登录后再操作！");
@@ -925,7 +934,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		// 判断必要字段是否都有<<<<<<<<<<<<<<<<<<<
 		String[] musts = StringUtil.split(must);
 		Set<String> mustSet = new HashSet<String>();
-		
+
 		if (musts != null && musts.length > 0) {
 			for (String s : musts) {
 				if (real.get(s) == null && real.get(s+"@") == null) {  // 可能传null进来，这里还会通过 real.containsKey(s) == false) {
