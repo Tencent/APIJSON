@@ -564,15 +564,15 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON 服务端框架，通过数据库表配置角色权限、参数校验等，简化使用
 
-[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，可控地对公网暴露类 RESTful 简单接口，内部转成 APIJSON 格式请求来执行。
+[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，可控地对公网暴露类 RESTful 简单接口，内部转成 APIJSON 格式请求来执行
   
 [apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
 
-[APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释
+[APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释
 
-[UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性和可用性
+[UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习零代码单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性、可用性和性能
 
-[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具
+[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具，一键批量生成参数组合、快速构造大量测试数据
 
 [apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 官方文档，提供排版清晰、搜索方便的文档内容展示，包括设计规范、图文教程等
 
@@ -638,7 +638,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
   
 [apijson-dynamic-datasource](https://github.com/wb04307201/apijson-dynamic-datasource) 基于APIJSON，动态切换数据源、同一数据源批量操作事务一致性DEMO
   
-感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
+感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
 
   
 ### 腾讯犀牛鸟开源人才培养计划
