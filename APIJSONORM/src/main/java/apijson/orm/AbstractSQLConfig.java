@@ -2786,7 +2786,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				boolean isBlankOrRightParenthesis = c == ' ' || c == ')';
 				if (isOver || isBlankOrRightParenthesis) {
 					boolean isEmpty = StringUtil.isEmpty(key, true);
-					if (combineKeyNotNull == true && isEmpty && last != ')') {
+					if (combineKeyNotNull && isEmpty && last != ')') {
 						throw new IllegalArgumentException(errPrefix + " 中字符 '" + (isOver ? s : s.substring(i))
 								+ "' 不合法！" + (c == ' ' ? "空格 ' ' " : "右括号 ')'") + " 左边缺少条件 key ！逻辑连接符 & | 左右必须各一个相邻空格！"
 								+ "空格不能多也不能少！不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
