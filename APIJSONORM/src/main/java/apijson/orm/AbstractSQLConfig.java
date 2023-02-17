@@ -8,7 +8,6 @@ package apijson.orm;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2749,7 +2748,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 
 		String result = "";
-		String tmpResult = "";//存储临时计算结果
 
 		List<Object> preparedValues = getPreparedValueList();
 		if (preparedValues == null && isHaving == false) {
@@ -2778,15 +2776,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			char last = 0;
 			boolean first = true;
 			boolean isNot = false;
+
 			String key = "";
-			boolean combineKeyNotNull = true;
 			while (i <= n) {  // "date> | (contactIdList<> & (name*~ | tag&$))"
 				boolean isOver = i >= n;
 				char c = isOver ? 0 : s.charAt(i);
 				boolean isBlankOrRightParenthesis = c == ' ' || c == ')';
 				if (isOver || isBlankOrRightParenthesis) {
 					boolean isEmpty = StringUtil.isEmpty(key, true);
-					if (combineKeyNotNull && isEmpty && last != ')') {
+					if (isEmpty && last != ')') {
 						throw new IllegalArgumentException(errPrefix + " 中字符 '" + (isOver ? s : s.substring(i))
 								+ "' 不合法！" + (c == ' ' ? "空格 ' ' " : "右括号 ')'") + " 左边缺少条件 key ！逻辑连接符 & | 左右必须各一个相邻空格！"
 								+ "空格不能多也不能少！不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
@@ -2798,38 +2796,35 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 									+ "'" + s.substring(i - key.length() - (isOver ? 1 : 0)) + "' 不合法！左边缺少 & | 其中一个逻辑连接符！");
 						}
 
+						allCount ++;
 						if (allCount > maxCombineCount && maxCombineCount > 0) {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 key 数量 " + allCount + " 已超过最大值，必须在条件键值对数量 0-" + maxCombineCount + " 内！");
 						}
+
+						String column = key;
+						int keyIndex = column.indexOf(":");
+						column = keyIndex > 0 ? column.substring(0, keyIndex) : column;
+						Object value = conditionMap.get(column);
+						String wi = "";
+						if (value == null) {
+							isNot = false; // 以默认表达式为准
+							size++; // 兼容 key 数量判断
+							wi = keyIndex > 0 ? key.substring(keyIndex + 1) : "";
+							if(StringUtil.isEmpty(wi)) {
+								throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
+										+ "' 对应的条件键值对 " + column + ":value 不存在！");
+							}
+						} else {
+							wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
+						}
+						
 						if (1.0f*allCount/size > maxCombineRatio && maxCombineRatio > 0) {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 key 数量 " + allCount + " / 条件键值对数量 " + size + " = " + (1.0f*allCount/size)
 									+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
 						}
-
-						String column = key;
-
-						Object value = conditionMap.get(column);
-						if (value == null) {
-							if (RequestMethod.isQueryMethod(method)) {
-								JSONObject jsonCombineExpr = rebuidCombineExpr(table, s, result, tmpResult, key, i - 1, depth);
-								result = jsonCombineExpr.getString("result");
-								i = jsonCombineExpr.getInteger("index");
-								depth = jsonCombineExpr.getIntValue("depth");
-								last = result.length() == 0 ? 0 : result.charAt(result.length() -1);
-								last = i > 0 && i < s.length() ? s.charAt(i) == '(' ? '(' : 0 : 0; // 兼容后续判断
-								tmpResult = "";
-								key = "";
-								lastLogic = 0;
-								combineKeyNotNull = false;
-								continue;
-							}
-							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
-									+ "' 对应的条件键值对 " + column + ":value 不存在！");
-						}
-
-						String wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
+						
 						if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
 									+ "' 对应的 " + column + ":value 不是有效条件键值对！");
@@ -2841,17 +2836,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 '" + column + "' 重复引用，次数 " + count + " 已超过最大值，必须在 0-" + maxCombineKeyCount + " 内！");
 						}
-						allCount ++;
 						usedKeyCountMap.put(column, count);
-						result += tmpResult;
 						result += "( " + getCondition(isNot, wi) + " )";
-						tmpResult = "";
 						isNot = false;
 						first = false;
 					}
 
 					key = "";
-					combineKeyNotNull = true;
 					lastLogic = 0;
 
 					if (isOver) {
@@ -2869,7 +2860,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 									+ "不允许首尾有空格，也不允许连续空格！左括号 ( 的右边 和 右括号 ) 的左边 都不允许有相邻空格！");
 						}
 
-						tmpResult += SQL.AND;
+						result += SQL.AND;
 						lastLogic = c;
 						i ++;
 					}
@@ -2885,7 +2876,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 									+ "不允许首尾有空格，也不允许连续空格！左括号 ( 右边和右括号 ) 左边都不允许有相邻空格！");
 						}
 
-						tmpResult += SQL.OR;
+						result += SQL.OR;
 						lastLogic = c;
 						i ++;
 					}
@@ -2914,7 +2905,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					}
 
 					if (next == '(') {
-						tmpResult += SQL.NOT;
+						result += SQL.NOT;
 						lastLogic = c;
 					}
 					else if (last <= 0 || last == ' ' || last == '(') {
@@ -2938,7 +2929,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						+ "' 不合法！括号 (()) 嵌套层级 " + depth + " 已超过最大值，必须在 0-" + maxDepth + " 内！");
 					}
 
-					tmpResult += c;
+					result += c;
 					lastLogic = 0;
 					first = true;
 				}
@@ -2949,7 +2940,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						+ "' 不合法！左括号 ( 比 右括号 ) 少！数量必须相等从而完整闭合 (...) ！");
 					}
 
-					tmpResult += c;
+					result += c;
 					lastLogic = 0;
 				}
 				else {
@@ -2965,9 +2956,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						+ "' 不合法！左括号 ( 比 右括号 ) 多！数量必须相等从而完整闭合 (...) ！");
 			}
 		}
-		if(StringUtil.isNotEmpty(tmpResult)) {
-			result += tmpResult;
-		}
+
 		List<Object> exprPreparedValues = getPreparedValueList();
 		if (isHaving == false) {  // 只收集 AND 条件值
 			setPreparedValueList(new ArrayList<>());
@@ -3019,85 +3008,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return result;
 	}
 
-	private static JSONObject rebuidCombineExpr(String table, String combineExpr, String result, String tmpResult, String key, int index, int depth) {
-		boolean isBegin = index < 4 ? true : false; // 兼容 ((a)), ((!a)), key=a
-		boolean isEnd = index + 3 >= combineExpr.length() ? true : false; // 最多嵌套2层(())
-		char right = index + 1 >= combineExpr.length() ? 0 : combineExpr.charAt(index + 1);
-		boolean isNot = tmpResult.length() == 0 ? false : tmpResult.endsWith(SQL.NOT);
-		// 处理 (a) | b, ((a)) | b
-		boolean leftIsBracket = tmpResult.length() > 0 ?  tmpResult.charAt(tmpResult.length() - 1) == '(' ? true : false : false;
-		// @combine=key
-		if (isBegin && isEnd) {
-			//combine条件存在,至少保证传递一个参数
-			result = "";
-			index = combineExpr.length() -1;
-			depth = 0;
-		} else if (isNot) { // 处理 ((!a))
-			// 一层、两层、无括号
-		} else if (leftIsBracket && right == ')') {
-			result += tmpResult;
-		} else { // 4、无单key括号比如:((a))、(a)
-			boolean isRemleft = tmpResult.length() == 0 ? false : (tmpResult.endsWith(SQL.AND) | tmpResult.endsWith(SQL.OR) | tmpResult.endsWith(SQL.NOT)) ? true : false;
-			if (isRemleft || right == ')') { // 去除左边
-				if (tmpResult.endsWith(SQL.AND)) {
-					result += tmpResult.substring(0, tmpResult.length() - SQL.AND.length());
-				} else if (tmpResult.endsWith(SQL.OR)) {
-					result += tmpResult.substring(0, tmpResult.length() - SQL.OR.length());
-				}
-			} else if (right == ' '){ // 去除右边
-				// a | (b!~ & d!),(a | (b!~ & d!)) key = a,b!~
-				result += tmpResult;
-				index += 3;
-			}
-		}
-		
-		leftIsBracket = result.length() == 0 ? false : result.charAt(result.length() - 1) == '(' ? true : false;
-		if(leftIsBracket && right == ')') { // 多层括号
-			JSONObject json = bracketMatching(combineExpr, result, index, depth, true);
-			int resultLength = StringUtil.isEmpty(json.get("result")) ? 0 : json.getString("result").length();
-			leftIsBracket = resultLength == 0 ? false : json.getString("result").charAt(resultLength - 1) == '(' ? true : false;
-			right = json.getIntValue("index") >= combineExpr.length() ? 0 : combineExpr.charAt(json.getIntValue("index"));
-			if(leftIsBracket && right == ')') {
-				return bracketMatching(combineExpr, json.getString("result"), json.getIntValue("index"), json.getIntValue("depth"), false);
-			}
-			return json;
-		}
-		
-		JSONObject json = new JSONObject();
-		json.put("result", result);
-		json.put("index", ++index); // 从下一个下标开始遍历
-		json.put("depth", depth);
-		return json;
-	}
-	
-	private static JSONObject bracketMatching(String combineExpr, String result, int index, int depth, boolean isBracketOne) {
-		if (result.endsWith(SQL.AND + "(")) {
-			result = result.substring(0, result.length() - SQL.AND.length() - 1);
-			if(isBracketOne) {
-				++index;
-			}
-		} else if (result.endsWith(SQL.OR + "(")) {
-			result = result.substring(0, result.length() - SQL.OR.length() - 1);
-			if(isBracketOne) {
-				++index;
-			}
-		} else {
-			// 处理右侧
-			result = result.substring(0, result.length() -1);
-			char _right = index + 4  >= combineExpr.length() ? 0 : combineExpr.charAt(index + 2);
-			if (_right == ' ') {
-				index += 4;
-			} else {
-				index += 1;
-			}
-		}
-		JSONObject json = new JSONObject();
-		json.put("result", result);
-		json.put("index", ++index); // 从下一个下标开始遍历
-		json.put("depth", --depth);
-		return json;
-	}
-	
 	/**@combine:"a,b" 条件组合。虽然有了 @combine:"a | b" 这种新方式，但为了 Join 多个 On 能保证顺序正确，以及这个性能更好，还是保留这个方式
 	 * @param hasPrefix
 	 * @param method
