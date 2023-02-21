@@ -626,7 +626,11 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
 
+[apijson-go-demo](https://github.com/glennliao/apijson-go-demo) apijson-go demos，提供 3 个从简单到复杂的不同场景 Demo
+
 [apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
+
+[apijson-go-ui](https://github.com/glennliao/apijson-go-ui) apijson-go UI 界面配置, 支持权限管理、请求规则配置等
 
 [AbsGrade](https://github.com/APIJSON/AbsGrade) 列表级联算法，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
 
