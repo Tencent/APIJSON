@@ -454,7 +454,8 @@ https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 ### 我要赞赏
 创作不易，坚持更难，右上角点 ⭐Star 来支持/收藏下吧，谢谢 ^_^ <br />
-
+https://github.com/Tencent/APIJSON
+  
 <br />
 <br />
 <br />
@@ -470,22 +471,19 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 **往往没有额外的时间精力顾及一些小问题，请理解和支持，开源要大家参与贡献才会更美好~** <br >
 **少数个人的热情终有被耗尽的一天，只有大家共同建设和繁荣社区，才能让开源可持续发展！** <br >  
 
-**QQ 技术群**： 请在常见问题 Issue 中查找 <br >
-
 **开发者时间精力有限，原则上优先解决 登记用户 和 贡献者 的问题，** <br >
 **不解决 文档/视频/常见问题 已明确说明、描述简陋 或 态度无礼 的问题！** <br >
 **如果你已经多次得到帮助，却仍然只索取不贡献，那就别指望大家再帮你！** <br >
 **私聊作者请教技术问题 或者 频繁在互助群 @ 作者 可能会被拉黑/禁言/踢群，请尊重和理解，谢谢！** <br >
 
 如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
-作者只有解答完了这个专群里的全部问题，才看情况解答 Issue 里的问题(对 Issue 不保证解答、更不保证及时)；<br >
-其它群为互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
-甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，作者不再解答互助群问题，由群友互助解答，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)。<br >
+作者只有解答完了这个专群里的全部问题，才看情况解答 Issue/问卷 里的问题(对 Issue/问卷 不保证解答、更不保证及时)；<br >
+之前的几个互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
+甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)。<br >
 
-如果你为 APIJSON 做出了以下任何一个贡献： <br >
+如果你为 APIJSON 做出了以下任何一个贡献，我们将优先为你答疑解惑： <br >
 [提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
-可以在群里发出贡献链接并附带说明，管理员将设置关注你一段时间，优先答疑解惑。 <br >
-互助群一般解答顺序：贡献者 > 帮助他人的群友 > 带企业名昵称 > 带岗位名昵称 > 其他群友。
+Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任职企业的用户 > 其他用户。
   
 
 ### 相关推荐
@@ -564,15 +562,15 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON 服务端框架，通过数据库表配置角色权限、参数校验等，简化使用
 
-[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，可控地对公网暴露类 RESTful 简单接口，内部转成 APIJSON 格式请求来执行。
+[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，可控地对公网暴露类 RESTful 简单接口，内部转成 APIJSON 格式请求来执行
   
 [apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
 
-[APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释
+[APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释
 
-[UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性和可用性
+[UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习零代码单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性、可用性和性能
 
-[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具
+[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具，一键批量生成参数组合、快速构造大量测试数据
 
 [apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 官方文档，提供排版清晰、搜索方便的文档内容展示，包括设计规范、图文教程等
 
@@ -628,7 +626,11 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 
 [ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
 
+[apijson-go-demo](https://github.com/glennliao/apijson-go-demo) apijson-go demos，提供 3 个从简单到复杂的不同场景 Demo
+
 [apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
+
+[apijson-go-ui](https://github.com/glennliao/apijson-go-ui) apijson-go UI 界面配置, 支持权限管理、请求规则配置等
 
 [AbsGrade](https://github.com/APIJSON/AbsGrade) 列表级联算法，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
 
@@ -638,7 +640,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
   
 [apijson-dynamic-datasource](https://github.com/wb04307201/apijson-dynamic-datasource) 基于APIJSON，动态切换数据源、同一数据源批量操作事务一致性DEMO
   
-感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧。
+感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
 
   
 ### 腾讯犀牛鸟开源人才培养计划
