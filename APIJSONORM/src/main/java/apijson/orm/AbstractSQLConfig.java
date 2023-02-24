@@ -2801,30 +2801,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 key 数量 " + allCount + " 已超过最大值，必须在条件键值对数量 0-" + maxCombineCount + " 内！");
 						}
-
-						String column = key;
-						int keyIndex = column.indexOf(":");
-						column = keyIndex > 0 ? column.substring(0, keyIndex) : column;
-						Object value = conditionMap.get(column);
-						String wi = "";
-						if (value == null) {
-							isNot = false; // 以默认表达式为准
-							size++; // 兼容 key 数量判断
-							wi = keyIndex > 0 ? key.substring(keyIndex + 1) : "";
-							if(StringUtil.isEmpty(wi)) {
-								throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
-										+ "' 对应的条件键值对 " + column + ":value 不存在！");
-							}
-						} else {
-							wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
-						}
-						
 						if (1.0f*allCount/size > maxCombineRatio && maxCombineRatio > 0) {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 key 数量 " + allCount + " / 条件键值对数量 " + size + " = " + (1.0f*allCount/size)
 									+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
 						}
-						
+
+						String column = key;
+
+						Object value = conditionMap.get(column);
+						if (value == null) {
+							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
+									+ "' 对应的条件键值对 " + column + ":value 不存在！");
+						}
+
+						String wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
 						if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
 									+ "' 对应的 " + column + ":value 不是有效条件键值对！");
@@ -2837,6 +2828,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 									+ "其中 '" + column + "' 重复引用，次数 " + count + " 已超过最大值，必须在 0-" + maxCombineKeyCount + " 内！");
 						}
 						usedKeyCountMap.put(column, count);
+
 						result += "( " + getCondition(isNot, wi) + " )";
 						isNot = false;
 						first = false;
@@ -5130,9 +5122,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					combineMap.put("!", notList);
 				}
 				config.setCombineMap(combineMap);
-				//combineExpr = callback.onMissingKey4Combine(table, request, combineExpr, tableWhere);
 				config.setCombine(combineExpr);
-				
+
 				config.setContent(tableContent);
 			}
 
@@ -5614,16 +5605,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		 * @param request
 		 */
 		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
-		
-		/***
-		 * 前端 搜索条件动态生成@combine 表达式
-		 * 1、orm、route配置 @combine 表达式
-		 * Document json、Request structure 配置 @combine = a | (b & c)
-		 * 2、将 @combine 表达式 生成执行 @combine语句
-		 * 比如:传递参数a,b , 生成执行 combineExpr = a | b
-		 * @return
-		 */
-		public String onMissingKey4Combine(String name, JSONObject request, String combineExpr, Map<String, Object> tableWhere);
 	}
 
 	public static Long LAST_ID;
@@ -5660,10 +5641,6 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(name + ":{} 里的 @combine:value 中的value里 " + item + " 对应的条件 " + key + ":value 中 value 不能为 null！");
 		}
 
-		@Override
-		public String onMissingKey4Combine(String name, JSONObject request,  String combineExpr, Map<String, Object> tableWhere) {
-			return combineExpr;
-		}
 	}
 
 	private static boolean keyInCombineExpr(String combineExpr, String key) {
