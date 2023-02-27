@@ -2801,21 +2801,29 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 key 数量 " + allCount + " 已超过最大值，必须在条件键值对数量 0-" + maxCombineCount + " 内！");
 						}
+
+						String column = key;
+						int keyIndex = column.indexOf(":");
+						column = keyIndex > 0 ? column.substring(0, keyIndex) : column;
+						Object value = conditionMap.get(column);
+						String wi = "";
+						if (value == null && conditionMap.containsKey(column) == false) { // 兼容@null
+							isNot = false; // 以占位表达式为准
+							size++; // 兼容 key 数量判断
+							wi = keyIndex > 0 ? key.substring(keyIndex + 1) : "";
+							if (StringUtil.isEmpty(wi)) {
+								throw new IllegalArgumentException(errPrefix + " 中字符 '" + key + "' 对应的条件键值对 " + column + ":value 不存在！");
+							}
+						} else {
+							wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
+						}
+						
 						if (1.0f*allCount/size > maxCombineRatio && maxCombineRatio > 0) {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 key 数量 " + allCount + " / 条件键值对数量 " + size + " = " + (1.0f*allCount/size)
 									+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
 						}
-
-						String column = key;
-
-						Object value = conditionMap.get(column);
-						if (value == null) {
-							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
-									+ "' 对应的条件键值对 " + column + ":value 不存在！");
-						}
-
-						String wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
+						
 						if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
 									+ "' 对应的 " + column + ":value 不是有效条件键值对！");
@@ -3230,6 +3238,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			throw new IllegalArgumentException(TAG + ".getWhereItem: 字符 " + key + " 不合法！");
 		}
 
+		if (value == null) {
+			return null;
+		}
 
 		int keyType;
 		if (key.endsWith("$")) {
@@ -5652,7 +5663,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			char left = index <= 0 ? ' ' : combineExpr.charAt(index - 1);
 			char right = index >= combineExpr.length() - key.length() ? ' ' : combineExpr.charAt(index + key.length());
-			if ((left == ' ' || left == '(' || left == '&' || left == '|' || left == '!') && (right == ' ' || right == ')')) {
+			if ((left == ' ' || left == '(' || left == '&' || left == '|' || left == '!') && (right == ' ' || right == ')' || right == ':')) {
 				return true;
 			}
 			int newIndex = index + key.length() + 1;
