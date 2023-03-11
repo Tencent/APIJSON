@@ -22,6 +22,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.Query;
 
+
 import apijson.JSON;
 import apijson.JSONRequest;
 import apijson.JSONResponse;
@@ -2093,52 +2094,46 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 			// @post、@get等RequestMethod
 			try {
-				if (key.startsWith("@")) {
-					try {
-						// 如果不匹配,异常不处理即可
-						RequestMethod _method = RequestMethod.valueOf(key.substring(1).toUpperCase());
-						removeTmpKeys.add(key);
+				if (key.startsWith("@") && getEnum(RequestMethod.class, key.substring(1).toUpperCase(), null) != null) {
+					// 如果不匹配,异常不处理即可
+					RequestMethod _method = RequestMethod.valueOf(key.substring(1).toUpperCase());
+					removeTmpKeys.add(key);
 
-						JSONObject obj = request.getJSONObject(key);
-						Set<String> set = obj == null ? new HashSet<>() : obj.keySet();
+					JSONObject obj = request.getJSONObject(key);
+					Set<String> set = obj == null ? new HashSet<>() : obj.keySet();
 
-						for (String objKey : set) {
-							if (objKey == null) {
+					for (String objKey : set) {
+						if (objKey == null) {
+							continue;
+						}
+
+						Map<String, Object> objAttrMap = new HashMap<>();
+						objAttrMap.put(apijson.JSONObject.KEY_METHOD, _method);
+						keyObjectAttributesMap.put(objKey, objAttrMap);
+						JSONObject objAttrJson = obj.getJSONObject(objKey);
+						Set<Entry<String, Object>> objSet = objAttrJson == null ? new HashSet<>() : objAttrJson.entrySet();
+
+						for (Entry<String, Object> entry : objSet) {
+							String objAttrKey = entry == null ? null : entry.getKey();
+							if (objAttrKey == null) {
 								continue;
 							}
 
-							Map<String, Object> objAttrMap = new HashMap<>();
-							objAttrMap.put(apijson.JSONObject.KEY_METHOD, _method);
-							keyObjectAttributesMap.put(objKey, objAttrMap);
-							JSONObject objAttrJson = obj.getJSONObject(objKey);
-							Set<Entry<String, Object>> objSet = objAttrJson == null ? new HashSet<>() : objAttrJson.entrySet();
-
-							for (Entry<String, Object> entry : objSet) {
-								String objAttrKey = entry == null ? null : entry.getKey();
-								if (objAttrKey == null) {
-									continue;
-								}
-
-								switch (objAttrKey) {
-								case apijson.JSONObject.KEY_DATASOURCE:
-								case apijson.JSONObject.KEY_SCHEMA:
-								case apijson.JSONObject.KEY_DATABASE:
-								case JSONRequest.KEY_VERSION:
-								case apijson.JSONObject.KEY_ROLE:
-								case JSONRequest.KEY_TAG:
-									objAttrMap.put(objAttrKey, entry.getValue());
-									break;
-								default:
-									break;
-								}
+							switch (objAttrKey) {
+							case apijson.JSONObject.KEY_DATASOURCE:
+							case apijson.JSONObject.KEY_SCHEMA:
+							case apijson.JSONObject.KEY_DATABASE:
+							case JSONRequest.KEY_VERSION:
+							case apijson.JSONObject.KEY_ROLE:
+							case JSONRequest.KEY_TAG:
+								objAttrMap.put(objAttrKey, entry.getValue());
+								break;
+							default:
+								break;
 							}
 						}
-
-						continue;
 					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}
+					continue;
 				}
 
 				// 1、非crud,对于没有显式声明操作方法的，直接用 URL(/get, /post 等) 对应的默认操作方法
@@ -2259,6 +2254,17 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		return jsonObject;
 	}
 
+	public static <E extends Enum<E>> E getEnum(final Class<E> enumClass, final String enumName, final E defaultEnum) {
+        if (enumName == null) {
+            return defaultEnum;
+        }
+        try {
+            return Enum.valueOf(enumClass, enumName);
+        } catch (final IllegalArgumentException ex) {
+            return defaultEnum;
+        }
+    }
+	
 	protected void setRequestAttribute(String key, boolean isArray, String attrKey, @NotNull JSONObject request) {
 		Map<String, Object> attrMap = keyObjectAttributesMap.get(isArray ? key + apijson.JSONObject.KEY_ARRAY : key);
 		Object attrVal = attrMap == null ? null : attrMap.get(attrKey);
