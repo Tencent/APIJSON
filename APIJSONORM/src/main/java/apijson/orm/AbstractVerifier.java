@@ -75,14 +75,14 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	/**为 PUT, DELETE 强制要求必须有 id/id{} 条件
 	 */
 	public static boolean IS_UPDATE_MUST_HAVE_ID_CONDITION = true;
-    /**开启校验请求角色权限
-     */
-    public static boolean ENABLE_VERIFY_ROLE = true;
-    /**开启校验请求传参内容
-     */
-    public static boolean ENABLE_VERIFY_CONTENT = true;
+	/**开启校验请求角色权限
+	*/
+	public static boolean ENABLE_VERIFY_ROLE = true;
+	/**开启校验请求传参内容
+	*/
+	public static boolean ENABLE_VERIFY_CONTENT = true;
 
-    /**未登录，不明身份的用户
+	/**未登录，不明身份的用户
 	 */
 	public static final String UNKNOWN = "UNKNOWN";
 
@@ -163,14 +163,14 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		if (Log.DEBUG) {
 			SYSTEM_ACCESS_MAP.put(Table.class.getSimpleName(), getAccessMap(Table.class.getAnnotation(MethodAccess.class)));
-            SYSTEM_ACCESS_MAP.put(Column.class.getSimpleName(), getAccessMap(Column.class.getAnnotation(MethodAccess.class)));
+			SYSTEM_ACCESS_MAP.put(Column.class.getSimpleName(), getAccessMap(Column.class.getAnnotation(MethodAccess.class)));
 			SYSTEM_ACCESS_MAP.put(PgAttribute.class.getSimpleName(), getAccessMap(PgAttribute.class.getAnnotation(MethodAccess.class)));
-            SYSTEM_ACCESS_MAP.put(PgClass.class.getSimpleName(), getAccessMap(PgClass.class.getAnnotation(MethodAccess.class)));
-            SYSTEM_ACCESS_MAP.put(AllTable.class.getSimpleName(), getAccessMap(AllTable.class.getAnnotation(MethodAccess.class)));
-            SYSTEM_ACCESS_MAP.put(AllTableComment.class.getSimpleName(), getAccessMap(AllTableComment.class.getAnnotation(MethodAccess.class)));
-            SYSTEM_ACCESS_MAP.put(AllColumn.class.getSimpleName(), getAccessMap(AllColumn.class.getAnnotation(MethodAccess.class)));
-            SYSTEM_ACCESS_MAP.put(AllColumnComment.class.getSimpleName(), getAccessMap(AllColumnComment.class.getAnnotation(MethodAccess.class)));
-            SYSTEM_ACCESS_MAP.put(SysTable.class.getSimpleName(), getAccessMap(SysTable.class.getAnnotation(MethodAccess.class)));
+			SYSTEM_ACCESS_MAP.put(PgClass.class.getSimpleName(), getAccessMap(PgClass.class.getAnnotation(MethodAccess.class)));
+			SYSTEM_ACCESS_MAP.put(AllTable.class.getSimpleName(), getAccessMap(AllTable.class.getAnnotation(MethodAccess.class)));
+			SYSTEM_ACCESS_MAP.put(AllTableComment.class.getSimpleName(), getAccessMap(AllTableComment.class.getAnnotation(MethodAccess.class)));
+			SYSTEM_ACCESS_MAP.put(AllColumn.class.getSimpleName(), getAccessMap(AllColumn.class.getAnnotation(MethodAccess.class)));
+			SYSTEM_ACCESS_MAP.put(AllColumnComment.class.getSimpleName(), getAccessMap(AllColumnComment.class.getAnnotation(MethodAccess.class)));
+			SYSTEM_ACCESS_MAP.put(SysTable.class.getSimpleName(), getAccessMap(SysTable.class.getAnnotation(MethodAccess.class)));
 			SYSTEM_ACCESS_MAP.put(SysColumn.class.getSimpleName(), getAccessMap(SysColumn.class.getAnnotation(MethodAccess.class)));
 			SYSTEM_ACCESS_MAP.put(ExtendedProperty.class.getSimpleName(), getAccessMap(ExtendedProperty.class.getAnnotation(MethodAccess.class)));
 
@@ -183,13 +183,6 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		REQUEST_MAP = new HashMap<>(ACCESS_MAP.size()*7);  // 单个与批量增删改
 
 		COMPILE_MAP = new HashMap<String, Pattern>();
-
-		COMPILE_MAP.put("PHONE",Pattern.compile("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$"));
-		COMPILE_MAP.put("QQ",Pattern.compile("[1-9][0-9]{4,}"));
-		COMPILE_MAP.put("EMAIL",Pattern.compile("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"));
-        COMPILE_MAP.put("IDCARD",Pattern.compile("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)"));
-		COMPILE_MAP.put("TEL",Pattern.compile("(^\\(\\d{3,4}-)|\\d{3,4}-\\)?\\d{7,8}$"));
-		COMPILE_MAP.put("IDCARD",Pattern.compile("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)"));
 
 	}
 
@@ -267,10 +260,10 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 */
 	@Override
 	public boolean verifyAccess(SQLConfig config) throws Exception {
-        if (ENABLE_VERIFY_ROLE == false) {
-            throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_ROLE == false " +
+		if (ENABLE_VERIFY_ROLE == false) {
+			throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_ROLE == false " +
                     "时不支持校验角色权限！如需支持则设置 AbstractVerifier.ENABLE_VERIFY_ROLE = true ！");
-        }
+		}
 
 		String table = config == null ? null : config.getTable();
 		if (table == null) {
@@ -539,17 +532,17 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 
 	/**从request提取target指定的内容
-     * @param method
-     * @param name
-     * @param target
-     * @param request
-     * @param maxUpdateCount
-     * @param database
-     * @param schema
-     * @param creator
-     * @return
-     * @throws Exception
-     */
+	* @param method
+	* @param name
+	* @param target
+	* @param request
+	* @param maxUpdateCount
+	* @param database
+	* @param schema
+	* @param creator
+	* @return
+	* @throws Exception
+	*/
 	@Override
 	public JSONObject verifyRequest(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject request, final int maxUpdateCount
@@ -588,19 +581,19 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	}
 
 	/**从request提取target指定的内容
-     * @param method
-     * @param name
-     * @param target
-     * @param request
-     * @param maxUpdateCount
-     * @param database
-     * @param schema
-     * @param idCallback
-     * @param creator
-     * @return
-     * @param <T>
-     * @throws Exception
-     */
+	* @param method
+	* @param name
+	* @param target
+	* @param request
+	* @param maxUpdateCount
+	* @param database
+	* @param schema
+	* @param idCallback
+	* @param creator
+	* @return
+	* @param <T>
+	* @throws Exception
+	*/
 	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method
             , final String name, final JSONObject target, final JSONObject request
             , final int maxUpdateCount, final String database, final String schema
@@ -609,28 +602,28 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
                 , null, idCallback, creator);
 	}
 	/**从request提取target指定的内容
-     * @param method
-     * @param name
-     * @param target
-     * @param request
-     * @param maxUpdateCount
-     * @param database
-     * @param schema
-     * @param datasource
-     * @param idCallback
-     * @param creator
-     * @return
-     * @param <T>
-     * @throws Exception
-     */
+	* @param method
+	* @param name
+	* @param target
+	* @param request
+	* @param maxUpdateCount
+	* @param database
+	* @param schema
+	* @param datasource
+	* @param idCallback
+	* @param creator
+	* @return
+	* @param <T>
+	* @throws Exception
+	*/
 	public static <T extends Object> JSONObject verifyRequest(@NotNull final RequestMethod method
             , final String name, final JSONObject target, final JSONObject request
             , final int maxUpdateCount, final String database, final String schema, final String datasource
             , final IdCallback<T> idCallback, final SQLCreator creator) throws Exception {
-        if (ENABLE_VERIFY_CONTENT == false) {
-            throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_CONTENT == false" +
+		if (ENABLE_VERIFY_CONTENT == false) {
+			throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_CONTENT == false" +
                     " 时不支持校验请求传参内容！如需支持则设置 AbstractVerifier.ENABLE_VERIFY_CONTENT = true ！");
-        }
+		}
 
 		Log.i(TAG, "verifyRequest  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -784,17 +777,17 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 
 	/**校验并将response转换为指定的内容和结构
-     * @param method
-     * @param name
-     * @param target
-     * @param response
-     * @param database
-     * @param schema
-     * @param creator
-     * @param callback
-     * @return
-     * @throws Exception
-     */
+	* @param method
+	* @param name
+	* @param target
+	* @param response
+	* @param database
+	* @param schema
+	* @param creator
+	* @param callback
+	* @return
+	* @throws Exception
+	*/
 	@Override
 	public JSONObject verifyResponse(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject response, final String database, final String schema
@@ -803,33 +796,33 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	}
 
 	/**校验并将response转换为指定的内容和结构
-     * @param method
-     * @param name
-     * @param target
-     * @param response
-     * @param creator
-     * @param callback
-     * @return
-     * @throws Exception
-     */
+	* @param method
+	* @param name
+	* @param target
+	* @param response
+	* @param creator
+	* @param callback
+	* @return
+	* @throws Exception
+	*/
 	public static JSONObject verifyResponse(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject response, SQLCreator creator, OnParseCallback callback) throws Exception {
 		return verifyResponse(method, name, target, response, null, null, null, creator, callback);
 	}
 	/**校验并将response转换为指定的内容和结构
-     * @param method
-     * @param name
-     * @param target
-     * @param response
-     * @param database
-     * @param schema
-     * @param idKeyCallback
-     * @param creator
-     * @param callback
-     * @return
-     * @param <T>
-     * @throws Exception
-     */
+	* @param method
+	* @param name
+	* @param target
+	* @param response
+	* @param database
+	* @param schema
+	* @param idKeyCallback
+	* @param creator
+	* @param callback
+	* @return
+	* @param <T>
+	* @throws Exception
+	*/
 	public static <T extends Object> JSONObject verifyResponse(@NotNull final RequestMethod method, final String name
 			, final JSONObject target, final JSONObject response, final String database, final String schema
 			, final IdCallback<T> idKeyCallback, SQLCreator creator, OnParseCallback callback) throws Exception {
@@ -1199,12 +1192,12 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		Set<Map.Entry<String, Object>> set = new LinkedHashSet<>(targetChild.entrySet());
 		for (Map.Entry<String, Object> e : set) {
-            String tk = e == null ? null : e.getKey();
+			String tk = e == null ? null : e.getKey();
 			if (tk == null || OPERATION_KEY_LIST.contains(tk)) {
 				continue;
 			}
 
-            Object tv = e.getValue();
+			Object tv = e.getValue();
 
 			if (opt == TYPE) {
 				verifyType(tk, tv, real);
@@ -1576,7 +1569,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		config.setTest(true);
 		//		config.setTable(Test.class.getSimpleName());
 		//		config.setColumn(rv + logic.getChar() + funChar)
-        // 字符串可能 SQL 注入，目前的解决方式是加 TYPE 校验类型或者干脆不用 sqlVerify，而是通过远程函数来校验
+		// 字符串可能 SQL 注入，目前的解决方式是加 TYPE 校验类型或者干脆不用 sqlVerify，而是通过远程函数来校验
 		config.putWhere(rv + logic.getChar() + funChar, tv, false);
 		config.setCount(1);
 
