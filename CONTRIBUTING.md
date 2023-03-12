@@ -51,7 +51,11 @@
 - [glennliao](https://github.com/glennliao)(还开源了 [apijson-go](https://github.com/glennliao/apijson-go) 和 [apijson-go-ui](https://github.com/glennliao/apijson-go-ui)）
 - [eltociear](https://github.com/eltociear)
 - [wb04307201](https://github.com/wb04307201)(还开源了 [apijson-dynamic-datasource](https://github.com/wb04307201/apijson-dynamic-datasource)）
-- [cloudAndMonkey](https://github.com/cloudAndMonkey)(还贡献了 apijson-framework, APIJSON-Demo）
+- [cloudAndMonkey](https://github.com/cloudAndMonkey)(还贡献了 apijson-framework, APIJSON-Demo，新增支持了 Redis, Elasticsearch, Kafka, Lua 等并提供了多个 Demo）
+- [12345ZMTHL](https://github.com/12345ZMTHL)
+- [cnscoo](https://github.com/cnscoo)(阿里云工程师）
+- [aninZz](https://github.com/aninZz)
+- [leomiaomiao](https://github.com/leomiaomiao)
 
 #### 其中特别致谢: <br/>
 cloudAndMonkey 提交的 11 个 Commits, 对 APIJSON 做出了 1,496 增加和 845 处删减(截止 2022/12/15 日)； <br/>
