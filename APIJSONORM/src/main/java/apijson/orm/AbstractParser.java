@@ -2229,7 +2229,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						continue;
 					}
 
-					if(tag != null && !tag.contains("\\:")) {
+					if(tag != null && !tag.contains(":")) {
 						JSONObject object = getRequestStructure(_method, tag, version);
 						JSONObject ret = objectVerify(_method, tag, version, name, request, maxUpdateCount, creator, object);
 						jsonObject.putAll(ret);
