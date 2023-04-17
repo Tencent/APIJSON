@@ -1092,6 +1092,30 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	@Override
+	public boolean isSnowflake() {
+		return isSnowflake(getSQLDatabase());
+	}
+	public static boolean isSnowflake(String db) {
+		return DATABASE_SNOWFLAKE.equals(db);
+	}
+
+	@Override
+	public boolean isDatabricks() {
+		return isDatabricks(getSQLDatabase());
+	}
+	public static boolean isDatabricks(String db) {
+		return DATABASE_DATABRICKS.equals(db);
+	}
+
+	@Override
+	public boolean isCassandra() {
+		return isCassandra(getSQLDatabase());
+	}
+	public static boolean isCassandra(String db) {
+		return DATABASE_CASSANDRA.equals(db);
+	}
+
+	@Override
 	public boolean isTrino() {
 		return isTrino(getSQLDatabase());
 	}

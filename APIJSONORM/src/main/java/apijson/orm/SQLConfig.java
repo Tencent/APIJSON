@@ -31,6 +31,9 @@ public interface SQLConfig {
 	String DATABASE_HIVE = "HIVE"; // https://hive.apache.org
 	String DATABASE_PRESTO = "PRESTO"; // Facebook PrestoDB  https://prestodb.io
 	String DATABASE_TRINO = "TRINO"; // PrestoSQL  https://trino.io
+	String DATABASE_SNOWFLAKE = "SNOWFLAKE"; // https://www.snowflake.com
+	String DATABASE_DATABRICKS = "DATABRICKS"; // https://www.databricks.com
+	String DATABASE_CASSANDRA = "CASSANDRA"; // https://cassandra.apache.org
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
 	String DATABASE_REDIS = "REDIS";
@@ -58,6 +61,9 @@ public interface SQLConfig {
 	boolean isClickHouse();
 	boolean isHive();
 	boolean isPresto();
+	boolean isSnowflake();
+	boolean isDatabricks();
+	boolean isCassandra();
 	boolean isTrino();
 	boolean isInfluxDB();
 	boolean isTDengine();
