@@ -2237,13 +2237,15 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					}
 
 					String _tag = buildTag(request, key, method, tag);
-					JSONObject requestItem = new JSONObject();
-					// key 处理别名
-					String _key = keyDelAlias(key);
-					requestItem.put(_key, obj);
 					JSONObject object = getRequestStructure(_method, _tag, version);
-					JSONObject ret = objectVerify(_method, _tag, version, name, requestItem, maxUpdateCount, creator, object);
-					jsonObject.put(key, ret.get(_key));
+					if(method == RequestMethod.CRUD && StringUtil.isEmpty(tag, true)) {
+						JSONObject requestItem = new JSONObject();
+						requestItem.put(key, obj);
+						JSONObject ret = objectVerify(_method, _tag, version, name, requestItem, maxUpdateCount, creator, object);
+						jsonObject.put(key, ret.get(key));
+					} else {
+						return objectVerify(_method, _tag, version, name, request, maxUpdateCount, creator, object);
+					}
 				} else {
 					jsonObject.put(key, obj);
 				}
@@ -2283,64 +2285,16 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 	}
 
-	protected String keyDelAlias(String key) {
-		int keyIndex = key.indexOf(":");
-		if (keyIndex != -1) {
-			String _key = key.substring(0, keyIndex);
-			if (apijson.JSONObject.isTableArray(key)) {
-				_key += apijson.JSONObject.KEY_ARRAY;
-			}
-			return _key;
-		}
-		return key;
-	}
-
 	protected String buildTag(JSONObject request, String key, RequestMethod method, String tag) {
-		Object val = request.get(key);
-
 		if (method == RequestMethod.CRUD) {
 			Map<String, Object> attrMap = keyObjectAttributesMap.get(key);
 			Object _tag = attrMap == null ? null : attrMap.get(JSONRequest.KEY_TAG);
-
-			if (_tag != null) {
-				if (val instanceof JSONArray) {
-					return _tag.toString();
-				}
-
-				tag = _tag.toString();
-			} else {
-				// key 作为默认的 tag
-				if (StringUtil.isEmpty(tag)) {
-					if (val instanceof JSONArray) {
-						return keyDelAlias(key);
-					}
-
-					tag = key;
-				} else {
-					if (val instanceof JSONArray) {
-						return tag;
-					}
-				}
-			}
+			return _tag != null ? _tag.toString() : StringUtil.isEmpty(tag) ? key : tag;
 		} else {
 			if (StringUtil.isEmpty(tag, true)) {
 				throw new IllegalArgumentException("请在最外层传 tag ！一般是 Table 名，例如 \"tag\": \"User\" ");
 			}
-			if (val instanceof JSONArray) {
-				return tag;
-			}
 		}
-		
-		// 通用判断
-		// 对象, 需处理别名
-		if (val instanceof JSONObject && StringUtil.isNotEmpty(tag)) {
-			int keyIndex = tag.indexOf(":");
-			if (keyIndex != -1) {
-				return tag.substring(0, keyIndex);
-			}
-			return tag;
-		}
-
 		return tag;
 	}
 	

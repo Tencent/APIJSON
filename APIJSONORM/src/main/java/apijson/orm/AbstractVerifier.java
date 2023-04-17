@@ -1073,7 +1073,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			}
 
 			// 不在target内的 key:{}
-			if (rk.startsWith("@") == false && objKeySet.contains(rk) == false) {
+			if (rk.startsWith("@") == false && rk.endsWith("@") == false && objKeySet.contains(rk) == false) {
 				if (rv instanceof JSONObject) {
 					throw new UnsupportedOperationException(method + " 请求，"
                             + name + " 里面不允许传 " + rk + ":{} ！");
