@@ -2229,6 +2229,13 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						continue;
 					}
 
+					if(tag != null && !tag.contains(":")) {
+						JSONObject object = getRequestStructure(_method, tag, version);
+						JSONObject ret = objectVerify(_method, tag, version, name, request, maxUpdateCount, creator, object);
+						jsonObject.putAll(ret);
+						break;
+					}
+
 					String _tag = buildTag(request, key, method, tag);
 					JSONObject requestItem = new JSONObject();
 					// key 处理别名
