@@ -3990,7 +3990,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception
 	 */
 	private String withAsExpreSubqueryString(SQLConfig cfg, Subquery subquery) throws Exception {
-		List<String> list = isWithAsEnable() ? getWithAsExprSqlList() : null;
+		boolean isWithAsEnable = isWithAsEnable();
+		List<String> list = isWithAsEnable ? getWithAsExprSqlList() : null;
 		if (cfg.getMethod() != RequestMethod.POST && list == null) {
 			clearWithAsExprListIfNeed();
 		}
@@ -4018,7 +4019,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		} else {
 			withAsExpreSql = cfg.getSQL(isPrepared());
 			// mysql 才存在这个问题, 主表和子表是一张表
-			if (isMySQL() && StringUtil.equals(getTable(), subquery.getFrom())) {
+			if (isWithAsEnable && isMySQL() && StringUtil.equals(getTable(), subquery.getFrom())) {
 				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql + ") AS " + quote + subquery.getKey() + quote;
 			}
 		}
