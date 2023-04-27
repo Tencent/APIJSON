@@ -93,6 +93,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	public static boolean IS_HAVING_ALLOW_NOT_FUNCTION = false;
 
+	/**
+	 * 开启 WITH AS 表达式(在支持这种语法的数据库及版本)来简化 SQL 和提升性能
+	 */
+	public static boolean ENABLE_WITH_AS = false;
+
 	public static int MAX_HAVING_COUNT = 5;
 	public static int MAX_WHERE_COUNT = 10;
 	public static int MAX_COMBINE_DEPTH = 2;
@@ -102,7 +107,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
 	public static String DEFAULT_SCHEMA = "sys";
-	public static String PREFFIX_DISTINCT = "DISTINCT ";
+	public static String PREFIX_DISTINCT = "DISTINCT ";
 
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
 	private static Pattern PATTERN_RANGE;
@@ -767,8 +772,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 
 	// mysql8版本以上,子查询支持with as表达式
-	private List<String> withAsExpreSqlList = null;
-	protected List<Object> withAsExprePreparedValueList = new ArrayList<>();
+	private List<String> withAsExprSqlList = null;
+	protected List<Object> withAsExprPreparedValueList = new ArrayList<>();
 	private int[] dbVersionNums = null;
 	@Override
 	public int[] getDBVersionNums() {
@@ -1885,7 +1890,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 			String c = StringUtil.getString(keys);
 			c = c + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
-			return isMain() && isDistinct() ? PREFFIX_DISTINCT + c : c;
+			return isMain() && isDistinct() ? PREFIX_DISTINCT + c : c;
 		default:
 			throw new UnsupportedOperationException(
 					"服务器内部错误：getColumnString 不支持 " + RequestMethod.getName(getMethod())
@@ -1966,9 +1971,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				String s = expression.substring(start + 1, end);
-				boolean distinct = s.startsWith(PREFFIX_DISTINCT);
+				boolean distinct = s.startsWith(PREFIX_DISTINCT);
 				if (distinct) {
-					s = s.substring(PREFFIX_DISTINCT.length());
+					s = s.substring(PREFIX_DISTINCT.length());
 				}
 
 				// 解析函数内的参数
@@ -1994,7 +1999,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
 				}
 
-				String origin = fun + "(" + (distinct ? PREFFIX_DISTINCT : "") + StringUtil.getString(ckeys) + ")" + suffix;
+				String origin = fun + "(" + (distinct ? PREFIX_DISTINCT : "") + StringUtil.getString(ckeys) + ")" + suffix;
 				expression = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
 			}
 			else {
@@ -3985,28 +3990,39 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @throws Exception
 	 */
 	private String withAsExpreSubqueryString(SQLConfig cfg, Subquery subquery) throws Exception {
-		if(cfg.getMethod() != RequestMethod.POST && this.withAsExpreSqlList == null) {
-			this.setWithAsExpreList();
+		List<String> list = isWithAsEnable() ? getWithAsExprSqlList() : null;
+		if (cfg.getMethod() != RequestMethod.POST && list == null) {
+			clearWithAsExprListIfNeed();
 		}
+
+		String quote = getQuote();
+
 		String withAsExpreSql;
-		if(this.withAsExpreSqlList != null) {
-			String withQuoteName = getQuote() + subquery.getKey() + getQuote();
-			this.withAsExpreSqlList.add(" " + withQuoteName + " AS " + "(" + cfg.getSQL(isPrepared()) + ") ");
+		if (list != null) {
+			String withQuoteName = quote + subquery.getKey() + quote;
+			list.add(" " + withQuoteName + " AS " + "(" + cfg.getSQL(isPrepared()) + ") ");
 			withAsExpreSql = " SELECT * FROM " + withQuoteName;
 
-			// 预编译参数
+			// 预编译参数 FIXME 这里重复添加了，导致子查询都报错参数超过 ? 数量 Parameter index out of range (5 > number of parameters, which is 4)
 			List<Object> subPvl = cfg.getPreparedValueList();
 			if (subPvl != null && subPvl.isEmpty() == false) {
-				this.withAsExprePreparedValueList.addAll(subPvl);
+				List<Object> valueList = getWithAsExprPreparedValueList();
+				if (valueList == null) {
+					valueList = new ArrayList<>();
+				}
+				valueList.addAll(subPvl);
+				setWithAsExprPreparedValueList(valueList);
+
 				cfg.setPreparedValueList(new ArrayList<>());
 			}
-		}else {
+		} else {
 			withAsExpreSql = cfg.getSQL(isPrepared());
 			// mysql 才存在这个问题, 主表和子表是一张表
-			if(this.isMySQL() && StringUtil.equals(this.getTable(), subquery.getFrom())) {
-				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql+") AS " + getQuote() + subquery.getKey() + getQuote();
+			if (isMySQL() && StringUtil.equals(getTable(), subquery.getFrom())) {
+				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql + ") AS " + quote + subquery.getKey() + quote;
 			}
 		}
+
 		return withAsExpreSql;
 	}
 
@@ -4024,8 +4040,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			cfg.setDatasource(this.getDatasource());
 		}
 		cfg.setPreparedValueList(new ArrayList<>());
-		String withAsExpreSql = withAsExpreSubqueryString(cfg, subquery);
-		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + withAsExpreSql + ") ";
+		String withAsExprSql = withAsExpreSubqueryString(cfg, subquery);
+		String sql = (range  == null || range.isEmpty() ? "" : range) + "(" + withAsExprSql + ") ";
 
 		//// SELECT .. FROM(SELECT ..) ..  WHERE .. 格式需要把子查询中的预编译值提前
 		//// 如果外查询 SELECT concat(`name`,?)  这种 SELECT 里也有预编译值，那就不能这样简单反向
@@ -4236,73 +4252,75 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			return null;
 		}
 
+		config.setPreparedValueList(new ArrayList<>()); // 解决重复添加导致报错：Parameter index out of range (6 > number of parameters, which is 5)
 		String cSql = null;
 		switch (config.getMethod()) {
-		case POST:
-			return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
-		case PUT:
-			if(config.isClickHouse()){
-				return  "ALTER TABLE " +  tablePath + " UPDATE" + config.getSetString() + config.getWhereString(true);
-			}
-			cSql =  "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
-			cSql = buildWithAsExpreSql(config, cSql);
-			return cSql;
-		case DELETE:
-			if(config.isClickHouse()){
-				return  "ALTER TABLE " +  tablePath + " DELETE" + config.getWhereString(true);
-			}
-			cSql =  "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
-			cSql = buildWithAsExpreSql(config, cSql);
-			return cSql;
-		default:
-			String explain = config.isExplain() ? (config.isSQLServer() ? "SET STATISTICS PROFILE ON  " : (config.isOracle() || config.isDameng() || config.isKingBase() ? "EXPLAIN PLAN FOR " : "EXPLAIN ")) : "";
-			if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
-				String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
-				return explain + "SELECT " + config.getWhereString(false) + " AS " + q + JSONResponse.KEY_COUNT + q + config.getLimitString();
-			}
-
-			config.setPreparedValueList(new ArrayList<Object>());
-			String column = config.getColumnString();
-			if (config.isOracle() || config.isDameng() || config.isKingBase()) {
-				//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
-				//针对oracle分组后条数的统计
-				if (StringUtil.isNotEmpty(config.getGroup(),true) && RequestMethod.isHeadMethod(config.getMethod(), true)){
-					return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + ") " + config.getLimitString();
+			case POST:
+				return "INSERT INTO " + tablePath + config.getColumnString() + " VALUES" + config.getValuesString();
+			case PUT:
+				if(config.isClickHouse()){
+					return  "ALTER TABLE " +  tablePath + " UPDATE" + config.getSetString() + config.getWhereString(true);
+				}
+				cSql =  "UPDATE " + tablePath + config.getSetString() + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");
+				cSql = buildWithAsExprSql(config, cSql);
+				return cSql;
+			case DELETE:
+				if(config.isClickHouse()){
+					return  "ALTER TABLE " +  tablePath + " DELETE" + config.getWhereString(true);
+				}
+				cSql =  "DELETE FROM " + tablePath + config.getWhereString(true) + (config.isMySQL() ? config.getLimitString() : "");  // PostgreSQL 不允许 LIMIT
+				cSql = buildWithAsExprSql(config, cSql);
+				return cSql;
+			default:
+				String explain = config.isExplain() ? (config.isSQLServer() ? "SET STATISTICS PROFILE ON  " : (config.isOracle() || config.isDameng() || config.isKingBase() ? "EXPLAIN PLAN FOR " : "EXPLAIN ")) : "";
+				if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
+					String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
+					return explain + "SELECT " + config.getWhereString(false) + " AS " + q + JSONResponse.KEY_COUNT + q + config.getLimitString();
 				}
 
-				String sql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config);
-				return explain + config.getOraclePageSql(sql);
-			}
+				config.setPreparedValueList(new ArrayList<Object>());
+				String column = config.getColumnString();
+				if (config.isOracle() || config.isDameng() || config.isKingBase()) {
+					//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
+					//针对oracle分组后条数的统计
+					if (StringUtil.isNotEmpty(config.getGroup(),true) && RequestMethod.isHeadMethod(config.getMethod(), true)){
+						return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + ") " + config.getLimitString();
+					}
 
-			cSql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + config.getLimitString();
-			cSql = buildWithAsExpreSql(config, cSql);
-			if(config.isElasticsearch()) { // elasticSearch 不支持 explain
-				return cSql;
-			}
-			return explain + cSql;
+					String sql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config);
+					return explain + config.getOraclePageSql(sql);
+				}
+
+				cSql = "SELECT " + (config.getCache() == JSONRequest.CACHE_RAM ? "SQL_NO_CACHE " : "") + column + " FROM " + getConditionString(tablePath, config) + config.getLimitString();
+				cSql = buildWithAsExprSql(config, cSql);
+				if(config.isElasticsearch()) { // elasticSearch 不支持 explain
+					return cSql;
+				}
+				return explain + cSql;
 		}
 	}
 
-	private static String buildWithAsExpreSql(@NotNull AbstractSQLConfig config, String cSql) throws Exception {
-		if(config.withAsExpreSqlList != null && config.withAsExpreSqlList.size() > 0) {
+	private static String buildWithAsExprSql(@NotNull AbstractSQLConfig config, String cSql) throws Exception {
+		if (config.isWithAsEnable() == false) {
+			return cSql;
+		}
+
+		List<String> list = config.getWithAsExprSqlList();
+		int size = list == null ? 0 : list.size();
+		if (size > 0) {
 			String withAsExpreSql = "WITH ";
-			// 只有一条
-			if (config.withAsExpreSqlList.size() == 1) {
-				withAsExpreSql += config.withAsExpreSqlList.get(0) + "\n" + cSql;
-			} else {
-				int lastIndex = config.withAsExpreSqlList.size() - 1;
-				for (int i = 0; i < config.withAsExpreSqlList.size(); i++) {
-					if (i == lastIndex) {
-						withAsExpreSql += config.withAsExpreSqlList.get(i) + "\n" + cSql;
-					} else {
-						withAsExpreSql += config.withAsExpreSqlList.get(i) + ",\n";
-					}
-				}
+			for (int i = 0; i < size; i++) {
+				withAsExpreSql += (i <= 0 ? "" : ",") + list.get(i) + "\n";
 			}
-			cSql = withAsExpreSql;
-			config.setWithAsExpreList();
+			cSql = withAsExpreSql + cSql;
+			config.clearWithAsExprListIfNeed();
 		}
 		return cSql;
+	}
+
+	@Override
+	public boolean isWithAsEnable() {
+		return ENABLE_WITH_AS && (isMySQL() == false || getDBVersionNums()[0] >= 8);
 	}
 
 	/**Oracle的分页获取
@@ -5197,9 +5215,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 
-			boolean distinct = column == null || rawColumnSQL != null ? false : column.startsWith(PREFFIX_DISTINCT);
+			boolean distinct = column == null || rawColumnSQL != null ? false : column.startsWith(PREFIX_DISTINCT);
 			if (rawColumnSQL == null) {
-				String[] fks = StringUtil.split(distinct ? column.substring(PREFFIX_DISTINCT.length()) : column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
+				String[] fks = StringUtil.split(distinct ? column.substring(PREFIX_DISTINCT.length()) : column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
 				if (fks != null) {
 					String[] ks;
 					for (String fk : fks) {
@@ -5698,21 +5716,25 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		}
 		return false;
 	}
-	
-	private void setWithAsExpreList() {
+
+
+	public List<String> getWithAsExprSqlList() {
+		return withAsExprSqlList;
+	}
+	private void clearWithAsExprListIfNeed() {
 		// mysql8版本以上,子查询支持with as表达式
 		if(this.isMySQL() && this.getDBVersionNums()[0] >= 8) {
-			this.withAsExpreSqlList = new ArrayList<>();
+			this.withAsExprSqlList = new ArrayList<>();
 		}
 	}
 
 	@Override
-	public List<Object> getWithAsExprePreparedValueList() {
-		return this.withAsExprePreparedValueList;
+	public List<Object> getWithAsExprPreparedValueList() {
+		return this.withAsExprPreparedValueList;
 	}
 
 	@Override
-	public void setWithAsExprePreparedValueList(List<Object> list) {
-		this.withAsExprePreparedValueList = list;
+	public void setWithAsExprPreparedValueList(List<Object> list) {
+		this.withAsExprPreparedValueList = list;
 	}
 }

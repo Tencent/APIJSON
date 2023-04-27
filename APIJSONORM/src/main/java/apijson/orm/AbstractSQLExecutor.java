@@ -1126,15 +1126,15 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 		}
 
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;
-		List<Object> withAsExprePreparedValueList = config.isPrepared() ? config.getWithAsExprePreparedValueList() : null;
-
-		// 不同数据库, 预编译mysql使用with-as
-		if (valueList != null && withAsExprePreparedValueList != null && withAsExprePreparedValueList.size() > 0) {
-			withAsExprePreparedValueList.addAll(valueList);
-			valueList = withAsExprePreparedValueList;
-			// 多条POST/PUT/DELETE语句的情况,需要重新初始化
-			config.setWithAsExprePreparedValueList(new ArrayList<>());
-		}
+//		List<Object> withAsExprePreparedValueList = config.isPrepared() ? config.getWithAsExprePreparedValueList() : null;
+//
+//		// 不同数据库, 预编译mysql使用with-as
+//		if (valueList != null && withAsExprePreparedValueList != null && withAsExprePreparedValueList.size() > 0) {
+//			withAsExprePreparedValueList.addAll(valueList);
+//			valueList = withAsExprePreparedValueList;
+//			// 多条POST/PUT/DELETE语句的情况,需要重新初始化
+//			config.setWithAsExprePreparedValueList(new ArrayList<>());
+//		}
 
 		if (valueList != null && valueList.isEmpty() == false) {
 			for (int i = 0; i < valueList.size(); i++) {

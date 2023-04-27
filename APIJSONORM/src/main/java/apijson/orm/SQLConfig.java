@@ -81,7 +81,12 @@ public interface SQLConfig {
      * @return
      */
 	boolean limitSQLCount();
-    /**允许增删改部分失败
+
+	/**是否开启 WITH AS 表达式来简化 SQL 和提升性能
+	 * @return
+	 */
+	boolean isWithAsEnable();
+	/**允许增删改部分失败
      * @return
      */
     boolean allowPartialUpdateFailed();
@@ -323,8 +328,8 @@ public interface SQLConfig {
 
 
 
-	List<Object> getWithAsExprePreparedValueList();
-	void setWithAsExprePreparedValueList(List<Object> withAsExprePreparedValueList);
+	List<Object> getWithAsExprPreparedValueList();
+	void setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
 
 	boolean isFakeDelete();
 	
