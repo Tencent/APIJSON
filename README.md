@@ -69,7 +69,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这套协议实现的 ORM 库。<br />
 为各种增删改查提供了完全自动化的万能通用接口，零代码实时满足千变万化的各种新增和变更需求。<br />
 能大幅降低开发和沟通成本，简化开发流程，缩短开发周期。<br />
-适合中小型前后端分离的项目，尤其是 初创项目、内部项目、低代码/零代码、小程序、BaaS、Serverless 等。<br />
+适合中小型前后端分离的项目，尤其是 创业项目、内部项目、低代码/零代码、小程序、BaaS、Serverless 等。<br />
 
 通过万能通用接口，前端可以定制任何数据、任何结构。<br />
 大部分 HTTP 请求后端再也不用写接口了，更不用写文档了。<br />
@@ -464,7 +464,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
 
 理论上所有支持 SQL 与 JDBC/ODBC 的软件，都可以用本项目对接 CRUD，待测试: <br />
-[Elasticsearch](https://www.elastic.co/cn/what-is/elasticsearch-sql), [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
+[OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
 
 ### 我要赞赏
 创作不易，坚持更难，右上角点 ⭐Star 来支持/收藏下吧，谢谢 ^_^ <br />
