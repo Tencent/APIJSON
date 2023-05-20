@@ -656,6 +656,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
   
 [xyerp](https://gitee.com/yinjg1997/xyerp) 基于ApiJson的低代码ERP
   
+[xyerp](https://github.com/csx-bill/quick-boot) 基于 Spring Cloud 2022 、Spring Boot 3、AMIS 和 APIJSON 的低代码系统。
+  
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
 
