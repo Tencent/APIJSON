@@ -780,20 +780,28 @@ public class StringUtil {
 		}
 	}
 
+	public static String join(String[] arr) {
+		return join(arr);
+	}
 	/** 数组以指定分隔s拼接
 	 * @param arr
 	 * @param s
 	 * @return
 	 */
 	public static String join(String[] arr, String s) {
-		StringBuilder stringBuilder = new StringBuilder();
+		if (s == null) {
+			s = ",";
+		}
+
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < arr.length; i++) {
-			stringBuilder.append(arr[i]);
-			if(i<arr.length-1){
-				stringBuilder.append(s);
+			sb.append(arr[i]);
+			if (i < arr.length-1) {
+				sb.append(s);
 			}
 		}
-		return  stringBuilder.toString();
+
+		return sb.toString();
 	}
 	/**分割路径
 	 * @param path

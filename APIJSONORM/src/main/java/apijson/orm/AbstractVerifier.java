@@ -23,6 +23,7 @@ import static apijson.orm.Operation.TYPE;
 import static apijson.orm.Operation.UNIQUE;
 import static apijson.orm.Operation.UPDATE;
 import static apijson.orm.Operation.VERIFY;
+import static apijson.orm.Operation.ON;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -151,6 +152,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		OPERATION_KEY_LIST.add(REMOVE.name());
 		OPERATION_KEY_LIST.add(MUST.name());
 		OPERATION_KEY_LIST.add(REFUSE.name());
+		OPERATION_KEY_LIST.add(ON.name());
 		OPERATION_KEY_LIST.add(ALLOW_PARTIAL_UPDATE_FAIL.name());
 
 
@@ -912,6 +914,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		String remove = StringUtil.getString(target.getString(REMOVE.name()));
 		String must = StringUtil.getString(target.getString(MUST.name()));
 		String refuse = StringUtil.getString(target.getString(REFUSE.name()));
+		JSONObject on = target.getJSONObject(ON.name());
 		String allowPartialUpdateFail = StringUtil.getString(target.getString(ALLOW_PARTIAL_UPDATE_FAIL.name()));
 
 
@@ -1051,6 +1054,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 		// 解析不允许的字段>>>>>>>>>>>>>>>>>>>
 
+		Set<String> onKeys = new LinkedHashSet<>();
 
 		// 判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
@@ -1084,6 +1088,11 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
                             + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
 				}
 			}
+
+			// 先让其它操作符完成
+//			if (rv != null) { // || nulls.contains(rk)) {
+//				onKeys.add(rk);
+//			}
 		}
 		// 判断不允许传的key>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -1167,6 +1176,34 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		// 校验并配置允许部分批量增删改失败>>>>>>>>>>>>>>>>>>>
 
 
+		String[] nks = on == null ? null : StringUtil.split(real.getString(JSONRequest.KEY_NULL));
+		Collection<?> nkl = nks == null || nks.length <= 0 ? new HashSet<>() : Arrays.asList(nks);
+
+		Set<Map.Entry<String, Object>> onSet = on == null ? null : on.entrySet();
+		if (onSet != null) {
+			// 没必要限制，都是后端配置的，安全可控，而且可能确实有特殊需求，需要 id, @column 等
+//			List<String> condKeys = new ArrayList<>(Arrays.asList(apijson.JSONRequest.KEY_ID, apijson.JSONRequest.KEY_ID_IN
+//					, apijson.JSONRequest.KEY_USER_ID, apijson.JSONRequest.KEY_USER_ID_IN));
+//			condKeys.addAll(JSONRequest.TABLE_KEY_LIST);
+
+			for (Map.Entry<String, Object> entry : onSet) {
+				String k = entry == null ? null : entry.getKey();
+//				if (condKeys.contains(k)) {
+//					throw new IllegalArgumentException("Request 表 structure 配置的 " + ON.name()
+//							+ ":{ " + k + ":value } 中 key 不合法，不允许传 [" + StringUtil.join(condKeys.toArray(new String[]{})) + "] 中的任何一个 ！");
+//				}
+
+				Object v = k == null ? null : entry.getValue();
+				if (v instanceof JSONObject == false) {
+					throw new IllegalArgumentException("Request 表 structure 配置的 " + ON.name()
+							+ ":{ " + k + ":value } 中 value 不合法，必须是 JSONObject {} ！");
+				}
+
+				if (nkl.contains(k) || real.get(k) != null) {
+					real = parse(method, name, (JSONObject) v, real, database, schema, datasource, idCallback, creator, callback);
+				}
+			}
+		}
 		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
 		return real;
 	}

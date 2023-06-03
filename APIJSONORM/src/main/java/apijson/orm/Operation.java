@@ -115,10 +115,18 @@ public enum Operation {
 	REMOVE,
 
 	/**
+	 * 监听事件，用于同步到其它表，结构是
+	 * "key0": {}
+	 * 例如 "name": { "UPDATE": { "Comment": { "userName@": "/name" } } }
+	 * 当 User.name 被修改时，同步修改 Comment.userName
+	 */
+	ON,
+
+	/**
 	 * 允许批量增删改部分失败，结构是
 	 * "Table[],key[],key:alias[]"
-     * 自动 ALLOW_PARTIAL_UPDATE_FAILED_TABLE_MAP.put
+	 * 自动 ALLOW_PARTIAL_UPDATE_FAILED_TABLE_MAP.put
 	 */
-    ALLOW_PARTIAL_UPDATE_FAIL;
+	ALLOW_PARTIAL_UPDATE_FAIL;
 
 }
