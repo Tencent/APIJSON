@@ -18,16 +18,11 @@ import apijson.orm.exception.UnsupportedDataTypeException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.rmi.ServerException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import static apijson.JSONObject.KEY_COMBINE;
 import static apijson.JSONObject.KEY_DROP;
@@ -559,8 +554,8 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	}
 
 
+	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！不过就没有具体报错了，或许可以新增功能符，或者直接调 SQL 函数
 
-	//TODO 改用 MySQL json_add,json_remove,json_contains 等函数！
 	/**PUT key:[]
 	 * @param key
 	 * @param array
@@ -596,31 +591,85 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 
 		//add all 或 remove all <<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONArray targetArray = rp == null ? null : rp.getJSONArray(realKey);
-		if (targetArray == null) {
+		Object target = rp == null ? null : rp.get(realKey);
+		if (target instanceof String) {
+			try {
+				target = JSON.parse((String) target);
+			} catch (Throwable e) {
+				if (Log.DEBUG) {
+					Log.e(TAG, "try {\n" +
+							"\t\t\t\ttarget = JSON.parse((String) target);\n" +
+							"\t\t\t}\n" +
+							"\t\t\tcatch (Throwable e) = " + e.getMessage());
+				}
+			}
+		}
+
+		if (apijson.JSON.isBooleanOrNumberOrString(target)) {
+			throw new NullPointerException("PUT " + path + ", " + realKey + " 类型为 " + target.getClass().getSimpleName() + "，"
+					+ "不支持 Boolean, String, Number 等类型字段使用 'key+': [] 或 'key-': [] ！"
+					+ "对应字段在数据库的值必须为 JSONArray, JSONObject 中的一种！"
+					+ "值为 JSONObject 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
+			);
+		}
+
+		boolean isAdd = putType == 1;
+
+		Collection<Object> targetArray = target instanceof Collection ? (Collection<Object>) target : null;
+		Map<String, ?> targetObj = target instanceof Map ? (Map<String, Object>) target : null;
+
+		if (targetArray == null && targetObj == null) {
+			if (isAdd == false) {
+				throw new NullPointerException("PUT " + path + ", " + realKey + (target == null ? " 值为 null，不支持移除！"
+						: " 类型为 " + target.getClass().getSimpleName() + "，不支持这样移除！")
+						+ "对应字段在数据库的值必须为 JSONArray, JSONObject 中的一种，且 key- 移除时，本身的值不能为 null！"
+						+ "值为 JSONObject 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
+				);
+			}
+
 			targetArray = new JSONArray();
 		}
-		for (Object obj : array) {
+
+		for (int i = 0; i < array.size(); i++) {
+			Object obj = array.get(i);
 			if (obj == null) {
 				continue;
 			}
-			if (putType == 1) {
-				if (targetArray.contains(obj)) {
-					throw new ConflictException("PUT " + path + ", " + realKey + ":" + obj + " 已存在！");
+
+			if (isAdd) {
+				if (targetArray != null) {
+					if (targetArray.contains(obj)) {
+						throw new ConflictException("PUT " + path + ", " + key + "/" + i + " 已存在！");
+					}
+					targetArray.add(obj);
+				} else {
+					if (obj != null && obj instanceof Map == false) {
+						throw new ConflictException("PUT " + path + ", " + key + "/" + i + " 必须为 JSONObject {} ！");
+					}
+					targetObj.putAll((Map) obj);
 				}
-				targetArray.add(obj);
-			} else if (putType == 2) {
-				if (targetArray.contains(obj) == false) {
-					throw new NullPointerException("PUT " + path + ", " + realKey + ":" + obj + " 不存在！");
+			} else {
+				if (targetArray != null) {
+					if (targetArray.contains(obj) == false) {
+						throw new NullPointerException("PUT " + path + ", " + key + "/" + i + " 不存在！");
+					}
+					targetArray.remove(obj);
+				} else {
+					if (obj instanceof String == false) {
+						throw new ConflictException("PUT " + path + ", " + key + "/" + i + " 必须为 String 类型 ！");
+					}
+					if (targetObj.containsKey(obj) == false) {
+						throw new NullPointerException("PUT " + path + ", " + key + "/" + i + " 不存在！");
+					}
+					targetObj.remove(obj);
 				}
-				targetArray.remove(obj);
 			}
 		}
 
 		//add all 或 remove all >>>>>>>>>>>>>>>>>>>>>>>>>
 
 		//PUT <<<<<<<<<<<<<<<<<<<<<<<<<
-		sqlRequest.put(realKey, targetArray);
+		sqlRequest.put(realKey, targetArray != null ? targetArray : JSON.toJSONString(targetObj, SerializerFeature.WriteMapNullValue));
 		//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
 
 	}
