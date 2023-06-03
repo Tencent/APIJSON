@@ -407,6 +407,16 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				+ "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n\n ");
 
 		requestObject = request;
+		try {
+			setVersion(requestObject.getIntValue(JSONRequest.KEY_VERSION));
+			if (getMethod() != RequestMethod.CRUD) {
+				setTag(requestObject.getString(JSONRequest.KEY_TAG));
+				requestObject.remove(JSONRequest.KEY_TAG);
+			}
+			requestObject.remove(JSONRequest.KEY_VERSION);
+		} catch (Exception e) {
+			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
+		}
 
 		verifier = createVerifier().setVisitor(getVisitor());
 
@@ -875,12 +885,6 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	@Override
 	public JSONObject parseCorrectRequest() throws Exception {
-		if (getMethod() != RequestMethod.CRUD) {
-			setTag(requestObject.getString(JSONRequest.KEY_TAG));
-		}
-		setVersion(requestObject.getIntValue(JSONRequest.KEY_VERSION));
-		requestObject.remove(JSONRequest.KEY_TAG);
-		requestObject.remove(JSONRequest.KEY_VERSION);
 		return parseCorrectRequest(requestMethod, tag, version, "", requestObject, getMaxUpdateCount(), this);
 	}
 
