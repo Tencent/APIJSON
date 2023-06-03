@@ -4705,11 +4705,18 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		return sql;
 	}
 
-	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+	protected void onJoinNotRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
 		throw new UnsupportedOperationException("JOIN 已禁用 '!' 非逻辑连接符 ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}
-	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+	protected void onJoinComplexRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
 		throw new UnsupportedOperationException("JOIN 已禁用 $, ~, {}, <>, >, <, >=, <= 等复杂关联 ！性能很差、需求极少，默认只允许 = 等价关联，如要取消禁用可在后端重写相关方法！");
+	}
+
+	/**已废弃，最早 6.2.0 移除，请改用 onJoinComplexRelation
+	 */
+	@Deprecated
+	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+		onJoinComplexRelation(sql, quote, j, jt, onList, on);
 	}
 
 	protected void onGetJoinString(Join j) throws UnsupportedOperationException {
