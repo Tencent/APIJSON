@@ -481,6 +481,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 
+		res.putIfAbsent("time", endTime);
 		if (Log.DEBUG) {
 			res.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
 			res.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
@@ -874,7 +875,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	@Override
 	public JSONObject parseCorrectRequest() throws Exception {
-		if(this.getMethod() != RequestMethod.CRUD) {
+		if (getMethod() != RequestMethod.CRUD) {
 			setTag(requestObject.getString(JSONRequest.KEY_TAG));
 		}
 		setVersion(requestObject.getIntValue(JSONRequest.KEY_VERSION));
