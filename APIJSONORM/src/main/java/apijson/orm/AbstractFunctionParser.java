@@ -20,6 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static apijson.orm.AbstractSQLConfig.PATTERN_SCHEMA;
+
 /**可远程调用的函数类
  * @author Lemon
  */
@@ -363,15 +365,13 @@ public class AbstractFunctionParser implements FunctionParser {
 					+ "总体必须为 function(key0,key1,...) 这种单函数格式！"
 					+ "\nfunction必须符合 " + (isSQLFunction ? "SQL 函数/SQL 存储过程" : "Java 函数") + " 命名，key 是用于在 request 内取值的键！");
 		}
-        if (isSQLFunction != true && StringUtil.isNotEmpty(schema, true)) {
+        if (isSQLFunction != true && schema != null) { // StringUtil.isNotEmpty(schema, false)) {
             throw new IllegalArgumentException("字符 " + schema + " 不合法！远程函数不允许指定类名！"
                     + "且必须为 function(key0,key1,...) 这种单函数格式！"
                     + "\nfunction必须符合 " + (isSQLFunction ? "SQL 函数/SQL 存储过程" : "Java 函数") + " 命名，key 是用于在 request 内取值的键！");
         }
-        if (schema != null && StringUtil.isName(schema) == false) {
-            throw new IllegalArgumentException("字符 " + schema + " 不合法！数据库名/模式名 不能为空且必须符合命名规范！"
-                    + "且必须为 function(key0,key1,...) 这种单函数格式！"
-                    + "\nfunction必须符合 " + (isSQLFunction ? "SQL 函数/SQL 存储过程" : "Java 函数") + " 命名，key 是用于在 request 内取值的键！");
+        if (schema != null) { // StringUtil.isName(schema) == false) {
+			schema = extractSchema(schema, null);
         }
 
 		String[] keys = StringUtil.split(function.substring(start + 1, end));
@@ -444,6 +444,40 @@ public class AbstractFunctionParser implements FunctionParser {
 		fb.setValues(values);
 
 		return fb;
+	}
+
+	public static void verifySchema(String sch, String table) {
+		extractSchema(sch, table);
+	}
+
+	public static String extractSchema(String sch, String table) {
+		if (table == null) {
+			table = "Table";
+		}
+
+		int ind = sch.indexOf("`");
+		if (ind > 0) {
+			throw new IllegalArgumentException(table + ": { @key(): value } 对应存储过程 value 中字符 "
+					+ sch + " 不合法！`schema` 当有 ` 包裹时一定是首尾各一个，不能多也不能少！");
+		}
+
+		if (ind == 0) {
+			sch = sch.substring(1);
+			if (sch.indexOf("`") != sch.length() - 1) {
+				throw new IllegalArgumentException(table + ": { @key(): value } 对应存储过程 value 中字符 `"
+						+ sch + " 不合法！`schema` 当有 ` 包裹时一定是首尾各一个，不能多也不能少！");
+			}
+
+			sch = sch.substring(0, sch.length() - 1);
+		}
+
+		if (PATTERN_SCHEMA.matcher(sch).matches() == false || sch.contains("--")) {
+			throw new IllegalArgumentException(table + ": { @key(): value } 对应存储过程 value 中字符 "
+					+ sch + " 不合法！schema.function(arg) 中 schema 必须符合 数据库名/模式名 的命名规则！"
+					+ "一般只能传英文字母、数字、下划线！不允许 -- 等可能导致 SQL 注入的符号！");
+		}
+
+		return sch;
 	}
 
 

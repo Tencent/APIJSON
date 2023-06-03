@@ -109,9 +109,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static String DEFAULT_SCHEMA = "sys";
 	public static String PREFIX_DISTINCT = "DISTINCT ";
 
+	public static Pattern PATTERN_SCHEMA;
 	// * 和 / 不能同时出现，防止 /* */ 段注释！ # 和 -- 不能出现，防止行注释！ ; 不能出现，防止隔断SQL语句！空格不能出现，防止 CRUD,DROP,SHOW TABLES等语句！
-	private static Pattern PATTERN_RANGE;
-	private static Pattern PATTERN_FUNCTION;
+	public static Pattern PATTERN_RANGE;
+	public static Pattern PATTERN_FUNCTION;
 
 	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
@@ -131,6 +132,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public static Map<String, String> SQL_FUNCTION_MAP;
 
 	static {  // 凡是 SQL 边界符、分隔符、注释符 都不允许，例如 ' " ` ( ) ; # -- /**/ ，以免拼接 SQL 时被注入意外可执行指令
+		PATTERN_SCHEMA = Pattern.compile("^[A-Za-z0-9_-]+$");
 		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
 		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~`!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\(\\)\\$]+$"); //TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
 
@@ -841,9 +843,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	public boolean allowPartialUpdateFailed() {
 		return allowPartialUpdateFailed(getTable());
 	}
-    public static boolean allowPartialUpdateFailed(String table) {
-        return ALLOW_PARTIAL_UPDATE_FAIL_TABLE_MAP.containsKey(table);
-    }
+	public static boolean allowPartialUpdateFailed(String table) {
+		return ALLOW_PARTIAL_UPDATE_FAIL_TABLE_MAP.containsKey(table);
+	}
 
 	@NotNull
 	@Override
@@ -1246,11 +1248,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
 		if (schema != null) {
-			String quote = getQuote();
-			String s = schema.startsWith(quote) && schema.endsWith(quote) ? schema.substring(1, schema.length() - 1) : schema;
-			if (StringUtil.isEmpty(s, true) == false && StringUtil.isName(s) == false) {
-				throw new IllegalArgumentException("@schema:value 中value必须是1个单词！");
-			}
+			AbstractFunctionParser.verifySchema(schema, getTable());
 		}
 		this.schema = schema;
 		return this;
@@ -4291,10 +4289,14 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 		// for (...) { Call procedure1();\n SQL \n; Call procedure2(); ... }
 		// 貌似不需要，因为 ObjectParser 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
 
-		String sch = config.getSQLSchema();
-		if (StringUtil.isNotEmpty(config.getProcedure(), true)) {
+		String procedure = config.getProcedure();
+		if (StringUtil.isNotEmpty(procedure, true)) {
+			int ind = procedure.indexOf(".");
+			boolean hasPrefix = ind >= 0 && ind < procedure.indexOf("(");
+			String sch = hasPrefix ? AbstractFunctionParser.extractSchema(procedure.substring(0, ind), config.getTable()) : config.getSQLSchema();
+
 			String q = config.getQuote();
-			return "CALL " + q + sch + q + "."+ config.getProcedure();
+			return "CALL " + q + sch + q + "." + (hasPrefix ? procedure.substring(ind + 1) : procedure);
 		}
 
 		String tablePath = config.getTablePath();
@@ -4765,13 +4767,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	/**已废弃，最早 6.2.0 移除，请改用 onJoinComplexRelation
 	 */
 	@Deprecated
-	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		onJoinComplexRelation(sql, quote, j, jt, onList, on);
+	protected void onJoinComplextRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+		onJoinComplexRelation(sql, quote, join, table, onList, on);
 	}
 
-	protected void onGetJoinString(Join j) throws UnsupportedOperationException {
+	protected void onGetJoinString(Join join) throws UnsupportedOperationException {
 	}
-	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
+	protected void onGetCrossJoinString(Join join) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("已禁用 * CROSS JOIN ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}
 
