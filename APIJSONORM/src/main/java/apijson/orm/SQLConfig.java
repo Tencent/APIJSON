@@ -48,6 +48,22 @@ public interface SQLConfig {
 	int TYPE_ITEM = 1;
 	int TYPE_ITEM_CHILD_0 = 2;
 
+	Parser<?> getParser();
+
+	AbstractSQLConfig setParser(Parser<?> parser);
+
+	ObjectParser getObjectParser();
+
+	AbstractSQLConfig setObjectParser(ObjectParser objectParser);
+
+	int getVersion();
+
+	AbstractSQLConfig setVersion(int version);
+
+	String getTag();
+
+	AbstractSQLConfig setTag(String tag);
+
 	boolean isMySQL();
 	boolean isPostgreSQL();
 	boolean isSQLServer();

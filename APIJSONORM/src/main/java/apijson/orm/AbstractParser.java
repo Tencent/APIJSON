@@ -1895,6 +1895,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			return null;
 		}
 
+		config.setParser(this);
+		config.setVersion(getVersion());
+		config.setTag(getTag());
+
 		if (isSubquery) {
 			JSONObject sqlObj = new JSONObject(true);
 			sqlObj.put(KEY_CONFIG, config);
@@ -1940,7 +1944,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			return result;
 		}
 		catch (Exception e) {
-      throw CommonException.wrap(e, config);
+			throw CommonException.wrap(e, config);
 		}
 		finally {
 			if (config.getPosition() == 0 && config.limitSQLCount()) {

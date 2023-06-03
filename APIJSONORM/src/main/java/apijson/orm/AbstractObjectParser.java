@@ -799,7 +799,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	@Override
 	public JSONObject parseResponse(RequestMethod method, String table, String alias
             , JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		SQLConfig config = newSQLConfig(method, table, alias, request, joinList, isProcedure);
+		SQLConfig config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
+				.setParser(parser)
+				.setObjectParser(this);
 		return parseResponse(config, isProcedure);
 	}
 	@Override
@@ -813,7 +815,9 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	@Override
 	public SQLConfig newSQLConfig(boolean isProcedure) throws Exception {
-		return newSQLConfig(method, table, alias, sqlRequest, joinList, isProcedure);
+		return newSQLConfig(method, table, alias, sqlRequest, joinList, isProcedure)
+				.setParser(parser)
+				.setObjectParser(this);
 	}
 
 	/**SQL 配置，for single object
@@ -836,10 +840,10 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				sqlConfig = newSQLConfig(false);
 			}
 			catch (Exception e) {
-        if (e instanceof NotExistException || (e instanceof CommonException && e.getCause() instanceof NotExistException)) {
-          return this;
-        }
-        throw e;
+				if (e instanceof NotExistException || (e instanceof CommonException && e.getCause() instanceof NotExistException)) {
+					return this;
+				}
+				throw e;
 			}
 		}
 		sqlConfig.setCount(sqlConfig.getCount() <= 0 ? count : sqlConfig.getCount()).setPage(page).setPosition(position);

@@ -771,6 +771,56 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 
 	}
 
+	private Parser<?> parser;
+	@Override
+	public Parser<?> getParser() {
+		return parser;
+	}
+	@Override
+	public AbstractSQLConfig setParser(Parser<?> parser) {
+		this.parser = parser;
+		return this;
+	}
+
+	private ObjectParser objectParser;
+	@Override
+	public ObjectParser getObjectParser() {
+		return objectParser;
+	}
+	@Override
+	public AbstractSQLConfig setObjectParser(ObjectParser objectParser) {
+		this.objectParser = objectParser;
+		return this;
+	}
+
+	private int version;
+	@Override
+	public int getVersion() {
+		if (version <= 0 && parser != null) {
+			version = parser.getVersion();
+		}
+		return version;
+	}
+	@Override
+	public AbstractSQLConfig setVersion(int version) {
+		this.version = version;
+		return this;
+	}
+
+	private String tag;
+	@Override
+	public String getTag() {
+		if (StringUtil.isEmpty(tag) && parser != null) {
+			tag = parser.getTag();
+		}
+		return tag;
+	}
+	@Override
+	public AbstractSQLConfig setTag(String tag) {
+		this.tag = tag;
+		return this;
+	}
+
 	// mysql8版本以上,子查询支持with as表达式
 	private List<String> withAsExprSqlList = null;
 	protected List<Object> withAsExprPreparedValueList = new ArrayList<>();
@@ -4734,7 +4784,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure, Callback<T> callback) throws Exception {
+	public static <T extends Object> SQLConfig newSQLConfig(RequestMethod method, String table, String alias
+			, JSONObject request, List<Join> joinList, boolean isProcedure, Callback<T> callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
