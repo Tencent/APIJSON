@@ -23,7 +23,8 @@ import static apijson.orm.Operation.TYPE;
 import static apijson.orm.Operation.UNIQUE;
 import static apijson.orm.Operation.UPDATE;
 import static apijson.orm.Operation.VERIFY;
-import static apijson.orm.Operation.ON;
+import static apijson.orm.Operation.IF;
+//import static apijson.orm.Operation.CODE;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -33,6 +34,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import apijson.orm.script.JavaScriptExecutor;
+import apijson.orm.script.ScriptExecutor;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -64,6 +67,10 @@ import apijson.orm.model.AllColumn;
 import apijson.orm.model.AllTableComment;
 import apijson.orm.model.AllColumnComment;
 import apijson.orm.model.TestRecord;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 
 /**校验器(权限、请求参数、返回结果等)
  * TODO 合并 Structure 的代码
@@ -107,6 +114,10 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	 */
 	public static final String ADMIN = "ADMIN";
 
+	public static ParserCreator PARSER_CREATOR;
+
+	public static ScriptEngineManager SCRIPT_ENGINE_MANAGER;
+	public static ScriptEngine SCRIPT_ENGINE;
 
 	// 共享 STRUCTURE_MAP 则不能 remove 等做任何变更，否则在并发情况下可能会出错，加锁效率又低，所以这里改为忽略对应的 key
 	public static Map<String, Entry<String, Object>> ROLE_MAP;
@@ -133,6 +144,9 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	@NotNull
 	public static final Map<String, Pattern> COMPILE_MAP;
 	static {
+		SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
+		SCRIPT_ENGINE = SCRIPT_ENGINE_MANAGER.getEngineByName("js");
+
 		ROLE_MAP = new LinkedHashMap<>();
 		ROLE_MAP.put(UNKNOWN, new Entry<String, Object>());
 		ROLE_MAP.put(LOGIN, new Entry<String, Object>("userId>", 0));
@@ -152,7 +166,8 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		OPERATION_KEY_LIST.add(REMOVE.name());
 		OPERATION_KEY_LIST.add(MUST.name());
 		OPERATION_KEY_LIST.add(REFUSE.name());
-		OPERATION_KEY_LIST.add(ON.name());
+		OPERATION_KEY_LIST.add(IF.name());
+//		OPERATION_KEY_LIST.add(CODE.name());
 		OPERATION_KEY_LIST.add(ALLOW_PARTIAL_UPDATE_FAIL.name());
 
 
@@ -914,7 +929,19 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		String remove = StringUtil.getString(target.getString(REMOVE.name()));
 		String must = StringUtil.getString(target.getString(MUST.name()));
 		String refuse = StringUtil.getString(target.getString(REFUSE.name()));
-		JSONObject on = target.getJSONObject(ON.name());
+
+		Object _if = target.get(IF.name());
+		boolean ifIsStr = _if instanceof String && StringUtil.isNotEmpty(_if, true);
+		JSONObject ifObj = ifIsStr == false && _if instanceof JSONObject ? (JSONObject) _if : null;
+//				: (_if instanceof String ? new apijson.JSONRequest((String) _if, "" /* "throw new Error('')" */ ) : null);
+		if (ifObj == null && _if != null && ifIsStr == false) {
+//			if (_if instanceof JSONArray) {
+//			}
+			throw new IllegalArgumentException(name + ": { " + IF.name() + ": value } 中 value 类型错误！只允许 String, JSONObject！");
+		}
+
+//		Object code = target.get(CODE.name());
+
 		String allowPartialUpdateFail = StringUtil.getString(target.getString(ALLOW_PARTIAL_UPDATE_FAIL.name()));
 
 
@@ -1143,7 +1170,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			long exceptId = real.getLongValue(finalIdKey);
 			Map<String,Object> map = new HashMap<>();
 			for (String u : uniques) {
-				map.put(u,real.get(u));
+				map.put(u, real.get(u));
 			}
 			verifyRepeat(name, map, exceptId, finalIdKey, creator);
 		}
@@ -1176,31 +1203,83 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		// 校验并配置允许部分批量增删改失败>>>>>>>>>>>>>>>>>>>
 
 
-		String[] nks = on == null ? null : StringUtil.split(real.getString(JSONRequest.KEY_NULL));
+		String[] nks = ifObj == null ? null : StringUtil.split(real.getString(JSONRequest.KEY_NULL));
 		Collection<?> nkl = nks == null || nks.length <= 0 ? new HashSet<>() : Arrays.asList(nks);
 
-		Set<Map.Entry<String, Object>> onSet = on == null ? null : on.entrySet();
-		if (onSet != null) {
+		Set<Map.Entry<String, Object>> ifSet = ifObj == null ? null : ifObj.entrySet();
+		if (ifIsStr || (ifSet != null && ifSet.isEmpty() == false)) {
 			// 没必要限制，都是后端配置的，安全可控，而且可能确实有特殊需求，需要 id, @column 等
 //			List<String> condKeys = new ArrayList<>(Arrays.asList(apijson.JSONRequest.KEY_ID, apijson.JSONRequest.KEY_ID_IN
 //					, apijson.JSONRequest.KEY_USER_ID, apijson.JSONRequest.KEY_USER_ID_IN));
 //			condKeys.addAll(JSONRequest.TABLE_KEY_LIST);
 
-			for (Map.Entry<String, Object> entry : onSet) {
-				String k = entry == null ? null : entry.getKey();
+			String preCode = "var curObj = " + JSON.format(real) + ";";
+
+			// 未传的 key 在后面 eval 时总是报错 undefined，而且可能有冲突，例如对象里有 "curObj": val 键值对，就会覆盖当前对象定义，还不如都是 curObj.sex 这样取值
+//			Set<Map.Entry<String, Object>> rset = real.entrySet();
+//			for (Map.Entry<String, Object> entry : rset) {
+//				String k = entry == null ? null : entry.getKey();
+//				if (StringUtil.isEmpty(k)) {
+//					continue;
+//				}
+//				String vn = JSONResponse.formatOtherKey(k);
+//				if (StringUtil.isName(vn) == false) { // 通过 curObj['id@'] 这样取值，写在 IF 配置里
+//					continue;
+//				}
+//
+//				Object v = entry.getValue();
+//				String vs = v instanceof String ? "\"" + ((String) v).replaceAll("\"", "\\\"") + "\""
+//						: (JSON.isBooleanOrNumberOrString(v) ? v.toString() : JSON.format(v));
+//				preCode += "\nvar " + vn + " = " + vs + ";";
+//			}
+
+			if (ifIsStr) {
+				String ifStr = (String) _if;
+				int ind = ifStr.indexOf(":");
+				String lang = ind < 0 ? null : ifStr.substring(0, ind);
+				ScriptEngine engine = getScriptEngine(lang);
+				engine.eval(preCode + "\n" + _if);
+			}
+			else {
+				for (Map.Entry<String, Object> entry : ifSet) {
+					String k = entry == null ? null : entry.getKey();
 //				if (condKeys.contains(k)) {
 //					throw new IllegalArgumentException("Request 表 structure 配置的 " + ON.name()
 //							+ ":{ " + k + ":value } 中 key 不合法，不允许传 [" + StringUtil.join(condKeys.toArray(new String[]{})) + "] 中的任何一个 ！");
 //				}
 
-				Object v = k == null ? null : entry.getValue();
-				if (v instanceof JSONObject == false) {
-					throw new IllegalArgumentException("Request 表 structure 配置的 " + ON.name()
-							+ ":{ " + k + ":value } 中 value 不合法，必须是 JSONObject {} ！");
-				}
+					Object v = k == null ? null : entry.getValue();
+					if (v instanceof String) {
+						int ind = k.indexOf(":");
+						String lang = ind < 0 ? null : k.substring(0, ind);
+						ScriptEngine engine = getScriptEngine(lang);
+						k =  ind < 0 ? k : k.substring(ind + 1);
 
-				if (nkl.contains(k) || real.get(k) != null) {
-					real = parse(method, name, (JSONObject) v, real, database, schema, datasource, idCallback, creator, callback);
+						boolean isElse = StringUtil.isEmpty(k, false); // 其它直接报错，不允许传 StringUtil.isEmpty(k, true) || "ELSE".equals(k);
+//						String code = preCode + "\n\n" + (StringUtil.isEmpty(v, false) ? k : (isElse ? v : "if (" + k + ") {\n  " + v + "\n}"));
+						String code = preCode + "\n\n" + (isElse ? v : "if (" + k + ") {\n  " + v + "\n}");
+
+//					ScriptExecutor executor = new JavaScriptExecutor();
+//					executor.execute(null, real, )
+
+						engine.eval(code);
+
+//					PARSER_CREATOR.createFunctionParser()
+//							.setCurrentObject(real)
+//							.setKey(k)
+//							.setMethod(method)
+//							.invoke()
+						continue;
+					}
+
+					if (v instanceof JSONObject == false) {
+						throw new IllegalArgumentException("Request 表 structure 配置的 " + IF.name()
+								+ ":{ " + k + ":value } 中 value 不合法，必须是 JSONObject {} ！");
+					}
+
+					if (nkl.contains(k) || real.get(k) != null) {
+						real = parse(method, name, (JSONObject) v, real, database, schema, datasource, idCallback, creator, callback);
+					}
 				}
 			}
 		}
@@ -1208,6 +1287,27 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		return real;
 	}
 
+	public static ScriptEngine getScriptEngine(String lang) {
+		List<ScriptEngineFactory> list = StringUtil.isEmpty(lang, true) ? null : SCRIPT_ENGINE_MANAGER.getEngineFactories();
+
+		ScriptEngine engine = null;
+		if (list == null || list.isEmpty()) {
+			engine = SCRIPT_ENGINE; // StringUtil.isEmpty(lang) ? SCRIPT_ENGINE : null;
+		}
+		else {
+			for (ScriptEngineFactory sef : list) {
+				if (sef != null && lang.equals(sef.getEngineName())) {
+					engine = sef.getScriptEngine();
+				}
+			}
+		}
+
+		if (engine == null) {
+			throw new NullPointerException("找不到可执行 " + (StringUtil.isEmpty(lang, true) ? "js" : lang) + " 脚本的引擎！engine == null!");
+		}
+
+		return engine;
+	}
 
 
 	/**执行操作

@@ -98,8 +98,8 @@ public class JSON {
 	 * @return
 	 */
 	public static <T> T parseObject(String json, Class<T> clazz) {
-		if (clazz == null) {
-			Log.e(TAG, "parseObject  clazz == null >> return null;");
+		if (clazz == null || StringUtil.isEmpty(json, true)) {
+			Log.e(TAG, "parseObject  clazz == null || StringUtil.isEmpty(json, true) >> return null;");
 		} else {
 			try {
 				return com.alibaba.fastjson.JSON.parseObject(getCorrectJson(json), clazz, DEFAULT_FASTJSON_FEATURES);
@@ -132,10 +132,14 @@ public class JSON {
 	 * @return
 	 */
 	public static JSONArray parseArray(String json) {
-		try {
-			return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json, true));
-		} catch (Exception e) {
-			Log.i(TAG, "parseArray  catch \n" + e.getMessage());
+		if (StringUtil.isEmpty(json, true)) {
+			Log.e(TAG, "parseArray  StringUtil.isEmpty(json, true) >> return null;");
+		} else {
+			try {
+				return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json, true));
+			} catch (Exception e) {
+				Log.i(TAG, "parseArray  catch \n" + e.getMessage());
+			}
 		}
 		return null;
 	}
@@ -153,8 +157,8 @@ public class JSON {
 	 * @return
 	 */
 	public static <T> List<T> parseArray(String json, Class<T> clazz) {
-		if (clazz == null) {
-			Log.e(TAG, "parseArray  clazz == null >> return null;");
+		if (clazz == null || StringUtil.isEmpty(json, true)) {
+			Log.e(TAG, "parseArray  clazz == null || StringUtil.isEmpty(json, true) >> return null;");
 		} else {
 			try {
 				return com.alibaba.fastjson.JSON.parseArray(getCorrectJson(json, true), clazz);
@@ -170,6 +174,9 @@ public class JSON {
 	 * @return
 	 */
 	public static String toJSONString(Object obj) {
+		if (obj == null) {
+			return null;
+		}
 		if (obj instanceof String) {
 			return (String) obj;
 		}
@@ -187,6 +194,9 @@ public class JSON {
 	 * @return
 	 */
 	public static String toJSONString(Object obj, SerializerFeature... features) {
+		if (obj == null) {
+			return null;
+		}
 		if (obj instanceof String) {
 			return (String) obj;
 		}

@@ -119,8 +119,28 @@ public enum Operation {
 	 * "key0": {}
 	 * 例如 "name": { "UPDATE": { "Comment": { "userName@": "/name" } } }
 	 * 当 User.name 被修改时，同步修改 Comment.userName
+	 *
+	 * 例如 "sex != 0 && sex != 1": "throw new Error('sex 必须在 [0, 1] 内！')"
+	 * 自定义代码，当满足条件是执行后面的代码
+	 *
+	 * 还有
+	 * "ELSE": ""
+	 * 自定义代码，不处理，和不传一样
 	 */
-	ON,
+	IF,
+
+//	/** 直接用 IF 替代
+//	 * 自定义代码，结构是 "code"，例如
+//	 * "var a = 1;
+//	 *  var b = a + 2;
+//	 *  if (b % 2 == 0) {
+//	 *      throw new Error('b % 2 == 0 !');
+//	 *  }
+//	 * "
+//	 *
+//	 * 或 { "code": "JS", "code2": "LUA" }
+//	 */
+//	CODE,
 
 	/**
 	 * 允许批量增删改部分失败，结构是

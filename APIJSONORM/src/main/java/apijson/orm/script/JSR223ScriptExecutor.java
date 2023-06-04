@@ -66,8 +66,8 @@ public abstract class JSR223ScriptExecutor implements ScriptExecutor {
 		}
 		
 		Map<String, Object> metaMap = new HashMap<>();
-		metaMap.put("version", parser.getVersion());
-		metaMap.put("tag", parser.getTag());
+		metaMap.put("version", parser == null ? 0 : parser.getVersion());
+		metaMap.put("tag", parser == null ? null : parser.getTag());
 		metaMap.put("args", args);
 		bindings.put("_meta", metaMap);
 		return compiledScript.eval(bindings);
