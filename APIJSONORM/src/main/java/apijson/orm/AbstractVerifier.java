@@ -1237,7 +1237,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 				String ifStr = (String) _if;
 				int ind = ifStr.indexOf(":");
 				String lang = ind < 0 ? null : ifStr.substring(0, ind);
-				ScriptEngine engine = getScriptEngine(lang);
+				ScriptEngine engine = getScriptEngine(StringUtil.isName(lang) ? lang : null);
 				engine.eval(preCode + "\n" + _if);
 			}
 			else {
@@ -1252,7 +1252,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 					if (v instanceof String) {
 						int ind = k.indexOf(":");
 						String lang = ind < 0 ? null : k.substring(0, ind);
-						ScriptEngine engine = getScriptEngine(lang);
+						ScriptEngine engine = getScriptEngine(StringUtil.isName(lang) ? lang : null);
 						k =  ind < 0 ? k : k.substring(ind + 1);
 
 						boolean isElse = StringUtil.isEmpty(k, false); // 其它直接报错，不允许传 StringUtil.isEmpty(k, true) || "ELSE".equals(k);
