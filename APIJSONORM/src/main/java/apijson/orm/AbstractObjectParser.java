@@ -258,7 +258,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 						if (obj instanceof JSONObject) {
 							((JSONObject) obj).put(apijson.JSONObject.KEY_METHOD, GET);
 						}
-                        
+
 						try {
                             boolean startsWithAt = key.startsWith("@");
                             //if (startsWithAt || (key.endsWith("()") == false)) {
@@ -372,7 +372,21 @@ public abstract class AbstractObjectParser implements ObjectParser {
 				}
 
 				String from = subquery.getString(JSONRequest.KEY_SUBQUERY_FROM);
-				JSONObject arrObj = from == null ? null : obj.getJSONObject(from);
+				boolean isEmpty = StringUtil.isEmpty(from);
+				JSONObject arrObj = isEmpty ? null : obj.getJSONObject(from);
+				if (isEmpty) {
+					Set<Entry<String, Object>> set = obj.entrySet();
+					for (Entry<String, Object> e : set) {
+						String k = e == null ? null : e.getKey();
+						Object v = k == null ? null : e.getValue();
+						if (v instanceof JSONObject && JSONRequest.isTableKey(k)) {
+							from = k;
+							arrObj = (JSONObject) v;
+							break;
+						}
+					}
+				}
+
 				if (arrObj == null) {
 					throw new IllegalArgumentException("子查询 " + path + "/"
                             + key + ":{ from:value } 中 value 对应的主表对象 " + from + ":{} 不存在！");
