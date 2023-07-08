@@ -2120,6 +2120,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	private String[] parseArgsSplitWithComma(String param, boolean isColumn, boolean containRaw, boolean allowAlias) {
 		// 以"," 分割参数
 		String quote = getQuote();
+		boolean isKeyPrefix = isKeyPrefix();
 		String tableAlias = getAliasWithQuote();
 		String ckeys[] = StringUtil.split(param); // 以","分割参数
 		if (ckeys != null && ckeys.length > 0) {
@@ -2190,12 +2191,10 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						// 以空格分割参数
 						String[] mkes = containRaw ? StringUtil.split(ck, " ", true) : new String[]{ ck };
 
-						//如果参数中含有空格(少数情况) 比如  fun(arg1 arg2 arg3 ,arg4) 中的 arg1 arg2 arg3，比如 DISTINCT id
+						//如果参数中含有空格(少数情况) 比如  fun(arg1, arg2,arg3,arg4) 中的 arg1 arg2 arg3，比如 DISTINCT id
 						if (mkes != null && mkes.length >= 2) {
-							origin = praseArgsSplitWithSpace(mkes);
+							origin = parseArgsSplitWithSpace(mkes);
 						} else {
-							boolean isName = false;
-
 							String mk = RAW_MAP.get(origin);
 							if (mk != null) {  // newSQLConfig 提前处理好的
 								if (mk.length() > 0) {
@@ -2203,15 +2202,30 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								}
 							} else if (StringUtil.isNumer(origin)) {
 								//do nothing
-							} else if (StringUtil.isName(origin)) {
-								origin = quote + origin + quote;
-								isName = true;
 							} else {
-								origin = getValue(origin).toString();
-							}
+								String[] keys = origin.split("[.]");
+								StringBuilder sb = new StringBuilder();
 
-							if (isName && isKeyPrefix()) {
-								origin = tableAlias + "." + origin;
+								int len = keys == null ? 0 : keys.length;
+								if (len > 0) {
+									boolean first = true;
+									for (String k : keys) {
+										if (StringUtil.isName(k) == false) {
+											sb = null;
+											break;
+										}
+
+										sb.append(first ? "" : ".").append(quote).append(k).append(quote);
+										first = false;
+									}
+								}
+
+								String s = sb == null ? null : sb.toString();
+								if (StringUtil.isNotEmpty(s, true)) {
+									origin = (len == 1 && isKeyPrefix ? tableAlias + "." : "") + s;
+								} else {
+									origin = getValue(origin).toString();
+								}
 							}
 
 							if (isColumn && StringUtil.isEmpty(alias, true) == false) {
@@ -2235,8 +2249,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * @param mkes
 	 * @return
 	 */
-	private String praseArgsSplitWithSpace(String mkes[]) {
+	private String parseArgsSplitWithSpace(String mkes[]) {
 		String quote = getQuote();
+		boolean isKeyPrefix = isKeyPrefix();
 		String tableAlias = getAliasWithQuote();
 
 		// 包含空格的参数  肯定不包含别名 不用处理别名
@@ -2264,7 +2279,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								+ " 中所有字符串 column 都必须必须为1个单词 ！");
 					}
 
-					mkes[j] = getKey(origin).toString();
+					mkes[j] = getKey(origin);
 					continue;
 				}
 				else if (ck.startsWith("'") && ck.endsWith("'")) {
@@ -2285,18 +2300,32 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 							+ " 中所有 arg 都必须是1个不以 _ 开头的单词 或者符合正则表达式 " + PATTERN_FUNCTION + " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
 				}
 
-				boolean isName = false;
 				if (StringUtil.isNumer(origin)) {
 					//do nothing
-				} else if (StringUtil.isName(origin)) {
-					origin = quote + origin + quote;
-					isName = true;
 				} else {
-					origin = getValue(origin).toString();
-				}
+					String[] keys = origin.split("[.]");
+					StringBuilder sb = new StringBuilder();
 
-				if (isName && isKeyPrefix()) {
-					origin = tableAlias + "." + origin;
+					int len = keys == null ? 0 : keys.length;
+					if (len > 0) {
+						boolean first = true;
+						for (String k : keys) {
+							if (StringUtil.isName(k) == false) {
+								sb = null;
+								break;
+							}
+
+							sb.append(first ? "" : ".").append(quote).append(k).append(quote);
+							first = false;
+						}
+					}
+
+					String s = sb == null ? null : sb.toString();
+					if (StringUtil.isNotEmpty(s, true)) {
+						origin = (len == 1 && isKeyPrefix ? tableAlias + "." : "") + s;
+					} else {
+						origin = getValue(origin).toString();
+					}
 				}
 
 				mkes[j] = origin;
@@ -2894,13 +2923,13 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						} else {
 							wi = isHaving ? getHavingItem(quote, table, alias, column, (String) value, containRaw) : getWhereItem(column, value, method, verifyName);
 						}
-						
+
 						if (1.0f*allCount/size > maxCombineRatio && maxCombineRatio > 0) {
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + s + "' 不合法！"
 									+ "其中 key 数量 " + allCount + " / 条件键值对数量 " + size + " = " + (1.0f*allCount/size)
 									+ " 已超过 最大倍数，必须在条件键值对数量 0-" + maxCombineRatio + " 倍内！");
 						}
-						
+
 						if (StringUtil.isEmpty(wi, true)) {  // 转成 1=1 ?
 							throw new IllegalArgumentException(errPrefix + " 中字符 '" + key
 									+ "' 对应的 " + column + ":value 不是有效条件键值对！");
@@ -5127,7 +5156,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								if(StringUtil.equals(table, from.getConfig().getTable())) {
 									isFakeDelete = false;
 								}
-								
+
 								if(from.getConfig().getJoinList() != null) {
 									for(Join join : from.getConfig().getJoinList()) {
 										if(StringUtil.equals(table, join.getTable())) {
@@ -5144,9 +5173,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 								whereList.addAll(fakeDeleteMap.keySet());
 							}
 						}
-					} 
+					}
 				}
-				
+
 				if (StringUtil.isNotEmpty(combineExpr, true)) {
 					List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
 					for (String key : banKeyList) {
@@ -5206,7 +5235,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 
 				//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				
+
 				Map<String, Object> tableContent = new LinkedHashMap<String, Object>();
 				Object value;
 				for (String key : set) {
@@ -5252,7 +5281,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						fakeDeleteMap.put(accessFakeDeleteMap.get("deletedKey").toString(), accessFakeDeleteMap.get("deletedValue"));
 						config.setMethod(PUT);
 						config.setContent(fakeDeleteMap);
-					} 
+					}
 				}
 			}
 
