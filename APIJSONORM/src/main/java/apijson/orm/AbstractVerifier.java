@@ -1236,39 +1236,41 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			if (ifIsStr) {
 				String ifStr = (String) _if;
 				int ind = ifStr.indexOf(":");
-				String lang = ind < 0 ? null : ifStr.substring(0, ind);
-				ScriptEngine engine = getScriptEngine(StringUtil.isName(lang) ? lang : null);
-				engine.eval(preCode + "\n" + _if);
+				String lang = ind < 0 || ind > 20 ? null : ifStr.substring(0, ind);
+				boolean isName = StringUtil.isName(lang);
+				ScriptEngine engine = getScriptEngine(isName ? lang : null);
+				engine.eval(preCode + "\n" + (isName ? ifStr.substring(ind + 1) : ifStr));
 			}
 			else {
 				for (Map.Entry<String, Object> entry : ifSet) {
 					String k = entry == null ? null : entry.getKey();
-//				if (condKeys.contains(k)) {
-//					throw new IllegalArgumentException("Request 表 structure 配置的 " + ON.name()
-//							+ ":{ " + k + ":value } 中 key 不合法，不允许传 [" + StringUtil.join(condKeys.toArray(new String[]{})) + "] 中的任何一个 ！");
-//				}
+//					if (condKeys.contains(k)) {
+//						throw new IllegalArgumentException("Request 表 structure 配置的 " + ON.name()
+//								+ ":{ " + k + ":value } 中 key 不合法，不允许传 [" + StringUtil.join(condKeys.toArray(new String[]{})) + "] 中的任何一个 ！");
+//					}
 
 					Object v = k == null ? null : entry.getValue();
 					if (v instanceof String) {
 						int ind = k.indexOf(":");
-						String lang = ind < 0 ? null : k.substring(0, ind);
-						ScriptEngine engine = getScriptEngine(StringUtil.isName(lang) ? lang : null);
-						k =  ind < 0 ? k : k.substring(ind + 1);
+						String lang = ind < 0 || ind > 20 ? null : k.substring(0, ind);
+						boolean isName = StringUtil.isName(lang);
+						ScriptEngine engine = getScriptEngine(isName ? lang : null);
+						k = isName ? k.substring(ind + 1) : k;
 
 						boolean isElse = StringUtil.isEmpty(k, false); // 其它直接报错，不允许传 StringUtil.isEmpty(k, true) || "ELSE".equals(k);
 //						String code = preCode + "\n\n" + (StringUtil.isEmpty(v, false) ? k : (isElse ? v : "if (" + k + ") {\n  " + v + "\n}"));
 						String code = preCode + "\n\n" + (isElse ? v : "if (" + k + ") {\n  " + v + "\n}");
 
-//					ScriptExecutor executor = new JavaScriptExecutor();
-//					executor.execute(null, real, )
+//						ScriptExecutor executor = new JavaScriptExecutor();
+//						executor.execute(null, real, )
 
 						engine.eval(code);
 
-//					PARSER_CREATOR.createFunctionParser()
-//							.setCurrentObject(real)
-//							.setKey(k)
-//							.setMethod(method)
-//							.invoke()
+//						PARSER_CREATOR.createFunctionParser()
+//								.setCurrentObject(real)
+//								.setKey(k)
+//								.setMethod(method)
+//								.invoke()
 						continue;
 					}
 
@@ -1288,22 +1290,11 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 	}
 
 	public static ScriptEngine getScriptEngine(String lang) {
-		List<ScriptEngineFactory> list = StringUtil.isEmpty(lang, true) ? null : SCRIPT_ENGINE_MANAGER.getEngineFactories();
-
-		ScriptEngine engine = null;
-		if (list == null || list.isEmpty()) {
-			engine = SCRIPT_ENGINE; // StringUtil.isEmpty(lang) ? SCRIPT_ENGINE : null;
-		}
-		else {
-			for (ScriptEngineFactory sef : list) {
-				if (sef != null && lang.equals(sef.getEngineName())) {
-					engine = sef.getScriptEngine();
-				}
-			}
-		}
+		boolean isEmpty = StringUtil.isEmpty(lang, true);
+		ScriptEngine engine = isEmpty ? SCRIPT_ENGINE : SCRIPT_ENGINE_MANAGER.getEngineByName(lang);
 
 		if (engine == null) {
-			throw new NullPointerException("找不到可执行 " + (StringUtil.isEmpty(lang, true) ? "js" : lang) + " 脚本的引擎！engine == null!");
+			throw new NullPointerException("找不到可执行 " + (isEmpty ? "js" : lang) + " 脚本的引擎！engine == null!");
 		}
 
 		return engine;
