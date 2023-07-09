@@ -98,6 +98,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 */
 	public static boolean ENABLE_WITH_AS = false;
 
+	/**
+	 * 对指定的方法，忽略空字符串，不作为 GET 条件，PUT 值等。可取值 new RequestMethod[]{ RequestMethod.GET, RequestMethod.POST ... }
+	 */
+	public static List<RequestMethod> IGNORE_EMPTY_STRING_METHOD_LIST = null;
+	/**
+	 * 对指定的方法，忽略空白字符串。即首尾 trim 去掉所有不可见字符后，仍然为空的，就忽略，不作为 GET 条件，PUT 值等。
+	 * 可取值 new RequestMethod[]{ RequestMethod.GET, RequestMethod.POST ... }
+	 */
+	public static List<RequestMethod> IGNORE_BLANK_STRING_METHOD_LIST = null;
 	public static int MAX_HAVING_COUNT = 5;
 	public static int MAX_WHERE_COUNT = 10;
 	public static int MAX_COMBINE_DEPTH = 2;
@@ -5056,11 +5065,17 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 			String[] rawArr = StringUtil.split(raw);
 			config.setRaw(rawArr == null || rawArr.length <= 0 ? null : new ArrayList<>(Arrays.asList(rawArr)));
 
-			Map<String, Object> tableWhere = new LinkedHashMap<String, Object>();//保证顺序好优化 WHERE id > 1 AND name LIKE...
+			Map<String, Object> tableWhere = new LinkedHashMap<String, Object>(); // 保证顺序好优化 WHERE id > 1 AND name LIKE...
 
-			//已经remove了id和id{}，以及@key
-			Set<String> set = request.keySet(); //前面已经判断request是否为空
-			if (method == POST) { //POST操作
+			boolean ignoreBlankStr = IGNORE_BLANK_STRING_METHOD_LIST != null && IGNORE_BLANK_STRING_METHOD_LIST.contains(method);
+			boolean ignoreEmptyStr = ignoreBlankStr || (IGNORE_EMPTY_STRING_METHOD_LIST != null && IGNORE_EMPTY_STRING_METHOD_LIST.contains(method));
+			boolean ignoreEmptyOrBlankStr = ignoreEmptyStr || ignoreBlankStr;
+
+			boolean enableFakeDelete = config.isFakeDelete();
+
+			// 已经 remove了 id 和 id{}，以及 @key
+			Set<String> set = request.keySet(); // 前面已经判断 request 是否为空
+			if (method == POST) { // POST操作
 				if (idIn != null) {
 					throw new IllegalArgumentException(table + ":{" + idInKey + ": value} 里的 key 不合法！POST 请求中不允许传 " + idInKey
 							+ " 这种非字段命名 key ！必须为 英文字母 开头且只包含 英文字母、数字、下划线的 字段命名！");				}
@@ -5237,17 +5252,21 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				//条件>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 				Map<String, Object> tableContent = new LinkedHashMap<String, Object>();
-				Object value;
 				for (String key : set) {
-					value = request.get(key);
-
-					if (key.endsWith("<>") == false && value instanceof Map) {//只允许常规Object
-						throw new IllegalArgumentException(table + ":{ " + key + ":value } 中 value 类型错误！除了 key<>:{} 外，不允许 " + key + " 等其它任何 key 对应 value 的类型为 JSONObject {} !");
+					Object value = request.get(key);
+					if (ignoreEmptyOrBlankStr && value instanceof String && StringUtil.isEmpty(value, ignoreBlankStr)) {
+						continue;
 					}
 
-					//兼容 PUT @combine
-					//解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-					if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false)) || (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && keyInCombineExpr(combineExpr, key))) {
+					if (key.endsWith("<>") == false && value instanceof Map) { // 只允许常规 Object
+						throw new IllegalArgumentException(table + ":{ " + key + ":value } 中 value 类型错误！除了 key<>:{} 外，不允许 "
+								+ key + " 等其它任何 key 对应 value 的类型为 JSONObject {} !");
+					}
+
+					// 兼容 PUT @combine
+					// 解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
+					if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false))
+							|| (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && keyInCombineExpr(combineExpr, key))) {
 						tableWhere.put(key, value);
 						if (whereList.contains(key) == false) {
 							andList.add(key);
@@ -5255,7 +5274,7 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					} else if (whereList.contains(key)) {
 						tableWhere.put(key, value);
 					} else {
-						tableContent.put(key, value); //一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
+						tableContent.put(key, value); // 一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 					}
 				}
 
@@ -5305,11 +5324,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				}
 			}
 
-			boolean distinct = column == null || rawColumnSQL != null ? false : column.startsWith(PREFIX_DISTINCT);
+			boolean distinct = rawColumnSQL == null && column != null && column.startsWith(PREFIX_DISTINCT);
 			if (rawColumnSQL == null) {
-				String[] fks = StringUtil.split(distinct ? column.substring(PREFIX_DISTINCT.length()) : column, ";"); // key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
+				// key0,key1;fun0(key0,...);fun1(key0,...);key3;fun2(key0,...)
+				String[] fks = StringUtil.split(distinct ? column.substring(PREFIX_DISTINCT.length()) : column, ";");
 				if (fks != null) {
-					String[] ks;
 					for (String fk : fks) {
 						if (containColumnRaw) {
 							String rawSQL = config.getRawSQL(KEY_COLUMN, fk);
@@ -5322,8 +5341,8 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 						if (fk.contains("(")) {  // fun0(key0,...)
 							cs.add(fk);
 						}
-						else { //key0,key1...
-							ks = StringUtil.split(fk);
+						else { // key0,key1...
+							String[] ks = StringUtil.split(fk);
 							if (ks != null && ks.length > 0) {
 								cs.addAll(Arrays.asList(ks));
 							}
@@ -5402,6 +5421,9 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					if (v instanceof String == false) {
 						throw new IllegalArgumentException(table + ":{ " + havingKey +  ":{ " + k + ":value } } 里的"
 								+ " value 不合法！类型只能是 String，且不允许为空！");
+					}
+					if (ignoreEmptyOrBlankStr && StringUtil.isEmpty(v, ignoreBlankStr)) {
+						continue;
 					}
 
 					if (KEY_COMBINE.equals(k)) {
