@@ -863,11 +863,11 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	public static JSONObject newErrorResult(Exception e, boolean isRoot) {
 		if (e != null) {
-      //      if (Log.DEBUG) {
-      e.printStackTrace();
-      //      }
+		  	//      if (Log.DEBUG) {
+		  	e.printStackTrace();
+		  	//      }
 
-      String msg = CommonException.getMsg(e);
+		  	String msg = CommonException.getMsg(e);
 			Integer code = CommonException.getCode(e);
 
 			return newResult(code, msg, isRoot);
@@ -1978,7 +1978,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	@Override
 	public void begin(int transactionIsolation) {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<<<<<<<<<<< begin transactionIsolation = " + transactionIsolation + " >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		getSQLExecutor().setTransactionIsolation(transactionIsolation); //不知道 connection 什么时候创建，不能在这里准确控制，getSqlExecutor().begin(transactionIsolation);
+		getSQLExecutor().setTransactionIsolation(transactionIsolation); // 不知道 connection 什么时候创建，不能在这里准确控制，getSqlExecutor().begin(transactionIsolation);
 	}
 	@Override
 	public void rollback() throws SQLException {
@@ -2016,7 +2016,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	protected void onCommit() {
 		//		Log.d(TAG, "onCommit >>");
 		// this.sqlExecutor.getTransactionIsolation() 只有json第一次执行才会设置, get请求=0
-		if (RequestMethod.isQueryMethod(requestMethod) && this.sqlExecutor.getTransactionIsolation() == Connection.TRANSACTION_NONE ) {
+		if (RequestMethod.isQueryMethod(requestMethod)
+				&& getSQLExecutor().getTransactionIsolation() == Connection.TRANSACTION_NONE) {
 			return;
 		}
 
@@ -2065,7 +2066,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	private void setOpMethod(JSONObject request, ObjectParser op, String key) {
 		String _method = key == null ? null : request.getString(apijson.JSONObject.KEY_METHOD);
 		if (_method != null) {
-			RequestMethod method = RequestMethod.valueOf(_method.toUpperCase());
+			RequestMethod method = RequestMethod.valueOf(_method); // 必须精准匹配，避免缓存命中率低
 			this.setMethod(method);
 			op.setMethod(method);
 		}

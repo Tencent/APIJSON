@@ -6,6 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm.exception;
 
 import java.io.UnsupportedEncodingException;
+import java.net.HttpRetryException;
 import java.sql.SQLException;
 import java.util.concurrent.TimeoutException;
 
@@ -46,6 +47,10 @@ public class CommonException extends Exception {
     Throwable t = isCommon ? e.getCause() : e;
     if (t == null) {
       return JSONResponse.CODE_SERVER_ERROR;
+    }
+
+    if (t instanceof HttpRetryException) {
+      return ((HttpRetryException) t).responseCode();
     }
 
     if (t instanceof UnsupportedEncodingException) {
