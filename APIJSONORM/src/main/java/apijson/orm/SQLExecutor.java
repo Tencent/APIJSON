@@ -20,7 +20,9 @@ import apijson.NotNull;
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
-public interface SQLExecutor {
+public interface SQLExecutor<T extends Object> {
+	Parser<T> getParser();
+	SQLExecutor setParser(Parser<T> parser);
 
 	/**保存缓存
 	 * @param sql

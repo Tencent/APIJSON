@@ -15,7 +15,7 @@ import apijson.StringUtil;
 /**SQL配置
  * @author Lemon
  */
-public interface SQLConfig {
+public interface SQLConfig<T extends Object> {
 
 	String DATABASE_MYSQL = "MYSQL"; // https://www.mysql.com
 	String DATABASE_POSTGRESQL = "POSTGRESQL"; // https://www.postgresql.org
@@ -48,9 +48,9 @@ public interface SQLConfig {
 	int TYPE_ITEM = 1;
 	int TYPE_ITEM_CHILD_0 = 2;
 
-	Parser<?> getParser();
+	Parser<T> getParser();
 
-	AbstractSQLConfig setParser(Parser<?> parser);
+	AbstractSQLConfig setParser(Parser<T> parser);
 
 	ObjectParser getObjectParser();
 
@@ -345,9 +345,9 @@ public interface SQLConfig {
 
 
 	List<Object> getWithAsExprPreparedValueList();
-	void setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
+	SQLConfig setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
 
 	boolean isFakeDelete();
-	
-	void onFakeDelete(Map<String, Object> map);
+
+	Map<String, Object> onFakeDelete(Map<String, Object> map);
 }

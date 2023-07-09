@@ -46,10 +46,21 @@ import apijson.orm.exception.NotExistException;
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
-public abstract class AbstractSQLExecutor implements SQLExecutor {
+public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecutor<T> {
 	private static final String TAG = "AbstractSQLExecutor";
 
 	public static String KEY_RAW_LIST = "@RAW@LIST";  // 避免和字段命名冲突，不用 $RAW@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
+
+	private Parser<T> parser;
+	@Override
+	public Parser<T> getParser() {
+		return parser;
+	}
+	@Override
+	public AbstractSQLExecutor setParser(Parser<T> parser) {
+		this.parser = parser;
+		return this;
+	}
 
 	private int generatedSQLCount = 0;
 	private int cachedSQLCount = 0;
@@ -1195,7 +1206,7 @@ public abstract class AbstractSQLExecutor implements SQLExecutor {
 	@Override
 	public void begin(int transactionIsolation) throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION begin transactionIsolation = " + transactionIsolation + " >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		//不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
+		// 不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
 		//		if (connection == null || connection.isClosed()) {
 		//			return;
 		//		}

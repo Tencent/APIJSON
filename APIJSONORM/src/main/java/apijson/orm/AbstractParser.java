@@ -344,6 +344,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public SQLExecutor getSQLExecutor() {
 		if (sqlExecutor == null) {
 			sqlExecutor = createSQLExecutor();
+			sqlExecutor.setParser(this);
 		}
 		return sqlExecutor;
 	}

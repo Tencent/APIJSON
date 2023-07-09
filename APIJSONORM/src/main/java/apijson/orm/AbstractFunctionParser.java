@@ -62,6 +62,17 @@ public class AbstractFunctionParser implements FunctionParser {
 		setRequest(request);
 	}
 
+	private Parser<?> parser;
+	@Override
+	public Parser<?> getParser() {
+		return parser;
+	}
+	@Override
+	public AbstractFunctionParser setParser(Parser<?> parser) {
+		this.parser = parser;
+		return this;
+	}
+
 	@Override
 	public RequestMethod getMethod() {
 		return method;

@@ -79,7 +79,7 @@ import static apijson.SQL.OR;
 /**config sql for JSON Request
  * @author Lemon
  */
-public abstract class AbstractSQLConfig implements SQLConfig {
+public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T> {
 	private static final String TAG = "AbstractSQLConfig";
 
 	/**

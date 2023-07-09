@@ -19,6 +19,10 @@ public interface FunctionParser {
 	Object invoke(@NotNull String function, @NotNull JSONObject currentObject) throws Exception;
 	Object invoke(@NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception;
 
+	Parser<?> getParser();
+
+	AbstractFunctionParser setParser(Parser<?> parser);
+
 	RequestMethod getMethod();
 	FunctionParser setMethod(RequestMethod method);
 
