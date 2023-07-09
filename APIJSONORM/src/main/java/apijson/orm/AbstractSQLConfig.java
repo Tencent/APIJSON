@@ -107,6 +107,11 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	 * 可取值 new RequestMethod[]{ RequestMethod.GET, RequestMethod.POST ... }
 	 */
 	public static List<RequestMethod> IGNORE_BLANK_STRING_METHOD_LIST = null;
+
+	public static String KEY_DELETED_KEY = "deletedKey";
+	public static String KEY_DELETED_VALUE = "deletedValue";
+	public static String KEY_NOT_DELETED_VALUE = "notDeletedValue";
+
 	public static int MAX_HAVING_COUNT = 5;
 	public static int MAX_WHERE_COUNT = 10;
 	public static int MAX_COMBINE_DEPTH = 2;
@@ -4295,6 +4300,15 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 	}
 	//SET >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+	@Override
+	public boolean isFakeDelete() {
+		return false;
+	}
+
+	@Override
+	public Map<String, Object> onFakeDelete(Map<String, Object> map) {
+		return map;
+	}
 
 	/**
 	 * @return
@@ -5159,33 +5173,49 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 					whereList.add(userIdInKey);
 				}
 
-				if(config.isFakeDelete()) {
-					// 查询Access假删除
-					Map<String, Object> accessFakeDeleteMap = AbstractVerifier.ACCESS_FAKE_DELETE_MAP.get(config.getTable());
-					if (accessFakeDeleteMap != null && StringUtil.isNotEmpty(accessFakeDeleteMap.get("deletedKey"), true)) {
-						Map<String, Object> fakeDeleteMap = new HashMap<>();
-						boolean isFakeDelete = true;
-						if(method != DELETE) {
-							if(from != null) {
-								// 兼容 join 外层select 重复生成deletedKey
-								if(StringUtil.equals(table, from.getConfig().getTable())) {
-									isFakeDelete = false;
-								}
+				if (enableFakeDelete) {
+					// 查询 Access 假删除
+					Map<String, Object> accessFakeDeleteMap = method == DELETE
+							? null : AbstractVerifier.ACCESS_FAKE_DELETE_MAP.get(config.getTable());
+					Object deletedKey = accessFakeDeleteMap == null ? null : accessFakeDeleteMap.get(KEY_DELETED_KEY);
+					boolean hasKey = deletedKey instanceof String && StringUtil.isNotEmpty(deletedKey, true);
+					Object deletedValue = hasKey ? accessFakeDeleteMap.get(KEY_DELETED_VALUE) : null;
+					boolean containNotDeletedValue = hasKey ? accessFakeDeleteMap.containsKey(KEY_NOT_DELETED_VALUE) : null;
+					Object notDeletedValue = containNotDeletedValue ? accessFakeDeleteMap.get(KEY_NOT_DELETED_VALUE) : null;
 
-								if(from.getConfig().getJoinList() != null) {
-									for(Join join : from.getConfig().getJoinList()) {
-										if(StringUtil.equals(table, join.getTable())) {
-											isFakeDelete = false;
-											break;
-										}
+					if (deletedValue != null || containNotDeletedValue) {
+						boolean isFakeDelete = true;
+						if (from != null) {
+							// 兼容 JOIN 外层 SELECT 重复生成 deletedKey
+							SQLConfig<?> cfg = from.getConfig();
+							if (cfg != null && StringUtil.equals(table, cfg.getTable())) {
+								isFakeDelete = false;
+							}
+
+							List<Join> jl = isFakeDelete && cfg != null ? cfg.getJoinList() : null;
+							if (jl != null) {
+								for (Join join : jl) {
+									if (join != null && StringUtil.equals(table, join.getTable())) {
+										isFakeDelete = false;
+										break;
 									}
 								}
 							}
-							if(isFakeDelete) {
-								fakeDeleteMap.put(accessFakeDeleteMap.get("deletedKey").toString()+"!", accessFakeDeleteMap.get("deletedValue"));
-								tableWhere.putAll(fakeDeleteMap);
-								andList.addAll(fakeDeleteMap.keySet());
-								whereList.addAll(fakeDeleteMap.keySet());
+						}
+
+						if (isFakeDelete) { // 支持 deleted != 1 / deleted is null 等表达式
+							if (deletedValue != null) { // deletedKey != deletedValue
+								String key = deletedKey + "!";
+								tableWhere.put(key, deletedValue);
+								andList.add(key);
+								whereList.add(key);
+							}
+
+							if (containNotDeletedValue) { // deletedKey = notDeletedValue
+								String key = deletedKey.toString();
+								tableWhere.put(key, notDeletedValue);
+								andList.add(key);
+								whereList.add(key);
 							}
 						}
 					}
@@ -5289,18 +5319,26 @@ public abstract class AbstractSQLConfig implements SQLConfig {
 				config.setContent(tableContent);
 			}
 
-			if(method == DELETE) {
-				if(config.isFakeDelete()) {
-					//查询Access假删除
-					Map<String, Object> accessFakeDeleteMap = AbstractVerifier.ACCESS_FAKE_DELETE_MAP.get(config.getTable());
-					if (StringUtil.isNotEmpty(accessFakeDeleteMap.get("deletedKey"), true)) {
-						//​假删除需要更新的其他字段，比如：删除时间 deletedTime 之类的
-						Map<String, Object> fakeDeleteMap = new HashMap<>();
-						config.onFakeDelete(fakeDeleteMap);
-						fakeDeleteMap.put(accessFakeDeleteMap.get("deletedKey").toString(), accessFakeDeleteMap.get("deletedValue"));
-						config.setMethod(PUT);
-						config.setContent(fakeDeleteMap);
+			if (enableFakeDelete && method == DELETE) {
+				// 查询 Access 假删除
+				Map<String, Object> accessFakeDeleteMap = AbstractVerifier.ACCESS_FAKE_DELETE_MAP.get(config.getTable());
+
+				Object deletedKey = accessFakeDeleteMap.get(KEY_DELETED_KEY);
+				if (StringUtil.isNotEmpty(deletedKey, true)) {
+					// 假删除需要更新的其他字段，比如：删除时间 deletedTime 之类的
+					Map<String, Object> fakeDeleteMap = new HashMap<>();
+					fakeDeleteMap.put(deletedKey.toString(), accessFakeDeleteMap.get(KEY_DELETED_VALUE));
+					fakeDeleteMap = config.onFakeDelete(fakeDeleteMap);
+
+					Map<String, Object> content = config.getContent();
+					if (content == null || content.isEmpty()) {
+						content = fakeDeleteMap;
+					} else {
+						content.putAll(fakeDeleteMap);
 					}
+
+					config.setMethod(PUT);
+					config.setContent(content);
 				}
 			}
 
