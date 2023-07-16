@@ -650,7 +650,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
 
-[apijson_template](https://github.com/abliger/apijson_template) apijson java 模版，使用 gradle 管理依赖和构建应用
+[apijson_template](https://github.com/abliger/apijson_template) APIJSON Java 模版，使用 gradle 管理依赖和构建应用
   
 [api-json-demo](https://gitee.com/hxdwd/api-json-demo) 基于 APIJSON，实现低代码写 CURD 代码，代替传统 ORM 框架，适配 Oracle 事务
 
@@ -673,6 +673,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [xyerp](https://gitee.com/yinjg1997/xyerp) 基于ApiJson的低代码ERP
   
 [quick-boot](https://github.com/csx-bill/quick-boot) 基于 Spring Cloud 2022、Spring Boot 3、AMIS 和 APIJSON 的低代码系统。
+
+[apijson-query-spring-boot-starter](https://gitee.com/mingbaobaba/apijson-query-spring-boot-starter) 一个快速构建 APIJSON 查询条件的插件
   
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
