@@ -83,7 +83,11 @@ public enum RequestMethod {
 	 * @return
 	 */
 	public static boolean isPublicMethod(RequestMethod method) {
-		return method == null || method == GET || method == HEAD;
+		/**
+		 * modify by boot
+		 * 修改所有方法都需要进行request验证
+		 */
+		return method == null /*|| method == GET || method == HEAD*/;
 	}
 
 	public static String getName(RequestMethod method) {
