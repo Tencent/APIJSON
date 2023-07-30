@@ -156,6 +156,24 @@ public class AbstractFunctionParser implements FunctionParser {
 		return this;
 	}
 
+	/**根据路径从当前对象取值
+	 * @param path
+	 * @return
+	 * @param <T>
+	 */
+	public <T extends Object> T getArgVal(String path) {
+		return getArgVal(getCurrentObject(), path);
+	}
+	/**根据路径从对象 obj 中取值
+	 * @param obj
+	 * @param path
+	 * @return
+	 * @param <T>
+	 */
+	public static <T extends Object> T getArgVal(JSONObject obj, String path) {
+		return AbstractParser.getValue(obj, StringUtil.splitPath(path));
+	}
+
 
 	/**反射调用
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值

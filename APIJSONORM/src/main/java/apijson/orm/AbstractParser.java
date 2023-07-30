@@ -1683,10 +1683,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @param pathKeys
 	 * @return
 	 */
-	protected static Object getValue(JSONObject parent, String[] pathKeys) {
+	public static <V extends Object> V getValue(JSONObject parent, String[] pathKeys) {
 		if (parent == null || pathKeys == null || pathKeys.length <= 0) {
 			Log.w(TAG, "getChild  parent == null || pathKeys == null || pathKeys.length <= 0 >> return parent;");
-			return parent;
+			return (V) parent;
 		}
 
 		//逐层到达child的直接容器JSONObject parent
@@ -1698,7 +1698,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			parent = getJSONObject(parent, pathKeys[i]);
 		}
 
-		return parent == null ? null : parent.get(pathKeys[last]);
+		return parent == null ? null : (V) parent.get(pathKeys[last]);
 	}
 
 
