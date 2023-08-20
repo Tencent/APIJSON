@@ -162,7 +162,22 @@ public class AbstractFunctionParser implements FunctionParser {
 	 * @param <T>
 	 */
 	public <T extends Object> T getArgVal(String path) {
-		return getArgVal(getCurrentObject(), path);
+		return getArgVal(path, false);
+	}
+	/**根据路径取值
+	 * @param path
+	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser 缓存值
+	 * @return
+	 * @param <T>
+	 */
+	public <T extends Object> T getArgVal(String path, boolean tryAll) {
+		T val = getArgVal(getCurrentObject(), path);
+		if (tryAll == false || val != null) {
+			return val;
+		}
+
+		Parser<?> p = getParser();
+		return p == null ? null : (T) p.getValueByPath(path);
 	}
 	/**根据路径从对象 obj 中取值
 	 * @param obj
