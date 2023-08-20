@@ -482,7 +482,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			}
 
             if (isPlus == false && isTable == false) {
-                parseFunction(key, k, (String) value, parentPath, name, request, isMinus);
+                parseFunction(key, k, (String) value, this.type == TYPE_ITEM ? path : parentPath, name, request, isMinus);
             }
             else {
 				//远程函数比较少用，一般一个Table:{}内用到也就一两个，所以这里循环里new出来对性能影响不大。
@@ -958,7 +958,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 			JSONObject json = isMinus ? sqlRequest : response; // key-():function 是实时执行，而不是在这里批量执行
 
 			for (Entry<String, String> entry : functionSet) {
-                parseFunction(entry.getKey(), entry.getKey(), entry.getValue(), parentPath, name, json, isMinus);
+                parseFunction(entry.getKey(), entry.getKey(), entry.getValue(), this.type == TYPE_ITEM ? path : parentPath, name, json, isMinus);
 			}
 		}
 	}

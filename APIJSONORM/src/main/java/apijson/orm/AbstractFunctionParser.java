@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static apijson.orm.AbstractSQLConfig.PATTERN_SCHEMA;
+import static apijson.orm.SQLConfig.TYPE_ITEM;
 
 /**可远程调用的函数类
  * @author Lemon
@@ -156,28 +157,39 @@ public class AbstractFunctionParser implements FunctionParser {
 		return this;
 	}
 
-	/**根据路径从当前对象取值
+	/**根据路径取值
 	 * @param path
 	 * @return
 	 * @param <T>
 	 */
 	public <T extends Object> T getArgVal(String path) {
-		return getArgVal(path, true); // 误判概率很小 false);
+		return getArgVal(path, null); // 误判概率很小 false);
 	}
 	/**根据路径取值
 	 * @param path
+	 * @param clazz
+	 * @return
+	 * @param <T>
+	 */
+	public <T extends Object> T getArgVal(String path, Class<T> clazz) {
+		return getArgVal(path, clazz, true);
+	}
+	/**根据路径取值
+	 * @param path
+	 * @param clazz
 	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser 缓存值
 	 * @return
 	 * @param <T>
 	 */
-	public <T extends Object> T getArgVal(String path, boolean tryAll) {
-		T val = getArgVal(getCurrentObject(), path);
+	public <T extends Object> T getArgVal(String path, Class<T> clazz, boolean tryAll) {
+		T val = getArgVal(getCurrentObject(), path, clazz);
 		if (tryAll == false || val != null) {
 			return val;
 		}
 
 		Parser<?> p = getParser();
-		return p == null ? null : (T) p.getValueByPath(path);
+		String targetPath = AbstractParser.getValuePath(getParentPath(), path);
+		return p == null ? null : (T) p.getValueByPath(targetPath);
 	}
 	/**根据路径从对象 obj 中取值
 	 * @param obj
@@ -186,7 +198,11 @@ public class AbstractFunctionParser implements FunctionParser {
 	 * @param <T>
 	 */
 	public static <T extends Object> T getArgVal(JSONObject obj, String path) {
-		return AbstractParser.getValue(obj, StringUtil.splitPath(path));
+		return getArgVal(obj, path, null);
+	}
+	public static <T extends Object> T getArgVal(JSONObject obj, String path, Class<T> clazz) {
+		Object v = AbstractParser.getValue(obj, StringUtil.splitPath(path));
+		return clazz == null ? (T) v : TypeUtils.cast(v, clazz, ParserConfig.getGlobalInstance());
 	}
 
 
