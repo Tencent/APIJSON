@@ -162,7 +162,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	 * @param <T>
 	 */
 	public <T extends Object> T getArgVal(String path) {
-		return getArgVal(path, false);
+		return getArgVal(path, true); // 误判概率很小 false);
 	}
 	/**根据路径取值
 	 * @param path
