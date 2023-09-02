@@ -9,7 +9,7 @@ import java.io.BufferedReader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
-import java.util.Date;
+import java.util.*;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,14 +22,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSON;
@@ -1202,7 +1195,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		this.transactionIsolation = transactionIsolation;
 	}
 
-	private boolean isIsolationStatusSet = false; //已设置事务等级
+	protected Map<Connection, Integer> isolationMap = new LinkedHashMap<>();
 	@Override
 	public void begin(int transactionIsolation) throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION begin transactionIsolation = " + transactionIsolation + " >>>>>>>>>>>>>>>>>>>>>>> \n\n");
@@ -1210,27 +1203,20 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		//		if (connection == null || connection.isClosed()) {
 		//			return;
 		//		}
-		if (! isIsolationStatusSet) { //只设置一次Isolation等级 PG重复设置事务等级会报错
-			isIsolationStatusSet = true;
-			connection.setTransactionIsolation(transactionIsolation);  // 这句导致 TDengine 驱动报错
-		}
-		connection.setAutoCommit(false); //java.sql.SQLException: Can''t call commit when autocommit=true
-	}
-	@Override
-	public void rollback() throws SQLException {
-		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION rollback >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
-		if (connection == null) { // || connection.isClosed()) {
-			return;
-		}
-		// 将所有连接进行回滚
-		Collection<Connection> connections = connectionMap.values();
 
+		// 将所有连接设置隔离级别，且禁止自动提交，需要以下代码来 commit/rollback
+		Collection<Connection> connections = connectionMap.values();
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
-					if (connection != null && connection.isClosed() == false) {
-						connection.rollback();
+					Integer isolation = isolationMap.get(connection);
+					if (isolation == null || isolation != transactionIsolation) { // 只设置一次 Isolation 等级 PG 及 MySQL 某些版本重复设置事务等级会报错
+						isolationMap.put(connection, transactionIsolation);
+
+						connection.setTransactionIsolation(transactionIsolation); // 这句导致 TDengine 驱动报错
+						if (isolation == null) {
+							connection.setAutoCommit(false); // java.sql.SQLException: Can''t call commit when autocommit=true
+						}
 					}
 				}
 				catch (SQLException e) {
@@ -1239,50 +1225,83 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 			}
 		}
 	}
+
+	@Override
+	public void rollback() throws SQLException {
+		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION rollback >>>>>>>>>>>>>>>>>>>>>>> \n\n");
+		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
+//		if (connection == null) { // || connection.isClosed()) {
+//			return;
+//		}
+
+		// 将所有连接进行回滚
+		Collection<Connection> connections = connectionMap.values();
+		if (connections != null) {
+			for (Connection connection : connections) {
+				try {
+					if (connection != null && connection.isClosed() == false) {
+						connection.rollback();
+						connection.setAutoCommit(true);
+
+						isolationMap.remove(connection);
+					}
+				}
+				catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION rollback savepoint " + (savepoint == null ? "" : "!") + "= null >>>>>>>>>>>>>>>>>>>>>>> \n\n");
-		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
-		if (connection == null) { // || connection.isClosed()) {
+		if (savepoint == null) {
+			rollback();
 			return;
 		}
-		
-		if(StringUtil.isEmpty(savepoint)) {
-			// 将所有连接进行回滚
-			Collection<Connection> connections = connectionMap.values();
 
-			if (connections != null) {
-				for (Connection connection : connections) {
-					try {
-						if (connection != null && connection.isClosed() == false) {
-							connection.rollback();
-						}
-					}
-					catch (SQLException e) {
-						e.printStackTrace();
+		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
+//		if (connection == null) { // || connection.isClosed()) {
+//			return;
+//		}
+
+		// 将所有连接进行回滚
+		Collection<Connection> connections = connectionMap.values();
+		if (connections != null) {
+			for (Connection connection : connections) {
+				try {
+					if (connection != null && connection.isClosed() == false) {
+						connection.rollback(savepoint);
+						connection.setAutoCommit(true);
+
+						isolationMap.remove(connection);
 					}
 				}
+				catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
-		} else {
-			connection.rollback(savepoint);
 		}
 	}
+
 	@Override
 	public void commit() throws SQLException {
 		Log.d("\n\n" + TAG, "<<<<<<<<<<<<<< TRANSACTION commit >>>>>>>>>>>>>>>>>>>>>>> \n\n");
 		//权限校验不通过，connection 也不会生成，还是得判断  //不做判断，如果掩盖了问题，调用层都不知道为啥事务没有提交成功
-		if (connection == null) { // || connection.isClosed()) {
-			return;
-		}
+//		if (connection == null) { // || connection.isClosed()) {
+//			return;
+//		}
 		
 		// 将所有连接进行提交
 		Collection<Connection> connections = connectionMap.values();
-
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
 					if (connection != null && connection.isClosed() == false) {
 						connection.commit();
+
+						isolationMap.remove(connection);
 					}
 				}
 				catch (SQLException e) {
@@ -1309,7 +1328,6 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		}
 
 		Collection<Connection> connections = connectionMap.values();
-
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
@@ -1334,7 +1352,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 
             Connection conn = getConnection(config);
             Statement stt = conn.createStatement();
-            //Statement stt = config.isTDengine()
+            // Statement stt = config.isTDengine()
             //        ? conn.createStatement() // fix Presto: ResultSet: Exception: set type is TYPE_FORWARD_ONLY, Result set concurrency must be CONCUR_READ_ONLY
             //        : conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
 

@@ -511,6 +511,10 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	public static String extractSchema(String sch, String table) {
+		if (StringUtil.isEmpty(sch)) {
+			return sch;
+		}
+
 		if (table == null) {
 			table = "Table";
 		}
