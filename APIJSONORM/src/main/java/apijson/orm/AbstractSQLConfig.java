@@ -4901,8 +4901,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
 
-		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
-		if (explain && Log.DEBUG == false) { // 不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
+		Boolean explain = request.getBoolean(KEY_EXPLAIN);
+		if (explain != null && explain && Log.DEBUG == false) { // 不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
 			throw new UnsupportedOperationException("非DEBUG模式, 不允许传 " + KEY_EXPLAIN + " ！");
 		}
 
@@ -5065,6 +5065,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String order = request.getString(KEY_ORDER);
 		String raw = request.getString(KEY_RAW);
 		String json = request.getString(KEY_JSON);
+		String mthd = request.getString(KEY_METHOD);
 
 		try {
 			// 强制作为条件且放在最前面优化性能
@@ -5547,7 +5548,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			// @having, @haivng& >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-			config.setExplain(explain);
+			config.setExplain(explain != null && explain);
 			config.setCache(getCache(cache));
 			config.setDistinct(distinct);
 			config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
@@ -5587,23 +5588,60 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 
 			// 关键词
-			request.put(KEY_DATABASE, database);
-			request.put(KEY_ROLE, role);
-			request.put(KEY_EXPLAIN, explain);
-			request.put(KEY_CACHE, cache);
-			request.put(KEY_DATASOURCE, datasource);
-			request.put(KEY_SCHEMA, schema);
-			request.put(KEY_FROM, from);
-			request.put(KEY_COLUMN, column);
-			request.put(KEY_NULL, nulls);
-			request.put(KEY_CAST, cast);
-			request.put(KEY_COMBINE, combine);
-			request.put(KEY_GROUP, group);
-			request.put(KEY_HAVING, having);
-			request.put(KEY_HAVING_AND, havingAnd);
-			request.put(KEY_ORDER, order);
-			request.put(KEY_RAW, raw);
-			request.put(KEY_JSON, json);
+			if (role != null) {
+				request.put(KEY_ROLE, role);
+			}
+			if (explain != null) {
+				request.put(KEY_EXPLAIN, explain);
+			}
+			if (cache != null) {
+				request.put(KEY_CACHE, cache);
+			}
+			if (database != null) {
+				request.put(KEY_DATABASE, database);
+			}
+			if (datasource != null) {
+				request.put(KEY_DATASOURCE, datasource);
+			}
+			if (schema != null) {
+				request.put(KEY_SCHEMA, schema);
+			}
+			if (from != null) {
+				request.put(KEY_FROM, from);
+			}
+			if (column != null) {
+				request.put(KEY_COLUMN, column);
+			}
+			if (nulls != null) {
+				request.put(KEY_NULL, nulls);
+			}
+			if (cast != null) {
+				request.put(KEY_CAST, cast);
+			}
+			if (combine != null) {
+				request.put(KEY_COMBINE, combine);
+			}
+			if (group != null) {
+				request.put(KEY_GROUP, group);
+			}
+			if (having != null) {
+				request.put(KEY_HAVING, having);
+			}
+			if (havingAnd != null) {
+				request.put(KEY_HAVING_AND, havingAnd);
+			}
+			if (order != null) {
+				request.put(KEY_ORDER, order);
+			}
+			if (raw != null) {
+				request.put(KEY_RAW, raw);
+			}
+			if (json != null) {
+				request.put(KEY_JSON, json);
+			}
+			if (mthd != null) {
+				request.put(KEY_METHOD, mthd);
+			}
 		}
 
 		return config;

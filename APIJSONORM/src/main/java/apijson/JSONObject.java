@@ -6,6 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -151,7 +152,16 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_ORDER = "@order"; //排序方式
 	public static final String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
 	public static final String KEY_JSON = "@json"; //SQL Server 把字段转为 JSON 输出
-	public static final String KEY_METHOD = "@method"; //json对象配置操作方法
+	public static final String KEY_METHOD = "@method"; // json 对象配置操作方法
+	public static final String KEY_GET = "@get"; // json 对象配置操作方法
+	public static final String KEY_GETS = "@gets"; // json 对象配置操作方法
+	public static final String KEY_HEAD = "@head"; // json 对象配置操作方法
+	public static final String KEY_HEADS = "@heads"; // json 对象配置操作方法
+	public static final String KEY_POST = "@post"; // json 对象配置操作方法
+	public static final String KEY_PUT = "@put"; // json 对象配置操作方法
+	public static final String KEY_DELETE = "@delete"; // json 对象配置操作方法
+
+	public static final Map<String, RequestMethod> KEY_METHOD_ENUM_MAP;
 
 	public static final List<String> TABLE_KEY_LIST;
 	static {
@@ -174,6 +184,22 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_RAW);
 		TABLE_KEY_LIST.add(KEY_JSON);
 		TABLE_KEY_LIST.add(KEY_METHOD);
+		TABLE_KEY_LIST.add(KEY_GET);
+		TABLE_KEY_LIST.add(KEY_GETS);
+		TABLE_KEY_LIST.add(KEY_HEAD);
+		TABLE_KEY_LIST.add(KEY_HEADS);
+		TABLE_KEY_LIST.add(KEY_POST);
+		TABLE_KEY_LIST.add(KEY_PUT);
+		TABLE_KEY_LIST.add(KEY_DELETE);
+
+		KEY_METHOD_ENUM_MAP = new LinkedHashMap<>();
+		KEY_METHOD_ENUM_MAP.put(KEY_GET, RequestMethod.GET);
+		KEY_METHOD_ENUM_MAP.put(KEY_GETS, RequestMethod.GETS);
+		KEY_METHOD_ENUM_MAP.put(KEY_HEAD, RequestMethod.HEAD);
+		KEY_METHOD_ENUM_MAP.put(KEY_HEADS, RequestMethod.HEADS);
+		KEY_METHOD_ENUM_MAP.put(KEY_POST, RequestMethod.POST);
+		KEY_METHOD_ENUM_MAP.put(KEY_PUT, RequestMethod.PUT);
+		KEY_METHOD_ENUM_MAP.put(KEY_DELETE, RequestMethod.DELETE);
 	}
 
 	//@key关键字都放这个类 >>>>>>>>>>>>>>>>>>>>>>

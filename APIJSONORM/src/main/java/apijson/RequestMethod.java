@@ -5,6 +5,9 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**请求方法，对应org.springframework.web.bind.annotation.RequestMethod，多出GETS,HEADS方法
  * @author Lemon
  */
@@ -41,17 +44,20 @@ public enum RequestMethod {
 	PUT,
 	
 	/**
-	 * json包含多条语句,支持增删改查,函数调用
-	 */
-	CRUD,
-	
-	/**
 	 * 删除数据
 	 */
-	DELETE;
+	DELETE,
+
+	/**
+	 * json 包含多条语句，支持增删改查、函数调用
+	 */
+	CRUD;
 	
-	public static final RequestMethod[] ALL = new RequestMethod[]{ GET, HEAD, GETS, HEADS, POST, PUT, CRUD, DELETE};
-	
+	public static final RequestMethod[] ALL = new RequestMethod[]{ GET, HEAD, GETS, HEADS, POST, PUT, DELETE, CRUD };
+	public static final List<String> ALL_NAME_LIST = Arrays.asList(
+			GET.name(), HEAD.name(), GETS.name(), HEADS.name(), POST.name(), PUT.name(), DELETE.name(), CRUD.name()
+	);
+
 	/**是否为GET请求方法
 	 * @param method
 	 * @param containPrivate 包含私密(非明文)获取方法GETS
