@@ -5,12 +5,10 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
-import apijson.StringUtil;
+import apijson.*;
 import apijson.orm.exception.UnsupportedDataTypeException;
 import apijson.orm.script.ScriptExecutor;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.util.TypeUtils;
@@ -18,6 +16,7 @@ import com.alibaba.fastjson.util.TypeUtils;
 import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static apijson.orm.AbstractSQLConfig.PATTERN_SCHEMA;
@@ -44,6 +43,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
     public static Map<String, ScriptExecutor> SCRIPT_EXECUTOR_MAP;
 	public static Map<String, JSONObject> FUNCTION_MAP;
+
 	static {
 		FUNCTION_MAP = new HashMap<>();
 		SCRIPT_EXECUTOR_MAP = new HashMap<>();
@@ -53,9 +53,11 @@ public class AbstractFunctionParser implements FunctionParser {
 	private String tag;
 	private int version;
 	private JSONObject request;
+
 	public AbstractFunctionParser() {
 		this(null, null, 0, null);
 	}
+
 	public AbstractFunctionParser(RequestMethod method, String tag, int version, @NotNull JSONObject request) {
 		setMethod(method == null ? RequestMethod.GET : method);
 		setTag(tag);
@@ -64,10 +66,12 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	private Parser<?> parser;
+
 	@Override
 	public Parser<?> getParser() {
 		return parser;
 	}
+
 	@Override
 	public AbstractFunctionParser setParser(Parser<?> parser) {
 		this.parser = parser;
@@ -78,83 +82,196 @@ public class AbstractFunctionParser implements FunctionParser {
 	public RequestMethod getMethod() {
 		return method;
 	}
+
 	@Override
 	public AbstractFunctionParser setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}
+
 	@Override
 	public String getTag() {
 		return tag;
 	}
+
 	@Override
 	public AbstractFunctionParser setTag(String tag) {
 		this.tag = tag;
 		return this;
 	}
+
 	@Override
 	public int getVersion() {
 		return version;
 	}
+
 	@Override
 	public AbstractFunctionParser setVersion(int version) {
 		this.version = version;
 		return this;
 	}
-	
+
 	private String key;
+
 	@Override
 	public String getKey() {
 		return key;
 	}
+
 	@Override
 	public AbstractFunctionParser setKey(String key) {
 		this.key = key;
 		return this;
 	}
-	
+
 	private String parentPath;
+
 	@Override
 	public String getParentPath() {
 		return parentPath;
 	}
+
 	@Override
 	public AbstractFunctionParser setParentPath(String parentPath) {
 		this.parentPath = parentPath;
 		return this;
 	}
+
 	private String currentName;
+
 	@Override
 	public String getCurrentName() {
 		return currentName;
 	}
+
 	@Override
 	public AbstractFunctionParser setCurrentName(String currentName) {
 		this.currentName = currentName;
 		return this;
 	}
-	
+
 	@NotNull
 	@Override
 	public JSONObject getRequest() {
 		return request;
 	}
+
 	@Override
 	public AbstractFunctionParser setRequest(@NotNull JSONObject request) {
 		this.request = request;
 		return this;
 	}
-	
+
 	private JSONObject currentObject;
-	@NotNull 
+
+	@NotNull
 	@Override
 	public JSONObject getCurrentObject() {
 		return currentObject;
 	}
+
 	@Override
 	public AbstractFunctionParser setCurrentObject(@NotNull JSONObject currentObject) {
 		this.currentObject = currentObject;
 		return this;
+	}
+
+	/**根据路径取 Boolean 值
+	 * @param path
+	 * @return
+	 */
+	public Boolean getArgBool(String path) {
+		return getArgVal(path, Boolean.class);
+	}
+
+	/**根据路径取 Integer 值
+	 * @param path
+	 * @return
+	 */
+	public Integer getArgInt(String path) {
+		return getArgVal(path, Integer.class);
+	}
+
+	/**根据路径取 Long 值
+	 * @param path
+	 * @return
+	 */
+	public Long getArgLong(String path) {
+		return getArgVal(path, Long.class);
+	}
+
+	/**根据路径取 Float 值
+	 * @param path
+	 * @return
+	 */
+	public Float getArgFloat(String path) {
+		return getArgVal(path, Float.class);
+	}
+
+	/**根据路径取 Double 值
+	 * @param path
+	 * @return
+	 */
+	public Double getArgDouble(String path) {
+		return getArgVal(path, Double.class);
+	}
+
+	/**根据路径取 Number 值
+	 * @param path
+	 * @return
+	 */
+	public Number getArgNum(String path) {
+		return getArgVal(path, Number.class);
+	}
+
+	/**根据路径取 BigDecimal 值
+	 * @param path
+	 * @return
+	 */
+	public BigDecimal getArgDecimal(String path) {
+		return getArgVal(path, BigDecimal.class);
+	}
+
+	/**根据路径取 String 值
+	 * @param path
+	 * @return
+	 */
+	public String getArgStr(String path) {
+		Object obj = getArgVal(path);
+		return JSON.toJSONString(obj);
+	}
+
+	/**根据路径取 JSONObject 值
+	 * @param path
+	 * @return
+	 */
+	public JSONObject getArgObj(String path) {
+		return getArgVal(path, JSONObject.class);
+	}
+
+	/**根据路径取 JSONArray 值
+	 * @param path
+	 * @return
+	 */
+	public JSONArray getArgArr(String path) {
+		return getArgVal(path, JSONArray.class);
+	}
+
+	/**根据路径取 List<T> 值
+	 * @param path
+	 * @return
+	 */
+	public <T extends Object> List<T> getArgList(String path) {
+		return getArgList(path, null);
+	}
+
+	/**根据路径取 List<T> 值
+	 * @param path
+	 * @return
+	 */
+	public <T extends Object> List<T> getArgList(String path, Class<T> clazz) {
+		String s = getArgStr(path);
+		return JSON.parseArray(s, clazz);
 	}
 
 	/**根据路径取值
