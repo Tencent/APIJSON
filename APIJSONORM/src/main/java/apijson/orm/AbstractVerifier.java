@@ -376,18 +376,18 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			break;
 		case CONTACT:
 		case CIRCLE:
-			//TODO 做一个缓存contactMap<visitorId, contactArray>，提高[]:{}查询性能， removeAccessInfo时map.remove(visitorId)
-			//不能在Visitor内null -> [] ! 否则会导致某些查询加上不需要的条件！
+			// TODO 做一个缓存contactMap<visitorId, contactArray>，提高[]:{}查询性能， removeAccessInfo时map.remove(visitorId)
+			// 不能在 Visitor内null -> [] ! 否则会导致某些查询加上不需要的条件！
 			List<Object> list = visitor.getContactIdList() == null
 			? new ArrayList<Object>() : new ArrayList<Object>(visitor.getContactIdList());
 			if (CIRCLE.equals(role)) {
 				list.add(visitorId);
 			}
 
-			//key!{}:[] 或 其它没有明确id的条件 等 可以和key{}:list组合。类型错误就报错
-			requestId = config.getWhere(visitorIdKey, true);//JSON里数值不能保证是Long，可能是Integer
+			// key!{}:[] 或 其它没有明确id的条件 等 可以和 key{}:[] 组合。类型错误就报错
+			requestId = config.getWhere(visitorIdKey, true); // JSON 里数值不能保证是 Long，可能是 Integer
 			@SuppressWarnings("unchecked")
-			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdKey + "{}", true);//不能是 &{}， |{} 不要传，直接{}
+			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdKey + "{}", true); // 不能是 &{}， |{} 不要传，直接 {}
 			if (requestId != null) {
 				if (requestIdArray == null) {
 					requestIdArray = new JSONArray();
@@ -395,20 +395,29 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 				requestIdArray.add(requestId);
 			}
 
-			if (requestIdArray == null) {//可能是@得到 || requestIdArray.isEmpty()) {//请求未声明key:id或key{}:[...]条件，自动补全
-				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); //key{}:[]有效，SQLConfig里throw NotExistException
+			if (requestIdArray == null) { // 可能是 @ 得到 || requestIdArray.isEmpty()) { // 请求未声明 key:id 或 key{}:[...] 条件，自动补全
+				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); // key{}:[] 有效，SQLConfig 里 throw NotExistException
 			}
-			else {//请求已声明key:id或key{}:[]条件，直接验证
+			else { // 请求已声明 key:id 或 key{}:[] 条件，直接验证
 				for (Object id : requestIdArray) {
 					if (id == null) {
 						continue;
 					}
-					if (id instanceof Number == false) {//不能准确地判断Long，可能是Integer
-						throw new UnsupportedDataTypeException(table + ".id类型错误，id类型必须是Long！");
+
+					if (id instanceof Number) { // 不能准确地判断 Long，可能是 Integer
+						if (((Number) id).longValue() <= 0 || list.contains(Long.valueOf("" + id)) == false) { // Integer等转为 Long 才能正确判断，强转崩溃
+							throw new IllegalAccessException(visitorIdKey + " = " + id + " 的 " + table
+									+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
+						}
 					}
-					if (list.contains(Long.valueOf("" + id)) == false) {//Integer等转为Long才能正确判断。强转崩溃
-						throw new IllegalAccessException(visitorIdKey + " = " + id + " 的 " + table
-								+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
+					else if (id instanceof String) {
+						if (StringUtil.isEmpty(id) || list.contains(id) == false) {
+							throw new IllegalAccessException(visitorIdKey + " = " + id + " 的 " + table
+									+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
+						}
+					}
+					else {
+						throw new UnsupportedDataTypeException(table + ".id 类型错误，类型必须是 Long/String！");
 					}
 				}
 			}
