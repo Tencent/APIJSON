@@ -1850,8 +1850,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			return target;
 		}
 
-		Log.i(TAG, "getValueByPath  return valuePath;");
-		return valuePath;
+		Log.i(TAG, "getValueByPath  return null;");
+		return null;
 	}
 
 	//依赖引用关系 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
