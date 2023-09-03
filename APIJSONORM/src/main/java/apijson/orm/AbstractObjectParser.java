@@ -423,7 +423,15 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 				if (target == null) { // String#equals(null)会出错
 					Log.d(TAG, "onParse  target == null  >>  return true;");
-					return true;
+					// 非查询关键词 @key 不影响查询，直接跳过
+					if (isTable && (key.startsWith("@") == false || JSONRequest.TABLE_KEY_LIST.contains(key))) {
+						Log.e(TAG, "onParse  isTable && (key.startsWith(@) == false"
+								+ " || JSONRequest.TABLE_KEY_LIST.contains(key)) >>  return null;");
+						return false; // 获取不到就不用再做无效的 query 了。不考虑 Table:{Table:{}} 嵌套
+					}
+
+					Log.d(TAG, "onParse  isTable(table) == false >> return true;");
+					return true; // 舍去，对Table无影响
 				}
 
 //				if (target instanceof Map) { // target 可能是从 requestObject 里取出的 {}
