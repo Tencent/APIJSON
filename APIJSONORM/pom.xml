@@ -5,7 +5,7 @@
 
 	<groupId>com.github.Tencent</groupId>
 	<artifactId>APIJSON</artifactId>
-	<version>6.1.0</version>
+	<version>6.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>
@@ -35,6 +35,20 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
