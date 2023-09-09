@@ -423,6 +423,11 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 				if (target == null) { // String#equals(null)会出错
 					Log.d(TAG, "onParse  target == null  >>  return true;");
+
+					if (Log.DEBUG) {
+						parser.putWarnIfNeed(AbstractParser.KEY_REF, path + "/" + key + ": " + targetPath + " 引用赋值获取路径对应的值为 null！请检查路径是否错误！");
+					}
+
 					// 非查询关键词 @key 不影响查询，直接跳过
 					if (isTable && (key.startsWith("@") == false || JSONRequest.TABLE_KEY_LIST.contains(key))) {
 						Log.e(TAG, "onParse  isTable && (key.startsWith(@) == false"
