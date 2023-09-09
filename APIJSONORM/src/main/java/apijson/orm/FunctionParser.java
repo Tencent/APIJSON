@@ -14,41 +14,41 @@ import apijson.RequestMethod;
 /**远程函数解析器
  * @author Lemon
  */
-public interface FunctionParser {
+public interface FunctionParser<T> {
 
 	Object invoke(@NotNull String function, @NotNull JSONObject currentObject) throws Exception;
 	Object invoke(@NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception;
 
-	Parser<?> getParser();
+	Parser<T> getParser();
 
-	AbstractFunctionParser setParser(Parser<?> parser);
+	FunctionParser<T> setParser(Parser<T> parser);
 
 	RequestMethod getMethod();
-	FunctionParser setMethod(RequestMethod method);
+	FunctionParser<T> setMethod(RequestMethod method);
 
 	String getTag();
-	FunctionParser setTag(String tag);
+	FunctionParser<T> setTag(String tag);
 
 	int getVersion();
-	AbstractFunctionParser setVersion(int version);
+	FunctionParser<T> setVersion(int version);
 
 	@NotNull 
 	JSONObject getRequest();
-	FunctionParser setRequest(@NotNull JSONObject request);
+	FunctionParser<T> setRequest(@NotNull JSONObject request);
 
 
 	String getKey();
-	FunctionParser setKey(String key);
+	FunctionParser<T> setKey(String key);
 	
 	String getParentPath();
-	FunctionParser setParentPath(String parentPath);
+	FunctionParser<T> setParentPath(String parentPath);
 
 	String getCurrentName();
-	FunctionParser setCurrentName(String currentName);
+	FunctionParser<T> setCurrentName(String currentName);
 
 	@NotNull
 	JSONObject getCurrentObject();
-	FunctionParser setCurrentObject(@NotNull JSONObject currentObject);
+	FunctionParser<T> setCurrentObject(@NotNull JSONObject currentObject);
 
 
 

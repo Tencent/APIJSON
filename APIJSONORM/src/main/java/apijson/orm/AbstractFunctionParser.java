@@ -25,7 +25,7 @@ import static apijson.orm.SQLConfig.TYPE_ITEM;
 /**可远程调用的函数类
  * @author Lemon
  */
-public class AbstractFunctionParser implements FunctionParser {
+public class AbstractFunctionParser<T extends Object> implements FunctionParser<T> {
     private static final String TAG = "AbstractFunctionParser";
 
     /**是否解析参数 key 的对应的值，不用手动编码 curObj.getString(key)
@@ -65,15 +65,15 @@ public class AbstractFunctionParser implements FunctionParser {
 		setRequest(request);
 	}
 
-	private Parser<?> parser;
+	private Parser<T> parser;
 
 	@Override
-	public Parser<?> getParser() {
+	public Parser<T> getParser() {
 		return parser;
 	}
 
 	@Override
-	public AbstractFunctionParser setParser(Parser<?> parser) {
+	public AbstractFunctionParser<T> setParser(Parser<T> parser) {
 		this.parser = parser;
 		return this;
 	}
@@ -84,7 +84,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setMethod(RequestMethod method) {
+	public AbstractFunctionParser<T> setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}
@@ -95,7 +95,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setTag(String tag) {
+	public AbstractFunctionParser<T> setTag(String tag) {
 		this.tag = tag;
 		return this;
 	}
@@ -106,7 +106,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setVersion(int version) {
+	public AbstractFunctionParser<T> setVersion(int version) {
 		this.version = version;
 		return this;
 	}
@@ -119,7 +119,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setKey(String key) {
+	public AbstractFunctionParser<T> setKey(String key) {
 		this.key = key;
 		return this;
 	}
@@ -132,7 +132,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setParentPath(String parentPath) {
+	public AbstractFunctionParser<T> setParentPath(String parentPath) {
 		this.parentPath = parentPath;
 		return this;
 	}
@@ -145,7 +145,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setCurrentName(String currentName) {
+	public AbstractFunctionParser<T> setCurrentName(String currentName) {
 		this.currentName = currentName;
 		return this;
 	}
@@ -157,7 +157,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setRequest(@NotNull JSONObject request) {
+	public AbstractFunctionParser<T> setRequest(@NotNull JSONObject request) {
 		this.request = request;
 		return this;
 	}
@@ -171,7 +171,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	}
 
 	@Override
-	public AbstractFunctionParser setCurrentObject(@NotNull JSONObject currentObject) {
+	public AbstractFunctionParser<T> setCurrentObject(@NotNull JSONObject currentObject) {
 		this.currentObject = currentObject;
 		return this;
 	}
@@ -294,7 +294,7 @@ public class AbstractFunctionParser implements FunctionParser {
 	/**根据路径取值
 	 * @param path
 	 * @param clazz
-	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser 缓存值
+	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser<T> 缓存值
 	 * @return
 	 * @param <T>
 	 */
@@ -342,14 +342,14 @@ public class AbstractFunctionParser implements FunctionParser {
 	public Object invoke(@NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception {
 		return invoke(this, function, currentObject, containRaw);
 	}
-	
+
 	/**反射调用
 	 * @param parser
 	 * @param function 例如get(Map:map,key)，参数只允许引用，不能直接传值
      * @param currentObject
      * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
 	 */
-	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception {
+	public static <T extends Object> Object invoke(@NotNull AbstractFunctionParser<T> parser, @NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception {
         if (ENABLE_REMOTE_FUNCTION == false) {
             throw new UnsupportedOperationException("AbstractFunctionParser.ENABLE_REMOTE_FUNCTION" +
                     " == false 时不支持远程函数！如需支持则设置 AbstractFunctionParser.ENABLE_REMOTE_FUNCTION = true ！");
@@ -369,9 +369,9 @@ public class AbstractFunctionParser implements FunctionParser {
             throw new UnsupportedOperationException("language = " + language + " 不合法！AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION" +
                     " == false 时不支持远程函数中的脚本形式！如需支持则设置 AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION = true ！");
         }
-        
+
 		if (lang != null && SCRIPT_EXECUTOR_MAP.get(lang) == null) {
-			throw new ClassNotFoundException("找不到脚本语言 " + lang + " 对应的执行引擎！请先依赖相关库并在后端 APIJSONFunctionParser 中注册！");
+			throw new ClassNotFoundException("找不到脚本语言 " + lang + " 对应的执行引擎！请先依赖相关库并在后端 APIJSONFunctionParser<T> 中注册！");
 		}
 
 		int version = row.getIntValue("version");
@@ -413,7 +413,7 @@ public class AbstractFunctionParser implements FunctionParser {
 		}
 
 	}
-	
+
 	/**反射调用
      * @param parser
      * @param methodName
@@ -422,7 +422,7 @@ public class AbstractFunctionParser implements FunctionParser {
      * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[], String, JSONObject, ScriptExecutor)}
      * @throws Exception
      */
-	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
+	public static <T extends Object> Object invoke(@NotNull AbstractFunctionParser<T> parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
         return invoke(parser, methodName, parameterTypes, args, null, null, null);
     }
@@ -437,7 +437,7 @@ public class AbstractFunctionParser implements FunctionParser {
      * @return
      * @throws Exception
      */
-	public static Object invoke(@NotNull AbstractFunctionParser parser, @NotNull String methodName
+	public static <T extends Object> Object invoke(@NotNull AbstractFunctionParser<T> parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType
             , JSONObject currentObject, ScriptExecutor scriptExecutor) throws Exception {
         if (scriptExecutor != null) {
@@ -474,7 +474,7 @@ public class AbstractFunctionParser implements FunctionParser {
      * @return
      * @throws Exception
      */
-    public static Object invokeScript(@NotNull AbstractFunctionParser parser, @NotNull String methodName
+    public static <T extends Object> Object invokeScript(@NotNull AbstractFunctionParser<T> parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject, ScriptExecutor scriptExecutor) throws Exception {
     	Object result = scriptExecutor.execute(parser, currentObject, methodName, args);
         if (Log.DEBUG && result != null) {

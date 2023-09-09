@@ -421,18 +421,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return puts(KEY_JSON, keys);
 	}
 
-	/**用 setJson 替代。
-	 * set keys to cast to json
-	 * @param keys  "key0,key1,key2..."
-	 * @return
-	 * @see #{@link #setJson(String)}
-	 */
-	@Deprecated
-	public JSONObject setJSON(String keys) {
-		return puts(KEY_JSON, keys);
-	}
-	
-
 	//JSONObject内关键词 key >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 

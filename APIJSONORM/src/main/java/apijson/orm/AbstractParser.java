@@ -39,7 +39,7 @@ import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.RequestMethod.CRUD;
 import static apijson.RequestMethod.GET;
 
-/**parser for parsing request to JSONObject
+/**Parser<T> for parsing request to JSONObject
  * @author Lemon
  */
 public abstract class AbstractParser<T extends Object> implements Parser<T>, ParserCreator<T>, VerifierCreator<T>, SQLCreator {
@@ -595,7 +595,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @throws Exception
 	 */
 	@Override
-	public void onVerifyRole(@NotNull SQLConfig config) throws Exception {
+	public void onVerifyRole(@NotNull SQLConfig<T> config) throws Exception {
 		if (Log.DEBUG) {
 			Log.i(TAG, "onVerifyRole  config = " + JSON.toJSONString(config));
 		}
@@ -1036,7 +1036,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			}
 
 			// 获取指定的JSON结构 <<<<<<<<<<<<<<
-			SQLConfig config = createSQLConfig().setMethod(GET).setTable(table);
+			SQLConfig<T> config = createSQLConfig().setMethod(GET).setTable(table);
 			config.setPrepared(false);
 			config.setColumn(Arrays.asList("structure"));
 
@@ -1066,7 +1066,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 	protected Map<String, ObjectParser> arrayObjectParserCacheMap = new HashMap<>();
 
-	//	protected SQLConfig itemConfig;
+	//	protected SQLConfig<T> itemConfig;
 	/**获取单个对象，该对象处于parentObject内
    * @param request parentObject 的 value
    * @param parentPath parentObject 的路径
@@ -1078,7 +1078,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
    */
 	@Override
 	public JSONObject onObjectParse(final JSONObject request
-			, String parentPath, String name, final SQLConfig arrayConfig, boolean isSubquery) throws Exception {
+			, String parentPath, String name, final SQLConfig<T> arrayConfig, boolean isSubquery) throws Exception {
 
 		if (Log.DEBUG) {
 			Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
@@ -1111,7 +1111,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		boolean isArrayMainTable = isSubquery == false && isTable && type == SQLConfig.TYPE_ITEM_CHILD_0 && arrayConfig != null && RequestMethod.isGetMethod(arrayConfig.getMethod(), true);
 		boolean isReuse = isArrayMainTable && position > 0;
 
-		ObjectParser op = null;
+		ObjectParser<T> op = null;
 		if (isReuse) {  // 数组主表使用专门的缓存数据
 			op = arrayObjectParserCacheMap.get(parentPath.substring(0, parentPath.lastIndexOf("[]") + 2));
 			op.setParentPath(parentPath);
@@ -1143,7 +1143,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					if (compat != null && compat) {
 						// 解决对聚合函数字段通过 query:2 分页查总数返回值错误
 						// 这里可能改变了内部的一些数据，下方通过 arrayConfig 还原
-						SQLConfig cfg = op.setSQLConfig(0, 0, 0).getSQLConfig();
+						SQLConfig<T> cfg = op.setSQLConfig(0, 0, 0).getSQLConfig();
 						boolean isExplain = cfg.isExplain();
 						cfg.setExplain(false);
 
@@ -1151,7 +1151,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						subqy.setFrom(cfg.getTable());
 						subqy.setConfig(cfg);
 
-						SQLConfig countSQLCfg = createSQLConfig();
+						SQLConfig<T> countSQLCfg = createSQLConfig();
 						countSQLCfg.setColumn(Arrays.asList("count(*):count"));
 						countSQLCfg.setFrom(subqy);
 
@@ -1336,7 +1336,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 			//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			response = new JSONArray();
-			SQLConfig config = createSQLConfig()
+			SQLConfig<T> config = createSQLConfig()
 					.setMethod(requestMethod)
 					.setCount(size)
 					.setPage(page2)
@@ -1745,7 +1745,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			//			onList.add(table + "." + key + " = " + targetTable + "." + targetKey); // ON User.id = Moment.userId
 
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 <<<<<<<<<
-			// AbstractSQLConfig.newSQLConfig 中强制把 id, id{}, userId, userId{} 放到了最前面		tableObj.put(key, tableObj.remove(key));
+			// AbstractSQLConfig.newSQLConfig<T> 中强制把 id, id{}, userId, userId{} 放到了最前面		tableObj.put(key, tableObj.remove(key));
 
 			if (refObj.size() != tableObj.size()) {  // 把 key 强制放最前，AbstractSQLExcecutor 中 config.putWhere 也是放尽可能最前
 				refObj.putAll(tableObj);
@@ -1757,8 +1757,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 >>>>>>>>>
 		}
 
-		//拼接多个 SQLConfig 的SQL语句，然后执行，再把结果分别缓存(Moment, User等)到 SQLExecutor 的 cacheMap
-		//		AbstractSQLConfig config0 = null;
+		//拼接多个 SQLConfig<T> 的SQL语句，然后执行，再把结果分别缓存(Moment, User等)到 SQLExecutor 的 cacheMap
+		//		AbstractSQLConfig<T> config0 = null;
 		//		String sql = "SELECT " + config0.getColumnString() + " FROM " + config0.getTable() + " INNER JOIN " + targetTable + " ON "
 		//				+ onList.get(0) + config0.getGroupString() + config0.getHavingString() + config0.getOrderString();
 
@@ -1981,7 +1981,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @throws Exception
 	 */
 	@Override
-	public JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception {
+	public JSONObject executeSQL(SQLConfig<T> config, boolean isSubquery) throws Exception {
 		if (config == null) {
 			Log.d(TAG, "executeSQL  config == null >> return null;");
 			return null;
@@ -2029,7 +2029,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			else {
 				sqlExecutor = getSQLExecutor();
 				result = sqlExecutor.execute(config, false);
-				// FIXME 改为直接在 sqlExecutor 内加好，最后 Parser 取结果，可以解决并发执行导致内部计算出错
+				// FIXME 改为直接在 sqlExecutor 内加好，最后 Parser<T> 取结果，可以解决并发执行导致内部计算出错
 //				executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
 			}
 
@@ -2150,7 +2150,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		queryResultMap = null;
 	}
 
-	private void setOpMethod(JSONObject request, ObjectParser op, String key) {
+	private void setOpMethod(JSONObject request, ObjectParser<T> op, String key) {
 		String _method = key == null ? null : request.getString(apijson.JSONObject.KEY_METHOD);
 		if (_method != null) {
 			RequestMethod method = RequestMethod.valueOf(_method); // 必须精准匹配，避免缓存命中率低

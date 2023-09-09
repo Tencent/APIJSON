@@ -4704,7 +4704,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 				}
 				else {
-					onJoinComplextRelation(sql, quote, j, jt, onList, on);
+					onJoinComplexRelation(sql, quote, j, jt, onList, on);
 
 					if (">=".equals(rt) || "<=".equals(rt) || ">".equals(rt) || "<".equals(rt)) {
 						if (isNot) {
@@ -4892,13 +4892,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				"性能很差、需求极少，默认只允许 = 等价关联，如要取消禁用可在后端重写相关方法！");
 	}
 
-	/**已废弃，最早 6.2.0 移除，请改用 onJoinComplexRelation
-	 */
-	@Deprecated
-	protected void onJoinComplextRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
-		onJoinComplexRelation(sql, quote, join, table, onList, on);
-	}
-
 	protected void onGetJoinString(Join join) throws UnsupportedOperationException {
 	}
 	protected void onGetCrossJoinString(Join join) throws UnsupportedOperationException {
@@ -4914,7 +4907,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> SQLConfig newSQLConfig(RequestMethod method, String table, String alias
+	public static <T extends Object> SQLConfig<T> newSQLConfig(RequestMethod method, String table, String alias
 			, JSONObject request, List<Join> joinList, boolean isProcedure, Callback<T> callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
@@ -4934,7 +4927,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String schema = request.getString(KEY_SCHEMA);
 		String datasource = request.getString(KEY_DATASOURCE);
 
-		SQLConfig config = callback.getSQLConfig(method, database, schema, datasource, table);
+		SQLConfig<T> config = callback.getSQLConfig(method, database, schema, datasource, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); // 不删，后面表对象还要用的，必须放在 parseJoin 前
@@ -5680,7 +5673,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> SQLConfig parseJoin(RequestMethod method, SQLConfig config
+	public static <T extends Object> SQLConfig<T> parseJoin(RequestMethod method, SQLConfig<T> config
 			, List<Join> joinList, Callback<T> callback) throws Exception {
 		boolean isQuery = RequestMethod.isQueryMethod(method);
 		config.setKeyPrefix(isQuery && config.isMain() == false);
@@ -5697,8 +5690,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			table = j.getTable();
 			alias = j.getAlias();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
-			SQLConfig joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
-			SQLConfig cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias
+			SQLConfig<T> joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
+			SQLConfig<T> cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias
 					, j.getRequest(), null, false, callback).setCount(j.getCount());
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
@@ -5725,7 +5718,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.getOuter() != null) {
-					SQLConfig outterConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
+					SQLConfig<T> outterConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
 					outterConfig.setMain(false)
 							.setKeyPrefix(true)
 							.setDatabase(joinConfig.getDatabase())
@@ -5934,7 +5927,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		 * @param table
 		 * @return
 		 */
-		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
+		SQLConfig<T>  getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
 
 		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
 		 * @param combine

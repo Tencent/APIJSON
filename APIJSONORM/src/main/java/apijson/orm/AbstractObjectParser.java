@@ -35,20 +35,24 @@ import static apijson.RequestMethod.GET;
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public abstract class AbstractObjectParser implements ObjectParser {
+public abstract class AbstractObjectParser<T extends Object> implements ObjectParser<T> {
 	private static final String TAG = "AbstractObjectParser";
 
 	@NotNull
-	protected AbstractParser<?> parser;
-	public AbstractObjectParser setParser(AbstractParser<?> parser) {
-		this.parser = parser;
+	protected AbstractParser<T> parser;
+	@Override
+	public AbstractParser<T> getParser() {
+		return parser;
+	}
+	@Override
+	public AbstractObjectParser<T> setParser(Parser<T> parser) {
+		this.parser = (AbstractParser<T>) parser;
 		return this;
 	}
 
-
 	protected JSONObject request;//不用final是为了recycle
 	protected String parentPath;//不用final是为了recycle
-	protected SQLConfig arrayConfig;//不用final是为了recycle
+	protected SQLConfig<T> arrayConfig;//不用final是为了recycle
 	protected boolean isSubquery;
 
 	protected final int type;
@@ -434,6 +438,7 @@ public abstract class AbstractObjectParser implements ObjectParser {
 								+ " || JSONRequest.TABLE_KEY_LIST.contains(key)) >>  return null;");
 						return false; // 获取不到就不用再做无效的 query 了。不考虑 Table:{Table:{}} 嵌套
 					}
+
 
 					Log.d(TAG, "onParse  isTable(table) == false >> return true;");
 					return true; // 舍去，对Table无影响
@@ -828,13 +833,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	@Override
 	public JSONObject parseResponse(RequestMethod method, String table, String alias
             , JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		SQLConfig config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
+		SQLConfig<T> config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
 				.setParser(parser)
 				.setObjectParser(this);
 		return parseResponse(config, isProcedure);
 	}
 	@Override
-	public JSONObject parseResponse(SQLConfig config, boolean isProcedure) throws Exception {
+	public JSONObject parseResponse(SQLConfig<T> config, boolean isProcedure) throws Exception {
 		if (parser.getSQLExecutor() == null) {
 			parser.createSQLExecutor();
 		}
@@ -1217,13 +1222,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		return alias;
 	}
 	@Override
-	public SQLConfig getArrayConfig() {
+	public SQLConfig<T> getArrayConfig() {
 		return arrayConfig;
 	}
 
 
 	@Override
-	public SQLConfig getSQLConfig() {
+	public SQLConfig<T> getSQLConfig() {
 		return sqlConfig;
 	}
 
