@@ -118,6 +118,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public static int MAX_COMBINE_COUNT = 5;
 	public static int MAX_COMBINE_KEY_COUNT = 2;
 	public static float MAX_COMBINE_RATIO = 1.0f;
+	public static boolean ALLOW_MISSING_KEY_4_COMBINE = true;
 
 	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
 	public static String DEFAULT_SCHEMA = "sys";
@@ -785,11 +786,26 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private Parser<T> parser;
 	@Override
 	public Parser<T> getParser() {
+		if (parser == null && objectParser != null) {
+			parser = objectParser.getParser();
+		}
 		return parser;
 	}
 	@Override
-	public AbstractSQLConfig setParser(Parser<T> parser) {
+	public AbstractSQLConfig<T> setParser(Parser<T> parser) {
 		this.parser = parser;
+		return this;
+	}
+	public AbstractSQLConfig<T> putWarnIfNeed(String type, String warn) {
+		if (Log.DEBUG && parser instanceof AbstractParser) {
+			((AbstractParser<T>) parser).putWarnIfNeed(type, warn);
+		}
+		return this;
+	}
+	public AbstractSQLConfig<T> putWarn(String type, String warn) {
+		if (Log.DEBUG && parser instanceof AbstractParser) {
+			((AbstractParser<T>) parser).putWarn(type, warn);
+		}
 		return this;
 	}
 
@@ -799,7 +815,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return objectParser;
 	}
 	@Override
-	public AbstractSQLConfig setObjectParser(ObjectParser objectParser) {
+	public AbstractSQLConfig<T> setObjectParser(ObjectParser objectParser) {
 		this.objectParser = objectParser;
 		return this;
 	}
@@ -1665,7 +1681,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 */
 	@Override
 	public String getRawSQL(String key, Object value) throws Exception {
-		return getRawSQL(key, value, false);
+		return getRawSQL(key, value, ! ALLOW_MISSING_KEY_4_COMBINE);
 	}
 	/**获取原始 SQL 片段
 	 * @param key
@@ -1694,6 +1710,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					throw new UnsupportedOperationException("@raw:value 的 value 中 " + key + " 不合法！"
 							+ "对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
 				}
+
+				putWarnIfNeed(JSONRequest.KEY_RAW, "@raw:value 的 value 中 "
+							+ key + " 不合法！对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
 			}
 			else if (rawSQL.isEmpty()) {
 				return (String) value;
@@ -3397,7 +3416,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String column = getRealKey(method, key, false, true, verifyName);
 
 		// 原始 SQL 片段
-		String rawSQL = getRawSQL(key, value, keyType != 4 || value instanceof String == false);
+		String rawSQL = getRawSQL(key, value);
 
 		switch (keyType) {
 		case 1:
@@ -5287,7 +5306,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				if (StringUtil.isNotEmpty(combineExpr, true)) {
 					List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
 					for (String key : banKeyList) {
-						if(keyInCombineExpr(combineExpr, key)) {
+						if (isKeyInCombineExpr(combineExpr, key)) {
 							throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
 									+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
 						}
@@ -5339,6 +5358,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						if (request.containsKey(w) == false) {  // 和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
 							//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
 							callback.onMissingKey4Combine(table, request, combine, ws[i], w);
+							if (config instanceof AbstractSQLConfig) {
+								((AbstractSQLConfig<T>) config).putWarnIfNeed(KEY_COMBINE, table + ":{} 里的 @combine:value 中的 value 里 "
+										+ ws[i] + " 对应的条件 " + w + ":value 中 value 必须存在且不能为 null！");
+							}
 						}
 					}
 				}
@@ -5361,7 +5384,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					// 兼容 PUT @combine
 					// 解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
 					if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false))
-							|| (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && keyInCombineExpr(combineExpr, key))) {
+							|| (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && isKeyInCombineExpr(combineExpr, key))) {
 						tableWhere.put(key, value);
 						if (whereList.contains(key) == false) {
 							andList.add(key);
@@ -5918,7 +5941,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		 * @param key
 		 * @param request
 		 */
-		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
+		void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
 	}
 
 	public static Long LAST_ID;
@@ -5952,13 +5975,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		@Override
 		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+			if (ALLOW_MISSING_KEY_4_COMBINE) {
+				return;
+			}
 			throw new IllegalArgumentException(name + ":{} 里的 @combine:value 中的value里 "
-					+ item + " 对应的条件 " + key + ":value 中 value 不能为 null！");
+					+ item + " 对应的条件 " + key + ":value 中 value 必须存在且不能为 null！");
 		}
 
 	}
 
-	private static boolean keyInCombineExpr(String combineExpr, String key) {
+	private static boolean isKeyInCombineExpr(String combineExpr, String key) {
 		while (combineExpr.isEmpty() == false) {
 			int index = combineExpr.indexOf(key);
 			if (index < 0) {
@@ -5976,6 +6002,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 			combineExpr = combineExpr.substring(newIndex);
 		}
+
 		return false;
 	}
 

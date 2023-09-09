@@ -121,10 +121,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @param method null ? requestMethod = GET
 	 */
 	public AbstractParser(RequestMethod method) {
-        super();
-        setMethod(method);
-        setNeedVerifyRole(AbstractVerifier.ENABLE_VERIFY_ROLE);
-        setNeedVerifyContent(AbstractVerifier.ENABLE_VERIFY_CONTENT);
+		super();
+		setMethod(method);
+		setNeedVerifyRole(AbstractVerifier.ENABLE_VERIFY_ROLE);
+		setNeedVerifyContent(AbstractVerifier.ENABLE_VERIFY_CONTENT);
 	}
 	/**
 	 * @param method null ? requestMethod = GET
@@ -143,6 +143,57 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public AbstractParser<T> setRoot(boolean isRoot) {
 		this.isRoot = isRoot;
 		return this;
+	}
+
+	public static final String KEY_REF = "Reference";
+
+	/**警告信息
+	 * Map<"Reference", "引用赋值获取路径 /Comment/userId 对应的值为 null！">
+	 */
+	protected Map<String, String> warnMap = new LinkedHashMap<>();
+	public String getWarn(String type) {
+		return warnMap == null ? null : warnMap.get(type);
+	}
+	public AbstractParser<T> putWarnIfNeed(String type, String warn) {
+		if (Log.DEBUG) {
+			String w = getWarn(type);
+			if (StringUtil.isEmpty(w, true)) {
+				putWarn(type, warn);
+			}
+		}
+		return this;
+	}
+	public AbstractParser<T> putWarn(String type, String warn) {
+		if (warnMap == null) {
+			warnMap = new LinkedHashMap<>();
+		}
+		warnMap.put(type, warn);
+		return this;
+	}
+	/**获取警告信息
+	 * @return
+	 */
+	public String getWarnString() {
+		Set<Entry<String, String>> set = warnMap == null ? null : warnMap.entrySet();
+		if (set == null || set.isEmpty()) {
+			return null;
+		}
+
+		StringBuilder sb = new StringBuilder();
+		for (Entry<String, String> e : set) {
+			String k = e == null ? null : e.getKey();
+			String v = k == null ? null : e.getValue();
+			if (StringUtil.isEmpty(v, true)) {
+				continue;
+			}
+
+			if (StringUtil.isNotEmpty(k, true)) {
+				sb.append("[" + k + "]: ");
+			}
+			sb.append(v + "; ");
+		}
+
+		return sb.toString();
 	}
 
 
@@ -334,9 +385,6 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	}
 
 
-
-
-
 	protected SQLExecutor sqlExecutor;
 	protected Verifier<T> verifier;
 	protected Map<String, Object> queryResultMap;//path-result
@@ -487,7 +535,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			onRollback();
 		}
 
-		requestObject = error == null ? extendSuccessResult(requestObject, isRoot) : extendErrorResult(requestObject, error, requestMethod, getRequestURL(), isRoot);
+		String warn = Log.DEBUG == false || error != null ? null : getWarnString();
+
+		requestObject = error == null ? extendSuccessResult(requestObject, warn, isRoot) : extendErrorResult(requestObject, error, requestMethod, getRequestURL(), isRoot);
 
 		JSONObject res = (globalFormat != null && globalFormat) && JSONResponse.isSuccess(requestObject) ? new JSONResponse(requestObject) : requestObject;
 
@@ -663,31 +713,49 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 * @return
 	 */
 	public static JSONObject newResult(int code, String msg) {
-		return newResult(code, msg, false);
+		return newResult(code, msg, null);
 	}
-	/**新建带状态内容的JSONObject
+
+	/**
+	 * 添加JSONObject的状态内容，一般用于错误提示结果
+	 *
 	 * @param code
 	 * @param msg
+	 * @param warn
+	 * @return
+	 */
+	public static JSONObject newResult(int code, String msg, String warn) {
+		return newResult(code, msg, warn, false);
+	}
+
+	/**
+	 * 新建带状态内容的JSONObject
+	 *
+	 * @param code
+	 * @param msg
+	 * @param warn
 	 * @param isRoot
 	 * @return
 	 */
-	public static JSONObject newResult(int code, String msg, boolean isRoot) {
-		return extendResult(null, code, msg, isRoot);
+	public static JSONObject newResult(int code, String msg, String warn, boolean isRoot) {
+		return extendResult(null, code, msg, warn, isRoot);
 	}
 
-	/**添加JSONObject的状态内容，一般用于错误提示结果
+	/**
+	 * 添加JSONObject的状态内容，一般用于错误提示结果
+	 *
 	 * @param object
 	 * @param code
 	 * @param msg
 	 * @return
 	 */
-	public static JSONObject extendResult(JSONObject object, int code, String msg, boolean isRoot) {
+	public static JSONObject extendResult(JSONObject object, int code, String msg, String warn, boolean isRoot) {
 		int index = Log.DEBUG == false || isRoot == false || msg == null ? -1 : msg.lastIndexOf(Log.KEY_SYSTEM_INFO_DIVIDER);
 		String debug = Log.DEBUG == false || isRoot == false ? null : (index >= 0 ? msg.substring(index + Log.KEY_SYSTEM_INFO_DIVIDER.length()).trim()
 				: " \n提 bug 请发请求和响应的【完整截屏】，没图的自行解决！"
-						+ " \n开发者有限的时间和精力主要放在【维护项目源码和文档】上！"
-						+ " \n【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！"
-						+ " \n【态度 不文明/不友善】的可能会被踢出群，问题也可能不予解答！！！"
+				+ " \n开发者有限的时间和精力主要放在【维护项目源码和文档】上！"
+				+ " \n【描述不详细】 或 【文档/常见问题 已有答案】 的问题可能会被忽略！！"
+				+ " \n【态度 不文明/不友善】的可能会被踢出群，问题也可能不予解答！！！"
 				+ " \n\n **环境信息** "
 				+ " \n系统: " + Log.OS_NAME + " " + Log.OS_VERSION
 				+ " \n数据库: DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE
@@ -717,6 +785,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 		object.put(JSONResponse.KEY_MSG, msg);
 		if (debug != null) {
+			if (StringUtil.isNotEmpty(warn, true)) {
+				debug += "\n 【警告】：" + warn;
+			}
 			object.put("debug:info|help", debug);
 		}
 
@@ -724,33 +795,51 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	}
 
 
-	/**添加请求成功的状态内容
+	/**
+	 * 添加请求成功的状态内容
+	 *
 	 * @param object
 	 * @return
 	 */
 	public static JSONObject extendSuccessResult(JSONObject object) {
 		return extendSuccessResult(object, false);
 	}
+
+	public static JSONObject extendSuccessResult(JSONObject object, boolean isRoot) {
+		return extendSuccessResult(object, null, isRoot);
+	}
+
 	/**添加请求成功的状态内容
 	 * @param object
 	 * @param isRoot
 	 * @return
 	 */
-	public static JSONObject extendSuccessResult(JSONObject object, boolean isRoot) {
-		return extendResult(object, JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED, isRoot);
+	public static JSONObject extendSuccessResult(JSONObject object, String warn, boolean isRoot) {
+		return extendResult(object, JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED, warn, isRoot);
 	}
+
 	/**获取请求成功的状态内容
 	 * @return
 	 */
 	public static JSONObject newSuccessResult() {
-		return newSuccessResult(false);
+		return newSuccessResult(null);
 	}
+
 	/**获取请求成功的状态内容
+	 * @param warn
+	 * @return
+	 */
+	public static JSONObject newSuccessResult(String warn) {
+		return newSuccessResult(warn, false);
+	}
+
+	/**获取请求成功的状态内容
+	 * @param warn
 	 * @param isRoot
 	 * @return
 	 */
-	public static JSONObject newSuccessResult(boolean isRoot) {
-		return newResult(JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED, isRoot);
+	public static JSONObject newSuccessResult(String warn, boolean isRoot) {
+		return newResult(JSONResponse.CODE_SUCCESS, JSONResponse.MSG_SUCCEED, warn, isRoot);
 	}
 
 	/**添加请求成功的状态内容
@@ -848,7 +937,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
         }
 
         int code = CommonException.getCode(e);
-        return extendResult(object, code, msg, isRoot);
+        return extendResult(object, code, msg, null, isRoot);
     }
 
 	/**新建错误状态内容
@@ -872,16 +961,13 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		  	String msg = CommonException.getMsg(e);
 			Integer code = CommonException.getCode(e);
 
-			return newResult(code, msg, isRoot);
+			return newResult(code, msg, null, isRoot);
 		}
 
-		return newResult(JSONResponse.CODE_SERVER_ERROR, JSONResponse.MSG_SERVER_ERROR, isRoot);
+		return newResult(JSONResponse.CODE_SERVER_ERROR, JSONResponse.MSG_SERVER_ERROR, null, isRoot);
 	}
 
 
-
-
-	//TODO 启动时一次性加载Request所有内容，作为初始化。
 	/**获取正确的请求，非GET请求必须是服务器指定的
 	 * @return
 	 * @throws Exception
@@ -902,7 +988,6 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	@Override
 	public JSONObject getStructure(@NotNull String table, String method, String tag, int version) throws Exception  {
-		// TODO 目前只使用 Request 而不使用 Response，所以这里写死用 REQUEST_MAP，以后可能 Response 表也会与 Request 表合并，用字段来区分
 		String cacheKey = AbstractVerifier.getCacheKeyForRequest(method, tag);
 		SortedMap<Integer, JSONObject> versionedMap = AbstractVerifier.REQUEST_MAP.get(cacheKey);
 
@@ -1419,17 +1504,17 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 			index = path.lastIndexOf("/");
 			String tableKey = index < 0 ? path : path.substring(0, index); // User:owner
-			  int index2 = tableKey.lastIndexOf("/");
-			  String arrKey = index2 < 0 ? null : tableKey.substring(0, index2);
-			  if (arrKey != null && JSONRequest.isArrayKey(arrKey) == false) {
+			int index2 = tableKey.lastIndexOf("/");
+			String arrKey = index2 < 0 ? null : tableKey.substring(0, index2);
+			if (arrKey != null && JSONRequest.isArrayKey(arrKey) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + " 不是合法的数组 key[] ！" +
-				  "@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
-			  }
+						"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
+			}
 
-			  tableKey = index2 < 0 ? tableKey : tableKey.substring(index2+1);
+			tableKey = index2 < 0 ? tableKey : tableKey.substring(index2+1);
 
-			  apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
-			  String table = entry.getKey(); // User
+			apijson.orm.Entry<String, String> entry = Pair.parseEntry(tableKey, true);
+			String table = entry.getKey(); // User
 			if (StringUtil.isName(table) == false) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":value 中 value 的 Table 值 " + table + " 不合法！"
 						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种格式！"
@@ -1458,20 +1543,20 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
           "必须是 {} 这种 JSONObject 格式！" + e2.getMessage());
 			}
 
-		  if (arrKey != null) {
-			if (parentPathObj.get(JSONRequest.KEY_JOIN) != null) {
-			  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ join: value } 中 value 不合法！" +
-				"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
+			if (arrKey != null) {
+				if (parentPathObj.get(JSONRequest.KEY_JOIN) != null) {
+					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ join: value } 中 value 不合法！" +
+							"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
+				}
+
+				Integer subPage = parentPathObj.getInteger(JSONRequest.KEY_PAGE);
+				if (subPage != null && subPage != 0) {
+					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ page: value } 中 value 不合法！" +
+							"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中 page 值只能为 null 或 0 ！");
+				}
 			}
 
-			Integer subPage = parentPathObj.getInteger(JSONRequest.KEY_PAGE);
-			if (subPage != null && subPage != 0) {
-			  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + ":{ page: value } 中 value 不合法！" +
-				"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中 page 值只能为 null 或 0 ！");
-			}
-		  }
-
-		  boolean isAppJoin = "@".equals(joinType);
+			boolean isAppJoin = "@".equals(joinType);
 
 			JSONObject refObj = new JSONObject(tableObj.size(), true);
 
@@ -1489,8 +1574,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				}
 
 				if (isAppJoin && StringUtil.isName(key.substring(0, key.length() - 1)) == false) {
-				  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + key + " 不合法 ！" +
-					"@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
+					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + key + " 不合法 ！" +
+							"@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
 				}
 
 				refObj.put(key, tableObj.getString(key));
@@ -1525,20 +1610,20 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						apijson.orm.Entry<String, String> te = tk == null || p.substring(ind2 + 1).indexOf("/") >= 0 ? null : Pair.parseEntry(tk, true);
 
 						if (te != null && JSONRequest.isTableKey(te.getKey()) && request.get(tk) instanceof JSONObject) {
-						  if (isAppJoin) {
-							if (refObj.size() >= 1) {
-							  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + " 中 " + k + " 不合法！"
-								+ "@ APP JOIN 必须有且只有一个引用赋值键值对！");
+							if (isAppJoin) {
+								if (refObj.size() >= 1) {
+									throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + " 中 " + k + " 不合法！"
+											+ "@ APP JOIN 必须有且只有一个引用赋值键值对！");
+								}
+
+								if (StringUtil.isName(k.substring(0, k.length() - 1)) == false) {
+									throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + k + " 不合法 ！" +
+											"@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
+								}
 							}
 
-							if (StringUtil.isName(k.substring(0, k.length() - 1)) == false) {
-							  throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 中 " + k + " 不合法 ！" +
-								"@ APP JOIN 只允许 key@:/Table/refKey 这种 = 等价连接！");
-							}
-						  }
-
-						  refObj.put(k, v);
-						  continue;
+							refObj.put(k, v);
+							continue;
 						}
 					}
 

@@ -833,12 +833,39 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		if (parser.getSQLExecutor() == null) {
 			parser.createSQLExecutor();
 		}
+		if (parser != null && config.getParser() == null) {
+			config.setParser(parser);
+		}
 		return parser.getSQLExecutor().execute(config, isProcedure);
 	}
 
 
 	@Override
 	public SQLConfig newSQLConfig(boolean isProcedure) throws Exception {
+		String raw = Log.DEBUG == false || sqlRequest == null ? null : sqlRequest.getString(apijson.JSONRequest.KEY_RAW);
+		String[] keys = raw == null ? null : StringUtil.split(raw);
+		if (keys != null && keys.length > 0) {
+			boolean allow = AbstractSQLConfig.ALLOW_MISSING_KEY_4_COMBINE;
+
+			for (String key : keys) {
+				if (sqlRequest.get(key) != null) {
+					continue;
+				}
+
+				String msg = "@raw:value 的 value 中 " + key + " 不合法！对应的 "
+						+ key + ": value 在当前对象 " + name + " 不存在或 value = null，无法有效转为原始 SQL 片段！";
+
+				if (allow == false) {
+					throw new UnsupportedOperationException(msg);
+				}
+
+				if (parser instanceof AbstractParser) {
+					((AbstractParser) parser).putWarnIfNeed(JSONRequest.KEY_RAW, msg);
+				}
+				break;
+			}
+		}
+
 		return newSQLConfig(method, table, alias, sqlRequest, joinList, isProcedure)
 				.setParser(parser)
 				.setObjectParser(this);
