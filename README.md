@@ -584,6 +584,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [apijson 初探](https://www.cnblogs.com/x3d/p/apijson-lowcode.html)
 
 [APIJSON使用介绍](http://api.flyrise.cn:9099/docs/open-docs//1459)
+
+[MassCMS With APIJSON最佳实践](https://zhuanlan.zhihu.com/p/655826966)
   
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
