@@ -584,6 +584,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [apijson 初探](https://www.cnblogs.com/x3d/p/apijson-lowcode.html)
 
 [APIJSON使用介绍](http://api.flyrise.cn:9099/docs/open-docs//1459)
+
+[MassCMS With APIJSON最佳实践](https://zhuanlan.zhihu.com/p/655826966)
   
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
@@ -645,6 +647,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [apijson-sample](https://gitee.com/greyzeng/apijson-sample) APIJSON 简单使用 Demo 及教程
 
 [apijson-examples](https://gitee.com/drone/apijson-examples) APIJSON 的前端、业务后端、管理后端 Demo
+
+[apijson-ruoyi](https://gitee.com/yxiedd/apijson-ruoyi) APIJSON 和 RuoYi 框架整合，实现零代码生成页面模板接口，在线维护 APIJSON 数据库配置等
 
 [light4j](https://github.com/xlongwei/light4j) 整合 APIJSON 和微服务框架 light-4j 的 Demo，同时接入了 Redis
 

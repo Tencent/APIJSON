@@ -18,20 +18,22 @@ import apijson.RequestMethod;
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public interface ObjectParser {
+public interface ObjectParser<T extends Object> {
+
+	Parser<T> getParser();
+	ObjectParser<T> setParser(Parser<T> parser);
 
 	String getParentPath();
-	ObjectParser setParentPath(String parentPath);
+	ObjectParser<T> setParentPath(String parentPath);
 
 	/**解析成员
 	 * response重新赋值
-	 * @param parentPath 
-	 * @param name 
+	 * @param name
 	 * @param isReuse 
 	 * @return null or this
 	 * @throws Exception
 	 */
-	ObjectParser parse(String name, boolean isReuse) throws Exception;
+	ObjectParser<T> parse(String name, boolean isReuse) throws Exception;
 
 	/**调用 parser 的 sqlExecutor 来解析结果
 	 * @param method
@@ -43,14 +45,14 @@ public interface ObjectParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public JSONObject parseResponse(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception;
+	JSONObject parseResponse(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception;
 	/**调用 parser 的 sqlExecutor 来解析结果
 	 * @param config
 	 * @param isProcedure
 	 * @return
 	 * @throws Exception
 	 */
-	public JSONObject parseResponse(SQLConfig config, boolean isProcedure) throws Exception;
+	JSONObject parseResponse(SQLConfig<T> config, boolean isProcedure) throws Exception;
 
 
 
@@ -95,20 +97,20 @@ public interface ObjectParser {
 	 * @return {@link #setSQLConfig(int, int, int)}
 	 * @throws Exception
 	 */
-	ObjectParser setSQLConfig() throws Exception;
+	ObjectParser<T> setSQLConfig() throws Exception;
 
 	/**SQL 配置
 	 * @return 
 	 * @throws Exception
 	 */
-	ObjectParser setSQLConfig(int count, int page, int position) throws Exception;
+	ObjectParser<T> setSQLConfig(int count, int page, int position) throws Exception;
 	
 	
 	/**执行 SQL
 	 * @return 
 	 * @throws Exception
 	 */
-	ObjectParser executeSQL() throws Exception;
+	ObjectParser<T> executeSQL() throws Exception;
 
 	
 	/**
@@ -129,8 +131,8 @@ public interface ObjectParser {
 	void onChildResponse() throws Exception;
 	
 
-	SQLConfig newSQLConfig(boolean isProcedure) throws Exception;
-	SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception;
+	SQLConfig<T> newSQLConfig(boolean isProcedure) throws Exception;
+	SQLConfig<T> newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception;
 	
 	/**
 	 * response has the final value after parse (and query if isTableKey)
@@ -143,7 +145,7 @@ public interface ObjectParser {
 	void recycle();
 
 
-	ObjectParser setMethod(RequestMethod method);
+	ObjectParser<T> setMethod(RequestMethod method);
 	RequestMethod getMethod();
 
 
@@ -151,9 +153,9 @@ public interface ObjectParser {
 	String getPath();
 	String getTable();
 	String getAlias();
-	SQLConfig getArrayConfig();
+	SQLConfig<T> getArrayConfig();
 
-	SQLConfig getSQLConfig();
+	SQLConfig<T> getSQLConfig();
 	JSONObject getResponse();
 	JSONObject getSqlRequest();
 	JSONObject getSqlResponse();

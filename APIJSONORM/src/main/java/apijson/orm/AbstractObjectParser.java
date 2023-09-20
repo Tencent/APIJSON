@@ -35,20 +35,24 @@ import static apijson.RequestMethod.GET;
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public abstract class AbstractObjectParser implements ObjectParser {
+public abstract class AbstractObjectParser<T extends Object> implements ObjectParser<T> {
 	private static final String TAG = "AbstractObjectParser";
 
 	@NotNull
-	protected AbstractParser<?> parser;
-	public AbstractObjectParser setParser(AbstractParser<?> parser) {
-		this.parser = parser;
+	protected AbstractParser<T> parser;
+	@Override
+	public AbstractParser<T> getParser() {
+		return parser;
+	}
+	@Override
+	public AbstractObjectParser<T> setParser(Parser<T> parser) {
+		this.parser = (AbstractParser<T>) parser;
 		return this;
 	}
 
-
 	protected JSONObject request;//不用final是为了recycle
 	protected String parentPath;//不用final是为了recycle
-	protected SQLConfig arrayConfig;//不用final是为了recycle
+	protected SQLConfig<T> arrayConfig;//不用final是为了recycle
 	protected boolean isSubquery;
 
 	protected final int type;
@@ -423,7 +427,21 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 				if (target == null) { // String#equals(null)会出错
 					Log.d(TAG, "onParse  target == null  >>  return true;");
-					return true;
+
+					if (Log.DEBUG) {
+						parser.putWarnIfNeed(AbstractParser.KEY_REF, path + "/" + key + ": " + targetPath + " 引用赋值获取路径对应的值为 null！请检查路径是否错误！");
+					}
+
+					// 非查询关键词 @key 不影响查询，直接跳过
+					if (isTable && (key.startsWith("@") == false || JSONRequest.TABLE_KEY_LIST.contains(key))) {
+						Log.e(TAG, "onParse  isTable && (key.startsWith(@) == false"
+								+ " || JSONRequest.TABLE_KEY_LIST.contains(key)) >>  return null;");
+						return false; // 获取不到就不用再做无效的 query 了。不考虑 Table:{Table:{}} 嵌套
+					}
+
+
+					Log.d(TAG, "onParse  isTable(table) == false >> return true;");
+					return true; // 舍去，对Table无影响
 				}
 
 //				if (target instanceof Map) { // target 可能是从 requestObject 里取出的 {}
@@ -815,15 +833,18 @@ public abstract class AbstractObjectParser implements ObjectParser {
 	@Override
 	public JSONObject parseResponse(RequestMethod method, String table, String alias
             , JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		SQLConfig config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
+		SQLConfig<T> config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
 				.setParser(parser)
 				.setObjectParser(this);
 		return parseResponse(config, isProcedure);
 	}
 	@Override
-	public JSONObject parseResponse(SQLConfig config, boolean isProcedure) throws Exception {
+	public JSONObject parseResponse(SQLConfig<T> config, boolean isProcedure) throws Exception {
 		if (parser.getSQLExecutor() == null) {
 			parser.createSQLExecutor();
+		}
+		if (parser != null && config.getParser() == null) {
+			config.setParser(parser);
 		}
 		return parser.getSQLExecutor().execute(config, isProcedure);
 	}
@@ -831,6 +852,30 @@ public abstract class AbstractObjectParser implements ObjectParser {
 
 	@Override
 	public SQLConfig newSQLConfig(boolean isProcedure) throws Exception {
+		String raw = Log.DEBUG == false || sqlRequest == null ? null : sqlRequest.getString(apijson.JSONRequest.KEY_RAW);
+		String[] keys = raw == null ? null : StringUtil.split(raw);
+		if (keys != null && keys.length > 0) {
+			boolean allow = AbstractSQLConfig.ALLOW_MISSING_KEY_4_COMBINE;
+
+			for (String key : keys) {
+				if (sqlRequest.get(key) != null) {
+					continue;
+				}
+
+				String msg = "@raw:value 的 value 中 " + key + " 不合法！对应的 "
+						+ key + ": value 在当前对象 " + name + " 不存在或 value = null，无法有效转为原始 SQL 片段！";
+
+				if (allow == false) {
+					throw new UnsupportedOperationException(msg);
+				}
+
+				if (parser instanceof AbstractParser) {
+					((AbstractParser) parser).putWarnIfNeed(JSONRequest.KEY_RAW, msg);
+				}
+				break;
+			}
+		}
+
 		return newSQLConfig(method, table, alias, sqlRequest, joinList, isProcedure)
 				.setParser(parser)
 				.setObjectParser(this);
@@ -1177,13 +1222,13 @@ public abstract class AbstractObjectParser implements ObjectParser {
 		return alias;
 	}
 	@Override
-	public SQLConfig getArrayConfig() {
+	public SQLConfig<T> getArrayConfig() {
 		return arrayConfig;
 	}
 
 
 	@Override
-	public SQLConfig getSQLConfig() {
+	public SQLConfig<T> getSQLConfig() {
 		return sqlConfig;
 	}
 

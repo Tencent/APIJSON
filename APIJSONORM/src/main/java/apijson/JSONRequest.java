@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static apijson.StringUtil.PATTERN_ALPHA_BIG;
+
 /**wrapper for request
  * @author Lemon
  * @see #puts
@@ -195,5 +197,70 @@ public class JSONRequest extends JSONObject {
 		super.puts(key, value);
 		return this;
 	}
+
+
+	/**ABCdEfg => upper ? A-B-CD-EFG : a-b-cd-efg
+	 * @param key
+	 * @return
+	 */
+	public static String recoverHyphen(@NotNull String key, Boolean upper) {
+		return recoverDivider(key, "-", upper);
+	}
+
+	/**ABCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
+	 * @param key
+	 * @return
+	 */
+	public static String recoverUnderline(@NotNull String key, Boolean upper) {
+		return recoverDivider(key, "_", upper);
+	}
+
+	/**ABCdEfg => upper ? A$B$CD$EFG : a$b$cd$efg
+	 * @param key
+	 * @return
+	 */
+	public static String recoverDollar(@NotNull String key, Boolean upper) {
+		return recoverDivider(key, "$", upper);
+	}
+
+	/**ABCdEfg => upper ? A.B.CD.EFG : a.b.cd.efg
+	 * @param key
+	 * @return
+	 */
+	public static String recoverDot(@NotNull String key, Boolean upper) {
+		return recoverDivider(key, ".", upper);
+	}
+
+	/**ABCdEfg => upper ? A_B_CD_EFG : a/b/cd/efg
+	 * @param key
+	 * @return
+	 */
+	public static String recoverDivider(@NotNull String key, Boolean upper) {
+		return recoverDivider(key, "/", upper);
+	}
+
+	/**驼峰格式转为带分隔符的全大写或全小写格式
+	 * @param key
+	 * @param divider
+	 * @param upper
+	 * @return
+	 */
+	public static String recoverDivider(@NotNull String key, @NotNull String divider, Boolean upper) {
+		StringBuilder name = new StringBuilder();
+		char[] cs = key.toCharArray();
+		int len = key.length();
+		for (int i = 0; i < len; i++) {
+			String s = key.substring(i, i + 1);
+			if (i > 0 && PATTERN_ALPHA_BIG.matcher(s).matches()) {
+				name.append(divider);
+			}
+			if (upper != null) {
+				s = upper ? s.toUpperCase() : s.toLowerCase();
+			}
+			name.append(s);
+		}
+		return name.toString();
+	}
+
 
 }

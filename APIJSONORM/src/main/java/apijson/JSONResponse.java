@@ -5,12 +5,11 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
+import java.util.Set;
 
 /**parser for response
  * @author Lemon
@@ -22,6 +21,17 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class JSONResponse extends apijson.JSONObject {
 	private static final long serialVersionUID = 1L;
+
+	// 节约性能和减少 bug，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
+	/**格式化带 - 中横线的单词
+	 */
+	public static boolean IS_FORMAT_HYPHEN = false;
+	/**格式化带 _ 下划线的单词
+	 */
+	public static boolean IS_FORMAT_UNDERLINE = false;
+	/**格式化带 $ 美元符的单词
+	 */
+	public static boolean IS_FORMAT_DOLLAR = false;
 
 	private static final String TAG = "JSONResponse";
 
@@ -204,10 +214,6 @@ public class JSONResponse extends apijson.JSONObject {
 	//		return response == null ? null : response.getObject(key, JSONResponse.class);
 	//	}
 	//状态信息，非GET请求获得的信息>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-
 
 
 	/**
@@ -408,18 +414,18 @@ public class JSONResponse extends apijson.JSONObject {
 
 	/**获取变量名
 	 * @param fullName
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String getVariableName(String fullName) {
 		if (isArrayKey(fullName)) {
 			fullName = StringUtil.addSuffix(fullName.substring(0, fullName.length() - 2), "list");
 		}
-		return formatKey(fullName, true, true, true, true);
+		return formatKey(fullName, true, true, true, true, false, true);
 	}
 
 	/**格式化数组的名称 key[] => keyList; key:alias[] => aliasList; Table-column[] => tableColumnList
 	 * @param key empty ? "list" : key + "List" 且首字母小写
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = true, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String formatArrayKey(String key) {
 		if (isArrayKey(key)) {
@@ -430,28 +436,29 @@ public class JSONResponse extends apijson.JSONObject {
 			return key.substring(index + 1); //不处理自定义的
 		}
 
-		return formatKey(key, false, true, true, true); //节约性能，除了数组对象 Table-column:alias[] ，一般都符合变量命名规范
+		return formatKey(key, false, true, true, IS_FORMAT_UNDERLINE, IS_FORMAT_DOLLAR, false); //节约性能，除了数组对象 Table-column:alias[] ，一般都符合变量命名规范
 	}
 
 	/**格式化对象的名称 name => name; name:alias => alias
 	 * @param key name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = true
 	 */
 	public static String formatObjectKey(String key) {
 		int index = key == null ? -1 : key.indexOf(":");
 		if (index >= 0) {
-			return key.substring(index + 1); //不处理自定义的
+			return key.substring(index + 1); // 不处理自定义的
 		}
 
-		return formatKey(key, false, true, false, true); //节约性能，除了表对象 Table:alias ，一般都符合变量命名规范
+		return formatKey(key, false, true, IS_FORMAT_HYPHEN, IS_FORMAT_UNDERLINE, IS_FORMAT_DOLLAR, false); //节约性能，除了表对象 Table:alias ，一般都符合变量命名规范
 	}
 
 	/**格式化普通值的名称 name => name; name:alias => alias
 	 * @param fullName name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = false
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = false
 	 */
 	public static String formatOtherKey(String fullName) {
-		return formatKey(fullName, false, true, false, false); //节约性能，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
+		return formatKey(fullName, false, true, IS_FORMAT_HYPHEN, IS_FORMAT_UNDERLINE, IS_FORMAT_DOLLAR
+				, IS_FORMAT_HYPHEN || IS_FORMAT_UNDERLINE || IS_FORMAT_DOLLAR ? false : null);
 	}
 
 
@@ -460,10 +467,13 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param formatAt 去除前缀 @ ， @a => a
 	 * @param formatColon 去除分隔符 : ， A:b => b
 	 * @param formatHyphen 去除分隔符 - ， A-b-cd-Efg => aBCdEfg
+	 * @param formatUnderline 去除分隔符 _ ， A_b_cd_Efg => aBCdEfg
+	 * @param formatDollar 去除分隔符 $ ， A$b$cd$Efg => aBCdEfg
 	 * @param firstCase 第一个单词首字母小写，后面的首字母大写， Ab => ab ; A-b-Cd => aBCd
 	 * @return name => name; name:alias => alias
 	 */
-	public static String formatKey(String fullName, boolean formatColon, boolean formatAt, boolean formatHyphen, boolean firstCase) {
+	public static String formatKey(String fullName, boolean formatColon, boolean formatAt, boolean formatHyphen
+			, boolean formatUnderline, boolean formatDollar, Boolean firstCase) {
 		if (fullName == null) {
 			Log.w(TAG, "formatKey  fullName == null >> return null;");
 			return null;
@@ -476,10 +486,17 @@ public class JSONResponse extends apijson.JSONObject {
 			fullName = formatAt(fullName);
 		}
 		if (formatHyphen) {
-			fullName = formatHyphen(fullName, firstCase);
+			fullName = formatHyphen(fullName, firstCase != null);
+		}
+		if (formatUnderline) {
+			fullName = formatUnderline(fullName, firstCase != null);
+		}
+		if (formatDollar) {
+			fullName = formatDollar(fullName, firstCase != null);
 		}
 
-		return firstCase ? StringUtil.firstCase(fullName) : fullName; //不格式化普通 key:value (value 不为 [], {}) 的 key
+		// 默认不格式化普通 key:value (value 不为 [], {}) 的 key
+		return firstCase == null ? fullName : StringUtil.firstCase(fullName, firstCase);
 	}
 
 	/**"@key" => "key"
@@ -489,6 +506,7 @@ public class JSONResponse extends apijson.JSONObject {
 	public static String formatAt(@NotNull String key) {
 		return key.startsWith("@") ? key.substring(1) : key;
 	}
+
 	/**key:alias => alias
 	 * @param key
 	 * @return
@@ -502,15 +520,60 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param key
 	 * @return
 	 */
-	public static String formatHyphen(@NotNull String key, boolean firstCase) {
-		String name = "";
-
-		StringTokenizer parts = new StringTokenizer(key, "-");
-		name += parts.nextToken();
-		while(parts.hasMoreTokens()) {
-			String part = parts.nextToken();
-			name += firstCase ? StringUtil.firstCase(part, true) : part;
-		}
-		return name;
+	public static String formatHyphen(@NotNull String key, Boolean firstCase) {
+		return formatDivider(key, "-", firstCase);
 	}
+
+	/**A_b_cd_Efg => ABCdEfg
+	 * @param key
+	 * @return
+	 */
+	public static String formatUnderline(@NotNull String key, Boolean firstCase) {
+		return formatDivider(key, "_", firstCase);
+	}
+
+	/**A$b$cd$Efg => ABCdEfg
+	 * @param key
+	 * @return
+	 */
+	public static String formatDollar(@NotNull String key, Boolean firstCase) {
+		return formatDivider(key, "$", firstCase);
+	}
+
+	/**A.b.cd.Efg => ABCdEfg
+	 * @param key
+	 * @return
+	 */
+	public static String formatDot(@NotNull String key, Boolean firstCase) {
+		return formatDivider(key, ".", firstCase);
+	}
+
+	/**A/b/cd/Efg => ABCdEfg
+	 * @param key
+	 * @return
+	 */
+	public static String formatDivider(@NotNull String key, Boolean firstCase) {
+		return formatDivider(key, "/", firstCase);
+	}
+
+	/**去除分割符，返回驼峰格式
+	 * @param key
+	 * @param divider
+	 * @param firstCase
+	 * @return
+	 */
+	public static String formatDivider(@NotNull String key, @NotNull String divider, Boolean firstCase) {
+		String[] parts = StringUtil.split(key, divider);
+		StringBuilder name = new StringBuilder();
+		for (String part : parts) {
+			part = part.toLowerCase(); // 始终小写，也方便反过来 ABCdEfg -> A_b_cd_Efg
+			if (firstCase != null) {
+				// 始终小写, A_b_cd_Efg -> ABCdEfg, firstCase ? part.toLowerCase() : part.toUpperCase();
+				part = StringUtil.firstCase(part, firstCase);
+			}
+			name.append(part);
+		}
+		return name.toString();
+	}
+
 }

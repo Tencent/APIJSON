@@ -22,21 +22,21 @@ import apijson.NotNull;
  */
 public interface SQLExecutor<T extends Object> {
 	Parser<T> getParser();
-	SQLExecutor setParser(Parser<T> parser);
+	SQLExecutor<T> setParser(Parser<T> parser);
 
 	/**保存缓存
 	 * @param sql
 	 * @param list
 	 * @param config
 	 */
-	void putCache(String sql, List<JSONObject> list, SQLConfig config);
+	void putCache(String sql, List<JSONObject> list, SQLConfig<T> config);
 
 	/**获取缓存
 	 * @param sql
 	 * @param config
 	 * @return
 	 */
-	List<JSONObject> getCache(String sql, SQLConfig config);
+	List<JSONObject> getCache(String sql, SQLConfig<T> config);
 
 	/**获取缓存
 	 * @param sql
@@ -44,13 +44,13 @@ public interface SQLExecutor<T extends Object> {
 	 * @param config
 	 * @return
 	 */
-	JSONObject getCacheItem(String sql, int position, SQLConfig config);
+	JSONObject getCacheItem(String sql, int position, SQLConfig<T> config);
 
 	/**移除缓存
 	 * @param sql
 	 * @param config
 	 */
-	void removeCache(String sql, SQLConfig config);
+	void removeCache(String sql, SQLConfig<T> config);
 
 	/**执行SQL
 	 * @param config
@@ -58,7 +58,7 @@ public interface SQLExecutor<T extends Object> {
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception;
+	JSONObject execute(@NotNull SQLConfig<T> config, boolean unknownType) throws Exception;
 
 	//executeQuery和executeUpdate这两个函数因为返回类型不同，所以不好合并
 	/**执行查询
@@ -66,20 +66,20 @@ public interface SQLExecutor<T extends Object> {
 	 * @return
 	 * @throws SQLException
 	 */
-	default ResultSet executeQuery(@NotNull SQLConfig config) throws Exception {
+	default ResultSet executeQuery(@NotNull SQLConfig<T> config) throws Exception {
 		return executeQuery(config, null);
 	}
-	ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception;
+	ResultSet executeQuery(@NotNull SQLConfig<T> config, String sql) throws Exception;
 
 	/**执行增、删、改
 	 * @param config
 	 * @return
 	 * @throws SQLException
 	 */
-	default int executeUpdate(@NotNull SQLConfig config) throws Exception {
+	default int executeUpdate(@NotNull SQLConfig<T> config) throws Exception {
 		return executeUpdate(config, null);
 	}
-	int executeUpdate(@NotNull SQLConfig config, String sql) throws Exception;
+	int executeUpdate(@NotNull SQLConfig<T> config, String sql) throws Exception;
 
 
 	/**判断是否为JSON类型
@@ -89,14 +89,14 @@ public interface SQLExecutor<T extends Object> {
 	* @param lable
 	* @return
 	*/
-	boolean isJSONType(@NotNull SQLConfig config, ResultSetMetaData rsmd, int position, String lable);
+	boolean isJSONType(@NotNull SQLConfig<T> config, ResultSetMetaData rsmd, int position, String lable);
 
 
-	Connection getConnection(@NotNull SQLConfig config) throws Exception;
-	default Statement getStatement(@NotNull SQLConfig config) throws Exception {
+	Connection getConnection(@NotNull SQLConfig<T> config) throws Exception;
+	default Statement getStatement(@NotNull SQLConfig<T> config) throws Exception {
 		return getStatement(config, null);
 	}
-	Statement getStatement(@NotNull SQLConfig config, String sql) throws Exception;
+	Statement getStatement(@NotNull SQLConfig<T> config, String sql) throws Exception;
 
 	int getTransactionIsolation();
 	void setTransactionIsolation(int transactionIsolation);

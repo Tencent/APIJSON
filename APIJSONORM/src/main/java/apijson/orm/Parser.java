@@ -66,7 +66,7 @@ public interface Parser<T extends Object> {
 	JSONObject getStructure(String table, String method, String tag, int version) throws Exception;
 
 
-	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception;
+	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig<T> arrayConfig, boolean isSubquery) throws Exception;
 
 	JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception;
 
@@ -81,7 +81,7 @@ public interface Parser<T extends Object> {
 	 */
 	Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject, boolean containRaw) throws Exception;
 	
-	ObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception;
+	ObjectParser<T> createObjectParser(JSONObject request, String parentPath, SQLConfig<T> arrayConfig, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception;
 
 	int getDefaultQueryCount();
 	int getMaxQueryPage();
@@ -100,11 +100,11 @@ public interface Parser<T extends Object> {
 
 	void onVerifyLogin() throws Exception;
 	void onVerifyContent() throws Exception;
-	void onVerifyRole(SQLConfig config) throws Exception;
+	void onVerifyRole(SQLConfig<T> config) throws Exception;
 	
-	JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception;
+	JSONObject executeSQL(SQLConfig<T> config, boolean isSubquery) throws Exception;
 	
-	SQLExecutor getSQLExecutor();
+	SQLExecutor<T> getSQLExecutor();
 	Verifier<T> getVerifier();
 	
 	

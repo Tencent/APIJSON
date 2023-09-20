@@ -118,6 +118,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public static int MAX_COMBINE_COUNT = 5;
 	public static int MAX_COMBINE_KEY_COUNT = 2;
 	public static float MAX_COMBINE_RATIO = 1.0f;
+	public static boolean ALLOW_MISSING_KEY_4_COMBINE = true;
 
 	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
 	public static String DEFAULT_SCHEMA = "sys";
@@ -785,11 +786,26 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private Parser<T> parser;
 	@Override
 	public Parser<T> getParser() {
+		if (parser == null && objectParser != null) {
+			parser = objectParser.getParser();
+		}
 		return parser;
 	}
 	@Override
-	public AbstractSQLConfig setParser(Parser<T> parser) {
+	public AbstractSQLConfig<T> setParser(Parser<T> parser) {
 		this.parser = parser;
+		return this;
+	}
+	public AbstractSQLConfig<T> putWarnIfNeed(String type, String warn) {
+		if (Log.DEBUG && parser instanceof AbstractParser) {
+			((AbstractParser<T>) parser).putWarnIfNeed(type, warn);
+		}
+		return this;
+	}
+	public AbstractSQLConfig<T> putWarn(String type, String warn) {
+		if (Log.DEBUG && parser instanceof AbstractParser) {
+			((AbstractParser<T>) parser).putWarn(type, warn);
+		}
 		return this;
 	}
 
@@ -799,7 +815,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return objectParser;
 	}
 	@Override
-	public AbstractSQLConfig setObjectParser(ObjectParser objectParser) {
+	public AbstractSQLConfig<T> setObjectParser(ObjectParser objectParser) {
 		this.objectParser = objectParser;
 		return this;
 	}
@@ -1665,7 +1681,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 */
 	@Override
 	public String getRawSQL(String key, Object value) throws Exception {
-		return getRawSQL(key, value, false);
+		return getRawSQL(key, value, ! ALLOW_MISSING_KEY_4_COMBINE);
 	}
 	/**获取原始 SQL 片段
 	 * @param key
@@ -1694,6 +1710,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					throw new UnsupportedOperationException("@raw:value 的 value 中 " + key + " 不合法！"
 							+ "对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
 				}
+
+				putWarnIfNeed(JSONRequest.KEY_RAW, "@raw:value 的 value 中 "
+							+ key + " 不合法！对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
 			}
 			else if (rawSQL.isEmpty()) {
 				return (String) value;
@@ -3397,7 +3416,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String column = getRealKey(method, key, false, true, verifyName);
 
 		// 原始 SQL 片段
-		String rawSQL = getRawSQL(key, value, keyType != 4 || value instanceof String == false);
+		String rawSQL = getRawSQL(key, value);
 
 		switch (keyType) {
 		case 1:
@@ -4685,7 +4704,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 				}
 				else {
-					onJoinComplextRelation(sql, quote, j, jt, onList, on);
+					onJoinComplexRelation(sql, quote, j, jt, onList, on);
 
 					if (">=".equals(rt) || "<=".equals(rt) || ">".equals(rt) || "<".equals(rt)) {
 						if (isNot) {
@@ -4873,13 +4892,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				"性能很差、需求极少，默认只允许 = 等价关联，如要取消禁用可在后端重写相关方法！");
 	}
 
-	/**已废弃，最早 6.2.0 移除，请改用 onJoinComplexRelation
-	 */
-	@Deprecated
-	protected void onJoinComplextRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
-		onJoinComplexRelation(sql, quote, join, table, onList, on);
-	}
-
 	protected void onGetJoinString(Join join) throws UnsupportedOperationException {
 	}
 	protected void onGetCrossJoinString(Join join) throws UnsupportedOperationException {
@@ -4895,14 +4907,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> SQLConfig newSQLConfig(RequestMethod method, String table, String alias
+	public static <T extends Object> SQLConfig<T> newSQLConfig(RequestMethod method, String table, String alias
 			, JSONObject request, List<Join> joinList, boolean isProcedure, Callback<T> callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
 			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
 		}
 
-		boolean explain = request.getBooleanValue(KEY_EXPLAIN);
-		if (explain && Log.DEBUG == false) { // 不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
+		Boolean explain = request.getBoolean(KEY_EXPLAIN);
+		if (explain != null && explain && Log.DEBUG == false) { // 不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
 			throw new UnsupportedOperationException("非DEBUG模式, 不允许传 " + KEY_EXPLAIN + " ！");
 		}
 
@@ -4915,7 +4927,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String schema = request.getString(KEY_SCHEMA);
 		String datasource = request.getString(KEY_DATASOURCE);
 
-		SQLConfig config = callback.getSQLConfig(method, database, schema, datasource, table);
+		SQLConfig<T> config = callback.getSQLConfig(method, database, schema, datasource, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); // 不删，后面表对象还要用的，必须放在 parseJoin 前
@@ -5065,6 +5077,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String order = request.getString(KEY_ORDER);
 		String raw = request.getString(KEY_RAW);
 		String json = request.getString(KEY_JSON);
+		String mthd = request.getString(KEY_METHOD);
 
 		try {
 			// 强制作为条件且放在最前面优化性能
@@ -5286,7 +5299,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				if (StringUtil.isNotEmpty(combineExpr, true)) {
 					List<String> banKeyList = Arrays.asList(idKey, idInKey, userIdKey, userIdInKey);
 					for (String key : banKeyList) {
-						if(keyInCombineExpr(combineExpr, key)) {
+						if (isKeyInCombineExpr(combineExpr, key)) {
 							throw new UnsupportedOperationException(table + ":{} 里的 @combine:value 中的 value 里 " + key + " 不合法！"
 									+ "不允许传 [" + idKey + ", " + idInKey + ", " + userIdKey + ", " + userIdInKey + "] 其中任何一个！");
 						}
@@ -5338,6 +5351,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						if (request.containsKey(w) == false) {  // 和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
 							//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
 							callback.onMissingKey4Combine(table, request, combine, ws[i], w);
+							if (config instanceof AbstractSQLConfig) {
+								((AbstractSQLConfig<T>) config).putWarnIfNeed(KEY_COMBINE, table + ":{} 里的 @combine:value 中的 value 里 "
+										+ ws[i] + " 对应的条件 " + w + ":value 中 value 必须存在且不能为 null！");
+							}
 						}
 					}
 				}
@@ -5360,7 +5377,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					// 兼容 PUT @combine
 					// 解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
 					if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false))
-							|| (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && keyInCombineExpr(combineExpr, key))) {
+							|| (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && isKeyInCombineExpr(combineExpr, key))) {
 						tableWhere.put(key, value);
 						if (whereList.contains(key) == false) {
 							andList.add(key);
@@ -5547,7 +5564,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			// @having, @haivng& >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-			config.setExplain(explain);
+			config.setExplain(explain != null && explain);
 			config.setCache(getCache(cache));
 			config.setDistinct(distinct);
 			config.setColumn(column == null ? null : cs); //解决总是 config.column != null，总是不能得到 *
@@ -5587,23 +5604,60 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 
 			// 关键词
-			request.put(KEY_DATABASE, database);
-			request.put(KEY_ROLE, role);
-			request.put(KEY_EXPLAIN, explain);
-			request.put(KEY_CACHE, cache);
-			request.put(KEY_DATASOURCE, datasource);
-			request.put(KEY_SCHEMA, schema);
-			request.put(KEY_FROM, from);
-			request.put(KEY_COLUMN, column);
-			request.put(KEY_NULL, nulls);
-			request.put(KEY_CAST, cast);
-			request.put(KEY_COMBINE, combine);
-			request.put(KEY_GROUP, group);
-			request.put(KEY_HAVING, having);
-			request.put(KEY_HAVING_AND, havingAnd);
-			request.put(KEY_ORDER, order);
-			request.put(KEY_RAW, raw);
-			request.put(KEY_JSON, json);
+			if (role != null) {
+				request.put(KEY_ROLE, role);
+			}
+			if (explain != null) {
+				request.put(KEY_EXPLAIN, explain);
+			}
+			if (cache != null) {
+				request.put(KEY_CACHE, cache);
+			}
+			if (database != null) {
+				request.put(KEY_DATABASE, database);
+			}
+			if (datasource != null) {
+				request.put(KEY_DATASOURCE, datasource);
+			}
+			if (schema != null) {
+				request.put(KEY_SCHEMA, schema);
+			}
+			if (from != null) {
+				request.put(KEY_FROM, from);
+			}
+			if (column != null) {
+				request.put(KEY_COLUMN, column);
+			}
+			if (nulls != null) {
+				request.put(KEY_NULL, nulls);
+			}
+			if (cast != null) {
+				request.put(KEY_CAST, cast);
+			}
+			if (combine != null) {
+				request.put(KEY_COMBINE, combine);
+			}
+			if (group != null) {
+				request.put(KEY_GROUP, group);
+			}
+			if (having != null) {
+				request.put(KEY_HAVING, having);
+			}
+			if (havingAnd != null) {
+				request.put(KEY_HAVING_AND, havingAnd);
+			}
+			if (order != null) {
+				request.put(KEY_ORDER, order);
+			}
+			if (raw != null) {
+				request.put(KEY_RAW, raw);
+			}
+			if (json != null) {
+				request.put(KEY_JSON, json);
+			}
+			if (mthd != null) {
+				request.put(KEY_METHOD, mthd);
+			}
 		}
 
 		return config;
@@ -5619,7 +5673,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> SQLConfig parseJoin(RequestMethod method, SQLConfig config
+	public static <T extends Object> SQLConfig<T> parseJoin(RequestMethod method, SQLConfig<T> config
 			, List<Join> joinList, Callback<T> callback) throws Exception {
 		boolean isQuery = RequestMethod.isQueryMethod(method);
 		config.setKeyPrefix(isQuery && config.isMain() == false);
@@ -5636,8 +5690,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			table = j.getTable();
 			alias = j.getAlias();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
-			SQLConfig joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
-			SQLConfig cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias
+			SQLConfig<T> joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
+			SQLConfig<T> cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias
 					, j.getRequest(), null, false, callback).setCount(j.getCount());
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
@@ -5664,7 +5718,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.getOuter() != null) {
-					SQLConfig outterConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
+					SQLConfig<T> outterConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
 					outterConfig.setMain(false)
 							.setKeyPrefix(true)
 							.setDatabase(joinConfig.getDatabase())
@@ -5873,14 +5927,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		 * @param table
 		 * @return
 		 */
-		SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
+		SQLConfig<T>  getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
 
 		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
 		 * @param combine
 		 * @param key
 		 * @param request
 		 */
-		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
+		void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
 	}
 
 	public static Long LAST_ID;
@@ -5914,13 +5968,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		@Override
 		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+			if (ALLOW_MISSING_KEY_4_COMBINE) {
+				return;
+			}
 			throw new IllegalArgumentException(name + ":{} 里的 @combine:value 中的value里 "
-					+ item + " 对应的条件 " + key + ":value 中 value 不能为 null！");
+					+ item + " 对应的条件 " + key + ":value 中 value 必须存在且不能为 null！");
 		}
 
 	}
 
-	private static boolean keyInCombineExpr(String combineExpr, String key) {
+	private static boolean isKeyInCombineExpr(String combineExpr, String key) {
 		while (combineExpr.isEmpty() == false) {
 			int index = combineExpr.indexOf(key);
 			if (index < 0) {
@@ -5938,6 +5995,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 			combineExpr = combineExpr.substring(newIndex);
 		}
+
 		return false;
 	}
 
