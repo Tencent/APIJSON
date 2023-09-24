@@ -336,7 +336,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <img src="https://github.com/Tencent/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
   <img src="https://github.com/Tencent/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
   <img src="https://github.com/Tencent/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
-
+  <img src="https://gitee.com/linksame-ivan/APIJSON/blob/master/assets/logo-name.9f99700f.png" height="75">
 <br />
   
  * [腾讯科技有限公司](https://www.tencent.com)
@@ -349,6 +349,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [乐拼科技](https://www.lepinyongche.com)
  * [珠海采筑电子商务有限公司](https://www.aupup.com)
  * [爱投斯智能技术（深圳）有限公司](http://www.aiotos.net)
+ * [邻盛科技（武汉）有限公司](http://www.linksame.com)
  * [上海麦市信息科技有限公司](https://www.masscms.com)
 
 ### 贡献者们
