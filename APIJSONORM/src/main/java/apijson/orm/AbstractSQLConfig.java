@@ -5255,7 +5255,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					Object deletedKey = accessFakeDeleteMap == null ? null : accessFakeDeleteMap.get(KEY_DELETED_KEY);
 					boolean hasKey = deletedKey instanceof String && StringUtil.isNotEmpty(deletedKey, true);
 					Object deletedValue = hasKey ? accessFakeDeleteMap.get(KEY_DELETED_VALUE) : null;
-					boolean containNotDeletedValue = hasKey ? accessFakeDeleteMap.containsKey(KEY_NOT_DELETED_VALUE) : null;
+					boolean containNotDeletedValue = hasKey ? accessFakeDeleteMap.containsKey(KEY_NOT_DELETED_VALUE) : false;
 					Object notDeletedValue = containNotDeletedValue ? accessFakeDeleteMap.get(KEY_NOT_DELETED_VALUE) : null;
 
 					if (deletedValue != null || containNotDeletedValue) {
