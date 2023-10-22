@@ -2190,9 +2190,10 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				throw new IllegalArgumentException("对象名重复,请添加别名区分 ! 重复对象名为: " + key);
 			}
 
+			boolean isPost = apijson.orm.JSONRequest.KEY_POST.equals(key);
 			// @post、@get 等 RequestMethod
 			try {
-				RequestMethod keyMethod = apijson.orm.JSONRequest.KEY_METHOD_ENUM_MAP.get(key);
+				RequestMethod keyMethod = isPost ? RequestMethod.POST : JSONRequest.KEY_METHOD_ENUM_MAP.get(key);
 				if (keyMethod != null) {
 					// 如果不匹配,异常不处理即可
 					removeTmpKeys.add(key);
@@ -2209,7 +2210,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 									if (obj.containsKey(tbl)) {
 										throw new ConflictException(key + ": value 中 " + tbl + " 已经存在，不能重复！");
 									}
-									obj.put(tbl, new JSONObject(true));
+
+									obj.put(tbl, isPost && JSONRequest.isTableArray(tbl)
+											? tbl.substring(0, tbl.length() - 2) + ":[]" : "");
 								}
 							}
 						}
@@ -2234,15 +2237,16 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						JSONObject objAttrJson = objVal instanceof JSONObject ? obj.getJSONObject(objKey) : null;
 						if (objAttrJson == null) {
 							if (objVal instanceof String) {
-								objAttrMap.put(JSONRequest.KEY_TAG, objVal);
+								objAttrMap.put(JSONRequest.KEY_TAG, "".equals(objVal) ? objKey : objVal);
 							}
 							else {
 								throw new IllegalArgumentException(key + ": { " + objKey + ": value 中 value 类型错误，只能是 String 或 JSONObject {} ！");
 							}
 						}
 						else {
-							Set<Entry<String, Object>> objSet = objAttrJson == null ? new HashSet<>() : objAttrJson.entrySet();
+							Set<Entry<String, Object>> objSet = objAttrJson.entrySet();
 
+							boolean hasTag = false;
 							for (Entry<String, Object> entry : objSet) {
 								String objAttrKey = entry == null ? null : entry.getKey();
 								if (objAttrKey == null) {
@@ -2255,12 +2259,20 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 									case apijson.JSONObject.KEY_DATABASE:
 									case JSONRequest.KEY_VERSION:
 									case apijson.JSONObject.KEY_ROLE:
+										objAttrMap.put(objAttrKey, entry.getValue());
+										break;
 									case JSONRequest.KEY_TAG:
+										hasTag = true;
 										objAttrMap.put(objAttrKey, entry.getValue());
 										break;
 									default:
 										break;
 								}
+							}
+
+							if (hasTag == false) {
+								objAttrMap.put(JSONRequest.KEY_TAG, isPost && JSONRequest.isTableArray(objKey)
+										? objKey.substring(0, objKey.length() - 2) + ":[]" : objKey);
 							}
 						}
 					}
@@ -2376,7 +2388,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new Exception(e);
+				throw new Exception(e); // 包装一层只是为了打印日志？看起来没必要
 			}
 		}
 
