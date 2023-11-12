@@ -216,6 +216,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		RAW_MAP.put("(", "");
 		RAW_MAP.put(")", "");
 
+		RAW_MAP.put("&", ""); // 位运算
+		RAW_MAP.put("|", ""); // 位运算
+		RAW_MAP.put("^", ""); // 位运算
+		RAW_MAP.put("~", ""); // 位运算
+		RAW_MAP.put("&=", ""); // 位运算
+		RAW_MAP.put("|=", ""); // 位运算
+		RAW_MAP.put("~=", ""); // 位运算
+		RAW_MAP.put(">>", ""); // 位运算
+		RAW_MAP.put("<<", ""); // 位运算
+
 		// MySQL 关键字
 		RAW_MAP.put("AS", "");
 		RAW_MAP.put("IS NOT NULL", "");
