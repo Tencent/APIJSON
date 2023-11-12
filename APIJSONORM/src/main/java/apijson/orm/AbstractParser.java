@@ -1445,6 +1445,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_HAVING_AND);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ORDER);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_KEY);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_RAW);
 	}
 

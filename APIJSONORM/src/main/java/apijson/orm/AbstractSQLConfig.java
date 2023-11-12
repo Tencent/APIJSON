@@ -62,6 +62,7 @@ import static apijson.JSONObject.KEY_ID;
 import static apijson.JSONObject.KEY_JSON;
 import static apijson.JSONObject.KEY_NULL;
 import static apijson.JSONObject.KEY_ORDER;
+import static apijson.JSONObject.KEY_KEY;
 import static apijson.JSONObject.KEY_RAW;
 import static apijson.JSONObject.KEY_ROLE;
 import static apijson.JSONObject.KEY_SCHEMA;
@@ -133,6 +134,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
 	public static Map<String, String> TABLE_KEY_MAP;
+	/**
+	 * 字段名映射，隐藏真实字段名，对安全要求很高的表可以这么做，另外可以配置 name_tag:(name,tag) 来实现多字段 IN，length_tag:length(tag) 来实现 SQL 函数复杂条件
+	 */
+	public static Map<String, String> COLUMN_KEY_MAP;
     /**
      * 允许批量增删改部分记录失败的表
      */
@@ -907,6 +912,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private String havingCombine; //聚合函数的字符串数组，','分隔
 	private Map<String, Object> having; //聚合函数的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
+	private Map<String, String> keyMap; //字段名映射，支持 name_tag:(name,tag) 多字段 IN，year:left(date,4) 截取日期年份等
 	private List<String> raw; //需要保留原始 SQL 的字段，','分隔
 	private List<String> json; //需要转为 JSON 的字段，','分隔
 	private Subquery from; //子查询临时表
@@ -1664,11 +1670,21 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public Map<String, String> getKeyMap() {
+		return keyMap;
+	}
+	@Override
+	public AbstractSQLConfig setKeyMap(Map<String, String> keyMap) {
+		this.keyMap = keyMap;
+		return this;
+	}
+
+	@Override
 	public List<String> getRaw() {
 		return raw;
 	}
 	@Override
-	public SQLConfig setRaw(List<String> raw) {
+	public AbstractSQLConfig setRaw(List<String> raw) {
 		this.raw = raw;
 		return this;
 	}
@@ -1967,13 +1983,13 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return parseSQLExpression(key, expression, containRaw, allowAlias, null);
 	}
 	/**解析@column 中以“;”分隔的表达式（"@column":"expression1;expression2;expression2;...."）中的expression
-   * @param key
-   * @param expression
-   * @param containRaw
-   * @param allowAlias
-   * @param example
-   * @return
-   */
+	 * @param key
+	 * @param expression
+	 * @param containRaw
+	 * @param allowAlias
+	 * @param example
+	 * @return
+	 */
 	public String parseSQLExpression(String key, String expression, boolean containRaw, boolean allowAlias, String example) {
 		String quote = getQuote();
 		int start = expression.indexOf('(');
@@ -3486,7 +3502,18 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			return getSQLValue(key).toString();
 		}
 
-		return getSQLKey(key);
+		Map<String, String> keyMap = getKeyMap();
+		String expression = keyMap == null ? null : keyMap.get(key);
+		if (expression == null) {
+			expression = COLUMN_KEY_MAP == null ? null : COLUMN_KEY_MAP.get(key);
+		}
+		if (expression == null) {
+			return getSQLKey(key);
+		}
+
+		// (name,tag) left(date,4) 等
+		List<String> raw = getRaw();
+		return parseSQLExpression(KEY_KEY, expression, raw != null && raw.contains(KEY_KEY), false);
 	}
 	public String getSQLKey(String key) {
 		String q = getQuote();
@@ -5075,6 +5102,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		Object having = request.get(KEY_HAVING);
 		String havingAnd = request.getString(KEY_HAVING_AND);
 		String order = request.getString(KEY_ORDER);
+		Object keyMap = request.get(KEY_KEY);
 		String raw = request.getString(KEY_RAW);
 		String json = request.getString(KEY_JSON);
 		String mthd = request.getString(KEY_METHOD);
@@ -5101,6 +5129,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			request.remove(KEY_HAVING);
 			request.remove(KEY_HAVING_AND);
 			request.remove(KEY_ORDER);
+			request.remove(KEY_KEY);
 			request.remove(KEY_RAW);
 			request.remove(KEY_JSON);
 			request.remove(KEY_METHOD);
@@ -5563,6 +5592,27 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 			// @having, @haivng& >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+			if (keyMap instanceof Map) {
+				config.setKeyMap((Map<String, String>) keyMap);
+			}
+			else if (keyMap instanceof String) {
+				String[] ks = StringUtil.split((String) keyMap, ";");
+				if (ks.length > 0) {
+					Map<String, String> nkm = new LinkedHashMap<>();
+					for (int i = 0; i < ks.length; i++) {
+						Entry<String, String> ety = Pair.parseEntry(ks[i]);
+						if (ety == null) {
+							continue;
+						}
+						nkm.put(ety.getKey(), ety.getValue());
+					}
+					config.setKeyMap(nkm);
+				}
+			}
+			else if (keyMap != null) {
+				throw new UnsupportedDataTypeException("@key:value 中 value 错误，只能是 String, JSONObject 中的一种！");
+			}
+
 
 			config.setExplain(explain != null && explain);
 			config.setCache(getCache(cache));
@@ -5648,6 +5698,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 			if (order != null) {
 				request.put(KEY_ORDER, order);
+			}
+			if (keyMap != null) {
+				request.put(KEY_KEY, keyMap);
 			}
 			if (raw != null) {
 				request.put(KEY_RAW, raw);

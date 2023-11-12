@@ -242,6 +242,9 @@ public interface SQLConfig<T extends Object> {
 
 	String getTablePath();
 
+	Map<String, String> getKeyMap();
+	AbstractSQLConfig setKeyMap(Map<String, String> keyMap);
+
 	List<String> getRaw();
 	SQLConfig setRaw(List<String> raw);
 

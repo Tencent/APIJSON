@@ -150,6 +150,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_HAVING_AND = "@having&"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_ORDER = "@order"; //排序方式
+	public static final String KEY_KEY = "@key"; // key 映射，year:left(date,4);name_tag:(name,tag)
 	public static final String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
 	public static final String KEY_JSON = "@json"; //SQL Server 把字段转为 JSON 输出
 	public static final String KEY_METHOD = "@method"; // json 对象配置操作方法
@@ -181,6 +182,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_HAVING);
 		TABLE_KEY_LIST.add(KEY_HAVING_AND);
 		TABLE_KEY_LIST.add(KEY_ORDER);
+		TABLE_KEY_LIST.add(KEY_KEY);
 		TABLE_KEY_LIST.add(KEY_RAW);
 		TABLE_KEY_LIST.add(KEY_JSON);
 		TABLE_KEY_LIST.add(KEY_METHOD);
@@ -403,6 +405,14 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject setOrder(String keys) {
 		return puts(KEY_ORDER, keys);
+	}
+
+	/**set key map
+	 * @param keyMap  "name_tag:(name,tag);year:left(date,1,5)..."
+	 * @return
+	 */
+	public JSONObject setKey(String keyMap) {
+		return puts(KEY_KEY, keyMap);
 	}
 
 	/**set keys to raw
