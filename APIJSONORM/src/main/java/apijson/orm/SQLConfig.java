@@ -50,19 +50,19 @@ public interface SQLConfig<T extends Object> {
 
 	Parser<T> getParser();
 
-	AbstractSQLConfig setParser(Parser<T> parser);
+	SQLConfig setParser(Parser<T> parser);
 
 	ObjectParser getObjectParser();
 
-	AbstractSQLConfig setObjectParser(ObjectParser objectParser);
+	SQLConfig setObjectParser(ObjectParser objectParser);
 
 	int getVersion();
 
-	AbstractSQLConfig setVersion(int version);
+	SQLConfig setVersion(int version);
 
 	String getTag();
 
-	AbstractSQLConfig setTag(String tag);
+	SQLConfig setTag(String tag);
 
 	boolean isMySQL();
 	boolean isPostgreSQL();
@@ -243,7 +243,7 @@ public interface SQLConfig<T extends Object> {
 	String getTablePath();
 
 	Map<String, String> getKeyMap();
-	AbstractSQLConfig setKeyMap(Map<String, String> keyMap);
+	SQLConfig setKeyMap(Map<String, String> keyMap);
 
 	List<String> getRaw();
 	SQLConfig setRaw(List<String> raw);
