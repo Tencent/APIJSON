@@ -36,8 +36,10 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_CASSANDRA = "CASSANDRA"; // https://cassandra.apache.org
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
-	String DATABASE_REDIS = "REDIS";
-	String DATABASE_MQ = "MQ";
+	String DATABASE_REDIS = "REDIS"; // https://redisql.com
+	String DATABASE_MONGODB = "MONGODB"; // https://www.mongodb.com/docs/atlas/data-federation/query/query-with-sql
+	String DATABASE_KAFKA = "KAFKA"; // https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka
+	String DATABASE_MQ = "MQ"; //
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -84,10 +86,12 @@ public interface SQLConfig<T extends Object> {
 	boolean isInfluxDB();
 	boolean isTDengine();
 	boolean isRedis();
+	boolean isMongoDB();
+	boolean isKafka();
 	boolean isMQ();
 
 
-	//暂时只兼容以上几种
+	// 暂时只兼容以上几种
 	//	boolean isSQL();
 	//	boolean isTSQL();
 	//	boolean isPLSQL();

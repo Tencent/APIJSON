@@ -198,6 +198,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
 		DATABASE_LIST.add(DATABASE_REDIS);
+		DATABASE_LIST.add(DATABASE_MONGODB);
+		DATABASE_LIST.add(DATABASE_KAFKA);
 		DATABASE_LIST.add(DATABASE_MQ);
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -1246,11 +1248,27 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isMongoDB() {
+		return isMongoDB(getSQLDatabase());
+	}
+	public static boolean isMongoDB(String db) {
+		return DATABASE_MONGODB.equals(db);
+	}
+
+	@Override
+	public boolean isKafka() {
+		return isKafka(getSQLDatabase());
+	}
+	public static boolean isKafka(String db) {
+		return DATABASE_KAFKA.equals(db);
+	}
+
+	@Override
 	public boolean isMQ() {
 		return isMQ(getSQLDatabase());
 	}
 	public static boolean isMQ(String db) {
-		return DATABASE_MQ.equals(db);
+		return isKafka(db);
 	}
 
 	@Override
