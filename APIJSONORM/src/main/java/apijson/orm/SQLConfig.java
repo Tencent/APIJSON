@@ -34,6 +34,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_SNOWFLAKE = "SNOWFLAKE"; // https://www.snowflake.com
 	String DATABASE_DATABRICKS = "DATABRICKS"; // https://www.databricks.com
 	String DATABASE_CASSANDRA = "CASSANDRA"; // https://cassandra.apache.org
+	String DATABASE_MILVUS = "MILVUS"; // https://milvus.io
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
 	String DATABASE_REDIS = "REDIS"; // https://redisql.com
@@ -79,10 +80,11 @@ public interface SQLConfig<T extends Object> {
 	boolean isClickHouse();
 	boolean isHive();
 	boolean isPresto();
+	boolean isTrino();
 	boolean isSnowflake();
 	boolean isDatabricks();
 	boolean isCassandra();
-	boolean isTrino();
+	boolean isMilvus();
 	boolean isInfluxDB();
 	boolean isTDengine();
 	boolean isRedis();
@@ -219,6 +221,7 @@ public interface SQLConfig<T extends Object> {
 	String getDatabase();
 	SQLConfig setDatabase(String database);
 
+	String getSQLSchema();
 	String getSchema();
 	SQLConfig setSchema(String schema);
 

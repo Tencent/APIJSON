@@ -195,6 +195,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_HIVE);
 		DATABASE_LIST.add(DATABASE_PRESTO);
 		DATABASE_LIST.add(DATABASE_TRINO);
+		DATABASE_LIST.add(DATABASE_MILVUS);
 		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
 		DATABASE_LIST.add(DATABASE_REDIS);
@@ -1192,6 +1193,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isTrino() {
+		return isTrino(getSQLDatabase());
+	}
+	public static boolean isTrino(String db) {
+		return DATABASE_TRINO.equals(db);
+	}
+
+	@Override
 	public boolean isSnowflake() {
 		return isSnowflake(getSQLDatabase());
 	}
@@ -1216,11 +1225,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public boolean isTrino() {
-		return isTrino(getSQLDatabase());
+	public boolean isMilvus() {
+		return isMilvus(getSQLDatabase());
 	}
-	public static boolean isTrino(String db) {
-		return DATABASE_TRINO.equals(db);
+	public static boolean isMilvus(String db) {
+		return DATABASE_MILVUS.equals(db);
 	}
 
 	@Override
@@ -1268,7 +1277,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return isMQ(getSQLDatabase());
 	}
 	public static boolean isMQ(String db) {
-		return isKafka(db);
+		return DATABASE_MQ.equals(db) || isKafka(db);
 	}
 
 	@Override
@@ -1276,7 +1285,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if(isElasticsearch()) {
 			return "";
 		}
-		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() ? "`" : "\"";
+		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() ? "`" : "\"";
 	}
 
 	public String quote(String s) {
@@ -1290,6 +1299,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@NotNull
+	@Override
 	public String getSQLSchema() {
 		String table = getTable();
 		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
@@ -2596,9 +2606,22 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 */
 	@JSONField(serialize = false)
 	public String getLimitString() {
-		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
+		int count = getCount();
+
+		if (isMilvus()) {
+			if (count == 0) {
+				Parser<T> parser = getParser();
+				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
+			}
+
+			int offset = getOffset(getPage(), count);
+			return " LIMIT " + offset + ", " + count; // 目前 moql-transx 的限制
+		}
+
+		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) { // TODO HEAD 真的不需要 LIMIT ？
 			return "";
 		}
+
 		return getLimitString(
                 getPage()
                 , getCount()
