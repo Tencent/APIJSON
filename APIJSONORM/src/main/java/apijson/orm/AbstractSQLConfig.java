@@ -157,7 +157,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		// TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
 		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~`!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\(\\)\\$]+$");
 
-		TABLE_KEY_MAP = new HashMap<String, String>();
+		TABLE_KEY_MAP = new HashMap<>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
 		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TABLE_NAME);
 		TABLE_KEY_MAP.put(PgClass.class.getSimpleName(), PgClass.TABLE_NAME);
@@ -1984,14 +1984,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 
 					// 简单点， 后台配置就带上 AS
-					//					int index = expression.lastIndexOf(":");
-					//					String alias = expression.substring(index+1);
-					//					boolean hasAlias = StringUtil.isName(alias);
-					//					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
-					//					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
-					//						expression = pre + (hasAlias ? " AS " + alias : "");
-					//						continue;
-					//					}
+					int index = expression.lastIndexOf(":");
+					String alias = expression.substring(index+1);
+					boolean hasAlias = StringUtil.isName(alias);
+					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
+					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
+						keys[i] = pre + (hasAlias ? " AS " + alias : "");
+						continue;
+					}
 				}
 
 				if (expression.length() > 100) {
