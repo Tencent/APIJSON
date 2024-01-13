@@ -83,6 +83,14 @@ public enum RequestMethod {
 	public static boolean isQueryMethod(RequestMethod method) {
 		return isGetMethod(method, true) || isHeadMethod(method, true);
 	}
+
+	/**是否为更新(增删改)的请求方法
+	 * @param method
+	 * @return 读操作(GET型或HEAD型) - false, 写操作(POST,PUT,DELETE) - true
+	 */
+	public static boolean isUpdateMethod(RequestMethod method) {
+		return ! isQueryMethod(method);
+	}
 	
 	/**是否为开放(不限制请求的结构或内容；明文，浏览器能直接访问及查看)的请求方法
 	 * @param method
@@ -90,6 +98,14 @@ public enum RequestMethod {
 	 */
 	public static boolean isPublicMethod(RequestMethod method) {
 		return method == null || method == GET || method == HEAD;
+	}
+
+	/**是否为私有(限制请求的结构或内容)的请求方法
+	 * @param method
+	 * @return
+	 */
+	public static boolean isPrivateMethod(RequestMethod method) {
+		return ! isPublicMethod(method);
 	}
 
 	public static String getName(RequestMethod method) {
