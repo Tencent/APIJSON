@@ -2032,6 +2032,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 */
 	public String parseSQLExpression(String key, String expression, boolean containRaw, boolean allowAlias, String example) {
+		if (containRaw) {
+			String s = RAW_MAP.get(expression);
+			if ("".equals(s)) {
+				return expression;
+			}
+			if (s != null) {
+				return s;
+			}
+		}
+
 		String quote = getQuote();
 		int start = expression.indexOf('(');
 		if (start < 0) {
