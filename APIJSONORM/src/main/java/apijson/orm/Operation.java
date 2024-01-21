@@ -145,8 +145,13 @@ public enum Operation {
 	/**
 	 * 允许批量增删改部分失败，结构是
 	 * "Table[],key[],key:alias[]"
-	 * 自动 ALLOW_PARTIAL_UPDATE_FAILED_TABLE_MAP.put
+	 * 自动 ALLOW_PARTIAL_UPDATE_FAILED_TABLE_MAP.put，结构是 Boolean，例如 true
 	 */
-	ALLOW_PARTIAL_UPDATE_FAIL;
+	ALLOW_PARTIAL_UPDATE_FAIL,
+
+	/**
+	 * 强制要求必须有 id/id{}/id{}@ 条件，结构是 Boolean，例如 true
+	 */
+	IS_ID_CONDITION_MUST;
 
 }

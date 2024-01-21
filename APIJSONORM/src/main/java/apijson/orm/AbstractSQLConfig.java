@@ -157,7 +157,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		// TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
 		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~`!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\(\\)\\$]+$");
 
-		TABLE_KEY_MAP = new HashMap<String, String>();
+		TABLE_KEY_MAP = new HashMap<>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
 		TABLE_KEY_MAP.put(Column.class.getSimpleName(), Column.TABLE_NAME);
 		TABLE_KEY_MAP.put(PgClass.class.getSimpleName(), PgClass.TABLE_NAME);
@@ -195,9 +195,15 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_HIVE);
 		DATABASE_LIST.add(DATABASE_PRESTO);
 		DATABASE_LIST.add(DATABASE_TRINO);
+		DATABASE_LIST.add(DATABASE_MILVUS);
 		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
+		DATABASE_LIST.add(DATABASE_SNOWFLAKE);
+		DATABASE_LIST.add(DATABASE_DATABRICKS);
 		DATABASE_LIST.add(DATABASE_REDIS);
+		DATABASE_LIST.add(DATABASE_MONGODB);
+		DATABASE_LIST.add(DATABASE_CASSANDRA);
+		DATABASE_LIST.add(DATABASE_KAFKA);
 		DATABASE_LIST.add(DATABASE_MQ);
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -1190,6 +1196,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isTrino() {
+		return isTrino(getSQLDatabase());
+	}
+	public static boolean isTrino(String db) {
+		return DATABASE_TRINO.equals(db);
+	}
+
+	@Override
 	public boolean isSnowflake() {
 		return isSnowflake(getSQLDatabase());
 	}
@@ -1214,11 +1228,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public boolean isTrino() {
-		return isTrino(getSQLDatabase());
+	public boolean isMilvus() {
+		return isMilvus(getSQLDatabase());
 	}
-	public static boolean isTrino(String db) {
-		return DATABASE_TRINO.equals(db);
+	public static boolean isMilvus(String db) {
+		return DATABASE_MILVUS.equals(db);
 	}
 
 	@Override
@@ -1246,11 +1260,27 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isMongoDB() {
+		return isMongoDB(getSQLDatabase());
+	}
+	public static boolean isMongoDB(String db) {
+		return DATABASE_MONGODB.equals(db);
+	}
+
+	@Override
+	public boolean isKafka() {
+		return isKafka(getSQLDatabase());
+	}
+	public static boolean isKafka(String db) {
+		return DATABASE_KAFKA.equals(db);
+	}
+
+	@Override
 	public boolean isMQ() {
 		return isMQ(getSQLDatabase());
 	}
 	public static boolean isMQ(String db) {
-		return DATABASE_MQ.equals(db);
+		return DATABASE_MQ.equals(db) || isKafka(db);
 	}
 
 	@Override
@@ -1258,7 +1288,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if(isElasticsearch()) {
 			return "";
 		}
-		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() ? "`" : "\"";
+		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() ? "`" : "\"";
 	}
 
 	public String quote(String s) {
@@ -1272,6 +1302,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@NotNull
+	@Override
 	public String getSQLSchema() {
 		String table = getTable();
 		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
@@ -1953,14 +1984,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 
 					// 简单点， 后台配置就带上 AS
-					//					int index = expression.lastIndexOf(":");
-					//					String alias = expression.substring(index+1);
-					//					boolean hasAlias = StringUtil.isName(alias);
-					//					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
-					//					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
-					//						expression = pre + (hasAlias ? " AS " + alias : "");
-					//						continue;
-					//					}
+					int index = expression.lastIndexOf(":");
+					String alias = expression.substring(index+1);
+					boolean hasAlias = StringUtil.isName(alias);
+					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
+					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
+						keys[i] = pre + (hasAlias ? " AS " + alias : "");
+						continue;
+					}
 				}
 
 				if (expression.length() > 100) {
@@ -2001,6 +2032,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 */
 	public String parseSQLExpression(String key, String expression, boolean containRaw, boolean allowAlias, String example) {
+		if (containRaw) {
+			String s = RAW_MAP.get(expression);
+			if ("".equals(s)) {
+				return expression;
+			}
+			if (s != null) {
+				return s;
+			}
+		}
+
 		String quote = getQuote();
 		int start = expression.indexOf('(');
 		if (start < 0) {
@@ -2578,9 +2619,22 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 */
 	@JSONField(serialize = false)
 	public String getLimitString() {
-		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) {
+		int count = getCount();
+
+		if (isMilvus()) {
+			if (count == 0) {
+				Parser<T> parser = getParser();
+				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
+			}
+
+			int offset = getOffset(getPage(), count);
+			return " LIMIT " + offset + ", " + count; // 目前 moql-transx 的限制
+		}
+
+		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) { // TODO HEAD 真的不需要 LIMIT ？
 			return "";
 		}
+
 		return getLimitString(
                 getPage()
                 , getCount()

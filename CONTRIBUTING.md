@@ -27,7 +27,7 @@
 - [gdjs2](https://github.com/gdjs2)(University of California, Riverside)
 - [Rkyzzy](https://github.com/Rkyzzy)(SUSTech, University of California, Berkeley)
 - [kxlv2000](https://github.com/kxlv2000)(SUSTech)
-- [caohao-php](https://github.com/caohao-php)(腾讯工程师)
+- [caohao-go](https://github.com/caohao-go)(腾讯工程师，曾在华为、恒生担任C/C++开发工程师，在wps担任项目经理，在360担任技术专家)
 - [Wscats](https://github.com/Wscats)(腾讯工程师、腾讯 AlloyTeam 成员、Tencent Creation Camp 成员、知名技术博主)
 - [jun0315](https://github.com/jun0315)(腾讯工程师)
 - [JieJo](https://github.com/JieJo)

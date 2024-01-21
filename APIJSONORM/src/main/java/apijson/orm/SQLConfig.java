@@ -34,10 +34,13 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_SNOWFLAKE = "SNOWFLAKE"; // https://www.snowflake.com
 	String DATABASE_DATABRICKS = "DATABRICKS"; // https://www.databricks.com
 	String DATABASE_CASSANDRA = "CASSANDRA"; // https://cassandra.apache.org
+	String DATABASE_MILVUS = "MILVUS"; // https://milvus.io
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
-	String DATABASE_REDIS = "REDIS";
-	String DATABASE_MQ = "MQ";
+	String DATABASE_REDIS = "REDIS"; // https://redisql.com
+	String DATABASE_MONGODB = "MONGODB"; // https://www.mongodb.com/docs/atlas/data-federation/query/query-with-sql
+	String DATABASE_KAFKA = "KAFKA"; // https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka
+	String DATABASE_MQ = "MQ"; //
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -50,19 +53,19 @@ public interface SQLConfig<T extends Object> {
 
 	Parser<T> getParser();
 
-	AbstractSQLConfig setParser(Parser<T> parser);
+	SQLConfig setParser(Parser<T> parser);
 
 	ObjectParser getObjectParser();
 
-	AbstractSQLConfig setObjectParser(ObjectParser objectParser);
+	SQLConfig setObjectParser(ObjectParser objectParser);
 
 	int getVersion();
 
-	AbstractSQLConfig setVersion(int version);
+	SQLConfig setVersion(int version);
 
 	String getTag();
 
-	AbstractSQLConfig setTag(String tag);
+	SQLConfig setTag(String tag);
 
 	boolean isMySQL();
 	boolean isPostgreSQL();
@@ -77,17 +80,20 @@ public interface SQLConfig<T extends Object> {
 	boolean isClickHouse();
 	boolean isHive();
 	boolean isPresto();
+	boolean isTrino();
 	boolean isSnowflake();
 	boolean isDatabricks();
 	boolean isCassandra();
-	boolean isTrino();
+	boolean isMilvus();
 	boolean isInfluxDB();
 	boolean isTDengine();
 	boolean isRedis();
+	boolean isMongoDB();
+	boolean isKafka();
 	boolean isMQ();
 
 
-	//暂时只兼容以上几种
+	// 暂时只兼容以上几种
 	//	boolean isSQL();
 	//	boolean isTSQL();
 	//	boolean isPLSQL();
@@ -215,6 +221,7 @@ public interface SQLConfig<T extends Object> {
 	String getDatabase();
 	SQLConfig setDatabase(String database);
 
+	String getSQLSchema();
 	String getSchema();
 	SQLConfig setSchema(String schema);
 
@@ -243,7 +250,7 @@ public interface SQLConfig<T extends Object> {
 	String getTablePath();
 
 	Map<String, String> getKeyMap();
-	AbstractSQLConfig setKeyMap(Map<String, String> keyMap);
+	SQLConfig setKeyMap(Map<String, String> keyMap);
 
 	List<String> getRaw();
 	SQLConfig setRaw(List<String> raw);

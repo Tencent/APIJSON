@@ -24,17 +24,19 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Dameng"><img src="https://img.shields.io/badge/Dameng-7.6%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/ClickHouse"><img src="https://img.shields.io/badge/ClickHouse-21.1%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Elasticsearch"><img src="https://img.shields.io/badge/Elasticsearch-7.17.5%2B-brightgreen.svg?style=flat"></a>
-  <a ><img src="https://img.shields.io/badge/Cassandra-4.0.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Presto"><img src="https://img.shields.io/badge/Presto-0.277%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Trino"><img src="https://img.shields.io/badge/Trino-400%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TDSQL-cloud-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TencentDB-cloud-brightgreen.svg?style=flat"></a>
   <a ><img src="https://img.shields.io/badge/Snowflake-7.0%2B-brightgreen.svg?style=flat"></a>
+    <a ><img src="https://img.shields.io/badge/Databricks-13.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hive-3.1.2%2B-brightgreen.svg?style=flat"></a>  
   <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hadoop-3.1.3%2B-brightgreen.svg?style=flat"></a>
-  <a ><img src="https://img.shields.io/badge/Databricks-13.0%2B-brightgreen.svg?style=flat"></a>
+  <a ><img src="https://img.shields.io/badge/Milvus-2.2.0%2B-brightgreen.svg?style=flat"></a>
+  <a ><img src="https://img.shields.io/badge/MongoDB-Altlas%2B-brightgreen.svg?style=flat"></a>
+  <a ><img src="https://img.shields.io/badge/Cassandra-2.1%2B-brightgreen.svg?style=flat"></a>
   <a ><img src="https://img.shields.io/badge/InfluxDB-2.6.1%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/TDengine"><img src="https://img.shields.io/badge/TDengine-2.6.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TDSQL-cloud-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TencentDB-cloud-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Redis"><img src="https://img.shields.io/badge/Redis-5.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka"><img src="https://img.shields.io/badge/Kafka-3.2.1%2B-brightgreen.svg?style=flat"></a>
 </p>
@@ -351,6 +353,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [爱投斯智能技术（深圳）有限公司](http://www.aiotos.net)
  * [邻盛科技（武汉）有限公司](http://www.linksame.com)
  * [上海麦市信息科技有限公司](https://www.masscms.com)
+ * [上海翊丞互联网科技有限公司](http://www.renrencjl.com/home)
 
 ### 贡献者们
 主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
@@ -680,7 +683,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [quick-boot](https://github.com/csx-bill/quick-boot) 基于 Spring Cloud 2022、Spring Boot 3、AMIS 和 APIJSON 的低代码系统。
 
 [apijson-query-spring-boot-starter](https://gitee.com/mingbaobaba/apijson-query-spring-boot-starter) 一个快速构建 APIJSON 查询条件的插件
-  
+
+[apijson-builder](https://github.com/yeli19950109/apijson-builder) 简单包装 APIJSON，相比直接构造查询 JSON 更好记，ts 编写，调整了一些参数和使用方式
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
 

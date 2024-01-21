@@ -80,7 +80,7 @@ import javax.script.ScriptEngineManager;
 public abstract class AbstractVerifier<T extends Object> implements Verifier<T>, IdCallback<T> {
 	private static final String TAG = "AbstractVerifier";
 
-	/**为 PUT, DELETE 强制要求必须有 id/id{} 条件
+	/**为 PUT, DELETE 强制要求必须有 id/id{}/id{}@ 条件
 	 */
 	public static boolean IS_UPDATE_MUST_HAVE_ID_CONDITION = true;
 	/**开启校验请求角色权限
@@ -700,8 +700,9 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 							throw new IllegalArgumentException(method + "请求，" + name + "/" + key + " 不能传 " + finalIdKey + " ！");
 						}
 					} else {
-						if (RequestMethod.isQueryMethod(method) == false) {
-							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, IS_UPDATE_MUST_HAVE_ID_CONDITION);
+						Boolean atLeastOne = tobj == null ? null : tobj.getBoolean(Operation.IS_ID_CONDITION_MUST.name());
+						if (Boolean.TRUE.equals(atLeastOne) || RequestMethod.isUpdateMethod(method)) {
+							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, atLeastOne != null ? atLeastOne : IS_UPDATE_MUST_HAVE_ID_CONDITION);
 
 							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, ds, key);
 							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? apijson.JSONObject.KEY_USER_ID : userIdKey;
@@ -746,7 +747,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		Object id = robj.get(idKey); //如果必须传 id ，可在Request表中配置NECESSARY
 		if (id != null && id instanceof Number == false && id instanceof String == false) {
 			throw new IllegalArgumentException(method + "请求，" + name + "/" + key
-					+ " 里面的 " + idKey + ":value 中value的类型只能是 Long 或 String ！");
+					+ " 里面的 " + idKey + ":value 中value的类型只能是 Long 或 String ！");
 		}
 
 
@@ -795,7 +796,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 				}
 				else {
 					throw new IllegalArgumentException(method + "请求，" + name + "/" + key
-							+ " 里面的 " + idInKey + ":[] 中所有项的类型都只能是 Long 或 String ！");
+							+ " 里面的 " + idInKey + ":[] 中所有项的类型都只能是 Long 或 String ！");
 				}
 			}
 		}

@@ -18,7 +18,6 @@ public interface Verifier<T> {
 
 	/**验证权限是否通过
 	 * @param config
-	 * @param visitor
 	 * @return
 	 * @throws Exception
 	 */
@@ -37,12 +36,10 @@ public interface Verifier<T> {
 	void verifyRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception;
 
 	/**登录校验
-	 * @param config
 	 * @throws Exception
 	 */
 	void verifyLogin() throws Exception;
 	/**管理员角色校验
-	 * @param config
 	 * @throws Exception
 	 */
 	void verifyAdmin() throws Exception;
@@ -67,24 +64,36 @@ public interface Verifier<T> {
 	void verifyRepeat(String table, String key, Object value, long exceptId) throws Exception;
 	
 	/**验证请求参数的数据和结构
-	 * @param table
-	 * @param key
-	 * @param value
-	 * @param exceptId 不包含id
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param request
+	 * @param maxUpdateCount
+	 * @param globalDatabase
+	 * @param globalSchema
+	 * @param creator
+	 * @return
 	 * @throws Exception
 	 */
 	JSONObject verifyRequest(RequestMethod method, String name, JSONObject target, JSONObject request,
 			int maxUpdateCount, String globalDatabase, String globalSchema, SQLCreator creator) throws Exception;
 
 	/**验证返回结果的数据和结构
-	 * @param table
-	 * @param key
-	 * @param value
-	 * @param exceptId 不包含id
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param response
+	 * @param database
+	 * @param schema
+	 * @param creator
+	 * @param callback
+	 * @return
 	 * @throws Exception
 	 */
-	JSONObject verifyResponse(RequestMethod method, String name, JSONObject target, JSONObject response,
-			String database, String schema, SQLCreator creator, OnParseCallback callback) throws Exception;
+	JSONObject verifyResponse(
+		RequestMethod method, String name, JSONObject target, JSONObject response,
+		String database, String schema, SQLCreator creator, OnParseCallback callback
+	) throws Exception;
 
 
 	@NotNull
