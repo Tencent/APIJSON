@@ -883,7 +883,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 	@Override
 	public boolean limitSQLCount() {
-		return Log.DEBUG == false || AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
+		return AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
 	}
 	@Override
 	public boolean allowPartialUpdateFailed() {
