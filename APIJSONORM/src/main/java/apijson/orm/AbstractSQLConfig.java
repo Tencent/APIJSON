@@ -883,7 +883,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 	@Override
 	public boolean limitSQLCount() {
-		return Log.DEBUG == false || AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
+		return AbstractVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable()) == false;
 	}
 	@Override
 	public boolean allowPartialUpdateFailed() {
@@ -4587,6 +4587,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 */
 	protected String getOraclePageSql(String sql) {
 		int count = getCount();
+		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) { // TODO HEAD 真的不需要 LIMIT ？
+			return sql;
+		}
 		int offset = getOffset(getPage(), count);
 		String alias = getAliasWithQuote();
 

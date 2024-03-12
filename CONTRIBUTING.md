@@ -56,6 +56,14 @@
 - [cnscoo](https://github.com/cnscoo)(阿里云工程师）
 - [aninZz](https://github.com/aninZz)
 - [leomiaomiao](https://github.com/leomiaomiao)
+- [YqxLzx](https://github.com/YqxLzx)
+- [hiteshbedre](https://github.com/hiteshbedre)
+- [wahowaho](https://github.com/wahowaho)
+- [jarrodquan](https://github.com/jarrodquan)
+- [gemufeng](https://github.com/gemufeng)(上海麦市工程师)
+- [komiblog](https://github.com/komiblog)
+- [ostrichManX](https://github.com/ostrichManX)
+- [jia199807](https://github.com/jia199807)
 
 #### 其中特别致谢: <br/>
 cloudAndMonkey 提交的 11 个 Commits, 对 APIJSON 做出了 1,496 增加和 845 处删减(截止 2022/12/15 日)； <br/>
