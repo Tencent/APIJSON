@@ -4592,9 +4592,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 		int offset = getOffset(getPage(), count);
 		String alias = getAliasWithQuote();
-
-		return "SELECT * FROM (SELECT " + alias + ".*, ROWNUM RN FROM (" + sql + ") " + alias
-				+ "  WHERE ROWNUM <= " + (offset + count) + ") WHERE RN > " + offset;
+        String quote = getQuote();
+		return "SELECT * FROM (SELECT " + alias + ".*, ROWNUM "+ quote + "RN" + quote +" FROM (" + sql + ") " + alias
+				+ "  WHERE ROWNUM <= " + (offset + count) + ") WHERE "+ quote + "RN" + quote +" > " + offset;
 	}
 
 	/**获取条件SQL字符串
