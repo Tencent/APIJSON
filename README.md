@@ -602,6 +602,14 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
   
 [apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
 
+[apijson-milvus](https://github.com/APIJSON/apijson-milvus) APIJSON 的 Milvus AI 向量数据库插件
+
+[apijson-influxdb](https://github.com/APIJSON/apijson-influxdb) APIJSON 的 InfluxDB 物联网时序数据库插件
+
+[apijson-mongodb](https://github.com/APIJSON/apijson-mongodb) APIJSON 的 MongoDB NoSQL 数据库插件
+
+[apijson-cassandra](https://github.com/APIJSON/apijson-cassandra) APIJSON 的 Cassandra NoSQL 数据库插件
+
 [APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释
 
 [UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习零代码单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性、可用性和性能
