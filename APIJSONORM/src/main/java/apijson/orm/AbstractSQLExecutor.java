@@ -6,6 +6,8 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import java.io.BufferedReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -995,8 +997,11 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		boolean castToJson = false;
 
 		//数据库查出来的null和empty值都有意义，去掉会导致 Moment:{ @column:"content" } 部分无结果及中断数组查询！
-		if (value instanceof Boolean || value instanceof Number) {
+		if (value instanceof Boolean) {
 			//加快判断速度
+		}
+		else if (value instanceof Number) {
+			value = getNumVal((Number) value);
 		}
 		else if (value instanceof Timestamp) {
 			value = ((Timestamp) value).toString();
@@ -1053,6 +1058,27 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 			} catch (Exception e) {
 				Log.e(TAG, "getValue  try { value = JSON.parse((String) value); } catch (Exception e) { \n" + e.getMessage());
 			}
+		}
+
+		return value;
+	}
+
+	public Object getNumVal(Number value) {
+		if (value == null) {
+			return null;
+		}
+
+		if (value instanceof BigInteger) {
+			return ((BigInteger) value).toString();
+		}
+
+		if (value instanceof BigDecimal) {
+			return ((BigDecimal) value).toString();
+		}
+
+		double v = value.doubleValue();
+		if (v > Integer.MAX_VALUE || v < Integer.MIN_VALUE) { // 避免前端/客户端拿到精度丢失甚至严重失真的值
+			return value.toString();
 		}
 
 		return value;
