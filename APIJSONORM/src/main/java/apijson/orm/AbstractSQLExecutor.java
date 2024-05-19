@@ -1081,7 +1081,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		// 	return value.toString();
 		// }
 		// JavaScript: Number.MAX_SAFE_INTEGER ~ Number.MIN_SAFE_INTEGER
-		if (v > 9007199254740991L || v < -9007199254740991) { // 避免前端/客户端拿到精度丢失甚至严重失真的值
+		if (v > 9007199254740991L || v < -9007199254740991L) { // 避免前端/客户端拿到精度丢失甚至严重失真的值
 			return value.toString();
 		}
 		
