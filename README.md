@@ -603,7 +603,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [MassCMS With APIJSON最佳实践](https://zhuanlan.zhihu.com/p/655826966)
 
-[APIJSON语法使用，超详细](https://juejin.cn/post/7370950331599306806)
+[APIJSON语法使用，超详细](https://blog.csdn.net/qq_36565607/article/details/139167040)
 
   
 ### 生态项目
