@@ -152,6 +152,10 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 
 <img width="1360" alt="wecom-temp-377bbd0daf5aed716baf7ebcb003d94c" src="https://user-images.githubusercontent.com/5738175/121370207-1b35de00-c96f-11eb-840e-cc2ff2995888.png">
 
+### 根据开源指南针报告，APIJSON Java 版已经是国内顶级、国际一流的 Java 开源项目了
+https://github.com/Tencent/APIJSON/issues/518
+<img width="1495" alt="image" src="https://user-images.githubusercontent.com/5738175/227158515-4e8bab65-a4b9-402b-b60b-29c08b4d930d.png">
+
 
 <br />
 
