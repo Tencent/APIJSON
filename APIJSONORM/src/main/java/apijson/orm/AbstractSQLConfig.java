@@ -131,6 +131,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public static Pattern PATTERN_FUNCTION;
 
 	/**
+	 * 表 SCHEMA 映射
+	 */
+	public static Map<String, String> TABLE_SCHEMA_MAP;
+
+	/**
 	 * 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 	 */
 	public static Map<String, String> TABLE_KEY_MAP;
@@ -156,6 +161,19 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		PATTERN_RANGE = Pattern.compile("^[0-9%,!=\\<\\>/\\.\\+\\-\\*\\^]+$"); // ^[a-zA-Z0-9_*%!=<>(),"]+$ 导致 exists(select*from(Comment)) 通过！
 		// TODO 改成更好的正则，校验前面为单词，中间为操作符，后面为值
 		PATTERN_FUNCTION = Pattern.compile("^[A-Za-z0-9%,:_@&~`!=\\<\\>\\|\\[\\]\\{\\} /\\.\\+\\-\\*\\^\\?\\(\\)\\$]+$");
+
+		TABLE_SCHEMA_MAP = new HashMap<>();
+		TABLE_SCHEMA_MAP.put(Table.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(Column.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(PgClass.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(PgAttribute.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(SysTable.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(SysColumn.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(ExtendedProperty.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(AllTable.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(AllColumn.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(AllTableComment.class.getSimpleName(), DEFAULT_SCHEMA);
+		TABLE_SCHEMA_MAP.put(AllColumnComment.class.getSimpleName(), DEFAULT_SCHEMA);
 
 		TABLE_KEY_MAP = new HashMap<>();
 		TABLE_KEY_MAP.put(Table.class.getSimpleName(), Table.TABLE_NAME);
@@ -1305,7 +1323,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	@Override
 	public String getSQLSchema() {
 		String table = getTable();
-		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
+		// FIXME 全部默认填充判断是 系统表 则不填充 // 强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
 		if (Table.TAG.equals(table) || Column.TAG.equals(table)) {
 			return SCHEMA_INFORMATION; //MySQL, PostgreSQL, SQL Server 都有的
 		}
@@ -1320,8 +1338,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			return ""; //Oracle, Dameng 的 all_tables, dba_tables 和 all_tab_columns, dba_columns 表好像不属于任何 Schema
 		}
 
-		String sch = getSchema();
-		return sch == null ? DEFAULT_SCHEMA : sch;
+		String sch = getSchema(); // 前端传参 @schema 优先
+		if (sch == null) {
+			sch = TABLE_SCHEMA_MAP.get(table); // 其次 Access 表 alias 和 schema 配置
+		}
+		return sch == null ? DEFAULT_SCHEMA : sch; // 最后代码默认兜底配置
 	}
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
