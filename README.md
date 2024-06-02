@@ -488,6 +488,8 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
+根据开源指南针报告，APIJSON Java 版已经是国内顶级、国际一流的 Java 开源项目了 [#518](https://github.com/Tencent/APIJSON/issues/518) <br >
+<img width="1495" alt="image" src="https://user-images.githubusercontent.com/5738175/227158515-4e8bab65-a4b9-402b-b60b-29c08b4d930d.png">
 
 ### 规划及路线图
 新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
