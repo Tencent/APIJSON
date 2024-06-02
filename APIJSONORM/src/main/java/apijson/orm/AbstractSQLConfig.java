@@ -1323,7 +1323,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	@Override
 	public String getSQLSchema() {
 		String table = getTable();
-		//强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
+		// FIXME 全部默认填充判断是 系统表 则不填充 // 强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
 		if (Table.TAG.equals(table) || Column.TAG.equals(table)) {
 			return SCHEMA_INFORMATION; //MySQL, PostgreSQL, SQL Server 都有的
 		}
@@ -1338,9 +1338,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			return ""; //Oracle, Dameng 的 all_tables, dba_tables 和 all_tab_columns, dba_columns 表好像不属于任何 Schema
 		}
 
-		//String sch = getSchema();
-		String sch = TABLE_SCHEMA_MAP.get(table);
-		return sch == null ? DEFAULT_SCHEMA : sch;
+		String sch = getSchema(); // 前端传参 @schema 优先
+		if (sch == null) {
+			sch = TABLE_SCHEMA_MAP.get(table); // 其次 Access 表 alias 和 schema 配置
+		}
+		return sch == null ? DEFAULT_SCHEMA : sch; // 最后代码默认兜底配置
 	}
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
