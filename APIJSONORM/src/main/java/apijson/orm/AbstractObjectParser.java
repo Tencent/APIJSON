@@ -560,7 +560,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 			child = parser.onArrayParse(value, path, key, isSubquery);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 
-			if (isEmpty == false && ("2".equals(query) || "ALL".equals(query))) {
+			if ("2".equals(query) || "ALL".equals(query)) { // 不判断 isEmpty，因为分页数据可能只是某页没有
 				String totalKey = JSONResponse.formatArrayKey(key) + "Total";
 				String infoKey = JSONResponse.formatArrayKey(key) + "Info";
 				if ((request.containsKey(totalKey) || request.containsKey(infoKey)
@@ -568,8 +568,10 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 					// onParse("total@", "/" + key + "/total");
 					// onParse(infoKey + "@", "/" + key + "/info");
 					// 替换为以下性能更好、对流程干扰最小的方式：
-					String totalPath = AbstractParser.getValuePath(type == TYPE_ITEM ? path : parentPath, "/" + key + "/total");
-					String infoPath = AbstractParser.getValuePath(type == TYPE_ITEM ? path : parentPath, "/" + key + "/info");
+
+					String keyPath = AbstractParser.getValuePath(type == TYPE_ITEM ? path : parentPath, "/" + key);
+					String totalPath = keyPath + "/total";
+					String infoPath = keyPath + "/info";
 					response.put(totalKey, onReferenceParse(totalPath));
 					response.put(infoKey, onReferenceParse(infoPath));
 				}
