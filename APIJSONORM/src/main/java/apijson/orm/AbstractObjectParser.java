@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import static apijson.JSONObject.KEY_COMBINE;
 import static apijson.JSONObject.KEY_DROP;
 import static apijson.JSONObject.KEY_TRY;
+import static apijson.JSONRequest.KEY_QUERY;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
 import static apijson.orm.SQLConfig.TYPE_ITEM;
@@ -555,8 +556,22 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 				}
 			}
 
+			String query = value.getString(KEY_QUERY);
 			child = parser.onArrayParse(value, path, key, isSubquery);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
+
+			if (isEmpty == false && ("2".equals(query) || "ALL".equals(query))) {
+				String infoKey = JSONResponse.formatArrayKey(key) + "Info";
+				if (request.containsKey("total@") == false && request.containsKey(infoKey + "@") == false) {
+					// onParse("total@", "/" + key + "/total");
+					// onParse(infoKey + "@", "/" + key + "/info");
+					// 替换为以下性能更好、对流程干扰最小的方式：
+					String totalPath = AbstractParser.getValuePath(type == TYPE_ITEM ? path : parentPath, "/" + key + "/total");
+					String infoPath = AbstractParser.getValuePath(type == TYPE_ITEM ? path : parentPath, "/" + key + "/info");
+					response.put("total", onReferenceParse(totalPath));
+					response.put(infoKey, onReferenceParse(infoPath));
+				}
+			}
 		}
 		else { //APIJSON Object
 			boolean isTableKey = JSONRequest.isTableKey(Pair.parseEntry(key, true).getKey());
