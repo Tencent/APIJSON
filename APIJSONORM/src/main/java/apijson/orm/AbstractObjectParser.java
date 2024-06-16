@@ -562,7 +562,8 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 			if (isEmpty == false && ("2".equals(query) || "ALL".equals(query))) {
 				String infoKey = JSONResponse.formatArrayKey(key) + "Info";
-				if (request.containsKey("total@") == false && request.containsKey(infoKey + "@") == false) {
+				if (request.containsKey("total") == false && request.containsKey(infoKey) == false
+						&& request.containsKey("total@") == false && request.containsKey(infoKey + "@") == false) {
 					// onParse("total@", "/" + key + "/total");
 					// onParse(infoKey + "@", "/" + key + "/info");
 					// 替换为以下性能更好、对流程干扰最小的方式：
