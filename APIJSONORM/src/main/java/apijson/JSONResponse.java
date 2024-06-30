@@ -485,14 +485,14 @@ public class JSONResponse extends apijson.JSONObject {
 		if (formatAt) { //关键词只去掉前缀，不格式化单词，例如 @a-b 返回 a-b ，最后不会调用 setter
 			fullName = formatAt(fullName);
 		}
-		if (formatHyphen) {
-			fullName = formatHyphen(fullName, firstCase != null);
+		if (formatHyphen && fullName.contains("-")) {
+			fullName = formatHyphen(fullName, true);
 		}
-		if (formatUnderline) {
-			fullName = formatUnderline(fullName, firstCase != null);
+		if (formatUnderline && fullName.contains("_")) {
+			fullName = formatUnderline(fullName, true);
 		}
-		if (formatDollar) {
-			fullName = formatDollar(fullName, firstCase != null);
+		if (formatDollar && fullName.contains("$")) {
+			fullName = formatDollar(fullName, true);
 		}
 
 		// 默认不格式化普通 key:value (value 不为 [], {}) 的 key
@@ -520,32 +520,100 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param key
 	 * @return
 	 */
+	public static String formatHyphen(@NotNull String key) {
+		return StringUtil.firstCase(formatHyphen(key, true), false);
+	}
+	/**A-b-cd-Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
 	public static String formatHyphen(@NotNull String key, Boolean firstCase) {
-		return formatDivider(key, "-", firstCase);
+		return formatHyphen(key, firstCase, false);
+	}
+	/**A-b-cd-Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @param otherCase 非首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
+	public static String formatHyphen(@NotNull String key, Boolean firstCase, Boolean otherCase) {
+		return formatDivider(key, "-", firstCase, otherCase);
 	}
 
 	/**A_b_cd_Efg => ABCdEfg
 	 * @param key
 	 * @return
 	 */
+	public static String formatUnderline(@NotNull String key) {
+		return StringUtil.firstCase(formatUnderline(key, true), false);
+	}
+	/**A_b_cd_Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
 	public static String formatUnderline(@NotNull String key, Boolean firstCase) {
-		return formatDivider(key, "_", firstCase);
+		return formatUnderline(key, firstCase, false);
+	}
+	/**A_b_cd_Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @param otherCase 非首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
+	public static String formatUnderline(@NotNull String key, Boolean firstCase, Boolean otherCase) {
+		return formatDivider(key, "_", firstCase, otherCase);
 	}
 
 	/**A$b$cd$Efg => ABCdEfg
 	 * @param key
 	 * @return
 	 */
+	public static String formatDollar(@NotNull String key) {
+		return StringUtil.firstCase(formatDollar(key, true), false);
+	}
+	/**A$b$cd$Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
 	public static String formatDollar(@NotNull String key, Boolean firstCase) {
-		return formatDivider(key, "$", firstCase);
+		return formatDollar(key, firstCase, false);
+	}
+	/**A$b$cd$Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @param otherCase 非首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
+	public static String formatDollar(@NotNull String key, Boolean firstCase, Boolean otherCase) {
+		return formatDivider(key, "$", firstCase, otherCase);
 	}
 
 	/**A.b.cd.Efg => ABCdEfg
 	 * @param key
 	 * @return
 	 */
+	public static String formatDot(@NotNull String key) {
+		return StringUtil.firstCase(formatDot(key, true), false);
+	}
+	/**A.b.cd.Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
 	public static String formatDot(@NotNull String key, Boolean firstCase) {
-		return formatDivider(key, ".", firstCase);
+		return formatDot(key, firstCase, false);
+	}
+	/**A.b.cd.Efg => ABCdEfg
+	 * @param key
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @param otherCase 非首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
+	public static String formatDot(@NotNull String key, Boolean firstCase, Boolean otherCase) {
+		return formatDivider(key, ".", firstCase, otherCase);
 	}
 
 	/**A/b/cd/Efg => ABCdEfg
@@ -559,16 +627,36 @@ public class JSONResponse extends apijson.JSONObject {
 	/**去除分割符，返回驼峰格式
 	 * @param key
 	 * @param divider
-	 * @param firstCase
+	 * @return
+	 */
+	public static String formatDivider(@NotNull String key, @NotNull String divider) {
+		return StringUtil.firstCase(formatDivider(key, divider, true), false);
+	}
+	/**去除分割符，返回驼峰格式
+	 * @param key
+	 * @param divider
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
 	 * @return
 	 */
 	public static String formatDivider(@NotNull String key, @NotNull String divider, Boolean firstCase) {
+		return formatDivider(key, divider, firstCase, false);
+	}
+
+	/**去除分割符，返回驼峰格式
+	 * @param key
+	 * @param divider
+	 * @param firstCase 首字符的大小写，true-大写，false-小写，null-不处理
+	 * @param otherCase 非首字符的大小写，true-大写，false-小写，null-不处理
+	 * @return
+	 */
+	public static String formatDivider(@NotNull String key, @NotNull String divider, Boolean firstCase, Boolean otherCase) {
 		String[] parts = StringUtil.split(key, divider);
 		StringBuilder name = new StringBuilder();
 		for (String part : parts) {
-			part = part.toLowerCase(); // 始终小写，也方便反过来 ABCdEfg -> A_b_cd_Efg
+			if (otherCase != null) {
+				part = otherCase ? part.toUpperCase() : part.toLowerCase();
+			}
 			if (firstCase != null) {
-				// 始终小写, A_b_cd_Efg -> ABCdEfg, firstCase ? part.toLowerCase() : part.toUpperCase();
 				part = StringUtil.firstCase(part, firstCase);
 			}
 			name.append(part);
