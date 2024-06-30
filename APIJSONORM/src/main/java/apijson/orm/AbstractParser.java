@@ -12,7 +12,9 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -1778,15 +1780,17 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 
 		//逐层到达child的直接容器JSONObject parent
-		final int last = pathKeys.length - 1;
+		int last = pathKeys.length - 1;
 		for (int i = 0; i < last; i++) {//一步一步到达指定位置
 			if (parent == null) {//不存在或路径错误(中间的key对应value不是JSONObject)
 				break;
 			}
-			parent = getJSONObject(parent, pathKeys[i]);
+
+			String k = getDecodedKey(pathKeys[i]);
+			parent = getJSONObject(parent, k);
 		}
 
-		return parent == null ? null : (V) parent.get(pathKeys[last]);
+		return parent == null ? null : (V) parent.get(getDecodedKey(pathKeys[last]));
 	}
 
 
@@ -1912,18 +1916,21 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 
 		//逐层到达targetKey的直接容器JSONObject parent
-		if (keys != null && keys.length > 1) {
-			for (int i = 0; i < keys.length - 1; i++) {//一步一步到达指定位置parentPath
+		int last = keys == null ? -1 : keys.length - 1;
+		if (last >= 1) {
+			for (int i = 0; i < last; i++) {//一步一步到达指定位置parentPath
 				if (parent == null) {//不存在或路径错误(中间的key对应value不是JSONObject)
 					break;
 				}
-				parent = getJSONObject(parent, keys[i]);
+
+				String k = getDecodedKey(keys[i]);
+				parent = getJSONObject(parent, k);
 			}
 		}
 
 		if (parent != null) {
 			Log.i(TAG, "getValueByPath >> get from queryResultMap >> return  parent.get(keys[keys.length - 1]);");
-			target = keys == null || keys.length <= 0 ? parent : parent.get(keys[keys.length - 1]); //值为null应该报错NotExistExeption，一般都是id关联，不可为null，否则可能绕过安全机制
+			target = last < 0 ? parent : parent.get(getDecodedKey(keys[last])); //值为null应该报错NotExistExeption，一般都是id关联，不可为null，否则可能绕过安全机制
 			if (target != null) {
 				Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
 				return target;
@@ -1940,6 +1947,18 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 		Log.i(TAG, "getValueByPath  return null;");
 		return null;
+	}
+
+	/**解码 引用赋值 路径中的 key，支持把 URL encode 后的值，转为 decode 后的原始值，例如 %2Fuser%2Flist -> /user/list ; %7B%7D -> []
+	 * @param key
+	 * @return
+	 */
+	public static String getDecodedKey(String key) {
+		try {
+			return URLDecoder.decode(key, StandardCharsets.UTF_8);
+		} catch (Throwable e) {
+			return key;
+		}
 	}
 
 	//依赖引用关系 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
