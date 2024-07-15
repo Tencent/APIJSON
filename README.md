@@ -712,6 +712,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [apijson-query-spring-boot-starter](https://gitee.com/mingbaobaba/apijson-query-spring-boot-starter) 一个快速构建 APIJSON 查询条件的插件
 
 [apijson-builder](https://github.com/yeli19950109/apijson-builder) 简单包装 APIJSON，相比直接构造查询 JSON 更好记，ts 编写，调整了一些参数和使用方式
+
+[lanmuc](https://gitee.com/element-admin/lanmuc) 后端低代码生产接口的平台，兼容配置式接口和编写式接口，可做到快速生产接口，上线项目
   
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
 
