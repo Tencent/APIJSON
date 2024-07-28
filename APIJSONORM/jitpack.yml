@@ -1,0 +1,6 @@
+jdk:
+  - openjdk8
+  
+before_install:
+   - sdk install java 1.8.0-open
+   - sdk use java 1.8.0-open
