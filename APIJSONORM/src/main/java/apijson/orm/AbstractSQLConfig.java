@@ -188,7 +188,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		TABLE_KEY_MAP.put(AllTableComment.class.getSimpleName(), AllTableComment.TABLE_NAME);
 		TABLE_KEY_MAP.put(AllColumnComment.class.getSimpleName(), AllColumnComment.TABLE_NAME);
 
-        ALLOW_PARTIAL_UPDATE_FAIL_TABLE_MAP = new HashMap<>();
+	ALLOW_PARTIAL_UPDATE_FAIL_TABLE_MAP = new HashMap<>();
 
 		CONFIG_TABLE_LIST = new ArrayList<>();  // Table, Column 等是系统表 AbstractVerifier.SYSTEM_ACCESS_MAP.keySet());
 		CONFIG_TABLE_LIST.add(Function.class.getSimpleName());
@@ -492,8 +492,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		SQL_FUNCTION_MAP.put("json_array_insert", ""); // JSON_ARRAY_INSERT(json_doc, val) 插入JSON数组
 		SQL_FUNCTION_MAP.put("json_array_get", ""); // JSON_ARRAY_GET(json_doc, position) 从JSON数组提取指定位置的元素
 		SQL_FUNCTION_MAP.put("json_contains", ""); // JSON_CONTAINS(json_doc, val) JSON文档是否在路径中包含特定对象
-        SQL_FUNCTION_MAP.put("json_array_contains", ""); // JSON_ARRAY_CONTAINS(json_doc, path) JSON文档是否在路径中包含特定对象
-        SQL_FUNCTION_MAP.put("json_contains_path", ""); // JSON_CONTAINS_PATH(json_doc, path) JSON文档是否在路径中包含任何数据
+	SQL_FUNCTION_MAP.put("json_array_contains", ""); // JSON_ARRAY_CONTAINS(json_doc, path) JSON文档是否在路径中包含特定对象
+	SQL_FUNCTION_MAP.put("json_contains_path", ""); // JSON_CONTAINS_PATH(json_doc, path) JSON文档是否在路径中包含任何数据
 		SQL_FUNCTION_MAP.put("json_depth", ""); // JSON_DEPTH(json_doc) JSON文档的最大深度
 		SQL_FUNCTION_MAP.put("json_extract", ""); // JSON_EXTRACT(json_doc, path) 从JSON文档返回数据
 		SQL_FUNCTION_MAP.put("json_extract_scalar", ""); // JSON_EXTRACT_SCALAR(json_doc, path) 从JSON文档返回基础类型数据，例如 Boolean, Number, String
@@ -1384,6 +1384,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String nt = TABLE_KEY_MAP.get(ot);
 		return StringUtil.isEmpty(nt) ? ot : nt;
 	}
+
+	@JSONField(serialize = false)
+	public String getSQLTableWithAlias(String table,String alias) {
+		return StringUtil.isEmpty(alias) ? table :  alias ;
+	}
+
 	@JSONField(serialize = false)
 	@Override
 	public String getTablePath() {
@@ -1547,7 +1553,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 		List<String> raw = getRaw();
-		//	提前把 @having& 转为 @having，或者干脆不允许 @raw:"@having&" 	boolean containRaw = raw != null && (raw.contains(KEY_HAVING) || raw.contains(KEY_HAVING_AND));
+		//	提前把 @having& 转为 @having，或者干脆不允许 @raw:"@having&"	boolean containRaw = raw != null && (raw.contains(KEY_HAVING) || raw.contains(KEY_HAVING_AND));
 		boolean containRaw = raw != null && raw.contains(KEY_HAVING);
 
 		// 直接把 having 类型从 Map<String, String> 定改为 Map<String, Object>，避免额外拷贝
@@ -2657,12 +2663,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 		return getLimitString(
-                getPage()
-                , getCount()
-                , isOracle() || isSQLServer() || isDb2()
-                , isOracle() || isDameng() || isKingBase()
-                , isPresto() || isTrino()
-        );
+		getPage()
+		, getCount()
+		, isOracle() || isSQLServer() || isDb2()
+		, isOracle() || isDameng() || isKingBase()
+		, isPresto() || isTrino()
+	);
 	}
 	/**获取限制数量及偏移量
 	* @param page
@@ -2672,7 +2678,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	* @return
 	*/
 	public static String getLimitString(int page, int count, boolean isTSQL, boolean isOracle) {
-        return getLimitString(page, count, isTSQL, isOracle, false);
+	return getLimitString(page, count, isTSQL, isOracle, false);
     }
 	/**获取限制数量及偏移量
 	* @param page
@@ -2685,17 +2691,17 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public static String getLimitString(int page, int count, boolean isTSQL, boolean isOracle, boolean isPresto) {
 		int offset = getOffset(page, count);
 
-        if (isOracle) {  // TODO 判断版本，高版本可以用 OFFSET FETCH
-            return " WHERE ROWNUM BETWEEN " + offset + " AND " + (offset + count);
-        }
+	if (isOracle) {  // TODO 判断版本，高版本可以用 OFFSET FETCH
+	    return " WHERE ROWNUM BETWEEN " + offset + " AND " + (offset + count);
+	}
 
 		if (isTSQL) {  // OFFSET FECTH 中所有关键词都不可省略, 另外 Oracle 数据库使用子查询加 where 分页
 			return " OFFSET " + offset + " ROWS FETCH FIRST " + count + " ROWS ONLY";
 		}
 
-        if (isPresto) {  // https://prestodb.io/docs/current/sql/select.html
-            return (offset <= 0 ? "" : " OFFSET " + offset) + " LIMIT " + count;
-        }
+	if (isPresto) {  // https://prestodb.io/docs/current/sql/select.html
+	    return (offset <= 0 ? "" : " OFFSET " + offset) + " LIMIT " + count;
+	}
 
 		return " LIMIT " + count + (offset <= 0 ? "" : " OFFSET " + offset);  // DELETE, UPDATE 不支持 OFFSET
 	}
@@ -3868,17 +3874,17 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
 			return "regexp_like(" + getKey(column) + ", " + getValue(key, column, value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
-        if (isPresto() || isTrino()) {
-            return "regexp_like(" + (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
-                    + ", " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "") + ")";
-        }
+	if (isPresto() || isTrino()) {
+	    return "regexp_like(" + (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
+		    + ", " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "") + ")";
+	}
 		if (isClickHouse()) {
 			return "match(" + (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
 					+ ", " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "") + ")";
 		}
-        if (isElasticsearch()) {
-            return getKey(column) + " RLIKE " + getValue(key, column, value);
-        }
+	if (isElasticsearch()) {
+	    return getKey(column) + " RLIKE " + getValue(key, column, value);
+	}
 		if (isHive()) {
 			return (ignoreCase ? "lower(" : "") + getKey(column) + (ignoreCase ? ")" : "")
 					+ " REGEXP " + (ignoreCase ? "lower(" : "") + getValue(key, column, value) + (ignoreCase ? ")" : "");
@@ -4135,7 +4141,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	/**WHERE key contains value
 	 * @param key
 	 * @param value
-	 * @return 	{@link #getContainString(String, String, Object[], int)}
+	 * @return	{@link #getContainString(String, String, Object[], int)}
 	 * @throws NotExistException
 	 */
 	@JSONField(serialize = false)
@@ -4196,11 +4202,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					condition += ("json_textcontains(" + getKey(column) + ", " + (StringUtil.isEmpty(path, true)
 							? "'$'" : getValue(key, column, path)) + ", " + getValue(key, column, c == null ? null : c.toString()) + ")");
 				}
-                else if (isPresto() || isTrino()) {
-                    condition += ("json_array_contains(cast(" + getKey(column) + " AS VARCHAR), "
+		else if (isPresto() || isTrino()) {
+		    condition += ("json_array_contains(cast(" + getKey(column) + " AS VARCHAR), "
 							+ getValue(key, column, c) + (StringUtil.isEmpty(path, true)
 							? "" : ", " + getValue(key, column, path)) + ")");
-                }
+		}
 				else {
 					String v = c == null ? "null" : (c instanceof Boolean || c instanceof Number ? c.toString() : "\"" + c + "\"");
 					if (isClickHouse()) {
@@ -4613,7 +4619,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 		int offset = getOffset(getPage(), count);
 		String alias = getAliasWithQuote();
-        String quote = getQuote();
+	String quote = getQuote();
 		return "SELECT * FROM (SELECT " + alias + ".*, ROWNUM "+ quote + "RN" + quote +" FROM (" + sql + ") " + alias
 				+ "  WHERE ROWNUM <= " + (offset + count) + ") WHERE "+ quote + "RN" + quote +" > " + offset;
 	}
@@ -4816,7 +4822,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				String rt = on.getRelateType();
 				if (StringUtil.isEmpty(rt, false)) {
 					sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? " != " : " = ")
-							+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							+ quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
 				}
 				else {
 					onJoinComplexRelation(sql, quote, j, jt, onList, on);
@@ -4828,7 +4834,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						}
 
 						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " " + rt + " "
-								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+								+ quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
 					}
 					else if (rt.endsWith("$")) {
 						String t = rt.substring(0, rt.length() - 1);
@@ -4874,11 +4880,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 						if (l <= 0 && r <= 0) {
 							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-									+ " LIKE " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+									+ " LIKE " + quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
 						}
 						else {
 							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-									+ (l <= 0 ? " LIKE concat(" : " LIKE concat('" + l + "', ") + quote + on.getTargetTable() + quote
+									+ (l <= 0 ? " LIKE concat(" : " LIKE concat('" + l + "', ") + quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote
 									+ "." + quote + on.getTargetKey() + quote + (r <= 0 ? ")" : ", '" + r + "')");
 						}
 					}
@@ -4887,38 +4893,38 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						if (isPostgreSQL() || isInfluxDB()) {
 							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote
 									+ (isNot ? NOT : "") + " ~" + (ignoreCase ? "* " : " ")
-									+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+									+ quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
 						}
 						else if (isOracle() || isDameng() || isKingBase()) {
 							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
-									+ ", " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote
+									+ ", " + quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote
 									+ (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 						}
-                        else if (isPresto() || isTrino()) {
-                            sql += (first ? ON : AND) + "regexp_like(" + (ignoreCase ? "lower(" : "") + quote
+			else if (isPresto() || isTrino()) {
+			    sql += (first ? ON : AND) + "regexp_like(" + (ignoreCase ? "lower(" : "") + quote
 									+ jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
-                                    + ", " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable()
+				    + ", " + (ignoreCase ? "lower(" : "") + quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias())
 									+ quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
-                        }
+			}
 						else if (isClickHouse()) {
 							sql += (first ? ON : AND) + "match(" + (ignoreCase ? "lower(" : "") + quote + jt
 									+ quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
-									+ ", " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable()
+									+ ", " + (ignoreCase ? "lower(" : "") + quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias())
 									+ quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
 						}
 						else if (isElasticsearch()) {
-                            sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-                                    + " RLIKE " + quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
-                        }
+			    sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+				    + " RLIKE " + quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+			}
 						else if (isHive()) {
-                            sql += (first ? ON : AND) + (ignoreCase ? "lower(" : "") +  quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
-									+ " REGEXP " + (ignoreCase ? "lower(" : "") + quote + on.getTargetTable()
+			    sql += (first ? ON : AND) + (ignoreCase ? "lower(" : "") +  quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
+									+ " REGEXP " + (ignoreCase ? "lower(" : "") + quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias())
 									+ quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "");
-                        }
+			}
 						else {
-                            sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
+			    sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
 									+ " REGEXP " + (ignoreCase ? "" : "BINARY ")
-									+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+									+ quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
 						}
 					}
 					else if ("{}".equals(rt) || "<>".equals(rt)) {
@@ -4950,12 +4956,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						String arrKeyPath;
 						String itemKeyPath;
 						if ("{}".equals(rt)) {
-							arrKeyPath = quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							arrKeyPath = quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
 							itemKeyPath =  quote + jt + quote + "." + quote + on.getKey() + quote;
 						}
 						else {
 							arrKeyPath = quote + jt + quote + "." + quote + on.getKey() + quote;
-							itemKeyPath = quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+							itemKeyPath = quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
 						}
 
 						if (isPostgreSQL() || isInfluxDB()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
