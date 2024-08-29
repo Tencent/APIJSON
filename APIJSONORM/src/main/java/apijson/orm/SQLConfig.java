@@ -41,6 +41,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_MONGODB = "MONGODB"; // https://www.mongodb.com/docs/atlas/data-federation/query/query-with-sql
 	String DATABASE_KAFKA = "KAFKA"; // https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka
 	String DATABASE_MQ = "MQ"; //
+	String DATABASE_SQLITE = "SQLITE"; // https://www.sqlite.org
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -91,6 +92,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isMongoDB();
 	boolean isKafka();
 	boolean isMQ();
+	boolean isSQLite();
 
 
 	// 暂时只兼容以上几种
