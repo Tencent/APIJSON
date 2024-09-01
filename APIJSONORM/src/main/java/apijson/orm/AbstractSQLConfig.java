@@ -1302,6 +1302,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isSQLite() {
+		return isSQLite(getSQLDatabase());
+	}
+	public static boolean isSQLite(String db) {
+		return DATABASE_SQLITE.equals(db);
+	}
+
+	@Override
 	public String getQuote() {
 		if(isElasticsearch()) {
 			return "";
