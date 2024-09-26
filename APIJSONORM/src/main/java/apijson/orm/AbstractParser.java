@@ -520,7 +520,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		queryResultMap = new HashMap<String, Object>();
 
 		Exception error = null;
-		sqlExecutor = createSQLExecutor();
+		sqlExecutor = getSQLExecutor();
 		onBegin();
 		try {
 			queryDepth = 0;
