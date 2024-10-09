@@ -356,6 +356,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [上海翊丞互联网科技有限公司](http://www.renrencjl.com/home)
  * [上海直真君智科技有限公司](http://www.zzjunzhi.com)
  * [北明软件有限公司](https://www.bmsoft.com.cn/)
+ * [上海钰亿环保科技有限公司](#)
 
 ### 贡献者们
 主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
