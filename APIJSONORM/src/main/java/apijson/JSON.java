@@ -8,7 +8,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.JSONReader;
 
 import java.util.List;
 
@@ -203,7 +202,7 @@ public class JSON {
 		try {
 			return com.alibaba.fastjson.JSON.toJSONString(obj, features);
 		} catch (Exception e) {
-			Log.e(TAG, "parseArray  catch \n" + e.getMessage());
+			Log.e(TAG, "toJSONString  catch \n" + e.getMessage());
 		}
 		return null;
 	}

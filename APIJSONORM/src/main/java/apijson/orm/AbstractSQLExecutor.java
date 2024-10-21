@@ -5,45 +5,32 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
+import apijson.*;
+import apijson.orm.Join.On;
+import apijson.orm.exception.NotExistException;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.BufferedReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.util.*;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.Year;
+import java.util.Date;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
-import apijson.JSONResponse;
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
-import apijson.StringUtil;
-import apijson.orm.Join.On;
-import apijson.orm.exception.NotExistException;
 
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
 public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecutor<T> {
 	private static final String TAG = "AbstractSQLExecutor";
-
+	//是否返回 值为null的字段
+	public static boolean ENABLE_OUTPUT_NULL_COLUMN = false;
 	public static String KEY_RAW_LIST = "@RAW@LIST";  // 避免和字段命名冲突，不用 $RAW@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
 
 	private Parser<T> parser;
@@ -918,8 +905,14 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		Object value = getValue(config, rs, rsmd, tablePosition, table, columnIndex, label, childMap);
 
 		// 主表必须 put 至少一个 null 进去，否则全部字段为 null 都不 put 会导致中断后续正常返回值
-		if (value != null || (join == null && table.isEmpty())) {
+		if (value != null) {
 			table.put(label, value);
+		} else{
+			if (join == null && table.isEmpty()) {
+				table.put(label, null);
+			} else if (ENABLE_OUTPUT_NULL_COLUMN) {
+				table.put(label, null);
+			}
 		}
 
 		return table;
