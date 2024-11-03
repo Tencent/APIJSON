@@ -6,7 +6,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
 
-<p align="center"> 🏆 零代码、全功能、强安全 ORM 库 🚀 <br />后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
+<p align="center"> 🏆 实时 零代码、全功能、强安全 ORM 库 🚀 <br />后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
