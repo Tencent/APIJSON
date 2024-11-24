@@ -3571,7 +3571,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (not) {
 			column = column.substring(0, column.length() - 1);
 		}
-		if (StringUtil.isName(column) == false) {
+
+		String rc = column.endsWith("[") || column.endsWith("{") ? column.substring(0, column.length() - 1) : column;
+		if (StringUtil.isName(rc) == false) {
 			throw new IllegalArgumentException(key + ":value 中key不合法！不支持 ! 以外的逻辑符 ！");
 		}
 
@@ -6032,12 +6034,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 		}
 
-		String len = "";
-		if (key.endsWith("[") || key.endsWith("{")) {
-			len = key.substring(key.length() - 1);
-			key = key.substring(0, key.length() - 1);
-		}
-
 		// TODO if (key.endsWith("-")) { // 表示 key 和 value 顺序反过来: value LIKE key ?
 
 		// 不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
@@ -6045,7 +6041,13 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
 			key = key.substring(0, key.length() - 1);
 		} else {
-			last = null;//避免key + StringUtil.getString(last)错误延长
+			last = null; // 避免key + StringUtil.getString(last) 错误延长
+		}
+
+		String len = "";
+		if (key.endsWith("[") || key.endsWith("{")) {
+			len = key.substring(key.length() - 1);
+			key = key.substring(0, key.length() - 1);
 		}
 
 		// "User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好
