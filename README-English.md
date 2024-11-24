@@ -7,7 +7,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 </h1>
 
 
-<p align="center">🏆 Tencent Top 7 Open Source Project, Achieved 5 Awards Inside & Outside Tencent 🚀 <br />A JSON Transmission Protocol and an ORM Library for providing APIs and Documents without writing any code. </p>
+<p align="center">🏆 Tencent Top 6 Open Source Project, Achieved 5 Awards Inside & Outside Tencent 🚀 <br />A JSON Transmission Protocol and an ORM Library for providing APIs and Documents without writing any code. </p>
 
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README.md">&nbsp;中文版&nbsp;</a>
