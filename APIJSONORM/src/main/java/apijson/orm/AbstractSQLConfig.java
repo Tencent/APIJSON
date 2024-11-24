@@ -3585,7 +3585,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (value != null && JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
 			throw new IllegalArgumentException(key + ":value 中 value 不合法！比较运算 [>, <, >=, <=] 只支持 [Boolean, Number, String] 内的类型 ！");
 		}
-		if (StringUtil.isName(column) == false) {
+
+		String rc = column.endsWith("[") || column.endsWith("{") ? column.substring(0, column.length() - 1) : column;
+		if ( ! StringUtil.isName(rc)) {
 			throw new IllegalArgumentException(key + ":value 中 key 不合法！比较运算 [>, <, >=, <=] 不支持 [&, !, |] 中任何逻辑运算符 ！");
 		}
 
@@ -3594,7 +3596,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	public String getKey(String key) {
-		if (isTest()) {
+		String lenFun = "";
+		if (key.endsWith("[")) {
+			lenFun = isSQLServer() ? "datalength" : "length";
+			key = key.substring(0, key.length() - 1);
+		}
+		else if (key.endsWith("{")) {
+			lenFun = "json_length";
+			key = key.substring(0, key.length() - 1);
+		}
+		else if (isTest()) {
 			if (key.contains("'")) {  // || key.contains("#") || key.contains("--")) {
 				throw new IllegalArgumentException("参数 " + key + " 不合法！key 中不允许有单引号 ' ！");
 			}
@@ -3606,13 +3617,18 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (expression == null) {
 			expression = COLUMN_KEY_MAP == null ? null : COLUMN_KEY_MAP.get(key);
 		}
+
+		String sqlKey;
 		if (expression == null) {
-			return getSQLKey(key);
+			sqlKey = getSQLKey(key);
+		}
+		else {
+			// (name,tag) left(date,4) 等
+			List<String> raw = getRaw();
+			sqlKey = parseSQLExpression(KEY_KEY, expression, raw != null && raw.contains(KEY_KEY), false);
 		}
 
-		// (name,tag) left(date,4) 等
-		List<String> raw = getRaw();
-		return parseSQLExpression(KEY_KEY, expression, raw != null && raw.contains(KEY_KEY), false);
+		return lenFun.isEmpty() ? sqlKey : lenFun + "(" + sqlKey + ")";
 	}
 	public String getSQLKey(String key) {
 		String q = getQuote();
@@ -6016,9 +6032,15 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 		}
 
-		//TODO if (key.endsWith("-")) { // 表示 key 和 value 顺序反过来: value LIKE key
+		String len = "";
+		if (key.endsWith("[") || key.endsWith("{")) {
+			len = key.substring(key.length() - 1);
+			key = key.substring(0, key.length() - 1);
+		}
 
-		//不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
+		// TODO if (key.endsWith("-")) { // 表示 key 和 value 顺序反过来: value LIKE key ?
+
+		// 不用Logic优化代码，否则 key 可能变为 key| 导致 key=value 变成 key|=value 而出错
 		String last = key.isEmpty() ? "" : key.substring(key.length() - 1);
 		if ("&".equals(last) || "|".equals(last) || "!".equals(last)) {
 			key = key.substring(0, key.length() - 1);
@@ -6026,17 +6048,20 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			last = null;//避免key + StringUtil.getString(last)错误延长
 		}
 
-		//"User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好
-		if (isTableKey) {//不允许在column key中使用Type:key形式
-			key = Pair.parseEntry(key, true).getKey();//table以左边为准
+		// "User:toUser":User转换"toUser":User, User为查询同名Table得到的JSONObject。交给客户端处理更好
+		if (isTableKey) { // 不允许在column key中使用Type:key形式
+			key = Pair.parseEntry(key, true).getKey(); // table以左边为准
 		} else {
-			key = Pair.parseEntry(key).getValue();//column以右边为准
+			key = Pair.parseEntry(key).getValue();// column 以右边为准
 		}
 
 		if (verifyName && StringUtil.isName(key.startsWith("@") ? key.substring(1) : key) == false) {
 			throw new IllegalArgumentException(method + "请求，字符 " + originKey + " 不合法！"
-					+ " key:value 中的key只能关键词 '@key' 或 'key[逻辑符][条件符]' 或 PUT请求下的 'key+' / 'key-' ！");
+					+ " key:value 中的 key 只能关键词 '@key' 或 'key[长度符][逻辑符][条件符]' 或 PUT 请求下的 'key+' / 'key-' ！"
+					+ "长度符 只能为 [ - length 和 { - json_length，逻辑符 只能是 & - 与、| - 或、! - 非 ！");
 		}
+
+		key += len;
 
 		if (saveLogic && last != null) {
 			key = key + last;

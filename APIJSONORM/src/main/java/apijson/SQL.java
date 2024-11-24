@@ -118,6 +118,13 @@ public class SQL {
 	}
 	/**
 	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
+	 * @return "json_length(" + s + ")"
+	 */
+	public static String json_length(String s) {
+		return "json_length(" + s + ")";
+	}
+	/**
+	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
 	 * @return "char_length(" + s + ")"
 	 */
 	public static String charLength(String s) {

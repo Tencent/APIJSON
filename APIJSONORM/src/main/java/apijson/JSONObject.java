@@ -480,6 +480,31 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public JSONObject putsLength(String key, String compare) {
 		return puts(key+"{}", SQL.length(key) + compare);
 	}
+	/**
+	 * @param key
+	 * @param compare <=, > ...
+	 * @param value 1, 5, 3.14, -99 ...
+	 * @return {@link #puts(String, Object)}
+	 */
+	public JSONObject putsLength(String key, String compare, Object value) {
+		return puts(key+"["+(StringUtil.isEmpty(compare) || "=".equals(compare) ? "" : ("!=".equals(compare) ? "!" : compare)), value);
+	}
+	/**
+	 * @param key
+	 * @param compare <=0, >5 ...
+	 * @return {@link #puts(String, Object)}
+	 */
+	public JSONObject putsJSONLength(String key, String compare) {
+		return puts(key+"{}", SQL.json_length(key) + compare);
+	}
+	/**
+	 * @param key
+	 * @param compare <=0, >5 ...
+	 * @return {@link #puts(String, Object)}
+	 */
+	public JSONObject putsJSONLength(String key, String compare, Object value) {
+		return puts(key + "{" + (StringUtil.isEmpty(compare) || "=".equals(compare) ? "" : ("!=".equals(compare) ? "!" : compare)), value);
+	}
 
 	/**设置搜索
 	 * type = SEARCH_TYPE_CONTAIN_FULL
