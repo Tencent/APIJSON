@@ -14,7 +14,7 @@ public class Log {
 
 	public static boolean DEBUG = true;
 
-	public static final String VERSION = "7.0.5";
+	public static final String VERSION = "7.1.0";
 	public static final String KEY_SYSTEM_INFO_DIVIDER = "\n---|-----APIJSON SYSTEM INFO-----|---\n";
 
 	public static final String OS_NAME;
