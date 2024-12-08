@@ -70,8 +70,12 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public static boolean IS_PRINT_REQUEST_ENDTIME_LOG = false;
 
 
-	public static int DEFAULT_QUERY_COUNT = 10;
+	/**
+	 * 分页页码是否从 1 开始，默认为从 0 开始
+	 */
+	public static boolean IS_START_FROM_1 = false;
 	public static int MAX_QUERY_PAGE = 100;
+	public static int DEFAULT_QUERY_COUNT = 10;
 	public static int MAX_QUERY_COUNT = 100;
 	public static int MAX_UPDATE_COUNT = 10;
 	public static int MAX_SQL_COUNT = 200;
@@ -79,13 +83,20 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public static int MAX_ARRAY_COUNT = 5;
 	public static int MAX_QUERY_DEPTH = 5;
 
+	public boolean isStartFrom1() {
+		return IS_START_FROM_1;
+	}
 	@Override
-	public int getDefaultQueryCount() {
-		return DEFAULT_QUERY_COUNT;
+	public int getMinQueryPage() {
+		return isStartFrom1() ? 1 : 0;
 	}
 	@Override
 	public int getMaxQueryPage() {
 		return MAX_QUERY_PAGE;
+	}
+	@Override
+	public int getDefaultQueryCount() {
+		return DEFAULT_QUERY_COUNT;
 	}
 	@Override
 	public int getMaxQueryCount() {
@@ -1183,23 +1194,28 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 							if (max < 0) {
 								max = 0;
 							}
+							int min = getMinQueryPage();
+
+							page += min;
+							max += min;
 
 							JSONObject pagination = new JSONObject(true);
 							Object explain = rp.get(JSONResponse.KEY_EXPLAIN);
 							if (explain instanceof JSONObject) {
 								pagination.put(JSONResponse.KEY_EXPLAIN, explain);
 							}
+
 							pagination.put(JSONResponse.KEY_TOTAL, total);
 							pagination.put(JSONRequest.KEY_COUNT, count);
 							pagination.put(JSONRequest.KEY_PAGE, page);
 							pagination.put(JSONResponse.KEY_MAX, max);
 							pagination.put(JSONResponse.KEY_MORE, page < max);
-							pagination.put(JSONResponse.KEY_FIRST, page == 0);
+							pagination.put(JSONResponse.KEY_FIRST, page == min);
 							pagination.put(JSONResponse.KEY_LAST, page == max);
 
 							putQueryResult(pathPrefix + JSONResponse.KEY_INFO, pagination);
 
-							if (total <= count*page) {
+							if (total <= count*(page - min)) {
 								query = JSONRequest.QUERY_TOTAL;//数量不够了，不再往后查询
 							}
 						}
@@ -1285,14 +1301,16 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				query2 = JSONRequest.QUERY_ALL;
 				break;
 			default:
-				throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_QUERY + ":value 中 value 的值不合法！必须在 [0,1,2] 或 [TABLE, TOTAL, ALL] 内 !");
+				throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_QUERY + ":value 中 value 的值不合法！必须在 [0, 1, 2] 或 [TABLE, TOTAL, ALL] 内 !");
 			}
 		}
 
-		int page2 = page == null ? 0 : page;
+		int minPage = getMinQueryPage(); // 兼容各种传 0 或 null/undefined 自动转 0 导致的问题
+		int page2 = page == null || page == 0 ? 0 : page - minPage;
+
 		int maxPage = getMaxQueryPage();
 		if (page2 < 0 || page2 > maxPage) {
-			throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_PAGE + ":value 中 value 的值不合法！必须在 0-" + maxPage + " 内 !");
+			throw new IllegalArgumentException(path + "/" + JSONRequest.KEY_PAGE + ":value 中 value 的值不合法！必须在 " + minPage + "-" + maxPage + " 内 !");
 		}
 
 		//不用total限制数量了，只用中断机制，total只在query = 1,2的时候才获取

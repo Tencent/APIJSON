@@ -152,7 +152,7 @@ public class JSONRequest extends JSONObject {
 	}
 	
 	/**set from for Subquery
-	 * @param range
+	 * @param from
 	 * @return
 	 */
 	public JSONRequest setSubqueryFrom(String from) {

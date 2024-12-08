@@ -83,8 +83,9 @@ public interface Parser<T extends Object> {
 	
 	ObjectParser<T> createObjectParser(JSONObject request, String parentPath, SQLConfig<T> arrayConfig, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception;
 
-	int getDefaultQueryCount();
+	int getMinQueryPage();
 	int getMaxQueryPage();
+	int getDefaultQueryCount();
 	int getMaxQueryCount();
 	int getMaxUpdateCount();
 	int getMaxSQLCount();
