@@ -4847,9 +4847,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				String rt = on.getRelateType();
 				if (StringUtil.isEmpty(rt, false)) {
-					//解决join不支持@cast问题
-					Map castMap = j.getJoinConfig().getCast();
-					if (castMap.isEmpty()) {
+					// 解决 JOIN ON 不支持 @cast 问题
+					SQLConfig jc = j.getJoinConfig();
+					Map<String, String> castMap = jc == null ? null : jc.getCast();
+					if (castMap == null || castMap.isEmpty()) {
 						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? " != " : " = ")
 								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
 					} else {
