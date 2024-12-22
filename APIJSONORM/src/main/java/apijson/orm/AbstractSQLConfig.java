@@ -216,6 +216,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_MILVUS);
 		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
+		DATABASE_LIST.add(DATABASE_IOTDB);
 		DATABASE_LIST.add(DATABASE_SNOWFLAKE);
 		DATABASE_LIST.add(DATABASE_DATABRICKS);
 		DATABASE_LIST.add(DATABASE_REDIS);
@@ -223,6 +224,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_CASSANDRA);
 		DATABASE_LIST.add(DATABASE_KAFKA);
 		DATABASE_LIST.add(DATABASE_MQ);
+
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
 
@@ -820,6 +822,18 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		SQL_FUNCTION_MAP.put("len", "");
 		SQL_FUNCTION_MAP.put("datalength", "");
 
+		// Milvus 相关 SQL 函数
+		SQL_FUNCTION_MAP.put("vMatch", "");
+		SQL_FUNCTION_MAP.put("consistencyLevel", "");
+		SQL_FUNCTION_MAP.put("partitionBy", "");
+		SQL_FUNCTION_MAP.put("gracefulTime", "");
+		SQL_FUNCTION_MAP.put("guaranteeTimestamp", "");
+		SQL_FUNCTION_MAP.put("roundDecimal", "");
+		SQL_FUNCTION_MAP.put("travelTimestamp", "");
+		SQL_FUNCTION_MAP.put("nProbe", "");
+		SQL_FUNCTION_MAP.put("ef", "");
+		SQL_FUNCTION_MAP.put("searchK", "");
+
 	}
 
 	private Parser<T> parser;
@@ -1011,7 +1025,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 	@Override
 	public boolean isPrepared() {
-		return prepared;
+		return prepared && ! isMongoDB(); // MongoDB JDBC 还不支持预编译;
 	}
 	@Override
 	public AbstractSQLConfig setPrepared(boolean prepared) {
@@ -1269,6 +1283,15 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return DATABASE_TDENGINE.equals(db);
 	}
 
+
+	public boolean isIoTDB() {
+		return isIoTDB(getDatabase());
+	}
+	public static boolean isIoTDB(String db) {
+		return DATABASE_IOTDB.equals(db);
+	}
+
+
 	@Override
 	public boolean isRedis() {
 		return isRedis(getSQLDatabase());
@@ -1310,8 +1333,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public String getQuote() {
-		if(isElasticsearch()) {
+	public String getQuote() { // MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
+		if(isElasticsearch() || isIoTDB()) {
 			return "";
 		}
 		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() ? "`" : "\"";
