@@ -4870,8 +4870,21 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				String rt = on.getRelateType();
 				if (StringUtil.isEmpty(rt, false)) {
-					sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? " != " : " = ")
-							+ quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+					// 解决 JOIN ON 不支持 @cast 问题
+					SQLConfig jc = j.getJoinConfig();
+					Map<String, String> castMap = jc == null ? null : jc.getCast();
+					if (castMap == null || castMap.isEmpty()) {
+						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? " != " : " = ")
+								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+					} else {
+						String leftTableRelationSql = quote + jt + quote + "." + quote + on.getKey() + quote;
+						Object castValueType = castMap.get(on.getOriginKey());
+						if (castValueType != null) {
+							leftTableRelationSql = "CAST(" + leftTableRelationSql + " AS " + castValueType + ")";
+						}
+						sql += (first ? ON : AND) + leftTableRelationSql + (isNot ? " != " : " = ")
+								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
+					}
 				}
 				else {
 					onJoinComplexRelation(sql, quote, j, jt, onList, on);
