@@ -224,6 +224,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_CASSANDRA);
 		DATABASE_LIST.add(DATABASE_KAFKA);
 		DATABASE_LIST.add(DATABASE_MQ);
+		DATABASE_LIST.add(DATABASE_DUCKDB);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -1330,6 +1331,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 	public static boolean isSQLite(String db) {
 		return DATABASE_SQLITE.equals(db);
+	}
+
+	@Override
+	public boolean isDuckDB() {
+		return isDuckDB(getSQLDatabase());
+	}
+	public static boolean isDuckDB(String db) {
+		return DATABASE_DUCKDB.equals(db);
 	}
 
 	@Override

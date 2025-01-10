@@ -43,6 +43,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_MONGODB = "MONGODB"; // https://www.mongodb.com/docs/atlas/data-federation/query/query-with-sql
 	String DATABASE_KAFKA = "KAFKA"; // https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka
 	String DATABASE_SQLITE = "SQLITE"; // https://www.sqlite.org
+	String DATABASE_DUCKDB = "DUCKDB"; // https://duckdb.org
 
 	String DATABASE_MQ = "MQ"; //
 
@@ -97,6 +98,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isKafka();
 	boolean isMQ();
 	boolean isSQLite();
+	boolean isDuckDB();
 
 
 	// 暂时只兼容以上几种
