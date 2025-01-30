@@ -47,31 +47,11 @@ import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
 import apijson.orm.model.TestRecord;
 
-import static apijson.JSONObject.KEY_CACHE;
-import static apijson.JSONObject.KEY_CAST;
-import static apijson.JSONObject.KEY_COLUMN;
-import static apijson.JSONObject.KEY_COMBINE;
-import static apijson.JSONObject.KEY_DATABASE;
-import static apijson.JSONObject.KEY_DATASOURCE;
-import static apijson.JSONObject.KEY_EXPLAIN;
-import static apijson.JSONObject.KEY_FROM;
-import static apijson.JSONObject.KEY_GROUP;
-import static apijson.JSONObject.KEY_HAVING;
-import static apijson.JSONObject.KEY_HAVING_AND;
-import static apijson.JSONObject.KEY_ID;
-import static apijson.JSONObject.KEY_JSON;
-import static apijson.JSONObject.KEY_NULL;
-import static apijson.JSONObject.KEY_ORDER;
-import static apijson.JSONObject.KEY_KEY;
-import static apijson.JSONObject.KEY_RAW;
-import static apijson.JSONObject.KEY_ROLE;
-import static apijson.JSONObject.KEY_SCHEMA;
-import static apijson.JSONObject.KEY_USER_ID;
+import static apijson.JSONObject.*;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
-import static apijson.JSONObject.KEY_METHOD;
 import static apijson.SQL.AND;
 import static apijson.SQL.NOT;
 import static apijson.SQL.ON;
@@ -122,6 +102,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public static boolean ALLOW_MISSING_KEY_4_COMBINE = true;
 
 	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
+	public static String DEFAULT_NAMESPACE = "root";
 	public static String DEFAULT_SCHEMA = "sys";
 	public static String PREFIX_DISTINCT = "DISTINCT ";
 
@@ -225,6 +206,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_KAFKA);
 		DATABASE_LIST.add(DATABASE_MQ);
 		DATABASE_LIST.add(DATABASE_DUCKDB);
+		DATABASE_LIST.add(DATABASE_SURREALDB);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -300,7 +282,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		RAW_MAP.put("POINT", "");
 		RAW_MAP.put("BLOB", "");
 		RAW_MAP.put("LONGBLOB", "");
-		RAW_MAP.put("BINARY", "");
 		RAW_MAP.put("UNSIGNED", "");
 		RAW_MAP.put("BIT", "");
 		RAW_MAP.put("TINYINT", "");
@@ -327,14 +308,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		RAW_MAP.put("ASC", "");
 		RAW_MAP.put("FOLLOWING", ""); // 往后
 		RAW_MAP.put("BETWEEN", "");
-		RAW_MAP.put("AND", "");
 		RAW_MAP.put("ROWS", "");
 
 		RAW_MAP.put("AGAINST", "");
 		RAW_MAP.put("IN NATURAL LANGUAGE MODE", "");
 		RAW_MAP.put("IN BOOLEAN MODE", "");
 		RAW_MAP.put("IN", "");
-		RAW_MAP.put("BOOLEAN", "");
 		RAW_MAP.put("NATURAL", "");
 		RAW_MAP.put("LANGUAGE", "");
 		RAW_MAP.put("MODE", "");
@@ -953,6 +932,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private String role; //发送请求的用户的角色
 	private boolean distinct = false;
 	private String database; //表所在的数据库类型
+	private String namespace; //表所在的命名空间
 	private String schema; //表所在的数据库名
 	private String datasource; //数据源
 	private String table; //表名
@@ -1342,8 +1322,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isSurrealDB() {
+		return isSurrealDB(getSQLDatabase());
+	}
+	public static boolean isSurrealDB(String db) {
+		return DATABASE_SURREALDB.equals(db);
+	}
+
+	@Override
 	public String getQuote() { // MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
-		if(isElasticsearch() || isIoTDB()) {
+		if(isElasticsearch() || isIoTDB() || isSurrealDB()) {
 			return "";
 		}
 		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() ? "`" : "\"";
@@ -1352,6 +1340,23 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String quote(String s) {
 		String q = getQuote();
 		return q + s + q;
+	}
+
+	@Override
+	public String getNamespace() {
+		return namespace;
+	}
+
+	@Override
+	public String getSQLNamespace() {
+		String sch = getNamespace(); // 前端传参 @namespace 优先
+		return sch == null ? DEFAULT_NAMESPACE : sch; // 最后代码默认兜底配置
+	}
+
+	@Override
+	public AbstractSQLConfig<T> setNamespace(String namespace) {
+		this.namespace = namespace;
+		return this;
 	}
 
 	@Override
@@ -1374,7 +1379,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			return SCHEMA_SYS; //SQL Server 在 sys 中的属性比 information_schema 中的要全，能拿到注释
 		}
 		if (AllTable.TAG.equals(table) || AllColumn.TAG.equals(table)
-				|| AllTableComment.TAG.equals(table) || AllTableComment.TAG.equals(table)) {
+				|| AllTableComment.TAG.equals(table) || AllColumnComment.TAG.equals(table)) {
 			return ""; //Oracle, Dameng 的 all_tables, dba_tables 和 all_tab_columns, dba_columns 表好像不属于任何 Schema
 		}
 
@@ -1384,6 +1389,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 		return sch == null ? DEFAULT_SCHEMA : sch; // 最后代码默认兜底配置
 	}
+
 	@Override
 	public AbstractSQLConfig setSchema(String schema) {
 		if (schema != null) {
@@ -2696,6 +2702,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 			int offset = getOffset(getPage(), count);
 			return " LIMIT " + offset + ", " + count; // 目前 moql-transx 的限制
+		} else if (isSurrealDB()) {
+			if (count == 0) {
+				Parser<T> parser = getParser();
+				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
+			}
+
+			int offset = getOffset(getPage(), count);
+			return " START " + offset + " LIMIT " + count;
 		}
 
 		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) { // TODO HEAD 真的不需要 LIMIT ？
@@ -5116,15 +5130,17 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					+ StringUtil.getString(DATABASE_LIST.toArray()) + "] 中的一种！");
 		}
 
-		String schema = request.getString(KEY_SCHEMA);
 		String datasource = request.getString(KEY_DATASOURCE);
+		String namespace = request.getString(KEY_NAMESPACE);
+		String schema = request.getString(KEY_SCHEMA);
 
 		SQLConfig<T> config = callback.getSQLConfig(method, database, schema, datasource, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); // 不删，后面表对象还要用的，必须放在 parseJoin 前
-		config.setSchema(schema); // 不删，后面表对象还要用的
 		config.setDatasource(datasource); // 不删，后面表对象还要用的
+		config.setNamespace(namespace); // 不删，后面表对象还要用的
+		config.setSchema(schema); // 不删，后面表对象还要用的
 
 		if (isProcedure) {
 			return config;
@@ -5282,8 +5298,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			request.remove(KEY_ROLE);
 			request.remove(KEY_EXPLAIN);
 			request.remove(KEY_CACHE);
-			request.remove(KEY_DATASOURCE);
 			request.remove(KEY_DATABASE);
+			request.remove(KEY_DATASOURCE);
+			request.remove(KEY_NAMESPACE);
 			request.remove(KEY_SCHEMA);
 			request.remove(KEY_FROM);
 			request.remove(KEY_COLUMN);

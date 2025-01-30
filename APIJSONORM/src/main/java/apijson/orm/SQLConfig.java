@@ -44,6 +44,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_KAFKA = "KAFKA"; // https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka
 	String DATABASE_SQLITE = "SQLITE"; // https://www.sqlite.org
 	String DATABASE_DUCKDB = "DUCKDB"; // https://duckdb.org
+	String DATABASE_SURREALDB = "SURREALDB"; // https://surrealdb.com
 
 	String DATABASE_MQ = "MQ"; //
 
@@ -99,6 +100,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isMQ();
 	boolean isSQLite();
 	boolean isDuckDB();
+	boolean isSurrealDB();
 
 
 	// 暂时只兼容以上几种
@@ -228,6 +230,10 @@ public interface SQLConfig<T extends Object> {
 
 	String getDatabase();
 	SQLConfig setDatabase(String database);
+
+	String getSQLNamespace();
+	String getNamespace();
+	SQLConfig<T> setNamespace(String namespace);
 
 	String getSQLSchema();
 	String getSchema();
