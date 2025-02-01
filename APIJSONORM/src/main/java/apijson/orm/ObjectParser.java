@@ -26,6 +26,10 @@ public interface ObjectParser<T extends Object> {
 	String getParentPath();
 	ObjectParser<T> setParentPath(String parentPath);
 
+	ObjectParser<T> setCache(JSONObject cache);
+	JSONObject getCache();
+
+
 	/**解析成员
 	 * response重新赋值
 	 * @param name
@@ -67,10 +71,11 @@ public interface ObjectParser<T extends Object> {
 	 * @param index
 	 * @param key
 	 * @param value
+	 * @param cache SQL 结果缓存
 	 * @return
 	 * @throws Exception
 	 */
-	JSON onChildParse(int index, String key, JSONObject value) throws Exception;
+	JSON onChildParse(int index, String key, JSONObject value, JSON cache) throws Exception;
 	
 	/**解析赋值引用
 	 * @param path
@@ -163,6 +168,5 @@ public interface ObjectParser<T extends Object> {
 	Map<String, Object> getCustomMap();
 	Map<String, Map<String, String>> getFunctionMap();
 	Map<String, JSONObject> getChildMap();
-
 
 }

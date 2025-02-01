@@ -32,6 +32,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	//是否返回 值为null的字段
 	public static boolean ENABLE_OUTPUT_NULL_COLUMN = false;
 	public static String KEY_RAW_LIST = "@RAW@LIST";  // 避免和字段命名冲突，不用 $RAW@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
+	public static String KEY_VICE_ITEM = "@VICE@ITEM";  // 避免和字段命名冲突，不用 $VICE@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
 
 	private Parser<T> parser;
 	@Override
@@ -406,6 +407,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
 
 					JSONObject item = new JSONObject(true);
+					JSONObject viceItem = null;
 					JSONObject curItem = item;
 					boolean isMain = true;
 
@@ -537,6 +539,9 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 							columnIndexAndJoinMap[i - 1] = curJoin;
 						}
 
+						//boolean isVice = false;
+						//String viceName = null;
+
 						// 如果是主表则直接用主表对应的 item，否则缓存副表数据到 childMap
 						Join prevJoin = columnIndexAndJoinMap == null || i < 2 ? null : columnIndexAndJoinMap[i - 2];
 						if (curJoin != prevJoin) {  // 前后字段不在同一个表对象，即便后面出现 null，也不该是主表数据，而是逻辑 bug 导致
@@ -556,6 +561,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 									}
 								}
 							}
+
 							String viceSql = viceConfig == null ? null : viceConfig.getSQL(false);  //TODO 在 SQLConfig<T> 缓存 SQL，减少大量的重复生成
 
 							if (StringUtil.isEmpty(viceSql, true)) {
@@ -568,15 +574,26 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 								// 副表是按常规条件查询，缓存会导致其它同表同条件对象查询结果集为空		childMap.put(viceSql, new JSONObject());  // 缓存固定空数据，避免后续多余查询
 							}
 							else {
-								curItem = childMap.get(viceSql);
+								//isVice = true;
+								String viceName = viceConfig.getTable() + (StringUtil.isEmpty(viceConfig.getAlias()) ? "" : ":" + StringUtil.isEmpty(viceConfig.getAlias()));
+								if (viceItem == null) {
+									viceItem = new JSONObject(true);
+								}
+								curItem = viceItem.getJSONObject(viceName);
+								//curItem = childMap.get(viceSql);
 								if (curItem == null) {
 									curItem = new JSONObject(true);
-									childMap.put(viceSql, curItem);
+									//childMap.put(viceSql, curItem);
+									viceItem.put(viceName, curItem);
 								}
 							}
 						}
 
 						curItem = onPutColumn(config, rs, rsmd, index, curItem, i, curJoin, childMap);  // isExplain == false && hasJoin && i >= viceColumnStart ? childMap : null);
+					}
+
+					if (viceItem != null) {
+						item.put(KEY_VICE_ITEM, viceItem);
 					}
 
 					resultList = onPutTable(config, rs, rsmd, resultList, index, item);
@@ -907,7 +924,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		// 主表必须 put 至少一个 null 进去，否则全部字段为 null 都不 put 会导致中断后续正常返回值
 		if (value != null) {
 			table.put(label, value);
-		} else{
+		} else {
 			if (join == null && table.isEmpty()) {
 				table.put(label, null);
 			} else if (ENABLE_OUTPUT_NULL_COLUMN) {

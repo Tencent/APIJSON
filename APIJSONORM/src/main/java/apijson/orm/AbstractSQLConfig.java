@@ -4504,7 +4504,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (setString.isEmpty()) {
 			throw new IllegalArgumentException("PUT 请求必须在Table内设置要修改的 key:value ！");
 		}
-		return (isClickHouse()?" ":" SET ") + setString;
+		return (isClickHouse() ? " " : " SET ") + setString;
 	}
 
 	/**SET key = concat(key, 'value')
@@ -6023,7 +6023,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			return originKey;
 		}
 
-		String key = new String(originKey);
+		String key = originKey;
 		if (key.endsWith("$")) {//搜索 LIKE，查询时处理
 			String k = key.substring(0, key.length() - 1);
 			// key%$:"a" -> key LIKE '%a%'; key?%$:"a" -> key LIKE 'a%'; key_?$:"a" -> key LIKE '_a'; key_%$:"a" -> key LIKE '_a%'

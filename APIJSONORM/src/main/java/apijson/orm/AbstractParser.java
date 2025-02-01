@@ -537,7 +537,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			queryDepth = 0;
 			executedSQLDuration = 0;
 
-			requestObject = onObjectParse(request, null, null, null, false);
+			requestObject = onObjectParse(request, null, null, null, false, null);
 
 			onCommit();
 		}
@@ -1081,17 +1081,18 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 	//	protected SQLConfig<T> itemConfig;
 	/**获取单个对象，该对象处于parentObject内
-   * @param request parentObject 的 value
-   * @param parentPath parentObject 的路径
-   * @param name parentObject 的 key
-   * @param arrayConfig config for array item
-   * @param isSubquery 是否为子查询
-   * @return
-   * @throws Exception
-   */
+	 * @param request parentObject 的 value
+	 * @param parentPath parentObject 的路径
+	 * @param name parentObject 的 key
+	 * @param arrayConfig config for array item
+	 * @param isSubquery 是否为子查询
+	 * @param cache SQL 结果缓存
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
-	public JSONObject onObjectParse(final JSONObject request
-			, String parentPath, String name, final SQLConfig<T> arrayConfig, boolean isSubquery) throws Exception {
+	public JSONObject onObjectParse(final JSONObject request, String parentPath, String name
+			, final SQLConfig<T> arrayConfig, boolean isSubquery, JSONObject cache) throws Exception {
 
 		if (Log.DEBUG) {
 			Log.i(TAG, "\ngetObject:  parentPath = " + parentPath
@@ -1135,6 +1136,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 		// 对象 - 设置 method
 		setOpMethod(request, op, name);
+
+		op.setCache(cache);
 		op = op.parse(name, isReuse);
 
 		JSONObject response = null;
@@ -1251,14 +1254,16 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	}
 
 	/**获取对象数组，该对象数组处于parentObject内
+	 * @param request parentObject的value
 	 * @param parentPath parentObject的路径
 	 * @param name parentObject的key
-	 * @param request parentObject的value
+	 * @param isSubquery 是否为子查询
+	 * @param cache SQL 结果缓存
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception {
+	public JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery, JSONArray cache) throws Exception {
 		if (Log.DEBUG) {
 			Log.i(TAG, "\n\n\n onArrayParse parentPath = " + parentPath
 					+ "; name = " + name + "; request = " + JSON.toJSONString(request));
@@ -1355,7 +1360,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 
 			//Table<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-			response = new JSONArray();
+
+			List<Join> joinList = onJoinParse(join, request);
 			SQLConfig<T> config = createSQLConfig()
 					.setMethod(requestMethod)
 					.setCount(size)
@@ -1363,15 +1369,16 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					.setQuery(query2)
 					.setCompat(compat)
 					.setTable(arrTableKey)
-					.setJoinList(onJoinParse(join, request));
+					.setJoinList(joinList);
 
 			JSONObject parent;
 
 			boolean isExtract = true;
 
+			response = new JSONArray();
 			//生成size个
 			for (int i = 0; i < (isSubquery ? 1 : size); i++) {
-				parent = onObjectParse(request, isSubquery ? parentPath : path, isSubquery ? name : "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery);
+				parent = onObjectParse(request, isSubquery ? parentPath : path, isSubquery ? name : "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery, null);
 				if (parent == null || parent.isEmpty()) {
 					break;
 				}
@@ -1386,7 +1393,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 				@SuppressWarnings("unchecked")
 				List<JSONObject> list = fo == null ? null : (List<JSONObject>) fo.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 
-				if (list != null && list.isEmpty() == false) {
+				if (list != null && list.isEmpty() == false && (joinList == null || joinList.isEmpty())) {
 					isExtract = false;
 
 					list.set(0, fo);  // 不知道为啥第 0 项也加了 @RAW@LIST

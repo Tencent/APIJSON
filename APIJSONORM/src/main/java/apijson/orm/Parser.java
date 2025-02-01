@@ -66,9 +66,9 @@ public interface Parser<T extends Object> {
 	JSONObject getStructure(String table, String method, String tag, int version) throws Exception;
 
 
-	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig<T> arrayConfig, boolean isSubquery) throws Exception;
+	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig<T> arrayConfig, boolean isSubquery, JSONObject cache) throws Exception;
 
-	JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception;
+	JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery, JSONArray cache) throws Exception;
 
 	/**解析远程函数
 	 * @param key

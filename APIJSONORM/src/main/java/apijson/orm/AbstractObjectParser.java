@@ -123,6 +123,18 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		return this;
 	}
 
+	protected JSONObject cache;
+	@Override
+	public JSONObject getCache() {
+		return cache;
+	}
+
+	@Override
+	public AbstractObjectParser<T> setCache(JSONObject cache) {
+		this.cache = cache;
+		return this;
+	}
+
 	protected int position;
 	public int getPosition() {
 		return position;
@@ -243,6 +255,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 					int index = 0;
                     // hasOtherKeyNotFun = false;
+					JSONObject viceItem = null;
 
 					for (Entry<String, Object> entry : set) {
 						if (isBreakParse()) {
@@ -280,7 +293,14 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 									childMap.put(key, (JSONObject)value);
 								}
 								else {  // 直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
-									response.put(key, onChildParse(index, key, (JSONObject)value));
+									JSON cache = index <= 0 || type != TYPE_ITEM || viceItem == null ? null : viceItem.getJSONObject(key);
+									JSON result = onChildParse(index, key, (JSONObject) value, cache);
+									if (index <= 0 && type == TYPE_ITEM) {
+										JSONObject mainItem = (JSONObject) result;
+										viceItem = result == null ? null : (JSONObject) mainItem.remove(AbstractSQLExecutor.KEY_VICE_ITEM);
+									}
+
+									response.put(key, result);
 									index ++;
 								}
 							}
@@ -368,7 +388,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                             + JSONRequest.SUBQUERY_RANGE_ALL + ", " + JSONRequest.SUBQUERY_RANGE_ANY + "] 中的一个！");
 				}
 
-				JSONArray arr = parser.onArrayParse(subquery, path, key, true);
+				JSONArray arr = parser.onArrayParse(subquery, path, key, true, null);
 
 				JSONObject obj = arr == null || arr.isEmpty() ? null : arr.getJSONObject(0);
 				if (obj == null) {
@@ -530,18 +550,19 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	 * @param index
 	 * @param key
 	 * @param value
+	 * @param cache
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
-	public JSON onChildParse(int index, String key, JSONObject value) throws Exception {
+	public JSON onChildParse(int index, String key, JSONObject value, JSON cache) throws Exception {
 		boolean isFirst = index <= 0;
 		boolean isMain = isFirst && type == TYPE_ITEM;
 
 		JSON child;
 		boolean isEmpty;
 
-		if (apijson.JSONObject.isArrayKey(key)) {//APIJSON Array
+		if (apijson.JSONObject.isArrayKey(key)) { // APIJSON Array
 			if (isMain) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
@@ -557,7 +578,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 			}
 
 			String query = value.getString(KEY_QUERY);
-			child = parser.onArrayParse(value, path, key, isSubquery);
+			child = parser.onArrayParse(value, path, key, isSubquery, cache instanceof JSONArray ? (JSONArray) cache : null);
 			isEmpty = child == null || ((JSONArray) child).isEmpty();
 
 			if ("2".equals(query) || "ALL".equals(query)) { // 不判断 isEmpty，因为分页数据可能只是某页没有
@@ -594,7 +615,8 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 				}
 			}
 
-			child = parser.onObjectParse(value, path, key, isMain ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null, isSubquery);
+			child = parser.onObjectParse(value, path, key, isMain ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null
+					, isSubquery, cache instanceof JSONObject ? (JSONObject) cache : null);
 
 			isEmpty = child == null || ((JSONObject) child).isEmpty();
 			if (isFirst && isEmpty) {
@@ -776,7 +798,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                     req = parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser);
                 }
                 //parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
-                result = (JSONObject) onChildParse(0, "" + i, req);
+                result = (JSONObject) onChildParse(0, "" + i, req, null);
             }
             catch (Exception e) {
                 if (allowPartialFailed == false) {
@@ -1080,7 +1102,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		if (set != null) {
 			int index = 0;
 			for (Entry<String, JSONObject> entry : set) {
-				Object child = entry == null ? null : onChildParse(index, entry.getKey(), entry.getValue());
+				Object child = entry == null ? null : onChildParse(index, entry.getKey(), entry.getValue(), null);
 				if (child == null
 						|| (child instanceof JSONObject && ((JSONObject) child).isEmpty())
 						|| (child instanceof JSONArray && ((JSONArray) child).isEmpty())
@@ -1106,8 +1128,11 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	public JSONObject onSQLExecute() throws Exception {
 		int position = getPosition();
 
-		JSONObject result;
-		if (isArrayMainTable && position > 0) {  // 数组主表使用专门的缓存数据
+		JSONObject result = getCache();
+		if (result != null) {
+			parser.putQueryResult(path, result);
+		}
+		else if (isArrayMainTable && position > 0) {  // 数组主表使用专门的缓存数据
 			result = parser.getArrayMainCacheItem(parentPath.substring(0, parentPath.lastIndexOf("[]") + 2), position);
 		}
 		else {
@@ -1134,7 +1159,8 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                         JSONObject obj = rawList.get(i);
 
                         if (obj != null) {
-                            parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
+							// obj.remove(AbstractSQLExecutor.KEY_VICE_ITEM);
+							parser.putQueryResult(arrayPath + "/" + i + "/" + name, obj);  // 解决获取关联数据时requestObject里不存在需要的关联数据
                         }
                     }
 
