@@ -354,7 +354,8 @@ public interface SQLConfig<T extends Object> {
 		return getSQLAlias(getTable(), getAlias());
 	}
 	static String getSQLAlias(@NotNull String table, String alias) {
-		return StringUtil.isEmpty(alias) ? table : table + "_" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
+		// 这里不用 : $ 等符号，因为部分数据库/引擎似乎不支持 `key`, "key", [key] 等避免关键词冲突的方式，只能使用符合变量命名的表别名
+		return StringUtil.isEmpty(alias) ? table : table + "__" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
 	}
 
 
