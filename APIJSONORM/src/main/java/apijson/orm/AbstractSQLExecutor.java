@@ -410,6 +410,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 					JSONObject viceItem = null;
 					JSONObject curItem = item;
 					boolean isMain = true;
+					boolean reseted = false;
 
 					for (int i = 1; i <= length; i++) {
 
@@ -437,20 +438,31 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 								if (toFindJoin) {  // 在主表字段数量内的都归属主表
 									long startTime3 = System.currentTimeMillis();
 									sqlTable = rsmd.getTableName(i);  // SQL 函数甚至部分字段都不返回表名，当然如果没传 @column 生成的 Table.* 则返回的所有字段都会带表名
-									sqlResultDuration += System.currentTimeMillis() - startTime3;
 
-                                    if (StringUtil.isEmpty(sqlTable, true)) {
-                                        boolean isEmpty = curItem == null || curItem.isEmpty();
-                                        String label = isEmpty ? null : getKey(config, rs, rsmd, index, curItem, i, childMap);
-                                        if (isEmpty || curItem.containsKey(label) == false) {  // 重复字段几乎肯定不是一张表的，尤其是主副表同名主键 id
-                                            sqlTable = i <= 1 ? config.getSQLTable() : lastTableName; // Presto 等引擎 JDBC 返回 rsmd.getTableName(i) 为空，主表如果一个字段都没有会导致 APISJON 主副表所有字段都不返回
-                                        }
-                                    }
+                                    //if (StringUtil.isEmpty(sqlTable, true)) {
+                                    	//   boolean isEmpty = curItem == null || curItem.isEmpty();
+                                        String label = getKey(config, rs, rsmd, index, curItem, i, childMap);
+                                        if (i > 1 && ( (curItem != null && curItem.containsKey(label))
+												|| (StringUtil.isNotEmpty(label) && StringUtil.equals(label, curConfig == null ? null : curConfig.getIdKey())))
+										) { // Presto 等引擎 JDBC 返回 rsmd.getTableName(i) 为空，主表如果一个字段都没有会导致 APISJON 主副表所有字段都不返回
+											sqlTable = null;
+											if (reseted) {
+												lastViceTableStart ++;
+
+												SQLConfig lastCfg = lastJoin == null ? null : lastJoin.getCacheConfig();
+												List<String> lastColumn = lastCfg == null ? null : lastCfg.getColumn();
+												lastViceColumnStart += lastColumn == null ? 1 : lastColumn.size();
+											}
+											reseted = true;
+										}
+                                    //}
+									sqlResultDuration += System.currentTimeMillis() - startTime3;
 
 									if (StringUtil.isEmpty(sqlTable, true)) {  // hasJoin 已包含这个判断 && joinList != null) {
 
 										int nextViceColumnStart = lastViceColumnStart;  // 主表没有 @column 时会偏小 lastViceColumnStart
-										for (int j = lastViceTableStart; j < joinList.size(); j++) {  // 查找副表 @column，定位字段所在表
+										int joinCount = joinList.size();
+										for (int j = lastViceTableStart; j < joinCount; j++) {  // 查找副表 @column，定位字段所在表
 											Join join = joinList.get(j);
 											SQLConfig<T> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
 											List<String> c = cfg == null ? null : cfg.getColumn();
@@ -461,7 +473,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 															&& StringUtil.equals(sqlAlias, lastAliasName) ? 1 : 0
 															)
 													);
-											if (i < nextViceColumnStart) {
+											if (i < nextViceColumnStart || j >= joinCount - 1) {
 												sqlTable = cfg.getSQLTable();
 												sqlAlias = cfg.getAlias();
 												lastViceTableStart = j;  // 避免后面的空 @column 表内字段被放到之前的空 @column 表
@@ -539,17 +551,17 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 							columnIndexAndJoinMap[i - 1] = curJoin;
 						}
 
-						//boolean isVice = false;
-						//String viceName = null;
-
 						// 如果是主表则直接用主表对应的 item，否则缓存副表数据到 childMap
 						Join prevJoin = columnIndexAndJoinMap == null || i < 2 ? null : columnIndexAndJoinMap[i - 2];
 						if (curJoin != prevJoin) {  // 前后字段不在同一个表对象，即便后面出现 null，也不该是主表数据，而是逻辑 bug 导致
 							SQLConfig<T> viceConfig = curJoin != null && curJoin.isSQLJoin() ? curJoin.getCacheConfig() : null;
+							boolean hasPK = false;
 							if (viceConfig != null) {  //FIXME 只有和主表关联才能用 item，否则应该从 childMap 查其它副表数据
 								List<On> onList = curJoin.getOnList();
 								int size = onList == null ? 0 : onList.size();
 								if (size > 0) {
+									String idKey = viceConfig.getIdKey();
+									String tblKey = config.getTableKey();
 									for (int j = size - 1; j >= 0; j--) {
 										On on = onList.get(j);
 										String ok = on == null ? null : on.getOriginKey();
@@ -557,34 +569,54 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 											throw new NullPointerException("服务器内部错误，List<Join> 中 Join.onList[" + j + (on == null ? "] = null！" : ".getOriginKey() = null！"));
 										}
 
-										viceConfig.putWhere(ok.substring(0, ok.length() - 1), item.get(on.getTargetKey()), true);
+										String k = ok.substring(0, ok.length() - 1);
+										String ttk = on.getTargetTableKey();
+
+										JSONObject target = StringUtil.equals(ttk, tblKey) ? item : (viceItem == null ? null : viceItem.getJSONObject(ttk));
+										Object v = target == null ? null : target.get(on.getTargetKey());
+										hasPK = hasPK || (k.equals(idKey) && v != null);
+
+										viceConfig.putWhere(k, v, true);
 									}
 								}
 							}
 
-							String viceSql = viceConfig == null ? null : viceConfig.getSQL(false);  //TODO 在 SQLConfig<T> 缓存 SQL，减少大量的重复生成
-
-							if (StringUtil.isEmpty(viceSql, true)) {
-								Log.i(TAG, "execute StringUtil.isEmpty(viceSql, true) >> item = null; >> ");
+							if (viceConfig == null) { // StringUtil.isEmpty(viceSql, true)) {
+								Log.i(TAG, "execute viceConfig == null >> item = null; >> ");
 								curItem = null;
 							}
 							else if (curJoin.isOuterJoin() || curJoin.isAntiJoin()) {
 								Log.i(TAG, "execute curJoin.isOuterJoin() || curJoin.isAntiJoin() >> item = null; >> ");
 								curItem = null;  // 肯定没有数据，缓存也无意义
-								// 副表是按常规条件查询，缓存会导致其它同表同条件对象查询结果集为空		childMap.put(viceSql, new JSONObject());  // 缓存固定空数据，避免后续多余查询
+								// 副表是按常规条件查询，缓存会导致其它同表同条件对象查询结果集为空	childMap.put(viceSql, new JSONObject());  // 缓存固定空数据，避免后续多余查询
 							}
 							else {
-								//isVice = true;
-								String viceName = viceConfig.getTable() + (StringUtil.isEmpty(viceConfig.getAlias()) ? "" : ":" + StringUtil.isEmpty(viceConfig.getAlias()));
+								String viceName = viceConfig.getTableKey();
 								if (viceItem == null) {
 									viceItem = new JSONObject(true);
 								}
 								curItem = viceItem.getJSONObject(viceName);
-								//curItem = childMap.get(viceSql);
-								if (curItem == null) {
+
+								String viceSql = hasPK ? viceConfig.getSQL(false) : null; // TODO 在 SQLConfig<T> 缓存 SQL，减少大量的重复生成
+								JSONObject curCache = hasPK ? childMap.get(viceSql) : null;
+
+								if (curItem == null || curItem.isEmpty()) {
+									// 导致前面判断重复 key 出错 curItem = curCache != null ? curCache : new JSONObject(true);
 									curItem = new JSONObject(true);
-									//childMap.put(viceSql, curItem);
 									viceItem.put(viceName, curItem);
+									if (hasPK && curCache == null) {
+										childMap.put(viceSql, curItem);
+									}
+								}
+								else if (hasPK) {
+									if (curCache == null || curCache.isEmpty()) {
+										childMap.put(viceSql, curItem);
+									}
+									else {
+										curCache.putAll(curItem);
+										// 导致前面判断重复 key 出错 curItem = curCache;
+										// viceItem.put(viceName, curItem);
+									}
 								}
 							}
 						}

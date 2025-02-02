@@ -290,7 +290,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 							}
 							else if (value instanceof JSONObject) {  // JSONObject，往下一级提取
 								if (childMap != null) {  // 添加到childMap，最后再解析
-									childMap.put(key, (JSONObject)value);
+									childMap.put(key, (JSONObject) value);
 								}
 								else {  // 直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
 									JSON cache = index <= 0 || type != TYPE_ITEM || viceItem == null ? null : viceItem.getJSONObject(key);
@@ -457,9 +457,9 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 					if (isTable && (key.startsWith("@") == false || JSONRequest.TABLE_KEY_LIST.contains(key))) {
 						Log.e(TAG, "onParse  isTable && (key.startsWith(@) == false"
 								+ " || JSONRequest.TABLE_KEY_LIST.contains(key)) >>  return null;");
+						// FIXME getCache() != null 时 return true，解决 RIGHT/OUTER/FOREIGN JOIN 主表无数据导致副表数据也不返回
 						return false; // 获取不到就不用再做无效的 query 了。不考虑 Table:{Table:{}} 嵌套
 					}
-
 
 					Log.d(TAG, "onParse  isTable(table) == false >> return true;");
 					return true; // 舍去，对Table无影响

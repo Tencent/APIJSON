@@ -181,6 +181,7 @@ public class Join {
 		private Logic logic; // & | !
 		private String relateType;  // "" - 一对一, "{}" - 一对多, "<>" - 多对一, > , <= , !=
 		private String key;  // id
+		private String targetTableKey;  // Moment:main
 		private String targetTable;  // Moment
 		private String targetAlias;  // main
 		private String targetKey;  // userId
@@ -218,6 +219,14 @@ public class Join {
 		public void setKey(String key) {
 			this.key = key;
 		}
+
+		public void setTargetTableKey(String targetTableKey) {
+			this.targetTableKey = targetTableKey;
+		}
+		public String getTargetTableKey() {
+			return targetTableKey;
+		}
+
 		public void setTargetTable(String targetTable) {
 			this.targetTable = targetTable;
 		}

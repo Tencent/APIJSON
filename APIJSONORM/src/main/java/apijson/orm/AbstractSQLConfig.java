@@ -9,15 +9,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import apijson.JSON;
@@ -1431,10 +1424,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return StringUtil.isEmpty(nt) ? ot : nt;
 	}
 
-	@JSONField(serialize = false)
-	public String getSQLTableWithAlias(String table,String alias) {
-		return StringUtil.isEmpty(alias) ? table : table + ":" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
-	}
 
 	@JSONField(serialize = false)
 	@Override
@@ -1445,12 +1434,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String sqlTable = getSQLTable();
 
 		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q
-				+ ( isKeyPrefix() ? " AS " + getAliasWithQuote() : "");
+				+ (isKeyPrefix() ? getAs() + q + getSQLAlias() + q : "");
 	}
 	@Override
 	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
 		this.table = table;
 		return this;
+	}
+
+	public String getAs() {
+		return isOracle() ? " " : " AS ";
 	}
 
 	@Override
@@ -1462,11 +1455,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		this.alias = alias;
 		return this;
 	}
-	public String getAliasWithQuote() {
-		String a = getAlias();
-		if (StringUtil.isEmpty(a, true)) {
-			a = getTable();
-		}
+	public String getSQLAliasWithQuote() {
+		String a = getSQLAlias();
 		String q = getQuote();
 		// getTable 不能小写，因为Verifier用大小写敏感的名称判断权限
 		// 如果要强制小写，则可在子类重写这个方法再 toLowerCase
@@ -1502,9 +1492,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
-					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-						cfg.setAlias(cfg.getTable());
-					}
+					//if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					//	cfg.setAlias(cfg.getTable());
+					//}
 					String c = ((AbstractSQLConfig) cfg).getGroupString(false);
 
 					if (StringUtil.isEmpty(c, true) == false) {
@@ -1579,9 +1569,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
-					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-						cfg.setAlias(cfg.getTable());
-					}
+					//if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					//	cfg.setAlias(cfg.getTable());
+					//}
 					String c = ((AbstractSQLConfig) cfg).getHavingString(false);
 
 					if (StringUtil.isEmpty(c, true) == false) {
@@ -1610,7 +1600,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		//fun0(arg0,arg1,...);fun1(arg0,arg1,...)
 		String havingString = parseCombineExpression(getMethod(), getQuote(), getTable()
-				, getAliasWithQuote(), map, getHavingCombine(), true, containRaw, true);
+				, getAlias(), map, getHavingCombine(), true, containRaw, true);
 
 		return (hasPrefix ? " HAVING " : "") + StringUtil.concat(havingString, joinHaving, AND);
 	}
@@ -1693,9 +1683,9 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
-					if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-						cfg.setAlias(cfg.getTable());
-					}
+					//if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					//	cfg.setAlias(cfg.getTable());
+					//}
 					String c = ((AbstractSQLConfig) cfg).getOrderString(false);
 
 					if (StringUtil.isEmpty(c, true) == false) {
@@ -1890,6 +1880,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	@JSONField(serialize = false)
 	public String getColumnString(boolean inSQLJoin) throws Exception {
 		List<String> column = getColumn();
+		String as = getAs();
+		String q = getQuote();
 
 		switch (getMethod()) {
 		case HEAD:
@@ -1950,25 +1942,24 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				if (start > 0 && end > start) {
 					String fun = c0.substring(0, start);
 
-					// Invalid use of group function  SELECT  count(max(`id`))  AS count  FROM `sys`.`Comment`
+					// Invalid use of group function  SELECT count(max(`id`))  AS count  FROM `sys`.`Comment`
 					if (SQL_AGGREGATE_FUNCTION_MAP.containsKey(fun)) {
 						String group = getGroup();  // TODO 唯一 100% 兼容的可能只有 SELECT count(*) FROM (原语句) AS table
 						return StringUtil.isEmpty(group, true) ? "1" : "count(DISTINCT " + group + ")";
 					}
 
 					String[] args = start == end - 1 ? null : StringUtil.split(c0.substring(start + 1, end));
-					if (args == null || args.length <= 0) {
-						return SQL.count(c0);
+					if (args != null && args.length > 0) {
+						List<String> raw = getRaw();
+						boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
+						c0 = parseSQLExpression(KEY_COLUMN, c0, containRaw, false, null);
 					}
 
-					List<String> raw = getRaw();
-					boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
-
-					return SQL.count(parseSQLExpression(KEY_COLUMN, c0, containRaw, false, null));
+					return "count(" + c0 + ")" + as + q + JSONResponse.KEY_COUNT + q;
 				}
 			}
 
-			return SQL.count(onlyOne ? getKey(c0) : "*");
+			return "count(" + (onlyOne ? getKey(c0) : "*") + ")" + as + q + JSONResponse.KEY_COUNT + q;
 			//			return SQL.count(onlyOne && StringUtil.isName(column.get(0)) ? getKey(column.get(0)) : "*");
 		case POST:
 			if (column == null || column.isEmpty()) {
@@ -1993,30 +1984,28 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			String joinColumn = "";
 			if (joinList != null) {
 				boolean first = true;
-				for (Join j : joinList) {
-					if (j.isAppJoin()) {
+				for (Join join : joinList) {
+					if (join.isAppJoin()) {
 						continue;
 					}
 
-					SQLConfig ocfg = j.getOuterConfig();
+					SQLConfig ocfg = join.getOuterConfig();
 					boolean isEmpty = ocfg == null || ocfg.getColumn() == null;
-					boolean isLeftOrRightJoin = j.isLeftOrRightJoin();
+					boolean isLeftOrRightJoin = join.isLeftOrRightJoin();
 
 					if (isEmpty && isLeftOrRightJoin) {
 						// 改为 SELECT  ViceTable.* 解决 SELECT sum(ViceTable.id)
 						// LEFT/RIGHT JOIN (SELECT sum(id) FROM ViceTable...) AS ViceTable
 						// 不仅导致 SQL 函数重复计算，还有时导致 SQL 报错或对应字段未返回
-						String quote = getQuote();
-						joinColumn += (first ? "" : ", ") + quote + (StringUtil.isEmpty(j.getAlias(), true)
-								? j.getTable() : j.getAlias()) + quote + ".*";
+						joinColumn += (first ? "" : ", ") + q + SQLConfig.getSQLAlias(join.getTable(), join.getAlias()) + q + ".*";
 						first = false;
 					} else {
-						SQLConfig cfg = isLeftOrRightJoin == false && isEmpty ? j.getJoinConfig() : ocfg;
+						SQLConfig cfg = isLeftOrRightJoin == false && isEmpty ? join.getJoinConfig() : ocfg;
 						if (cfg != null) {
 							cfg.setMain(false).setKeyPrefix(true);
-							if (StringUtil.isEmpty(cfg.getAlias(), true)) {
-								cfg.setAlias(cfg.getTable());
-							}
+							//if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+							//	cfg.setAlias(cfg.getTable());
+							//}
 
 							String c = ((AbstractSQLConfig) cfg).getColumnString(true);
 							if (StringUtil.isEmpty(c, true) == false) {
@@ -2030,9 +2019,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				}
 			}
 
-			String tableAlias = getAliasWithQuote();
-
-			//			String c = StringUtil.getString(column); //id,name;json_length(contactIdList):contactCount;...
+			String tableAlias = q + getSQLAlias() + q;
+			//	String c = StringUtil.getString(column); //id,name;json_length(contactIdList):contactCount;...
 
 			String[] keys = column == null ? null : column.toArray(new String[]{}); //StringUtil.split(c, ";");
 			if (keys == null || keys.length <= 0) {
@@ -2042,7 +2030,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				return StringUtil.concat(mc, joinColumn, ", ", true);
 			}
-
 
 			List<String> raw = getRaw();
 			boolean containRaw = raw != null && raw.contains(KEY_COLUMN);
@@ -2062,7 +2049,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					boolean hasAlias = StringUtil.isName(alias);
 					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
 					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
-						keys[i] = pre + (hasAlias ? " AS " + alias : "");
+						keys[i] = pre + (hasAlias ? getAs() + q + alias + q : "");
 						continue;
 					}
 				}
@@ -2197,7 +2184,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				}
 
 				String origin = fun + "(" + (distinct ? PREFIX_DISTINCT : "") + StringUtil.getString(ckeys) + ")" + suffix;
-				expression = origin + (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
+				expression = origin + (StringUtil.isEmpty(alias, true) ? "" : getAs() + quote + alias + quote);
 			}
 			else {
 				//是窗口函数   fun(arg0,agr1) OVER (agr0 agr1 ...)
@@ -2255,7 +2242,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				String argsString2[] = parseArgsSplitWithComma(argString2, false, containRaw, allowAlias);
 				expression = fun + "(" + StringUtil.getString(agrsString1) + (containOver ? ") OVER (" : ") AGAINST (")
 						+ StringUtil.getString(argsString2) + ")" + suffix  // 传参不传空格，拼接带空格
-						+ (StringUtil.isEmpty(alias, true) ? "" : " AS " + quote + alias + quote);
+						+ (StringUtil.isEmpty(alias, true) ? "" : getAs() + quote + alias + quote);
 			}
 		}
 
@@ -2274,7 +2261,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		// 以"," 分割参数
 		String quote = getQuote();
 		boolean isKeyPrefix = isKeyPrefix();
-		String tableAlias = getAliasWithQuote();
+		String tableAlias = quote + getSQLAlias() + quote;
 		String ckeys[] = StringUtil.split(param); // 以","分割参数
 		if (ckeys != null && ckeys.length > 0) {
 
@@ -2385,7 +2372,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							}
 
 							if (isColumn && StringUtil.isEmpty(alias, true) == false) {
-								origin += " AS " + quote + alias + quote;
+								origin += getAs() + quote + alias + quote;
 							}
 						}
 					}
@@ -2408,7 +2395,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private String parseArgsSplitWithSpace(String mkes[]) {
 		String quote = getQuote();
 		boolean isKeyPrefix = isKeyPrefix();
-		String tableAlias = getAliasWithQuote();
+		String tableAlias = quote + getSQLAlias() + quote;
 
 		// 包含空格的参数  肯定不包含别名 不用处理别名
 		if (mkes != null && mkes.length > 0) {
@@ -2988,8 +2975,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	@JSONField(serialize = false)
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where
 			, String combine, List<Join> joinList, boolean verifyName) throws Exception {
-
-		String whereString = parseCombineExpression(method, getQuote(), getTable(), getAliasWithQuote()
+		String whereString = parseCombineExpression(method, getQuote(), getTable(), getAlias()
 				, where, combine, verifyName, false, false);
 		whereString = concatJoinWhereString(whereString);
 		String result = StringUtil.isEmpty(whereString, true) ? "" : (hasPrefix ? " WHERE " : "") + whereString;
@@ -3680,7 +3666,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 	public String getSQLKey(String key) {
 		String q = getQuote();
-		return (isKeyPrefix() ? getAliasWithQuote() + "." : "") + q + key + q;
+		return (isKeyPrefix() ? q + getSQLAlias() + q + "." : "") + q + key + q;
 	}
 
 	/**
@@ -4327,11 +4313,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 		String quote = getQuote();
+		String as = getAs();
 
 		String withAsExpreSql;
 		if (list != null) {
 			String withQuoteName = quote + subquery.getKey() + quote;
-			list.add(" " + withQuoteName + " AS " + "(" + cfg.getSQL(isPrepared()) + ") ");
+			list.add(" " + withQuoteName + as + "(" + cfg.getSQL(isPrepared()) + ") ");
 			withAsExpreSql = " SELECT * FROM " + withQuoteName;
 
 			// 预编译参数 FIXME 这里重复添加了，导致子查询都报错参数超过 ? 数量 Parameter index out of range (5 > number of parameters, which is 4)
@@ -4350,7 +4337,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			withAsExpreSql = cfg.getSQL(isPrepared());
 			// mysql 才存在这个问题, 主表和子表是一张表
 			if (isWithAsEnable && isMySQL() && StringUtil.equals(getTable(), subquery.getFrom())) {
-				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql + ") AS " + quote + subquery.getKey() + quote;
+				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql + ")" + as + quote + subquery.getKey() + quote;
 			}
 		}
 
@@ -4629,7 +4616,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
 					String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
 					return explain + "SELECT " + config.getWhereString(false)
-							+ " AS " + q + JSONResponse.KEY_COUNT + q + config.getLimitString();
+							+ config.getAs() + q + JSONResponse.KEY_COUNT + q + config.getLimitString();
 				}
 
 				config.setPreparedValueList(new ArrayList<Object>());
@@ -4690,8 +4677,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			return sql;
 		}
 		int offset = getOffset(getPage(), count);
-		String alias = getAliasWithQuote();
 		String quote = getQuote();
+		String alias = quote + getSQLAlias() + quote;
 		return "SELECT * FROM (SELECT " + alias + ".*, ROWNUM "+ quote + "RN" + quote +" FROM (" + sql + ") " + alias
 				+ "  WHERE ROWNUM <= " + (offset + count) + ") WHERE "+ quote + "RN" + quote +" > " + offset;
 	}
@@ -4705,7 +4692,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private static String getConditionString(String table, AbstractSQLConfig config) throws Exception {
 		Subquery from = config.getFrom();
 		if (from != null) {
-			table = config.getSubqueryString(from) + " AS " + config.getAliasWithQuote() + " ";
+			table = config.getSubqueryString(from) + config.getAs() + config.getSQLAliasWithQuote() + " ";
 		}
 
 		String join = config.getJoinString();
@@ -4803,7 +4790,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				jc.setPrepared(isPrepared());
 				// 将关联表所属数据源配置为主表数据源
 				jc.setDatasource(this.getDatasource());
-				String jt = StringUtil.isEmpty(jc.getAlias(), true) ? jc.getTable() : jc.getAlias();
+				String jt = jc.getSQLAlias();
 				List<On> onList = j.getOnList();
 
 				//如果要强制小写，则可在子类重写这个方法再 toLowerCase
@@ -4824,7 +4811,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				case ">": // RIGHT JOIN
 					jc.setMain(true).setKeyPrefix(false);
 					sql = ( "<".equals(type) ? " LEFT" : (">".equals(type) ? " RIGHT" : " CROSS") )
-							+ " JOIN ( " + jc.getSQL(isPrepared()) + " ) AS " + quote + jt + quote;
+							+ " JOIN ( " + jc.getSQL(isPrepared()) + " ) " + getAs() + quote + jt + quote;
 					sql = concatJoinOn(sql, quote, j, jt, onList);
 
 					jc.setMain(false).setKeyPrefix(true);
@@ -4844,9 +4831,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					sql = concatJoinOn(sql, quote, j, jt, onList);
 					break;
 				default:
+					String k = jc.getTableKey();
 					throw new UnsupportedOperationException(
-							"join:value 中 value 里的 " + jt + "/" + j.getPath()
-							+ "错误！不支持 " + jt + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
+							"join:value 中 value 里的 " + k + "/" + j.getPath()
+							+ "错误！不支持 " + k + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
 							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
 							);
 				}
@@ -4881,45 +4869,42 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 
-	protected String concatJoinOn(@NotNull String sql, @NotNull String quote, @NotNull Join j, @NotNull String jt, List<On> onList) {
+	protected String concatJoinOn(@NotNull String sql, @NotNull String quote, @NotNull Join join, @NotNull String jt, List<On> onList) {
 		if (onList != null) {
+			SQLConfig jc = join.getJoinConfig();
+			Map<String, String> castMap = jc == null ? null : jc.getCast();
+
 			boolean first = true;
 			for (On on : onList) {
 				Logic logic = on.getLogic();
 				boolean isNot = logic == null ? false : logic.isNot();
 				if (isNot) {
-					onJoinNotRelation(sql, quote, j, jt, onList, on);
+					onJoinNotRelation(sql, quote, join, jt, onList, on);
+				}
+
+				String lk = quote + jt + quote + "." + quote + on.getKey() + quote;
+				Object ct = castMap == null ? null : castMap.get(on.getOriginKey());
+				if (StringUtil.isNotEmpty(ct, false)) {
+					lk = "cast(" + lk + " AS " + ct + ")"; // 解决 JOIN ON 不支持 @cast 问题，CAST(expression AS TYPE) 中 AS 不能省略
 				}
 
 				String rt = on.getRelateType();
+
+				String rk = quote + SQLConfig.getSQLAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+
 				if (StringUtil.isEmpty(rt, false)) {
-					// 解决 JOIN ON 不支持 @cast 问题
-					SQLConfig jc = j.getJoinConfig();
-					Map<String, String> castMap = jc == null ? null : jc.getCast();
-					if (castMap == null || castMap.isEmpty()) {
-						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? " != " : " = ")
-								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
-					} else {
-						String leftTableRelationSql = quote + jt + quote + "." + quote + on.getKey() + quote;
-						Object castValueType = castMap.get(on.getOriginKey());
-						if (castValueType != null) {
-							leftTableRelationSql = "CAST(" + leftTableRelationSql + " AS " + castValueType + ")";
-						}
-						sql += (first ? ON : AND) + leftTableRelationSql + (isNot ? " != " : " = ")
-								+ quote + on.getTargetTable() + quote + "." + quote + on.getTargetKey() + quote;
-					}
+					sql += (first ? ON : AND) + lk + (isNot ? " != " : " = ") + rk;
 				}
 				else {
-					onJoinComplexRelation(sql, quote, j, jt, onList, on);
+					onJoinComplexRelation(sql, quote, join, jt, onList, on);
 
 					if (">=".equals(rt) || "<=".equals(rt) || ">".equals(rt) || "<".equals(rt)) {
 						if (isNot) {
-							throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+							throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + join.getPath()
 							+ " 中 JOIN ON 条件关联逻辑符 " + rt + " 不合法！ >, <, >=, <= 不支持与或非逻辑符 & | ! ！");
 						}
 
-						sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + " " + rt + " "
-								+ quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+						sql += (first ? ON : AND) + lk + " " + rt + " " + rk;
 					}
 					else if (rt.endsWith("$")) {
 						String t = rt.substring(0, rt.length() - 1);
@@ -4964,52 +4949,38 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						}
 
 						if (l <= 0 && r <= 0) {
-							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-									+ " LIKE " + quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+							sql += (first ? ON : AND) + lk + (isNot ? NOT : "") + " LIKE " + rk;
 						}
 						else {
-							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-									+ (l <= 0 ? " LIKE concat(" : " LIKE concat('" + l + "', ") + quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote
-									+ "." + quote + on.getTargetKey() + quote + (r <= 0 ? ")" : ", '" + r + "')");
+							sql += (first ? ON : AND) + lk + (isNot ? NOT : "")
+									+ (l <= 0 ? " LIKE concat(" : " LIKE concat('" + l + "', ") + rk + (r <= 0 ? ")" : ", '" + r + "')");
 						}
 					}
 					else if (rt.endsWith("~")) {
 						boolean ignoreCase = "*~".equals(rt);
 						if (isPostgreSQL() || isInfluxDB()) {
-							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote
-									+ (isNot ? NOT : "") + " ~" + (ignoreCase ? "* " : " ")
-									+ quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+							sql += (first ? ON : AND) + lk + (isNot ? NOT : "") + " ~" + (ignoreCase ? "* " : " ") + rk;
 						}
 						else if (isOracle() || isDameng() || isKingBase()) {
-							sql += (first ? ON : AND) + "regexp_like(" +  quote + jt + quote + "." + quote + on.getKey() + quote
-									+ ", " + quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote
-									+ (ignoreCase ? ", 'i'" : ", 'c'") + ")";
+							sql += (first ? ON : AND) + "regexp_like(" +  lk + ", " + rk + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 						}
 						else if (isPresto() || isTrino()) {
-							sql += (first ? ON : AND) + "regexp_like(" + (ignoreCase ? "lower(" : "") + quote
-									+ jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
-									+ ", " + (ignoreCase ? "lower(" : "") + quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias())
-									+ quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
+							sql += (first ? ON : AND) + "regexp_like(" + (ignoreCase ? "lower(" : "") + lk + (ignoreCase ? ")" : "")
+									+ ", " + (ignoreCase ? "lower(" : "") + rk + (ignoreCase ? ")" : "") + ")";
 						}
 						else if (isClickHouse()) {
-							sql += (first ? ON : AND) + "match(" + (ignoreCase ? "lower(" : "") + quote + jt
-									+ quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
-									+ ", " + (ignoreCase ? "lower(" : "") + quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias())
-									+ quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "") + ")";
+							sql += (first ? ON : AND) + "match(" + (ignoreCase ? "lower(" : "") + lk + (ignoreCase ? ")" : "")
+									+ ", " + (ignoreCase ? "lower(" : "") + rk + (ignoreCase ? ")" : "") + ")";
 						}
 						else if (isElasticsearch()) {
-							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-									+ " RLIKE " + quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+							sql += (first ? ON : AND) + lk + (isNot ? NOT : "") + " RLIKE " + rk;
 						}
 						else if (isHive()) {
-							sql += (first ? ON : AND) + (ignoreCase ? "lower(" : "") +  quote + jt + quote + "." + quote + on.getKey() + quote + (ignoreCase ? ")" : "")
-									+ " REGEXP " + (ignoreCase ? "lower(" : "") + quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias())
-									+ quote + "." + quote + on.getTargetKey() + quote + (ignoreCase ? ")" : "");
+							sql += (first ? ON : AND) + (ignoreCase ? "lower(" : "") + lk + (ignoreCase ? ")" : "")
+									+ " REGEXP " + (ignoreCase ? "lower(" : "") + rk + (ignoreCase ? ")" : "");
 						}
 						else {
-							sql += (first ? ON : AND) + quote + jt + quote + "." + quote + on.getKey() + quote + (isNot ? NOT : "")
-									+ " REGEXP " + (ignoreCase ? "" : "BINARY ")
-									+ quote + getSQLTableWithAlias(on.getTargetTable(), on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
+							sql += (first ? ON : AND) + lk + (isNot ? NOT : "") + " REGEXP " + (ignoreCase ? "" : "BINARY ") + rk;
 						}
 					}
 					else if ("{}".equals(rt) || "<>".equals(rt)) {
@@ -5017,13 +4988,13 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						String ta = on.getTargetAlias();
 
 						Map<String, String> cast = null;
-						if (tt.equals(getTable()) && ((ta == null && getAlias() == null) || ta.equals(getAlias()))) {
+						if (tt.equals(getTable()) && Objects.equals(ta, getAlias())) {
 							cast = getCast();
 						}
 						else {
 							boolean find = false;
 							for (Join jn : joinList) {
-								if (tt.equals(jn.getTable()) && ((ta == null && jn.getAlias() == null) || ta.equals(jn.getAlias()))) {
+								if (tt.equals(jn.getTable()) && Objects.equals(ta, jn.getAlias())) {
 									cast = getCast();
 									find = true;
 									break;
@@ -5031,23 +5002,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							}
 
 							if (find == false) {
-								throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+								throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + join.getPath()
 								+ " 中 JOIN ON 条件中找不到对应的 " + rt + " 不合法！只支持 =, {}, <> 这几种！");
 							}
 						}
 
 						boolean isBoolOrNum = SQL.isBooleanOrNumber(cast == null ? null : cast.get(on.getTargetKey()));
 
-						String arrKeyPath;
-						String itemKeyPath;
-						if ("{}".equals(rt)) {
-							arrKeyPath = quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
-							itemKeyPath =  quote + jt + quote + "." + quote + on.getKey() + quote;
-						}
-						else {
-							arrKeyPath = quote + jt + quote + "." + quote + on.getKey() + quote;
-							itemKeyPath = quote + getSQLTableWithAlias(on.getTargetTable(),on.getTargetAlias()) + quote + "." + quote + on.getTargetKey() + quote;
-						}
+						boolean isIn = "{}".equals(rt);
+						String arrKeyPath = isIn ? rk : lk;
+						String itemKeyPath = isIn ? lk : rk;
 
 						if (isPostgreSQL() || isInfluxDB()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
 							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
@@ -5073,12 +5037,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 									+ " IS NOT NULL AND json_contains(" + arrKeyPath
 									+ (isBoolOrNum ? ", cast(" + itemKeyPath + " AS CHAR), '$')"
 											: ", concat('\"', " + itemKeyPath + ", '\"'), '$')"
-											)
-									) + (isNot ? ") " : "");
+									)
+							) + (isNot ? ") " : "");
 						}
 					}
 					else {
-						throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + j.getPath()
+						throw new IllegalArgumentException("join:value 中 value 里的 " + jt + "/" + join.getPath()
 						+ " 中 JOIN ON 条件关联类型 " + rt + " 不合法！只支持 =, >, <, >=, <=, !=, $, ~, {}, <> 这几种！");
 					}
 				}
@@ -5953,13 +5917,13 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.getOuter() != null) {
-					SQLConfig<T> outterConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
-					outterConfig.setMain(false)
+					SQLConfig<T> outerConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
+					outerConfig.setMain(false)
 							.setKeyPrefix(true)
 							.setDatabase(joinConfig.getDatabase())
 							.setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 
-					j.setOuterConfig(outterConfig);
+					j.setOuterConfig(outerConfig);
 				}
 			}
 

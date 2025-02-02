@@ -1734,7 +1734,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 					throw new IllegalArgumentException(e.getKey() + ":'/targetTable:targetAlias/targetKey' 中 targetAlias 值 " + targetAlias + " 不合法！必须满足英文单词变量名格式！");
 				}
 
-				targetTable = targetTableKey;  // 主表允许别名
+				//targetTable = targetTableKey;  // 主表允许别名
 				if (StringUtil.isName(targetTable) == false) {
 					throw new IllegalArgumentException(e.getKey() + ":'/targetTable/targetKey' 中 targetTable 值 " + targetTable + " 不合法！必须满足大写字母开头的表对象英文单词 key 格式！");
 				}
@@ -1760,6 +1760,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 
 				on.setOriginKey(originKey);
 				on.setOriginValue((String) refEntry.getValue());
+				on.setTargetTableKey(targetTableKey);
 				on.setTargetTable(targetTable);
 				on.setTargetAlias(targetAlias);
 				on.setTargetKey(targetKey);

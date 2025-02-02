@@ -345,6 +345,19 @@ public interface SQLConfig<T extends Object> {
 
 	SQLConfig setAlias(String alias);
 
+	default String getTableKey() {
+		String alias = getAlias();
+		return getTable() + (StringUtil.isEmpty(alias) ? "" : ":" + alias);
+	}
+
+	default String getSQLAlias() {
+		return getSQLAlias(getTable(), getAlias());
+	}
+	static String getSQLAlias(@NotNull String table, String alias) {
+		return StringUtil.isEmpty(alias) ? table : table + "_" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
+	}
+
+
 	String getWhereString(boolean hasPrefix) throws Exception;
 
 	String getRawSQL(String key, Object value) throws Exception;
@@ -374,4 +387,5 @@ public interface SQLConfig<T extends Object> {
 	boolean isFakeDelete();
 
 	Map<String, Object> onFakeDelete(Map<String, Object> map);
+
 }
