@@ -45,6 +45,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_SQLITE = "SQLITE"; // https://www.sqlite.org
 	String DATABASE_DUCKDB = "DUCKDB"; // https://duckdb.org
 	String DATABASE_SURREALDB = "SURREALDB"; // https://surrealdb.com
+	String DATABASE_OPENGAUSS = "OPENGAUSS"; // https://surrealdb.com
 
 	String DATABASE_MQ = "MQ"; //
 
@@ -101,6 +102,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isSQLite();
 	boolean isDuckDB();
 	boolean isSurrealDB();
+	boolean isOpenGauss();
 
 
 	// 暂时只兼容以上几种

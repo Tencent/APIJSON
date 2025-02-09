@@ -200,6 +200,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_MQ);
 		DATABASE_LIST.add(DATABASE_DUCKDB);
 		DATABASE_LIST.add(DATABASE_SURREALDB);
+		DATABASE_LIST.add(DATABASE_OPENGAUSS);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -1320,6 +1321,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 	public static boolean isSurrealDB(String db) {
 		return DATABASE_SURREALDB.equals(db);
+	}
+
+	@Override
+	public boolean isOpenGauss() {
+		return isOpenGauss(getSQLDatabase());
+	}
+	public static boolean isOpenGauss(String db) {
+		return DATABASE_OPENGAUSS.equals(db);
 	}
 
 	@Override
