@@ -1981,7 +1981,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	public static String getDecodedKey(String key) {
 		try {
-			return URLDecoder.decode(key, StandardCharsets.UTF_8);
+			return URLDecoder.decode(key, StringUtil.UTF_8);
 		} catch (Throwable e) {
 			return key;
 		}
