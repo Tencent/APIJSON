@@ -320,15 +320,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public String getGlobalDatabase() {
 		return globalDatabase;
 	}
-	protected String globalSchema;
-	public AbstractParser<T> setGlobalSchema(String globalSchema) {
-		this.globalSchema = globalSchema;
-		return this;
-	}
-	@Override
-	public String getGlobalSchema() {
-		return globalSchema;
-	}
+
 	protected String globalDatasource;
 	@Override
 	public String getGlobalDatasource() {
@@ -337,6 +329,36 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	public AbstractParser<T> setGlobalDatasource(String globalDatasource) {
 		this.globalDatasource = globalDatasource;
 		return this;
+	}
+
+	protected String globalNamespace;
+	public AbstractParser<T> setGlobalNamespace(String globalNamespace) {
+		this.globalNamespace = globalNamespace;
+		return this;
+	}
+	@Override
+	public String getGlobalNamespace() {
+		return globalNamespace;
+	}
+
+	protected String globalCatalog;
+	public AbstractParser<T> setGlobalCatalog(String globalCatalog) {
+		this.globalCatalog = globalCatalog;
+		return this;
+	}
+	@Override
+	public String getGlobalCatalog() {
+		return globalCatalog;
+	}
+
+	protected String globalSchema;
+	public AbstractParser<T> setGlobalSchema(String globalSchema) {
+		this.globalSchema = globalSchema;
+		return this;
+	}
+	@Override
+	public String getGlobalSchema() {
+		return globalSchema;
 	}
 
 	protected Boolean globalExplain;
@@ -508,19 +530,25 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		}
 
 		try {
-			setGlobalFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
 			setGlobalDatabase(requestObject.getString(JSONRequest.KEY_DATABASE));
-			setGlobalSchema(requestObject.getString(JSONRequest.KEY_SCHEMA));
 			setGlobalDatasource(requestObject.getString(JSONRequest.KEY_DATASOURCE));
+			setGlobalNamespace(requestObject.getString(JSONRequest.KEY_NAMESPACE));
+			setGlobalCatalog(requestObject.getString(JSONRequest.KEY_CATALOG));
+			setGlobalSchema(requestObject.getString(JSONRequest.KEY_SCHEMA));
+
 			setGlobalExplain(requestObject.getBoolean(JSONRequest.KEY_EXPLAIN));
 			setGlobalCache(requestObject.getString(JSONRequest.KEY_CACHE));
+			setGlobalFormat(requestObject.getBoolean(JSONRequest.KEY_FORMAT));
 
-			requestObject.remove(JSONRequest.KEY_FORMAT);
 			requestObject.remove(JSONRequest.KEY_DATABASE);
-			requestObject.remove(JSONRequest.KEY_SCHEMA);
 			requestObject.remove(JSONRequest.KEY_DATASOURCE);
+			requestObject.remove(JSONRequest.KEY_NAMESPACE);
+			requestObject.remove(JSONRequest.KEY_CATALOG);
+			requestObject.remove(JSONRequest.KEY_SCHEMA);
+
 			requestObject.remove(JSONRequest.KEY_EXPLAIN);
 			requestObject.remove(JSONRequest.KEY_CACHE);
+			requestObject.remove(JSONRequest.KEY_FORMAT);
 		} catch (Exception e) {
 			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 		}
@@ -1462,6 +1490,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 		JOIN_COPY_KEY_LIST = new ArrayList<String>();
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_ROLE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATABASE);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_NAMESPACE);
+		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_CATALOG);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_SCHEMA);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_DATASOURCE);
 		JOIN_COPY_KEY_LIST.add(JSONRequest.KEY_COLUMN);

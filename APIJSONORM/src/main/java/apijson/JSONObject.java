@@ -140,8 +140,9 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	public static final String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
 	public static final String KEY_DATASOURCE = "@datasource"; //数据源
-	public static final String KEY_NAMESPACE = "@namespace"; //命名空间，Table在非默认namespace内时需要声明
-	public static final String KEY_SCHEMA = "@schema"; //数据库，Table在非默认schema内时需要声明
+	public static final String KEY_NAMESPACE = "@namespace"; //命名空间，Table 在非默认 namespace 内时需要声明
+	public static final String KEY_CATALOG = "@catalog"; //目录，Table 在非默认 catalog 内时需要声明
+	public static final String KEY_SCHEMA = "@schema"; //数据库，Table 在非默认 schema 内时需要声明
 	public static final String KEY_EXPLAIN = "@explain"; //分析 true/false
 	public static final String KEY_CACHE = "@cache"; //缓存 RAM/ROM/ALL
 	public static final String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
@@ -172,6 +173,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_DATABASE);
 		TABLE_KEY_LIST.add(KEY_DATASOURCE);
 		TABLE_KEY_LIST.add(KEY_NAMESPACE);
+		TABLE_KEY_LIST.add(KEY_CATALOG);
 		TABLE_KEY_LIST.add(KEY_SCHEMA);
 		TABLE_KEY_LIST.add(KEY_EXPLAIN);
 		TABLE_KEY_LIST.add(KEY_CACHE);
@@ -268,6 +270,13 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject setNamespace(String namespace) {
 		return puts(KEY_NAMESPACE, namespace);
+	}
+	/**set catalog where table was puts
+	 * @param catalog
+	 * @return this
+	 */
+	public JSONObject setCatalog(String catalog) {
+		return puts(KEY_CATALOG, catalog);
 	}
 	/**set schema where table was puts
 	 * @param schema

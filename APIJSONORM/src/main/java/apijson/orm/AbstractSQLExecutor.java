@@ -1237,7 +1237,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	@NotNull
 	@Override
 	public Connection getConnection(@NotNull SQLConfig<T> config) throws Exception {
-		String connectionKey = config.getDatasource() + "-" + config.getDatabase();
+		String connectionKey = getConnectionKey(config);
 		connection = connectionMap.get(connectionKey);
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
@@ -1253,6 +1253,13 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		}
 
 		return connection;
+	}
+
+	public String getConnectionKey(@NotNull SQLConfig<T> config) {
+		return getConnectionKey(config.getNamespace(), config.getCatalog(), config.getDatasource(), config.getDatabase());
+	}
+	public String getConnectionKey(String database, String datasource, String namespace, String catalog) {
+		return database + "-" + datasource + "-" + namespace + "-" + catalog;
 	}
 
 	//事务处理 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

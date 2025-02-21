@@ -96,6 +96,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
 	public static String DEFAULT_NAMESPACE = "root";
+	public static String DEFAULT_CATALOG = "postgres";
 	public static String DEFAULT_SCHEMA = "sys";
 	public static String PREFIX_DISTINCT = "DISTINCT ";
 
@@ -856,7 +857,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return version;
 	}
 	@Override
-	public AbstractSQLConfig setVersion(int version) {
+	public AbstractSQLConfig<T> setVersion(int version) {
 		this.version = version;
 		return this;
 	}
@@ -870,7 +871,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return tag;
 	}
 	@Override
-	public AbstractSQLConfig setTag(String tag) {
+	public AbstractSQLConfig<T> setTag(String tag) {
 		this.tag = tag;
 		return this;
 	}
@@ -927,6 +928,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private boolean distinct = false;
 	private String database; //表所在的数据库类型
 	private String namespace; //表所在的命名空间
+	private String catalog; //表所在的目录
 	private String schema; //表所在的数据库名
 	private String datasource; //数据源
 	private String table; //表名
@@ -964,7 +966,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 	private String procedure;
 
-	public SQLConfig setProcedure(String procedure) {
+	public AbstractSQLConfig<T> setProcedure(String procedure) {
 		this.procedure = procedure;
 		return this;
 	}
@@ -994,7 +996,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return method;
 	}
 	@Override
-	public AbstractSQLConfig setMethod(RequestMethod method) {
+	public AbstractSQLConfig<T> setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}
@@ -1003,7 +1005,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return prepared && ! isMongoDB(); // MongoDB JDBC 还不支持预编译;
 	}
 	@Override
-	public AbstractSQLConfig setPrepared(boolean prepared) {
+	public AbstractSQLConfig<T> setPrepared(boolean prepared) {
 		this.prepared = prepared;
 		return this;
 	}
@@ -1012,7 +1014,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return main;
 	}
 	@Override
-	public AbstractSQLConfig setMain(boolean main) {
+	public AbstractSQLConfig<T> setMain(boolean main) {
 		this.main = main;
 		return this;
 	}
@@ -1023,7 +1025,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return id;
 	}
 	@Override
-	public AbstractSQLConfig setId(Object id) {
+	public AbstractSQLConfig<T> setId(Object id) {
 		this.id = id;
 		return this;
 	}
@@ -1033,7 +1035,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return idIn;
 	}
 	@Override
-	public AbstractSQLConfig setIdIn(Object idIn) {
+	public AbstractSQLConfig<T> setIdIn(Object idIn) {
 		this.idIn = idIn;
 		return this;
 	}
@@ -1044,7 +1046,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return userId;
 	}
 	@Override
-	public AbstractSQLConfig setUserId(Object userId) {
+	public AbstractSQLConfig<T> setUserId(Object userId) {
 		this.userId = userId;
 		return this;
 	}
@@ -1054,7 +1056,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return userIdIn;
 	}
 	@Override
-	public AbstractSQLConfig setUserIdIn(Object userIdIn) {
+	public AbstractSQLConfig<T> setUserIdIn(Object userIdIn) {
 		this.userIdIn = userIdIn;
 		return this;
 	}
@@ -1065,7 +1067,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return role;
 	}
 	@Override
-	public AbstractSQLConfig setRole(String role) {
+	public AbstractSQLConfig<T> setRole(String role) {
 		this.role = role;
 		return this;
 	}
@@ -1075,7 +1077,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return distinct;
 	}
 	@Override
-	public SQLConfig setDistinct(boolean distinct) {
+	public AbstractSQLConfig<T> setDistinct(boolean distinct) {
 		this.distinct = distinct;
 		return this;
 	}
@@ -1085,7 +1087,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return database;
 	}
 	@Override
-	public SQLConfig setDatabase(String database) {
+	public AbstractSQLConfig<T> setDatabase(String database) {
 		this.database = database;
 		return this;
 	}
@@ -1345,14 +1347,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public String getNamespace() {
-		return namespace;
-	}
-
-	@Override
 	public String getSQLNamespace() {
 		String sch = getNamespace(); // 前端传参 @namespace 优先
 		return sch == null ? DEFAULT_NAMESPACE : sch; // 最后代码默认兜底配置
+	}
+
+	@Override
+	public String getNamespace() {
+		return namespace;
 	}
 
 	@Override
@@ -1361,9 +1363,22 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return this;
 	}
 
+
 	@Override
-	public String getSchema() {
-		return schema;
+	public String getSQLCatalog() {
+		String catalog = getCatalog(); // 前端传参 @catalog 优先
+		return catalog == null ? DEFAULT_CATALOG : catalog; // 最后代码默认兜底配置
+	}
+
+	@Override
+	public String getCatalog() {
+		return catalog;
+	}
+
+	@Override
+	public AbstractSQLConfig<T> setCatalog(String catalog) {
+		this.catalog = catalog;
+		return this;
 	}
 
 	@NotNull
@@ -1393,7 +1408,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public AbstractSQLConfig setSchema(String schema) {
+	public String getSchema() {
+		return schema;
+	}
+
+	@Override
+	public AbstractSQLConfig<T> setSchema(String schema) {
 		if (schema != null) {
 			AbstractFunctionParser.verifySchema(schema, getTable());
 		}
@@ -1406,7 +1426,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return datasource;
 	}
 	@Override
-	public SQLConfig setDatasource(String datasource) {
+	public AbstractSQLConfig<T> setDatasource(String datasource) {
 		this.datasource = datasource;
 		return this;
 	}
@@ -1446,7 +1466,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				+ (isKeyPrefix() ? getAs() + q + getSQLAlias() + q : "");
 	}
 	@Override
-	public AbstractSQLConfig setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
+	public AbstractSQLConfig<T> setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
 		this.table = table;
 		return this;
 	}
@@ -1460,7 +1480,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return alias;
 	}
 	@Override
-	public AbstractSQLConfig setAlias(String alias) {
+	public AbstractSQLConfig<T> setAlias(String alias) {
 		this.alias = alias;
 		return this;
 	}
@@ -1477,11 +1497,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getGroup() {
 		return group;
 	}
-	public AbstractSQLConfig setGroup(String... keys) {
+	public AbstractSQLConfig<T> setGroup(String... keys) {
 		return setGroup(StringUtil.getString(keys));
 	}
 	@Override
-	public AbstractSQLConfig setGroup(String group) {
+	public AbstractSQLConfig<T> setGroup(String group) {
 		this.group = group;
 		return this;
 	}
@@ -1540,7 +1560,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return havingCombine;
 	}
 	@Override
-	public SQLConfig setHavingCombine(String havingCombine) {
+	public AbstractSQLConfig<T> setHavingCombine(String havingCombine) {
 		this.havingCombine = havingCombine;
 		return this;
 	}
@@ -1550,11 +1570,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return having;
 	}
 	@Override
-	public SQLConfig setHaving(Map<String, Object> having) {
+	public AbstractSQLConfig<T> setHaving(Map<String, Object> having) {
 		this.having = having;
 		return this;
 	}
-	public AbstractSQLConfig setHaving(String... conditions) {
+	public AbstractSQLConfig<T> setHaving(String... conditions) {
 		return setHaving(StringUtil.getString(conditions));
 	}
 
@@ -1668,11 +1688,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getOrder() {
 		return order;
 	}
-	public AbstractSQLConfig setOrder(String... conditions) {
+	public AbstractSQLConfig<T> setOrder(String... conditions) {
 		return setOrder(StringUtil.getString(conditions));
 	}
 	@Override
-	public AbstractSQLConfig setOrder(String order) {
+	public AbstractSQLConfig<T> setOrder(String order) {
 		this.order = order;
 		return this;
 	}
@@ -1787,7 +1807,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return keyMap;
 	}
 	@Override
-	public AbstractSQLConfig setKeyMap(Map<String, String> keyMap) {
+	public AbstractSQLConfig<T> setKeyMap(Map<String, String> keyMap) {
 		this.keyMap = keyMap;
 		return this;
 	}
@@ -1797,7 +1817,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return raw;
 	}
 	@Override
-	public AbstractSQLConfig setRaw(List<String> raw) {
+	public AbstractSQLConfig<T> setRaw(List<String> raw) {
 		this.raw = raw;
 		return this;
 	}
@@ -1857,7 +1877,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return json;
 	}
 	@Override
-	public AbstractSQLConfig setJson(List<String> json) {
+	public AbstractSQLConfig<T> setJson(List<String> json) {
 		this.json = json;
 		return this;
 	}
@@ -1868,7 +1888,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return from;
 	}
 	@Override
-	public AbstractSQLConfig setFrom(Subquery from) {
+	public AbstractSQLConfig<T> setFrom(Subquery from) {
 		this.from = from;
 		return this;
 	}
@@ -1878,7 +1898,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return column;
 	}
 	@Override
-	public AbstractSQLConfig setColumn(List<String> column) {
+	public AbstractSQLConfig<T> setColumn(List<String> column) {
 		this.column = column;
 		return this;
 	}
@@ -2517,7 +2537,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return s;
 	}
 	@Override
-	public AbstractSQLConfig setValues(List<List<Object>> valuess) {
+	public AbstractSQLConfig<T> setValues(List<List<Object>> valuess) {
 		this.values = valuess;
 		return this;
 	}
@@ -2527,7 +2547,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return content;
 	}
 	@Override
-	public AbstractSQLConfig setContent(Map<String, Object> content) {
+	public AbstractSQLConfig<T> setContent(Map<String, Object> content) {
 		this.content = content;
 		return this;
 	}
@@ -2537,7 +2557,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return count;
 	}
 	@Override
-	public AbstractSQLConfig setCount(int count) {
+	public AbstractSQLConfig<T> setCount(int count) {
 		this.count = count;
 		return this;
 	}
@@ -2546,7 +2566,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return page;
 	}
 	@Override
-	public AbstractSQLConfig setPage(int page) {
+	public AbstractSQLConfig<T> setPage(int page) {
 		this.page = page;
 		return this;
 	}
@@ -2555,7 +2575,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return position;
 	}
 	@Override
-	public AbstractSQLConfig setPosition(int position) {
+	public AbstractSQLConfig<T> setPosition(int position) {
 		this.position = position;
 		return this;
 	}
@@ -2565,7 +2585,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return query;
 	}
 	@Override
-	public AbstractSQLConfig setQuery(int query) {
+	public AbstractSQLConfig<T> setQuery(int query) {
 		this.query = query;
 		return this;
 	}
@@ -2574,7 +2594,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return compat;
 	}
 	@Override
-	public AbstractSQLConfig setCompat(Boolean compat) {
+	public AbstractSQLConfig<T> setCompat(Boolean compat) {
 		this.compat = compat;
 		return this;
 	}
@@ -2584,7 +2604,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return type;
 	}
 	@Override
-	public AbstractSQLConfig setType(int type) {
+	public AbstractSQLConfig<T> setType(int type) {
 		this.type = type;
 		return this;
 	}
@@ -2594,12 +2614,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return cache;
 	}
 	@Override
-	public AbstractSQLConfig setCache(int cache) {
+	public AbstractSQLConfig<T> setCache(int cache) {
 		this.cache = cache;
 		return this;
 	}
 
-	public AbstractSQLConfig setCache(String cache) {
+	public AbstractSQLConfig<T> setCache(String cache) {
 		return setCache(getCache(cache));
 	}
 	public static int getCache(String cache) {
@@ -2638,7 +2658,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return explain;
 	}
 	@Override
-	public AbstractSQLConfig setExplain(boolean explain) {
+	public AbstractSQLConfig<T> setExplain(boolean explain) {
 		this.explain = explain;
 		return this;
 	}
@@ -2648,7 +2668,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return joinList;
 	}
 	@Override
-	public SQLConfig setJoinList(List<Join> joinList) {
+	public AbstractSQLConfig<T> setJoinList(List<Join> joinList) {
 		this.joinList = joinList;
 		return this;
 	}
@@ -2663,7 +2683,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return test;
 	}
 	@Override
-	public AbstractSQLConfig setTest(boolean test) {
+	public AbstractSQLConfig<T> setTest(boolean test) {
 		this.test = test;
 		return this;
 	}
@@ -2761,7 +2781,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return nulls;
 	}
 	@Override
-	public SQLConfig setNull(List<String> nulls) {
+	public AbstractSQLConfig<T> setNull(List<String> nulls) {
 		this.nulls = nulls;
 		return this;
 	}
@@ -2771,7 +2791,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return cast;
 	}
 	@Override
-	public SQLConfig setCast(Map<String, String> cast) {
+	public AbstractSQLConfig<T> setCast(Map<String, String> cast) {
 		this.cast = cast;
 		return this;
 	}
@@ -2803,7 +2823,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return combine;
 	}
 	@Override
-	public AbstractSQLConfig setCombine(String combine) {
+	public AbstractSQLConfig<T> setCombine(String combine) {
 		this.combine = combine;
 		return this;
 	}
@@ -2822,7 +2842,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return combineMap;
 	}
 	@Override
-	public AbstractSQLConfig setCombineMap(Map<String, List<String>> combineMap) {
+	public AbstractSQLConfig<T> setCombineMap(Map<String, List<String>> combineMap) {
 		this.combineMap = combineMap;
 		return this;
 	}
@@ -2832,7 +2852,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return where;
 	}
 	@Override
-	public AbstractSQLConfig setWhere(Map<String, Object> where) {
+	public AbstractSQLConfig<T> setWhere(Map<String, Object> where) {
 		this.where = where;
 		return this;
 	}
@@ -2877,7 +2897,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return null;
 	}
 	@Override
-	public AbstractSQLConfig putWhere(String key, Object value, boolean prior) {
+	public AbstractSQLConfig<T> putWhere(String key, Object value, boolean prior) {
 		if (key != null) {
 			if (where == null) {
 				where = new LinkedHashMap<String, Object>();
@@ -3740,7 +3760,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return preparedValueList;
 	}
 	@Override
-	public AbstractSQLConfig setPreparedValueList(List<Object> preparedValueList) {
+	public AbstractSQLConfig<T> setPreparedValueList(List<Object> preparedValueList) {
 		this.preparedValueList = preparedValueList;
 		return this;
 	}
@@ -4770,7 +4790,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return keyPrefix;
 	}
 	@Override
-	public AbstractSQLConfig setKeyPrefix(boolean keyPrefix) {
+	public AbstractSQLConfig<T> setKeyPrefix(boolean keyPrefix) {
 		this.keyPrefix = keyPrefix;
 		return this;
 	}
@@ -5105,6 +5125,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		String datasource = request.getString(KEY_DATASOURCE);
 		String namespace = request.getString(KEY_NAMESPACE);
+		String catalog = request.getString(KEY_CATALOG);
 		String schema = request.getString(KEY_SCHEMA);
 
 		SQLConfig<T> config = callback.getSQLConfig(method, database, schema, datasource, table);
@@ -5113,6 +5134,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		config.setDatabase(database); // 不删，后面表对象还要用的，必须放在 parseJoin 前
 		config.setDatasource(datasource); // 不删，后面表对象还要用的
 		config.setNamespace(namespace); // 不删，后面表对象还要用的
+		config.setCatalog(catalog); // 不删，后面表对象还要用的
 		config.setSchema(schema); // 不删，后面表对象还要用的
 
 		if (isProcedure) {
@@ -5274,6 +5296,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			request.remove(KEY_DATABASE);
 			request.remove(KEY_DATASOURCE);
 			request.remove(KEY_NAMESPACE);
+			request.remove(KEY_CATALOG);
 			request.remove(KEY_SCHEMA);
 			request.remove(KEY_FROM);
 			request.remove(KEY_COLUMN);
@@ -6233,7 +6256,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public AbstractSQLConfig setWithAsExprPreparedValueList(List<Object> list) {
+	public AbstractSQLConfig<T> setWithAsExprPreparedValueList(List<Object> list) {
 		this.withAsExprPreparedValueList = list;
 		return this;
 	}

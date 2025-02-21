@@ -60,19 +60,19 @@ public interface SQLConfig<T extends Object> {
 
 	Parser<T> getParser();
 
-	SQLConfig setParser(Parser<T> parser);
+	SQLConfig<T> setParser(Parser<T> parser);
 
 	ObjectParser getObjectParser();
 
-	SQLConfig setObjectParser(ObjectParser objectParser);
+	SQLConfig<T> setObjectParser(ObjectParser objectParser);
 
 	int getVersion();
 
-	SQLConfig setVersion(int version);
+	SQLConfig<T> setVersion(int version);
 
 	String getTag();
 
-	SQLConfig setTag(String tag);
+	SQLConfig<T> setTag(String tag);
 
 	boolean isMySQL();
 	boolean isPostgreSQL();
@@ -182,72 +182,76 @@ public interface SQLConfig<T extends Object> {
 
 
 	boolean isTest();
-	SQLConfig setTest(boolean test);
+	SQLConfig<T> setTest(boolean test);
 
 	int getType();
-	SQLConfig setType(int type);
+	SQLConfig<T> setType(int type);
 
 	int getCount();
-	SQLConfig setCount(int count);
+	SQLConfig<T> setCount(int count);
 
 	int getPage();
-	SQLConfig setPage(int page);
+	SQLConfig<T> setPage(int page);
 
 	int getQuery();
-	SQLConfig setQuery(int query);
+	SQLConfig<T> setQuery(int query);
 
 	Boolean getCompat();
-	SQLConfig setCompat(Boolean compat);
+	SQLConfig<T> setCompat(Boolean compat);
 
 	int getPosition();
-	SQLConfig setPosition(int position);
+	SQLConfig<T> setPosition(int position);
 
 	int getCache();
-	SQLConfig setCache(int cache);
+	SQLConfig<T> setCache(int cache);
 
 	boolean isExplain();
-	SQLConfig setExplain(boolean explain);
+	SQLConfig<T> setExplain(boolean explain);
 
 
 	RequestMethod getMethod();
-	SQLConfig setMethod(RequestMethod method);
+	SQLConfig<T> setMethod(RequestMethod method);
 
 	Object getId();
-	SQLConfig setId(Object id);
+	SQLConfig<T> setId(Object id);
 
 	Object getIdIn();
-	SQLConfig setIdIn(Object idIn);
+	SQLConfig<T> setIdIn(Object idIn);
 
 	Object getUserId();
-	SQLConfig setUserId(Object userId);
+	SQLConfig<T> setUserId(Object userId);
 
 	Object getUserIdIn();
-	SQLConfig setUserIdIn(Object userIdIn);
+	SQLConfig<T> setUserIdIn(Object userIdIn);
 
 	String getRole();
-	SQLConfig setRole(String role);
+	SQLConfig<T> setRole(String role);
 
 	public boolean isDistinct();
-	public SQLConfig setDistinct(boolean distinct);
+	public SQLConfig<T> setDistinct(boolean distinct);
 
 	String getDatabase();
-	SQLConfig setDatabase(String database);
+	SQLConfig<T> setDatabase(String database);
 
 	String getSQLNamespace();
 	String getNamespace();
 	SQLConfig<T> setNamespace(String namespace);
 
+	String getSQLCatalog();
+	String getCatalog();
+	SQLConfig<T> setCatalog(String catalog);
+
 	String getSQLSchema();
 	String getSchema();
-	SQLConfig setSchema(String schema);
+	SQLConfig<T> setSchema(String schema);
 
 	String getDatasource();
-	SQLConfig setDatasource(String datasource);
+	SQLConfig<T> setDatasource(String datasource);
 
 	String getQuote();
 
 	List<String> getJson();
-	SQLConfig setJson(List<String> json);
+	SQLConfig<T> setJson(List<String> json);
 
 	/**请求传进来的Table名
 	 * @return
@@ -255,7 +259,7 @@ public interface SQLConfig<T extends Object> {
 	 */
 	String getTable();
 
-	SQLConfig setTable(String table);
+	SQLConfig<T> setTable(String table);
 
 	/**数据库里的真实Table名
 	 * 通过 {@link AbstractSQLConfig.TABLE_KEY_MAP} 映射
@@ -266,49 +270,49 @@ public interface SQLConfig<T extends Object> {
 	String getTablePath();
 
 	Map<String, String> getKeyMap();
-	SQLConfig setKeyMap(Map<String, String> keyMap);
+	SQLConfig<T> setKeyMap(Map<String, String> keyMap);
 
 	List<String> getRaw();
-	SQLConfig setRaw(List<String> raw);
+	SQLConfig<T> setRaw(List<String> raw);
 
 	Subquery getFrom();
-	SQLConfig setFrom(Subquery from);
+	SQLConfig<T> setFrom(Subquery from);
 
 	List<String> getColumn();
-	SQLConfig setColumn(List<String> column);
+	SQLConfig<T> setColumn(List<String> column);
 
 	List<List<Object>> getValues();
-	SQLConfig setValues(List<List<Object>> values);
+	SQLConfig<T> setValues(List<List<Object>> values);
 
 	Map<String, Object> getContent();
-	SQLConfig setContent(Map<String, Object> content);
+	SQLConfig<T> setContent(Map<String, Object> content);
 
 	Map<String, List<String>> getCombineMap();
-	SQLConfig setCombineMap(Map<String, List<String>> combineMap);
+	SQLConfig<T> setCombineMap(Map<String, List<String>> combineMap);
 
 	String getCombine();
-	SQLConfig setCombine(String combine);
+	SQLConfig<T> setCombine(String combine);
 
 	Map<String, String> getCast();
-	SQLConfig setCast(Map<String, String> cast);
+	SQLConfig<T> setCast(Map<String, String> cast);
 
 	List<String> getNull();
-	SQLConfig setNull(List<String> nulls);
+	SQLConfig<T> setNull(List<String> nulls);
 
 	Map<String, Object> getWhere();
-	SQLConfig setWhere(Map<String, Object> where);
+	SQLConfig<T> setWhere(Map<String, Object> where);
 
 	String getGroup();
-	SQLConfig setGroup(String group);
+	SQLConfig<T> setGroup(String group);
 
 	Map<String, Object> getHaving();
-	SQLConfig setHaving(Map<String, Object> having);
+	SQLConfig<T> setHaving(Map<String, Object> having);
 
 	String getHavingCombine();
-	SQLConfig setHavingCombine(String havingCombine);
+	SQLConfig<T> setHavingCombine(String havingCombine);
 
 	String getOrder();
-	SQLConfig setOrder(String order);
+	SQLConfig<T> setOrder(String order);
 
 	/**
 	 * exactMatch = false
@@ -327,25 +331,25 @@ public interface SQLConfig<T extends Object> {
 	 * @param value
 	 * @return
 	 */
-	SQLConfig putWhere(String key, Object value, boolean prior);
+	SQLConfig<T> putWhere(String key, Object value, boolean prior);
 
 
 	boolean isPrepared();
 
-	SQLConfig setPrepared(boolean prepared);
+	SQLConfig<T> setPrepared(boolean prepared);
 
 	boolean isMain();
 
-	SQLConfig setMain(boolean main);
+	SQLConfig<T> setMain(boolean main);
 
 
 	List<Object> getPreparedValueList();
-	SQLConfig setPreparedValueList(List<Object> preparedValueList);
+	SQLConfig<T> setPreparedValueList(List<Object> preparedValueList);
 
 
 	String getAlias();
 
-	SQLConfig setAlias(String alias);
+	SQLConfig<T> setAlias(String alias);
 
 	default String getTableKey() {
 		String alias = getAlias();
@@ -368,24 +372,24 @@ public interface SQLConfig<T extends Object> {
 
 	boolean isKeyPrefix();
 
-	SQLConfig setKeyPrefix(boolean keyPrefix);
+	SQLConfig<T> setKeyPrefix(boolean keyPrefix);
 
 
 	List<Join> getJoinList();
 
-	SQLConfig setJoinList(List<Join> joinList);
+	SQLConfig<T> setJoinList(List<Join> joinList);
 
 	boolean hasJoin();
 
 
 	String getSubqueryString(Subquery subquery) throws Exception;
 
-	SQLConfig setProcedure(String procedure);
+	SQLConfig<T> setProcedure(String procedure);
 
 
 
 	List<Object> getWithAsExprPreparedValueList();
-	SQLConfig setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
+	SQLConfig<T> setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
 
 	boolean isFakeDelete();
 

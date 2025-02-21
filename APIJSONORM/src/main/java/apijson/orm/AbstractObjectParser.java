@@ -328,22 +328,42 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 				}
 
 				if (isTable) {
-					if (parser.getGlobalDatabase() != null && sqlRequest.get(JSONRequest.KEY_DATABASE) == null) {
-						sqlRequest.put(JSONRequest.KEY_DATABASE, parser.getGlobalDatabase());
+					// parser.onVerifyRole 已处理 globalRole
+
+					String db = parser.getGlobalDatabase();
+					if (db != null) {
+						sqlRequest.putIfAbsent(JSONRequest.KEY_DATABASE, db);
 					}
-					if (parser.getGlobalSchema() != null && sqlRequest.get(JSONRequest.KEY_SCHEMA) == null) {
-						sqlRequest.put(JSONRequest.KEY_SCHEMA, parser.getGlobalSchema());
+
+					String ds = parser.getGlobalDatasource();
+					if (ds != null) {
+						sqlRequest.putIfAbsent(JSONRequest.KEY_DATASOURCE, ds);
 					}
-					if (parser.getGlobalDatasource() != null && sqlRequest.get(JSONRequest.KEY_DATASOURCE) == null) {
-						sqlRequest.put(JSONRequest.KEY_DATASOURCE, parser.getGlobalDatasource());
+
+					String ns = parser.getGlobalNamespace();
+					if (ns != null) {
+						sqlRequest.putIfAbsent(JSONRequest.KEY_NAMESPACE, ns);
+					}
+
+					String cl = parser.getGlobalCatalog();
+					if (cl != null) {
+						sqlRequest.putIfAbsent(JSONRequest.KEY_CATALOG, cl);
+					}
+
+					String sch = parser.getGlobalSchema();
+					if (sch != null) {
+						sqlRequest.putIfAbsent(JSONRequest.KEY_SCHEMA, sch);
 					}
 
 					if (isSubquery == false) { // 解决 SQL 语法报错，子查询不能 EXPLAIN
-						if (parser.getGlobalExplain() != null && sqlRequest.get(JSONRequest.KEY_EXPLAIN) == null) {
-							sqlRequest.put(JSONRequest.KEY_EXPLAIN, parser.getGlobalExplain());
+						Boolean exp = parser.getGlobalExplain();
+						if (sch != null) {
+							sqlRequest.putIfAbsent(JSONRequest.KEY_EXPLAIN, exp);
 						}
-						if (parser.getGlobalCache() != null && sqlRequest.get(JSONRequest.KEY_CACHE) == null) {
-							sqlRequest.put(JSONRequest.KEY_CACHE, parser.getGlobalCache());
+
+						String cache = parser.getGlobalCache();
+						if (cache != null) {
+							sqlRequest.putIfAbsent(JSONRequest.KEY_CACHE, cache);
 						}
 					}
 				}

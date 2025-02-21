@@ -112,8 +112,10 @@ public interface Parser<T extends Object> {
 	Boolean getGlobalFormat();
 	String getGlobalRole();
 	String getGlobalDatabase();
-	String getGlobalSchema();
 	String getGlobalDatasource();
+	String getGlobalNamespace();
+	String getGlobalCatalog();
+	String getGlobalSchema();
 	Boolean getGlobalExplain();
 	String getGlobalCache();
 
