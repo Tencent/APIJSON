@@ -113,9 +113,9 @@ public interface SQLConfig<T extends Object> {
 	//	boolean isPLSQL();
 	//	boolean isAnsiSQL();
 
-    /**用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
-     * @return
-     */
+	/**用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
+	 * @return
+	 */
 	boolean limitSQLCount();
 
 	/**是否开启 WITH AS 表达式来简化 SQL 和提升性能
@@ -123,11 +123,11 @@ public interface SQLConfig<T extends Object> {
 	 */
 	boolean isWithAsEnable();
 	/**允许增删改部分失败
-     * @return
-     */
-    boolean allowPartialUpdateFailed();
+	 * @return
+	 */
+	boolean allowPartialUpdateFailed();
 
-    @NotNull
+	@NotNull
 	String getIdKey();
 	@NotNull
 	String getUserIdKey();
