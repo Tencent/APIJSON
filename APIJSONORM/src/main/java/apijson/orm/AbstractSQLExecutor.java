@@ -1190,7 +1190,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
             //} else {
             //    statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             //}
-            if (config.isMySQL() || config.isPostgreSQL() || config.isOracle() || config.isSQLServer() || config.isDb2()) {
+            if (config.isMySQL() || config.isPostgreSQL() || config.isCockroachDB() || config.isOracle() || config.isSQLServer() || config.isDb2()) {
                 statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             } else {
                 statement = getConnection(config).prepareStatement(sql);

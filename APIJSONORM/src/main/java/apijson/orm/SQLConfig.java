@@ -22,12 +22,13 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_SQLSERVER = "SQLSERVER"; // https://www.microsoft.com/en-us/sql-server
 	String DATABASE_ORACLE = "ORACLE"; // https://www.oracle.com/database
 	String DATABASE_DB2 = "DB2"; // https://www.ibm.com/products/db2
-    String DATABASE_MARIADB = "MARIADB"; // https://mariadb.org
-    String DATABASE_TIDB = "TIDB"; // https://www.pingcap.com/tidb
-    String DATABASE_DAMENG = "DAMENG"; // https://www.dameng.com
-    String DATABASE_KINGBASE = "KINGBASE"; // https://www.kingbase.com.cn
-    String DATABASE_ELASTICSEARCH = "ELASTICSEARCH"; // https://www.elastic.co/guide/en/elasticsearch/reference/7.4/xpack-sql.html
-    String DATABASE_CLICKHOUSE = "CLICKHOUSE"; // https://clickhouse.com
+	String DATABASE_MARIADB = "MARIADB"; // https://mariadb.org
+	String DATABASE_TIDB = "TIDB"; // https://www.pingcap.com/tidb
+	String DATABASE_COCKROACHDB = "COCKROACHDB"; // https://www.cockroachlabs.com
+	String DATABASE_DAMENG = "DAMENG"; // https://www.dameng.com
+	String DATABASE_KINGBASE = "KINGBASE"; // https://www.kingbase.com.cn
+	String DATABASE_ELASTICSEARCH = "ELASTICSEARCH"; // https://www.elastic.co/guide/en/elasticsearch/reference/7.4/xpack-sql.html
+	String DATABASE_CLICKHOUSE = "CLICKHOUSE"; // https://clickhouse.com
 	String DATABASE_HIVE = "HIVE"; // https://hive.apache.org
 	String DATABASE_PRESTO = "PRESTO"; // Facebook PrestoDB  https://prestodb.io
 	String DATABASE_TRINO = "TRINO"; // PrestoSQL  https://trino.io
@@ -45,7 +46,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_SQLITE = "SQLITE"; // https://www.sqlite.org
 	String DATABASE_DUCKDB = "DUCKDB"; // https://duckdb.org
 	String DATABASE_SURREALDB = "SURREALDB"; // https://surrealdb.com
-	String DATABASE_OPENGAUSS = "OPENGAUSS"; // https://surrealdb.com
+	String DATABASE_OPENGAUSS = "OPENGAUSS"; // https://opengauss.org
 
 	String DATABASE_MQ = "MQ"; //
 
@@ -81,6 +82,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isDb2();
 	boolean isMariaDB();
 	boolean isTiDB();
+	boolean isCockroachDB();
 	boolean isDameng();
 	boolean isKingBase();
 	boolean isElasticsearch();

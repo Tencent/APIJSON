@@ -147,7 +147,7 @@ public class CommonException extends Exception {
   }
 
 
-  public static Exception wrap(Exception e, SQLConfig config) {
+  public static Exception wrap(Exception e, SQLConfig<?> config) {
     if (Log.DEBUG == false && e instanceof SQLException) {
       return new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);
     }
@@ -158,22 +158,31 @@ public class CommonException extends Exception {
       // msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
       try {
         String db = config == null ? AbstractSQLConfig.DEFAULT_DATABASE : (config instanceof AbstractSQLConfig
-          ? ((AbstractSQLConfig) config).getSQLDatabase() : config.getDatabase()
+          ? ((AbstractSQLConfig<?>) config).getSQLDatabase() : config.getDatabase()
         );
 
-        String dbVersion = config.getDBVersion();
+        String dbVersion = config == null ? null : config.getDBVersion();
         if (StringUtil.isEmpty(dbVersion)) {
           dbVersion = "<!-- 请填写版本号，例如 8.0 -->";
         }
 
-        if (db != null) {
+        if (db != null || config == null) {
           db += " " + dbVersion;
         }
         else if (config.isMySQL()) {
           db = SQLConfig.DATABASE_MYSQL + " " + dbVersion;
         }
+        else if (config.isMariaDB()) {
+          db = SQLConfig.DATABASE_MARIADB + " " + dbVersion;
+        }
+        else if (config.isTiDB()) {
+          db = SQLConfig.DATABASE_TIDB + " " + dbVersion;
+        }
         else if (config.isPostgreSQL()) {
           db = SQLConfig.DATABASE_POSTGRESQL + " " + dbVersion;
+        }
+        else if (config.isCockroachDB()) {
+          db = SQLConfig.DATABASE_COCKROACHDB + " " + dbVersion;
         }
         else if (config.isSQLServer()) {
           db = SQLConfig.DATABASE_SQLSERVER + " " + dbVersion;
@@ -184,14 +193,68 @@ public class CommonException extends Exception {
         else if (config.isDb2()) {
           db = SQLConfig.DATABASE_DB2 + " " + dbVersion;
         }
+        else if (config.isDuckDB()) {
+          db = SQLConfig.DATABASE_DUCKDB + " " + dbVersion;
+        }
+        else if (config.isSurrealDB()) {
+          db = SQLConfig.DATABASE_SURREALDB + " " + dbVersion;
+        }
+        else if (config.isOpenGauss()) {
+          db = SQLConfig.DATABASE_OPENGAUSS + " " + dbVersion;
+        }
         else if (config.isDameng()) {
           db = SQLConfig.DATABASE_DAMENG + " " + dbVersion;
+        }
+        else if (config.isKingBase()) {
+          db = SQLConfig.DATABASE_KINGBASE + " " + dbVersion;
+        }
+        else if (config.isElasticsearch()) {
+          db = SQLConfig.DATABASE_ELASTICSEARCH + " " + dbVersion;
         }
         else if (config.isClickHouse()) {
           db = SQLConfig.DATABASE_CLICKHOUSE + " " + dbVersion;
         }
+        else if (config.isMilvus()) {
+          db = SQLConfig.DATABASE_MILVUS + " " + dbVersion;
+        }
+        else if (config.isInfluxDB()) {
+          db = SQLConfig.DATABASE_INFLUXDB + " " + dbVersion;
+        }
         else if (config.isTDengine()) {
           db = SQLConfig.DATABASE_TDENGINE + " " + dbVersion;
+        }
+        else if (config.isIoTDB()) {
+          db = SQLConfig.DATABASE_IOTDB + " " + dbVersion;
+        }
+        else if (config.isSQLite()) {
+          db = SQLConfig.DATABASE_SQLITE + " " + dbVersion;
+        }
+        else if (config.isHive()) {
+          db = SQLConfig.DATABASE_HIVE + " " + dbVersion;
+        }
+        else if (config.isPresto()) {
+          db = SQLConfig.DATABASE_PRESTO + " " + dbVersion;
+        }
+        else if (config.isTrino()) {
+          db = SQLConfig.DATABASE_TRINO + " " + dbVersion;
+        }
+        else if (config.isSnowflake()) {
+          db = SQLConfig.DATABASE_SNOWFLAKE + " " + dbVersion;
+        }
+        else if (config.isDatabricks()) {
+          db = SQLConfig.DATABASE_DATABRICKS + " " + dbVersion;
+        }
+        else if (config.isMongoDB()) {
+          db = SQLConfig.DATABASE_MONGODB + " " + dbVersion;
+        }
+        else if (config.isCassandra()) {
+          db = SQLConfig.DATABASE_CASSANDRA + " " + dbVersion;
+        }
+        else if (config.isRedis()) {
+          db = SQLConfig.DATABASE_REDIS + " " + dbVersion;
+        }
+        else if (config.isKafka()) {
+          db = SQLConfig.DATABASE_KAFKA + " " + dbVersion;
         }
         else {
           db = "<!-- 请填写，例如 MySQL 5.7。获取到的默认数据库为 " + AbstractSQLConfig.DEFAULT_DATABASE + " -->";

@@ -95,8 +95,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public static boolean ALLOW_MISSING_KEY_4_COMBINE = true;
 
 	public static String DEFAULT_DATABASE = DATABASE_MYSQL;
-	public static String DEFAULT_NAMESPACE = "root";
-	public static String DEFAULT_CATALOG = "postgres";
+	public static String DEFAULT_NAMESPACE = ""; // "root";
+	public static String DEFAULT_CATALOG = ""; // PostgreSQL JDBC 必须在 URI 中传 ""postgres";
 	public static String DEFAULT_SCHEMA = "sys";
 	public static String PREFIX_DISTINCT = "DISTINCT ";
 
@@ -181,6 +181,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_DB2);
 		DATABASE_LIST.add(DATABASE_MARIADB);
 		DATABASE_LIST.add(DATABASE_TIDB);
+		DATABASE_LIST.add(DATABASE_COCKROACHDB);
 		DATABASE_LIST.add(DATABASE_DAMENG);
 		DATABASE_LIST.add(DATABASE_KINGBASE);
 		DATABASE_LIST.add(DATABASE_ELASTICSEARCH);
@@ -1157,6 +1158,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isCockroachDB() {
+		return isCockroachDB(getSQLDatabase());
+	}
+	public static boolean isCockroachDB(String db) {
+		return DATABASE_COCKROACHDB.equals(db);
+	}
+
+	@Override
 	public boolean isDameng() {
 		return isDameng(getSQLDatabase());
 	}
@@ -1459,11 +1468,15 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getTablePath() {
 		String q = getQuote();
 
+		String ns = isSurrealDB() ? getSQLNamespace() : null;
+		String cl = isPostgreSQL() || isCockroachDB() || isOpenGauss() || isDuckDB() ? getSQLCatalog() : null;
 		String sch = getSQLSchema();
 		String sqlTable = getSQLTable();
 
-		return (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".") + q + sqlTable + q
-				+ (isKeyPrefix() ? getAs() + q + getSQLAlias() + q : "");
+		return (StringUtil.isEmpty(ns, true) ? "" : q + ns + q + ".")
+				+ (StringUtil.isEmpty(cl, true) ? "" : q + cl + q + ".")
+				+ (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".")
+				+ q + sqlTable + q + (isKeyPrefix() ? getAs() + q + getSQLAlias() + q : "");
 	}
 	@Override
 	public AbstractSQLConfig<T> setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
@@ -3955,7 +3968,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 */
 	@JSONField(serialize = false)
 	public String getRegExpString(String key, String column, String value, boolean ignoreCase) {
-		if (isPostgreSQL() || isInfluxDB()) {
+		if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {
 			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
 		}
 		if (isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
@@ -4281,7 +4294,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				}
 
 				condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
-				if (isPostgreSQL() || isInfluxDB()) {
+				if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {
 					condition += (getKey(column) + " @> " + getValue(key, column, newJSONArray(c)));
 					// operator does not exist: jsonb @> character varying  "[" + c + "]");
 				}
@@ -4987,7 +5000,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 					else if (rt.endsWith("~")) {
 						boolean ignoreCase = "*~".equals(rt);
-						if (isPostgreSQL() || isInfluxDB()) {
+						if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {
 							sql += (first ? ON : AND) + lk + (isNot ? NOT : "") + " ~" + (ignoreCase ? "* " : " ") + rk;
 						}
 						else if (isOracle() || isDameng() || isKingBase()) {
@@ -5042,7 +5055,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						String arrKeyPath = isIn ? rk : lk;
 						String itemKeyPath = isIn ? lk : rk;
 
-						if (isPostgreSQL() || isInfluxDB()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
+						if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
 							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
 									+ " IS NOT NULL AND " + arrKeyPath + " @> " + itemKeyPath) + (isNot ? ") " : "");
 						}
