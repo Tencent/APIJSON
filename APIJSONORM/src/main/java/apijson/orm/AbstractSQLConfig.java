@@ -1494,7 +1494,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	public String getAs() {
-		return isOracle() ? " " : " AS ";
+		return isOracle() || isManticore() ? " " : " AS ";
 	}
 
 	@Override
