@@ -28,6 +28,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_DAMENG = "DAMENG"; // https://www.dameng.com
 	String DATABASE_KINGBASE = "KINGBASE"; // https://www.kingbase.com.cn
 	String DATABASE_ELASTICSEARCH = "ELASTICSEARCH"; // https://www.elastic.co/guide/en/elasticsearch/reference/7.4/xpack-sql.html
+	String DATABASE_MANTICORE = "MANTICORE"; // https://manticoresearch.com
 	String DATABASE_CLICKHOUSE = "CLICKHOUSE"; // https://clickhouse.com
 	String DATABASE_HIVE = "HIVE"; // https://hive.apache.org
 	String DATABASE_PRESTO = "PRESTO"; // Facebook PrestoDB  https://prestodb.io
@@ -86,6 +87,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isDameng();
 	boolean isKingBase();
 	boolean isElasticsearch();
+	boolean isManticore();
 	boolean isClickHouse();
 	boolean isHive();
 	boolean isPresto();

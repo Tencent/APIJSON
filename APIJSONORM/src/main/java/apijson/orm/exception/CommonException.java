@@ -211,6 +211,9 @@ public class CommonException extends Exception {
         else if (config.isElasticsearch()) {
           db = SQLConfig.DATABASE_ELASTICSEARCH + " " + dbVersion;
         }
+        else if (config.isManticore()) {
+          db = SQLConfig.DATABASE_MANTICORE + " " + dbVersion;
+        }
         else if (config.isClickHouse()) {
           db = SQLConfig.DATABASE_CLICKHOUSE + " " + dbVersion;
         }

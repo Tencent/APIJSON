@@ -185,6 +185,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_DAMENG);
 		DATABASE_LIST.add(DATABASE_KINGBASE);
 		DATABASE_LIST.add(DATABASE_ELASTICSEARCH);
+		DATABASE_LIST.add(DATABASE_MANTICORE);
 		DATABASE_LIST.add(DATABASE_CLICKHOUSE);
 		DATABASE_LIST.add(DATABASE_HIVE);
 		DATABASE_LIST.add(DATABASE_PRESTO);
@@ -1190,6 +1191,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
+	public boolean isManticore() {
+		return isManticore(getSQLDatabase());
+	}
+	public static boolean isManticore(String db) {
+		return DATABASE_MANTICORE.equals(db);
+	}
+
+	@Override
 	public boolean isClickHouse() {
 		return isClickHouse(getSQLDatabase());
 	}
@@ -1344,7 +1353,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 	@Override
 	public String getQuote() { // MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
-		if(isElasticsearch() || isIoTDB() || isSurrealDB()) {
+		if(isElasticsearch() || isManticore() || isIoTDB() || isSurrealDB()) {
 			return "";
 		}
 		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() ? "`" : "\"";
