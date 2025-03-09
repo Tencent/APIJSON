@@ -39,6 +39,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_MILVUS = "MILVUS"; // https://milvus.io
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
+	String DATABASE_TIMESCALEDB = "TIMESCALEDB"; // https://www.timescale.com
 	String DATABASE_IOTDB = "IOTDB"; // https://iotdb.apache.org/zh/UserGuide/latest/API/Programming-JDBC.html
 
 	String DATABASE_REDIS = "REDIS"; // https://redisql.com
@@ -98,6 +99,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isMilvus();
 	boolean isInfluxDB();
 	boolean isTDengine();
+	boolean isTimescaleDB();
 	boolean isIoTDB();
 	boolean isRedis();
 	boolean isMongoDB();

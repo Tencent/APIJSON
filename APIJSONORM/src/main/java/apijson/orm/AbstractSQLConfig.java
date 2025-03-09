@@ -193,6 +193,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_MILVUS);
 		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
+		DATABASE_LIST.add(DATABASE_TIMESCALEDB);
 		DATABASE_LIST.add(DATABASE_IOTDB);
 		DATABASE_LIST.add(DATABASE_SNOWFLAKE);
 		DATABASE_LIST.add(DATABASE_DATABRICKS);
@@ -1276,6 +1277,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 	public static boolean isTDengine(String db) {
 		return DATABASE_TDENGINE.equals(db);
+	}
+
+	@Override
+	public boolean isTimescaleDB() {
+		return isTimescaleDB(getSQLDatabase());
+	}
+	public static boolean isTimescaleDB(String db) {
+		return DATABASE_TIMESCALEDB.equals(db);
 	}
 
 
