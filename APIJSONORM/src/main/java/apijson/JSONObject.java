@@ -151,6 +151,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	public static final String KEY_GROUP = "@group"; //分组方式
 	public static final String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
 	public static final String KEY_HAVING_AND = "@having&"; //聚合函数条件，一般和@group一起用
+	public static final String KEY_SAMPLE = "@sample"; //取样方式
+	public static final String KEY_LATEST = "@latest"; //最近方式
+	public static final String KEY_PARTITION = "@partition"; //分区方式
+	public static final String KEY_FILL = "@fill"; //填充方式
 	public static final String KEY_ORDER = "@order"; //排序方式
 	public static final String KEY_KEY = "@key"; // key 映射，year:left(date,4);name_tag:(name,tag)
 	public static final String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
@@ -185,6 +189,10 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		TABLE_KEY_LIST.add(KEY_GROUP);
 		TABLE_KEY_LIST.add(KEY_HAVING);
 		TABLE_KEY_LIST.add(KEY_HAVING_AND);
+		TABLE_KEY_LIST.add(KEY_SAMPLE);
+		TABLE_KEY_LIST.add(KEY_LATEST);
+		TABLE_KEY_LIST.add(KEY_PARTITION);
+		TABLE_KEY_LIST.add(KEY_FILL);
 		TABLE_KEY_LIST.add(KEY_ORDER);
 		TABLE_KEY_LIST.add(KEY_KEY);
 		TABLE_KEY_LIST.add(KEY_RAW);
@@ -408,6 +416,66 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 */
 	public JSONObject setHaving(String keys, boolean isAnd) {
 		return puts(isAnd ? KEY_HAVING_AND : KEY_HAVING, keys);
+	}
+
+	/**set keys for sample by
+	 * @param keys  key0, key1, key2 ...
+	 * @return {@link #setSample(String)}
+	 */
+	public JSONObject setSample(String... keys) {
+		return setSample(StringUtil.getString(keys, true));
+	}
+	/**set keys for sample by
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setSample(String keys) {
+		return puts(KEY_SAMPLE, keys);
+	}
+
+	/**set keys for latest on
+	 * @param keys  key0, key1, key2 ...
+	 * @return {@link #setLatest(String)}
+	 */
+	public JSONObject setLatest(String... keys) {
+		return setLatest(StringUtil.getString(keys, true));
+	}
+	/**set keys for latest on
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	public JSONObject setLatest(String keys) {
+		return puts(KEY_LATEST, keys);
+	}
+
+	/**set keys for partition by
+	 * @param keys  key0, key1, key2 ...
+	 * @return {@link #setPartition(String)}
+	 */
+	public JSONObject setPartition(String... keys) {
+		return setPartition(StringUtil.getString(keys, true));
+	}
+	/**set keys for partition by
+	 * @param keys  key0, key1, key2 ...
+	 * @return
+	 */
+	public JSONObject setPartition(String keys) {
+		return puts(KEY_PARTITION, keys);
+	}
+
+	/**set keys for fill(key): fill(null), fill(linear), fill(prev)
+	 * @param keys  key0, key1, key2 ...
+	 * @return {@link #setFill(String)}
+	 */
+	public JSONObject setFill(String... keys) {
+		return setFill(StringUtil.getString(keys, true));
+	}
+	/**set keys for fill(key): fill(null), fill(linear), fill(prev)
+	 * @param keys  key0, key1, key2 ...
+	 * @return
+	 */
+	public JSONObject setFill(String keys) {
+		return puts(KEY_FILL, keys);
 	}
 
 	/**set keys for order by

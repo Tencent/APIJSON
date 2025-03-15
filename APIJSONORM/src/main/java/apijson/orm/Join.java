@@ -19,7 +19,7 @@ public class Join {
 
 	private String path;  // /User/id@
 
-	private String joinType;  // "@" - APP, "<" - LEFT, ">" - RIGHT, "*" - CROSS, "&" - INNER, "|" - FULL, "!" - OUTER, "^" - SIDE, "(" - ANTI, ")" - FOREIGN
+	private String joinType;  // "@" - APP, "<" - LEFT, ">" - RIGHT, "*" - CROSS, "&" - INNER, "|" - FULL, "!" - OUTER, "^" - SIDE, "(" - ANTI, ")" - FOREIGN, "~" ASOF
 	private String table;  // User
 	private String alias;  // owner
 	private int count = 1;	// 当app join子表，需要返回子表的行数，默认1行；
@@ -142,6 +142,9 @@ public class Join {
 	}
 	public boolean isForeignJoin() {
 		return ")".equals(getJoinType());
+	}
+	public boolean isAsofJoin() {
+		return "~".equals(getJoinType());
 	}
 
 	public boolean isLeftOrRightJoin() {

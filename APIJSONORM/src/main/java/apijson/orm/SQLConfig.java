@@ -40,6 +40,7 @@ public interface SQLConfig<T extends Object> {
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
 	String DATABASE_TIMESCALEDB = "TIMESCALEDB"; // https://www.timescale.com
+	String DATABASE_QUESTDB = "QUESTDB"; // https://questdb.com
 	String DATABASE_IOTDB = "IOTDB"; // https://iotdb.apache.org/zh/UserGuide/latest/API/Programming-JDBC.html
 
 	String DATABASE_REDIS = "REDIS"; // https://redisql.com
@@ -77,6 +78,10 @@ public interface SQLConfig<T extends Object> {
 
 	SQLConfig<T> setTag(String tag);
 
+	boolean isTSQL();
+	boolean isMSQL();
+	boolean isPSQL();
+
 	boolean isMySQL();
 	boolean isPostgreSQL();
 	boolean isSQLServer();
@@ -100,6 +105,7 @@ public interface SQLConfig<T extends Object> {
 	boolean isInfluxDB();
 	boolean isTDengine();
 	boolean isTimescaleDB();
+	boolean isQuestDB();
 	boolean isIoTDB();
 	boolean isRedis();
 	boolean isMongoDB();
@@ -316,6 +322,18 @@ public interface SQLConfig<T extends Object> {
 
 	String getHavingCombine();
 	SQLConfig<T> setHavingCombine(String havingCombine);
+
+	String getSample();
+	SQLConfig<T> setSample(String order);
+
+	String getLatest();
+	SQLConfig<T> setLatest(String latest);
+
+	String getPartition();
+	SQLConfig<T> setPartition(String partition);
+
+	String getFill();
+	SQLConfig<T> setFill(String fill);
 
 	String getOrder();
 	SQLConfig<T> setOrder(String order);

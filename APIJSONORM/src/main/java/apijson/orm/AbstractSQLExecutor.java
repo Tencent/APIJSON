@@ -1185,12 +1185,16 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 			}
 		}
 		else if (RequestMethod.isGetMethod(config.getMethod(), true)) {
-            //if (config.isPresto() || config.isTrino()) {
+            // if (config.isPresto() || config.isTrino()) {
             //    statement = getConnection(config).prepareStatement(sql); // , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-            //} else {
+            // } else {
             //    statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            //}
-            if (config.isMySQL() || config.isPostgreSQL() || config.isCockroachDB() || config.isOracle() || config.isSQLServer() || config.isDb2()) {
+            // }
+
+			// TODO 补充各种支持 TYPE_SCROLL_SENSITIVE 和 CONCUR_UPDATABLE 的数据库
+            if (config.isMySQL() || config.isTiDB() || config.isMariaDB() || config.isOracle() || config.isSQLServer() || config.isDb2()
+				|| config.isPostgreSQL() || config.isCockroachDB() || config.isOpenGauss() || config.isTimescaleDB() || config.isQuestDB()
+			) {
                 statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             } else {
                 statement = getConnection(config).prepareStatement(sql);

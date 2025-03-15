@@ -194,6 +194,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		DATABASE_LIST.add(DATABASE_INFLUXDB);
 		DATABASE_LIST.add(DATABASE_TDENGINE);
 		DATABASE_LIST.add(DATABASE_TIMESCALEDB);
+		DATABASE_LIST.add(DATABASE_QUESTDB);
 		DATABASE_LIST.add(DATABASE_IOTDB);
 		DATABASE_LIST.add(DATABASE_SNOWFLAKE);
 		DATABASE_LIST.add(DATABASE_DATABRICKS);
@@ -939,7 +940,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private String group; //分组方式的字符串数组，','分隔
 	private String havingCombine; //聚合函数的字符串数组，','分隔
 	private Map<String, Object> having; //聚合函数的字符串数组，','分隔
+	private String sample; //取样方式的字符串数组，','分隔
+	private String latest; //最近方式的字符串数组，','分隔
+	private String partition; //分区方式的字符串数组，','分隔
+	private String fill; //填充方式的字符串数组，','分隔
 	private String order; //排序方式的字符串数组，','分隔
+
 	private Map<String, String> keyMap; //字段名映射，支持 name_tag:(name,tag) 多字段 IN，year:left(date,4) 截取日期年份等
 	private List<String> raw; //需要保留原始 SQL 的字段，','分隔
 	private List<String> json; //需要转为 JSON 的字段，','分隔
@@ -1101,6 +1107,19 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getSQLDatabase() {
 		String db = getDatabase();
 		return db == null ? DEFAULT_DATABASE : db;  // "" 表示已设置，不需要用全局默认的 StringUtil.isEmpty(db, false)) {
+	}
+
+	@Override
+	public boolean isTSQL() { // 兼容 TSQL 语法
+		return isOracle() || isSQLServer() || isDb2();
+	}
+	@Override
+	public boolean isMSQL() { // 兼容 MySQL 语法，但不一定可以使用它的 JDBC/ODBC
+		return isMySQL() || isTiDB() || isMariaDB() || isSQLite() || isTDengine();
+	}
+	@Override
+	public boolean isPSQL() { // 兼容 PostgreSQL 语法，但不一定可以使用它的 JDBC/ODBC
+		return isPostgreSQL() || isCockroachDB() || isOpenGauss() || isInfluxDB() || isTimescaleDB() || isQuestDB() || isDuckDB();
 	}
 
 	@Override
@@ -1285,6 +1304,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 	public static boolean isTimescaleDB(String db) {
 		return DATABASE_TIMESCALEDB.equals(db);
+	}
+
+	@Override
+	public boolean isQuestDB() {
+		return isQuestDB(getSQLDatabase());
+	}
+	public static boolean isQuestDB(String db) {
+		return DATABASE_QUESTDB.equals(db);
 	}
 
 
@@ -1487,7 +1514,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String q = getQuote();
 
 		String ns = isSurrealDB() ? getSQLNamespace() : null;
-		String cl = isPostgreSQL() || isCockroachDB() || isOpenGauss() || isDuckDB() ? getSQLCatalog() : null;
+		String cl = isPSQL() ? getSQLCatalog() : null;
 		String sch = getSQLSchema();
 		String sqlTable = getSQLTable();
 
@@ -1713,6 +1740,274 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 		return method + parseSQLExpression(KEY_HAVING, expression.substring(start), containRaw, false, null);
+	}
+
+	@Override
+	public String getSample() {
+		return sample;
+	}
+	public AbstractSQLConfig<T> setSample(String... conditions) {
+		return setSample(StringUtil.getString(conditions));
+	}
+	@Override
+	public AbstractSQLConfig<T> setSample(String sample) {
+		this.sample = sample;
+		return this;
+	}
+	@JSONField(serialize = false)
+	public String getSampleString(boolean hasPrefix) {
+		//加上子表的 sample
+		String joinSample = "";
+		if (joinList != null) {
+			boolean first = true;
+			for (Join j : joinList) {
+				if (j.isAppJoin()) {
+					continue;
+				}
+
+				SQLConfig ocfg = j.getOuterConfig();
+				SQLConfig cfg = (ocfg != null && ocfg.getSample() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+
+				if (cfg != null) {
+					cfg.setMain(false).setKeyPrefix(true);
+					// if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					//	 cfg.setAlias(cfg.getTable());
+					// }
+					String c = ((AbstractSQLConfig) cfg).getSampleString(false);
+
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinSample += (first ? "" : ", ") + c;
+						first = false;
+					}
+				}
+			}
+		}
+
+		String sample = StringUtil.getTrimedString(getSample());
+
+		String[] keys = StringUtil.split(sample);
+		if (keys == null || keys.length <= 0) {
+			return StringUtil.isEmpty(joinSample, true) ? "" : (hasPrefix ? " SAMPLE BY " : "") + joinSample;
+		}
+
+		for (int i = 0; i < keys.length; i++) {
+			String item = keys[i];
+			//if ("fill(null)".equals(item) || "fill(linear)".equals(item) || "fill(prev)".equals(item) || "fill(previous)".equals(item)) {
+			//	continue;
+			//}
+
+			String origin = item;
+
+			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
+				if (StringUtil.isNumberOrAlpha(origin) == false) {
+					throw new IllegalArgumentException("预编译模式下 @sample:value 中 " + item + " 不合法! value 里面用 , 分割的"
+							+ "每一项必须是 column 且其中 column 必须是 字母或数字组合！并且不要有多余的空格！");
+				}
+			}
+
+			keys[i] = getKey(origin);
+		}
+
+		return (hasPrefix ? " SAMPLE BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinSample, ", ");
+	}
+
+	@Override
+	public String getLatest() {
+		return latest;
+	}
+	public AbstractSQLConfig<T> setLatest(String... conditions) {
+		return setLatest(StringUtil.getString(conditions));
+	}
+	@Override
+	public AbstractSQLConfig<T> setLatest(String latest) {
+		this.latest = latest;
+		return this;
+	}
+	@JSONField(serialize = false)
+	public String getLatestString(boolean hasPrefix) {
+		//加上子表的 latest
+		String joinLatest = "";
+		if (joinList != null) {
+			boolean first = true;
+			for (Join j : joinList) {
+				if (j.isAppJoin()) {
+					continue;
+				}
+
+				SQLConfig ocfg = j.getOuterConfig();
+				SQLConfig cfg = (ocfg != null && ocfg.getLatest() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+
+				if (cfg != null) {
+					cfg.setMain(false).setKeyPrefix(true);
+					// if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					//	 cfg.setAlias(cfg.getTable());
+					// }
+					String c = ((AbstractSQLConfig) cfg).getLatestString(false);
+
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinLatest += (first ? "" : ", ") + c;
+						first = false;
+					}
+				}
+			}
+		}
+
+		String latest = StringUtil.getTrimedString(getLatest());
+
+		String[] keys = StringUtil.split(latest);
+		if (keys == null || keys.length <= 0) {
+			return StringUtil.isEmpty(joinLatest, true) ? "" : (hasPrefix ? " LATEST ON " : "") + joinLatest;
+		}
+
+		for (int i = 0; i < keys.length; i++) {
+			String item = keys[i];
+			String origin = item;
+
+			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
+				if (StringUtil.isName(origin) == false) {
+					throw new IllegalArgumentException("预编译模式下 @latest:value 中 " + item + " 不合法! value 里面用 , 分割的"
+							+ "每一项必须是 column 且其中 column 必须是 英语单词！并且不要有多余的空格！");
+				}
+			}
+
+			keys[i] = getKey(origin);
+		}
+
+		return (hasPrefix ? " LATEST ON " : "") + StringUtil.concat(StringUtil.getString(keys), joinLatest, ", ");
+	}
+
+	@Override
+	public String getPartition() {
+		return partition;
+	}
+	public AbstractSQLConfig<T> setPartition(String... conditions) {
+		return setPartition(StringUtil.getString(conditions));
+	}
+	@Override
+	public AbstractSQLConfig<T> setPartition(String partition) {
+		this.partition = partition;
+		return this;
+	}
+	@JSONField(serialize = false)
+	public String getPartitionString(boolean hasPrefix) {
+		//加上子表的 partition
+		String joinPartition = "";
+		if (joinList != null) {
+			boolean first = true;
+			for (Join j : joinList) {
+				if (j.isAppJoin()) {
+					continue;
+				}
+
+				SQLConfig ocfg = j.getOuterConfig();
+				SQLConfig cfg = (ocfg != null && ocfg.getPartition() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+
+				if (cfg != null) {
+					cfg.setMain(false).setKeyPrefix(true);
+					// if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					//	 cfg.setAlias(cfg.getTable());
+					// }
+					String c = ((AbstractSQLConfig) cfg).getPartitionString(false);
+
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinPartition += (first ? "" : ", ") + c;
+						first = false;
+					}
+				}
+			}
+		}
+
+		String partition = StringUtil.getTrimedString(getPartition());
+
+		String[] keys = StringUtil.split(partition);
+		if (keys == null || keys.length <= 0) {
+			return StringUtil.isEmpty(joinPartition, true) ? "" : (hasPrefix ? " PARTITION BY " : "") + joinPartition;
+		}
+
+		for (int i = 0; i < keys.length; i++) {
+			String item = keys[i];
+			String origin = item;
+
+			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
+				if (StringUtil.isName(origin) == false) {
+					throw new IllegalArgumentException("预编译模式下 @partition:value 中 " + item + " 不合法! value 里面用 , 分割的"
+							+ "每一项必须是 column 且其中 column 必须是 英语单词！并且不要有多余的空格！");
+				}
+			}
+
+			keys[i] = getKey(origin);
+		}
+
+		return (hasPrefix ? " PARTITION BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinPartition, ", ");
+	}
+
+	@Override
+	public String getFill() {
+		return fill;
+	}
+	public AbstractSQLConfig<T> setFill(String... conditions) {
+		return setFill(StringUtil.getString(conditions));
+	}
+	@Override
+	public AbstractSQLConfig<T> setFill(String fill) {
+		this.fill = fill;
+		return this;
+	}
+	@JSONField(serialize = false)
+	public String getFillString(boolean hasPrefix) {
+		//加上子表的 fill
+		String joinFill = "";
+		if (joinList != null) {
+			boolean first = true;
+			for (Join j : joinList) {
+				if (j.isAppJoin()) {
+					continue;
+				}
+
+				SQLConfig ocfg = j.getOuterConfig();
+				SQLConfig cfg = (ocfg != null && ocfg.getFill() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+
+				if (cfg != null) {
+					cfg.setMain(false).setKeyPrefix(true);
+					// if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+					//	 cfg.setAlias(cfg.getTable());
+					// }
+					String c = ((AbstractSQLConfig) cfg).getFillString(false);
+
+					if (StringUtil.isEmpty(c, true) == false) {
+						joinFill += (first ? "" : ", ") + c;
+						first = false;
+					}
+				}
+			}
+		}
+
+		String fill = StringUtil.getTrimedString(getFill());
+
+		String[] keys = StringUtil.split(fill);
+		if (keys == null || keys.length <= 0) {
+			return StringUtil.isEmpty(joinFill, true) ? "" : (hasPrefix ? " FILL(" : "") + joinFill + ")";
+		}
+
+		for (int i = 0; i < keys.length; i++) {
+			String item = keys[i];
+			String origin = item;
+
+			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
+				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
+				if (StringUtil.isName(origin) == false) {
+					throw new IllegalArgumentException("预编译模式下 @fill:value 中 " + item + " 不合法! value 里面用 , 分割的"
+							+ "每一项必须是 column 且其中 column 必须是 英语单词！并且不要有多余的空格！");
+				}
+			}
+
+			keys[i] = getKey(origin);
+		}
+
+		return (hasPrefix ? " FILL(" : "") + StringUtil.concat(StringUtil.getString(keys), joinFill, ", ") + ")";
 	}
 
 	@Override
@@ -2741,35 +3036,38 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getLimitString() {
 		int count = getCount();
 
-		if (isMilvus()) {
+		boolean isSurrealDB = isSurrealDB();
+		boolean isQuestDB = isQuestDB();
+		if (isSurrealDB || isQuestDB || isMilvus()) {
 			if (count == 0) {
 				Parser<T> parser = getParser();
 				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
 			}
 
 			int offset = getOffset(getPage(), count);
-			return " LIMIT " + offset + ", " + count; // 目前 moql-transx 的限制
-		} else if (isSurrealDB()) {
-			if (count == 0) {
-				Parser<T> parser = getParser();
-				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
+			if (isQuestDB()) {
+				return " LIMIT " + offset + ", " + (offset + count);
 			}
-
-			int offset = getOffset(getPage(), count);
-			return " START " + offset + " LIMIT " + count;
+		    else if (isSurrealDB()) {
+				return " START " + offset + " LIMIT " + count;
+			}
+			else {
+				return " LIMIT " + offset + ", " + count; // 目前 moql-transx 的限制
+			}
 		}
 
 		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) { // TODO HEAD 真的不需要 LIMIT ？
 			return "";
 		}
 
+		boolean isOracle = isOracle();
 		return getLimitString(
-		getPage()
-		, getCount()
-		, isOracle() || isSQLServer() || isDb2()
-		, isOracle() || isDameng() || isKingBase()
-		, isPresto() || isTrino()
-	);
+			getPage()
+			, count
+			, isTSQL()
+			, isOracle || isDameng() || isKingBase()
+			, isPresto() || isTrino()
+		);
 	}
 	/**获取限制数量及偏移量
 	* @param page
@@ -3462,6 +3760,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				case "^": // SIDE JOIN: ! (A & B)
 				case "(": // ANTI JOIN: A & ! B
 				case ")": // FOREIGN JOIN: B & ! A
+				case "~": // ASOF JOIN: B ~= A
 					jc = j.getJoinConfig();
 					boolean isMain = jc.isMain();
 					jc.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
@@ -3547,7 +3846,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					throw new UnsupportedOperationException(
 							"join:value 中 value 里的 " + jt + "/" + j.getPath()
 							+ "错误！不支持 " + jt + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
-							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
+							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN, ~ ASOF ] 之外的 JOIN 类型 !"
 							);
 				}
 			}
@@ -3986,7 +4285,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 */
 	@JSONField(serialize = false)
 	public String getRegExpString(String key, String column, String value, boolean ignoreCase) {
-		if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {
+		if (isPSQL()) {
 			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
 		}
 		if (isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
@@ -4312,7 +4611,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				}
 
 				condition += (i <= 0 ? "" : (Logic.isAnd(type) ? AND : OR));
-				if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {
+				if (isPSQL()) {
 					condition += (getKey(column) + " @> " + getValue(key, column, newJSONArray(c)));
 					// operator does not exist: jsonb @> character varying  "[" + c + "]");
 				}
@@ -4763,11 +5062,15 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String aggregation;
 		if (RequestMethod.isGetMethod(config.getMethod(), true)) {
 			aggregation = config.getGroupString(true) + config.getHavingString(true)
+					+ config.getSampleString(true) + config.getLatestString(true)
+					+ config.getPartitionString(true) + config.getFillString(true)
 					+ config.getOrderString(true);
 		}
 		else if (RequestMethod.isHeadMethod(config.getMethod(), true)) {
 			// TODO 加参数 isPagenation 判断是 GET 内分页 query:2 查总数，不用加这些条件
-			aggregation = config.getGroupString(true) + config.getHavingString(true) ;
+			aggregation = config.getGroupString(true) + config.getHavingString(true)
+					+ config.getSampleString(true) + config.getLatestString(true)
+					+ config.getPartitionString(true) + config.getFillString(true);
 		}
 		else if (config.getMethod() == PUT || config.getMethod() == DELETE) {
 			aggregation = config.getHavingString(true) ;
@@ -4890,12 +5193,16 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					sql = " INNER JOIN " + jc.getTablePath();
 					sql = concatJoinOn(sql, quote, j, jt, onList);
 					break;
+				case "~": // ASOF JOIN: B ~= A
+					sql = " ASOF JOIN " + jc.getTablePath();
+					sql = concatJoinOn(sql, quote, j, jt, onList);
+					break;
 				default:
 					String k = jc.getTableKey();
 					throw new UnsupportedOperationException(
 							"join:value 中 value 里的 " + k + "/" + j.getPath()
 							+ "错误！不支持 " + k + " 等 [ @ APP, < LEFT, > RIGHT, * CROSS"
-							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN ] 之外的 JOIN 类型 !"
+							+ ", & INNER, | FULL, ! OUTER, ^ SIDE, ( ANTI, ) FOREIGN, ~ ASOF ] 之外的 JOIN 类型 !"
 							);
 				}
 
@@ -5018,7 +5325,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 					else if (rt.endsWith("~")) {
 						boolean ignoreCase = "*~".equals(rt);
-						if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {
+						if (isPSQL()) {
 							sql += (first ? ON : AND) + lk + (isNot ? NOT : "") + " ~" + (ignoreCase ? "* " : " ") + rk;
 						}
 						else if (isOracle() || isDameng() || isKingBase()) {
@@ -5073,7 +5380,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						String arrKeyPath = isIn ? rk : lk;
 						String itemKeyPath = isIn ? lk : rk;
 
-						if (isPostgreSQL() || isCockroachDB() || isInfluxDB()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
+						if (isPSQL()) {  //operator does not exist: jsonb @> character varying  "[" + c + "]");
 							sql += (first ? ON : AND) + (isNot ? "( " : "") + getCondition(isNot, arrKeyPath
 									+ " IS NOT NULL AND " + arrKeyPath + " @> " + itemKeyPath) + (isNot ? ") " : "");
 						}
@@ -5308,6 +5615,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String group = request.getString(KEY_GROUP);
 		Object having = request.get(KEY_HAVING);
 		String havingAnd = request.getString(KEY_HAVING_AND);
+		String sample = request.getString(KEY_SAMPLE);
+		String latest = request.getString(KEY_LATEST);
+		String partition = request.getString(KEY_PARTITION);
+		String fill = request.getString(KEY_FILL);
 		String order = request.getString(KEY_ORDER);
 		Object keyMap = request.get(KEY_KEY);
 		String raw = request.getString(KEY_RAW);
@@ -5337,6 +5648,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			request.remove(KEY_GROUP);
 			request.remove(KEY_HAVING);
 			request.remove(KEY_HAVING_AND);
+			request.remove(KEY_SAMPLE);
+			request.remove(KEY_LATEST);
+			request.remove(KEY_PARTITION);
+			request.remove(KEY_FILL);
 			request.remove(KEY_ORDER);
 			request.remove(KEY_KEY);
 			request.remove(KEY_RAW);
@@ -5841,6 +6156,10 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			config.setGroup(group);
 			config.setHaving(havingMap);
 			config.setHavingCombine(havingCombine);
+			config.setSample(sample);
+			config.setLatest(latest);
+			config.setPartition(partition);
+			config.setFill(fill);
 			config.setOrder(order);
 
 			String[] jsons = StringUtil.split(json);
@@ -5904,6 +6223,18 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 			if (havingAnd != null) {
 				request.put(KEY_HAVING_AND, havingAnd);
+			}
+			if (sample != null) {
+				request.put(KEY_SAMPLE, sample);
+			}
+			if (latest != null) {
+				request.put(KEY_LATEST, latest);
+			}
+			if (partition != null) {
+				request.put(KEY_PARTITION, partition);
+			}
+			if (fill != null) {
+				request.put(KEY_FILL, fill);
 			}
 			if (order != null) {
 				request.put(KEY_ORDER, order);

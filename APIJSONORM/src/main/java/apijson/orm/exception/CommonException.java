@@ -229,6 +229,9 @@ public class CommonException extends Exception {
         else if (config.isTimescaleDB()) {
           db = SQLConfig.DATABASE_TIMESCALEDB + " " + dbVersion;
         }
+        else if (config.isQuestDB()) {
+          db = SQLConfig.DATABASE_QUESTDB + " " + dbVersion;
+        }
         else if (config.isIoTDB()) {
           db = SQLConfig.DATABASE_IOTDB + " " + dbVersion;
         }
