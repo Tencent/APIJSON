@@ -520,8 +520,6 @@ public class StringUtil {
 	public static final String HTTP = "http";
 	public static final String URL_PREFIX = "http://";
 	public static final String URL_PREFIXs = "https://";
-	public static final String URL_STAFFIX = URL_PREFIX;
-	public static final String URL_STAFFIXs = URL_PREFIXs;
 	/**判断字符类型是否是网址
 	 * @param url
 	 * @return
