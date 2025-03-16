@@ -1133,7 +1133,6 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		if (castToJson == false) {
 			List<String> json = config.getJson();
 			castToJson = json != null && json.contains(label);
-			castToJson = json != null && json.contains(label);
 		}
 		if (castToJson) {
 			try {
