@@ -1792,17 +1792,18 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		for (int i = 0; i < keys.length; i++) {
 			String item = keys[i];
-			//if ("fill(null)".equals(item) || "fill(linear)".equals(item) || "fill(prev)".equals(item) || "fill(previous)".equals(item)) {
-			//	continue;
-			//}
 
 			String origin = item;
 
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
-				if (StringUtil.isNumberOrAlpha(origin) == false) {
+				if (StringUtil.isName(origin)) {}
+				else if (StringUtil.isCombineOfNumOrAlpha(origin)) {
+					continue;
+				}
+				else {
 					throw new IllegalArgumentException("预编译模式下 @sample:value 中 " + item + " 不合法! value 里面用 , 分割的"
-							+ "每一项必须是 column 且其中 column 必须是 字母或数字组合！并且不要有多余的空格！");
+							+ "每一项必须是 column 且其中 column 必须是 数字或英语字母组合！并且不要有多余的空格！");
 				}
 			}
 
@@ -1994,13 +1995,21 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		for (int i = 0; i < keys.length; i++) {
 			String item = keys[i];
+			if ("NULL".equals(item) || "LINEAR".equals(item) || "PREV".equals(item) || "PREVIOUS".equals(item)) {
+				continue;
+			}
+
 			String origin = item;
 
 			if (isPrepared()) { //不能通过 ? 来代替，SELECT 'id','name' 返回的就是 id:"id", name:"name"，而不是数据库里的值！
 				//这里既不对origin trim，也不对 ASC/DESC ignoreCase，希望前端严格传没有任何空格的字符串过来，减少传输数据量，节约服务器性能
-				if (StringUtil.isName(origin) == false) {
+				if (StringUtil.isName(origin)) {}
+				else if (StringUtil.isCombineOfNumOrAlpha(origin)) {
+					continue;
+				}
+				else {
 					throw new IllegalArgumentException("预编译模式下 @fill:value 中 " + item + " 不合法! value 里面用 , 分割的"
-							+ "每一项必须是 column 且其中 column 必须是 英语单词！并且不要有多余的空格！");
+							+ "每一项必须是 column 且其中 column 必须是 数字或英语字母组合！并且不要有多余的空格！");
 				}
 			}
 
@@ -3035,20 +3044,26 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	@JSONField(serialize = false)
 	public String getLimitString() {
 		int count = getCount();
+		int page = getPage();
+
+		boolean isMilvus = isMilvus();
+		if ((count <= 0 && ! (isMilvus && isMain())) || RequestMethod.isHeadMethod(getMethod(), true)) { // TODO HEAD 真的不需要 LIMIT ？
+			return "";
+		}
 
 		boolean isSurrealDB = isSurrealDB();
 		boolean isQuestDB = isQuestDB();
-		if (isSurrealDB || isQuestDB || isMilvus()) {
+		if (isSurrealDB || isQuestDB || isMilvus) {
 			if (count == 0) {
 				Parser<T> parser = getParser();
 				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
 			}
 
-			int offset = getOffset(getPage(), count);
+			int offset = getOffset(page, count);
 			if (isQuestDB()) {
 				return " LIMIT " + offset + ", " + (offset + count);
 			}
-		    else if (isSurrealDB()) {
+			else if (isSurrealDB()) {
 				return " START " + offset + " LIMIT " + count;
 			}
 			else {
@@ -3056,18 +3071,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 		}
 
-		if (count <= 0 || RequestMethod.isHeadMethod(getMethod(), true)) { // TODO HEAD 真的不需要 LIMIT ？
-			return "";
-		}
-
 		boolean isOracle = isOracle();
-		return getLimitString(
-			getPage()
-			, count
-			, isTSQL()
-			, isOracle || isDameng() || isKingBase()
-			, isPresto() || isTrino()
-		);
+		return getLimitString(page, count, isTSQL(), isOracle || isDameng() || isKingBase(), isPresto() || isTrino());
 	}
 	/**获取限制数量及偏移量
 	* @param page

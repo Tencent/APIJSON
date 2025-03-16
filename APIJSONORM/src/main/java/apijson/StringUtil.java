@@ -343,6 +343,7 @@ public class StringUtil {
 	public static final Pattern PATTERN_PHONE;
 	public static final Pattern PATTERN_EMAIL;
 	public static final Pattern PATTERN_ID_CARD;
+	public static final Pattern PATTERN_NUM_OR_ALPHA;
 	public static final Pattern PATTERN_ALPHA;
 	public static final Pattern PATTERN_PASSWORD; //TODO
 	public static final Pattern PATTERN_NAME;
@@ -351,6 +352,7 @@ public class StringUtil {
 	public static final Pattern PATTERN_BRANCH_URL;
 	static {
 		PATTERN_NUMBER = Pattern.compile("^[0-9]+$");
+		PATTERN_NUM_OR_ALPHA = Pattern.compile("^[0-9a-zA-Z_.:]+$");
 		PATTERN_ALPHA = Pattern.compile("^[a-zA-Z]+$");
 		PATTERN_ALPHA_BIG = Pattern.compile("^[A-Z]+$");
 		PATTERN_ALPHA_SMALL = Pattern.compile("^[a-z]+$");
@@ -440,6 +442,19 @@ public class StringUtil {
 	 */
 	public static boolean isNumberOrAlpha(String s) {
 		return isNumer(s) || isAlpha(s);
+	}
+
+	/**判断是否全是数字或字母
+	 * @param s
+	 * @return
+	 */
+	public static boolean isCombineOfNumOrAlpha(String s) {
+		if (isEmpty(s, true)) {
+			return false;
+		}
+
+		currentString = s;
+		return PATTERN_NUM_OR_ALPHA.matcher(s).matches();
 	}
 
 	/**判断是否为代码名称，只能包含字母，数字或下划线
