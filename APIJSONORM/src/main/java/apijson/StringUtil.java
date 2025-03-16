@@ -389,7 +389,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isNumberPassword(String s) {
-		return getLength(s, false) == 6 && isNumer(s);
+		return getLength(s, false) == 6 && isNumber(s);
 	}
 	/**判断email格式是否正确
 	 * @param email
@@ -410,13 +410,13 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isVerify(String s) {
-		return getLength(s, false) >= 4 && isNumer(s);
+		return getLength(s, false) >= 4 && isNumber(s);
 	}
 	/**判断是否全是数字
 	 * @param s
 	 * @return
 	 */
-	public static boolean isNumer(String s) {
+	public static boolean isNumber(String s) {
 		if (isNotEmpty(s, true) == false) {
 			return false;
 		}
@@ -441,7 +441,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isNumberOrAlpha(String s) {
-		return isNumer(s) || isAlpha(s);
+		return isNumber(s) || isAlpha(s);
 	}
 
 	/**判断是否全是数字或字母
@@ -500,7 +500,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isIDCard(String number) {
-		if (isNumberOrAlpha(number) == false) {
+		if (isCombineOfNumOrAlpha(number) == false) {
 			return false;
 		}
 		number = getString(number);
@@ -627,7 +627,7 @@ public class StringUtil {
 		String single;
 		for (int i = 0; i < s.length(); i++) {
 			single = s.substring(i, i + 1);
-			if (isNumer(single)) {
+			if (isNumber(single)) {
 				numberString.append(single);
 			} else {
 				if (onlyStart) {
@@ -732,7 +732,7 @@ public class StringUtil {
 		String s;
 		for (int i = 0; i < price.length(); i++) {
 			s = price.substring(i, i + 1);
-			if (".".equals(s) || isNumer(s)) {
+			if (".".equals(s) || isNumber(s)) {
 				correctPriceBuilder.append(s);
 			}
 		}

@@ -2707,7 +2707,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 								if (mk.length() > 0) {
 									origin = mk;
 								}
-							} else if (StringUtil.isNumer(origin)) {
+							} else if (StringUtil.isNumber(origin)) {
 								//do nothing
 							} else {
 								String[] keys = origin.split("[.]");
@@ -2809,7 +2809,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							+ " 且不包含连续减号 -- ！DISTINCT 必须全大写，且后面必须有且只有 1 个空格！其它情况不允许空格！");
 				}
 
-				if (StringUtil.isNumer(origin)) {
+				if (StringUtil.isNumber(origin)) {
 					//do nothing
 				} else {
 					String[] keys = origin.split("[.]");
