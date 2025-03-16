@@ -940,6 +940,8 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 							count ++;
 							Log.d(TAG, ">>> executeAppJoin childMap.put('" + cacheSql + "', result);  childMap.size() = " + childMap.size());
 						}
+					}
+				}
 				finally {
 					if (rs != null) {
 						try {
@@ -1101,7 +1103,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		else if (value instanceof DayOfWeek) {
 			value = ((DayOfWeek) value).getValue();
 		}
-		else if (value instanceof String && isJSONType(config, rsmd, columnIndex, lable)) { //json String
+		else if (value instanceof String && isJSONType(config, rsmd, columnIndex, label)) { //json String
 			castToJson = true;
 		}
 		else if (value instanceof Blob) { //FIXME 存的是 abcde，取出来直接就是 [97, 98, 99, 100, 101] 这种 byte[] 类型，没有经过以下处理，但最终序列化后又变成了字符串 YWJjZGU=
@@ -1130,7 +1132,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 
 		if (castToJson == false) {
 			List<String> json = config.getJson();
-			castToJson = json != null && json.contains(lable);
+			castToJson = json != null && json.contains(label);
 			castToJson = json != null && json.contains(label);
 		}
 		if (castToJson) {
