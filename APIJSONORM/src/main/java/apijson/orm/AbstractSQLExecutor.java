@@ -190,8 +190,8 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		Log.d(TAG, "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 				+ "\n已生成 " + generatedSQLCount + " 条 SQL"
 				+ "\nexecute  startTime = " + startTime
-				+ "\ndatabase = " + StringUtil.getString(config.getDatabase())
-				+ "; schema = " + StringUtil.getString(config.getSchema())
+				+ "\ndatabase = " + StringUtil.get(config.getDatabase())
+				+ "; schema = " + StringUtil.get(config.getSchema())
 				+ "; sql = \n" + sql
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 

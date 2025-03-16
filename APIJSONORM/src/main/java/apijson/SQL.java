@@ -242,7 +242,7 @@ public class SQL {
 	 * @return column.isEmpty() ? "*" : column;
 	 */
 	public static String column(String column) {
-		column = StringUtil.getTrimedString(column);
+		column = StringUtil.trim(column);
 		return column.isEmpty() ? "*" : column;
 	}
 	/**有别名的字段

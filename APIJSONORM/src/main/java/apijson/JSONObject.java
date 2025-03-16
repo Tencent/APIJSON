@@ -326,7 +326,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setColumn(String)}
 	 */
 	public JSONObject setColumn(String... keys) {
-		return setColumn(StringUtil.getString(keys, true));
+		return setColumn(StringUtil.get(keys, true));
 	}
 	/**set keys need to be returned
 	 * @param keys  "key0,key1,key2..."
@@ -341,7 +341,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setNull(String)}
 	 */
 	public JSONObject setNull(String... keys) {
-		return setNull(StringUtil.getString(keys, true));
+		return setNull(StringUtil.get(keys, true));
 	}
 	/**set keys whose value is null
 	 * @param keys  "key0,key1,key2..."
@@ -356,7 +356,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setCast(String)}
 	 */
 	public JSONObject setCast(String... keyTypes) {
-		return setCast(StringUtil.getString(keyTypes, true));
+		return setCast(StringUtil.get(keyTypes, true));
 	}
 	/**set keys and types whose value should be cast to type, cast(value AS DATE)
 	 * @param keyTypes  "key0:type0,key1:type1,key2:type2..."
@@ -371,7 +371,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setColumn(String)}
 	 */
 	public JSONObject setCombine(String... keys) {
-		return setCombine(StringUtil.getString(keys, true));
+		return setCombine(StringUtil.get(keys, true));
 	}
 	/**set combination of keys for conditions
 	 * @param keys  key0,&key1,|key2,!key3 ...  TODO or key0> | (key1{} & !key2)...
@@ -386,7 +386,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setGroup(String)}
 	 */
 	public JSONObject setGroup(String... keys) {
-		return setGroup(StringUtil.getString(keys, true));
+		return setGroup(StringUtil.get(keys, true));
 	}
 	/**set keys for group by
 	 * @param keys  "key0,key1,key2..."
@@ -401,7 +401,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setHaving(String)}
 	 */
 	public JSONObject setHaving(String... keys) {
-		return setHaving(StringUtil.getString(keys, true));
+		return setHaving(StringUtil.get(keys, true));
 	}
 	/**set keys for having
 	 * @param keys  "key0,key1,key2..."
@@ -423,7 +423,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setSample(String)}
 	 */
 	public JSONObject setSample(String... keys) {
-		return setSample(StringUtil.getString(keys, true));
+		return setSample(StringUtil.get(keys, true));
 	}
 	/**set keys for sample by
 	 * @param keys  "key0,key1,key2..."
@@ -438,7 +438,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setLatest(String)}
 	 */
 	public JSONObject setLatest(String... keys) {
-		return setLatest(StringUtil.getString(keys, true));
+		return setLatest(StringUtil.get(keys, true));
 	}
 	/**set keys for latest on
 	 * @param keys  "key0,key1,key2..."
@@ -453,7 +453,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setPartition(String)}
 	 */
 	public JSONObject setPartition(String... keys) {
-		return setPartition(StringUtil.getString(keys, true));
+		return setPartition(StringUtil.get(keys, true));
 	}
 	/**set keys for partition by
 	 * @param keys  key0, key1, key2 ...
@@ -468,7 +468,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setFill(String)}
 	 */
 	public JSONObject setFill(String... keys) {
-		return setFill(StringUtil.getString(keys, true));
+		return setFill(StringUtil.get(keys, true));
 	}
 	/**set keys for fill(key): fill(null), fill(linear), fill(prev)
 	 * @param keys  key0, key1, key2 ...
@@ -483,7 +483,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #setOrder(String)}
 	 */
 	public JSONObject setOrder(String... keys) {
-		return setOrder(StringUtil.getString(keys, true));
+		return setOrder(StringUtil.get(keys, true));
 	}
 	/**set keys for order by
 	 * @param keys  "key0,key1+,key2-..."
@@ -530,7 +530,7 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	 * @return {@link #puts(String, Object)}
 	 */
 	public JSONObject putsPath(String key, String... keys) {
-		return puts(key+"@", StringUtil.getString(keys, "/"));
+		return puts(key+"@", StringUtil.get(keys, "/"));
 	}
 
 	/**

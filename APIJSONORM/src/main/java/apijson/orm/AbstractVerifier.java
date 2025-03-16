@@ -34,8 +34,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import apijson.orm.script.JavaScriptExecutor;
-import apijson.orm.script.ScriptExecutor;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -69,7 +67,6 @@ import apijson.orm.model.AllColumnComment;
 import apijson.orm.model.TestRecord;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
 /**校验器(权限、请求参数、返回结果等)
@@ -295,7 +292,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			if (ROLE_MAP.containsKey(role) == false) {
 				Set<String> NAMES = ROLE_MAP.keySet();
 				throw new IllegalArgumentException("角色 " + role + " 不存在！" +
-                        "只能是[" + StringUtil.getString(NAMES.toArray()) + "]中的一种！");
+                        "只能是[" + StringUtil.get(NAMES.toArray()) + "]中的一种！");
 			}
 
 			if (role.equals(UNKNOWN) == false) { //未登录的角色
@@ -435,7 +432,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 					Object oid;
 					for (List<Object> ovl : ovs) {
 						oid = ovl == null || index >= ovl.size() ? null : ovl.get(index);
-						if (oid == null || StringUtil.getString(oid).equals("" + visitorId) == false) {
+						if (oid == null || StringUtil.get(oid).equals("" + visitorId) == false) {
 							throw new IllegalAccessException(visitorIdKey + " = " + oid + " 的 " + table
 									+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 						}
@@ -459,7 +456,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 			}
 			else {
 				requestId = config.getWhere(visitorIdKey, true);//JSON里数值不能保证是Long，可能是Integer
-				if (requestId != null && StringUtil.getString(requestId).equals(StringUtil.getString(visitorId)) == false) {
+				if (requestId != null && StringUtil.get(requestId).equals(StringUtil.get(visitorId)) == false) {
 					throw new IllegalAccessException(visitorIdKey + " = " + requestId + " 的 " + table
 							+ " 不允许 " + role + " 用户的 " + method.name() + " 请求！");
 				}
@@ -934,11 +931,11 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		JSONObject update = target.getJSONObject(UPDATE.name());
 		JSONObject replace = target.getJSONObject(REPLACE.name());
 
-		String exist = StringUtil.getString(target.getString(EXIST.name()));
-		String unique = StringUtil.getString(target.getString(UNIQUE.name()));
-		String remove = StringUtil.getString(target.getString(REMOVE.name()));
-		String must = StringUtil.getString(target.getString(MUST.name()));
-		String refuse = StringUtil.getString(target.getString(REFUSE.name()));
+		String exist = StringUtil.get(target.getString(EXIST.name()));
+		String unique = StringUtil.get(target.getString(UNIQUE.name()));
+		String remove = StringUtil.get(target.getString(REMOVE.name()));
+		String must = StringUtil.get(target.getString(MUST.name()));
+		String refuse = StringUtil.get(target.getString(REFUSE.name()));
 
 		Object _if = target.get(IF.name());
 		boolean ifIsStr = _if instanceof String && StringUtil.isNotEmpty(_if, true);
@@ -952,7 +949,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 
 //		Object code = target.get(CODE.name());
 
-		String allowPartialUpdateFail = StringUtil.getString(target.getString(ALLOW_PARTIAL_UPDATE_FAIL.name()));
+		String allowPartialUpdateFail = StringUtil.get(target.getString(ALLOW_PARTIAL_UPDATE_FAIL.name()));
 
 
 		// 移除字段<<<<<<<<<<<<<<<<<<<
@@ -1097,7 +1094,7 @@ public abstract class AbstractVerifier<T extends Object> implements Verifier<T>,
 		for (String rk : rkset) {
 			if (refuseSet.contains(rk)) { // 不允许的字段
 				throw new IllegalArgumentException(method + "请求，" + name
-						+ " 里面不允许传 " + rk + " 等" + StringUtil.getString(refuseSet) + "内的任何字段！");
+						+ " 里面不允许传 " + rk + " 等" + StringUtil.get(refuseSet) + "内的任何字段！");
 			}
 
 			if (rk == null) { // 无效的key

@@ -1556,7 +1556,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return group;
 	}
 	public AbstractSQLConfig<T> setGroup(String... keys) {
-		return setGroup(StringUtil.getString(keys));
+		return setGroup(StringUtil.get(keys));
 	}
 	@Override
 	public AbstractSQLConfig<T> setGroup(String group) {
@@ -1593,7 +1593,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 
-		group = StringUtil.getTrimedString(group);
+		group = StringUtil.trim(group);
 		String[] keys = StringUtil.split(group);
 		if (keys == null || keys.length <= 0) {
 			return StringUtil.isEmpty(joinGroup, true) ? "" : (hasPrefix ? " GROUP BY " : "") + joinGroup;
@@ -1610,7 +1610,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			keys[i] = getKey(keys[i]);
 		}
 
-		return (hasPrefix ? " GROUP BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinGroup, ", ");
+		return (hasPrefix ? " GROUP BY " : "") + StringUtil.concat(StringUtil.get(keys), joinGroup, ", ");
 	}
 
 	@Override
@@ -1633,7 +1633,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return this;
 	}
 	public AbstractSQLConfig<T> setHaving(String... conditions) {
-		return setHaving(StringUtil.getString(conditions));
+		return setHaving(StringUtil.get(conditions));
 	}
 
 	/**TODO @having 改为默认 | 或连接，且支持 @having: { "key1>": 1, "key{}": "length(key2)>0", "@combine": "key1,key2" }
@@ -1747,7 +1747,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return sample;
 	}
 	public AbstractSQLConfig<T> setSample(String... conditions) {
-		return setSample(StringUtil.getString(conditions));
+		return setSample(StringUtil.get(conditions));
 	}
 	@Override
 	public AbstractSQLConfig<T> setSample(String sample) {
@@ -1783,7 +1783,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 		}
 
-		String sample = StringUtil.getTrimedString(getSample());
+		String sample = StringUtil.trim(getSample());
 
 		String[] keys = StringUtil.split(sample);
 		if (keys == null || keys.length <= 0) {
@@ -1810,7 +1810,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			keys[i] = getKey(origin);
 		}
 
-		return (hasPrefix ? " SAMPLE BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinSample, ", ");
+		return (hasPrefix ? " SAMPLE BY " : "") + StringUtil.concat(StringUtil.get(keys), joinSample, ", ");
 	}
 
 	@Override
@@ -1818,7 +1818,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return latest;
 	}
 	public AbstractSQLConfig<T> setLatest(String... conditions) {
-		return setLatest(StringUtil.getString(conditions));
+		return setLatest(StringUtil.get(conditions));
 	}
 	@Override
 	public AbstractSQLConfig<T> setLatest(String latest) {
@@ -1854,7 +1854,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 		}
 
-		String latest = StringUtil.getTrimedString(getLatest());
+		String latest = StringUtil.trim(getLatest());
 
 		String[] keys = StringUtil.split(latest);
 		if (keys == null || keys.length <= 0) {
@@ -1876,7 +1876,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			keys[i] = getKey(origin);
 		}
 
-		return (hasPrefix ? " LATEST ON " : "") + StringUtil.concat(StringUtil.getString(keys), joinLatest, ", ");
+		return (hasPrefix ? " LATEST ON " : "") + StringUtil.concat(StringUtil.get(keys), joinLatest, ", ");
 	}
 
 	@Override
@@ -1884,7 +1884,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return partition;
 	}
 	public AbstractSQLConfig<T> setPartition(String... conditions) {
-		return setPartition(StringUtil.getString(conditions));
+		return setPartition(StringUtil.get(conditions));
 	}
 	@Override
 	public AbstractSQLConfig<T> setPartition(String partition) {
@@ -1920,7 +1920,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 		}
 
-		String partition = StringUtil.getTrimedString(getPartition());
+		String partition = StringUtil.trim(getPartition());
 
 		String[] keys = StringUtil.split(partition);
 		if (keys == null || keys.length <= 0) {
@@ -1942,7 +1942,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			keys[i] = getKey(origin);
 		}
 
-		return (hasPrefix ? " PARTITION BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinPartition, ", ");
+		return (hasPrefix ? " PARTITION BY " : "") + StringUtil.concat(StringUtil.get(keys), joinPartition, ", ");
 	}
 
 	@Override
@@ -1950,7 +1950,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return fill;
 	}
 	public AbstractSQLConfig<T> setFill(String... conditions) {
-		return setFill(StringUtil.getString(conditions));
+		return setFill(StringUtil.get(conditions));
 	}
 	@Override
 	public AbstractSQLConfig<T> setFill(String fill) {
@@ -1986,7 +1986,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			}
 		}
 
-		String fill = StringUtil.getTrimedString(getFill());
+		String fill = StringUtil.trim(getFill());
 
 		String[] keys = StringUtil.split(fill);
 		if (keys == null || keys.length <= 0) {
@@ -2016,7 +2016,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			keys[i] = getKey(origin);
 		}
 
-		return (hasPrefix ? " FILL(" : "") + StringUtil.concat(StringUtil.getString(keys), joinFill, ", ") + ")";
+		return (hasPrefix ? " FILL(" : "") + StringUtil.concat(StringUtil.get(keys), joinFill, ", ") + ")";
 	}
 
 	@Override
@@ -2024,7 +2024,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return order;
 	}
 	public AbstractSQLConfig<T> setOrder(String... conditions) {
-		return setOrder(StringUtil.getString(conditions));
+		return setOrder(StringUtil.get(conditions));
 	}
 	@Override
 	public AbstractSQLConfig<T> setOrder(String order) {
@@ -2061,7 +2061,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 
-		String order = StringUtil.getTrimedString(getOrder());
+		String order = StringUtil.trim(getOrder());
 		// SELECT * FROM sys.Moment ORDER BY userId ASC, rand();   前面的 userId ASC 和后面的 rand() 都有效
 		//		if ("rand()".equals(order)) {
 		//			return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(order, joinOrder, ", ");
@@ -2134,7 +2134,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			keys[i] = getKey(origin) + sort;
 		}
 
-		return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(StringUtil.getString(keys), joinOrder, ", ");
+		return (hasPrefix ? " ORDER BY " : "") + StringUtil.concat(StringUtil.get(keys), joinOrder, ", ");
 	}
 
 	@Override
@@ -2426,7 +2426,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						, "@column:\"column0,column1:alias1;function0(arg0,arg1,...);function1(...):alias2...\"");
 			}
 
-			String c = StringUtil.getString(keys);
+			String c = StringUtil.get(keys);
 			c = c + (StringUtil.isEmpty(joinColumn, true) ? "" : ", " + joinColumn);//不能在这里改，后续还要用到:
 			return isMain() && isDistinct() ? PREFIX_DISTINCT + c : c;
 		default:
@@ -2471,7 +2471,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (start < 0) {
 			//没有函数 ,可能是字段,也可能是 DISTINCT xx
 			String[] cks = parseArgsSplitWithComma(expression, true, containRaw, allowAlias);
-			expression = StringUtil.getString(cks);
+			expression = StringUtil.get(cks);
 		} else {  // FIXME 用括号断开？ 如果少的话，用关键词加括号断开，例如  )OVER( 和 )AGAINST(
 			// 窗口函数 rank() OVER (PARTITION BY id ORDER BY userId ASC)
 			// 全文索引 math(name,tag) AGAINST ('a b +c -d' IN NATURALE LANGUAGE MODE)  // IN BOOLEAN MODE
@@ -2547,7 +2547,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							+ " 中 ?value 必须符合正则表达式 " + PATTERN_RANGE + " 且不包含连续减号 -- 或注释符 /* ！不允许多余的空格！");
 				}
 
-				String origin = fun + "(" + (distinct ? PREFIX_DISTINCT : "") + StringUtil.getString(ckeys) + ")" + suffix;
+				String origin = fun + "(" + (distinct ? PREFIX_DISTINCT : "") + StringUtil.get(ckeys) + ")" + suffix;
 				expression = origin + (StringUtil.isEmpty(alias, true) ? "" : getAs() + quote + alias + quote);
 			}
 			else {
@@ -2604,8 +2604,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				// 获取后半部分的参数解析 (agr0 agr1 ...)
 				String argsString2[] = parseArgsSplitWithComma(argString2, false, containRaw, allowAlias);
-				expression = fun + "(" + StringUtil.getString(agrsString1) + (containOver ? ") OVER (" : ") AGAINST (")
-						+ StringUtil.getString(argsString2) + ")" + suffix  // 传参不传空格，拼接带空格
+				expression = fun + "(" + StringUtil.get(agrsString1) + (containOver ? ") OVER (" : ") AGAINST (")
+						+ StringUtil.get(argsString2) + ")" + suffix  // 传参不传空格，拼接带空格
 						+ (StringUtil.isEmpty(alias, true) ? "" : getAs() + quote + alias + quote);
 			}
 		}
@@ -2867,7 +2867,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				}
 				items[i] += ")";
 			}
-			s = StringUtil.getString(items);
+			s = StringUtil.get(items);
 		}
 		return s;
 	}
@@ -3367,7 +3367,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			, Map<String, Object> conditionMap, String combine, boolean verifyName, boolean containRaw, boolean isHaving) throws Exception {
 
 		String errPrefix = table + (isHaving ? ":{ @having:{ " : ":{ ") + "@combine:'" + combine + (isHaving ? "' } }" : "' }");
-		String s = StringUtil.getString(combine);
+		String s = StringUtil.get(combine);
 		if (s.startsWith(" ") || s.endsWith(" ") ) {
 			throw new IllegalArgumentException(errPrefix + " 中字符 '" + s
 					+ "' 不合法！不允许首尾有空格，也不允许连续空格！空格不能多也不能少！"
@@ -5463,7 +5463,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String database = request.getString(KEY_DATABASE);
 		if (StringUtil.isEmpty(database, false) == false && DATABASE_LIST.contains(database) == false) {
 			throw new UnsupportedDataTypeException("@database:value 中 value 错误，只能是 ["
-					+ StringUtil.getString(DATABASE_LIST.toArray()) + "] 中的一种！");
+					+ StringUtil.get(DATABASE_LIST.toArray()) + "] 中的一种！");
 		}
 
 		String datasource = request.getString(KEY_DATASOURCE);
@@ -5748,7 +5748,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 
 					column = (id == null ? "" : idKey + ",") + (userId == null ? "" : userIdKey + ",")
-							+ StringUtil.getString(columns); //set已经判断过不为空
+							+ StringUtil.get(columns); //set已经判断过不为空
 
 					int idCount = id == null ? (userId == null ? 0 : 1) : (userId == null ? 1 : 2);
 					int size = idCount + columns.length; // 以 key 数量为准

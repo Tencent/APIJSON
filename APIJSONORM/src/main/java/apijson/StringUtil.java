@@ -53,171 +53,317 @@ public class StringUtil {
 	public static final String YUAN = "元";
 
 
-	private static String currentString = "";
-	/**获取刚传入处理后的string
+	private static String current = "";
+	/**获取刚传入处理后的 string
+	 * @must 上个影响 current 的方法 和 这个方法都应该在同一线程中，否则返回值可能不对
+	 * @return
+	 */
+	public static String cur() {
+		return get(current);
+	}
+
+	/**FIXME 改用 cur
 	 * @must 上个影响currentString的方法 和 这个方法都应该在同一线程中，否则返回值可能不对
 	 * @return
 	 */
+	@Deprecated
 	public static String getCurrentString() {
-		return currentString == null ? "" : currentString;
+		return cur();
 	}
 
 	//获取string,为null时返回"" <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**获取string,为null则返回""
-	 * @param object
+	 * @param obj
 	 * @return
 	 */
-	public static String getString(Object object) {
-		return object == null ? "" : object.toString();
-	}
-	/**获取string,为null则返回""
-	 * @param cs
-	 * @return
-	 */
-	public static String getString(CharSequence cs) {
-		return cs == null ? "" : cs.toString();
+	public static String get(Object obj) {
+		return obj == null ? "" : obj.toString();
 	}
 	/**获取string,为null则返回""
 	 * @param s
 	 * @return
 	 */
-	public static String getString(String s) {
+	public static String get(String s) {
 		return s == null ? "" : s;
 	}
 	/**获取string,为null则返回""
 	 * ignoreEmptyItem = false;
 	 * split = ","
-	 * @param array
-	 * @return {@link #getString(Object[], boolean)}
+	 * @param arr
+	 * @return {@link #get(Object[], boolean)}
 	 */
-	public static String getString(Object[] array) {
-		return getString(array, false);
+	public static String get(Object[] arr) {
+		return get(arr, false);
 	}
 	/**获取string,为null则返回""
 	 * split = ","
-	 * @param array
+	 * @param arr
 	 * @param ignoreEmptyItem
-	 * @return {@link #getString(Object[], boolean)}
+	 * @return {@link #get(Object[], boolean)}
 	 */
-	public static String getString(Object[] array, boolean ignoreEmptyItem) {
-		return getString(array, null, ignoreEmptyItem);
+	public static String get(Object[] arr, boolean ignoreEmptyItem) {
+		return get(arr, null, ignoreEmptyItem);
 	}
 	/**获取string,为null则返回""
 	 * ignoreEmptyItem = false;
-	 * @param array
+	 * @param arr
 	 * @param split
-	 * @return {@link #getString(Object[], String, boolean)}
+	 * @return {@link #get(Object[], String, boolean)}
 	 */
-	public static String getString(Object[] array, String split) {
-		return getString(array, split, false);
+	public static String get(Object[] arr, String split) {
+		return get(arr, split, false);
 	}
 	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
 	/**获取string,为null则返回""
-	 * @param array -the str array given
+	 * @param arr -the str arr given
 	 * @param split -the token used to split
 	 * @param ignoreEmptyItem -whether to ignore empty item or not
-	 * @return {@link #getString(Object[], String, boolean)}
+	 * @return {@link #get(Object[], String, boolean)}
 	 * <p>Here we replace the simple "+" way of concatenating with Stringbuilder 's append</p>
 	 */
-	public static String getString(Object[] array, String split, boolean ignoreEmptyItem) {
+	public static String get(Object[] arr, String split, boolean ignoreEmptyItem) {
 		StringBuilder s = new StringBuilder("");
-		if (array != null) {
+		if (arr != null) {
 			if (split == null) {
 				split = ",";
 			}
-			for (int i = 0; i < array.length; i++) {
-				if (ignoreEmptyItem && isEmpty(array[i], true)) {
+			for (int i = 0; i < arr.length; i++) {
+				if (ignoreEmptyItem && isEmpty(arr[i], true)) {
 					continue;
 				}
-				s.append(((i > 0 ? split : "") + array[i]));
+				s.append(((i > 0 ? split : "") + arr[i]));
 			}
 		}
-		return getString(s.toString());
+		return get(s.toString());
+	}
+
+	/**FIXME 用 get 替代
+	 * @param object
+	 * @return
+	 */
+	@Deprecated
+	public static String getString(Object object) {
+		return object == null ? "" : object.toString();
+	}
+	/**FIXME 用 get 替代
+	 * @param cs
+	 * @return
+	 */
+	@Deprecated
+	public static String getString(CharSequence cs) {
+		return cs == null ? "" : cs.toString();
+	}
+	/**FIXME 用 get 替代
+	 * @param s
+	 * @return
+	 */
+	@Deprecated
+	public static String getString(String s) {
+		return s == null ? "" : s;
+	}
+	/**FIXME 用 get 替代
+	 * ignoreEmptyItem = false;
+	 * split = ","
+	 * @param array
+	 * @return {@link #get(Object[], boolean)}
+	 */
+	@Deprecated
+	public static String getString(Object[] array) {
+		return get(array, false);
+	}
+	/**FIXME 用 get 替代
+	 * split = ","
+	 * @param array
+	 * @param ignoreEmptyItem
+	 * @return {@link #get(Object[], boolean)}
+	 */
+	@Deprecated
+	public static String getString(Object[] array, boolean ignoreEmptyItem) {
+		return get(array, null, ignoreEmptyItem);
+	}
+	/**FIXME 用 get 替代
+	 * ignoreEmptyItem = false;
+	 * @param array
+	 * @param split
+	 * @return {@link #get(Object[], String, boolean)}
+	 */
+	@Deprecated
+	public static String getString(Object[] array, String split) {
+		return get(array, split, false);
+	}
+	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
+	/**FIXME 用 get 替代
+	 * @param array -the str array given
+	 * @param split -the token used to split
+	 * @param ignoreEmptyItem -whether to ignore empty item or not
+	 * @return {@link #get(Object[], String, boolean)}
+	 * <p>Here we replace the simple "+" way of concatenating with Stringbuilder 's append</p>
+	 */
+	@Deprecated
+	public static String getString(Object[] array, String split, boolean ignoreEmptyItem) {
+		return get(array, split, ignoreEmptyItem);
 	}
 
 	//获取string,为null时返回"" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	//获取去掉前后空格后的string<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 	/**获取去掉前后空格后的string,为null则返回""
-	 * @param object
+	 * @param obj
 	 * @return
 	 */
-	public static String getTrimedString(Object object) {
-		return getTrimedString(getString(object));
+	public static String trim(Object obj) {
+		return trim(get(obj));
 	}
 	/**获取去掉前后空格后的string,为null则返回""
 	 * @param cs
 	 * @return
 	 */
-	public static String getTrimedString(CharSequence cs) {
-		return getTrimedString(getString(cs));
+	public static String trim(CharSequence cs) {
+		return trim(get(cs));
 	}
 	/**获取去掉前后空格后的string,为null则返回""
 	 * @param s
 	 * @return
 	 */
+	public static String trim(String s) {
+		return get(s).trim();
+	}
+
+
+	/**FIXME 用 trim 替代
+	 * @param object
+	 * @return
+	 */
+	@Deprecated
+	public static String getTrimedString(Object object) {
+		return trim(object);
+	}
+	/**FIXME 用 trim 替代
+	 * @param cs
+	 * @return
+	 */
+	@Deprecated
+	public static String getTrimedString(CharSequence cs) {
+		return trim(cs);
+	}
+	/**FIXME 用 trim 替代
+	 * @param s
+	 * @return
+	 */
+	@Deprecated
 	public static String getTrimedString(String s) {
-		return getString(s).trim();
+		return trim(s);
 	}
 
 	//获取去掉前后空格后的string>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 	//获取去掉所有空格后的string <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 	/**获取去掉所有空格后的string,为null则返回""
-	 * @param object
+	 * @param obj
 	 * @return
 	 */
-	public static String getNoBlankString(Object object) {
-		return getNoBlankString(getString(object));
+	public static String noBlank(Object obj) {
+		return noBlank(get(obj));
 	}
 	/**获取去掉所有空格后的string,为null则返回""
 	 * @param cs
 	 * @return
 	 */
-	public static String getNoBlankString(CharSequence cs) {
-		return getNoBlankString(getString(cs));
+	public static String noBlank(CharSequence cs) {
+		return noBlank(get(cs));
 	}
 	/**获取去掉所有空格后的string,为null则返回""
 	 * @param s
 	 * @return
 	 */
+	public static String noBlank(String s) {
+		return get(s).replaceAll("\\s", "");
+	}
+
+	/**FIXME 用 noBlank 替代
+	 * @param object
+	 * @return
+	 */
+	@Deprecated
+	public static String getNoBlankString(Object object) {
+		return noBlank(object);
+	}
+	/**FIXME 用 noBlank 替代
+	 * @param cs
+	 * @return
+	 */
+	@Deprecated
+	public static String getNoBlankString(CharSequence cs) {
+		return noBlank(cs);
+	}
+	/**FIXME 用 noBlank 替代
+	 * @param s
+	 * @return
+	 */
+	@Deprecated
 	public static String getNoBlankString(String s) {
-		return getString(s).replaceAll("\\s", "");
+		return noBlank(s);
 	}
 
 	//获取去掉所有空格后的string >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 	//获取string的长度<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 	/**获取string的长度,为null则返回0
 	 * @param object
 	 * @param trim
 	 * @return
 	 */
-	public static int getLength(Object object, boolean trim) {
-		return getLength(getString(object), trim);
+	public static int length(Object object, boolean trim) {
+		return length(get(object), trim);
 	}
 	/**获取string的长度,为null则返回0
 	 * @param cs
 	 * @param trim
 	 * @return
 	 */
-	public static int getLength(CharSequence cs, boolean trim) {
-		return getLength(getString(cs), trim);
+	public static int length(CharSequence cs, boolean trim) {
+		return length(get(cs), trim);
 	}
 	/**获取string的长度,为null则返回0
 	 * @param s
 	 * @param trim
 	 * @return
 	 */
+	public static int length(String s, boolean trim) {
+		s = trim ? trim(s) : s;
+		return get(s).length();
+	}
+
+
+	/**FIXME 用 length 替代
+	 * @param object
+	 * @param trim
+	 * @return
+	 */
+	@Deprecated
+	public static int getLength(Object object, boolean trim) {
+		return length(object, trim);
+	}
+	/**FIXME 用 length 替代
+	 * @param cs
+	 * @param trim
+	 * @return
+	 */
+	@Deprecated
+	public static int getLength(CharSequence cs, boolean trim) {
+		return length(cs, trim);
+	}
+	/**FIXME 用 length 替代
+	 * @param s
+	 * @param trim
+	 * @return
+	 */
+	@Deprecated
 	public static int getLength(String s, boolean trim) {
-		s = trim ? getTrimedString(s) : s;
-		return getString(s).length();
+		return length(s, trim);
 	}
 
 	//获取string的长度>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -238,7 +384,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isEmpty(Object obj, boolean trim) {
-		return isEmpty(getString(obj), trim);
+		return isEmpty(get(obj), trim);
 	}
 	/**判断字符是否为空 trim = true
 	 * @param cs
@@ -253,7 +399,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isEmpty(CharSequence cs, boolean trim) {
-		return isEmpty(getString(cs), trim);
+		return isEmpty(get(cs), trim);
 	}
 	/**判断字符是否为空 trim = true
 	 * @param s
@@ -268,7 +414,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isEmpty(String s, boolean trim) {
-		//		Log.i(TAG, "getTrimedString   s = " + s);
+		//		Log.i(TAG, "isEmpty   s = " + s);
 		if (s == null) {
 			return true;
 		}
@@ -279,7 +425,7 @@ public class StringUtil {
 			return true;
 		}
 
-		currentString = s;
+		current = s;
 
 		return false;
 	}
@@ -289,7 +435,7 @@ public class StringUtil {
 	//判断字符是否非空 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**判断字符是否非空 trim = true
-	 * @param object
+	 * @param obj
 	 * @return
 	 */
 	public static boolean isNotEmpty(Object obj) {
@@ -374,7 +520,7 @@ public class StringUtil {
 			return false;
 		}
 
-		currentString = phone;
+		current = phone;
 		return PATTERN_PHONE.matcher(phone).matches();
 	}
 	/**判断手机格式是否正确
@@ -382,14 +528,14 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isPassword(String s) {
-		return getLength(s, false) >= 6 && PATTERN_PASSWORD.matcher(s).matches();
+		return length(s, false) >= 6 && PATTERN_PASSWORD.matcher(s).matches();
 	}
 	/**判断是否全是数字密码
 	 * @param s
 	 * @return
 	 */
 	public static boolean isNumberPassword(String s) {
-		return getLength(s, false) == 6 && isNumber(s);
+		return length(s, false) == 6 && isNumber(s);
 	}
 	/**判断email格式是否正确
 	 * @param email
@@ -400,7 +546,7 @@ public class StringUtil {
 			return false;
 		}
 
-		currentString = email;
+		current = email;
 		return PATTERN_EMAIL.matcher(email).matches();
 	}
 
@@ -410,18 +556,18 @@ public class StringUtil {
 	 * @return
 	 */
 	public static boolean isVerify(String s) {
-		return getLength(s, false) >= 4 && isNumber(s);
+		return length(s, false) >= 4 && isNumber(s);
 	}
 	/**判断是否全是数字
 	 * @param s
 	 * @return
 	 */
 	public static boolean isNumber(String s) {
-		if (isNotEmpty(s, true) == false) {
+		if (isEmpty(s, true)) {
 			return false;
 		}
 
-		currentString = s;
+		current = s;
 		return PATTERN_NUMBER.matcher(s).matches();
 	}
 	/**判断是否全是字母
@@ -433,7 +579,7 @@ public class StringUtil {
 			return false;
 		}
 
-		currentString = s;
+		current = s;
 		return PATTERN_ALPHA.matcher(s).matches();
 	}
 	/**判断是否全是数字或字母
@@ -453,7 +599,7 @@ public class StringUtil {
 			return false;
 		}
 
-		currentString = s;
+		current = s;
 		return PATTERN_NUM_OR_ALPHA.matcher(s).matches();
 	}
 
@@ -503,14 +649,14 @@ public class StringUtil {
 		if (isCombineOfNumOrAlpha(number) == false) {
 			return false;
 		}
-		number = getString(number);
+		number = get(number);
 		if (number.length() == 15) {
 			Log.i(TAG, "isIDCard number.length() == 15 old IDCard");
-			currentString = number;
+			current = number;
 			return true;
 		}
 		if (number.length() == 18) {
-			currentString = number;
+			current = number;
 			return true;
 		}
 
@@ -532,7 +678,7 @@ public class StringUtil {
 			return false;
 		}
 
-		currentString = url;
+		current = url;
 		return true;
 	}
 
@@ -577,7 +723,7 @@ public class StringUtil {
 			return false;
 		}
 
-		currentString = path;
+		current = path;
 
 		return true;
 	}
@@ -592,14 +738,14 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String getNumber(Object object) {
-		return getNumber(getString(object));
+		return getNumber(get(object));
 	}
 	/**去掉string内所有非数字类型字符
 	 * @param cs
 	 * @return
 	 */
 	public static String getNumber(CharSequence cs) {
-		return getNumber(getString(cs));
+		return getNumber(get(cs));
 	}
 	/**去掉string内所有非数字类型字符
 	 * @param s
@@ -617,7 +763,7 @@ public class StringUtil {
 	 * <p>Here we replace the simple "+" way of concatenating with Stringbuilder 's append</p>
 	 */
 	public static String getNumber(String s, boolean onlyStart) {
-		if (isNotEmpty(s, true) == false) {
+		if (isEmpty(s, true)) {
 			return "";
 		}
 
@@ -669,7 +815,7 @@ public class StringUtil {
 			return "";
 		}
 
-		phone = getNoBlankString(phone);
+		phone = noBlank(phone);
 		phone = phone.replaceAll("-", "");
 		if (phone.startsWith("+86")) {
 			phone = phone.substring(3);
@@ -687,7 +833,7 @@ public class StringUtil {
 			return "";
 		}
 
-		email = getNoBlankString(email);
+		email = noBlank(email);
 		if (isEmail(email) == false && ! email.endsWith(".com")) {
 			email += ".com";
 		}
@@ -857,7 +1003,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String[] split(String s, String split, boolean trim) {
-		s = getString(s);
+		s = get(s);
 		if (s.isEmpty()) {
 			return null;
 		}
@@ -881,7 +1027,7 @@ public class StringUtil {
 	 * @return key + suffix，第一个字母小写
 	 */
 	public static String addSuffix(String key, String suffix) {
-		key = getNoBlankString(key);
+		key = noBlank(key);
 		if (key.isEmpty()) {
 			return firstCase(suffix);
 		}
@@ -899,7 +1045,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String firstCase(String key, boolean upper) {
-		key = getString(key);
+		key = get(key);
 		if (key.isEmpty()) {
 			return "";
 		}
@@ -923,7 +1069,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String toUpperCase(String s, boolean trim) {
-		s = trim ? getTrimedString(s) : getString(s);
+		s = trim ? trim(s) : get(s);
 		return s.toUpperCase();
 	}
 	/**全部小写
@@ -938,7 +1084,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String toLowerCase(String s, boolean trim) {
-		s = trim ? getTrimedString(s) : getString(s);
+		s = trim ? trim(s) : get(s);
 		return s.toLowerCase();
 	}
 

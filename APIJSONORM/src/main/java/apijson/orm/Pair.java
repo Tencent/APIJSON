@@ -79,7 +79,7 @@ public class Pair extends Entry<String, String> {
 	 * @return
 	 */
 	public static String toPairString(Class<?> type, Object value) {
-		return toPairString(type == null ? null : type.getSimpleName(), StringUtil.getString(value));
+		return toPairString(type == null ? null : type.getSimpleName(), StringUtil.get(value));
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class Pair extends Entry<String, String> {
 	 * @return @NonNull
 	 */
 	public static Entry<String, String> parseEntry(String pair, boolean isRightValueDefault, String defaultValue) {
-		pair = StringUtil.getString(pair);//让客户端去掉所有空格 getNoBlankString(pair);
+		pair = StringUtil.get(pair);//让客户端去掉所有空格 getNoBlankString(pair);
 		Entry<String, String> entry = new Entry<String, String>();
 		if (pair.isEmpty() == false) {
 			int index = pair.indexOf(":");
@@ -137,7 +137,7 @@ public class Pair extends Entry<String, String> {
 	 * @return
 	 */
 	public static Entry<Class<?>, Object> parseVariableEntry(String pair, Map<String, Object> valueMap) {
-		pair = StringUtil.getString(pair);//让客户端去掉所有空格 getNoBlankString(pair);
+		pair = StringUtil.get(pair);//让客户端去掉所有空格 getNoBlankString(pair);
 		Entry<Class<?>, Object> entry = new Entry<Class<?>, Object>();
 		if (pair.isEmpty() == false) {
 			int index = pair.contains(":") ? pair.indexOf(":") : -1;

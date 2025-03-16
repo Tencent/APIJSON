@@ -14,7 +14,6 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -819,9 +818,9 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 			object.put(JSONResponse.KEY_CODE, code);
 		}
 
-		String m = StringUtil.getString(object.getString(JSONResponse.KEY_MSG));
+		String m = StringUtil.get(object.getString(JSONResponse.KEY_MSG));
 		if (m.isEmpty() == false) {
-			msg = m + " ;\n " + StringUtil.getString(msg);
+			msg = m + " ;\n " + StringUtil.get(msg);
 		}
 
 		object.put(JSONResponse.KEY_MSG, msg);
@@ -1875,8 +1874,8 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 	 */
 	public static String getAbsPath(String path, String name) {
 		Log.i(TAG, "getPath  path = " + path + "; name = " + name + " <<<<<<<<<<<<<");
-		path = StringUtil.getString(path);
-		name = StringUtil.getString(name);
+		path = StringUtil.get(path);
+		name = StringUtil.get(name);
 		if (StringUtil.isNotEmpty(path, false)) {
 			if (StringUtil.isNotEmpty(name, false)) {
 				path += ((name.startsWith("/") ? "" : "/") + name);
@@ -1917,7 +1916,7 @@ public abstract class AbstractParser<T extends Object> implements Parser<T>, Par
 						vs[i+1] = pos + "/" + vs[i+1];
 					}
 				}
-				return StringUtil.getString(vs, "]/");
+				return StringUtil.get(vs, "]/");
 			}
 		}
 		return valuePath;

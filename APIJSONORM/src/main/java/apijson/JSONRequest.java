@@ -138,7 +138,7 @@ public class JSONRequest extends JSONObject {
 	 * @return
 	 */
 	public JSONRequest setJoin(String... joins) {
-		return puts(KEY_JOIN, StringUtil.getString(joins));
+		return puts(KEY_JOIN, StringUtil.get(joins));
 	}
 	
 	/**set range for Subquery
@@ -178,7 +178,7 @@ public class JSONRequest extends JSONObject {
 	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #putsAll(Map<? extends String, ? extends Object>)} instead
 	 */
 	public JSONRequest toArray(int count, int page, String name) {
-		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page));
+		return new JSONRequest(StringUtil.get(name) + KEY_ARRAY, this.setCount(count).setPage(page));
 	}
 
 

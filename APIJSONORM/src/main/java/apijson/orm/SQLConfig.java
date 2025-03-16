@@ -151,7 +151,7 @@ public interface SQLConfig<T extends Object> {
 
 	@NotNull
 	default int[] getDBVersionNums() {
-		String dbVersion = StringUtil.getNoBlankString(getDBVersion());
+		String dbVersion = StringUtil.noBlank(getDBVersion());
 		if (dbVersion.isEmpty()) {
 			return new int[]{0};
 		}

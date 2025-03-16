@@ -48,7 +48,7 @@ public class JSON {
 	 * @return
 	 */
 	public static String getCorrectJson(String s, boolean isArray) {
-		s = StringUtil.getTrimedString(s);
+		s = StringUtil.trim(s);
 		//		if (isArray) {
 		//			while (s.startsWith("\"")) {
 		//				s = s.substring(1);
