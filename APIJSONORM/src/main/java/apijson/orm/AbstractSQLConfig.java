@@ -3442,9 +3442,20 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						}
 
 						String column = key;
-						int keyIndex = column.indexOf(":");
-						column = keyIndex > 0 ? column.substring(0, keyIndex) : column;
-						Object value = conditionMap.get(column);
+			                        int keyIndex = column.indexOf(":");
+			                        Object value = null;
+			                        //combine增加数据筛选,兼容combine与data中存在同字段，可用combine筛选后再通过data覆盖字段数据
+			                        if (keyIndex > -1) {
+			                            String valueKey = key.substring(keyIndex);
+			                            if (valueKey != null && valueKey.indexOf("=") > -1) {
+			                                int valueKeyIndex = valueKey.indexOf("=");
+			                                value = valueKey.substring(valueKeyIndex + 1);
+			                            }
+			                        }
+			                        column = keyIndex > 0 ? column.substring(0, keyIndex) : column;
+			                        if (value == null) {
+			                            value = conditionMap.get(column);
+			                        }
 						String wi = "";
 						if (value == null && conditionMap.containsKey(column) == false) { // 兼容@null
 							isNot = false; // 以占位表达式为准
@@ -5933,16 +5944,28 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 
 					// 兼容 PUT @combine
-					// 解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
-					if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false))
-							|| (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && isKeyInCombineExpr(combineExpr, key))) {
+				   	// 解决AccessVerifier新增userId没有作为条件，而是作为内容，导致PUT，DELETE出错
+		                    	//if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false)) || (isWhere == false && StringUtil.isNotEmpty(combineExpr, true) && isKeyInCombineExpr(combineExpr, key))) {
+						//tableWhere.put(key, value);
+		                        	//if (whereList.contains(key) == false) {
+		                        		//andList.add(key);
+		                        	//}
+		                    	//} else if (whereList.contains(key)) {
+		                        	//  tableWhere.put(key, value);
+		                    	//} else {
+		  		        	//  tableContent.put(key, value); // 一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
+					//}
+					//不限制combine内的key只能作为条件，可使用table:{"a":"1","@combine":"a:a=3331"}的方式对a=3331的数据修改为a=1。同时兼容旧的combine格式
+					if ((isWhere || (StringUtil.isName(key.replaceFirst("[+-]$", "")) == false)) || (isWhere == false && StringUtil.isNotEmpty(combineExpr, true)) && isKeyInCombineExpr(combineExpr, key)) {
 						tableWhere.put(key, value);
 						if (whereList.contains(key) == false) {
 							andList.add(key);
 						}
 					} else if (whereList.contains(key)) {
 						tableWhere.put(key, value);
-					} else {
+					}
+					//当combine只有单个key没有数据时，将数据内容转成条件。当combine有key=value时，对数据内容进行修改
+					if (!key.equals(combineExpr)) {
 						tableContent.put(key, value); // 一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
 					}
 				}
