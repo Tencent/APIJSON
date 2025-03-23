@@ -622,6 +622,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [wend看源码-ORM-APIJSON](https://itwend.blog.csdn.net/article/details/143980281)
 
+[APIJSON – The No-Code API Revolution That Puts Developers in the Fast Lane](https://medevel.com/apijson)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
