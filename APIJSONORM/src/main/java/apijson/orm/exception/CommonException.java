@@ -147,7 +147,7 @@ public class CommonException extends Exception {
   }
 
 
-  public static Exception wrap(Exception e, SQLConfig<?> config) {
+  public static Exception wrap(Exception e, SQLConfig<?, ?, ?> config) {
     if (Log.DEBUG == false && e instanceof SQLException) {
       return new SQLException("数据库驱动执行异常SQLException，非 Log.DEBUG 模式下不显示详情，避免泄漏真实模式名、表名等隐私信息", e);
     }
@@ -158,7 +158,7 @@ public class CommonException extends Exception {
       // msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
       try {
         String db = config == null ? AbstractSQLConfig.DEFAULT_DATABASE : (config instanceof AbstractSQLConfig
-          ? ((AbstractSQLConfig<?>) config).getSQLDatabase() : config.getDatabase()
+          ? ((AbstractSQLConfig<?, ?, ?>) config).getSQLDatabase() : config.getDatabase()
         );
 
         String dbVersion = config == null ? null : config.getDBVersion();

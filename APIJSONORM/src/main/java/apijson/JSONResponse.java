@@ -5,11 +5,11 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import apijson.orm.exception.UnsupportedDataTypeException;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static apijson.JSON.parseObject;
 
 /**parser for response
  * @author Lemon
@@ -19,7 +19,7 @@ import java.util.Set;
  * <br> User user = response.getObject(User.class);//not a must
  * <br> List<Comment> commenntList = response.getList("Comment[]", Comment.class);//not a must
  */
-public class JSONResponse extends apijson.JSONObject {
+public class JSONResponse<M extends Map<String, Object>, L extends List<Object>> extends apijson.JSONObject {
 	private static final long serialVersionUID = 1L;
 
 	// 节约性能和减少 bug，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
@@ -38,11 +38,17 @@ public class JSONResponse extends apijson.JSONObject {
 	public JSONResponse() {
 		super();
 	}
-	public JSONResponse(String json) {
+	public JSONResponse(Object json) {
 		this(parseObject(json));
 	}
-	public JSONResponse(JSONObject object) {
+	public JSONResponse(Object json, JSONParser<M, L> parser) {
+		this(parseObject(json, parser));
+	}
+	public JSONResponse(Map<String, Object> object) {
 		super(format(object));
+	}
+	public JSONResponse(M object, JSONCreator<M, L> creator) {
+		super(format(object, creator));
 	}
 
 	//状态信息，非GET请求获得的信息<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -92,9 +98,9 @@ public class JSONResponse extends apijson.JSONObject {
 	/**获取状态
 	 * @return
 	 */
-	public static int getCode(JSONObject reponse) {
+	public static int getCode(Map<String, Object> reponse) {
 		try {
-			return reponse.getIntValue(KEY_CODE);
+			return JSON.getIntValue(reponse, KEY_CODE);
 		} catch (Exception e) {
 			//empty
 		}
@@ -110,8 +116,8 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param reponse
 	 * @return
 	 */
-	public static String getMsg(JSONObject reponse) {
-		return reponse == null ? null : reponse.getString(KEY_MSG);
+	public static String getMsg(Map<String, Object> reponse) {
+		return reponse == null ? null : JSON.getString(reponse, KEY_MSG);
 	}
 	/**获取id
 	 * @return
@@ -172,9 +178,13 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param response
 	 * @return
 	 */
-	public static boolean isSuccess(JSONObject response) {
-		return response != null && isSuccess(response.getIntValue(KEY_CODE));
-	}
+	public static boolean isSuccess(Map<String, Object> response) {
+        try {
+            return response != null && isSuccess(JSON.getIntValue(response, KEY_CODE));
+        } catch (UnsupportedDataTypeException e) {
+            return false;
+        }
+    }
 
 	/**校验服务端是否存在table
 	 * @return
@@ -201,8 +211,8 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param key
 	 * @return
 	 */
-	public JSONResponse getJSONResponse(String key) {
-		return getObject(key, JSONResponse.class);
+	public JSONResponse<M, L> getJSONResponse(String key, JSONParser<M, L> parser) {
+		return getObject(key, JSONResponse.class, parser);
 	}
 	//cannot get javaBeanDeserizer
 	//	/**获取内部的JSONResponse
@@ -210,7 +220,7 @@ public class JSONResponse extends apijson.JSONObject {
 	//	 * @param key
 	//	 * @return
 	//	 */
-	//	public static JSONResponse getJSONResponse(JSONObject response, String key) {
+	//	public static JSONResponse getJSONResponse(M response, String key) {
 	//		return response == null ? null : response.getObject(key, JSONResponse.class);
 	//	}
 	//状态信息，非GET请求获得的信息>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -221,16 +231,16 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param clazz
 	 * @return
 	 */
-	public <T> T getObject(Class<T> clazz) {
-		return getObject(clazz == null ? "" : clazz.getSimpleName(), clazz);
+	public <T> T getObject(Class<T> clazz, JSONParser<M, L> parser) {
+		return getObject(clazz == null ? "" : clazz.getSimpleName(), clazz, parser);
 	}
 	/**
 	 * @param key
 	 * @param clazz
 	 * @return
 	 */
-	public <T> T getObject(String key, Class<T> clazz) {
-		return getObject(this, key, clazz);
+	public <T> T getObject(String key, Class<T> clazz, JSONParser<M, L> parser) {
+		return getObject(this, key, clazz, parser);
 	}
 	/**
 	 * @param object
@@ -238,24 +248,26 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> T getObject(JSONObject object, String key, Class<T> clazz) {
-		return toObject(object == null ? null : object.getJSONObject(formatObjectKey(key)), clazz);
+	public static <T, M extends Map<String, Object>, L extends List<Object>> T getObject(
+			Map<String, Object> object, String key, Class<T> clazz, JSONParser<M, L> parser) {
+		return toObject(object == null ? null : JSON.get(object, formatObjectKey(key)), clazz, parser);
 	}
 
 	/**
 	 * @param clazz
 	 * @return
 	 */
-	public <T> T toObject(Class<T> clazz) {
-		return toObject(this, clazz);
+	public <T> T toObject(Class<T> clazz, JSONParser<M, L> parser) {
+		return toObject(this, clazz, parser);
 	}
 	/**
 	 * @param object
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> T toObject(JSONObject object, Class<T> clazz) {
-		return JSON.parseObject(JSON.toJSONString(object), clazz);
+	public static <T, M extends Map<String, Object>, L extends List<Object>> T toObject(
+			Map<String, Object> object, Class<T> clazz, JSONParser<M, L> parser) {
+		return parseObject(JSON.toJSONString(object), clazz, parser);
 	}
 
 
@@ -266,8 +278,8 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param clazz
 	 * @return
 	 */
-	public <T> List<T> getList(Class<T> clazz) {
-		return getList(KEY_ARRAY, clazz);
+	public <T> List<T> getList(Class<T> clazz, JSONParser<M, List<Object>> parser) {
+		return getList(KEY_ARRAY, clazz, parser);
 	}
 	/**
 	 * arrayObject = this
@@ -275,8 +287,8 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param clazz
 	 * @return
 	 */
-	public <T> List<T> getList(String key, Class<T> clazz) {
-		return getList(this, key, clazz);
+	public <T> List<T> getList(String key, Class<T> clazz, JSONParser<M, List<Object>> parser) {
+		return getList(this, key, clazz, parser);
 	}
 
 	/**
@@ -285,8 +297,8 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> List<T> getList(JSONObject object, Class<T> clazz) {
-		return getList(object, KEY_ARRAY, clazz);
+	public static <T, M extends Map<String, Object>> List<T> getList(Map<String, Object> object, Class<T> clazz, JSONParser<M, List<Object>> parser) {
+		return getList(object, KEY_ARRAY, clazz, parser);
 	}
 	/**
 	 * @param object
@@ -294,8 +306,8 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> List<T> getList(JSONObject object, String key, Class<T> clazz) {
-		return object == null ? null : JSON.parseArray(object.getString(formatArrayKey(key)), clazz);
+	public static <T, M extends Map<String, Object>> List<T> getList(Map<String, Object> object, String key, Class<T> clazz, JSONParser<M, List<Object>> parser) {
+		return object == null ? null : JSON.parseArray(JSON.getString(object, formatArrayKey(key)), clazz, parser);
 	}
 
 	/**
@@ -316,7 +328,7 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param object
 	 * @return
 	 */
-	public static JSONArray getArray(JSONObject object) {
+	public static JSONArray getArray(Map<String, Object> object) {
 		return getArray(object, KEY_ARRAY);
 	}
 	/**
@@ -325,28 +337,47 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param key
 	 * @return
 	 */
-	public static JSONArray getArray(JSONObject object, String key) {
-		return object == null ? null : object.getJSONArray(formatArrayKey(key));
+	public static JSONArray getArray(Map<String, Object> object, String key) {
+		return object == null ? null : JSON.get(object, formatArrayKey(key));
 	}
 
 
 	//	/**
 	//	 * @return
 	//	 */
-	//	public JSONObject format() {
+	//	public M format() {
 	//		return format(this);
 	//	}
 	/**格式化key名称
 	 * @param object
 	 * @return
 	 */
-	public static JSONObject format(final JSONObject object) {
+	public static Map<String, Object> format(final Map<String, Object> object) {
+//		return format(object, JSON.DEFAULT_JSON_CREATOR);
+		return format(object, new JSONCreator<>() {
+			@Override
+			public Map<String, Object> createJSONObject() {
+				return new LinkedHashMap<>();
+			}
+
+			@Override
+			public List<Object> createJSONArray() {
+				return new ArrayList<>();
+			}
+		});
+	}
+	/**格式化key名称
+	 * @param object
+	 * @return
+	 */
+	public static <M extends Map<String, Object>, L extends List<Object>> M format(final M object, @NotNull JSONCreator<M, L> creator) {
 		//太长查看不方便，不如debug	 Log.i(TAG, "format  object = \n" + JSON.toJSONString(object));
 		if (object == null || object.isEmpty()) {
 			Log.i(TAG, "format  object == null || object.isEmpty() >> return object;");
 			return object;
 		}
-		JSONObject formatedObject = new JSONObject(true);
+
+		M formatedObject = creator.createJSONObject();
 
 		Set<String> set = object.keySet();
 		if (set != null) {
@@ -355,11 +386,11 @@ public class JSONResponse extends apijson.JSONObject {
 			for (String key : set) {
 				value = object.get(key);
 
-				if (value instanceof JSONArray) {//JSONArray，遍历来format内部项
-					formatedObject.put(formatArrayKey(key), format((JSONArray) value));
+				if (value instanceof List<?>) {//JSONArray，遍历来format内部项
+					formatedObject.put(formatArrayKey(key), format((L) value, creator));
 				}
-				else if (value instanceof JSONObject) {//JSONObject，往下一级提取
-					formatedObject.put(formatObjectKey(key), format((JSONObject) value));
+				else if (value instanceof Map<?, ?>) {//M，往下一级提取
+					formatedObject.put(formatObjectKey(key), format((M) value, creator));
 				}
 				else {//其它Object，直接填充
 					formatedObject.put(formatOtherKey(key), value);
@@ -375,22 +406,36 @@ public class JSONResponse extends apijson.JSONObject {
 	 * @param array
 	 * @return
 	 */
-	public static JSONArray format(final JSONArray array) {
+	public static List<Object> format(final List<Object> array) {
+		//		return format(array, JSON.DEFAULT_JSON_CREATOR);
+		return format(array, new JSONCreator<>() {
+			@Override
+			public Map<String, Object> createJSONObject() {
+				return new LinkedHashMap<>();
+			}
+
+			@Override
+			public List<Object> createJSONArray() {
+				return new ArrayList<>();
+			}
+		});
+	}
+	public static <M extends Map<String, Object>, L extends List<Object>> L format(final L array, @NotNull JSONCreator<M, L> creator) {
 		//太长查看不方便，不如debug	 Log.i(TAG, "format  array = \n" + JSON.toJSONString(array));
 		if (array == null || array.isEmpty()) {
 			Log.i(TAG, "format  array == null || array.isEmpty() >> return array;");
 			return array;
 		}
-		JSONArray formatedArray = new JSONArray();
+		L formatedArray = creator.createJSONArray();
 
 		Object value;
 		for (int i = 0; i < array.size(); i++) {
 			value = array.get(i);
-			if (value instanceof JSONArray) {//JSONArray，遍历来format内部项
-				formatedArray.add(format((JSONArray) value));
+			if (value instanceof List<?>) {//JSONArray，遍历来format内部项
+				formatedArray.add(format((L) value, creator));
 			}
-			else if (value instanceof JSONObject) {//JSONObject，往下一级提取
-				formatedArray.add(format((JSONObject) value));
+			else if (value instanceof Map<?, ?>) {//M，往下一级提取
+				formatedArray.add(format((M) value, creator));
 			}
 			else {//其它Object，直接填充
 				formatedArray.add(value);
@@ -414,7 +459,7 @@ public class JSONResponse extends apijson.JSONObject {
 
 	/**获取变量名
 	 * @param fullName
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, Boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String getVariableName(String fullName) {
 		if (isArrayKey(fullName)) {
@@ -425,7 +470,7 @@ public class JSONResponse extends apijson.JSONObject {
 
 	/**格式化数组的名称 key[] => keyList; key:alias[] => aliasList; Table-column[] => tableColumnList
 	 * @param key empty ? "list" : key + "List" 且首字母小写
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = true, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, Boolean)} formatColon = false, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String formatArrayKey(String key) {
 		if (isArrayKey(key)) {
@@ -441,7 +486,7 @@ public class JSONResponse extends apijson.JSONObject {
 
 	/**格式化对象的名称 name => name; name:alias => alias
 	 * @param key name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = true
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, Boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = true
 	 */
 	public static String formatObjectKey(String key) {
 		int index = key == null ? -1 : key.indexOf(":");
@@ -454,7 +499,7 @@ public class JSONResponse extends apijson.JSONObject {
 
 	/**格式化普通值的名称 name => name; name:alias => alias
 	 * @param fullName name 或 name:alias
-	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = false
+	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, Boolean)} formatColon = false, formatAt = true, formatHyphen = false, firstCase = false
 	 */
 	public static String formatOtherKey(String fullName) {
 		return formatKey(fullName, false, true, IS_FORMAT_HYPHEN, IS_FORMAT_UNDERLINE, IS_FORMAT_DOLLAR

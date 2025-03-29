@@ -8,8 +8,6 @@ package apijson.orm;
 import apijson.*;
 import apijson.orm.Join.On;
 import apijson.orm.exception.NotExistException;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 
 import java.io.BufferedReader;
 import java.math.BigDecimal;
@@ -27,20 +25,21 @@ import java.util.regex.Pattern;
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
-public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecutor<T> {
+public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L extends List<Object>>
+		implements SQLExecutor<T, M, L>, JSONParser<M, L> {
 	private static final String TAG = "AbstractSQLExecutor";
 	//是否返回 值为null的字段
 	public static boolean ENABLE_OUTPUT_NULL_COLUMN = false;
 	public static String KEY_RAW_LIST = "@RAW@LIST";  // 避免和字段命名冲突，不用 $RAW@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
 	public static String KEY_VICE_ITEM = "@VICE@ITEM";  // 避免和字段命名冲突，不用 $VICE@LIST$ 是因为 $ 会在 fastjson 内部转义，浪费性能
 
-	private Parser<T> parser;
+	private Parser<T, M, L> parser;
 	@Override
-	public Parser<T> getParser() {
+	public Parser<T, M, L> getParser() {
 		return parser;
 	}
 	@Override
-	public AbstractSQLExecutor<T> setParser(Parser<T> parser) {
+	public AbstractSQLExecutor<T, M, L> setParser(Parser<T, M, L> parser) {
 		this.parser = parser;
 		return this;
 	}
@@ -78,15 +77,15 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	/**
 	 * 缓存 Map
 	 */
-	protected Map<String, List<JSONObject>> cacheMap = new HashMap<>();
+	protected Map<String, List<M>> cacheMap = new HashMap<>();
 
 	/**保存缓存
 	 * @param sql  key
 	 * @param list  value
-	 * @param config  一般主表 SQLConfig<T> 不为 null，JOIN 副表的为 null
+	 * @param config  一般主表 SQLConfig<T, M, L> 不为 null，JOIN 副表的为 null
 	 */
 	@Override
-	public void putCache(String sql, List<JSONObject> list, SQLConfig<T> config) {
+	public void putCache(String sql, List<M> list, SQLConfig<T, M, L> config) {
 		if (sql == null || list == null) { // 空 list 有效，说明查询过 sql 了  || list.isEmpty()) {
 			Log.i(TAG, "saveList  sql == null || list == null >> return;");
 			return;
@@ -97,33 +96,33 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 
 	/**获取缓存
 	 * @param sql  key
-	 * @param config  一般主表 SQLConfig<T> 不为 null，JOIN 副表的为 null
+	 * @param config  一般主表 SQLConfig<T, M, L> 不为 null，JOIN 副表的为 null
 	 */
 	@Override
-	public List<JSONObject> getCache(String sql, SQLConfig<T> config) {
+	public List<M> getCache(String sql, SQLConfig<T, M, L> config) {
 		return cacheMap.get(sql);
 	}
 
 	/**获取缓存
 	 * @param sql  key
 	 * @param position
-	 * @param config  一般主表 SQLConfig<T> 不为 null，JOIN 副表的为 null
+	 * @param config  一般主表 SQLConfig<T, M, L> 不为 null，JOIN 副表的为 null
 	 * @return
 	 */
 	@Override
-	public JSONObject getCacheItem(String sql, int position, SQLConfig<T> config) {
-		List<JSONObject> list = getCache(sql, config);
+	public M getCacheItem(String sql, int position, SQLConfig<T, M, L> config) {
+		List<M> list = getCache(sql, config);
 		return getCacheItem(list, position, config);
 	}
 
-	public JSONObject getCacheItem(List<JSONObject> list, int position, SQLConfig<T> config) {
+	public M getCacheItem(List<M> list, int position, SQLConfig<T, M, L> config) {
 		// 只要 list 不为 null，则如果 list.get(position) == null，则返回 {} ，避免再次 SQL 查询
 		if (list == null) {
 			return null;
 		}
 
-		JSONObject result = position >= list.size() ? null : list.get(position);
-		return result != null ? result : new JSONObject();
+		M result = position >= list.size() ? null : list.get(position);
+		return result != null ? result : createJSONObject();
 	}
 
 
@@ -135,7 +134,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	 * @param config
 	 */
 	@Override
-	public void removeCache(String sql, SQLConfig<T> config) {
+	public void removeCache(String sql, SQLConfig<T, M, L> config) {
 		if (sql == null) {
 			Log.i(TAG, "removeList  sql == null >> return;");
 			return;
@@ -167,7 +166,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	 * @throws Exception
 	 */
 	@Override
-	public JSONObject execute(@NotNull SQLConfig<T> config, boolean unknownType) throws Exception {
+	public M execute(@NotNull SQLConfig<T, M, L> config, boolean unknownType) throws Exception {
 		long executedSQLStartTime = System.currentTimeMillis();
 		final String sql = config.getSQL(false);
 
@@ -180,7 +179,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		boolean isHead = RequestMethod.isHeadMethod(config.getMethod(), true);
 
 		final int position = config.getPosition();
-		JSONObject result;
+		M result;
 
 		if (isExplain == false) {
 			generatedSQLCount ++;
@@ -196,8 +195,8 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 				+ "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
 		ResultSet rs = null;
-		List<JSONObject> resultList = null;
-		Map<String, JSONObject> childMap = null;
+		List<M> resultList = null;
+		Map<String, M> childMap = null;
 		Map<String, String> keyMap = null;
 
 		try {
@@ -213,7 +212,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 					executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
 				}
 
-				result = new JSONObject(true);
+				result = createJSONObject();
 				result.put(JSONResponse.KEY_COUNT, updateCount);
 				result.put("update", updateCount >= 0);
 				//导致后面 rs.getMetaData() 报错 Operation not allowed after ResultSet closed		result.put("moreResults", statement.getMoreResults());
@@ -238,7 +237,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 					}
 
 					// updateCount>0时收集结果。例如更新操作成功时，返回count(affected rows)、id字段
-					result = AbstractParser.newSuccessResult();  // TODO 对 APIAuto 及其它现有的前端/客户端影响比较大，暂时还是返回 code 和 msg，5.0 再移除  new JSONObject(true);
+					result = getParser().newSuccessResult();  // TODO 对 APIAuto 及其它现有的前端/客户端影响比较大，暂时还是返回 code 和 msg，5.0 再移除  new M(true);
 
 					//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
 					result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
@@ -263,7 +262,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 				case GETS:
 				case HEAD:
 				case HEADS:
-					List<JSONObject> cache = getCache(sql, config);
+					List<M> cache = getCache(sql, config);
 					result = getCacheItem(cache, position, config);
 					Log.i(TAG, ">>> execute  result = getCache('" + sql + "', " + position + ") = " + result);
 					if (result != null) {
@@ -297,10 +296,10 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 
 			if (isExplain == false && isHead) {
 				if (rs.next() == false) {
-					return AbstractParser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
+					return getParser().newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
 				}
 
-				result = AbstractParser.newSuccessResult();
+				result = getParser().newSuccessResult();
 				// 兼容nosql,比如 elasticSearch-sql
 				if(config.isElasticsearch()) {
 					result.put(JSONResponse.KEY_COUNT, rs.getObject(1));
@@ -389,7 +388,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 				// WHERE id = ? AND ... 或 WHERE ... AND id = ? 强制排序 remove 再 put，还是重新 getSQL吧
 
 
-				List<Join> joinList = config.getJoinList();
+				List<Join<T, M, L>> joinList = config.getJoinList();
 				boolean hasJoin = config.hasJoin() && joinList != null && ! joinList.isEmpty();
 
 				// 直接用数组存取更快  Map<Integer, Join> columnIndexAndJoinMap = isExplain || ! hasJoin ? null : new HashMap<>(length);
@@ -409,9 +408,9 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 					index ++;
 					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
 
-					JSONObject item = new JSONObject(true);
-					JSONObject viceItem = null;
-					JSONObject curItem = item;
+					M item = createJSONObject();
+					M viceItem = null;
+					M curItem = item;
 					boolean isMain = true;
 					boolean reseted = false;
 
@@ -427,7 +426,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 						// 为什么 isExplain == false 不用判断？因为所有字段都在一张 Query Plan 表
 						if (index <= 0 && columnIndexAndJoinMap != null) { // && viceColumnStart > length) {
 
-							SQLConfig<T> curConfig = curJoin == null || ! curJoin.isSQLJoin() ? null : curJoin.getCacheConfig();
+							SQLConfig<T, M, L> curConfig = curJoin == null || ! curJoin.isSQLJoin() ? null : curJoin.getCacheConfig();
 							List<String> curColumn = curConfig == null ? null : curConfig.getColumn();
 							String sqlTable = curConfig == null ? null : curConfig.getSQLTable();
 							String sqlAlias = curConfig == null ? null : curConfig.getAlias();
@@ -461,7 +460,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 										) { // Presto 等引擎 JDBC 返回 rsmd.getTableName(i) 为空，主表如果一个字段都没有会导致 APISJON 主副表所有字段都不返回
 											sqlTable = null;
 											if (reseted) {
-												SQLConfig lastCfg = lastJoin == null ? null : lastJoin.getCacheConfig();
+												SQLConfig<T, M, L> lastCfg = lastJoin == null ? null : lastJoin.getCacheConfig();
 												List<String> lastColumn = lastCfg == null ? null : lastCfg.getColumn();
 
 												lastViceTableStart ++;
@@ -469,8 +468,8 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 											}
 											else if (isMain) {
 												for (int j = 0; j < joinList.size(); j++) {
-													Join join = joinList.get(j);
-													SQLConfig<T> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
+													Join<T, M, L> join = joinList.get(j);
+													SQLConfig<T, M, L> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
 													List<String> c = cfg == null ? null : cfg.getColumn();
 
 													if (cfg != null) {
@@ -501,8 +500,8 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 										int nextViceColumnStart = lastViceColumnStart;  // 主表没有 @column 时会偏小 lastViceColumnStart
 										int joinCount = joinList.size();
 										for (int j = lastViceTableStart; j < joinCount; j++) {  // 查找副表 @column，定位字段所在表
-											Join join = joinList.get(j);
-											SQLConfig<T> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
+											Join<T, M, L> join = joinList.get(j);
+											SQLConfig<T, M, L> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
 											List<String> c = cfg == null ? null : cfg.getColumn();
 
 											nextViceColumnStart += (c != null && ! c.isEmpty() ?
@@ -546,7 +545,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 								if (toFindJoin) {  // 找到对应的副表 JOIN 配置
 									for (int j = lastViceTableStart; j < joinList.size(); j++) {  // 查找副表 @column，定位字段所在表
 										Join join = joinList.get(j);
-										SQLConfig<T> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
+										SQLConfig<T, M, L> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
 
 										if (cfg != null && StringUtil.equalsIgnoreCase(sqlTable, cfg.getSQLTable())
 										) {  // FIXME 导致副表字段错放到主表 && StringUtil.equals(sqlAlias, cfg.getAlias())) {
@@ -591,7 +590,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 						// 如果是主表则直接用主表对应的 item，否则缓存副表数据到 childMap
 						Join prevJoin = columnIndexAndJoinMap == null || i < 2 ? null : columnIndexAndJoinMap[i - 2];
 						if (curJoin != prevJoin) {  // 前后字段不在同一个表对象，即便后面出现 null，也不该是主表数据，而是逻辑 bug 导致
-							SQLConfig<T> viceConfig = curJoin != null && curJoin.isSQLJoin() ? curJoin.getCacheConfig() : null;
+							SQLConfig<T, M, L> viceConfig = curJoin != null && curJoin.isSQLJoin() ? curJoin.getCacheConfig() : null;
 							boolean hasPK = false;
 							if (viceConfig != null) {  //FIXME 只有和主表关联才能用 item，否则应该从 childMap 查其它副表数据
 								List<On> onList = curJoin.getOnList();
@@ -609,7 +608,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 										String k = ok.substring(0, ok.length() - 1);
 										String ttk = on.getTargetTableKey();
 
-										JSONObject target = StringUtil.equals(ttk, tblKey) ? item : (viceItem == null ? null : viceItem.getJSONObject(ttk));
+										M target = StringUtil.equals(ttk, tblKey) ? item : (viceItem == null ? null : JSON.get(viceItem, ttk));
 										Object v = target == null ? null : target.get(on.getTargetKey());
 										hasPK = hasPK || (k.equals(idKey) && v != null);
 
@@ -625,21 +624,21 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 							else if (curJoin.isOuterJoin() || curJoin.isAntiJoin()) {
 								Log.i(TAG, "execute curJoin.isOuterJoin() || curJoin.isAntiJoin() >> item = null; >> ");
 								curItem = null;  // 肯定没有数据，缓存也无意义
-								// 副表是按常规条件查询，缓存会导致其它同表同条件对象查询结果集为空	childMap.put(viceSql, new JSONObject());  // 缓存固定空数据，避免后续多余查询
+								// 副表是按常规条件查询，缓存会导致其它同表同条件对象查询结果集为空	childMap.put(viceSql, new M());  // 缓存固定空数据，避免后续多余查询
 							}
 							else {
 								String viceName = viceConfig.getTableKey();
 								if (viceItem == null) {
-									viceItem = new JSONObject(true);
+									viceItem = createJSONObject();
 								}
-								curItem = viceItem.getJSONObject(viceName);
+								curItem = JSON.get(viceItem, viceName);
 
-								String viceSql = hasPK ? viceConfig.getSQL(false) : null; // TODO 在 SQLConfig<T> 缓存 SQL，减少大量的重复生成
-								JSONObject curCache = hasPK ? childMap.get(viceSql) : null;
+								String viceSql = hasPK ? viceConfig.getSQL(false) : null; // TODO 在 SQLConfig<T, M, L> 缓存 SQL，减少大量的重复生成
+								M curCache = hasPK ? childMap.get(viceSql) : null;
 
 								if (curItem == null || curItem.isEmpty()) {
-									// 导致前面判断重复 key 出错 curItem = curCache != null ? curCache : new JSONObject(true);
-									curItem = new JSONObject(true);
+									// 导致前面判断重复 key 出错 curItem = curCache != null ? curCache : new M(true);
+									curItem = createJSONObject();
 									viceItem.put(viceName, curItem);
 									if (hasPK && curCache == null) {
 										childMap.put(viceSql, curItem);
@@ -658,7 +657,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 							}
 						}
 
-						curItem = onPutColumn(config, rs, rsmd, index, curItem, i, curJoin, childMap, keyMap);  // isExplain == false && hasJoin && i >= viceColumnStart ? childMap : null);
+						curItem = (M) onPutColumn(config, rs, rsmd, index, curItem, i, curJoin, childMap, keyMap);  // isExplain == false && hasJoin && i >= viceColumnStart ? childMap : null);
 					}
 
 					if (viceItem != null) {
@@ -689,7 +688,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		if (unknownType || isExplain) {
 			if (isExplain) {
 				if (result == null) {
-					result = new JSONObject(true);
+					result = createJSONObject();
 				}
 				config.setExplain(false);
 				result.put("sql", config.getSQL(false));
@@ -706,31 +705,31 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 
 		if (isHead == false) {
 			// @ APP JOIN 查询副表并缓存到 childMap <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-			Map<String, List<JSONObject>> appJoinChildMap = new HashMap<>();
+			Map<String, List<M>> appJoinChildMap = new HashMap<>();
 			childMap.forEach((viceSql, item) -> appJoinChildMap.put(viceSql, Arrays.asList(item)));
 			executeAppJoin(config, resultList, appJoinChildMap, keyMap);
 
 			// @ APP JOIN 查询副表并缓存到 childMap >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 			//子查询 SELECT Moment.*, Comment.id 中的 Comment 内字段
-			Set<Entry<String, List<JSONObject>>> set = appJoinChildMap.entrySet();
+			Set<Entry<String, List<M>>> set = appJoinChildMap.entrySet();
 
 			//<sql, Table>
-			for (Entry<String, List<JSONObject>> entry : set) {
+			for (Entry<String, List<M>> entry : set) {
 				putCache(entry.getKey(), entry.getValue(), null);
 			}
 
 			Log.i(TAG, ">>> execute  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
-			// 数组主表对象额外一次返回全部，方便 Parser 缓存来提高性能
+			// 数组主表对象额外一次返回全部，方便 Parser<T, M, L> 缓存来提高性能
 
-			result = position >= resultList.size() ? new JSONObject() : resultList.get(position);
+			result = position >= resultList.size() ? createJSONObject() : resultList.get(position);
 			if (position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false) {
 				// 不是 main 不会直接执行，count=1 返回的不会超过 1   && config.isMain() && config.getCount() != 1
 				Log.i(TAG, ">>> execute  position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false"
-						+ " >> result = new JSONObject(result); result.put(KEY_RAW_LIST, resultList);");
+						+ " >> result = new M(result); result.put(KEY_RAW_LIST, resultList);");
 
-				result = new JSONObject(result);
+				result = createJSONObject();
 				result.put(KEY_RAW_LIST, resultList);
 			}
 		}
@@ -750,17 +749,17 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	 * @param childMap
 	 * @throws Exception
 	 */
-	protected void executeAppJoin(SQLConfig<T> config, List<JSONObject> resultList, Map<String, List<JSONObject>> childMap, Map<String, String> keyMap) throws Exception {
-		List<Join> joinList = config.getJoinList();
+	protected void executeAppJoin(SQLConfig<T, M, L> config, List<M> resultList, Map<String, List<M>> childMap, Map<String, String> keyMap) throws Exception {
+		List<Join<T, M, L>> joinList = config.getJoinList();
 		if (joinList != null) {
 
-			for (Join join : joinList) {
+			for (Join<T, M, L> join : joinList) {
 				if (join.isAppJoin() == false) {
 					Log.i(TAG, "executeAppJoin  for (Join j : joinList) >> j.isAppJoin() == false >>  continue;");
 					continue;
 				}
 
-				SQLConfig<T> cc = join.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
+				SQLConfig<T, M, L> cc = join.getCacheConfig(); //这里用config改了getSQL后再还原很麻烦，所以提前给一个config2更好
 				if (cc == null) {
 					if (Log.DEBUG) {
 						throw new NullPointerException("服务器内部错误, executeAppJoin cc == null ! 导致不能缓存 @ APP JOIN 的副表数据！");
@@ -768,7 +767,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 					continue;
 				}
 
-				SQLConfig<T> jc = join.getJoinConfig();
+				SQLConfig<T, M, L> jc = join.getJoinConfig();
 
 				List<On> onList = join.getOnList();
 				On on = onList == null || onList.isEmpty() ? null : onList.get(0);  // APP JOIN 应该有且只有一个 ON 条件
@@ -785,7 +784,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 				List<Object> targetValueList = new ArrayList<>();
 
 				for (int i = 0; i < resultList.size(); i++) {
-					JSONObject mainTable = resultList.get(i);
+					M mainTable = resultList.get(i);
 					Object targetValue = mainTable == null ? null : mainTable.get(on.getTargetKey());
 
 					if (targetValue != null && targetValueList.contains(targetValue) == false) {
@@ -910,7 +909,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 						index ++;
 						Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n executeAppJoin while (rs.next()){  index = " + index + "\n\n");
 
-						JSONObject result = new JSONObject(true);
+						M result = createJSONObject();
 
 						for (int i = 1; i <= length; i++) {
 							result = onPutColumn(jc, rs, rsmd, index, result, i, null, null, keyMap);
@@ -924,7 +923,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 						//TODO 兼容复杂关联
 						cc.putWhere(key, result.get(key), true);  // APP JOIN 应该有且只有一个 ON 条件
 						String cacheSql = cc.getSQL(false);
-						List<JSONObject> results = childMap.get(cacheSql);
+						List<M> results = childMap.get(cacheSql);
 
 						if (results == null || skipMap.get(cacheSql) == null) {  // 避免添加重复数据
 							results = new ArrayList<>(childCount);
@@ -968,15 +967,15 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	 * @param config
 	 * @param rs
 	 * @param rsmd
-	 * @param tablePosition 从0开始
+	 * @param row 从0开始
 	 * @param table
 	 * @param columnIndex 从1开始
 	 * @param childMap
 	 * @return result
 	 * @throws Exception
 	 */
-	protected JSONObject onPutColumn(@NotNull SQLConfig<T> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, final int row, @NotNull JSONObject table, final int columnIndex, Join join, Map<String, JSONObject> childMap
+	protected M onPutColumn(@NotNull SQLConfig<T, M, L> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, final int row, @NotNull M table, final int columnIndex, Join<T, M, L> join, Map<String, M> childMap
 			, Map<String, String> keyMap) throws Exception {
 		if (table == null) {  // 对应副表 viceSql 不能生成正常 SQL， 或者是 ! - Outer, ( - ANTI JOIN 的副表这种不需要缓存及返回的数据
 			Log.i(TAG, "onPutColumn table == null >> return table;");
@@ -1010,8 +1009,8 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	 * @return
 	 * @throws SQLException
 	 */
-	protected boolean isHideColumn(@NotNull SQLConfig<T> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, final int row, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap
+	protected boolean isHideColumn(@NotNull SQLConfig<T, M, L> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, final int row, @NotNull M table, final int columnIndex, Map<String, M> childMap
 			, Map<String, String> keyMap) throws SQLException {
 		return rsmd.getColumnName(columnIndex).startsWith("_");
 	}
@@ -1025,15 +1024,15 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	 * @param table
 	 * @return resultList
 	 */
-	protected List<JSONObject> onPutTable(@NotNull SQLConfig<T> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, @NotNull List<JSONObject> resultList, int position, @NotNull JSONObject table) {
+	protected List<M> onPutTable(@NotNull SQLConfig<T, M, L> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, @NotNull List<M> resultList, int position, @NotNull M table) {
 
 		resultList.add(table);
 		return resultList;
 	}
 
-	protected String getKey(@NotNull SQLConfig<T> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, final int row, @NotNull JSONObject table, final int columnIndex, Map<String, JSONObject> childMap
+	protected String getKey(@NotNull SQLConfig<T, M, L> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, final int row, @NotNull M table, final int columnIndex, Map<String, M> childMap
 			, Map<String, String> keyMap) throws Exception {
 		long startTime = System.currentTimeMillis();
 		String key = rsmd.getColumnLabel(columnIndex);  // dotIndex < 0 ? label : label.substring(dotIndex + 1);
@@ -1060,9 +1059,9 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		return key;
 	}
 
-	protected Object getValue(@NotNull SQLConfig<T> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-			, final int row, @NotNull JSONObject table, final int columnIndex, String label
-			, Map<String, JSONObject> childMap, Map<String, String> keyMap) throws Exception {
+	protected Object getValue(@NotNull SQLConfig<T, M, L> config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+			, final int row, @NotNull M table, final int columnIndex, String label
+			, Map<String, M> childMap, Map<String, String> keyMap) throws Exception {
 
 		long startTime = System.currentTimeMillis();
 		Object value = rs.getObject(columnIndex);
@@ -1136,9 +1135,9 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		}
 		if (castToJson) {
 			try {
-				value = JSON.parse((String) value);
+				value = parseJSON((String) value);
 			} catch (Exception e) {
-				Log.e(TAG, "getValue  try { value = JSON.parse((String) value); } catch (Exception e) { \n" + e.getMessage());
+				Log.e(TAG, "getValue  try { value = parseJSON((String) value); } catch (Exception e) { \n" + e.getMessage());
 			}
 		}
 
@@ -1179,7 +1178,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	 * @return
 	 */
 	@Override
-	public boolean isJSONType(@NotNull SQLConfig<T> config, ResultSetMetaData rsmd, int position, String label) {
+	public boolean isJSONType(@NotNull SQLConfig<T, M, L> config, ResultSetMetaData rsmd, int position, String label) {
 		try {
 			long startTime = System.currentTimeMillis();
 			String column = rsmd.getColumnTypeName(position);
@@ -1204,12 +1203,12 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 
 
 	@Override  // 重写是为了返回类型从 Statement 改为 PreparedStatement，避免其它方法出错
-	public PreparedStatement getStatement(@NotNull SQLConfig<T> config) throws Exception {
+	public PreparedStatement getStatement(@NotNull SQLConfig<T, M, L> config) throws Exception {
 		return getStatement(config, null);
 	}
 
 	@Override
-	public PreparedStatement getStatement(@NotNull SQLConfig<T> config, String sql) throws Exception {
+	public PreparedStatement getStatement(@NotNull SQLConfig<T, M, L> config, String sql) throws Exception {
 		if (StringUtil.isEmpty(sql)) {
 			sql = config.getSQL(config.isPrepared());
 		}
@@ -1265,7 +1264,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		return statement;
 	}
 
-	public PreparedStatement setArgument(@NotNull SQLConfig<T> config, @NotNull PreparedStatement statement, int index, Object value) throws SQLException {
+	public PreparedStatement setArgument(@NotNull SQLConfig<T, M, L> config, @NotNull PreparedStatement statement, int index, Object value) throws SQLException {
 		//JSON.isBooleanOrNumberOrString(v) 解决 PostgreSQL: Can't infer the SQL type to use for an instance of com.alibaba.fastjson.JSONArray
 		if (apijson.JSON.isBooleanOrNumberOrString(value)) {
 			statement.setObject(index + 1, value); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
@@ -1280,7 +1279,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	protected Connection connection;
 	@NotNull
 	@Override
-	public Connection getConnection(@NotNull SQLConfig<T> config) throws Exception {
+	public Connection getConnection(@NotNull SQLConfig<T, M, L> config) throws Exception {
 		String connectionKey = getConnectionKey(config);
 		connection = connectionMap.get(connectionKey);
 		if (connection == null || connection.isClosed()) {
@@ -1299,7 +1298,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 		return connection;
 	}
 
-	public String getConnectionKey(@NotNull SQLConfig<T> config) {
+	public String getConnectionKey(@NotNull SQLConfig<T, M, L> config) {
 		return getConnectionKey(config.getNamespace(), config.getCatalog(), config.getDatasource(), config.getDatabase());
 	}
 	public String getConnectionKey(String database, String datasource, String namespace, String catalog) {
@@ -1468,7 +1467,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 	}
 
 	@Override
-	public ResultSet executeQuery(@NotNull SQLConfig<T> config, String sql) throws Exception {
+	public ResultSet executeQuery(@NotNull SQLConfig<T, M, L> config, String sql) throws Exception {
 		if (config.isPrepared() == false || config.isTDengine() // TDengine JDBC 不支持 PreparedStatement
             || (config.isExplain() && (config.isPresto() || config.isTrino()))) { // Presto JDBC 0.277 在 EXPLAIN 模式下预编译值不会替代 ? 占位导致报错
 
@@ -1493,7 +1492,7 @@ public abstract class AbstractSQLExecutor<T extends Object> implements SQLExecut
 
 
 	@Override
-	public int executeUpdate(@NotNull SQLConfig<T> config, String sql) throws Exception {
+	public int executeUpdate(@NotNull SQLConfig<T, M, L> config, String sql) throws Exception {
 		Statement stt;
 		int count;
 		if (config.isTDengine()) {

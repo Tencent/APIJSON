@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import apijson.orm.exception.UnsupportedDataTypeException;
 
 /**use this class instead of com.alibaba.fastjson.JSONObject
  * @author Lemon
@@ -16,7 +20,7 @@ import java.util.Map;
  * @see #puts
  * @see #putsAll
  */
-public class JSONObject extends com.alibaba.fastjson.JSONObject {
+public class JSONObject extends LinkedHashMap<String, Object> implements JSON {
 	private static final long serialVersionUID = 1L;
 
 	private static final String TAG = "JSONObject";
@@ -25,27 +29,44 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 	/**ordered
 	 */
 	public JSONObject() {
-		super(true);
+		super();
 	}
 	/**transfer Object to JSONObject
 	 * @param object
 	 * @see {@link #JSONObject(Object)}
 	 */
 	public JSONObject(Object object) {
-		this(toJSONString(object));
+		this();
+		if (object instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>) object;
+			putAll(map);
+		} else if (object != null) {
+			String json = JSON.toJSONString(object);
+			if (json != null) {
+				Map<String, Object> map = JSON.parseObject(json);
+				if (map != null) {
+					putAll(map);
+				}
+			}
+		}
 	}
 	/**parse JSONObject with JSON String
 	 * @param json
 	 * @see {@link #JSONObject(String)}
 	 */
 	public JSONObject(String json) {
-		this(parseObject(json));
+		this();
+		Map<String, Object> map = JSON.parseObject(json);
+		if (map != null) {
+			putAll(map);
+		}
 	}
 	/**transfer com.alibaba.fastjson.JSONObject to JSONObject
 	 * @param object
 	 * @see {@link #putsAll(Map<? extends String, ? extends Object>)}
 	 */
-	public JSONObject(com.alibaba.fastjson.JSONObject object) {
+	public JSONObject(Map<String, Object> object) {
 		this();
 		putsAll(object);
 	}
@@ -682,6 +703,116 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 		return super.put(key, value);
 	}
 
-
-
+	/**
+	 * Get a boolean value from the JSONObject
+	 * @param key the key
+	 * @return the boolean value or false if not found
+	 */
+	public boolean getBooleanValue(String key) {
+		try {
+			return JSON.getBooleanValue(this, key);
+		} catch (UnsupportedDataTypeException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Get an integer value from the JSONObject
+	 * @param key the key
+	 * @return the integer value or 0 if not found
+	 */
+	public int getIntValue(String key) {
+		try {
+			return JSON.getIntValue(this, key);
+		} catch (UnsupportedDataTypeException e) {
+			return 0;
+		}
+	}
+	
+	/**
+	 * Get a long value from the JSONObject
+	 * @param key the key
+	 * @return the long value or 0 if not found
+	 */
+	public long getLongValue(String key) {
+		try {
+			return JSON.getLongValue(this, key);
+		} catch (UnsupportedDataTypeException e) {
+			return 0L;
+		}
+	}
+	
+	/**
+	 * Get a double value from the JSONObject
+	 * @param key the key
+	 * @return the double value or 0 if not found
+	 */
+	public double getDoubleValue(String key) {
+		try {
+			return JSON.getDoubleValue(this, key);
+		} catch (UnsupportedDataTypeException e) {
+			return 0.0;
+		}
+	}
+	
+	/**
+	 * Get a string value from the JSONObject
+	 * @param key the key
+	 * @return the string value or null if not found
+	 */
+	public String getString(String key) {
+		Object value = get(key);
+		return value != null ? value.toString() : null;
+	}
+	
+	/**
+	 * Get a JSONObject value from the JSONObject
+	 * @param key the key
+	 * @return the JSONObject value or null if not found
+	 */
+	public JSONObject getJSONObject(String key) {
+		try {
+			Map<String, Object> map = JSON.getMap(this, key);
+			return map != null ? new JSONObject(map) : null;
+		} catch (UnsupportedDataTypeException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get a JSONArray value from the JSONObject
+	 * @param key the key
+	 * @return the JSONArray value or null if not found
+	 */
+	public JSONArray getJSONArray(String key) {
+		try {
+			List<Object> list = JSON.getList(this, key);
+			return list != null ? new JSONArray(list) : null;
+		} catch (UnsupportedDataTypeException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Check if the JSONObject is empty or has no values other than null
+	 * @return true if empty
+	 */
+	public boolean isEmpty() {
+		if (super.isEmpty()) {
+			return true;
+		}
+		
+		Set<Entry<String, Object>> set = entrySet();
+		for (Entry<String, Object> entry : set) {
+			if (entry.getValue() != null) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return JSON.toJSONString(this);
+	}
 }

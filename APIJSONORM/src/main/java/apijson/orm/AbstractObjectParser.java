@@ -5,25 +5,18 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import apijson.JSONResponse;
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
-import apijson.StringUtil;
+import apijson.*;
 import apijson.orm.AbstractFunctionParser.FunctionBean;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.CommonException;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.UnsupportedDataTypeException;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.rmi.ServerException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static apijson.JSON.*;
 import static apijson.JSONObject.KEY_COMBINE;
 import static apijson.JSONObject.KEY_DROP;
 import static apijson.JSONObject.KEY_TRY;
@@ -36,29 +29,30 @@ import static apijson.RequestMethod.GET;
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public abstract class AbstractObjectParser<T extends Object> implements ObjectParser<T> {
+public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L extends List<Object>>
+		implements ObjectParser<T, M, L>, JSONParser<M, L> {
 	private static final String TAG = "AbstractObjectParser";
 
 	@NotNull
-	protected AbstractParser<T> parser;
+	protected AbstractParser<T, M, L> parser;
 	@Override
-	public AbstractParser<T> getParser() {
+	public AbstractParser<T, M, L> getParser() {
 		return parser;
 	}
 	@Override
-	public AbstractObjectParser<T> setParser(Parser<T> parser) {
-		this.parser = (AbstractParser<T>) parser;
+	public AbstractObjectParser<T, M, L> setParser(Parser<T, M, L> parser) {
+		this.parser = (AbstractParser<T, M, L>) parser;
 		return this;
 	}
 
-	protected JSONObject request;//不用final是为了recycle
+	protected M request;//不用final是为了recycle
 	protected String parentPath;//不用final是为了recycle
-	protected SQLConfig<T> arrayConfig;//不用final是为了recycle
+	protected SQLConfig<T, M, L> arrayConfig;//不用final是为了recycle
 	protected boolean isSubquery;
 
 	protected final int type;
 	protected final String arrayTable;
-	protected final List<Join> joinList;
+	protected final List<Join<T, M, L>> joinList;
 	protected final boolean isTable;
 	protected final boolean isArrayMainTable;
 
@@ -70,10 +64,10 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 	/**for single object
 	 */
-	public AbstractObjectParser(@NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
+	public AbstractObjectParser(@NotNull M request, String parentPath, SQLConfig<T, M, L> arrayConfig
 			, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
 		if (request == null) {
-			throw new IllegalArgumentException(TAG + ".ObjectParser  request == null!!!");
+			throw new IllegalArgumentException(TAG + ".ObjectParser<T, M, L>  request == null!!!");
 		}
 		this.request = request;
 		this.parentPath = parentPath;
@@ -98,15 +92,15 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 			this.drop = false;
 		}
 		else {
-			this.tri = request.getBooleanValue(KEY_TRY);
-			this.drop = request.getBooleanValue(KEY_DROP);
+			this.tri = getBooleanValue(request, KEY_TRY);
+			this.drop = getBooleanValue(request, KEY_DROP);
 
 			request.remove(KEY_TRY);
 			request.remove(KEY_DROP);
 		}
 
         if (isTable) {
-            String raw = request.getString(JSONRequest.KEY_RAW);
+            String raw = getString(request, JSONRequest.KEY_RAW);
             String[] rks = StringUtil.split(raw);
             rawKeyList = rks == null || rks.length <= 0 ? null : Arrays.asList(rks);
         }
@@ -118,19 +112,19 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	}
 
 	@Override
-	public AbstractObjectParser setParentPath(String parentPath) {
+	public AbstractObjectParser<T, M, L> setParentPath(String parentPath) {
 		this.parentPath = parentPath;
 		return this;
 	}
 
-	protected JSONObject cache;
+	protected M cache;
 	@Override
-	public JSONObject getCache() {
+	public M getCache() {
 		return cache;
 	}
 
 	@Override
-	public AbstractObjectParser<T> setCache(JSONObject cache) {
+	public AbstractObjectParser<T, M, L> setCache(M cache) {
 		this.cache = cache;
 		return this;
 	}
@@ -139,7 +133,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	public int getPosition() {
 		return position;
 	}
-	public AbstractObjectParser setPosition(int position) {
+	public AbstractObjectParser<T, M, L> setPosition(int position) {
 		this.position = position;
 		return this;
 	}
@@ -167,9 +161,9 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	protected boolean isReuse;
 	protected String path;
 
-	protected JSONObject response;
-	protected JSONObject sqlRequest;
-	protected JSONObject sqlResponse;
+	protected M response;
+	protected M sqlRequest;
+	protected M sqlResponse;
 	/**
 	 * 自定义关键词
 	 */
@@ -185,7 +179,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	/**
 	 * 子对象
 	 */
-	protected Map<String, JSONObject> childMap;
+	protected Map<String, M> childMap;
 
 	private int objectCount;
 	private int arrayCount;
@@ -197,7 +191,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	 * @throws Exception
 	 */
 	@Override
-	public AbstractObjectParser parse(String name, boolean isReuse) throws Exception {
+	public AbstractObjectParser<T, M, L> parse(String name, boolean isReuse) throws Exception {
 		if (isInvalidate() == false) {
 			this.isReuse = isReuse;
 			this.name = name;
@@ -207,17 +201,17 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 			this.table = tentry.getKey();
 			this.alias = tentry.getValue();
 
-			Log.d(TAG, "AbstractObjectParser  parentPath = " + parentPath + "; name = " + name + "; table = " + table + "; alias = " + alias);
-			Log.d(TAG, "AbstractObjectParser  type = " + type + "; isTable = " + isTable + "; isArrayMainTable = " + isArrayMainTable);
-			Log.d(TAG, "AbstractObjectParser  isEmpty = " + request.isEmpty() + "; tri = " + tri + "; drop = " + drop);
+			Log.d(TAG, "AbstractObjectParser<T, M, L>  parentPath = " + parentPath + "; name = " + name + "; table = " + table + "; alias = " + alias);
+			Log.d(TAG, "AbstractObjectParser<T, M, L>  type = " + type + "; isTable = " + isTable + "; isArrayMainTable = " + isArrayMainTable);
+			Log.d(TAG, "AbstractObjectParser<T, M, L>  isEmpty = " + request.isEmpty() + "; tri = " + tri + "; drop = " + drop);
 
 			breakParse = false;
 
-			response = new JSONObject(true); // must init
+			response = createJSONObject(); // must init
 			sqlResponse = null; // must init
 
 			if (isReuse == false) {
-				sqlRequest = new JSONObject(true); // must init
+				sqlRequest = createJSONObject(); // must init
 
 				customMap = null; // must init
 				functionMap = null; // must init
@@ -227,14 +221,14 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 				if (set != null && set.isEmpty() == false) { // 判断换取少几个变量的初始化是否值得？
 					if (isTable) { // 非Table下必须保证原有顺序！否则 count,page 会丢, total@:"/[]/total" 会在[]:{}前执行！
 						customMap = new LinkedHashMap<String, Object>();
-						childMap = new LinkedHashMap<String, JSONObject>();
+						childMap = new LinkedHashMap<String, M>();
 					}
 					functionMap = new LinkedHashMap<String, Map<String, String>>();//必须执行
 
 					// 条件 <<<<<<<<<<<<<<<<<<<
 					List<String> whereList = null;
 					if (method == PUT) { // 这里只有PUTArray需要处理  || method == DELETE) {
-						String[] combine = StringUtil.split(request.getString(KEY_COMBINE));
+						String[] combine = StringUtil.split(getString(request, KEY_COMBINE));
 						if (combine != null) {
 							String w;
 							for (int i = 0; i < combine.length; i++) { // 去除 &,|,! 前缀
@@ -255,7 +249,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 					int index = 0;
                     // hasOtherKeyNotFun = false;
-					JSONObject viceItem = null;
+					M viceItem = null;
 
 					for (Entry<String, Object> entry : set) {
 						if (isBreakParse()) {
@@ -273,8 +267,8 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 						// 没有执行校验流程的情况,比如url head, sql@子查询, sql@ method=GET
 
 						Object obj = key.endsWith("@") ? request.get(key) : null;
-						if (obj instanceof JSONObject) {
-							((JSONObject) obj).put(apijson.JSONObject.KEY_METHOD, GET);
+						if (obj instanceof Map<?, ?>) {
+							((Map<String, Object>) obj).put(apijson.JSONObject.KEY_METHOD, GET);
 						}
 
 						try {
@@ -283,36 +277,36 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                             //     hasOtherKeyNotFun = true;
                             // }
 
-							if (startsWithAt || key.endsWith("@") || (key.endsWith("<>") && value instanceof JSONObject)) {
+							if (startsWithAt || key.endsWith("@") || (key.endsWith("<>") && value instanceof Map<?, ?>)) {
 								if (onParse(key, value) == false) {
 									invalidate();
 								}
 							}
-							else if (value instanceof JSONObject) {  // JSONObject，往下一级提取
+							else if (value instanceof Map<?, ?>) {  // M，往下一级提取
 								if (childMap != null) {  // 添加到childMap，最后再解析
-									childMap.put(key, (JSONObject) value);
+									childMap.put(key, (M) value);
 								}
 								else {  // 直接解析并替换原来的，[]:{} 内必须直接解析，否则会因为丢掉count等属性，并且total@:"/[]/total"必须在[]:{} 后！
-									JSON cache = index <= 0 || type != TYPE_ITEM || viceItem == null ? null : viceItem.getJSONObject(key);
-									JSON result = onChildParse(index, key, (JSONObject) value, cache);
+									Object cache = index <= 0 || type != TYPE_ITEM || viceItem == null ? null : JSON.get(viceItem, key);
+									Object result = onChildParse(index, key, (M) value, cache);
 									if (index <= 0 && type == TYPE_ITEM) {
-										JSONObject mainItem = (JSONObject) result;
-										viceItem = result == null ? null : (JSONObject) mainItem.remove(AbstractSQLExecutor.KEY_VICE_ITEM);
+										M mainItem = (M) result;
+										viceItem = result == null ? null : (M) mainItem.remove(AbstractSQLExecutor.KEY_VICE_ITEM);
 									}
 
 									response.put(key, result);
 									index ++;
 								}
 							}
-							else if ((_method == POST || _method == PUT) && value instanceof JSONArray
-									&& JSONRequest.isTableArray(key)) {  // JSONArray，批量新增或修改，往下一级提取
-								onTableArrayParse(key, (JSONArray) value);
+							else if ((_method == POST || _method == PUT) && value instanceof List<?>
+									&& JSONRequest.isTableArray(key)) {  // L，批量新增或修改，往下一级提取
+								onTableArrayParse(key, (L) value);
 							}
-							else if (_method == PUT && value instanceof JSONArray && (whereList == null || whereList.contains(key) == false)
-									&& StringUtil.isName(key.replaceFirst("[+-]$", ""))) {  // PUT JSONArray
-								onPUTArrayParse(key, (JSONArray) value);
+							else if (_method == PUT && value instanceof List<?> && (whereList == null || whereList.contains(key) == false)
+									&& StringUtil.isName(key.replaceFirst("[+-]$", ""))) {  // PUT L
+								onPUTArrayParse(key, (L) value);
 							}
-							else {  // JSONArray 或其它 Object，直接填充
+							else {  // L 或其它 Object，直接填充
 								if (onParse(key, value) == false) {
 									invalidate();
 								}
@@ -396,36 +390,36 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	@Override
 	public boolean onParse(@NotNull String key, @NotNull Object value) throws Exception {
 		if (key.endsWith("@")) {  // StringUtil.isPath((String) value)) {
-			// [] 内主表 position > 0 时，用来生成 SQLConfig 的键值对全都忽略，不解析
-			if (value instanceof JSONObject) {  // key{}@ getRealKey, SQL 子查询对象，JSONObject -> SQLConfig.getSQL
+			// [] 内主表 position > 0 时，用来生成 SQLConfig<T, M, L> 的键值对全都忽略，不解析
+			if (value instanceof Map<?, ?>) {  // key{}@ getRealKey, SQL 子查询对象，M -> SQLConfig.getSQL
 				String replaceKey = key.substring(0, key.length() - 1);
 
-				JSONObject subquery = (JSONObject) value;
-				String range = subquery.getString(JSONRequest.KEY_SUBQUERY_RANGE);
+				M subquery = (M) value;
+				String range = getString(subquery, JSONRequest.KEY_SUBQUERY_RANGE);
 				if (range != null && JSONRequest.SUBQUERY_RANGE_ALL.equals(range) == false
                         && JSONRequest.SUBQUERY_RANGE_ANY.equals(range) == false) {
 					throw new IllegalArgumentException("子查询 " + path + "/" + key + ":{ range:value } 中 value 只能为 ["
                             + JSONRequest.SUBQUERY_RANGE_ALL + ", " + JSONRequest.SUBQUERY_RANGE_ANY + "] 中的一个！");
 				}
 
-				JSONArray arr = parser.onArrayParse(subquery, path, key, true, null);
+				L arr = parser.onArrayParse(subquery, path, key, true, null);
 
-				JSONObject obj = arr == null || arr.isEmpty() ? null : arr.getJSONObject(0);
+				M obj = arr == null || arr.isEmpty() ? null : JSON.get(arr, 0);
 				if (obj == null) {
 					throw new Exception("服务器内部错误，解析子查询 " + path + "/" + key + ":{ } 为 Subquery 对象失败！");
 				}
 
-				String from = subquery.getString(JSONRequest.KEY_SUBQUERY_FROM);
+				String from = getString(subquery, JSONRequest.KEY_SUBQUERY_FROM);
 				boolean isEmpty = StringUtil.isEmpty(from);
-				JSONObject arrObj = isEmpty ? null : obj.getJSONObject(from);
+				M arrObj = isEmpty ? null : JSON.get(obj, from);
 				if (isEmpty) {
 					Set<Entry<String, Object>> set = obj.entrySet();
 					for (Entry<String, Object> e : set) {
 						String k = e == null ? null : e.getKey();
 						Object v = k == null ? null : e.getValue();
-						if (v instanceof JSONObject && JSONRequest.isTableKey(k)) {
+						if (v instanceof Map<?, ?> && JSONRequest.isTableKey(k)) {
 							from = k;
-							arrObj = (JSONObject) v;
+							arrObj = (M) v;
 							break;
 						}
 					}
@@ -436,7 +430,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                             + key + ":{ from:value } 中 value 对应的主表对象 " + from + ":{} 不存在！");
 				}
 
-				SQLConfig cfg = (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
+				SQLConfig<T, M, L> cfg = (SQLConfig) arrObj.get(AbstractParser.KEY_CONFIG);
 				if (cfg == null) {
 					throw new NotExistException(TAG + ".onParse  cfg == null");
 				}
@@ -488,11 +482,11 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 //				if (target instanceof Map) { // target 可能是从 requestObject 里取出的 {}
 //					if (isTable || targetPath.endsWith("[]/" + JSONResponse.KEY_INFO) == false) {
 //						Log.d(TAG, "onParse  target instanceof Map  >>  return false;");
-//						return false; // FIXME 这个判断现在来看是否还有必要？为啥不允许为 JSONObject ？以前可能因为防止二次遍历再解析，现在只有一次遍历
+//						return false; // FIXME 这个判断现在来看是否还有必要？为啥不允许为 M ？以前可能因为防止二次遍历再解析，现在只有一次遍历
 //					}
 //				}
 //
-//				// FIXME 这个判断现在来看是否还有必要？为啥不允许为 JSONObject ？以前可能因为防止二次遍历再解析，现在只有一次遍历
+//				// FIXME 这个判断现在来看是否还有必要？为啥不允许为 M ？以前可能因为防止二次遍历再解析，现在只有一次遍历
 //				if (targetPath.equals(target)) { // 必须 valuePath 和保证 getValueByPath 传进去的一致！
 //					Log.d(TAG, "onParse  targetPath.equals(target)  >>");
 //
@@ -575,11 +569,11 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	 * @throws Exception
 	 */
 	@Override
-	public JSON onChildParse(int index, String key, JSONObject value, JSON cache) throws Exception {
+	public Object onChildParse(int index, String key, M value, Object cache) throws Exception {
 		boolean isFirst = index <= 0;
 		boolean isMain = isFirst && type == TYPE_ITEM;
 
-		JSON child;
+		Object child;
 		boolean isEmpty;
 
 		if (apijson.JSONObject.isArrayKey(key)) { // APIJSON Array
@@ -597,9 +591,9 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 				}
 			}
 
-			String query = value.getString(KEY_QUERY);
-			child = parser.onArrayParse(value, path, key, isSubquery, cache instanceof JSONArray ? (JSONArray) cache : null);
-			isEmpty = child == null || ((JSONArray) child).isEmpty();
+			String query = getString(value, KEY_QUERY);
+			child = parser.onArrayParse(value, path, key, isSubquery, cache instanceof List<?> ? (L) cache : null);
+			isEmpty = child == null || ((List<?>) child).isEmpty();
 
 			if ("2".equals(query) || "ALL".equals(query)) { // 不判断 isEmpty，因为分页数据可能只是某页没有
 				String totalKey = JSONResponse.formatArrayKey(key) + "Total";
@@ -636,16 +630,16 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 			}
 
 			child = parser.onObjectParse(value, path, key, isMain ? arrayConfig.setType(SQLConfig.TYPE_ITEM_CHILD_0) : null
-					, isSubquery, cache instanceof JSONObject ? (JSONObject) cache : null);
+					, isSubquery, cache instanceof Map<?, ?> ? (M) cache : null);
 
-			isEmpty = child == null || ((JSONObject) child).isEmpty();
+			isEmpty = child == null || ((Map<?, ?>) child).isEmpty();
 			if (isFirst && isEmpty) {
 				invalidate();
 			}
 		}
 //		Log.i(TAG, "onChildParse  ObjectParser.onParse  key = " + key + "; child = " + child);
 
-		return isEmpty ? null : child;//只添加! isChildEmpty的值，可能数据库返回数据不够count
+		return isEmpty ? null : child; // 只添加! isChildEmpty的值，可能数据库返回数据不够count
 	}
 
 
@@ -657,7 +651,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	 * @throws Exception
 	 */
 	@Override
-	public void onPUTArrayParse(@NotNull String key, @NotNull JSONArray array) throws Exception {
+	public void onPUTArrayParse(@NotNull String key, @NotNull L array) throws Exception {
 		if (isTable == false || array.isEmpty()) {
 			sqlRequest.put(key, array);
 			Log.e(TAG, "onPUTArrayParse  isTable == false || array == null || array.isEmpty() >> return;");
@@ -678,10 +672,10 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		//GET > add all 或 remove all > PUT > remove key
 
 		//GET <<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONObject rq = new JSONObject(true);
+		M rq = createJSONObject();
 		rq.put(JSONRequest.KEY_ID, request.get(JSONRequest.KEY_ID));
 		rq.put(JSONRequest.KEY_COLUMN, realKey);
-		JSONObject rp = parseResponse(RequestMethod.GET, table, null, rq, null, false);
+		M rp = parseResponse(RequestMethod.GET, table, null, rq, null, false);
 		//GET >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -689,11 +683,11 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		Object target = rp == null ? null : rp.get(realKey);
 		if (target instanceof String) {
 			try {
-				target = JSON.parse((String) target);
+				target = parseJSON((String) target);
 			} catch (Throwable e) {
 				if (Log.DEBUG) {
 					Log.e(TAG, "try {\n" +
-							"\t\t\t\ttarget = JSON.parse((String) target);\n" +
+							"\t\t\t\ttarget = parseJSON((String) target);\n" +
 							"\t\t\t}\n" +
 							"\t\t\tcatch (Throwable e) = " + e.getMessage());
 				}
@@ -703,8 +697,8 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		if (apijson.JSON.isBooleanOrNumberOrString(target)) {
 			throw new NullPointerException("PUT " + path + ", " + realKey + " 类型为 " + target.getClass().getSimpleName() + "，"
 					+ "不支持 Boolean, String, Number 等类型字段使用 'key+': [] 或 'key-': [] ！"
-					+ "对应字段在数据库的值必须为 JSONArray, JSONObject 中的一种！"
-					+ "值为 JSONObject 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
+					+ "对应字段在数据库的值必须为 L, M 中的一种！"
+					+ "值为 M 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
 			);
 		}
 
@@ -717,12 +711,12 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 			if (isAdd == false) {
 				throw new NullPointerException("PUT " + path + ", " + realKey + (target == null ? " 值为 null，不支持移除！"
 						: " 类型为 " + target.getClass().getSimpleName() + "，不支持这样移除！")
-						+ "对应字段在数据库的值必须为 JSONArray, JSONObject 中的一种，且 key- 移除时，本身的值不能为 null！"
-						+ "值为 JSONObject 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
+						+ "对应字段在数据库的值必须为 L, M 中的一种，且 key- 移除时，本身的值不能为 null！"
+						+ "值为 M 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
 				);
 			}
 
-			targetArray = new JSONArray();
+			targetArray = createJSONArray();
 		}
 
 		for (int i = 0; i < array.size(); i++) {
@@ -739,7 +733,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 					targetArray.add(obj);
 				} else {
 					if (obj != null && obj instanceof Map == false) {
-						throw new ConflictException("PUT " + path + ", " + key + "/" + i + " 必须为 JSONObject {} ！");
+						throw new ConflictException("PUT " + path + ", " + key + "/" + i + " 必须为 M {} ！");
 					}
 					targetObj.putAll((Map) obj);
 				}
@@ -764,23 +758,23 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		//add all 或 remove all >>>>>>>>>>>>>>>>>>>>>>>>>
 
 		//PUT <<<<<<<<<<<<<<<<<<<<<<<<<
-		sqlRequest.put(realKey, targetArray != null ? targetArray : JSON.toJSONString(targetObj, SerializerFeature.WriteMapNullValue));
+		sqlRequest.put(realKey, targetArray != null ? targetArray : JSON.toJSONString(targetObj)); // FIXME, SerializerFeature.WriteMapNullValue));
 		//PUT >>>>>>>>>>>>>>>>>>>>>>>>>
 
 	}
 
 
 	@Override
-	public void onTableArrayParse(String key, JSONArray valueArray) throws Exception {
+	public void onTableArrayParse(String key, L valueArray) throws Exception {
 		String childKey = key.substring(0, key.length() - JSONRequest.KEY_ARRAY.length());
 
 		int allCount = 0;
-		JSONArray ids = new JSONArray();
+		L ids = createJSONArray();
 
 		int version = parser.getVersion();
 		int maxUpdateCount = parser.getMaxUpdateCount();
 
-        SQLConfig cfg = null; // 不能污染当前的配置 getSQLConfig();
+        SQLConfig<T, M, L> cfg = null; // 不能污染当前的配置 getSQLConfig();
         if (cfg == null) { // TODO 每次都创建成本比较高，是否新增 defaultInstance 或者 configInstance 用来专门 getIdKey 等？
             cfg = parser.createSQLConfig();
         }
@@ -790,16 +784,16 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
         cfg.setTable(childKey); // Request 表 structure 中配置 "ALLOW_PARTIAL_UPDATE_FAILED": "Table[],key[],key:alias[]" 自动配置
         boolean allowPartialFailed = cfg.allowPartialUpdateFailed();
-        JSONArray failedIds = allowPartialFailed ? new JSONArray() : null;
+        L failedIds = allowPartialFailed ? createJSONArray() : null;
 
         int firstFailIndex = -1;
-        JSONObject firstFailReq = null;
+        M firstFailReq = null;
         Throwable firstFailThrow = null;
 		for (int i = 0; i < valueArray.size(); i++) { //只要有一条失败，则抛出异常，全部失败
 			//TODO 改成一条多 VALUES 的 SQL 性能更高，报错也更会更好处理，更人性化
-			JSONObject item;
+			M item;
 			try {
-				item = valueArray.getJSONObject(i);
+				item = JSON.get(valueArray, i);
                 if (item == null) {
                     throw new NullPointerException();
                 }
@@ -811,14 +805,16 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 			}
 
             Object id = item.get(idKey);
-			JSONObject req = new JSONRequest(childKey, item);
-            JSONObject result = null;
+			M req = createJSONObject();
+			req.put(childKey, item);
+
+            M result = null;
             try {
                 if (isNeedVerifyContent) {
                     req = parser.parseCorrectRequest(method, childKey, version, "", req, maxUpdateCount, parser);
                 }
                 //parser.getMaxSQLCount() ? 可能恶意调用接口，把数据库拖死
-                result = (JSONObject) onChildParse(0, "" + i, req, null);
+                result = (M) onChildParse(0, "" + i, req, null);
             }
             catch (Exception e) {
                 if (allowPartialFailed == false) {
@@ -827,14 +823,14 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
                 if (firstFailThrow == null) {
                     firstFailThrow = e;
-                    firstFailReq = valueArray.getJSONObject(i); // item
+                    firstFailReq = JSON.get(valueArray, i); // item
                 }
             }
 
-            result = result == null ? null : result.getJSONObject(childKey);
+            result = result == null ? null : JSON.get(result, childKey);
 
             boolean success = JSONResponse.isSuccess(result);
-            int count = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);
+            int count = result == null ? 0 : getIntValue(result, JSONResponse.KEY_COUNT);
             if (id == null && result != null) {
                 id = result.get(idKey);
             }
@@ -849,7 +845,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                 else {
                     throw new ServerException(
                             "批量新增/修改失败！" + key + "/" + i + "：" + (success ? "成功但 count != 1 ！"
-                                    : (result == null ? "null" : result.getString(JSONResponse.KEY_MSG))
+                                    : (result == null ? "null" : getString(result, JSONResponse.KEY_MSG))
                     ));
                 }
             }
@@ -864,19 +860,19 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                     + "第 " + firstFailIndex + " 项失败原因：" + (firstFailThrow == null ? "" : firstFailThrow.getMessage()));
         }
 
-        JSONObject allResult = AbstractParser.newSuccessResult();
+        M allResult = getParser().newSuccessResult();
         if (failedCount > 0) {
             allResult.put("failedCount", failedCount);
             allResult.put("failedIdList", failedIds);
 
-            JSONObject failObj = new JSONObject(true);
+            M failObj = createJSONObject();
             failObj.put("index", firstFailIndex);
             failObj.put(childKey, firstFailReq);
 
             if (firstFailThrow instanceof CommonException && firstFailThrow.getCause() != null) {
                 firstFailThrow = firstFailThrow.getCause();
             }
-            JSONObject obj = firstFailThrow == null ? failObj : AbstractParser.extendErrorResult(failObj, firstFailThrow, parser.isRoot());
+            M obj = firstFailThrow == null ? failObj : getParser().extendErrorResult(failObj, firstFailThrow, parser.isRoot());
             if (Log.DEBUG && firstFailThrow != null) {
                 obj.put("trace:throw", firstFailThrow.getClass().getName());
                 obj.put("trace:stack", firstFailThrow.getStackTrace());
@@ -892,15 +888,15 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 
 	@Override
-	public JSONObject parseResponse(RequestMethod method, String table, String alias
-            , JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		SQLConfig<T> config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
+	public M parseResponse(RequestMethod method, String table, String alias
+            , M request, List<Join<T, M, L>> joinList, boolean isProcedure) throws Exception {
+		SQLConfig<T, M, L> config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
 				.setParser(parser)
 				.setObjectParser(this);
 		return parseResponse(config, isProcedure);
 	}
 	@Override
-	public JSONObject parseResponse(SQLConfig<T> config, boolean isProcedure) throws Exception {
+	public M parseResponse(SQLConfig<T, M, L> config, boolean isProcedure) throws Exception {
 		if (parser.getSQLExecutor() == null) {
 			parser.createSQLExecutor();
 		}
@@ -912,8 +908,8 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 
 	@Override
-	public SQLConfig newSQLConfig(boolean isProcedure) throws Exception {
-		String raw = Log.DEBUG == false || sqlRequest == null ? null : sqlRequest.getString(apijson.JSONRequest.KEY_RAW);
+	public SQLConfig<T, M, L> newSQLConfig(boolean isProcedure) throws Exception {
+		String raw = Log.DEBUG == false || sqlRequest == null ? null : getString(sqlRequest, apijson.JSONRequest.KEY_RAW);
 		String[] keys = raw == null ? null : StringUtil.split(raw);
 		if (keys != null && keys.length > 0) {
 			boolean allow = AbstractSQLConfig.ALLOW_MISSING_KEY_4_COMBINE;
@@ -947,12 +943,12 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	 * @throws Exception
 	 */
 	@Override
-	public AbstractObjectParser setSQLConfig() throws Exception {
+	public AbstractObjectParser<T, M, L> setSQLConfig() throws Exception {
 		return setSQLConfig(RequestMethod.isQueryMethod(method) ? 1 : 0, 0, 0);
 	}
 
 	@Override
-	public AbstractObjectParser setSQLConfig(int count, int page, int position) throws Exception {
+	public AbstractObjectParser<T, M, L> setSQLConfig(int count, int page, int position) throws Exception {
 		if (isTable == false || isReuse) {
 			return setPosition(position);
 		}
@@ -978,16 +974,17 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 
 
-	protected SQLConfig sqlConfig = null;//array item复用
+	protected SQLConfig<T, M, L> sqlConfig = null;//array item复用
 	/**SQL查询，for array item
 	 * @return this
 	 * @throws Exception
 	 */
 	@Override
-	public AbstractObjectParser executeSQL() throws Exception {
+	public AbstractObjectParser<T, M, L> executeSQL() throws Exception {
 		//执行SQL操作数据库
 		if (isTable == false) {//提高性能
-			sqlResponse = new JSONObject(sqlRequest);
+			sqlResponse = createJSONObject();
+			sqlResponse.putAll(sqlRequest);
 		}
 		else {
             try {
@@ -1025,7 +1022,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	 * @throws Exception
 	 */
 	@Override
-	public JSONObject response() throws Exception {
+	public M response() throws Exception {
 		if (sqlResponse == null || sqlResponse.isEmpty()) {
 			if (isTable) {//Table自身都获取不到值，则里面的Child都无意义，不需要再解析
 				return null;  // response;
@@ -1061,7 +1058,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		Set<Entry<String, String>> functionSet = map == null ? null : map.entrySet();
 		if (functionSet != null && functionSet.isEmpty() == false) {
             boolean isMinus = "-".equals(type);
-			JSONObject json = isMinus ? sqlRequest : response; // key-():function 是实时执行，而不是在这里批量执行
+			M json = isMinus ? sqlRequest : response; // key-():function 是实时执行，而不是在这里批量执行
 
 			for (Entry<String, String> entry : functionSet) {
                 parseFunction(entry.getKey(), entry.getKey(), entry.getValue(), this.type == TYPE_ITEM ? path : parentPath, name, json, isMinus);
@@ -1070,11 +1067,11 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	}
 
 
-	//public void parseFunction(String key, String value, String parentPath, String currentName, JSONObject currentObject) throws Exception {
+	//public void parseFunction(String key, String value, String parentPath, String currentName, M currentObject) throws Exception {
     //    parseFunction(key, value, parentPath, currentName, currentObject, false);
     //}
 	public void parseFunction(String rawKey, String key, String value, String parentPath
-            , String currentName, JSONObject currentObject, boolean isMinus) throws Exception {
+            , String currentName, M currentObject, boolean isMinus) throws Exception {
 		Object result;
         boolean containRaw = rawKeyList != null && rawKeyList.contains(rawKey);
 
@@ -1082,7 +1079,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		if (isProcedure) {
 			FunctionBean fb = AbstractFunctionParser.parseFunction(value, currentObject, true, containRaw);
 
-			SQLConfig config = newSQLConfig(true);
+			SQLConfig<T, M, L> config = newSQLConfig(true);
             String sch = fb.getSchema();
             if (StringUtil.isNotEmpty(sch, true)) {
                 config.setSchema(sch);
@@ -1118,14 +1115,14 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 	@Override
 	public void onChildResponse() throws Exception {
 		//把isTable时取出去child解析后重新添加回来
-		Set<Entry<String, JSONObject>> set = childMap == null ? null : childMap.entrySet();
+		Set<Entry<String, M>> set = childMap == null ? null : childMap.entrySet();
 		if (set != null) {
 			int index = 0;
-			for (Entry<String, JSONObject> entry : set) {
+			for (Entry<String, M> entry : set) {
 				Object child = entry == null ? null : onChildParse(index, entry.getKey(), entry.getValue(), null);
 				if (child == null
-						|| (child instanceof JSONObject && ((JSONObject) child).isEmpty())
-						|| (child instanceof JSONArray && ((JSONArray) child).isEmpty())
+						|| (child instanceof Map<?, ?> && ((M) child).isEmpty())
+						|| (child instanceof List<?> && ((L) child).isEmpty())
 						) {
 					continue;
 				}
@@ -1145,10 +1142,10 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public JSONObject onSQLExecute() throws Exception {
+	public M onSQLExecute() throws Exception {
 		int position = getPosition();
 
-		JSONObject result = getCache();
+		M result = getCache();
 		if (result != null) {
 			parser.putQueryResult(path, result);
 		}
@@ -1160,7 +1157,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 			boolean isSimpleArray = false;
             // 提取并缓存数组主表的列表数据
-            List<JSONObject> rawList = result == null ? null : (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
+            List<M> rawList = result == null ? null : (List<M>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
 
             if (isArrayMainTable && position == 0 && rawList != null) {
 
@@ -1169,14 +1166,14 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
                         && (childMap == null || childMap.isEmpty())
                         && (table.equals(arrayTable));
 
-                // APP JOIN 副表时副表返回了这个字段   rawList = (List<JSONObject>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
+                // APP JOIN 副表时副表返回了这个字段   rawList = (List<M>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
                 String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
                 if (isSimpleArray == false) {
                     long startTime = System.currentTimeMillis();
 
                     for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
-                        JSONObject obj = rawList.get(i);
+                        M obj = rawList.get(i);
 
                         if (obj != null) {
 							// obj.remove(AbstractSQLExecutor.KEY_VICE_ITEM);
@@ -1254,7 +1251,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 
 	protected RequestMethod method;
 	@Override
-	public AbstractObjectParser setMethod(RequestMethod method) {
+	public AbstractObjectParser<T, M, L> setMethod(RequestMethod method) {
 		if (this.method != method) {
 			this.method = method;
 			sqlConfig = null;
@@ -1287,26 +1284,26 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		return alias;
 	}
 	@Override
-	public SQLConfig<T> getArrayConfig() {
+	public SQLConfig<T, M, L> getArrayConfig() {
 		return arrayConfig;
 	}
 
 
 	@Override
-	public SQLConfig<T> getSQLConfig() {
+	public SQLConfig<T, M, L> getSQLConfig() {
 		return sqlConfig;
 	}
 
 	@Override
-	public JSONObject getResponse() {
+	public M getResponse() {
 		return response;
 	}
 	@Override
-	public JSONObject getSqlRequest() {
+	public M getSqlRequest() {
 		return sqlRequest;
 	}
 	@Override
-	public JSONObject getSqlResponse() {
+	public M getSqlResponse() {
 		return sqlResponse;
 	}
 
@@ -1319,7 +1316,7 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 		return functionMap;
 	}
 	@Override
-	public Map<String, JSONObject> getChildMap() {
+	public Map<String, M> getChildMap() {
 		return childMap;
 	}
 

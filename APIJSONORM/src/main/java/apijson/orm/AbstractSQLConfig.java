@@ -5,21 +5,11 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
-
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import apijson.JSON;
-import apijson.JSONResponse;
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
-import apijson.SQL;
-import apijson.StringUtil;
+import apijson.*;
 import apijson.orm.Join.On;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.UnsupportedDataTypeException;
@@ -40,6 +30,8 @@ import apijson.orm.model.SysTable;
 import apijson.orm.model.Table;
 import apijson.orm.model.TestRecord;
 
+import static apijson.JSON.getBoolean;
+import static apijson.JSON.getString;
 import static apijson.JSONObject.*;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
@@ -53,7 +45,8 @@ import static apijson.SQL.OR;
 /**config sql for JSON Request
  * @author Lemon
  */
-public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T> {
+public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L extends List<Object>>
+		implements SQLConfig<T, M, L>, JSONCreator<M, L> {
 	private static final String TAG = "AbstractSQLConfig";
 
 	/**
@@ -815,39 +808,39 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 	}
 
-	private Parser<T> parser;
+	private Parser<T, M, L> parser;
 	@Override
-	public Parser<T> getParser() {
+	public Parser<T, M, L> getParser() {
 		if (parser == null && objectParser != null) {
 			parser = objectParser.getParser();
 		}
 		return parser;
 	}
 	@Override
-	public AbstractSQLConfig<T> setParser(Parser<T> parser) {
+	public AbstractSQLConfig<T, M, L> setParser(Parser<T, M, L> parser) {
 		this.parser = parser;
 		return this;
 	}
-	public AbstractSQLConfig<T> putWarnIfNeed(String type, String warn) {
+	public AbstractSQLConfig<T, M, L> putWarnIfNeed(String type, String warn) {
 		if (Log.DEBUG && parser instanceof AbstractParser) {
-			((AbstractParser<T>) parser).putWarnIfNeed(type, warn);
+			((AbstractParser<T, M, L>) parser).putWarnIfNeed(type, warn);
 		}
 		return this;
 	}
-	public AbstractSQLConfig<T> putWarn(String type, String warn) {
+	public AbstractSQLConfig<T, M, L> putWarn(String type, String warn) {
 		if (Log.DEBUG && parser instanceof AbstractParser) {
-			((AbstractParser<T>) parser).putWarn(type, warn);
+			((AbstractParser<T, M, L>) parser).putWarn(type, warn);
 		}
 		return this;
 	}
 
-	private ObjectParser objectParser;
+	private ObjectParser<T, M, L> objectParser;
 	@Override
-	public ObjectParser getObjectParser() {
+	public ObjectParser<T, M, L> getObjectParser() {
 		return objectParser;
 	}
 	@Override
-	public AbstractSQLConfig<T> setObjectParser(ObjectParser objectParser) {
+	public AbstractSQLConfig<T, M, L> setObjectParser(ObjectParser<T, M, L> objectParser) {
 		this.objectParser = objectParser;
 		return this;
 	}
@@ -861,7 +854,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return version;
 	}
 	@Override
-	public AbstractSQLConfig<T> setVersion(int version) {
+	public AbstractSQLConfig<T, M, L> setVersion(int version) {
 		this.version = version;
 		return this;
 	}
@@ -875,7 +868,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return tag;
 	}
 	@Override
-	public AbstractSQLConfig<T> setTag(String tag) {
+	public AbstractSQLConfig<T, M, L> setTag(String tag) {
 		this.tag = tag;
 		return this;
 	}
@@ -969,13 +962,13 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	private int cache;
 	private boolean explain;
 
-	private List<Join> joinList; //连表 配置列表
+	private List<Join<T, M, L>> joinList; //连表 配置列表
 	//array item >>>>>>>>>>
 	private boolean test; //测试
 
 	private String procedure;
 
-	public AbstractSQLConfig<T> setProcedure(String procedure) {
+	public AbstractSQLConfig<T, M, L> setProcedure(String procedure) {
 		this.procedure = procedure;
 		return this;
 	}
@@ -1005,7 +998,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return method;
 	}
 	@Override
-	public AbstractSQLConfig<T> setMethod(RequestMethod method) {
+	public AbstractSQLConfig<T, M, L> setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}
@@ -1014,7 +1007,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return prepared && ! isMongoDB(); // MongoDB JDBC 还不支持预编译;
 	}
 	@Override
-	public AbstractSQLConfig<T> setPrepared(boolean prepared) {
+	public AbstractSQLConfig<T, M, L> setPrepared(boolean prepared) {
 		this.prepared = prepared;
 		return this;
 	}
@@ -1023,7 +1016,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return main;
 	}
 	@Override
-	public AbstractSQLConfig<T> setMain(boolean main) {
+	public AbstractSQLConfig<T, M, L> setMain(boolean main) {
 		this.main = main;
 		return this;
 	}
@@ -1034,7 +1027,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return id;
 	}
 	@Override
-	public AbstractSQLConfig<T> setId(Object id) {
+	public AbstractSQLConfig<T, M, L> setId(Object id) {
 		this.id = id;
 		return this;
 	}
@@ -1044,7 +1037,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return idIn;
 	}
 	@Override
-	public AbstractSQLConfig<T> setIdIn(Object idIn) {
+	public AbstractSQLConfig<T, M, L> setIdIn(Object idIn) {
 		this.idIn = idIn;
 		return this;
 	}
@@ -1055,7 +1048,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return userId;
 	}
 	@Override
-	public AbstractSQLConfig<T> setUserId(Object userId) {
+	public AbstractSQLConfig<T, M, L> setUserId(Object userId) {
 		this.userId = userId;
 		return this;
 	}
@@ -1065,7 +1058,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return userIdIn;
 	}
 	@Override
-	public AbstractSQLConfig<T> setUserIdIn(Object userIdIn) {
+	public AbstractSQLConfig<T, M, L> setUserIdIn(Object userIdIn) {
 		this.userIdIn = userIdIn;
 		return this;
 	}
@@ -1076,7 +1069,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return role;
 	}
 	@Override
-	public AbstractSQLConfig<T> setRole(String role) {
+	public AbstractSQLConfig<T, M, L> setRole(String role) {
 		this.role = role;
 		return this;
 	}
@@ -1086,7 +1079,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return distinct;
 	}
 	@Override
-	public AbstractSQLConfig<T> setDistinct(boolean distinct) {
+	public AbstractSQLConfig<T, M, L> setDistinct(boolean distinct) {
 		this.distinct = distinct;
 		return this;
 	}
@@ -1096,7 +1089,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return database;
 	}
 	@Override
-	public AbstractSQLConfig<T> setDatabase(String database) {
+	public AbstractSQLConfig<T, M, L> setDatabase(String database) {
 		this.database = database;
 		return this;
 	}
@@ -1412,7 +1405,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public AbstractSQLConfig<T> setNamespace(String namespace) {
+	public AbstractSQLConfig<T, M, L> setNamespace(String namespace) {
 		this.namespace = namespace;
 		return this;
 	}
@@ -1430,7 +1423,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public AbstractSQLConfig<T> setCatalog(String catalog) {
+	public AbstractSQLConfig<T, M, L> setCatalog(String catalog) {
 		this.catalog = catalog;
 		return this;
 	}
@@ -1467,7 +1460,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public AbstractSQLConfig<T> setSchema(String schema) {
+	public AbstractSQLConfig<T, M, L> setSchema(String schema) {
 		if (schema != null) {
 			AbstractFunctionParser.verifySchema(schema, getTable());
 		}
@@ -1480,7 +1473,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return datasource;
 	}
 	@Override
-	public AbstractSQLConfig<T> setDatasource(String datasource) {
+	public AbstractSQLConfig<T, M, L> setDatasource(String datasource) {
 		this.datasource = datasource;
 		return this;
 	}
@@ -1497,7 +1490,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * 通过 {@link #TABLE_KEY_MAP} 映射
 	 * @return
 	 */
-	@JSONField(serialize = false)
 	@Override
 	public String getSQLTable() {
 		// 如果要强制小写，则可在子类重写这个方法再 toLowerCase
@@ -1508,7 +1500,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 
-	@JSONField(serialize = false)
 	@Override
 	public String getTablePath() {
 		String q = getQuote();
@@ -1524,7 +1515,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				+ q + sqlTable + q + (isKeyPrefix() ? getAs() + q + getSQLAlias() + q : "");
 	}
 	@Override
-	public AbstractSQLConfig<T> setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
+	public AbstractSQLConfig<T, M, L> setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
 		this.table = table;
 		return this;
 	}
@@ -1538,7 +1529,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return alias;
 	}
 	@Override
-	public AbstractSQLConfig<T> setAlias(String alias) {
+	public AbstractSQLConfig<T, M, L> setAlias(String alias) {
 		this.alias = alias;
 		return this;
 	}
@@ -1555,15 +1546,15 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getGroup() {
 		return group;
 	}
-	public AbstractSQLConfig<T> setGroup(String... keys) {
+	public AbstractSQLConfig<T, M, L> setGroup(String... keys) {
 		return setGroup(StringUtil.get(keys));
 	}
 	@Override
-	public AbstractSQLConfig<T> setGroup(String group) {
+	public AbstractSQLConfig<T, M, L> setGroup(String group) {
 		this.group = group;
 		return this;
 	}
-	@JSONField(serialize = false)
+
 	public String getGroupString(boolean hasPrefix) {
 		//加上子表的 group
 		String joinGroup = "";
@@ -1574,8 +1565,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					continue;
 				}
 
-				SQLConfig ocfg = j.getOuterConfig();
-				SQLConfig cfg = (ocfg != null && ocfg.getGroup() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getGroup() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
@@ -1601,7 +1592,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		for (int i = 0; i < keys.length; i++) {
 			if (isPrepared()) {
-				// 不能通过 ? 来代替，因为SQLExecutor statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
+				// 不能通过 ? 来代替，因为SQLExecutor<T, M, L> statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
 				if (StringUtil.isName(keys[i]) == false) {
 					throw new IllegalArgumentException("@group:value 中 value里面用 , 分割的每一项都必须是1个单词！并且不要有空格！");
 				}
@@ -1618,7 +1609,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return havingCombine;
 	}
 	@Override
-	public AbstractSQLConfig<T> setHavingCombine(String havingCombine) {
+	public AbstractSQLConfig<T, M, L> setHavingCombine(String havingCombine) {
 		this.havingCombine = havingCombine;
 		return this;
 	}
@@ -1628,11 +1619,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return having;
 	}
 	@Override
-	public AbstractSQLConfig<T> setHaving(Map<String, Object> having) {
+	public AbstractSQLConfig<T, M, L> setHaving(Map<String, Object> having) {
 		this.having = having;
 		return this;
 	}
-	public AbstractSQLConfig<T> setHaving(String... conditions) {
+	public AbstractSQLConfig<T, M, L> setHaving(String... conditions) {
 		return setHaving(StringUtil.get(conditions));
 	}
 
@@ -1640,7 +1631,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return HAVING conditoin0 AND condition1 OR condition2 ...
 	 * @throws Exception
 	 */
-	@JSONField(serialize = false)
 	public String getHavingString(boolean hasPrefix) throws Exception {
 		//加上子表的 having
 		String joinHaving = "";
@@ -1651,8 +1641,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					continue;
 				}
 
-				SQLConfig ocfg = j.getOuterConfig();
-				SQLConfig cfg = (ocfg != null && ocfg.getHaving() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getHaving() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
@@ -1746,15 +1736,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getSample() {
 		return sample;
 	}
-	public AbstractSQLConfig<T> setSample(String... conditions) {
+	public AbstractSQLConfig<T, M, L> setSample(String... conditions) {
 		return setSample(StringUtil.get(conditions));
 	}
 	@Override
-	public AbstractSQLConfig<T> setSample(String sample) {
+	public AbstractSQLConfig<T, M, L> setSample(String sample) {
 		this.sample = sample;
 		return this;
 	}
-	@JSONField(serialize = false)
 	public String getSampleString(boolean hasPrefix) {
 		//加上子表的 sample
 		String joinSample = "";
@@ -1765,8 +1754,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					continue;
 				}
 
-				SQLConfig ocfg = j.getOuterConfig();
-				SQLConfig cfg = (ocfg != null && ocfg.getSample() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getSample() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
@@ -1817,15 +1806,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getLatest() {
 		return latest;
 	}
-	public AbstractSQLConfig<T> setLatest(String... conditions) {
+	public AbstractSQLConfig<T, M, L> setLatest(String... conditions) {
 		return setLatest(StringUtil.get(conditions));
 	}
 	@Override
-	public AbstractSQLConfig<T> setLatest(String latest) {
+	public AbstractSQLConfig<T, M, L> setLatest(String latest) {
 		this.latest = latest;
 		return this;
 	}
-	@JSONField(serialize = false)
 	public String getLatestString(boolean hasPrefix) {
 		//加上子表的 latest
 		String joinLatest = "";
@@ -1836,8 +1824,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					continue;
 				}
 
-				SQLConfig ocfg = j.getOuterConfig();
-				SQLConfig cfg = (ocfg != null && ocfg.getLatest() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getLatest() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
@@ -1883,15 +1871,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getPartition() {
 		return partition;
 	}
-	public AbstractSQLConfig<T> setPartition(String... conditions) {
+	public AbstractSQLConfig<T, M, L> setPartition(String... conditions) {
 		return setPartition(StringUtil.get(conditions));
 	}
 	@Override
-	public AbstractSQLConfig<T> setPartition(String partition) {
+	public AbstractSQLConfig<T, M, L> setPartition(String partition) {
 		this.partition = partition;
 		return this;
 	}
-	@JSONField(serialize = false)
 	public String getPartitionString(boolean hasPrefix) {
 		//加上子表的 partition
 		String joinPartition = "";
@@ -1902,8 +1889,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					continue;
 				}
 
-				SQLConfig ocfg = j.getOuterConfig();
-				SQLConfig cfg = (ocfg != null && ocfg.getPartition() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getPartition() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
@@ -1949,15 +1936,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getFill() {
 		return fill;
 	}
-	public AbstractSQLConfig<T> setFill(String... conditions) {
+	public AbstractSQLConfig<T, M, L> setFill(String... conditions) {
 		return setFill(StringUtil.get(conditions));
 	}
 	@Override
-	public AbstractSQLConfig<T> setFill(String fill) {
+	public AbstractSQLConfig<T, M, L> setFill(String fill) {
 		this.fill = fill;
 		return this;
 	}
-	@JSONField(serialize = false)
 	public String getFillString(boolean hasPrefix) {
 		//加上子表的 fill
 		String joinFill = "";
@@ -1968,8 +1954,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					continue;
 				}
 
-				SQLConfig ocfg = j.getOuterConfig();
-				SQLConfig cfg = (ocfg != null && ocfg.getFill() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getFill() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
@@ -2023,15 +2009,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public String getOrder() {
 		return order;
 	}
-	public AbstractSQLConfig<T> setOrder(String... conditions) {
+	public AbstractSQLConfig<T, M, L> setOrder(String... conditions) {
 		return setOrder(StringUtil.get(conditions));
 	}
 	@Override
-	public AbstractSQLConfig<T> setOrder(String order) {
+	public AbstractSQLConfig<T, M, L> setOrder(String order) {
 		this.order = order;
 		return this;
 	}
-	@JSONField(serialize = false)
 	public String getOrderString(boolean hasPrefix) {
 		//加上子表的 order
 		String joinOrder = "";
@@ -2042,8 +2027,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					continue;
 				}
 
-				SQLConfig ocfg = j.getOuterConfig();
-				SQLConfig cfg = (ocfg != null && ocfg.getOrder() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getOrder() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
@@ -2142,7 +2127,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return keyMap;
 	}
 	@Override
-	public AbstractSQLConfig<T> setKeyMap(Map<String, String> keyMap) {
+	public AbstractSQLConfig<T, M, L> setKeyMap(Map<String, String> keyMap) {
 		this.keyMap = keyMap;
 		return this;
 	}
@@ -2152,7 +2137,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return raw;
 	}
 	@Override
-	public AbstractSQLConfig<T> setRaw(List<String> raw) {
+	public AbstractSQLConfig<T, M, L> setRaw(List<String> raw) {
 		this.raw = raw;
 		return this;
 	}
@@ -2212,7 +2197,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return json;
 	}
 	@Override
-	public AbstractSQLConfig<T> setJson(List<String> json) {
+	public AbstractSQLConfig<T, M, L> setJson(List<String> json) {
 		this.json = json;
 		return this;
 	}
@@ -2223,7 +2208,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return from;
 	}
 	@Override
-	public AbstractSQLConfig<T> setFrom(Subquery from) {
+	public AbstractSQLConfig<T, M, L> setFrom(Subquery from) {
 		this.from = from;
 		return this;
 	}
@@ -2233,15 +2218,13 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return column;
 	}
 	@Override
-	public AbstractSQLConfig<T> setColumn(List<String> column) {
+	public AbstractSQLConfig<T, M, L> setColumn(List<String> column) {
 		this.column = column;
 		return this;
 	}
-	@JSONField(serialize = false)
 	public String getColumnString() throws Exception {
 		return getColumnString(false);
 	}
-	@JSONField(serialize = false)
 	public String getColumnString(boolean inSQLJoin) throws Exception {
 		List<String> column = getColumn();
 		String as = getAs();
@@ -2257,7 +2240,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				for (String c : column) {
 					if (containRaw) {
 						// 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
-						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig 提前处理好的
+						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig<T, M, L> 提前处理好的
 							//排除@raw中的值，以避免使用date_format(date,'%Y-%m-%d %H:%i:%s') 时,冒号的解析出错
 							//column.remove(c);
 							continue;
@@ -2353,7 +2336,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						continue;
 					}
 
-					SQLConfig ocfg = join.getOuterConfig();
+					SQLConfig<T, M, L> ocfg = join.getOuterConfig();
 					boolean isEmpty = ocfg == null || ocfg.getColumn() == null;
 					boolean isLeftOrRightJoin = join.isLeftOrRightJoin();
 
@@ -2364,7 +2347,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						joinColumn += (first ? "" : ", ") + q + SQLConfig.getSQLAlias(join.getTable(), join.getAlias()) + q + ".*";
 						first = false;
 					} else {
-						SQLConfig cfg = isLeftOrRightJoin == false && isEmpty ? join.getJoinConfig() : ocfg;
+						SQLConfig<T, M, L> cfg = isLeftOrRightJoin == false && isEmpty ? join.getJoinConfig() : ocfg;
 						if (cfg != null) {
 							cfg.setMain(false).setKeyPrefix(true);
 							//if (StringUtil.isEmpty(cfg.getAlias(), true)) {
@@ -2403,7 +2386,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				String expression = keys[i];  //fun(arg0,arg1,...)
 
 				if (containRaw) {  // 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
-					if ("".equals(RAW_MAP.get(expression)) || RAW_MAP.containsValue(expression)) {  // newSQLConfig 提前处理好的
+					if ("".equals(RAW_MAP.get(expression)) || RAW_MAP.containsValue(expression)) {  // newSQLConfig<T, M, L> 提前处理好的
 						continue;
 					}
 
@@ -2412,7 +2395,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					String alias = expression.substring(index+1);
 					boolean hasAlias = StringUtil.isName(alias);
 					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
-					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig 提前处理好的
+					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig<T, M, L> 提前处理好的
 						keys[i] = pre + (hasAlias ? getAs() + q + alias + q : "");
 						continue;
 					}
@@ -2703,7 +2686,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							origin = parseArgsSplitWithSpace(mkes);
 						} else {
 							String mk = RAW_MAP.get(origin);
-							if (mk != null) {  // newSQLConfig 提前处理好的
+							if (mk != null) {  // newSQLConfig<T, M, L> 提前处理好的
 								if (mk.length() > 0) {
 									origin = mk;
 								}
@@ -2768,7 +2751,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				String origin = mkes[j];
 
 				String mk = RAW_MAP.get(origin);
-				if (mk != null) {  // newSQLConfig 提前处理好的
+				if (mk != null) {  // newSQLConfig<T, M, L> 提前处理好的
 					if (mk.length() > 0) {
 						mkes[j] = mk;
 					}
@@ -2849,7 +2832,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	public List<List<Object>> getValues() {
 		return values;
 	}
-	@JSONField(serialize = false)
 	public String getValuesString() {
 		String s = "";
 		if (values != null && values.size() > 0) {
@@ -2872,7 +2854,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return s;
 	}
 	@Override
-	public AbstractSQLConfig<T> setValues(List<List<Object>> valuess) {
+	public AbstractSQLConfig<T, M, L> setValues(List<List<Object>> valuess) {
 		this.values = valuess;
 		return this;
 	}
@@ -2882,7 +2864,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return content;
 	}
 	@Override
-	public AbstractSQLConfig<T> setContent(Map<String, Object> content) {
+	public AbstractSQLConfig<T, M, L> setContent(Map<String, Object> content) {
 		this.content = content;
 		return this;
 	}
@@ -2892,7 +2874,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return count;
 	}
 	@Override
-	public AbstractSQLConfig<T> setCount(int count) {
+	public AbstractSQLConfig<T, M, L> setCount(int count) {
 		this.count = count;
 		return this;
 	}
@@ -2901,7 +2883,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return page;
 	}
 	@Override
-	public AbstractSQLConfig<T> setPage(int page) {
+	public AbstractSQLConfig<T, M, L> setPage(int page) {
 		this.page = page;
 		return this;
 	}
@@ -2910,7 +2892,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return position;
 	}
 	@Override
-	public AbstractSQLConfig<T> setPosition(int position) {
+	public AbstractSQLConfig<T, M, L> setPosition(int position) {
 		this.position = position;
 		return this;
 	}
@@ -2920,7 +2902,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return query;
 	}
 	@Override
-	public AbstractSQLConfig<T> setQuery(int query) {
+	public AbstractSQLConfig<T, M, L> setQuery(int query) {
 		this.query = query;
 		return this;
 	}
@@ -2929,7 +2911,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return compat;
 	}
 	@Override
-	public AbstractSQLConfig<T> setCompat(Boolean compat) {
+	public AbstractSQLConfig<T, M, L> setCompat(Boolean compat) {
 		this.compat = compat;
 		return this;
 	}
@@ -2939,7 +2921,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return type;
 	}
 	@Override
-	public AbstractSQLConfig<T> setType(int type) {
+	public AbstractSQLConfig<T, M, L> setType(int type) {
 		this.type = type;
 		return this;
 	}
@@ -2949,12 +2931,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return cache;
 	}
 	@Override
-	public AbstractSQLConfig<T> setCache(int cache) {
+	public AbstractSQLConfig<T, M, L> setCache(int cache) {
 		this.cache = cache;
 		return this;
 	}
 
-	public AbstractSQLConfig<T> setCache(String cache) {
+	public AbstractSQLConfig<T, M, L> setCache(String cache) {
 		return setCache(getCache(cache));
 	}
 	public static int getCache(String cache) {
@@ -2993,17 +2975,17 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return explain;
 	}
 	@Override
-	public AbstractSQLConfig<T> setExplain(boolean explain) {
+	public AbstractSQLConfig<T, M, L> setExplain(boolean explain) {
 		this.explain = explain;
 		return this;
 	}
 
 	@Override
-	public List<Join> getJoinList() {
+	public List<Join<T, M, L>> getJoinList() {
 		return joinList;
 	}
 	@Override
-	public AbstractSQLConfig<T> setJoinList(List<Join> joinList) {
+	public AbstractSQLConfig<T, M, L> setJoinList(List<Join<T, M, L>> joinList) {
 		this.joinList = joinList;
 		return this;
 	}
@@ -3018,7 +3000,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return test;
 	}
 	@Override
-	public AbstractSQLConfig<T> setTest(boolean test) {
+	public AbstractSQLConfig<T, M, L> setTest(boolean test) {
 		this.test = test;
 		return this;
 	}
@@ -3026,7 +3008,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	/**获取初始位置offset
 	 * @return
 	 */
-	@JSONField(serialize = false)
 	public int getOffset() {
 		return getOffset(getPage(), getCount());
 	}
@@ -3041,7 +3022,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	/**获取限制数量
 	 * @return
 	 */
-	@JSONField(serialize = false)
 	public String getLimitString() {
 		int count = getCount();
 		int page = getPage();
@@ -3055,7 +3035,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		boolean isQuestDB = isQuestDB();
 		if (isSurrealDB || isQuestDB || isMilvus) {
 			if (count == 0) {
-				Parser<T> parser = getParser();
+				Parser<T, M, L> parser = getParser();
 				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
 			}
 
@@ -3115,7 +3095,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return nulls;
 	}
 	@Override
-	public AbstractSQLConfig<T> setNull(List<String> nulls) {
+	public AbstractSQLConfig<T, M, L> setNull(List<String> nulls) {
 		this.nulls = nulls;
 		return this;
 	}
@@ -3125,7 +3105,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return cast;
 	}
 	@Override
-	public AbstractSQLConfig<T> setCast(Map<String, String> cast) {
+	public AbstractSQLConfig<T, M, L> setCast(Map<String, String> cast) {
 		this.cast = cast;
 		return this;
 	}
@@ -3157,7 +3137,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return combine;
 	}
 	@Override
-	public AbstractSQLConfig<T> setCombine(String combine) {
+	public AbstractSQLConfig<T, M, L> setCombine(String combine) {
 		this.combine = combine;
 		return this;
 	}
@@ -3176,7 +3156,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return combineMap;
 	}
 	@Override
-	public AbstractSQLConfig<T> setCombineMap(Map<String, List<String>> combineMap) {
+	public AbstractSQLConfig<T, M, L> setCombineMap(Map<String, List<String>> combineMap) {
 		this.combineMap = combineMap;
 		return this;
 	}
@@ -3186,7 +3166,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return where;
 	}
 	@Override
-	public AbstractSQLConfig<T> setWhere(Map<String, Object> where) {
+	public AbstractSQLConfig<T, M, L> setWhere(Map<String, Object> where) {
 		this.where = where;
 		return this;
 	}
@@ -3196,7 +3176,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @param key
 	 * @return
 	 */
-	@JSONField(serialize = false)
 	@Override
 	public Object getWhere(String key) {
 		return getWhere(key, false);
@@ -3208,7 +3187,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
-	@JSONField(serialize = false)
 	@Override
 	public Object getWhere(String key, boolean exactMatch) {
 		if (exactMatch) {
@@ -3231,7 +3209,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return null;
 	}
 	@Override
-	public AbstractSQLConfig<T> putWhere(String key, Object value, boolean prior) {
+	public AbstractSQLConfig<T, M, L> putWhere(String key, Object value, boolean prior) {
 		if (key != null) {
 			if (where == null) {
 				where = new LinkedHashMap<String, Object>();
@@ -3320,7 +3298,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	@JSONField(serialize = false)
 	@Override
 	public String getWhereString(boolean hasPrefix) throws Exception {
 		String combineExpr = getCombine();
@@ -3335,9 +3312,8 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	@JSONField(serialize = false)
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where
-			, String combine, List<Join> joinList, boolean verifyName) throws Exception {
+			, String combine, List<Join<T, M, L>> joinList, boolean verifyName) throws Exception {
 		String whereString = parseCombineExpression(method, getQuote(), getTable(), getAlias()
 				, where, combine, verifyName, false, false);
 		whereString = concatJoinWhereString(whereString);
@@ -3637,7 +3613,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 		else if (StringUtil.isNotEmpty(andCond, true)) {  // andCond 必须放后面，否则 prepared 值顺序错误
 			if (isHaving) {
-				// HAVING 前 WHERE 已经有条件 ? 占位，不能反过来，想优化 AND 连接在最前，需要多遍历一次内部的 key，也可以 newSQLConfig 时存到 andList
+				// HAVING 前 WHERE 已经有条件 ? 占位，不能反过来，想优化 AND 连接在最前，需要多遍历一次内部的 key，也可以 newSQLConfig<T, M, L> 时存到 andList
 				result = "( " + result + " )" + AND + andCond;
 			}
 			else {
@@ -3666,7 +3642,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @throws Exception
 	 */
 	public String getWhereString(boolean hasPrefix, RequestMethod method, Map<String, Object> where
-		, Map<String, List<String>> combine, List<Join> joinList, boolean verifyName) throws Exception {
+		, Map<String, List<String>> combine, List<Join<T, M, L>> joinList, boolean verifyName) throws Exception {
 		Set<Entry<String, List<String>>> combineSet = combine == null ? null : combine.entrySet();
 		if (combineSet == null || combineSet.isEmpty()) {
 			Log.w(TAG, "getWhereString  combineSet == null || combineSet.isEmpty() >> return \"\";");
@@ -3734,7 +3710,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 
 	protected String concatJoinWhereString(String whereString) throws Exception {
-		List<Join> joinList = getJoinList();
+		List<Join<T, M, L>> joinList = getJoinList();
 		if (joinList != null) {
 
 			String newWs = "";
@@ -3743,12 +3719,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			List<Object> newPvl = new ArrayList<>();
 			List<Object> pvl = new ArrayList<>(getPreparedValueList());
 
-			SQLConfig jc;
+			SQLConfig<T, M, L> jc;
 			String js;
 
 			boolean changed = false;
 			// 各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
-			for (Join j : joinList) {
+			for (Join<T, M, L> j : joinList) {
 				String jt = j.getJoinType();
 
 				switch (jt) {
@@ -3957,7 +3933,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 
-	@JSONField(serialize = false)
 	public String getEqualString(String key, String column, Object value, String rawSQL) throws Exception {
 		if (value != null && JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
 			throw new IllegalArgumentException(key + ":value 中value不合法！非PUT请求只支持 [Boolean, Number, String] 内的类型 ！");
@@ -3978,7 +3953,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				: (rawSQL != null ? rawSQL : getValue(key, column, value)));
 	}
 
-	@JSONField(serialize = false)
 	public String getCompareString(String key, String column, Object value, String type, String rawSQL) throws Exception {
 		if (value != null && JSON.isBooleanOrNumberOrString(value) == false && value instanceof Subquery == false) {
 			throw new IllegalArgumentException(key + ":value 中 value 不合法！比较运算 [>, <, >=, <=] 只支持 [Boolean, Number, String] 内的类型 ！");
@@ -4095,7 +4069,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return preparedValueList;
 	}
 	@Override
-	public AbstractSQLConfig<T> setPreparedValueList(List<Object> preparedValueList) {
+	public AbstractSQLConfig<T, M, L> setPreparedValueList(List<Object> preparedValueList) {
 		this.preparedValueList = preparedValueList;
 		return this;
 	}
@@ -4109,7 +4083,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	* @return {@link #getSearchString(String, String, Object[], int)}
 	* @throws IllegalArgumentException
 	*/
-	@JSONField(serialize = false)
 	public String getSearchString(String key, String column, Object value, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 "
@@ -4123,7 +4096,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		column = logic.getKey();
 		Log.i(TAG, "getSearchString column = " + column);
 
-		JSONArray arr = newJSONArray(value);
+		List<Object> arr = newJSONArray(value);
 		if (arr.isEmpty()) {
 			return "";
 		}
@@ -4137,7 +4110,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	* @return LOGIC [  key LIKE 'values[i]' ]
 	* @throws IllegalArgumentException
 	*/
-	@JSONField(serialize = false)
 	public String getSearchString(String key, String column, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
@@ -4168,7 +4140,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @param value
 	 * @return key LIKE 'value'
 	 */
-	@JSONField(serialize = false)
 	public String getLikeString(@NotNull String key, @NotNull String column, String value) {
 		String k = key.substring(0, key.length() - 1);
 		char r = k.charAt(k.length() - 1);
@@ -4234,7 +4205,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return {@link #getRegExpString(String, String, Object[], int, boolean)}
 	 * @throws IllegalArgumentException
 	 */
-	@JSONField(serialize = false)
 	public String getRegExpString(String key, String column, Object value, boolean ignoreCase, String rawSQL)
 			throws IllegalArgumentException {
 		if (rawSQL != null) {
@@ -4249,7 +4219,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		column = logic.getKey();
 		Log.i(TAG, "getRegExpString column = " + column);
 
-		JSONArray arr = newJSONArray(value);
+		L arr = newJSONArray(value);
 		if (arr.isEmpty()) {
 			return "";
 		}
@@ -4263,7 +4233,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return LOGIC [  key REGEXP 'values[i]' ]
 	 * @throws IllegalArgumentException
 	 */
-	@JSONField(serialize = false)
 	public String getRegExpString(String key, String column, Object[] values, int type, boolean ignoreCase)
 			throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
@@ -4288,7 +4257,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @param ignoreCase
 	 * @return key REGEXP 'value'
 	 */
-	@JSONField(serialize = false)
 	public String getRegExpString(String key, String column, String value, boolean ignoreCase) {
 		if (isPSQL()) {
 			return getKey(column) + " ~" + (ignoreCase ? "* " : " ") + getValue(key, column, value);
@@ -4327,7 +4295,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
 	 * @throws IllegalArgumentException
 	 */
-	@JSONField(serialize = false)
 	public String getBetweenString(String key, String column, Object value, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key% 这种功能符 ！" +
@@ -4341,7 +4308,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		column = logic.getKey();
 		Log.i(TAG, "getBetweenString column = " + column);
 
-		JSONArray arr = newJSONArray(value);
+		L arr = newJSONArray(value);
 		if (arr.isEmpty()) {
 			return "";
 		}
@@ -4356,7 +4323,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return LOGIC [ key BETWEEN 'start' AND 'end' ]
 	 * @throws IllegalArgumentException
 	 */
-	@JSONField(serialize = false)
 	public String getBetweenString(String key, String column, Object[] values, int type) throws IllegalArgumentException {
 		if (values == null || values.length <= 0) {
 			return "";
@@ -4390,7 +4356,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	* @return LOGIC [ key BETWEEN 'start' AND 'end' ]
 	* @throws IllegalArgumentException
 	*/
-	@JSONField(serialize = false)
 	public String getBetweenString(String key, String column, Object start, Object end) throws IllegalArgumentException {
 		if (JSON.isBooleanOrNumberOrString(start) == false || JSON.isBooleanOrNumberOrString(end) == false) {
 			throw new IllegalArgumentException(key + ":value 中 value 不合法！类型为 String 时必须包括1个逗号 , " +
@@ -4413,7 +4378,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return key condition0 AND key condition1 AND ...
 	 * @throws Exception
 	 */
-	@JSONField(serialize = false)
 	public String getRangeString(String key, String column, Object range, String rawSQL) throws Exception {
 		Log.i(TAG, "getRangeString column = " + column);
 		if (range == null) {//依赖的对象都没有给出有效值，这个存在无意义。如果是客户端传的，那就能在客户端确定了。
@@ -4500,7 +4464,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 			return getCondition(logic.isNot(), condition);
 		}
 		else if (range instanceof Subquery) {
-			// 如果在 Parser 解析成 SQL 字符串再引用，没法保证安全性，毕竟可以再通过远程函数等方式来拼接再替代，最后引用的字符串就能注入
+			// 如果在 Parser<T, M, L> 解析成 SQL 字符串再引用，没法保证安全性，毕竟可以再通过远程函数等方式来拼接再替代，最后引用的字符串就能注入
 			return getKey(k) + (logic.isNot() ? NOT : "") + " IN " + getSubqueryString((Subquery) range);
 		}
 
@@ -4512,7 +4476,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return IN ('key0', 'key1', ... )
 	 * @throws NotExistException
 	 */
-	@JSONField(serialize = false)
 	public String getInString(String key, String column, Object[] in, boolean not) throws NotExistException {
 		String condition = "";
 		if (in != null) {//返回 "" 会导致 id:[] 空值时效果和没有筛选id一样！
@@ -4537,7 +4500,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return EXISTS ALL(SELECT ...)
 	 * @throws NotExistException
 	 */
-	@JSONField(serialize = false)
 	public String getExistsString(String key, String column, Object value, String rawSQL) throws Exception {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！" +
@@ -4566,7 +4528,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return	{@link #getContainString(String, String, Object[], int)}
 	 * @throws NotExistException
 	 */
-	@JSONField(serialize = false)
 	public String getContainString(String key, String column, Object value, String rawSQL) throws IllegalArgumentException {
 		if (rawSQL != null) {
 			throw new UnsupportedOperationException("@raw:value 中 " + key + " 不合法！@raw 不支持 key<> 这种功能符 ！" +
@@ -4589,7 +4550,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 *   OR  key LIKE '%, " + childs[i] + ", %'  OR  key LIKE '%, " + childs[i] + "]' )  ]
 	 * @throws IllegalArgumentException
 	 */
-	@JSONField(serialize = false)
 	public String getContainString(String key, String column, Object[] childs, int type) throws IllegalArgumentException {
 		boolean not = Logic.isNot(type);
 		String condition = "";
@@ -4669,7 +4629,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	private String withAsExpreSubqueryString(SQLConfig cfg, Subquery subquery) throws Exception {
+	private String withAsExpreSubqueryString(SQLConfig<T, M, L> cfg, Subquery subquery) throws Exception {
 		boolean isWithAsEnable = isWithAsEnable();
 		List<String> list = isWithAsEnable ? getWithAsExprSqlList() : null;
 		if (cfg.getMethod() != RequestMethod.POST && list == null) {
@@ -4715,7 +4675,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 		String range = subquery.getRange();
-		SQLConfig cfg = subquery.getConfig();
+		SQLConfig<T, M, L> cfg = subquery.getConfig();
 
 		// 子查询  = 主语句 datasource
 		if(StringUtil.equals(this.getTable(), subquery.getFrom() )  == false  && cfg.hasJoin() == false) {
@@ -4783,8 +4743,20 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 */
 	@NotNull
-	public static JSONArray newJSONArray(Object obj) {
-		JSONArray array = new JSONArray();
+	public L newJSONArray(Object obj) {
+		L array = createJSONArray();
+		if (obj != null) {
+			if (obj instanceof Collection) {
+				array.addAll((Collection<?>) obj);
+			} else {
+				array.add(obj);
+			}
+		}
+		return array;
+	}
+	@NotNull
+	public static <M extends Map<String, Object>, L extends List<Object>> L newJSONArray(Object obj, JSONCreator<M, L> creator) {
+		L array = creator.createJSONArray();
 		if (obj != null) {
 			if (obj instanceof Collection) {
 				array.addAll((Collection<?>) obj);
@@ -4803,7 +4775,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	@JSONField(serialize = false)
 	public String getSetString() throws Exception {
 		return getSetString(getMethod(), getContent(), ! isTest());
 	}
@@ -4815,7 +4786,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @throws Exception
 	 * <p>use entrySet+getValue() to replace keySet+get() to enhance efficiency</p>
 	 */
-	@JSONField(serialize = false)
 	public String getSetString(RequestMethod method, Map<String, Object> content, boolean verifyName) throws Exception {
 		Set<String> set = content == null ? null : content.keySet();
 		String setString = "";
@@ -4864,7 +4834,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return concat(key, 'value')
 	 * @throws IllegalArgumentException
 	 */
-	@JSONField(serialize = false)
 	public String getAddString(String key, String column, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
 			return getKey(column) + " + " + value;
@@ -4880,7 +4849,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return REPLACE (key, 'value', '')
 	 * @throws IllegalArgumentException
 	 */
-	@JSONField(serialize = false)
 	public String getRemoveString(String key, String column, Object value) throws IllegalArgumentException {
 		if (value instanceof Number) {
 			return getKey(column) + " - " + value;
@@ -4907,7 +4875,6 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	@JSONField(serialize = false)
 	@Override
 	public String getSQL(boolean prepared) throws Exception {
 		boolean isPrepared = isPrepared();
@@ -4924,7 +4891,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	public static String getSQL(AbstractSQLConfig config) throws Exception {
+	public static <T, M extends Map<String, Object>, L extends List<Object>> String getSQL(AbstractSQLConfig<T, M, L> config) throws Exception {
 		if (config == null) {
 			Log.i(TAG, "getSQL  config == null >> return null;");
 			return null;
@@ -4932,7 +4899,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		// TODO procedure 改为 List<Procedure>  procedureList; behind : true; function: callFunction(); String key; ...
 		// for (...) { Call procedure1();\n SQL \n; Call procedure2(); ... }
-		// 貌似不需要，因为 ObjectParser 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
+		// 貌似不需要，因为 ObjectParser<T, M, L> 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
 
 		String procedure = config.getProcedure();
 		if (StringUtil.isNotEmpty(procedure, true)) {
@@ -5008,7 +4975,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 	}
 
-	private static String buildWithAsExprSql(@NotNull AbstractSQLConfig config, String cSql) throws Exception {
+	private static <T, M extends Map<String, Object>, L extends List<Object>> String buildWithAsExprSql(@NotNull AbstractSQLConfig<T, M, L> config, String cSql) throws Exception {
 		if (config.isWithAsEnable() == false) {
 			return cSql;
 		}
@@ -5053,7 +5020,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	private static String getConditionString(String table, AbstractSQLConfig config) throws Exception {
+	private static <T, M extends Map<String, Object>, L extends List<Object>> String getConditionString(String table, AbstractSQLConfig<T, M, L> config) throws Exception {
 		Subquery from = config.getFrom();
 		if (from != null) {
 			table = config.getSubqueryString(from) + config.getAs() + config.getSQLAliasWithQuote() + " ";
@@ -5129,7 +5096,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		return keyPrefix;
 	}
 	@Override
-	public AbstractSQLConfig<T> setKeyPrefix(boolean keyPrefix) {
+	public AbstractSQLConfig<T, M, L> setKeyPrefix(boolean keyPrefix) {
 		this.keyPrefix = keyPrefix;
 		return this;
 	}
@@ -5154,7 +5121,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 				//LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
 				// <"INNER JOIN User ON User.id = Moment.userId", UserConfig>  TODO  AS 放 getSQLTable 内
-				SQLConfig jc = j.getJoinConfig();
+				SQLConfig<T, M, L> jc = j.getJoinConfig();
 				jc.setPrepared(isPrepared());
 				// 将关联表所属数据源配置为主表数据源
 				jc.setDatasource(this.getDatasource());
@@ -5211,7 +5178,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 							);
 				}
 
-				SQLConfig oc = j.getOuterConfig();
+				SQLConfig<T, M, L> oc = j.getOuterConfig();
 				String ow = null;
 				if (oc != null) {
 					oc.setPrepared(isPrepared());
@@ -5243,7 +5210,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 	protected String concatJoinOn(@NotNull String sql, @NotNull String quote, @NotNull Join join, @NotNull String jt, List<On> onList) {
 		if (onList != null) {
-			SQLConfig jc = join.getJoinConfig();
+			SQLConfig<T, M, L> jc = join.getJoinConfig();
 			Map<String, String> castMap = jc == null ? null : jc.getCast();
 
 			boolean first = true;
@@ -5449,29 +5416,30 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> SQLConfig<T> newSQLConfig(RequestMethod method, String table, String alias
-			, JSONObject request, List<Join> joinList, boolean isProcedure, Callback<T> callback) throws Exception {
+	public static <T, M extends Map<String, Object>, L extends List<Object>> SQLConfig<T, M, L> newSQLConfig(
+			RequestMethod method, String table, String alias
+			, M request, List<Join<T, M, L>> joinList, boolean isProcedure, Callback<T, M, L> callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
-			throw new NullPointerException(TAG + ": newSQLConfig  request == null!");
+			throw new NullPointerException(TAG + ": newSQLConfig<T, M, L>  request == null!");
 		}
 
-		Boolean explain = request.getBoolean(KEY_EXPLAIN);
+		Boolean explain = getBoolean(request, KEY_EXPLAIN);
 		if (explain != null && explain && Log.DEBUG == false) { // 不在 config.setExplain 抛异常，一方面处理更早性能更好，另一方面为了内部调用可以绕过这个限制
 			throw new UnsupportedOperationException("非DEBUG模式, 不允许传 " + KEY_EXPLAIN + " ！");
 		}
 
-		String database = request.getString(KEY_DATABASE);
+		String database = getString(request, KEY_DATABASE);
 		if (StringUtil.isEmpty(database, false) == false && DATABASE_LIST.contains(database) == false) {
 			throw new UnsupportedDataTypeException("@database:value 中 value 错误，只能是 ["
 					+ StringUtil.get(DATABASE_LIST.toArray()) + "] 中的一种！");
 		}
 
-		String datasource = request.getString(KEY_DATASOURCE);
-		String namespace = request.getString(KEY_NAMESPACE);
-		String catalog = request.getString(KEY_CATALOG);
-		String schema = request.getString(KEY_SCHEMA);
+		String datasource = getString(request, KEY_DATASOURCE);
+		String namespace = getString(request, KEY_NAMESPACE);
+		String catalog = getString(request, KEY_CATALOG);
+		String schema = getString(request, KEY_SCHEMA);
 
-		SQLConfig<T> config = callback.getSQLConfig(method, database, schema, datasource, table);
+		SQLConfig<T, M, L> config = (SQLConfig<T, M, L>) callback.getSQLConfig(method, database, schema, datasource, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); // 不删，后面表对象还要用的，必须放在 parseJoin 前
@@ -5509,7 +5477,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				}
 			}
 			if (newIdIn.isEmpty()) {
-				throw new NotExistException(TAG + ": newSQLConfig idIn instanceof List >> 去掉无效 id 后 newIdIn.isEmpty()");
+				throw new NotExistException(TAG + ": newSQLConfig<T, M, L> idIn instanceof List >> 去掉无效 id 后 newIdIn.isEmpty()");
 			}
 			idIn = newIdIn;
 
@@ -5526,12 +5494,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (id != null) { // null 无效
 			if (id instanceof Number) {
 				if (((Number) id).longValue() <= 0) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig " + table + ".id <= 0");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> " + table + ".id <= 0");
 				}
 			}
 			else if (id instanceof String) {
 				if (StringUtil.isEmpty(id, true)) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig StringUtil.isEmpty(" + table + ".id, true)");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> StringUtil.isEmpty(" + table + ".id, true)");
 				}
 			}
 			else if (id instanceof Subquery) {}
@@ -5549,7 +5517,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 				}
 				if (contains == false) { // empty有效  BaseModel.isEmpty(idIn) == false) {
-					throw new NotExistException(TAG + ": newSQLConfig  idIn != null && (((List<?>) idIn).contains(id) == false");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L>  idIn != null && (((List<?>) idIn).contains(id) == false");
 				}
 			}
 
@@ -5571,7 +5539,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				}
 			}
 			if (newUserIdIn.isEmpty()) {
-				throw new NotExistException(TAG + ": newSQLConfig userIdIn instanceof List >> 去掉无效 userId 后 newIdIn.isEmpty()");
+				throw new NotExistException(TAG + ": newSQLConfig<T, M, L> userIdIn instanceof List >> 去掉无效 userId 后 newIdIn.isEmpty()");
 			}
 			userIdIn = newUserIdIn;
 		}
@@ -5580,12 +5548,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		if (userId != null) { // null 无效
 			if (userId instanceof Number) {
 				if (((Number) userId).longValue() <= 0) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig " + table + ".userId <= 0");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> " + table + ".userId <= 0");
 				}
 			}
 			else if (userId instanceof String) {
 				if (StringUtil.isEmpty(userId, true)) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig StringUtil.isEmpty(" + table + ".userId, true)");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> StringUtil.isEmpty(" + table + ".userId, true)");
 				}
 			}
 			else if (userId instanceof Subquery) {}
@@ -5603,32 +5571,32 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					}
 				}
 				if (contains == false) { // empty有效  BaseModel.isEmpty(userIdIn) == false) {
-					throw new NotExistException(TAG + ": newSQLConfig  userIdIn != null && (((List<?>) userIdIn).contains(userId) == false");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L>  userIdIn != null && (((List<?>) userIdIn).contains(userId) == false");
 				}
 			}
 		}
 		// 对 id, id{}, userId, userId{} 处理，这些只要不为 null 就一定会作为 AND 条件 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-		String role = request.getString(KEY_ROLE);
-		String cache = request.getString(KEY_CACHE);
+		String role = getString(request, KEY_ROLE);
+		String cache = getString(request, KEY_CACHE);
 		Subquery from = (Subquery) request.get(KEY_FROM);
-		String column = request.getString(KEY_COLUMN);
-		String nulls = request.getString(KEY_NULL);
-		String cast = request.getString(KEY_CAST);
-		String combine = request.getString(KEY_COMBINE);
-		String group = request.getString(KEY_GROUP);
+		String column = getString(request, KEY_COLUMN);
+		String nulls = getString(request, KEY_NULL);
+		String cast = getString(request, KEY_CAST);
+		String combine = getString(request, KEY_COMBINE);
+		String group = getString(request, KEY_GROUP);
 		Object having = request.get(KEY_HAVING);
-		String havingAnd = request.getString(KEY_HAVING_AND);
-		String sample = request.getString(KEY_SAMPLE);
-		String latest = request.getString(KEY_LATEST);
-		String partition = request.getString(KEY_PARTITION);
-		String fill = request.getString(KEY_FILL);
-		String order = request.getString(KEY_ORDER);
+		String havingAnd = getString(request, KEY_HAVING_AND);
+		String sample = getString(request, KEY_SAMPLE);
+		String latest = getString(request, KEY_LATEST);
+		String partition = getString(request, KEY_PARTITION);
+		String fill = getString(request, KEY_FILL);
+		String order = getString(request, KEY_ORDER);
 		Object keyMap = request.get(KEY_KEY);
-		String raw = request.getString(KEY_RAW);
-		String json = request.getString(KEY_JSON);
-		String mthd = request.getString(KEY_METHOD);
+		String raw = getString(request, KEY_RAW);
+		String json = getString(request, KEY_JSON);
+		String mthd = getString(request, KEY_METHOD);
 
 		try {
 			// 强制作为条件且放在最前面优化性能
@@ -5744,7 +5712,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 					if (values == null || values.length != columns.length) {
 						throw new Exception("服务器内部错误:\n" + TAG
-								+ " newSQLConfig  values == null || values.length != columns.length !");
+								+ " newSQLConfig<T, M, L>  values == null || values.length != columns.length !");
 					}
 
 					column = (id == null ? "" : idKey + ",") + (userId == null ? "" : userIdKey + ",")
@@ -5820,14 +5788,14 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 						boolean isFakeDelete = true;
 						if (from != null) {
 							// 兼容 JOIN 外层 SELECT 重复生成 deletedKey
-							SQLConfig<?> cfg = from.getConfig();
+							SQLConfig<?, ?, ?> cfg = from.getConfig();
 							if (cfg != null && StringUtil.equals(table, cfg.getTable())) {
 								isFakeDelete = false;
 							}
 
-							List<Join> jl = isFakeDelete && cfg != null ? cfg.getJoinList() : null;
+							List<? extends Join<?, ?, ?>> jl = isFakeDelete && cfg != null ? cfg.getJoinList() : null;
 							if (jl != null) {
-								for (Join join : jl) {
+								for (Join<?, ?, ?> join : jl) {
 									if (join != null && StringUtil.equals(table, join.getTable())) {
 										isFakeDelete = false;
 										break;
@@ -5906,11 +5874,11 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 						// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！
 						// 去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
-						if (request.containsKey(w) == false) {  // 和 request.get(w) == null 没区别，前面 Parser 已经过滤了 null
+						if (request.containsKey(w) == false) {  // 和 request.get(w) == null 没区别，前面 Parser<T, M, L> 已经过滤了 null
 							//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
 							callback.onMissingKey4Combine(table, request, combine, ws[i], w);
 							if (config instanceof AbstractSQLConfig) {
-								((AbstractSQLConfig<T>) config).putWarnIfNeed(KEY_COMBINE, table + ":{} 里的 @combine:value 中的 value 里 "
+								((AbstractSQLConfig<T, M, L>) config).putWarnIfNeed(KEY_COMBINE, table + ":{} 里的 @combine:value 中的 value 里 "
 										+ ws[i] + " 对应的条件 " + w + ":value 中 value 必须存在且不能为 null！");
 							}
 						}
@@ -5943,7 +5911,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 					} else if (whereList.contains(key)) {
 						tableWhere.put(key, value);
 					} else {
-						tableContent.put(key, value); // 一样 instanceof JSONArray ? JSON.toJSONString(value) : value);
+						tableContent.put(key, value); // 一样 instanceof List<?> ? JSON.toJSONString(value) : value);
 					}
 				}
 
@@ -6271,12 +6239,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T extends Object> SQLConfig<T> parseJoin(RequestMethod method, SQLConfig<T> config
-			, List<Join> joinList, Callback<T> callback) throws Exception {
+	public static <T, M extends Map<String, Object>, L extends List<Object>> SQLConfig<T, M, L> parseJoin(RequestMethod method, SQLConfig<T, M, L> config
+			, List<Join<T, M, L>> joinList, Callback<T, M, L> callback) throws Exception {
 		boolean isQuery = RequestMethod.isQueryMethod(method);
 		config.setKeyPrefix(isQuery && config.isMain() == false);
 
-		//TODO 解析出 SQLConfig 再合并 column, order, group 等
+		//TODO 解析出 SQLConfig<T, M, L> 再合并 column, order, group 等
 		if (joinList == null || joinList.isEmpty() || RequestMethod.isQueryMethod(method) == false) {
 			return config;
 		}
@@ -6284,12 +6252,12 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 
 		String table;
 		String alias;
-		for (Join j : joinList) {
+		for (Join<T, M, L> j : joinList) {
 			table = j.getTable();
 			alias = j.getAlias();
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
-			SQLConfig<T> joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
-			SQLConfig<T> cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias
+			SQLConfig<T, M, L> joinConfig = newSQLConfig(method, table, alias, j.getRequest(), null, false, callback);
+			SQLConfig<T, M, L> cacheConfig = j.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias
 					, j.getRequest(), null, false, callback).setCount(j.getCount());
 
 			if (j.isAppJoin() == false) { //除了 @ APP JOIN，其它都是 SQL JOIN，则副表要这样配置
@@ -6316,7 +6284,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (j.getOuter() != null) {
-					SQLConfig<T> outerConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
+					SQLConfig<T, M, L> outerConfig = newSQLConfig(method, table, alias, j.getOuter(), null, false, callback);
 					outerConfig.setMain(false)
 							.setKeyPrefix(true)
 							.setDatabase(joinConfig.getDatabase())
@@ -6526,22 +6494,22 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		String getUserIdKey(String database, String schema, String datasource, String table);
 	}
 
-	public static interface Callback<T extends Object> extends IdCallback<T> {
-		/**获取 SQLConfig 的实例
+	public static interface Callback<T, M extends Map<String, Object>, L extends List<Object>> extends IdCallback<T> {
+		/**获取 SQLConfig<T, M, L> 的实例
 		 * @param method
 		 * @param database
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		SQLConfig<T>  getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
+		SQLConfig<T, M, L>  getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
 
 		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
 		 * @param combine
 		 * @param key
 		 * @param request
 		 */
-		void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception;
+		void onMissingKey4Combine(String name, M request, String combine, String item, String key) throws Exception;
 	}
 
 	public static Long LAST_ID;
@@ -6549,7 +6517,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		LAST_ID = System.currentTimeMillis();
 	}
 
-	public static abstract class SimpleCallback<T extends Object> implements Callback<T> {
+	public static abstract class SimpleCallback<T, M extends Map<String, Object>, L extends List<Object>> implements Callback<T, M, L> {
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -6574,7 +6542,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 		}
 
 		@Override
-		public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+		public void onMissingKey4Combine(String name, M request, String combine, String item, String key) throws Exception {
 			if (ALLOW_MISSING_KEY_4_COMBINE) {
 				return;
 			}
@@ -6623,7 +6591,7 @@ public abstract class AbstractSQLConfig<T extends Object> implements SQLConfig<T
 	}
 
 	@Override
-	public AbstractSQLConfig<T> setWithAsExprPreparedValueList(List<Object> list) {
+	public AbstractSQLConfig<T, M, L> setWithAsExprPreparedValueList(List<Object> list) {
 		this.withAsExprPreparedValueList = list;
 		return this;
 	}

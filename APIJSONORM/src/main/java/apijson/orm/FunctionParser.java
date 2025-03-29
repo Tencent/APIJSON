@@ -5,7 +5,8 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import com.alibaba.fastjson.JSONObject;
+import java.util.List;
+import java.util.Map;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
@@ -14,41 +15,41 @@ import apijson.RequestMethod;
 /**远程函数解析器
  * @author Lemon
  */
-public interface FunctionParser<T> {
+public interface FunctionParser<T extends Object, M extends Map<String, Object>, L extends List<Object>> {
 
-	Object invoke(@NotNull String function, @NotNull JSONObject currentObject) throws Exception;
-	Object invoke(@NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception;
+	Object invoke(@NotNull String function, @NotNull M currentObject) throws Exception;
+	Object invoke(@NotNull String function, @NotNull M currentObject, boolean containRaw) throws Exception;
 
-	Parser<T> getParser();
+	Parser<T, M, L> getParser();
 
-	FunctionParser<T> setParser(Parser<T> parser);
+	FunctionParser<T, M, L> setParser(Parser<T, M, L> parser);
 
 	RequestMethod getMethod();
-	FunctionParser<T> setMethod(RequestMethod method);
+	FunctionParser<T, M, L> setMethod(RequestMethod method);
 
 	String getTag();
-	FunctionParser<T> setTag(String tag);
+	FunctionParser<T, M, L> setTag(String tag);
 
 	int getVersion();
-	FunctionParser<T> setVersion(int version);
+	FunctionParser<T, M, L> setVersion(int version);
 
 	@NotNull 
-	JSONObject getRequest();
-	FunctionParser<T> setRequest(@NotNull JSONObject request);
+	M getRequest();
+	FunctionParser<T, M, L> setRequest(@NotNull M request);
 
 
 	String getKey();
-	FunctionParser<T> setKey(String key);
+	FunctionParser<T, M, L> setKey(String key);
 	
 	String getParentPath();
-	FunctionParser<T> setParentPath(String parentPath);
+	FunctionParser<T, M, L> setParentPath(String parentPath);
 
 	String getCurrentName();
-	FunctionParser<T> setCurrentName(String currentName);
+	FunctionParser<T, M, L> setCurrentName(String currentName);
 
 	@NotNull
-	JSONObject getCurrentObject();
-	FunctionParser<T> setCurrentObject(@NotNull JSONObject currentObject);
+	M getCurrentObject();
+	FunctionParser<T, M, L> setCurrentObject(@NotNull M currentObject);
 
 
 

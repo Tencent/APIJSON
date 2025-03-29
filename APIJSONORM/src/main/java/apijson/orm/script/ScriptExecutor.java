@@ -1,16 +1,17 @@
 package apijson.orm.script;
 
-import com.alibaba.fastjson.JSONObject;
+import java.util.List;
+import java.util.Map;
 
 import apijson.orm.AbstractFunctionParser;
 
-public interface ScriptExecutor {
+public interface ScriptExecutor<T, M extends Map<String, Object>, L extends List<Object>> {
 
-    ScriptExecutor init();
+    ScriptExecutor<T, M, L> init();
 
     void load(String name, String script);
 
-    Object execute(AbstractFunctionParser parser, JSONObject currentObject, String methodName, Object[] args) throws Exception;
+    Object execute(AbstractFunctionParser<T, M, L> parser, Map<String, Object> currentObject, String methodName, Object[] args) throws Exception;
 
     void cleanCache();
     

@@ -13,7 +13,7 @@ import apijson.StringUtil;
 /**JSONRequest for Server to replace apijson.JSONRequest,
  * put JSON.parseObject(value) and not encode in default cases
  * @author Lemon
- * @see #put(String, Object, boolean)
+ * @see #put(String, Object)
  */
 public class JSONRequest extends apijson.JSONRequest {
 	private static final long serialVersionUID = 1L;
@@ -81,8 +81,13 @@ public class JSONRequest extends apijson.JSONRequest {
 			return null;
 		}
 
-		Object target = JSON.parse(value);
-		//		if (target == null) { // "tag":"User" 报错
+        Object target = null;
+        try {
+            target = JSON.parseJSON(value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        //		if (target == null) { // "tag":"User" 报错
 		//			return null;
 		//		}
 		return super.put(StringUtil.isNotEmpty(key, true) ? key : value.getClass().getSimpleName() //must handle key here
