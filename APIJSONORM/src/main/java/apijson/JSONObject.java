@@ -690,10 +690,6 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 		return this;
 	}
 
-	@Override
-	public Object remove(Object key) {
-		return null;
-	}
 
 	/**
 	 * Get a boolean value from the JSONObject
@@ -823,6 +819,11 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 		for (Entry<? extends String, ?> entry : set) {
 			put(entry.getKey(), entry.getValue());
 		}
+	}
+
+	@Override
+	public Object remove(Object key) {
+		return map.remove(key);
 	}
 
 	@Override

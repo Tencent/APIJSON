@@ -6,12 +6,8 @@ package apijson;
 
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import apijson.orm.exception.UnsupportedDataTypeException;
-import apijson.Log;
-import apijson.StringUtil;
 
 /**JSON工具类 防止解析时异常
  * @author Lemon
@@ -69,8 +65,16 @@ public class JSON {
 		return DEFAULT_JSON_PARSER.createJSONObject();
 	}
 
+	public static Object createJSONObject(Map<? extends String, ?> map) {
+		return DEFAULT_JSON_PARSER.createJSONObject(map);
+	}
+
 	public static Object createJSONArray() {
 		return DEFAULT_JSON_PARSER.createJSONArray();
+	}
+
+	public static Object createJSONArray(List<?> list) {
+		return DEFAULT_JSON_PARSER.createJSONArray(list);
 	}
 
 	public static Object parseJSON(Object json) {

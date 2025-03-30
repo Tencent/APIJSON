@@ -122,7 +122,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		}
 
 		M result = position >= list.size() ? null : list.get(position);
-		return result != null ? result : createJSONObject();
+		return result != null ? result : (M) JSON.createJSONObject();
 	}
 
 
@@ -212,7 +212,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					executedSQLDuration += System.currentTimeMillis() - executedSQLStartTime;
 				}
 
-				result = createJSONObject();
+				result = (M) JSON.createJSONObject();
 				result.put(JSONResponse.KEY_COUNT, updateCount);
 				result.put("update", updateCount >= 0);
 				//导致后面 rs.getMetaData() 报错 Operation not allowed after ResultSet closed		result.put("moreResults", statement.getMoreResults());
@@ -408,7 +408,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					index ++;
 					Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n execute while (rs.next()){  index = " + index + "\n\n");
 
-					M item = createJSONObject();
+					M item = (M) JSON.createJSONObject();
 					M viceItem = null;
 					M curItem = item;
 					boolean isMain = true;
@@ -629,7 +629,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 							else {
 								String viceName = viceConfig.getTableKey();
 								if (viceItem == null) {
-									viceItem = createJSONObject();
+									viceItem = (M) JSON.createJSONObject();
 								}
 								curItem = JSON.get(viceItem, viceName);
 
@@ -638,7 +638,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 								if (curItem == null || curItem.isEmpty()) {
 									// 导致前面判断重复 key 出错 curItem = curCache != null ? curCache : new M(true);
-									curItem = createJSONObject();
+									curItem = (M) JSON.createJSONObject();
 									viceItem.put(viceName, curItem);
 									if (hasPK && curCache == null) {
 										childMap.put(viceSql, curItem);
@@ -688,7 +688,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		if (unknownType || isExplain) {
 			if (isExplain) {
 				if (result == null) {
-					result = createJSONObject();
+					result = (M) JSON.createJSONObject();
 				}
 				config.setExplain(false);
 				result.put("sql", config.getSQL(false));
@@ -723,13 +723,13 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 			// 数组主表对象额外一次返回全部，方便 Parser<T, M, L> 缓存来提高性能
 
-			result = position >= resultList.size() ? createJSONObject() : resultList.get(position);
+			result = position >= resultList.size() ? (M) JSON.createJSONObject() : resultList.get(position);
 			if (position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false) {
 				// 不是 main 不会直接执行，count=1 返回的不会超过 1   && config.isMain() && config.getCount() != 1
 				Log.i(TAG, ">>> execute  position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false"
 						+ " >> result = new M(result); result.put(KEY_RAW_LIST, resultList);");
 
-				result = createJSONObject();
+				result = (M) JSON.createJSONObject(result);
 				result.put(KEY_RAW_LIST, resultList);
 			}
 		}
@@ -909,7 +909,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 						index ++;
 						Log.d(TAG, "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n executeAppJoin while (rs.next()){  index = " + index + "\n\n");
 
-						M result = createJSONObject();
+						M result = (M) JSON.createJSONObject();
 
 						for (int i = 1; i <= length; i++) {
 							result = onPutColumn(jc, rs, rsmd, index, result, i, null, null, keyMap);
@@ -1135,7 +1135,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		}
 		if (castToJson) {
 			try {
-				value = parseJSON((String) value);
+				value = JSON.parseJSON(value);
 			} catch (Exception e) {
 				Log.e(TAG, "getValue  try { value = parseJSON((String) value); } catch (Exception e) { \n" + e.getMessage());
 			}
