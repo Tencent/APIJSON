@@ -5,12 +5,11 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import apijson.orm.exception.UnsupportedDataTypeException;
 
@@ -20,11 +19,10 @@ import apijson.orm.exception.UnsupportedDataTypeException;
  * @see #puts
  * @see #putsAll
  */
-public class JSONObject extends LinkedHashMap<String, Object> implements JSON {
-	private static final long serialVersionUID = 1L;
-
+public class JSONObject extends JSON implements Map<String, Object>  {
 	private static final String TAG = "JSONObject";
 
+	private final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
 	/**ordered
 	 */
@@ -70,8 +68,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements JSON {
 		this();
 		putsAll(object);
 	}
-
-
 
 
 	//judge <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -634,25 +630,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements JSON {
 
 	//Request >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
-
-	/**puts key-value in object into this
-	 * @param map
-	 * @return this
-	 */
-	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
-		putAll(map);
-		return this;
-	}
-	@Override
-	public void putAll(Map<? extends String, ? extends Object> map) {
-		if (map != null && map.isEmpty() == false) {
-			super.putAll(map);
-		}
-	}
-
-
-
 	/**put and return this
 	 * @param value  must be annotated by {@link MethodAccess}
 	 * @return {@link #puts(String, Object)}
@@ -700,7 +677,22 @@ public class JSONObject extends LinkedHashMap<String, Object> implements JSON {
 			}
 			key = value.getClass().getSimpleName();
 		}
-		return super.put(key, value);
+
+		return map.put(key, value);
+	}
+
+	/**puts key-value in object into this
+	 * @param map
+	 * @return this
+	 */
+	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
+		putAll(map);
+		return this;
+	}
+
+	@Override
+	public Object remove(Object key) {
+		return null;
 	}
 
 	/**
@@ -792,27 +784,70 @@ public class JSONObject extends LinkedHashMap<String, Object> implements JSON {
 			return null;
 		}
 	}
-	
+
+	@Override
+	public int size() {
+		return map.size();
+	}
+
 	/**
 	 * Check if the JSONObject is empty or has no values other than null
 	 * @return true if empty
 	 */
 	public boolean isEmpty() {
-		if (super.isEmpty()) {
-			return true;
-		}
-		
-		Set<Entry<String, Object>> set = entrySet();
-		for (Entry<String, Object> entry : set) {
-			if (entry.getValue() != null) {
-				return false;
-			}
-		}
-		return true;
+		return map.isEmpty();
 	}
-	
+
+	@Override
+	public boolean containsKey(Object key) {
+		return map.containsKey(key);
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		return map.containsValue(value);
+	}
+
+	@Override
+	public Object get(Object key) {
+		return map.get(key);
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> map) {
+		Set<? extends Entry<? extends String, ?>> set = map == null ? null : map.entrySet();
+		if (set != null || set.isEmpty()) {
+			return;
+		}
+
+		for (Entry<? extends String, ?> entry : set) {
+			put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	@Override
+	public void clear() {
+		map.clear();
+	}
+
+	@Override
+	public Set<String> keySet() {
+		return map.keySet();
+	}
+
+	@Override
+	public Collection<Object> values() {
+		return map.values();
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		return map.entrySet();
+	}
+
 	@Override
 	public String toString() {
-		return JSON.toJSONString(this);
+		return JSON.toJSONString(map);
 	}
+
 }

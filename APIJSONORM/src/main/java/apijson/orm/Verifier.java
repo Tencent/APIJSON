@@ -8,13 +8,12 @@ package apijson.orm;
 import java.util.List;
 import java.util.Map;
 
-import apijson.NotNull;
-import apijson.RequestMethod;
+import apijson.*;
 
 /**校验器(权限、请求参数、返回结果等)
  * @author Lemon
  */
-public interface Verifier<T, M extends Map<String, Object>, L extends List<Object>> {
+public interface Verifier<T, M extends Map<String, Object>, L extends List<Object>> extends JSONParser<M, L> {
 
 
 	/**验证权限是否通过
@@ -106,5 +105,35 @@ public interface Verifier<T, M extends Map<String, Object>, L extends List<Objec
 	
 	String getVisitorIdKey(SQLConfig<T, M, L> config);
 
+	default M createJSONObject() {
+		return (M) new JSONObject();
+	}
 
+	default L createJSONArray() {
+		return (L) new JSONArray();
+	}
+
+	default String toJSONString(Object obj) {
+		return JSON.toJSONString(obj);
+	}
+
+	default Object parseJSON(Object json) {
+		return JSON.parseJSON(json);
+	}
+
+	default M parseObject(Object json) {
+		return (M) parseObject(json, JSONObject.class);
+	}
+
+	default <T> T parseObject(Object json, Class<T> clazz) {
+		return JSON.parseObject(json, clazz);
+	}
+
+	default L parseArray(Object json) {
+		return (L) parseObject(json, JSONArray.class);
+	}
+
+	default <T> List<T> parseArray(Object json, Class<T> clazz) {
+		return JSON.parseArray(json, clazz);
+	}
 }

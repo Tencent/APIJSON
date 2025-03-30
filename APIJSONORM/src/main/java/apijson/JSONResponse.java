@@ -352,17 +352,18 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param object
 	 * @return
 	 */
-	public static Map<String, Object> format(final Map<String, Object> object) {
-//		return format(object, JSON.DEFAULT_JSON_CREATOR);
-		return format(object, new JSONCreator<>() {
+	public static JSONObject format(final Map<String, Object> object) {
+		//		return format(object, JSON.DEFAULT_JSON_CREATOR);
+		JSONObject obj = new JSONObject(object);
+		return format(obj, new JSONCreator<JSONObject, JSONArray>() {
 			@Override
-			public Map<String, Object> createJSONObject() {
-				return new LinkedHashMap<>();
+			public JSONObject createJSONObject() {
+				return new JSONObject();
 			}
 
 			@Override
-			public List<Object> createJSONArray() {
-				return new ArrayList<>();
+			public JSONArray createJSONArray() {
+				return new JSONArray();
 			}
 		});
 	}
@@ -406,17 +407,18 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param array
 	 * @return
 	 */
-	public static List<Object> format(final List<Object> array) {
+	public static JSONArray format(final List<Object> array) {
 		//		return format(array, JSON.DEFAULT_JSON_CREATOR);
-		return format(array, new JSONCreator<>() {
+		JSONArray arr = new JSONArray(array);
+		return format(arr, new JSONCreator<JSONObject, JSONArray>() {
 			@Override
-			public Map<String, Object> createJSONObject() {
-				return new LinkedHashMap<>();
+			public JSONObject createJSONObject() {
+				return new JSONObject();
 			}
 
 			@Override
-			public List<Object> createJSONArray() {
-				return new ArrayList<>();
+			public JSONArray createJSONArray() {
+				return new JSONArray();
 			}
 		});
 	}

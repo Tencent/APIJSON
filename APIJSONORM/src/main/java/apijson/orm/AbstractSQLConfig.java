@@ -5393,17 +5393,17 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		return sql;
 	}
 
-	protected void onJoinNotRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+	protected void onJoinNotRelation(String sql, String quote, Join<T, M, L> join, String table, List<On> onList, On on) {
 		throw new UnsupportedOperationException("JOIN 已禁用 '!' 非逻辑连接符 ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}
-	protected void onJoinComplexRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+	protected void onJoinComplexRelation(String sql, String quote, Join<T, M, L> join, String table, List<On> onList, On on) {
 		throw new UnsupportedOperationException("JOIN 已禁用 $, ~, {}, <>, >, <, >=, <= 等复杂关联 ！" +
 				"性能很差、需求极少，默认只允许 = 等价关联，如要取消禁用可在后端重写相关方法！");
 	}
 
-	protected void onGetJoinString(Join join) throws UnsupportedOperationException {
+	protected void onGetJoinString(Join<T, M, L> join) throws UnsupportedOperationException {
 	}
-	protected void onGetCrossJoinString(Join join) throws UnsupportedOperationException {
+	protected void onGetCrossJoinString(Join<T, M, L> join) throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("已禁用 * CROSS JOIN ！性能很差、需求极少，如要取消禁用可在后端重写相关方法！");
 	}
 

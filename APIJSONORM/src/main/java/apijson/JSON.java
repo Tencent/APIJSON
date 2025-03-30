@@ -16,57 +16,57 @@ import apijson.StringUtil;
 /**JSON工具类 防止解析时异常
  * @author Lemon
  */
-public interface JSON {
+public class JSON {
 	static final String TAG = "JSON";
 
-	JSONParser<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_PARSER = new JSONParser<>() {
+	public static JSONParser<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
 
 		@Override
-		public Map<String, Object> parseJSON(Object json) {
-			return Map.of();
+		public JSONObject createJSONObject() {
+			return new JSONObject();
 		}
 
 		@Override
-		public Map<String, Object> parseObject(Object json) {
-			return Map.of();
+		public JSONArray createJSONArray() {
+			return new JSONArray();
 		}
 
-		@Override
-		public <T> T parseObject(Object json, Class<T> clazz) {
-			return null;
-		}
-
-		@Override
-		public List<Object> parseArray(Object json) {
-			return List.of();
-		}
-
-		@Override
-		public <T> List<T> parseArray(Object json, Class<T> clazz) {
-			return List.of();
-		}
-
-		//
 		@Override
 		public String toJSONString(Object obj) {
 			return JSON.toJSONString(obj);
 		}
 
 		@Override
-		public Map<String, Object> createJSONObject() {
-			return new LinkedHashMap<>();
+		public Object parseJSON(Object json) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public List<Object> createJSONArray() {
-			return new ArrayList<>();
+		public JSONObject parseObject(Object json) {
+			throw new UnsupportedOperationException();
 		}
+
+		@Override
+		public <T> T parseObject(Object json, Class<T> clazz) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public JSONArray parseArray(Object json) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public <T> List<T> parseArray(Object json, Class<T> clazz) {
+			throw new UnsupportedOperationException();
+		}
+
 	};
 
 	public static JSONCreator<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_CREATOR = DEFAULT_JSON_PARSER;
 
 
-	public static Object parseJSON(Object json) throws Exception {
+	public static Object parseJSON(Object json) {
 		if (json instanceof Boolean || json instanceof Number || json instanceof Enum<?>) {
 			return json;
 		}
@@ -80,7 +80,7 @@ public interface JSON {
 			return parseArray(json, DEFAULT_JSON_PARSER);
 		}
 
-		throw new UnsupportedDataTypeException("JSON 格式错误！" + s);
+		throw new IllegalArgumentException("JSON 格式错误！" + s);
 	}
 
 	/**
@@ -96,13 +96,10 @@ public interface JSON {
 			return null;
 		}
 
-		try {
-			M obj = parser.parseObject(s);
-			return obj;
-		} catch (Exception e) {
-			Log.i(TAG, "parseObject catch \n" + e.getMessage());
-		}
-		return null;
+		return parser.parseObject(s);
+	}
+	public static <T> T parseObject(Object json, Class<T> clazz) {
+		return parseObject(json, clazz, DEFAULT_JSON_PARSER);
 	}
 	public static <T, M extends Map<String, Object>, L extends List<Object>> T parseObject(Object json, Class<T> clazz, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
@@ -110,13 +107,7 @@ public interface JSON {
 			return null;
 		}
 
-		try {
-			T obj = parser.parseObject(s, clazz);
-			return obj;
-		} catch (Exception e) {
-			Log.i(TAG, "parseObject catch \n" + e.getMessage());
-		}
-		return null;
+		return parser.parseObject(s, clazz);
 	}
 	
 	/**
@@ -142,18 +133,17 @@ public interface JSON {
 		return null;
 	}
 
-//	public static <T, M extends Map<String, Object>> List<T> parseArray(Object json, Class<T> clazz) {
-//		return parseArray(json, clazz, DEFAULT_JSON_PARSER);
-//	}
-	public static <T, M extends Map<String, Object>> List<T> parseArray(Object json, Class<T> clazz, JSONParser<M, List<Object>> parser) {
+	public static <T> List<T> parseArray(Object json, Class<T> clazz) {
+		return parseArray(json, clazz, DEFAULT_JSON_PARSER);
+	}
+	public static <T, M extends Map<String, Object>, L extends List<Object>> List<T> parseArray(Object json, Class<T> clazz, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
 			return null;
 		}
 
 		try {
-			List<T> arr = parser.parseArray(s, clazz);
-			return arr;
+			return parser.parseArray(s, clazz);
 		} catch (Exception e) {
 			Log.i(TAG, "parseArray catch \n" + e.getMessage());
 		}

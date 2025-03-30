@@ -4,10 +4,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import apijson.orm.exception.UnsupportedDataTypeException;
 
@@ -16,23 +13,25 @@ import apijson.orm.exception.UnsupportedDataTypeException;
  * Maintains same API as fastjson but uses standard Java List implementation
  * @author Lemon
  */
-public class JSONArray extends ArrayList<Object> implements JSON {
-    private static final long serialVersionUID = 1L;
+public class JSONArray extends JSON implements List<Object> {
     private static final String TAG = "JSONArray";
-    
+
+    private ArrayList<Object> list = new ArrayList<>();
     /**
      * Create an empty JSONArray
      */
     public JSONArray() {
         super();
     }
-    
+
+    private int initialCapacity = 10;
     /**
      * Create a JSONArray with initial capacity
      * @param initialCapacity the initial capacity
      */
     public JSONArray(int initialCapacity) {
-        super(initialCapacity);
+        this.initialCapacity = initialCapacity;
+        this.list = new ArrayList<>(initialCapacity);
     }
     
     /**
@@ -218,4 +217,163 @@ public class JSONArray extends ArrayList<Object> implements JSON {
     public String toString() {
         return JSON.toJSONString(this);
     }
-} 
+
+    @Override
+    public int size() {
+        return list.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        return list.contains(o);
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        return list.iterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return list.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return list.toArray(a);
+    }
+
+    @Override
+    public boolean add(Object o) {
+        return list.add(o);
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        return list.remove(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        if (c == null || c.isEmpty()) {
+            return true;
+        }
+        return list.containsAll(c);
+    }
+
+    @Override
+    public boolean addAll(Collection<?> c) {
+        if (c == null || c.isEmpty()) {
+            return true;
+        }
+        return list.addAll(c);
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<?> c) {
+        int sz = size();
+        if (index < 0) {
+            index += sz;
+        }
+
+        if (c == null || c.isEmpty()) {
+            return true;
+        }
+        return list.addAll(index, c);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        if (c == null || c.isEmpty()) {
+            return true;
+        }
+        return list.removeAll(c);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        if (c == null || c.isEmpty()) {
+            return true;
+        }
+        return list.retainAll(c);
+    }
+
+    @Override
+    public void clear() {
+        list.clear();
+    }
+
+    @Override
+    public Object get(int index) {
+        int sz = size();
+        if (index < 0) {
+            index += sz;
+        }
+
+        return list.get(index);
+    }
+
+    @Override
+    public Object set(int index, Object element) {
+        return list.set(index, element);
+    }
+
+    @Override
+    public void add(int index, Object element) {
+        list.add(index, element);
+    }
+
+    @Override
+    public Object remove(int index) {
+        int sz = size();
+        if (index < 0) {
+            index += sz;
+        }
+        if (index >= sz) {
+            return null;
+        }
+
+        return list.remove(index);
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        return list.indexOf(o);
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        return list.lastIndexOf(o);
+    }
+
+    @Override
+    public ListIterator<Object> listIterator() {
+        return list.listIterator();
+    }
+
+    @Override
+    public ListIterator<Object> listIterator(int index) {
+        int sz = size();
+        if (index < 0) {
+            index += sz;
+        }
+
+        return list.listIterator(index);
+    }
+
+    @Override
+    public List<Object> subList(int fromIndex, int toIndex) {
+        if (fromIndex < 0) {
+            fromIndex += size();
+        }
+        if (toIndex < 0) {
+            toIndex += size();
+        }
+        return list.subList(fromIndex, toIndex);
+    }
+}
