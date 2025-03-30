@@ -1223,7 +1223,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 							page += min;
 							max += min;
 
-							Map<String, Object> pagination = new LinkedHashMap<String, Object>();
+							M pagination = (M) JSON.createJSONObject();
 							Object explain = rp.get(JSONResponse.KEY_EXPLAIN);
 							if (explain instanceof Map<?, ?>) {
 								pagination.put(JSONResponse.KEY_EXPLAIN, explain);
@@ -1509,7 +1509,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	 * @return
 	 * @throws Exception
 	 */
-	private List<Join<T, M, L>> onJoinParse(Object join, Map<String, Object> request) throws Exception {
+	private List<Join<T, M, L>> onJoinParse(Object join, M request) throws Exception {
 		Map<String, Object> joinMap = null;
 
 		if (join instanceof Map<?, ?>) {
@@ -1584,8 +1584,8 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			}
 
 			// 取出Table对应的JSONObject，及内部引用赋值 key:value
-			Map<String, Object> tableObj;
-			Map<String, Object> parentPathObj;	// 保留
+			M tableObj;
+			M parentPathObj;	// 保留
 			try {
 				parentPathObj = arrKey == null ? request : JSON.get(request, arrKey);	// 保留
 				tableObj = parentPathObj == null ? null : JSON.get(parentPathObj, tableKey);
@@ -1595,7 +1595,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			}
 			catch (Exception e2) {
 				throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + tableKey + ":value 中 value 类型不合法！" +
-          "必须是 {} 这种 Map<String, Object> 格式！" + e2.getMessage());
+          			"必须是 {} 这种 Map<String, Object> 格式！" + e2.getMessage());
 			}
 
 			if (arrKey != null) {
@@ -1613,7 +1613,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 			boolean isAppJoin = "@".equals(joinType);
 
-			Map<String, Object> refObj = new LinkedHashMap<String, Object>(tableObj.size());
+			M refObj = (M) JSON.createJSONObject();
 
 			String key = index < 0 ? null : path.substring(index + 1); // id@
 			if (key != null) {  // 指定某个 key 为 JOIN ON 条件
@@ -1625,7 +1625,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 				if (tableObj.get(key) instanceof String == false) {
 					throw new IllegalArgumentException(JSONRequest.KEY_JOIN + ":" + e.getKey() + "' 对应的 "
-            + tableKey + ":{ " + key + ": value } 中 value 类型不合法！必须为同层级引用赋值路径 String！");
+            			+ tableKey + ":{ " + key + ": value } 中 value 类型不合法！必须为同层级引用赋值路径 String！");
 				}
 
 				if (isAppJoin && StringUtil.isName(key.substring(0, key.length() - 1)) == false) {
@@ -1639,7 +1639,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 			Set<Entry<String, Object>> tableSet = tableObj.entrySet();
 			// 取出所有 join 条件
-			Map<String, Object> requestObj = new LinkedHashMap<String, Object>(); // (Map<String, Object>) obj.clone();
+			M requestObj = (M) JSON.createJSONObject(); // (Map<String, Object>) obj.clone();
 
 			boolean matchSingle = false;
 			for (Entry<String, Object> tableEntry : tableSet) {
@@ -1717,13 +1717,16 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			}
 
 
-			Join j = new Join();
+			Join<T, M, L> j = new Join<>();
 			j.setPath(e.getKey());
 			j.setJoinType(joinType);
 			j.setTable(table);
 			j.setAlias(alias);
-			j.setOuter((Map<String, Object>) outer);
+
+			M outerObj = (M) JSON.createJSONObject((Map<String, Object>) outer);
+			j.setOuter(outerObj);
 			j.setRequest(requestObj);
+
 			if (arrKey != null) {
 				Integer count = getInteger(parentPathObj, JSONRequest.KEY_COUNT);
 				j.setCount(count == null ? getDefaultQueryCount() : count);

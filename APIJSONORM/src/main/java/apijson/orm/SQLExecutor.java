@@ -19,7 +19,7 @@ import apijson.*;
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
-public interface SQLExecutor<T, M extends Map<String, Object>, L extends List<Object>> { // extends JSONParser<M, L> {
+public interface SQLExecutor<T, M extends Map<String, Object>, L extends List<Object>> {
 	Parser<T, M, L> getParser();
 	SQLExecutor<T, M, L> setParser(Parser<T, M, L> parser);
 
@@ -134,37 +134,5 @@ public interface SQLExecutor<T, M extends Map<String, Object>, L extends List<Ob
 	long getExecutedSQLDuration();
 
 	long getSqlResultDuration();
-
-//	default M createJSONObject() {
-//		return (M) new JSONObject();
-//	}
-//
-//	default L createJSONArray() {
-//		return (L) new JSONArray();
-//	}
-//
-//	default String toJSONString(Object obj) {
-//		return JSON.toJSONString(obj);
-//	}
-//
-//	default Object parseJSON(Object json) {
-//		return JSON.parseJSON(json);
-//	}
-//
-//	default M parseObject(Object json) {
-//		return (M) parseObject(json, JSONObject.class);
-//	}
-//
-//	default <T> T parseObject(Object json, Class<T> clazz) {
-//		return JSON.parseObject(json, clazz);
-//	}
-//
-//	default L parseArray(Object json) {
-//		return (L) parseObject(json, JSONArray.class);
-//	}
-//
-//	default <T> List<T> parseArray(Object json, Class<T> clazz) {
-//		return JSON.parseArray(json, clazz);
-//	}
 
 }

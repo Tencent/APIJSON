@@ -30,7 +30,7 @@ import static apijson.RequestMethod.GET;
  * @author Lemon
  */
 public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L extends List<Object>>
-		implements ObjectParser<T, M, L> { //, JSONParser<M, L> {
+		implements ObjectParser<T, M, L> {
 	private static final String TAG = "AbstractObjectParser";
 
 	@NotNull
@@ -1319,6 +1319,5 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 	public Map<String, M> getChildMap() {
 		return childMap;
 	}
-
 
 }

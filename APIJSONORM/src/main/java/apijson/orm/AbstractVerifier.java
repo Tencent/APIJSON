@@ -68,7 +68,7 @@ import javax.script.ScriptEngineManager;
  * @param <T> id 与 userId 的类型，一般为 Long
  */
 public abstract class AbstractVerifier<T, M extends Map<String, Object>, L extends List<Object>>
-		implements Verifier<T, M, L>, IdCallback<T> { // , JSONParser<M, L> {
+		implements Verifier<T, M, L>, IdCallback<T> {
 	private static final String TAG = "AbstractVerifier";
 
 	/**为 PUT, DELETE 强制要求必须有 id/id{}/id{}@ 条件
@@ -381,7 +381,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdKey + "{}", true); // 不能是 &{}， |{} 不要传，直接 {}
 			if (requestId != null) {
 				if (requestIdArray == null) {
-					requestIdArray = createJSONArray();
+					requestIdArray = (L) JSON.createJSONArray();
 				}
 				requestIdArray.add(requestId);
 			}
@@ -530,13 +530,13 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
 
-		M tblObj = createJSONObject();
+		M tblObj = (M) JSON.createJSONObject();
 		tblObj.put(key, value);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
 			tblObj.put(JSONRequest.KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
 		}
 
-		M req = createJSONObject();
+		M req = (M) JSON.createJSONObject();
 		req.put(table, tblObj);
 		Map<String, Object> repeat = createParser().setMethod(HEAD).setNeedVerify(true).parseResponse(req);
 
@@ -1620,7 +1620,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 			L array = AbstractSQLConfig.newJSONArray(tv, new JSONCreator<Map<String, Object>, L>() {
 				@Override
-				public Map<String, Object> createJSONObject() {
+				public M createJSONObject() {
 					return (M) JSON.createJSONObject();
 				}
 
@@ -1884,6 +1884,5 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	public static String getCacheKeyForRequest(String method, String tag) {
 		return method + "/" + tag;
 	}
-
 
 }

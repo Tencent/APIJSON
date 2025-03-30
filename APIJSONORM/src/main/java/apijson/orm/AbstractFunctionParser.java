@@ -22,7 +22,7 @@ import static apijson.orm.SQLConfig.TYPE_ITEM;
  * @author Lemon
  */
 public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L extends List<Object>>
-		implements FunctionParser<T, M, L> { //, JSONParser<M, L> {
+		implements FunctionParser<T, M, L> {
     private static final String TAG = "AbstractFunctionParser";
 
     /**是否解析参数 key 的对应的值，不用手动编码 curObj.getString(key)

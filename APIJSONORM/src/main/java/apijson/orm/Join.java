@@ -161,15 +161,15 @@ public class Join<T, M extends Map<String, Object>, L extends List<Object>> {
 		return ! isAppJoin();
 	}
 
-	public static boolean isSQLJoin(Join j) {
+	public static boolean isSQLJoin(Join<?, ?, ?> j) {
 		return j != null && j.isSQLJoin();
 	}
 
-	public static boolean isAppJoin(Join j) {
+	public static boolean isAppJoin(Join<?, ?, ?> j) {
 		return j != null && j.isAppJoin();
 	}
 
-	public static boolean isLeftOrRightJoin(Join j) {
+	public static boolean isLeftOrRightJoin(Join<?, ?, ?> j) {
 		return j != null && j.isLeftOrRightJoin();
 	}
 
