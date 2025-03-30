@@ -265,7 +265,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 	 */
 	public <T extends Object> List<T> getArgList(String path, Class<T> clazz) {
 		String s = getArgStr(path);
-		return JSON.parseArray(s, clazz, (JSONParser<? extends Map<String, Object>, List<Object>>) this);
+		return JSON.parseArray(s, clazz);
 	}
 
 	/**根据路径取值
@@ -349,13 +349,13 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 				if (v instanceof Map) {
 					return (T) v;
 				}
-				return (T) JSON.parseObject(JSON.toJSONString(v));
+				return (T) JSON.parseObject(v);
 			}
 			if (List.class.isAssignableFrom(clazz)) {
 				if (v instanceof List) {
 					return (T) v;
 				}
-				return (T) JSON.parseArray(JSON.toJSONString(v));
+				return (T) JSON.parseArray(v);
 			}
 			// Fallback to string conversion
 			return (T) v;
@@ -386,7 +386,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 			throw new IllegalArgumentException("字符 " + function + " 不合法！");
 		}
 
-		return invoke(this, function, (JSONObject) current, containRaw);
+		return invoke(this, function, current, containRaw);
 	}
 
 	/**反射调用
@@ -657,7 +657,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 		}
 		else {
 			types = new Class<?>[length + 1];
-			types[0] = JSONObject.class;
+			types[0] = JSON.JSON_OBJECT_CLASS;
 
 			values = new Object[length + 1];
 			values[0] = request;
@@ -940,13 +940,13 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 				if (obj instanceof Map) {
 					return (V) obj;
 				}
-				return (V) JSON.parseObject(JSON.toJSONString(obj));
+				return (V) JSON.parseObject(obj);
 			}
 			if (List.class.isAssignableFrom(clazz)) {
 				if (obj instanceof List) {
 					return (V) obj;
 				}
-				return (V) JSON.parseArray(JSON.toJSONString(obj));
+				return (V) JSON.parseArray(obj);
 			}
 			// Fallback to string conversion
 			return (V) obj;

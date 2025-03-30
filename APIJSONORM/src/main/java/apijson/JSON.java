@@ -13,6 +13,9 @@ import apijson.orm.exception.UnsupportedDataTypeException;
  * @author Lemon
  */
 public class JSON {
+	public static Class<?> JSON_OBJECT_CLASS = JSONObject.class;
+	public static Class<?> JSON_ARRAY_CLASS = JSONArray.class;
+
 	static final String TAG = "JSON";
 
 	public static JSONParser<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
