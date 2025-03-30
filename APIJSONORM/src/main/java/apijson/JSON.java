@@ -63,8 +63,15 @@ public class JSON {
 
 	};
 
-	public static JSONCreator<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_CREATOR = DEFAULT_JSON_PARSER;
+//	public static JSONCreator<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_CREATOR = DEFAULT_JSON_PARSER;
 
+	public static Object createJSONObject() {
+		return DEFAULT_JSON_PARSER.createJSONObject();
+	}
+
+	public static Object createJSONArray() {
+		return DEFAULT_JSON_PARSER.createJSONArray();
+	}
 
 	public static Object parseJSON(Object json) {
 		if (json instanceof Boolean || json instanceof Number || json instanceof Enum<?>) {
@@ -565,4 +572,5 @@ public class JSON {
 		
 		return value.toString();
 	}
+
 }

@@ -19,7 +19,7 @@ import apijson.*;
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
-public interface SQLExecutor<T, M extends Map<String, Object>, L extends List<Object>> extends JSONParser<M, L> {
+public interface SQLExecutor<T, M extends Map<String, Object>, L extends List<Object>> { // extends JSONParser<M, L> {
 	Parser<T, M, L> getParser();
 	SQLExecutor<T, M, L> setParser(Parser<T, M, L> parser);
 

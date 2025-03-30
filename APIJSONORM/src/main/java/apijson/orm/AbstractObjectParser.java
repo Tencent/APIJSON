@@ -30,7 +30,7 @@ import static apijson.RequestMethod.GET;
  * @author Lemon
  */
 public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L extends List<Object>>
-		implements ObjectParser<T, M, L>, JSONParser<M, L> {
+		implements ObjectParser<T, M, L> { //, JSONParser<M, L> {
 	private static final String TAG = "AbstractObjectParser";
 
 	@NotNull
@@ -207,11 +207,11 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
 			breakParse = false;
 
-			response = createJSONObject(); // must init
+			response = (M) JSON.createJSONObject(); // must init
 			sqlResponse = null; // must init
 
 			if (isReuse == false) {
-				sqlRequest = createJSONObject(); // must init
+				sqlRequest = (M) JSON.createJSONObject(); // must init
 
 				customMap = null; // must init
 				functionMap = null; // must init
@@ -672,7 +672,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		//GET > add all 或 remove all > PUT > remove key
 
 		//GET <<<<<<<<<<<<<<<<<<<<<<<<<
-		M rq = createJSONObject();
+		M rq = (M) JSON.createJSONObject();
 		rq.put(JSONRequest.KEY_ID, request.get(JSONRequest.KEY_ID));
 		rq.put(JSONRequest.KEY_COLUMN, realKey);
 		M rp = parseResponse(RequestMethod.GET, table, null, rq, null, false);
@@ -716,7 +716,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 				);
 			}
 
-			targetArray = createJSONArray();
+			targetArray = (L) JSON.createJSONArray();
 		}
 
 		for (int i = 0; i < array.size(); i++) {
@@ -769,7 +769,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		String childKey = key.substring(0, key.length() - JSONRequest.KEY_ARRAY.length());
 
 		int allCount = 0;
-		L ids = createJSONArray();
+		L ids = (L) JSON.createJSONArray();
 
 		int version = parser.getVersion();
 		int maxUpdateCount = parser.getMaxUpdateCount();
@@ -784,7 +784,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
         cfg.setTable(childKey); // Request 表 structure 中配置 "ALLOW_PARTIAL_UPDATE_FAILED": "Table[],key[],key:alias[]" 自动配置
         boolean allowPartialFailed = cfg.allowPartialUpdateFailed();
-        L failedIds = allowPartialFailed ? createJSONArray() : null;
+        L failedIds = allowPartialFailed ? (L) JSON.createJSONArray() : null;
 
         int firstFailIndex = -1;
         M firstFailReq = null;
@@ -805,7 +805,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 			}
 
             Object id = item.get(idKey);
-			M req = createJSONObject();
+			M req = (M) JSON.createJSONObject();
 			req.put(childKey, item);
 
             M result = null;
@@ -865,7 +865,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
             allResult.put("failedCount", failedCount);
             allResult.put("failedIdList", failedIds);
 
-            M failObj = createJSONObject();
+            M failObj = (M) JSON.createJSONObject();
             failObj.put("index", firstFailIndex);
             failObj.put(childKey, firstFailReq);
 
@@ -983,7 +983,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 	public AbstractObjectParser<T, M, L> executeSQL() throws Exception {
 		//执行SQL操作数据库
 		if (isTable == false) {//提高性能
-			sqlResponse = createJSONObject();
+			sqlResponse = (M) JSON.createJSONObject();
 			sqlResponse.putAll(sqlRequest);
 		}
 		else {

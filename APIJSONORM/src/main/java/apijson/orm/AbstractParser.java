@@ -38,7 +38,7 @@ import static apijson.RequestMethod.GET;
  * @author Lemon
  */
 public abstract class AbstractParser<T, M extends Map<String, Object>, L extends List<Object>>
-		implements Parser<T, M, L>, ParserCreator<T, M, L>, VerifierCreator<T, M, L>, SQLCreator<T, M, L>, JSONParser<M, L> {
+		implements Parser<T, M, L>, ParserCreator<T, M, L>, VerifierCreator<T, M, L>, SQLCreator<T, M, L> { //, JSONParser<M, L> {
 	protected static final String TAG = "AbstractParser";
 	
 	/**
@@ -463,7 +463,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				+ requestMethod + "/parseResponse  request = \n" + request + "\n\n");
 
 		try {
-			requestObject = parseObject(request);
+			requestObject = (M) JSON.parseObject(request);
 			if (requestObject == null) {
 				throw new UnsupportedEncodingException("JSON格式不合法！");
 			}
@@ -577,7 +577,17 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		requestObject = error == null ? extendSuccessResult(requestObject, warn, isRoot) : extendErrorResult(requestObject, error, requestMethod, getRequestURL(), isRoot);
 
-		M res = (globalFormat != null && globalFormat) && JSONResponse.isSuccess(requestObject) ? JSONResponse.format(requestObject, this) : requestObject;
+		M res = (globalFormat != null && globalFormat) && JSONResponse.isSuccess(requestObject) ? JSONResponse.format(requestObject, new JSONCreator<M, List<Object>>() {
+			@Override
+			public M createJSONObject() {
+				return (M) JSON.createJSONObject();
+			}
+
+			@Override
+			public List<Object> createJSONArray() {
+				return (L) JSON.createJSONArray();
+			}
+		}) : requestObject;
 
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
@@ -692,7 +702,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 					String arrKey = key + "[]";
 
 					if (target.containsKey(arrKey) == false) {
-						target.put(arrKey, createJSONArray());
+						target.put(arrKey, JSON.createJSONArray());
 					}
 
 					try {
@@ -792,7 +802,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		msg = index >= 0 ? msg.substring(0, index) : msg;
 
 		if (object == null) {
-			object = createJSONObject();
+			object = (M) JSON.createJSONObject();
 		}
 
 		if (object.get(JSONResponse.KEY_OK) == null) {
@@ -1386,7 +1396,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 			boolean isExtract = true;
 
-			response = createJSONArray();
+			response = (L) JSON.createJSONArray();
 			//生成size个
 			for (int i = 0; i < (isSubquery ? 1 : size); i++) {
 				parent = onObjectParse(request, isSubquery ? parentPath : path, isSubquery ? name : "" + i, config.setType(SQLConfig.TYPE_ITEM).setPosition(i), isSubquery, null);
@@ -2043,7 +2053,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		config.setTag(getTag());
 
 		if (isSubquery) {
-			M sqlObj = createJSONObject();
+			M sqlObj = (M) JSON.createJSONObject();
 			sqlObj.put(KEY_CONFIG, config);
 			return sqlObj;//容易丢失信息 JSON.parseObject(config);
 		}
@@ -2066,13 +2076,13 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 						result = res;
 					}
 					else {
-						result = createJSONObject();
+						result = (M) JSON.createJSONObject();
 						result.put(KEY_EXPLAIN, explainResult);
 						result.putAll(res);
 					}
 				}
 				else {//如果是更新请求，不执行explain，但可以返回sql
-					result = createJSONObject();
+					result = (M) JSON.createJSONObject();
 					result.put(KEY_SQL, config.getSQL(false));
 					result.putAll(res);
 				}
@@ -2227,7 +2237,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	}
 
 	protected M batchVerify(RequestMethod method, String tag, int version, String name, @NotNull M request, int maxUpdateCount, SQLCreator<T, M, L> creator) throws Exception {
-		M correctRequest = createJSONObject();
+		M correctRequest = (M) JSON.createJSONObject();
 		List<String> removeTmpKeys = new ArrayList<>(); // 请求json里面的临时变量,不需要带入后面的业务中,比如 @post、@get等
 
 		Set<String> reqSet = request == null ? null : request.keySet();
@@ -2427,7 +2437,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 					String _tag = buildTag(request, key, method, tag);
 					M object = getRequestStructure(_method, _tag, version);
 					if (method == RequestMethod.CRUD && StringUtil.isEmpty(tag, true)) {
-						M requestItem = createJSONObject();
+						M requestItem = (M) JSON.createJSONObject();
 						requestItem.put(key, obj);
 						Map<String, Object> ret = objectVerify(_method, _tag, version, name, requestItem, maxUpdateCount, creator, object);
 						correctRequest.put(key, ret.get(key));
@@ -2490,7 +2500,17 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	protected M objectVerify(RequestMethod method, String tag, int version, String name, @NotNull M request
 			, int maxUpdateCount, SQLCreator<T, M, L> creator, M object) throws Exception {
 		// 获取指定的JSON结构 >>>>>>>>>>>>>>
-		M target = wrapRequest(method, tag, object, true, this);
+		M target = wrapRequest(method, tag, object, true, new JSONCreator<M, L>() {
+			@Override
+			public M createJSONObject() {
+				return (M) JSON.createJSONObject();
+			}
+
+			@Override
+			public L createJSONArray() {
+				return (L) JSON.createJSONArray();
+			}
+		});
 		// Map<String, Object> clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
 		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema(), creator);
 	}

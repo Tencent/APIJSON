@@ -46,7 +46,7 @@ import static apijson.SQL.OR;
  * @author Lemon
  */
 public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L extends List<Object>>
-		implements SQLConfig<T, M, L>, JSONCreator<M, L> {
+		implements SQLConfig<T, M, L> { // }, JSONCreator<M, L> {
 	private static final String TAG = "AbstractSQLConfig";
 
 	/**
@@ -4744,7 +4744,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	 */
 	@NotNull
 	public L newJSONArray(Object obj) {
-		L array = createJSONArray();
+		L array = (L) JSON.createJSONArray();
 		if (obj != null) {
 			if (obj instanceof Collection) {
 				array.addAll((Collection<?>) obj);
@@ -6049,13 +6049,13 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					}
 				}
 			}
-			else if (newHaving instanceof JSONObject) {
+			else if (newHaving instanceof Map<?, ?>) {
 				if (isHavingAnd) {
 					throw new IllegalArgumentException(table + ":{ " + havingKey +  ":value } 里的 value 类型不合法！"
 							+ "@having&:value 中 value 只能是 String，@having:value 中 value 只能是 String 或 JSONObject ！");
 				}
 
-				JSONObject havingObj = (JSONObject) newHaving;
+				JSONObject havingObj = new JSONObject(newHaving);
 				Set<Entry<String, Object>> havingSet = havingObj.entrySet();
 				for (Entry<String, Object> entry : havingSet) {
 					String k = entry == null ? null : entry.getKey();

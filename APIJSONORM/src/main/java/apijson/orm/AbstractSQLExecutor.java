@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * @author Lemon
  */
 public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L extends List<Object>>
-		implements SQLExecutor<T, M, L>, JSONParser<M, L> {
+		implements SQLExecutor<T, M, L> { // , JSONParser<M, L> {
 	private static final String TAG = "AbstractSQLExecutor";
 	//是否返回 值为null的字段
 	public static boolean ENABLE_OUTPUT_NULL_COLUMN = false;

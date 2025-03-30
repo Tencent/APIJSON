@@ -68,7 +68,7 @@ import javax.script.ScriptEngineManager;
  * @param <T> id 与 userId 的类型，一般为 Long
  */
 public abstract class AbstractVerifier<T, M extends Map<String, Object>, L extends List<Object>>
-		implements Verifier<T, M, L>, IdCallback<T>, JSONParser<M, L> {
+		implements Verifier<T, M, L>, IdCallback<T> { // , JSONParser<M, L> {
 	private static final String TAG = "AbstractVerifier";
 
 	/**为 PUT, DELETE 强制要求必须有 id/id{}/id{}@ 条件
@@ -566,7 +566,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	@Override
 	public M verifyRequest(@NotNull final RequestMethod method, final String name, final M target, final M request, final int maxUpdateCount
 			, final String database, final String schema, final SQLCreator<T, M, L> creator) throws Exception {
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, this, creator, this);
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, this, creator);
 	}
 
 	/**从request提取target指定的内容
@@ -579,8 +579,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(@NotNull final RequestMethod method, final String name
-			, final M target, final M request, final SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator) throws Exception {
-		return verifyRequest(method, name, target, request, AbstractParser.MAX_UPDATE_COUNT, creator, jsonCreator);
+			, final M target, final M request, final SQLCreator<T, M, L> creator) throws Exception {
+		return verifyRequest(method, name, target, request, AbstractParser.MAX_UPDATE_COUNT, creator);
 	}
 	/**从request提取target指定的内容
 	 * @param method
@@ -594,9 +594,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
 			@NotNull final RequestMethod method, final String name, final M target, final M request
-            , final int maxUpdateCount, final SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator) throws Exception {
+            , final int maxUpdateCount, final SQLCreator<T, M, L> creator) throws Exception {
 
-		return verifyRequest(method, name, target, request, maxUpdateCount, null, null, null, creator, jsonCreator);
+		return verifyRequest(method, name, target, request, maxUpdateCount, null, null, null, creator);
 	}
 
 	/**从request提取target指定的内容
@@ -616,10 +616,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
 			@NotNull final RequestMethod method, final String name, final M target, final M request
             , final int maxUpdateCount, final String database, final String schema
-            , final IdCallback<T> idCallback, final SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator) throws Exception {
+            , final IdCallback<T> idCallback, final SQLCreator<T, M, L> creator) throws Exception {
 
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema
-                , null, idCallback, creator, jsonCreator);
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, null, idCallback, creator);
 	}
 	/**从request提取target指定的内容
 	* @param method
@@ -639,7 +638,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
 			@NotNull final RequestMethod method, final String name, final M target, final M request
             , final int maxUpdateCount, final String database, final String schema, final String datasource
-            , final IdCallback<T> idCallback, final SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator) throws Exception {
+            , final IdCallback<T> idCallback, final SQLCreator<T, M, L> creator) throws Exception {
 		if (ENABLE_VERIFY_CONTENT == false) {
 			throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_CONTENT == false" +
                     " 时不支持校验请求传参内容！如需支持则设置 AbstractVerifier.ENABLE_VERIFY_CONTENT = true ！");
@@ -662,7 +661,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 
 		//解析
-		return parse(method, name, target, request, database, schema, idCallback, creator, jsonCreator, new OnParseCallback<T, M, L>() {
+		return parse(method, name, target, request, database, schema, idCallback, creator, new OnParseCallback<T, M, L>() {
 
 			@Override
 			public M onParseJSONObject(String key, M tobj, M robj) throws Exception {
@@ -705,7 +704,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 				}
 
-				return verifyRequest(method, key, tobj, robj, maxUpdateCount, database, schema, idCallback, creator, jsonCreator);
+				return verifyRequest(method, key, tobj, robj, maxUpdateCount, database, schema, idCallback, creator);
 			}
 
 			@Override
@@ -813,7 +812,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	@Override
 	public M verifyResponse(@NotNull final RequestMethod method, final String name, final M target, final M response
 			, final String database, final String schema, SQLCreator<T, M, L> creator, OnParseCallback<T, M, L> callback) throws Exception {
-		return verifyResponse(method, name, target, response, database, schema, this, creator, this, callback);
+		return verifyResponse(method, name, target, response, database, schema, this, creator, callback);
 	}
 
 	/**校验并将response转换为指定的内容和结构
@@ -827,8 +826,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @throws Exception
 	*/
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyResponse(@NotNull final RequestMethod method, final String name
-			, final M target, final M response, SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator, OnParseCallback<T, M, L> callback) throws Exception {
-		return verifyResponse(method, name, target, response, null, null, null, creator, jsonCreator, callback);
+			, final M target, final M response, SQLCreator<T, M, L> creator, OnParseCallback<T, M, L> callback) throws Exception {
+		return verifyResponse(method, name, target, response, null, null, null, creator, callback);
 	}
 	/**校验并将response转换为指定的内容和结构
 	* @param method
@@ -846,7 +845,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	*/
 	public static <T, M extends Map<String, Object>, L extends List<Object>>  M verifyResponse(@NotNull final RequestMethod method
 			, final String name, final M target, final M response, final String database, final String schema
-			, final IdCallback<T> idKeyCallback, SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator, OnParseCallback<T, M, L> callback) throws Exception {
+			, final IdCallback<T> idKeyCallback, SQLCreator<T, M, L> creator, OnParseCallback<T, M, L> callback) throws Exception {
 
 		Log.i(TAG, "verifyResponse  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -859,10 +858,10 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		//解析
 		return parse(method, name, target, response, database, schema
-                , idKeyCallback, creator, jsonCreator, callback != null ? callback : new OnParseCallback<T, M, L>() {
+                , idKeyCallback, creator, callback != null ? callback : new OnParseCallback<T, M, L>() {
 			@Override
 			protected M onParseJSONObject(String key, M tobj, M robj) throws Exception {
-				return verifyResponse(method, key, tobj, robj, database, schema, idKeyCallback, creator, jsonCreator, callback);
+				return verifyResponse(method, key, tobj, robj, database, schema, idKeyCallback, creator, callback);
 			}
 		});
 	}
@@ -879,8 +878,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(@NotNull final RequestMethod method
-			, String name, M target, M real, SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
-		return parse(method, name, target, real, null, null, null, creator, jsonCreator, callback);
+			, String name, M target, M real, SQLCreator<T, M, L> creator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
+		return parse(method, name, target, real, null, null, null, creator, callback);
 	}
 	/**对request和response不同的解析用callback返回
 	 * @param method
@@ -897,8 +896,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(
 			@NotNull final RequestMethod method, String name, M target, M real, final String database, final String schema
-            , final IdCallback<T> idCallback, SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
-		return parse(method, name, target, real, database, schema, null, idCallback, creator, jsonCreator, callback);
+            , final IdCallback<T> idCallback, SQLCreator<T, M, L> creator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
+		return parse(method, name, target, real, database, schema, null, idCallback, creator, callback);
 	}
 	/**对request和response不同的解析用callback返回
 	 * @param method
@@ -916,7 +915,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(@NotNull final RequestMethod method
 			, String name, M target, M real, final String database, final String schema, final String datasource
-            , final IdCallback<T> idCallback, SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
+            , final IdCallback<T> idCallback, SQLCreator<T, M, L> creator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
 		if (target == null) {
 			return null;
 		}
@@ -1131,11 +1130,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		// 校验与修改Request<<<<<<<<<<<<<<<<<
 		// 在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
-		real = operate(TYPE, type, real, creator, jsonCreator);
-		real = operate(VERIFY, verify, real, creator, jsonCreator);
-		real = operate(INSERT, insert, real, creator, jsonCreator);
-		real = operate(UPDATE, update, real, creator, jsonCreator);
-		real = operate(REPLACE, replace, real, creator, jsonCreator);
+		real = operate(TYPE, type, real, creator);
+		real = operate(VERIFY, verify, real, creator);
+		real = operate(INSERT, insert, real, creator);
+		real = operate(UPDATE, update, real, creator);
+		real = operate(REPLACE, replace, real, creator);
 		// 校验与修改Request>>>>>>>>>>>>>>>>>
 
 
@@ -1284,7 +1283,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 
 					if (nkl.contains(k) || real.get(k) != null) {
-						real = parse(method, name, (M) v, real, database, schema, datasource, idCallback, creator, jsonCreator, callback);
+						real = parse(method, name, (M) v, real, database, schema, datasource, idCallback, creator, callback);
 					}
 				}
 			}
@@ -1314,7 +1313,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	private static <T, M extends Map<String, Object>, L extends List<Object>> M operate(Operation opt, M targetChild
-            , M real, SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator) throws Exception {
+            , M real, SQLCreator<T, M, L> creator) throws Exception {
 		if (targetChild == null) {
 			return real;
 		}
@@ -1335,7 +1334,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				verifyType(tk, tv, real);
 			}
 			else if (opt == VERIFY) {
-				verifyValue(tk, tv, real, creator, jsonCreator);
+				verifyValue(tk, tv, real, creator);
 			}
 			else if (opt == UPDATE) {
 				real.put(tk, tv);
@@ -1505,7 +1504,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	private static <T, M extends Map<String, Object>, L extends List<Object>> void verifyValue(@NotNull String tk
-			, @NotNull Object tv, @NotNull M real, SQLCreator<T, M, L> creator, JSONCreator<M, L> jsonCreator) throws Exception {
+			, @NotNull Object tv, @NotNull M real, SQLCreator<T, M, L> creator) throws Exception {
 		if (tv == null) {
 			throw new IllegalArgumentException("operate  operate == VERIFY " + tk + ":" + tv + " ,  >> tv == null!!!");
 		}
@@ -1524,7 +1523,17 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				return;
 			}
 
-			L array = AbstractSQLConfig.newJSONArray(tv, jsonCreator);
+			L array = AbstractSQLConfig.newJSONArray(tv, new JSONCreator<M, L>() {
+				@Override
+				public M createJSONObject() {
+					return (M) JSON.createJSONObject();
+				}
+
+				@Override
+				public L createJSONArray() {
+					return (L) JSON.createJSONArray();
+				}
+			});
 
 			boolean m;
 			boolean isOr = false;
@@ -1605,11 +1614,21 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				return;
 			}
 
-			if (rv instanceof List<?> == false) {
+			if (rv instanceof Collection<?> == false) {
 				throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
 			}
 
-			L array = AbstractSQLConfig.newJSONArray(tv, jsonCreator);
+			L array = AbstractSQLConfig.newJSONArray(tv, new JSONCreator<Map<String, Object>, L>() {
+				@Override
+				public Map<String, Object> createJSONObject() {
+					return (M) JSON.createJSONObject();
+				}
+
+				@Override
+				public L createJSONArray() {
+					return (L) JSON.createJSONArray();
+				}
+			});
 
 			boolean isOr = false;
 			for (Object o : array) {

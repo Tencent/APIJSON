@@ -13,7 +13,7 @@ import apijson.*;
 /**校验器(权限、请求参数、返回结果等)
  * @author Lemon
  */
-public interface Verifier<T, M extends Map<String, Object>, L extends List<Object>> extends JSONParser<M, L> {
+public interface Verifier<T, M extends Map<String, Object>, L extends List<Object>> { // extends JSONParser<M, L> {
 
 
 	/**验证权限是否通过

@@ -6,8 +6,6 @@ package apijson;
 
 import java.util.*;
 
-import apijson.orm.exception.UnsupportedDataTypeException;
-
 /**
  * Custom JSONArray implementation based on ArrayList to replace com.alibaba.fastjson.JSONArray
  * Maintains same API as fastjson but uses standard Java List implementation
@@ -68,12 +66,11 @@ public class JSONArray extends JSON implements List<Object> {
         }
         
         Object obj = get(index);
-        if (obj instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>) obj;
-            return new JSONObject(map);
-        } else if (obj instanceof JSONObject) {
+        if (obj instanceof JSONObject) {
             return (JSONObject) obj;
+        }
+        else if (obj instanceof Map) {
+            return new JSONObject(obj);
         }
         return null;
     }
