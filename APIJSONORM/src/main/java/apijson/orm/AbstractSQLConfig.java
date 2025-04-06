@@ -1591,7 +1591,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 		for (int i = 0; i < keys.length; i++) {
 			if (isPrepared()) {
-				// 不能通过 ? 来代替，因为SQLExecutor<T, JSONRequest, L> statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
+				// 不能通过 ? 来代替，因为SQLExecutor<T, M, L> statement.setString后 GROUP BY 'userId' 有单引号，只能返回一条数据，必须去掉单引号才行！
 				if (StringUtil.isName(keys[i]) == false) {
 					throw new IllegalArgumentException("@group:value 中 value里面用 , 分割的每一项都必须是1个单词！并且不要有空格！");
 				}
@@ -2239,7 +2239,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				for (String c : column) {
 					if (containRaw) {
 						// 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
-						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig<T, JSONRequest, L> 提前处理好的
+						if ("".equals(RAW_MAP.get(c)) || RAW_MAP.containsValue(c)) {  // newSQLConfig<T, M, L> 提前处理好的
 							//排除@raw中的值，以避免使用date_format(date,'%Y-%m-%d %H:%i:%s') 时,冒号的解析出错
 							//column.remove(c);
 							continue;
@@ -2385,7 +2385,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				String expression = keys[i];  //fun(arg0,arg1,...)
 
 				if (containRaw) {  // 由于 HashMap 对 key 做了 hash 处理，所以 get 比 containsValue 更快
-					if ("".equals(RAW_MAP.get(expression)) || RAW_MAP.containsValue(expression)) {  // newSQLConfig<T, JSONRequest, L> 提前处理好的
+					if ("".equals(RAW_MAP.get(expression)) || RAW_MAP.containsValue(expression)) {  // newSQLConfig<T, M, L> 提前处理好的
 						continue;
 					}
 
@@ -2394,7 +2394,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					String alias = expression.substring(index+1);
 					boolean hasAlias = StringUtil.isName(alias);
 					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
-					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig<T, JSONRequest, L> 提前处理好的
+					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig<T, M, L> 提前处理好的
 						keys[i] = pre + (hasAlias ? getAs() + q + alias + q : "");
 						continue;
 					}
@@ -2685,7 +2685,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 							origin = parseArgsSplitWithSpace(mkes);
 						} else {
 							String mk = RAW_MAP.get(origin);
-							if (mk != null) {  // newSQLConfig<T, JSONRequest, L> 提前处理好的
+							if (mk != null) {  // newSQLConfig<T, M, L> 提前处理好的
 								if (mk.length() > 0) {
 									origin = mk;
 								}
@@ -2750,7 +2750,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				String origin = mkes[j];
 
 				String mk = RAW_MAP.get(origin);
-				if (mk != null) {  // newSQLConfig<T, JSONRequest, L> 提前处理好的
+				if (mk != null) {  // newSQLConfig<T, M, L> 提前处理好的
 					if (mk.length() > 0) {
 						mkes[j] = mk;
 					}
@@ -3612,7 +3612,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		}
 		else if (StringUtil.isNotEmpty(andCond, true)) {  // andCond 必须放后面，否则 prepared 值顺序错误
 			if (isHaving) {
-				// HAVING 前 WHERE 已经有条件 ? 占位，不能反过来，想优化 AND 连接在最前，需要多遍历一次内部的 key，也可以 newSQLConfig<T, JSONRequest, L> 时存到 andList
+				// HAVING 前 WHERE 已经有条件 ? 占位，不能反过来，想优化 AND 连接在最前，需要多遍历一次内部的 key，也可以 newSQLConfig<T, M, L> 时存到 andList
 				result = "( " + result + " )" + AND + andCond;
 			}
 			else {
@@ -4463,7 +4463,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			return gainCondition(logic.isNot(), condition);
 		}
 		else if (range instanceof Subquery) {
-			// 如果在 Parser<T, JSONRequest, L> 解析成 SQL 字符串再引用，没法保证安全性，毕竟可以再通过远程函数等方式来拼接再替代，最后引用的字符串就能注入
+			// 如果在 Parser<T, M, L> 解析成 SQL 字符串再引用，没法保证安全性，毕竟可以再通过远程函数等方式来拼接再替代，最后引用的字符串就能注入
 			return gainKey(k) + (logic.isNot() ? NOT : "") + " IN " + gainSubqueryString((Subquery) range);
 		}
 
@@ -4919,7 +4919,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 		// TODO procedure 改为 List<Procedure>  procedureList; behind : true; function: callFunction(); String key; ...
 		// for (...) { Call procedure1();\n SQL \n; Call procedure2(); ... }
-		// 貌似不需要，因为 ObjectParser<T, JSONRequest, L> 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
+		// 貌似不需要，因为 ObjectParser<T, M, L> 里就已经处理的顺序等，只是这里要解决下 Schema 问题。
 
 		String procedure = config.getProcedure();
 		if (StringUtil.isNotEmpty(procedure, true)) {
@@ -5445,7 +5445,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			RequestMethod method, String table, String alias
 			, M request, List<Join<T, M, L>> joinList, boolean isProcedure, Callback<T, M, L> callback) throws Exception {
 		if (request == null) { // User:{} 这种空内容在查询时也有效
-			throw new NullPointerException(TAG + ": newSQLConfig<T, JSONRequest, L>  request == null!");
+			throw new NullPointerException(TAG + ": newSQLConfig<T, M, L>  request == null!");
 		}
 
 		Boolean explain = getBoolean(request, KEY_EXPLAIN);
@@ -5502,7 +5502,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				}
 			}
 			if (newIdIn.isEmpty()) {
-				throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L> idIn instanceof List >> 去掉无效 id 后 newIdIn.isEmpty()");
+				throw new NotExistException(TAG + ": newSQLConfig<T, M, L> idIn instanceof List >> 去掉无效 id 后 newIdIn.isEmpty()");
 			}
 			idIn = newIdIn;
 
@@ -5519,12 +5519,12 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		if (id != null) { // null 无效
 			if (id instanceof Number) {
 				if (((Number) id).longValue() <= 0) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L> " + table + ".id <= 0");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> " + table + ".id <= 0");
 				}
 			}
 			else if (id instanceof String) {
 				if (StringUtil.isEmpty(id, true)) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L> StringUtil.isEmpty(" + table + ".id, true)");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> StringUtil.isEmpty(" + table + ".id, true)");
 				}
 			}
 			else if (id instanceof Subquery) {}
@@ -5542,7 +5542,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					}
 				}
 				if (contains == false) { // empty有效  BaseModel.isEmpty(idIn) == false) {
-					throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L>  idIn != null && (((List<?>) idIn).contains(id) == false");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L>  idIn != null && (((List<?>) idIn).contains(id) == false");
 				}
 			}
 
@@ -5564,7 +5564,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				}
 			}
 			if (newUserIdIn.isEmpty()) {
-				throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L> userIdIn instanceof List >> 去掉无效 userId 后 newIdIn.isEmpty()");
+				throw new NotExistException(TAG + ": newSQLConfig<T, M, L> userIdIn instanceof List >> 去掉无效 userId 后 newIdIn.isEmpty()");
 			}
 			userIdIn = newUserIdIn;
 		}
@@ -5573,12 +5573,12 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		if (userId != null) { // null 无效
 			if (userId instanceof Number) {
 				if (((Number) userId).longValue() <= 0) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L> " + table + ".userId <= 0");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> " + table + ".userId <= 0");
 				}
 			}
 			else if (userId instanceof String) {
 				if (StringUtil.isEmpty(userId, true)) { // 一定没有值
-					throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L> StringUtil.isEmpty(" + table + ".userId, true)");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L> StringUtil.isEmpty(" + table + ".userId, true)");
 				}
 			}
 			else if (userId instanceof Subquery) {}
@@ -5596,7 +5596,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					}
 				}
 				if (contains == false) { // empty有效  BaseModel.isEmpty(userIdIn) == false) {
-					throw new NotExistException(TAG + ": newSQLConfig<T, JSONRequest, L>  userIdIn != null && (((List<?>) userIdIn).contains(userId) == false");
+					throw new NotExistException(TAG + ": newSQLConfig<T, M, L>  userIdIn != null && (((List<?>) userIdIn).contains(userId) == false");
 				}
 			}
 		}
@@ -5737,7 +5737,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 					if (values == null || values.length != columns.length) {
 						throw new Exception("服务器内部错误:\n" + TAG
-								+ " newSQLConfig<T, JSONRequest, L>  values == null || values.length != columns.length !");
+								+ " newSQLConfig<T, M, L>  values == null || values.length != columns.length !");
 					}
 
 					column = (id == null ? "" : idKey + ",") + (userId == null ? "" : userIdKey + ",")
@@ -5899,7 +5899,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 						// 可重写回调方法自定义处理 // 动态设置的场景似乎很少，而且去掉后不方便用户排错！
 						// 去掉判断，有时候不在没关系，如果是对增删改等非开放请求强制要求传对应的条件，可以用 Operation.NECESSARY
-						if (request.containsKey(w) == false) {  // 和 request.get(w) == null 没区别，前面 Parser<T, JSONRequest, L> 已经过滤了 null
+						if (request.containsKey(w) == false) {  // 和 request.get(w) == null 没区别，前面 Parser<T, M, L> 已经过滤了 null
 							//	throw new IllegalArgumentException(table + ":{} 里的 @combine:value 中的value里 " + ws[i] + " 对应的 " + w + " 不在它里面！");
 							callback.onMissingKey4Combine(table, request, combine, ws[i], w);
 							if (config instanceof AbstractSQLConfig) {
@@ -6269,7 +6269,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		boolean isQuery = RequestMethod.isQueryMethod(method);
 		config.setKeyPrefix(isQuery && config.isMain() == false);
 
-		//TODO 解析出 SQLConfig<T, JSONRequest, L> 再合并 column, order, group 等
+		//TODO 解析出 SQLConfig<T, M, L> 再合并 column, order, group 等
 		if (joinList == null || joinList.isEmpty() || RequestMethod.isQueryMethod(method) == false) {
 			return config;
 		}
@@ -6519,7 +6519,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	}
 
 	public static interface Callback<T, M extends Map<String, Object>, L extends List<Object>> extends IdCallback<T> {
-		/**获取 SQLConfig<T, JSONRequest, L> 的实例
+		/**获取 SQLConfig<T, M, L> 的实例
 		 * @param method
 		 * @param database
 		 * @param schema

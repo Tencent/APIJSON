@@ -33,11 +33,11 @@ import static apijson.JSONObject.KEY_EXPLAIN;
 import static apijson.RequestMethod.CRUD;
 import static apijson.RequestMethod.GET;
 
-/**Parser<T, JSONRequest, L> for parsing request to JSONRequest
+/**Parser<T, M, L> for parsing request to JSONRequest
  * @author Lemon
  */
 public abstract class AbstractParser<T, M extends Map<String, Object>, L extends List<Object>>
-		implements Parser<T, M, L>, ParserCreator<T, M, L>, VerifierCreator<T, M, L>, SQLCreator<T, M, L> { //, JSONParser<JSONRequest, L> {
+		implements Parser<T, M, L>, ParserCreator<T, M, L>, VerifierCreator<T, M, L>, SQLCreator<T, M, L> {
 	protected static final String TAG = "AbstractParser";
 	
 	/**
@@ -1098,7 +1098,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 	protected Map<String, ObjectParser<T, M, L>> arrayObjectParserCacheMap = new HashMap<>();
 
-	//	protected SQLConfig<T, JSONRequest, L> itemConfig;
+	//	protected SQLConfig<T, M, L> itemConfig;
 	/**获取单个对象，该对象处于parentObject内
 	 * @param request parentObject 的 value
 	 * @param parentPath parentObject 的路径
@@ -1405,7 +1405,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				long startTime = System.currentTimeMillis();
 
 				/* 这里优化了 Table[]: { Table:{} } 这种情况下的性能
-				 * 如果把 List<Map<String, Object>> 改成 L 来减少以下 addAll 一次复制，则会导致 AbstractSQLExecutor<T, JSONRequest, L> 等其它很多地方 get 要改为 getJSONObject，
+				 * 如果把 List<Map<String, Object>> 改成 L 来减少以下 addAll 一次复制，则会导致 AbstractSQLExecutor<T, M, L> 等其它很多地方 get 要改为 getJSONObject，
 				 * 修改类型会导致不兼容旧版依赖 ORM 的项目，而且整体上性能只有特殊情况下性能提升，其它非特殊情况下因为多出很多 instanceof Map<?, ?> 的判断而降低了性能。
 				 */
 				Map<String, Object> fo = i != 0 || arrTableKey == null ? null : JSON.get(parent, arrTableKey);
@@ -1802,7 +1802,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			//			onList.add(table + "." + key + " = " + targetTable + "." + targetKey); // ON User.id = Moment.userId
 
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 <<<<<<<<<
-			// AbstractSQLConfig.newSQLConfig<T, JSONRequest, L> 中强制把 id, id{}, userId, userId{} 放到了最前面		tableObj.put(key, tableObj.remove(key));
+			// AbstractSQLConfig.newSQLConfig<T, M, L> 中强制把 id, id{}, userId, userId{} 放到了最前面		tableObj.put(key, tableObj.remove(key));
 
 			if (refObj.size() != tableObj.size()) {  // 把 key 强制放最前，AbstractSQLExcecutor 中 config.putWhere 也是放尽可能最前
 				refObj.putAll(tableObj);
@@ -1814,8 +1814,8 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			// 保证和 SQLExcecutor 缓存的 Config 里 where 顺序一致，生成的 SQL 也就一致 >>>>>>>>>
 		}
 
-		//拼接多个 SQLConfig<T, JSONRequest, L> 的SQL语句，然后执行，再把结果分别缓存(Moment, User等)到 SQLExecutor<T, JSONRequest, L> 的 cacheMap
-		//		AbstractSQLConfig<T, JSONRequest, L> config0 = null;
+		//拼接多个 SQLConfig<T, M, L> 的SQL语句，然后执行，再把结果分别缓存(Moment, User等)到 SQLExecutor<T, M, L> 的 cacheMap
+		//		AbstractSQLConfig<T, M, L> config0 = null;
 		//		String sql = "SELECT " + config0.getColumnString() + " FROM " + config0.getTable() + " INNER JOIN " + targetTable + " ON "
 		//				+ onList.get(0) + config0.getGroupString() + config0.getHavingString() + config0.getOrderString();
 
@@ -2091,7 +2091,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			else {
 				sqlExecutor = getSQLExecutor();
 				result = sqlExecutor.execute(config, false);
-				// FIXME 改为直接在 sqlExecutor 内加好，最后 Parser<T, JSONRequest, L> 取结果，可以解决并发执行导致内部计算出错
+				// FIXME 改为直接在 sqlExecutor 内加好，最后 Parser<T, M, L> 取结果，可以解决并发执行导致内部计算出错
 //				executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
 			}
 

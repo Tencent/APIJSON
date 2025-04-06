@@ -67,7 +67,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 	public AbstractObjectParser(@NotNull M request, String parentPath, SQLConfig<T, M, L> arrayConfig
 			, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
 		if (request == null) {
-			throw new IllegalArgumentException(TAG + ".ObjectParser<T, JSONRequest, L>  request == null!!!");
+			throw new IllegalArgumentException(TAG + ".ObjectParser<T, M, L>  request == null!!!");
 		}
 		this.request = request;
 		this.parentPath = parentPath;
@@ -201,9 +201,9 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 			this.table = tentry.getKey();
 			this.alias = tentry.getValue();
 
-			Log.d(TAG, "AbstractObjectParser<T, JSONRequest, L>  parentPath = " + parentPath + "; name = " + name + "; table = " + table + "; alias = " + alias);
-			Log.d(TAG, "AbstractObjectParser<T, JSONRequest, L>  type = " + type + "; isTable = " + isTable + "; isArrayMainTable = " + isArrayMainTable);
-			Log.d(TAG, "AbstractObjectParser<T, JSONRequest, L>  isEmpty = " + request.isEmpty() + "; tri = " + tri + "; drop = " + drop);
+			Log.d(TAG, "AbstractObjectParser<T, M, L>  parentPath = " + parentPath + "; name = " + name + "; table = " + table + "; alias = " + alias);
+			Log.d(TAG, "AbstractObjectParser<T, M, L>  type = " + type + "; isTable = " + isTable + "; isArrayMainTable = " + isArrayMainTable);
+			Log.d(TAG, "AbstractObjectParser<T, M, L>  isEmpty = " + request.isEmpty() + "; tri = " + tri + "; drop = " + drop);
 
 			breakParse = false;
 
@@ -390,7 +390,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 	@Override
 	public boolean onParse(@NotNull String key, @NotNull Object value) throws Exception {
 		if (key.endsWith("@")) {  // StringUtil.isPath((String) value)) {
-			// [] 内主表 position > 0 时，用来生成 SQLConfig<T, JSONRequest, L> 的键值对全都忽略，不解析
+			// [] 内主表 position > 0 时，用来生成 SQLConfig<T, M, L> 的键值对全都忽略，不解析
 			if (value instanceof Map<?, ?>) {  // key{}@ getRealKey, SQL 子查询对象，JSONRequest -> SQLConfig.getSQL
 				String replaceKey = key.substring(0, key.length() - 1);
 

@@ -105,7 +105,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 */
 	public static final String ADMIN = "ADMIN";
 
-//	public static ParserCreator<T, JSONRequest, L> PARSER_CREATOR;
+//	public static ParserCreator<T, M, L> PARSER_CREATOR;
 
 	public static ScriptEngineManager SCRIPT_ENGINE_MANAGER;
 	public static ScriptEngine SCRIPT_ENGINE;
@@ -387,7 +387,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 
 			if (requestIdArray == null) { // 可能是 @ 得到 || requestIdArray.isEmpty()) { // 请求未声明 key:id 或 key{}:[...] 条件，自动补全
-				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); // key{}:[] 有效，SQLConfig<T, JSONRequest, L> 里 throw NotExistException
+				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); // key{}:[] 有效，SQLConfig<T, M, L> 里 throw NotExistException
 			}
 			else { // 请求已声明 key:id 或 key{}:[] 条件，直接验证
 				for (Object id : requestIdArray) {

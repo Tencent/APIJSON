@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * @author Lemon
  */
 public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L extends List<Object>>
-		implements SQLExecutor<T, M, L> { // , JSONParser<JSONRequest, L> {
+		implements SQLExecutor<T, M, L> {
 	private static final String TAG = "AbstractSQLExecutor";
 	//是否返回 值为null的字段
 	public static boolean ENABLE_OUTPUT_NULL_COLUMN = false;
@@ -82,7 +82,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 	/**保存缓存
 	 * @param sql  key
 	 * @param list  value
-	 * @param config  一般主表 SQLConfig<T, JSONRequest, L> 不为 null，JOIN 副表的为 null
+	 * @param config  一般主表 SQLConfig<T, M, L> 不为 null，JOIN 副表的为 null
 	 */
 	@Override
 	public void putCache(String sql, List<M> list, SQLConfig<T, M, L> config) {
@@ -96,7 +96,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 	/**获取缓存
 	 * @param sql  key
-	 * @param config  一般主表 SQLConfig<T, JSONRequest, L> 不为 null，JOIN 副表的为 null
+	 * @param config  一般主表 SQLConfig<T, M, L> 不为 null，JOIN 副表的为 null
 	 */
 	@Override
 	public List<M> getCache(String sql, SQLConfig<T, M, L> config) {
@@ -106,7 +106,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 	/**获取缓存
 	 * @param sql  key
 	 * @param position
-	 * @param config  一般主表 SQLConfig<T, JSONRequest, L> 不为 null，JOIN 副表的为 null
+	 * @param config  一般主表 SQLConfig<T, M, L> 不为 null，JOIN 副表的为 null
 	 * @return
 	 */
 	@Override
@@ -633,7 +633,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 								}
 								curItem = JSON.get(viceItem, viceName);
 
-								String viceSql = hasPK ? viceConfig.gainSQL(false) : null; // TODO 在 SQLConfig<T, JSONRequest, L> 缓存 SQL，减少大量的重复生成
+								String viceSql = hasPK ? viceConfig.gainSQL(false) : null; // TODO 在 SQLConfig<T, M, L> 缓存 SQL，减少大量的重复生成
 								M curCache = hasPK ? childMap.get(viceSql) : null;
 
 								if (curItem == null || curItem.isEmpty()) {
@@ -721,7 +721,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 			Log.i(TAG, ">>> execute  putCache('" + sql + "', resultList);  resultList.size() = " + resultList.size());
 
-			// 数组主表对象额外一次返回全部，方便 Parser<T, JSONRequest, L> 缓存来提高性能
+			// 数组主表对象额外一次返回全部，方便 Parser<T, M, L> 缓存来提高性能
 
 			result = position >= resultList.size() ? JSON.createJSONObject() : resultList.get(position);
 			if (position == 0 && resultList.size() > 1 && result != null && result.isEmpty() == false) {

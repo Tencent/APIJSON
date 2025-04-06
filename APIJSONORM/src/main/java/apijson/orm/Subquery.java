@@ -31,7 +31,7 @@ public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> 
 		this.path = path;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, JSONRequest, L> 里的 dbPassword 等
+	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
 	public String getOriginKey() {
 		return originKey;
 	}
@@ -39,7 +39,7 @@ public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> 
 		this.originKey = originKey;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, JSONRequest, L> 里的 dbPassword 等
+	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
 	public M getOriginValue() {
 		return originValue;
 	}
@@ -47,7 +47,7 @@ public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> 
 		this.originValue = originValue;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, JSONRequest, L> 里的 dbPassword 等
+	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
 	public String getFrom() {
 		return from;
 	}
@@ -55,7 +55,7 @@ public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> 
 		this.from = from;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, JSONRequest, L> 里的 dbPassword 等
+	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
 	public String getRange() {
 		return range;
 	}
@@ -63,7 +63,7 @@ public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> 
 		this.range = range;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, JSONRequest, L> 里的 dbPassword 等
+	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
 	public String getKey() {
 		return key;
 	}
@@ -71,7 +71,7 @@ public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> 
 		this.key = key;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, JSONRequest, L> 里的 dbPassword 等
+	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
 	public SQLConfig<T, M, L> getConfig() {
 		return config;
 	}
