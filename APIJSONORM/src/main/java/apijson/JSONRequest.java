@@ -15,7 +15,7 @@ import static apijson.StringUtil.PATTERN_ALPHA_BIG;
  * @author Lemon
  * @see #puts
  * @see #toArray
- * @use JSONRequest request = new JSONRequest(...);
+ * @use JSONRequest request = JSON.createJSONObject(...);
  * <br> request.puts(...);//not a must
  * <br> request.toArray(...);//not a must
  */

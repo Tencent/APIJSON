@@ -10,7 +10,7 @@ import java.util.Map;
 import apijson.JSON;
 import apijson.StringUtil;
 
-/**JSONRequest for Server to replace apijson.JSONRequest,
+/**JSONRequest for Server to replace apijson.JSONObject,
  * put JSON.parseObject(value) and not encode in default cases
  * @author Lemon
  * @see #put(String, Object)

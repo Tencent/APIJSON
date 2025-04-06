@@ -7,8 +7,6 @@ package apijson;
 import java.util.List;
 import java.util.Map;
 
-import apijson.orm.exception.UnsupportedDataTypeException;
-
 /**JSON工具类 防止解析时异常
  * @author Lemon
  */
@@ -18,66 +16,74 @@ public class JSON {
 
 	static final String TAG = "JSON";
 
-	public static JSONParser<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
+	public static JSONParser<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_PARSER;
 
-		@Override
-		public JSONObject createJSONObject() {
-			return new JSONObject();
-		}
+	static {
+		DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
 
-		@Override
-		public JSONArray createJSONArray() {
-			return new JSONArray();
-		}
+			@Override
+			public JSONObject createJSONObject() {
+				return new JSONObject();
+			}
 
-		@Override
-		public String toJSONString(Object obj) {
-			return JSON.toJSONString(obj);
-		}
+			@Override
+			public JSONArray createJSONArray() {
+				return new JSONArray();
+			}
 
-		@Override
-		public Object parseJSON(Object json) {
-			throw new UnsupportedOperationException();
-		}
+			@Override
+			public String toJSONString(Object obj) {
+				return JSON.toJSONString(obj);
+			}
 
-		@Override
-		public JSONObject parseObject(Object json) {
-			throw new UnsupportedOperationException();
-		}
+			@Override
+			public Object parseJSON(Object json) {
+				throw new UnsupportedOperationException();
+			}
 
-		@Override
-		public <T> T parseObject(Object json, Class<T> clazz) {
-			throw new UnsupportedOperationException();
-		}
+			@Override
+			public JSONObject parseObject(Object json) {
+				throw new UnsupportedOperationException();
+			}
 
-		@Override
-		public JSONArray parseArray(Object json) {
-			throw new UnsupportedOperationException();
-		}
+			@Override
+			public <T> T parseObject(Object json, Class<T> clazz) {
+				throw new UnsupportedOperationException();
+			}
 
-		@Override
-		public <T> List<T> parseArray(Object json, Class<T> clazz) {
-			throw new UnsupportedOperationException();
-		}
+			@Override
+			public JSONArray parseArray(Object json) {
+				throw new UnsupportedOperationException();
+			}
 
-	};
+			@Override
+			public <T> List<T> parseArray(Object json, Class<T> clazz) {
+				throw new UnsupportedOperationException();
+			}
+
+		};
+	}
 
 //	public static JSONCreator<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_CREATOR = DEFAULT_JSON_PARSER;
 
-	public static Object createJSONObject() {
-		return DEFAULT_JSON_PARSER.createJSONObject();
+	public static <M extends Map<String, Object>> M createJSONObject() {
+		return (M) DEFAULT_JSON_PARSER.createJSONObject();
+	}
+	public static <M extends Map<String, Object>> M createJSONObject(String key, Object value) {
+		return (M) DEFAULT_JSON_PARSER.createJSONObject(key, value);
+	}
+	public static <M extends Map<String, Object>> M createJSONObject(Map<? extends String, ?> map) {
+		return (M) DEFAULT_JSON_PARSER.createJSONObject(map);
 	}
 
-	public static Object createJSONObject(Map<? extends String, ?> map) {
-		return DEFAULT_JSON_PARSER.createJSONObject(map);
+	public static <L extends List<Object>> L createJSONArray() {
+		return (L) DEFAULT_JSON_PARSER.createJSONArray();
 	}
-
-	public static Object createJSONArray() {
-		return DEFAULT_JSON_PARSER.createJSONArray();
+	public static <L extends List<Object>> L createJSONArray(Object obj) {
+		return (L) DEFAULT_JSON_PARSER.createJSONArray(obj);
 	}
-
-	public static Object createJSONArray(List<?> list) {
-		return DEFAULT_JSON_PARSER.createJSONArray(list);
+	public static <L extends List<Object>> L createJSONArray(List<?> list) {
+		return (L) DEFAULT_JSON_PARSER.createJSONArray(list);
 	}
 
 	public static Object parseJSON(Object json) {
@@ -101,9 +107,10 @@ public class JSON {
 	 * @param json
 	 * @return
 	 */
-	public static Map<String, Object> parseObject(Object json) {
-		return parseObject(json, DEFAULT_JSON_PARSER);
+	public static <M extends Map<String, Object>> M parseObject(Object json) {
+		return (M) parseObject(json, DEFAULT_JSON_PARSER);
 	}
+
 	public static <M extends Map<String, Object>, L extends List<Object>> M parseObject(Object json, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
@@ -112,24 +119,30 @@ public class JSON {
 
 		return parser.parseObject(s);
 	}
+
 	public static <T> T parseObject(Object json, Class<T> clazz) {
 		return parseObject(json, clazz, DEFAULT_JSON_PARSER);
 	}
+
 	public static <T, M extends Map<String, Object>, L extends List<Object>> T parseObject(Object json, Class<T> clazz, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
 			return null;
 		}
 
+		if (parser == null) {
+			parser = (JSONParser<M, L>) DEFAULT_JSON_PARSER;
+		}
+
 		return parser.parseObject(s, clazz);
 	}
-	
+
 	/**
 	 * @param json
 	 * @return
 	 */
-	public static List<Object> parseArray(Object json) {
-		return parseArray(json, DEFAULT_JSON_PARSER);
+	public static <L extends List<Object>> L parseArray(Object json) {
+		return (L) parseArray(json, DEFAULT_JSON_PARSER);
 	}
 
 	public static <M extends Map<String, Object>, L extends List<Object>> L parseArray(Object json, JSONParser<M, L> parser) {
@@ -150,6 +163,7 @@ public class JSON {
 	public static <T> List<T> parseArray(Object json, Class<T> clazz) {
 		return parseArray(json, clazz, DEFAULT_JSON_PARSER);
 	}
+
 	public static <T, M extends Map<String, Object>, L extends List<Object>> List<T> parseArray(Object json, Class<T> clazz, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
@@ -163,7 +177,7 @@ public class JSON {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @param obj
 	 * @return
@@ -172,66 +186,56 @@ public class JSON {
 		if (obj == null) {
 			return null;
 		}
-		
-		// In a real implementation, you would use a JSON parser library
-		// Here we're just providing a basic implementation to replace fastjson
-		try {
-			// For now, this is a placeholder. In a real implementation,
-			// you would convert the object to a JSON string
-			if (obj instanceof String) {
-				return (String) obj;
-			}
 
-			if (obj instanceof Map) {
-				// Simple JSON object format
-				StringBuilder sb = new StringBuilder("{");
-				@SuppressWarnings("unchecked")
-				Map<Object, Object> map = (Map<Object, Object>) obj;
-				boolean first = true;
-				for (Map.Entry<Object, Object> entry : map.entrySet()) {
-					if (! first) {
-						sb.append(",");
-					}
-					first = false;
-					sb.append("\"").append(entry.getKey()).append("\":");
-					Object value = entry.getValue();
-					if (value instanceof String) {
-						sb.append("\"").append(value).append("\"");
-					} else {
-						sb.append(toJSONString(value));
-					}
-				}
-				sb.append("}");
-				return sb.toString();
-			}
-
-			if (obj instanceof List) {
-				// Simple JSON array format
-				StringBuilder sb = new StringBuilder("[");
-				@SuppressWarnings("unchecked")
-				List<Object> list = (List<Object>) obj;
-				boolean first = true;
-				for (Object item : list) {
-					if (! first) {
-						sb.append(",");
-					}
-					first = false;
-					if (item instanceof String) {
-						sb.append("\"").append(item).append("\"");
-					} else {
-						sb.append(toJSONString(item));
-					}
-				}
-				sb.append("]");
-				return sb.toString();
-			}
-
-			return obj.toString();
+		if (obj instanceof String) {
+			return (String) obj;
 		}
-		catch (Exception e) {
-			Log.i(TAG, "toJSONString catch \n" + e.getMessage());
-		}
-		return null;
+
+		//if (obj instanceof Map) {
+		//	// Simple JSON object format
+		//	StringBuilder sb = new StringBuilder("{");
+		//	@SuppressWarnings("unchecked")
+		//	Map<Object, Object> map = (Map<Object, Object>) obj;
+		//	boolean first = true;
+		//	for (Map.Entry<Object, Object> entry : map.entrySet()) {
+		//		if (! first) {
+		//			sb.append(",");
+		//		}
+		//
+		//		first = false;
+		//		sb.append("\"").append(entry.getKey()).append("\":");
+		//		Object value = entry.getValue();
+		//		if (value instanceof String) {
+		//			sb.append("\"").append(value).append("\"");
+		//		} else {
+		//			sb.append(toJSONString(value));
+		//		}
+		//	}
+		//	sb.append("}");
+		//	return sb.toString();
+		//}
+		//
+		//if (obj instanceof List) {
+		//	StringBuilder sb = new StringBuilder("[");
+		//	@SuppressWarnings("unchecked")
+		//	List<Object> list = (List<Object>) obj;
+		//	boolean first = true;
+		//	for (Object item : list) {
+		//		if (! first) {
+		//				sb.append(",");
+		//		}
+		//		first = false;
+		//		if (item instanceof String) {
+		//			sb.append("\"").append(item).append("\"");
+		//		} else {
+		//			sb.append(toJSONString(item));
+		//		}
+		//	}
+		//	sb.append("]");
+		//	return sb.toString();
+		//}
+
+		return DEFAULT_JSON_PARSER.toJSONString(obj);
 	}
 
 
@@ -243,7 +247,7 @@ public class JSON {
 		return key != null && key.startsWith("is") && key.length() > 2 && key.contains("JSON");
 	}
 
-	public static boolean isBooleanOrNumberOrString(Object obj) {
+	public static boolean isBoolOrNumOrStr(Object obj) {
 		return obj instanceof Boolean || obj instanceof Number || obj instanceof String;
 	}
 
@@ -261,6 +265,32 @@ public class JSON {
 
 	/**
 	 * Get a value from a Map and convert to the specified type
+	 * @param map Source map
+	 * @param key The key
+	 * @param <M> Target type
+	 * @return The converted value
+	 */
+	@SuppressWarnings("unchecked")
+	public static <M extends Map<String, Object>> M getJSONObject(Map<String, Object> map, String key) {
+		Object obj = get(map, key);
+		return (M) obj;
+	}
+
+	/**
+	 * Get a value from a Map and convert to the specified type
+	 * @param map Source map
+	 * @param key The key
+	 * @param <L> Target type
+	 * @return The converted value
+	 */
+	@SuppressWarnings("unchecked")
+	public static <L extends List<Object>> L getJSONArray(Map<String, Object> map, String key) {
+		Object obj = get(map, key);
+		return (L) obj;
+	}
+
+	/**
+	 * Get a value from a Map and convert to the specified type
 	 * @param list Source map
 	 * @param index The key
 	 * @param <T> Target type
@@ -270,6 +300,19 @@ public class JSON {
 	public static <T> T get(List<Object> list, int index) {
 		return list == null || index < 0 || index >= list.size() ? null : (T) list.get(index);
 	}
+
+	@SuppressWarnings("unchecked")
+	public static <M extends Map<String, Object>> M getJSONObject(List<Object> list, int index) {
+		Object obj = get(list, index);
+		return (M) obj;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <L extends List<Object>> L getJSONArray(List<Object> list, int index) {
+		Object obj = get(list, index);
+		return (L) obj;
+	}
+
 //	/**
 //	 * Get a value from a Map and convert to the specified type
 //	 * @param map Source map
@@ -287,20 +330,20 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The Map value
-	 * @throws UnsupportedDataTypeException If value is not a Map and cannot be converted
+	 * @throws IllegalArgumentException If value is not a Map and cannot be converted
 	 */
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> getMap(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static Map<String, Object> getMap(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
 		}
-		
+
 		if (value instanceof Map) {
 			return (Map<String, Object>) value;
 		}
-		
-		throw new UnsupportedDataTypeException("Value for key '" + key + "' is not a Map: " + value.getClass().getName());
+
+		throw new IllegalArgumentException("Value for key '" + key + "' is not a Map: " + value.getClass().getName());
 	}
 
 	/**
@@ -308,20 +351,20 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The List value
-	 * @throws UnsupportedDataTypeException If value is not a List and cannot be converted
+	 * @throws IllegalArgumentException If value is not a List and cannot be converted
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Object> getList(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static List<Object> getList(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
 		}
-		
+
 		if (value instanceof List) {
 			return (List<Object>) value;
 		}
-		
-		throw new UnsupportedDataTypeException("Value for key '" + key + "' is not a List: " + value.getClass().getName());
+
+		throw new IllegalArgumentException("Value for key '" + key + "' is not a List: " + value.getClass().getName());
 	}
 
 	/**
@@ -329,9 +372,9 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The int value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to int
+	 * @throws IllegalArgumentException If value cannot be converted to int
 	 */
-	public static Integer getInteger(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static Integer getInteger(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
@@ -345,11 +388,11 @@ public class JSON {
 			try {
 				return Integer.parseInt((String) value);
 			} catch (NumberFormatException e) {
-				throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to int: " + e.getMessage());
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to int: " + e.getMessage());
 			}
 		}
 
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to int");
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to int");
 	}
 
 	/**
@@ -357,27 +400,27 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The int value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to int
+	 * @throws IllegalArgumentException If value cannot be converted to int
 	 */
-	public static int getIntValue(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static int getIntValue(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return 0;
 		}
-		
+
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
 		}
-		
+
 		if (value instanceof String) {
 			try {
 				return Integer.parseInt((String) value);
 			} catch (NumberFormatException e) {
-				throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to int: " + e.getMessage());
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to int: " + e.getMessage());
 			}
 		}
-		
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to int");
+
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to int");
 	}
 
 	/**
@@ -385,9 +428,9 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The int value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to int
+	 * @throws IllegalArgumentException If value cannot be converted to int
 	 */
-	public static Long getLong(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static Long getLong(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
@@ -401,11 +444,11 @@ public class JSON {
 			try {
 				return Long.parseLong((String) value);
 			} catch (NumberFormatException e) {
-				throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to int: " + e.getMessage());
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to int: " + e.getMessage());
 			}
 		}
 
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to int");
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to int");
 	}
 
 	/**
@@ -413,27 +456,27 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The long value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to long
+	 * @throws IllegalArgumentException If value cannot be converted to long
 	 */
-	public static long getLongValue(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static long getLongValue(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return 0;
 		}
-		
+
 		if (value instanceof Number) {
 			return ((Number) value).longValue();
 		}
-		
+
 		if (value instanceof String) {
 			try {
 				return Long.parseLong((String) value);
 			} catch (NumberFormatException e) {
-				throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to long: " + e.getMessage());
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to long: " + e.getMessage());
 			}
 		}
-		
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to long");
+
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to long");
 	}
 
 	/**
@@ -441,27 +484,27 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The double value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to double
+	 * @throws IllegalArgumentException If value cannot be converted to double
 	 */
-	public static Double getDouble(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static Float getFloat(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
 		}
-		
+
 		if (value instanceof Number) {
-			return ((Number) value).doubleValue();
+			return ((Number) value).floatValue();
 		}
-		
+
 		if (value instanceof String) {
 			try {
-				return Double.parseDouble((String) value);
+				return Float.parseFloat((String) value);
 			} catch (NumberFormatException e) {
-				throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to double: " + e.getMessage());
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to double: " + e.getMessage());
 			}
 		}
-		
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to double");
+
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to double");
 	}
 
 	/**
@@ -469,9 +512,66 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The double value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to double
+	 * @throws IllegalArgumentException If value cannot be converted to double
 	 */
-	public static double getDoubleValue(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static float getFloatValue(Map<String, Object> map, String key) throws IllegalArgumentException {
+		Object value = map == null || key == null ? null : map.get(key);
+		if (value == null) {
+			return 0;
+		}
+
+		if (value instanceof Number) {
+			return ((Number) value).floatValue();
+		}
+
+		if (value instanceof String) {
+			try {
+				return Float.parseFloat((String) value);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to double: " + e.getMessage());
+			}
+		}
+
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to double");
+	}
+
+
+	/**
+	 * Get a double value from a Map
+	 * @param map Source map
+	 * @param key The key
+	 * @return The double value
+	 * @throws IllegalArgumentException If value cannot be converted to double
+	 */
+	public static Double getDouble(Map<String, Object> map, String key) throws IllegalArgumentException {
+		Object value = map == null || key == null ? null : map.get(key);
+		if (value == null) {
+			return null;
+		}
+
+		if (value instanceof Number) {
+			return ((Number) value).doubleValue();
+		}
+
+		if (value instanceof String) {
+			try {
+				return Double.parseDouble((String) value);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to double: " + e.getMessage());
+			}
+		}
+
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to double");
+	}
+
+	/**
+	 * Get a double value from a Map
+	 * @param map Source map
+	 * @param key The key
+	 * @return The double value
+	 * @throws IllegalArgumentException If value cannot be converted to double
+	 */
+	public static double getDoubleValue(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return 0;
@@ -485,11 +585,11 @@ public class JSON {
 			try {
 				return Double.parseDouble((String) value);
 			} catch (NumberFormatException e) {
-				throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to double: " + e.getMessage());
+				throw new IllegalArgumentException("Cannot convert String value '" + value + "' to double: " + e.getMessage());
 			}
 		}
 
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to double");
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to double");
 	}
 
 
@@ -498,9 +598,9 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The boolean value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to boolean
+	 * @throws IllegalArgumentException If value cannot be converted to boolean
 	 */
-	public static Boolean getBoolean(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static Boolean getBoolean(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
@@ -515,7 +615,7 @@ public class JSON {
 			if (str.equals("true") || str.equals("false")) {
 				return Boolean.parseBoolean(str);
 			}
-			throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to boolean");
+			throw new IllegalArgumentException("Cannot convert String value '" + value + "' to boolean");
 		}
 
 		if (value instanceof Number) {
@@ -523,10 +623,10 @@ public class JSON {
 			if (intValue == 0 || intValue == 1) {
 				return intValue != 0;
 			}
-			throw new UnsupportedDataTypeException("Cannot convert Number value '" + value + "' to boolean. Only 0 and 1 are supported.");
+			throw new IllegalArgumentException("Cannot convert Number value '" + value + "' to boolean. Only 0 and 1 are supported.");
 		}
 
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to boolean");
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to boolean");
 	}
 
 	/**
@@ -534,35 +634,35 @@ public class JSON {
 	 * @param map Source map
 	 * @param key The key
 	 * @return The boolean value
-	 * @throws UnsupportedDataTypeException If value cannot be converted to boolean
+	 * @throws IllegalArgumentException If value cannot be converted to boolean
 	 */
-	public static boolean getBooleanValue(Map<String, Object> map, String key) throws UnsupportedDataTypeException {
+	public static boolean getBooleanValue(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return false;
 		}
-		
+
 		if (value instanceof Boolean) {
 			return (Boolean) value;
 		}
-		
+
 		if (value instanceof String) {
 			String str = ((String) value).toLowerCase();
 			if (str.equals("true") || str.equals("false")) {
 				return Boolean.parseBoolean(str);
 			}
-			throw new UnsupportedDataTypeException("Cannot convert String value '" + value + "' to boolean");
+			throw new IllegalArgumentException("Cannot convert String value '" + value + "' to boolean");
 		}
-		
+
 		if (value instanceof Number) {
 			int intValue = ((Number) value).intValue();
 			if (intValue == 0 || intValue == 1) {
 				return intValue != 0;
 			}
-			throw new UnsupportedDataTypeException("Cannot convert Number value '" + value + "' to boolean. Only 0 and 1 are supported.");
+			throw new IllegalArgumentException("Cannot convert Number value '" + value + "' to boolean. Only 0 and 1 are supported.");
 		}
-		
-		throw new UnsupportedDataTypeException("Cannot convert value of type " + value.getClass().getName() + " to boolean");
+
+		throw new IllegalArgumentException("Cannot convert value of type " + value.getClass().getName() + " to boolean");
 	}
 
 	/**
@@ -576,7 +676,7 @@ public class JSON {
 		if (value == null) {
 			return null;
 		}
-		
+
 		return value.toString();
 	}
 

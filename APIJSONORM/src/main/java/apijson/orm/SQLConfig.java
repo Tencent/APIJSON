@@ -189,7 +189,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	 * @return
 	 * @throws Exception
 	 */
-	String getSQL(boolean prepared) throws Exception;
+	String gainSQL(boolean prepared) throws Exception;
 
 
 
@@ -287,8 +287,8 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	List<String> getRaw();
 	SQLConfig<T, M, L> setRaw(List<String> raw);
 
-	Subquery getFrom();
-	SQLConfig<T, M, L> setFrom(Subquery from);
+	Subquery<T, M, L> getFrom();
+	SQLConfig<T, M, L> setFrom(Subquery<T, M, L> from);
 
 	List<String> getColumn();
 	SQLConfig<T, M, L> setColumn(List<String> column);
@@ -375,41 +375,38 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 
 	SQLConfig<T, M, L> setAlias(String alias);
 
-	default String getTableKey() {
+	default String gainTableKey() {
 		String alias = getAlias();
 		return getTable() + (StringUtil.isEmpty(alias) ? "" : ":" + alias);
 	}
 
-	default String getSQLAlias() {
-		return getSQLAlias(getTable(), getAlias());
+	default String gainSQLAlias() {
+		return gainSQLAlias(getTable(), getAlias());
 	}
-	static String getSQLAlias(@NotNull String table, String alias) {
+	static String gainSQLAlias(@NotNull String table, String alias) {
 		// 这里不用 : $ 等符号，因为部分数据库/引擎似乎不支持 `key`, "key", [key] 等避免关键词冲突的方式，只能使用符合变量命名的表别名
 		return StringUtil.isEmpty(alias) ? table : table + "__" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
 	}
 
 
-	String getWhereString(boolean hasPrefix) throws Exception;
+	String gainWhereString(boolean hasPrefix) throws Exception;
 
-	String getRawSQL(String key, Object value) throws Exception;
-	String getRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception;
+	String gainRawSQL(String key, Object value) throws Exception;
+	String gainRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception;
 
 	boolean isKeyPrefix();
 
 	SQLConfig<T, M, L> setKeyPrefix(boolean keyPrefix);
 
-
 	List<Join<T, M, L>> getJoinList();
-
 	SQLConfig<T, M, L> setJoinList(List<Join<T, M, L>> joinList);
 
 	boolean hasJoin();
 
 
-	String getSubqueryString(Subquery subquery) throws Exception;
+	String gainSubqueryString(Subquery<T, M, L> subquery) throws Exception;
 
 	SQLConfig<T, M, L> setProcedure(String procedure);
-
 
 
 	List<Object> getWithAsExprPreparedValueList();

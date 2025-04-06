@@ -5,8 +5,6 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
-import apijson.orm.exception.UnsupportedDataTypeException;
-
 import java.util.*;
 
 import static apijson.JSON.parseObject;
@@ -19,7 +17,7 @@ import static apijson.JSON.parseObject;
  * <br> User user = response.getObject(User.class);//not a must
  * <br> List<Comment> commenntList = response.getList("Comment[]", Comment.class);//not a must
  */
-public class JSONResponse<M extends Map<String, Object>, L extends List<Object>> extends apijson.JSONObject {
+public class JSONResponse<M extends Map<String, Object>, L extends List<Object>> extends apijson.JSONObject implements Map<String, Object> {
 	private static final long serialVersionUID = 1L;
 
 	// 节约性能和减少 bug，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
@@ -113,11 +111,11 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 		return getString(KEY_MSG);
 	}
 	/**获取状态描述
-	 * @param reponse
+	 * @param response
 	 * @return
 	 */
-	public static String getMsg(Map<String, Object> reponse) {
-		return reponse == null ? null : JSON.getString(reponse, KEY_MSG);
+	public static String getMsg(Map<String, Object> response) {
+		return response == null ? null : JSON.getString(response, KEY_MSG);
 	}
 	/**获取id
 	 * @return
@@ -171,7 +169,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param response
 	 * @return
 	 */
-	public static boolean isSuccess(JSONResponse response) {
+	public static boolean isSuccess(JSONResponse<?, ?> response) {
 		return response != null && response.isSuccess();
 	}
 	/**是否成功
@@ -181,7 +179,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	public static boolean isSuccess(Map<String, Object> response) {
         try {
             return response != null && isSuccess(JSON.getIntValue(response, KEY_CODE));
-        } catch (UnsupportedDataTypeException e) {
+        } catch (IllegalArgumentException e) {
             return false;
         }
     }
@@ -203,10 +201,17 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param response
 	 * @return
 	 */
-	public static boolean isExist(JSONResponse response) {
+	public static boolean isExist(JSONResponse<?, ?> response) {
 		return response != null && response.isExist();
 	}
 
+	/**获取内部的JSONResponse
+	 * @param key
+	 * @return
+	 */
+	public JSONResponse<M, L> getJSONResponse(String key) {
+		return getObject(key, JSONResponse.class, null);
+	}
 	/**获取内部的JSONResponse
 	 * @param key
 	 * @return
@@ -220,7 +225,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	//	 * @param key
 	//	 * @return
 	//	 */
-	//	public static JSONResponse getJSONResponse(M response, String key) {
+	//	public static JSONResponse getJSONResponse(JSONRequest response, String key) {
 	//		return response == null ? null : response.getObject(key, JSONResponse.class);
 	//	}
 	//状态信息，非GET请求获得的信息>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -231,8 +236,24 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param clazz
 	 * @return
 	 */
+	public <T> T getObject(Class<T> clazz) {
+		return getObject(clazz == null ? "" : clazz.getSimpleName(), clazz, (JSONParser<M, L>) DEFAULT_JSON_PARSER);
+	}
+	/**
+	 * key = clazz.getSimpleName()
+	 * @param clazz
+	 * @return
+	 */
 	public <T> T getObject(Class<T> clazz, JSONParser<M, L> parser) {
 		return getObject(clazz == null ? "" : clazz.getSimpleName(), clazz, parser);
+	}
+	/**
+	 * @param key
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T getObject(String key, Class<T> clazz) {
+		return getObject(this, key, clazz, (JSONParser<M, L>) DEFAULT_JSON_PARSER);
 	}
 	/**
 	 * @param key
@@ -257,6 +278,13 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param clazz
 	 * @return
 	 */
+	public <T> T toObject(Class<T> clazz) {
+		return toObject(clazz, null);
+	}
+	/**
+	 * @param clazz
+	 * @return
+	 */
 	public <T> T toObject(Class<T> clazz, JSONParser<M, L> parser) {
 		return toObject(this, clazz, parser);
 	}
@@ -267,7 +295,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> T toObject(
 			Map<String, Object> object, Class<T> clazz, JSONParser<M, L> parser) {
-		return parseObject(JSON.toJSONString(object), clazz, parser);
+		return parseObject(object, clazz, parser);
 	}
 
 
@@ -345,7 +373,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	//	/**
 	//	 * @return
 	//	 */
-	//	public M format() {
+	//	public JSONRequest format() {
 	//		return format(this);
 	//	}
 	/**格式化key名称
@@ -390,7 +418,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 				if (value instanceof List<?>) {//JSONArray，遍历来format内部项
 					formatedObject.put(formatArrayKey(key), format((L) value, creator));
 				}
-				else if (value instanceof Map<?, ?>) {//M，往下一级提取
+				else if (value instanceof Map<?, ?>) {//JSONRequest，往下一级提取
 					formatedObject.put(formatObjectKey(key), format((M) value, creator));
 				}
 				else {//其它Object，直接填充
@@ -436,7 +464,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 			if (value instanceof List<?>) {//JSONArray，遍历来format内部项
 				formatedArray.add(format((L) value, creator));
 			}
-			else if (value instanceof Map<?, ?>) {//M，往下一级提取
+			else if (value instanceof Map<?, ?>) {//JSONRequest，往下一级提取
 				formatedArray.add(format((M) value, creator));
 			}
 			else {//其它Object，直接填充

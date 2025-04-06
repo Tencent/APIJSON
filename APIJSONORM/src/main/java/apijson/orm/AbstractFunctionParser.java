@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static apijson.orm.AbstractSQLConfig.PATTERN_SCHEMA;
-import static apijson.orm.SQLConfig.TYPE_ITEM;
 
 /**可远程调用的函数类
  * @author Lemon
@@ -38,7 +37,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 
 	// <methodName, JSONObject>
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
-    public static Map<String, ScriptExecutor> SCRIPT_EXECUTOR_MAP;
+    public static Map<String, ScriptExecutor<?, ? extends Map<String, Object>, ? extends List<Object>>> SCRIPT_EXECUTOR_MAP;
 	public static Map<String, Map<String, Object>> FUNCTION_MAP;
 
 	static {
@@ -288,7 +287,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 	/**根据路径取值
 	 * @param path
 	 * @param clazz
-	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser<T, M, L> 缓存值
+	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser<T, JSONRequest, L> 缓存值
 	 * @return
 	 * @param <T>
 	 */
@@ -420,7 +419,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
         }
 
 		if (lang != null && SCRIPT_EXECUTOR_MAP.get(lang) == null) {
-			throw new ClassNotFoundException("找不到脚本语言 " + lang + " 对应的执行引擎！请先依赖相关库并在后端 APIJSONFunctionParser<T, M, L> 中注册！");
+			throw new ClassNotFoundException("找不到脚本语言 " + lang + " 对应的执行引擎！请先依赖相关库并在后端 APIJSONFunctionParser<T, JSONRequest, L> 中注册！");
 		}
 
 		int version = row.get("version") != null ? Integer.parseInt(row.get("version").toString()) : 0;
@@ -904,7 +903,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 	 * @throws Exception 
 	 */
 	public <V> V getArgVal(String key, Class<V> clazz, boolean defaultValue) throws Exception {
-		Object obj = parser != null && JSONRequest.isArrayKey(key) ? AbstractParser.getValue(request, key.split("\\,")) : request.get(key);
+		Object obj = parser != null && apijson.JSONObject.isArrayKey(key) ? AbstractParser.getValue(request, key.split("\\,")) : request.get(key);
 		
 		if (clazz == null) {
 			return (V) obj;

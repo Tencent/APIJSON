@@ -105,7 +105,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 */
 	public static final String ADMIN = "ADMIN";
 
-//	public static ParserCreator<T, M, L> PARSER_CREATOR;
+//	public static ParserCreator<T, JSONRequest, L> PARSER_CREATOR;
 
 	public static ScriptEngineManager SCRIPT_ENGINE_MANAGER;
 	public static ScriptEngine SCRIPT_ENGINE;
@@ -381,13 +381,13 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdKey + "{}", true); // 不能是 &{}， |{} 不要传，直接 {}
 			if (requestId != null) {
 				if (requestIdArray == null) {
-					requestIdArray = (L) JSON.createJSONArray();
+					requestIdArray = JSON.createJSONArray();
 				}
 				requestIdArray.add(requestId);
 			}
 
 			if (requestIdArray == null) { // 可能是 @ 得到 || requestIdArray.isEmpty()) { // 请求未声明 key:id 或 key{}:[...] 条件，自动补全
-				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); // key{}:[] 有效，SQLConfig<T, M, L> 里 throw NotExistException
+				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); // key{}:[] 有效，SQLConfig<T, JSONRequest, L> 里 throw NotExistException
 			}
 			else { // 请求已声明 key:id 或 key{}:[] 条件，直接验证
 				for (Object id : requestIdArray) {
@@ -530,13 +530,13 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
 
-		M tblObj = (M) JSON.createJSONObject();
+		M tblObj = JSON.createJSONObject();
 		tblObj.put(key, value);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
-			tblObj.put(JSONRequest.KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
+			tblObj.put(apijson.JSONObject.KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
 		}
 
-		M req = (M) JSON.createJSONObject();
+		M req = JSON.createJSONObject();
 		req.put(table, tblObj);
 		Map<String, Object> repeat = createParser().setMethod(HEAD).setNeedVerify(true).parseResponse(req);
 
@@ -578,8 +578,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @return
 	 * @throws Exception
 	 */
-	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(@NotNull final RequestMethod method, final String name
-			, final M target, final M request, final SQLCreator<T, M, L> creator) throws Exception {
+	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
+			@NotNull final RequestMethod method, final String name, final M target, final M request
+			, final SQLCreator<T, M, L> creator) throws Exception {
 		return verifyRequest(method, name, target, request, AbstractParser.MAX_UPDATE_COUNT, creator);
 	}
 	/**从request提取target指定的内容
@@ -654,9 +655,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 
 		//已在 Verifier 中处理
-		//		if (get(getString(request, JSONRequest.KEY_ROLE)) == ADMIN) {
+		//		if (get(getString(request, apijson.JSONObject.KEY_ROLE)) == ADMIN) {
 		//			throw new IllegalArgumentException("角色设置错误！不允许在写操作Request中传 " + name +
-		//					":{ " + JSONRequest.KEY_ROLE + ":admin } ！");
+		//					":{ " + apijson.JSONObject.KEY_ROLE + ":admin } ！");
 		//		}
 
 
@@ -709,7 +710,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 			@Override
 			protected L onParseJSONArray(String key, L tarray, L rarray) throws Exception {
-				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONRequest.isArrayKey(key)) {
+				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && apijson.JSONObject.isArrayKey(key)) {
 					if (rarray == null || rarray.isEmpty()) {
 						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":[{ ... }] "
 								+ "，批量新增 Table[]:value 中 value 必须是包含表对象的非空数组！其中每个子项 { ... } 都是"
@@ -936,11 +937,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		Object _if = target.get(IF.name());
 		boolean ifIsStr = _if instanceof String && StringUtil.isNotEmpty(_if, true);
 		M ifObj = ifIsStr == false && _if instanceof Map<?,?> ? (M) _if : null;
-//				: (_if instanceof String ? new apijson.JSONRequest((String) _if, "" /* "throw new Error('')" */ ) : null);
+//				: (_if instanceof String ? new apijson.JSONObject((String) _if, "" /* "throw new Error('')" */ ) : null);
 		if (ifObj == null && _if != null && ifIsStr == false) {
 //			if (_if instanceof List<?>) {
 //			}
-			throw new IllegalArgumentException(name + ": { " + IF.name() + ": value } 中 value 类型错误！只允许 String, M！");
+			throw new IllegalArgumentException(name + ": { " + IF.name() + ": value } 中 value 类型错误！只允许 String, JSONRequest！");
 		}
 
 //		Object code = target.get(CODE.name());
@@ -992,7 +993,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					continue;
 				}
 
-				if (tvalue instanceof Map<?, ?>) { // M，往下一级提取
+				if (tvalue instanceof Map<?, ?>) { // JSONRequest，往下一级提取
 					if (rvalue != null && rvalue instanceof Map<?, ?> == false) {
 						throw new UnsupportedDataTypeException(key + ":value 的 value 不合法！类型必须是 OBJECT ，结构为 {} !");
 					}
@@ -1005,7 +1006,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 					tvalue = callback.onParseJSONArray(key, (L) tvalue, (L) rvalue);
 
-					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONRequest.isArrayKey(key)) {
+					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && apijson.JSONObject.isArrayKey(key)) {
 						objKeySet.add(key);
 					}
 				} else { // 其它Object
@@ -1113,7 +1114,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
                             + name + " 里面不允许传 " + rk + ":{} ！");
 				}
 				if ((method == RequestMethod.POST || method == RequestMethod.PUT)
-                        && rv instanceof List<?> && JSONRequest.isArrayKey(rk)) {
+                        && rv instanceof List<?> && apijson.JSONObject.isArrayKey(rk)) {
 					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 "
                             + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
 				}
@@ -1206,15 +1207,15 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		// 校验并配置允许部分批量增删改失败>>>>>>>>>>>>>>>>>>>
 
 
-		String[] nks = ifObj == null ? null : StringUtil.split(getString(real, JSONRequest.KEY_NULL));
+		String[] nks = ifObj == null ? null : StringUtil.split(getString(real, apijson.JSONObject.KEY_NULL));
 		Collection<?> nkl = nks == null || nks.length <= 0 ? new HashSet<>() : Arrays.asList(nks);
 
 		Set<Map.Entry<String, Object>> ifSet = ifObj == null ? null : ifObj.entrySet();
 		if (ifIsStr || (ifSet != null && ifSet.isEmpty() == false)) {
 			// 没必要限制，都是后端配置的，安全可控，而且可能确实有特殊需求，需要 id, @column 等
-//			List<String> condKeys = new ArrayList<>(Arrays.asList(apijson.JSONRequest.KEY_ID, apijson.JSONRequest.KEY_ID_IN
-//					, apijson.JSONRequest.KEY_USER_ID, apijson.JSONRequest.KEY_USER_ID_IN));
-//			condKeys.addAll(JSONRequest.TABLE_KEY_LIST);
+//			List<String> condKeys = new ArrayList<>(Arrays.asList(apijson.JSONObject.KEY_ID, apijson.JSONObject.KEY_ID_IN
+//					, apijson.JSONObject.KEY_USER_ID, apijson.JSONObject.KEY_USER_ID_IN));
+//			condKeys.addAll(apijson.JSONObject.TABLE_KEY_LIST);
 
 			String preCode = "var curObj = " + JSON.toJSONString(real) + ";";
 
@@ -1279,7 +1280,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 					if (v instanceof Map<?, ?> == false) {
 						throw new IllegalArgumentException("Request 表 structure 配置的 " + IF.name()
-								+ ":{ " + k + ":value } 中 value 不合法，必须是 M {} ！");
+								+ ":{ " + k + ":value } 中 value 不合法，必须是 JSONRequest {} ！");
 					}
 
 					if (nkl.contains(k) || real.get(k) != null) {
@@ -1408,7 +1409,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		//这里不抽取 enum，因为 enum 不能满足扩展需求，子类需要可以自定义，而且 URL[] 这种也不符合命名要求，得用 constructor + getter + setter
 		switch (tv) {
 		case "BOOLEAN": //Boolean.parseBoolean(getString(real, tk)); 只会判断null和true
-			if (rv instanceof Boolean == false) { //M.getBoolean 可转换Number类型
+			if (rv instanceof Boolean == false) { //apijson.JSONObject.getBoolean 可转换Number类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 BOOLEAN" + (isInArray ? "[] !" : " !"));
 			}
 			break;
@@ -1428,7 +1429,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 			break;
 		case "STRING":
-			if (rv instanceof String == false) { //M.getString 可转换任何类型
+			if (rv instanceof String == false) { //apijson.JSONObject.getString 可转换任何类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
                         "类型必须是 STRING" + (isInArray ? "[] !" : " !"));
 			}
@@ -1466,13 +1467,13 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 			break;
 		case "OBJECT":
-			if (rv instanceof Map == false) { //M.getJSONObject 可转换String类型
+			if (rv instanceof Map == false) { //apijson.JSONObject.getJSONObject 可转换String类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
                         "类型必须是 OBJECT" + (isInArray ? "[] !" : " !") + " OBJECT 结构为 {} !");
 			}
 			break;
 		case "ARRAY":
-			if (rv instanceof Collection == false) { //M.getJSONArray 可转换String类型
+			if (rv instanceof Collection == false) { //apijson.JSONObject.getJSONArray 可转换String类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
                         "类型必须是 ARRAY" + (isInArray ? "[] !" : " !") + " ARRAY 结构为 [] !");
 			}
@@ -1526,12 +1527,12 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			L array = AbstractSQLConfig.newJSONArray(tv, new JSONCreator<M, L>() {
 				@Override
 				public M createJSONObject() {
-					return (M) JSON.createJSONObject();
+					return JSON.createJSONObject();
 				}
 
 				@Override
 				public L createJSONArray() {
-					return (L) JSON.createJSONArray();
+					return JSON.createJSONArray();
 				}
 			});
 
@@ -1621,12 +1622,12 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			L array = AbstractSQLConfig.newJSONArray(tv, new JSONCreator<Map<String, Object>, L>() {
 				@Override
 				public M createJSONObject() {
-					return (M) JSON.createJSONObject();
+					return JSON.createJSONObject();
 				}
 
 				@Override
 				public L createJSONArray() {
-					return (L) JSON.createJSONArray();
+					return JSON.createJSONArray();
 				}
 			});
 

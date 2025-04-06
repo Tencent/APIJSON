@@ -20,16 +20,30 @@ public interface JSONCreator<M extends Map<String, Object>, L extends List<Objec
     M createJSONObject();
 
     @NotNull
-    default M createJSONObject(Map<? extends String, ?> m) {
+    default M createJSONObject(String key, Object value) {
         M obj = createJSONObject();
-        if (m != null && ! m.isEmpty()) {
-            obj.putAll(m);
+        obj.put(key, value);
+        return obj;
+    }
+
+    @NotNull
+    default M createJSONObject(Map<? extends String, ?> map) {
+        M obj = createJSONObject();
+        if (map != null && ! map.isEmpty()) {
+            obj.putAll(map);
         }
         return obj;
     }
 
 	@NotNull
     L createJSONArray();
+
+    @NotNull
+    default L createJSONArray(Object obj){
+        L arr = createJSONArray();
+        arr.add(obj);
+        return arr;
+    }
 
     @NotNull
     default L createJSONArray(List<?> l){

@@ -157,8 +157,8 @@ public interface ObjectParser<T, M extends Map<String, Object>, L extends List<O
 
 	SQLConfig<T, M, L> getSQLConfig();
 	M getResponse();
-	M getSqlRequest();
-	M getSqlResponse();
+	M getSQLRequest();
+	M getSQLResponse();
 
 	Map<String, Object> getCustomMap();
 	Map<String, Map<String, String>> getFunctionMap();

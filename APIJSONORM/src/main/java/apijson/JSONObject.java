@@ -6,12 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson;
 
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
-import apijson.orm.exception.UnsupportedDataTypeException;
 
 /**use this class instead of com.alibaba.fastjson.JSONObject
  * @author Lemon
@@ -19,7 +14,7 @@ import apijson.orm.exception.UnsupportedDataTypeException;
  * @see #puts
  * @see #putsAll
  */
-public class JSONObject extends JSON implements Map<String, Object>  {
+public class JSONObject extends JSON implements Map<String, Object> {
 	private static final String TAG = "JSONObject";
 
 	private final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
@@ -699,7 +694,7 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 	public boolean getBooleanValue(String key) {
 		try {
 			return JSON.getBooleanValue(this, key);
-		} catch (UnsupportedDataTypeException e) {
+		} catch (IllegalArgumentException e) {
 			return false;
 		}
 	}
@@ -712,7 +707,7 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 	public int getIntValue(String key) {
 		try {
 			return JSON.getIntValue(this, key);
-		} catch (UnsupportedDataTypeException e) {
+		} catch (IllegalArgumentException e) {
 			return 0;
 		}
 	}
@@ -725,7 +720,7 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 	public long getLongValue(String key) {
 		try {
 			return JSON.getLongValue(this, key);
-		} catch (UnsupportedDataTypeException e) {
+		} catch (IllegalArgumentException e) {
 			return 0L;
 		}
 	}
@@ -738,7 +733,7 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 	public double getDoubleValue(String key) {
 		try {
 			return JSON.getDoubleValue(this, key);
-		} catch (UnsupportedDataTypeException e) {
+		} catch (IllegalArgumentException e) {
 			return 0.0;
 		}
 	}
@@ -762,7 +757,7 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 		try {
 			Map<String, Object> map = JSON.getMap(this, key);
 			return map != null ? new JSONObject(map) : null;
-		} catch (UnsupportedDataTypeException e) {
+		} catch (IllegalArgumentException e) {
 			return null;
 		}
 	}
@@ -776,7 +771,7 @@ public class JSONObject extends JSON implements Map<String, Object>  {
 		try {
 			List<Object> list = JSON.getList(this, key);
 			return list != null ? new JSONArray(list) : null;
-		} catch (UnsupportedDataTypeException e) {
+		} catch (IllegalArgumentException e) {
 			return null;
 		}
 	}

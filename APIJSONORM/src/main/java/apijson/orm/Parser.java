@@ -52,7 +52,7 @@ public interface Parser<T, M extends Map<String, Object>, L extends List<Object>
 	M parseResponse(String request);
 	M parseResponse(M request);
 
-	// 没必要性能还差 M parseCorrectResponse(String table, M response) throws Exception;
+	// 没必要性能还差 JSONRequest parseCorrectResponse(String table, JSONRequest response) throws Exception;
 
 
 	M parseCorrectRequest() throws Exception;
