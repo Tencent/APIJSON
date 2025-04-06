@@ -810,7 +810,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	private Parser<T, M, L> parser;
 	@Override
-	public Parser<T, M, L> getParser() {
+	public Parser<T, M, L> gainParser() {
 		if (parser == null && objectParser != null) {
 			parser = objectParser.getParser();
 		}
@@ -836,7 +836,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	private ObjectParser<T, M, L> objectParser;
 	@Override
-	public ObjectParser<T, M, L> getObjectParser() {
+	public ObjectParser<T, M, L> gainObjectParser() {
 		return objectParser;
 	}
 	@Override
@@ -878,9 +878,9 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	protected List<Object> withAsExprPreparedValueList = new ArrayList<>();
 	private int[] dbVersionNums = null;
 	@Override
-	public int[] getDBVersionNums() {
+	public int[] gainDBVersionNums() {
 		if (dbVersionNums == null || dbVersionNums.length <= 0) {
-			dbVersionNums = SQLConfig.super.getDBVersionNums();
+			dbVersionNums = SQLConfig.super.gainDBVersionNums();
 		}
 		return dbVersionNums;
 	}
@@ -1096,7 +1096,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	 * @return db == null ? DEFAULT_DATABASE : db
 	 */
 	@NotNull
-	public String getSQLDatabase() {
+	public String gainSQLDatabase() {
 		String db = getDatabase();
 		return db == null ? DEFAULT_DATABASE : db;  // "" 表示已设置，不需要用全局默认的 StringUtil.isEmpty(db, false)) {
 	}
@@ -1116,7 +1116,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isMySQL() {
-		return isMySQL(getSQLDatabase());
+		return isMySQL(gainSQLDatabase());
 	}
 	public static boolean isMySQL(String db) {
 		return DATABASE_MYSQL.equals(db);
@@ -1124,7 +1124,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isPostgreSQL() {
-		return isPostgreSQL(getSQLDatabase());
+		return isPostgreSQL(gainSQLDatabase());
 	}
 	public static boolean isPostgreSQL(String db) {
 		return DATABASE_POSTGRESQL.equals(db);
@@ -1132,7 +1132,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isSQLServer() {
-		return isSQLServer(getSQLDatabase());
+		return isSQLServer(gainSQLDatabase());
 	}
 	public static boolean isSQLServer(String db) {
 		return DATABASE_SQLSERVER.equals(db);
@@ -1140,7 +1140,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isOracle() {
-		return isOracle(getSQLDatabase());
+		return isOracle(gainSQLDatabase());
 	}
 	public static boolean isOracle(String db) {
 		return DATABASE_ORACLE.equals(db);
@@ -1148,7 +1148,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isDb2() {
-		return isDb2(getSQLDatabase());
+		return isDb2(gainSQLDatabase());
 	}
 	public static boolean isDb2(String db) {
 		return DATABASE_DB2.equals(db);
@@ -1156,7 +1156,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isMariaDB() {
-		return isMariaDB(getSQLDatabase());
+		return isMariaDB(gainSQLDatabase());
 	}
 	public static boolean isMariaDB(String db) {
 		return DATABASE_MARIADB.equals(db);
@@ -1164,7 +1164,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isTiDB() {
-		return isTiDB(getSQLDatabase());
+		return isTiDB(gainSQLDatabase());
 	}
 	public static boolean isTiDB(String db) {
 		return DATABASE_TIDB.equals(db);
@@ -1172,7 +1172,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isCockroachDB() {
-		return isCockroachDB(getSQLDatabase());
+		return isCockroachDB(gainSQLDatabase());
 	}
 	public static boolean isCockroachDB(String db) {
 		return DATABASE_COCKROACHDB.equals(db);
@@ -1180,7 +1180,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isDameng() {
-		return isDameng(getSQLDatabase());
+		return isDameng(gainSQLDatabase());
 	}
 	public static boolean isDameng(String db) {
 		return DATABASE_DAMENG.equals(db);
@@ -1188,7 +1188,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isKingBase() {
-		return isKingBase(getSQLDatabase());
+		return isKingBase(gainSQLDatabase());
 	}
 	public static boolean isKingBase(String db) {
 		return DATABASE_KINGBASE.equals(db);
@@ -1196,7 +1196,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isElasticsearch() {
-		return isElasticsearch(getSQLDatabase());
+		return isElasticsearch(gainSQLDatabase());
 	}
 	public static boolean isElasticsearch(String db) {
 		return DATABASE_ELASTICSEARCH.equals(db);
@@ -1204,7 +1204,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isManticore() {
-		return isManticore(getSQLDatabase());
+		return isManticore(gainSQLDatabase());
 	}
 	public static boolean isManticore(String db) {
 		return DATABASE_MANTICORE.equals(db);
@@ -1212,7 +1212,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isClickHouse() {
-		return isClickHouse(getSQLDatabase());
+		return isClickHouse(gainSQLDatabase());
 	}
 	public static boolean isClickHouse(String db) {
 		return DATABASE_CLICKHOUSE.equals(db);
@@ -1220,7 +1220,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isHive() {
-		return isHive(getSQLDatabase());
+		return isHive(gainSQLDatabase());
 	}
 	public static boolean isHive(String db) {
 		return DATABASE_HIVE.equals(db);
@@ -1228,7 +1228,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isPresto() {
-		return isPresto(getSQLDatabase());
+		return isPresto(gainSQLDatabase());
 	}
 	public static boolean isPresto(String db) {
 		return DATABASE_PRESTO.equals(db);
@@ -1236,7 +1236,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isTrino() {
-		return isTrino(getSQLDatabase());
+		return isTrino(gainSQLDatabase());
 	}
 	public static boolean isTrino(String db) {
 		return DATABASE_TRINO.equals(db);
@@ -1244,7 +1244,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isSnowflake() {
-		return isSnowflake(getSQLDatabase());
+		return isSnowflake(gainSQLDatabase());
 	}
 	public static boolean isSnowflake(String db) {
 		return DATABASE_SNOWFLAKE.equals(db);
@@ -1252,7 +1252,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isDatabricks() {
-		return isDatabricks(getSQLDatabase());
+		return isDatabricks(gainSQLDatabase());
 	}
 	public static boolean isDatabricks(String db) {
 		return DATABASE_DATABRICKS.equals(db);
@@ -1260,7 +1260,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isCassandra() {
-		return isCassandra(getSQLDatabase());
+		return isCassandra(gainSQLDatabase());
 	}
 	public static boolean isCassandra(String db) {
 		return DATABASE_CASSANDRA.equals(db);
@@ -1268,7 +1268,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isMilvus() {
-		return isMilvus(getSQLDatabase());
+		return isMilvus(gainSQLDatabase());
 	}
 	public static boolean isMilvus(String db) {
 		return DATABASE_MILVUS.equals(db);
@@ -1276,7 +1276,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isInfluxDB() {
-		return isInfluxDB(getSQLDatabase());
+		return isInfluxDB(gainSQLDatabase());
 	}
 	public static boolean isInfluxDB(String db) {
 		return DATABASE_INFLUXDB.equals(db);
@@ -1284,7 +1284,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isTDengine() {
-		return isTDengine(getSQLDatabase());
+		return isTDengine(gainSQLDatabase());
 	}
 	public static boolean isTDengine(String db) {
 		return DATABASE_TDENGINE.equals(db);
@@ -1292,7 +1292,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isTimescaleDB() {
-		return isTimescaleDB(getSQLDatabase());
+		return isTimescaleDB(gainSQLDatabase());
 	}
 	public static boolean isTimescaleDB(String db) {
 		return DATABASE_TIMESCALEDB.equals(db);
@@ -1300,7 +1300,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isQuestDB() {
-		return isQuestDB(getSQLDatabase());
+		return isQuestDB(gainSQLDatabase());
 	}
 	public static boolean isQuestDB(String db) {
 		return DATABASE_QUESTDB.equals(db);
@@ -1317,7 +1317,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isRedis() {
-		return isRedis(getSQLDatabase());
+		return isRedis(gainSQLDatabase());
 	}
 	public static boolean isRedis(String db) {
 		return DATABASE_REDIS.equals(db);
@@ -1325,7 +1325,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isMongoDB() {
-		return isMongoDB(getSQLDatabase());
+		return isMongoDB(gainSQLDatabase());
 	}
 	public static boolean isMongoDB(String db) {
 		return DATABASE_MONGODB.equals(db);
@@ -1333,7 +1333,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isKafka() {
-		return isKafka(getSQLDatabase());
+		return isKafka(gainSQLDatabase());
 	}
 	public static boolean isKafka(String db) {
 		return DATABASE_KAFKA.equals(db);
@@ -1341,7 +1341,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isMQ() {
-		return isMQ(getSQLDatabase());
+		return isMQ(gainSQLDatabase());
 	}
 	public static boolean isMQ(String db) {
 		return DATABASE_MQ.equals(db) || isKafka(db);
@@ -1349,7 +1349,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isSQLite() {
-		return isSQLite(getSQLDatabase());
+		return isSQLite(gainSQLDatabase());
 	}
 	public static boolean isSQLite(String db) {
 		return DATABASE_SQLITE.equals(db);
@@ -1357,7 +1357,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isDuckDB() {
-		return isDuckDB(getSQLDatabase());
+		return isDuckDB(gainSQLDatabase());
 	}
 	public static boolean isDuckDB(String db) {
 		return DATABASE_DUCKDB.equals(db);
@@ -1365,7 +1365,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isSurrealDB() {
-		return isSurrealDB(getSQLDatabase());
+		return isSurrealDB(gainSQLDatabase());
 	}
 	public static boolean isSurrealDB(String db) {
 		return DATABASE_SURREALDB.equals(db);
@@ -1373,7 +1373,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isOpenGauss() {
-		return isOpenGauss(getSQLDatabase());
+		return isOpenGauss(gainSQLDatabase());
 	}
 	public static boolean isOpenGauss(String db) {
 		return DATABASE_OPENGAUSS.equals(db);
@@ -1411,7 +1411,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 
 	@Override
-	public String getSQLCatalog() {
+	public String gainSQLCatalog() {
 		String catalog = getCatalog(); // 前端传参 @catalog 优先
 		return catalog == null ? DEFAULT_CATALOG : catalog; // 最后代码默认兜底配置
 	}
@@ -1429,7 +1429,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@NotNull
 	@Override
-	public String getSQLSchema() {
+	public String gainSQLSchema() {
 		String table = getTable();
 		// FIXME 全部默认填充判断是 系统表 则不填充 // 强制，避免因为全局默认的 @schema 自动填充进来，导致这几个类的 schema 为 sys 等其它值
 		if (Table.TAG.equals(table) || Column.TAG.equals(table)) {
@@ -1479,7 +1479,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	/**请求传进来的Table名
 	 * @return
-	 * @see {@link #getSQLTable()}
+	 * @see {@link #gainSQLTable()}
 	 */
 	@Override
 	public String getTable() {
@@ -1490,7 +1490,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	 * @return
 	 */
 	@Override
-	public String getSQLTable() {
+	public String gainSQLTable() {
 		// 如果要强制小写，则可在子类重写这个方法再 toLowerCase
 		// return DATABASE_POSTGRESQL.equals(getDatabase()) ? t.toLowerCase() : t;
 		String ot = getTable();
@@ -1500,18 +1500,18 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 
 	@Override
-	public String getTablePath() {
+	public String gainTablePath() {
 		String q = getQuote();
 
 		String ns = isSurrealDB() ? getSQLNamespace() : null;
-		String cl = isPSQL() ? getSQLCatalog() : null;
-		String sch = getSQLSchema();
-		String sqlTable = getSQLTable();
+		String cl = isPSQL() ? gainSQLCatalog() : null;
+		String sch = gainSQLSchema();
+		String sqlTable = gainSQLTable();
 
 		return (StringUtil.isEmpty(ns, true) ? "" : q + ns + q + ".")
 				+ (StringUtil.isEmpty(cl, true) ? "" : q + cl + q + ".")
 				+ (StringUtil.isEmpty(sch, true) ? "" : q + sch + q + ".")
-				+ q + sqlTable + q + (isKeyPrefix() ? getAs() + q + gainSQLAlias() + q : "");
+				+ q + sqlTable + q + (isKeyPrefix() ? gainAs() + q + gainSQLAlias() + q : "");
 	}
 	@Override
 	public AbstractSQLConfig<T, M, L> setTable(String table) { //Table已经在Parser中校验，所以这里不用防SQL注入
@@ -1519,7 +1519,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		return this;
 	}
 
-	public String getAs() {
+	public String gainAs() {
 		return isOracle() || isManticore() ? " " : " AS ";
 	}
 
@@ -1532,7 +1532,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		this.alias = alias;
 		return this;
 	}
-	public String getSQLAliasWithQuote() {
+	public String gainSQLAliasWithQuote() {
 		String a = gainSQLAlias();
 		String q = getQuote();
 		// getTable 不能小写，因为Verifier用大小写敏感的名称判断权限
@@ -1559,22 +1559,22 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		String joinGroup = "";
 		if (joinList != null) {
 			boolean first = true;
-			for (Join j : joinList) {
-				if (j.isAppJoin()) {
+			for (Join<T, M, L> join : joinList) {
+				if (join.isAppJoin()) {
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = j.getOuterConfig();
-				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getGroup() != null) || j.isLeftOrRightJoin() ? ocfg : j.getJoinConfig();
+				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getGroup() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
 					cfg.setMain(false).setKeyPrefix(true);
 					//if (StringUtil.isEmpty(cfg.getAlias(), true)) {
 					//	cfg.setAlias(cfg.getTable());
 					//}
-					String c = ((AbstractSQLConfig) cfg).gainGroupString(false);
+					String c = ((AbstractSQLConfig<?, ?, ?>) cfg).gainGroupString(false);
 
-					if (StringUtil.isEmpty(c, true) == false) {
+					if (StringUtil.isNotEmpty(c, true)) {
 						joinGroup += (first ? "" : ", ") + c;
 						first = false;
 					}
@@ -2226,7 +2226,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	}
 	public String gainColumnString(boolean inSQLJoin) throws Exception {
 		List<String> column = getColumn();
-		String as = getAs();
+		String as = gainAs();
 		String q = getQuote();
 
 		switch (getMethod()) {
@@ -2395,7 +2395,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					boolean hasAlias = StringUtil.isName(alias);
 					String pre = index > 0 && hasAlias ? expression.substring(0, index) : expression;
 					if (RAW_MAP.containsValue(pre) || "".equals(RAW_MAP.get(pre))) {  // newSQLConfig<T, M, L> 提前处理好的
-						keys[i] = pre + (hasAlias ? getAs() + q + alias + q : "");
+						keys[i] = pre + (hasAlias ? gainAs() + q + alias + q : "");
 						continue;
 					}
 				}
@@ -2530,7 +2530,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				}
 
 				String origin = fun + "(" + (distinct ? PREFIX_DISTINCT : "") + StringUtil.get(ckeys) + ")" + suffix;
-				expression = origin + (StringUtil.isEmpty(alias, true) ? "" : getAs() + quote + alias + quote);
+				expression = origin + (StringUtil.isEmpty(alias, true) ? "" : gainAs() + quote + alias + quote);
 			}
 			else {
 				//是窗口函数   fun(arg0,agr1) OVER (agr0 agr1 ...)
@@ -2588,7 +2588,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				String[] argsString2 = parseArgsSplitWithComma(argString2, false, containRaw, allowAlias);
 				expression = fun + "(" + StringUtil.get(agrsString1) + (containOver ? ") OVER (" : ") AGAINST (")
 						+ StringUtil.get(argsString2) + ")" + suffix  // 传参不传空格，拼接带空格
-						+ (StringUtil.isEmpty(alias, true) ? "" : getAs() + quote + alias + quote);
+						+ (StringUtil.isEmpty(alias, true) ? "" : gainAs() + quote + alias + quote);
 			}
 		}
 
@@ -2718,7 +2718,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 							}
 
 							if (isColumn && StringUtil.isNotEmpty(alias, true)) {
-								origin += getAs() + quote + alias + quote;
+								origin += gainAs() + quote + alias + quote;
 							}
 						}
 					}
@@ -3034,7 +3034,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		boolean isQuestDB = isQuestDB();
 		if (isSurrealDB || isQuestDB || isMilvus) {
 			if (count == 0) {
-				Parser<T, M, L> parser = getParser();
+				Parser<T, M, L> parser = gainParser();
 				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
 			}
 
@@ -4260,7 +4260,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		if (isPSQL()) {
 			return gainKey(column) + " ~" + (ignoreCase ? "* " : " ") + gainValue(key, column, value);
 		}
-		if (isOracle() || isDameng() || isKingBase() || (isMySQL() && getDBVersionNums()[0] >= 8)) {
+		if (isOracle() || isDameng() || isKingBase() || (isMySQL() && gainDBVersionNums()[0] >= 8)) {
 			return "regexp_like(" + gainKey(column) + ", " + gainValue(key, column, value) + (ignoreCase ? ", 'i'" : ", 'c'") + ")";
 		}
 		if (isPresto() || isTrino()) {
@@ -4626,7 +4626,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	}
 	private void clearWithAsExprListIfNeed() {
 		// mysql8版本以上,子查询支持with as表达式
-		if(this.isMySQL() && this.getDBVersionNums()[0] >= 8) {
+		if(this.isMySQL() && this.gainDBVersionNums()[0] >= 8) {
 			this.withAsExprSQLList = new ArrayList<>();
 		}
 	}
@@ -4657,11 +4657,11 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		}
 
 		String quote = getQuote();
-		String as = getAs();
+		String as = gainAs();
 
 		String withAsExpreSql;
 		if (list != null) {
-			String withQuoteName = quote + subquery.getKey() + quote;
+			String withQuoteName = quote + subquery.gainKey() + quote;
 			list.add(" " + withQuoteName + as + "(" + cfg.gainSQL(isPrepared()) + ") ");
 			withAsExpreSql = " SELECT * FROM " + withQuoteName;
 
@@ -4680,8 +4680,8 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		} else {
 			withAsExpreSql = cfg.gainSQL(isPrepared());
 			// mysql 才存在这个问题, 主表和子表是一张表
-			if (isWithAsEnable && isMySQL() && StringUtil.equals(getTable(), subquery.getFrom())) {
-				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql + ")" + as + quote + subquery.getKey() + quote;
+			if (isWithAsEnable && isMySQL() && StringUtil.equals(getTable(), subquery.gainFrom())) {
+				withAsExpreSql = " SELECT * FROM (" + withAsExpreSql + ")" + as + quote + subquery.gainKey() + quote;
 			}
 		}
 
@@ -4694,11 +4694,11 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			return "";
 		}
 
-		String range = subquery.getRange();
-		SQLConfig<T, M, L> cfg = subquery.getConfig();
+		String range = subquery.gainRange();
+		SQLConfig<T, M, L> cfg = subquery.gainConfig();
 
 		// 子查询  = 主语句 datasource
-		if (StringUtil.equals(this.getTable(), subquery.getFrom()) == false && cfg.hasJoin() == false) {
+		if (StringUtil.equals(this.getTable(), subquery.gainFrom()) == false && cfg.hasJoin() == false) {
 			cfg.setDatasource(this.getDatasource());
 		}
 		cfg.setPreparedValueList(new ArrayList<>());
@@ -4927,13 +4927,13 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			boolean hasPrefix = ind >= 0 && ind < procedure.indexOf("(");
 			String sch = hasPrefix ? AbstractFunctionParser.extractSchema(
 					procedure.substring(0, ind), config.getTable()
-			) : config.getSQLSchema();
+			) : config.gainSQLSchema();
 
 			String q = config.getQuote();
 			return "CALL " + q + sch + q + "." + (hasPrefix ? procedure.substring(ind + 1) : procedure);
 		}
 
-		String tablePath = config.getTablePath();
+		String tablePath = config.gainTablePath();
 		if (StringUtil.isEmpty(tablePath, true)) {
 			Log.i(TAG, "getSQL  StringUtil.isEmpty(tablePath, true) >> return null;");
 			return null;
@@ -4972,7 +4972,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				if (config.isTest() && RequestMethod.isGetMethod(config.getMethod(), true)) {  // FIXME 为啥是 code 而不是 count ？
 					String q = config.getQuote();  // 生成 SELECT  (  (24 >=0 AND 24 <3)  )  AS `code` LIMIT 1 OFFSET 0
 					return explain + "SELECT " + config.gainWhereString(false)
-							+ config.getAs() + q + JSONResponse.KEY_COUNT + q + config.gainLimitString();
+							+ config.gainAs() + q + JSONResponse.KEY_COUNT + q + config.gainLimitString();
 				}
 
 				config.setPreparedValueList(new ArrayList<Object>());
@@ -5020,7 +5020,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 	@Override
 	public boolean isWithAsEnable() {
-		return ENABLE_WITH_AS && (isMySQL() == false || getDBVersionNums()[0] >= 8);
+		return ENABLE_WITH_AS && (isMySQL() == false || gainDBVersionNums()[0] >= 8);
 	}
 
 	/**Oracle的分页获取
@@ -5049,7 +5049,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			String table, AbstractSQLConfig<T, M, L> config) throws Exception {
 		Subquery<T, M, L> from = config.getFrom();
 		if (from != null) {
-			table = config.gainSubqueryString(from) + config.getAs() + config.getSQLAliasWithQuote() + " ";
+			table = config.gainSubqueryString(from) + config.gainAs() + config.gainSQLAliasWithQuote() + " ";
 		}
 
 		String join = config.gainJoinString();
@@ -5172,7 +5172,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				case ">": // RIGHT JOIN
 					jc.setMain(true).setKeyPrefix(false);
 					sql = ( "<".equals(type) ? " LEFT" : (">".equals(type) ? " RIGHT" : " CROSS") )
-							+ " JOIN ( " + jc.gainSQL(isPrepared()) + " ) " + getAs() + quote + jt + quote;
+							+ " JOIN ( " + jc.gainSQL(isPrepared()) + " ) " + gainAs() + quote + jt + quote;
 					sql = concatJoinOn(sql, quote, j, jt, onList);
 
 					jc.setMain(false).setKeyPrefix(true);
@@ -5188,11 +5188,11 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				case "^": // SIDE JOIN: ! (A & B)
 				case "(": // ANTI JOIN: A & ! B
 				case ")": // FOREIGN JOIN: B & ! A
-					sql = " INNER JOIN " + jc.getTablePath();
+					sql = " INNER JOIN " + jc.gainTablePath();
 					sql = concatJoinOn(sql, quote, j, jt, onList);
 					break;
 				case "~": // ASOF JOIN: B ~= A
-					sql = " ASOF JOIN " + jc.getTablePath();
+					sql = " ASOF JOIN " + jc.gainTablePath();
 					sql = concatJoinOn(sql, quote, j, jt, onList);
 					break;
 				default:
@@ -5813,7 +5813,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 						boolean isFakeDelete = true;
 						if (from != null) {
 							// 兼容 JOIN 外层 SELECT 重复生成 deletedKey
-							SQLConfig<?, ?, ?> cfg = from.getConfig();
+							SQLConfig<?, ?, ?> cfg = from.gainConfig();
 							if (cfg != null && StringUtil.equals(table, cfg.getTable())) {
 								isFakeDelete = false;
 							}

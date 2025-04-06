@@ -24,55 +24,49 @@ public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> 
 	private String key; //id{}
 	private SQLConfig<T, M, L> config;
 	
-	public String getPath() {
+	public String gainPath() {
 		return path;
 	}
 	public void setPath(String path) {
 		this.path = path;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
-	public String getOriginKey() {
+	public String gainOriginKey() {
 		return originKey;
 	}
 	public void setOriginKey(String originKey) {
 		this.originKey = originKey;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
-	public M getOriginValue() {
+	public M gainOriginValue() {
 		return originValue;
 	}
 	public void setOriginValue(M originValue) {
 		this.originValue = originValue;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
-	public String getFrom() {
+	public String gainFrom() {
 		return from;
 	}
 	public void setFrom(String from) {
 		this.from = from;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
-	public String getRange() {
+	public String gainRange() {
 		return range;
 	}
 	public void setRange(String range) {
 		this.range = range;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
-	public String getKey() {
+	public String gainKey() {
 		return key;
 	}
 	public void setKey(String key) {
 		this.key = key;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig<T, M, L> 里的 dbPassword 等
-	public SQLConfig<T, M, L> getConfig() {
+	public SQLConfig<T, M, L> gainConfig() {
 		return config;
 	}
 	public void setConfig(SQLConfig<T, M, L> config) {

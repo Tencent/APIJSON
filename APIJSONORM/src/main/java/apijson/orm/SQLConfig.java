@@ -62,11 +62,11 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	int TYPE_ITEM = 1;
 	int TYPE_ITEM_CHILD_0 = 2;
 
-	Parser<T, M, L> getParser();
+	Parser<T, M, L> gainParser();
 
 	SQLConfig<T, M, L> setParser(Parser<T, M, L> parser);
 
-	ObjectParser<T, M, L> getObjectParser();
+	ObjectParser<T, M, L> gainObjectParser();
 
 	SQLConfig<T, M, L> setObjectParser(ObjectParser<T, M, L> objectParser);
 
@@ -147,11 +147,11 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	 * MYSQL: 8.0, 5.7, 5.6 等； PostgreSQL: 11, 10, 9.6 等
 	 * @return
 	 */
-	String getDBVersion();
+	String gainDBVersion();
 
 	@NotNull
-	default int[] getDBVersionNums() {
-		String dbVersion = StringUtil.noBlank(getDBVersion());
+	default int[] gainDBVersionNums() {
+		String dbVersion = StringUtil.noBlank(gainDBVersion());
 		if (dbVersion.isEmpty()) {
 			return new int[]{0};
 		}
@@ -173,17 +173,17 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	/**获取数据库地址
 	 * @return
 	 */
-	String getDBUri();
+	String gainDBUri();
 
 	/**获取数据库账号
 	 * @return
 	 */
-	String getDBAccount();
+	String gainDBAccount();
 
 	/**获取数据库密码
 	 * @return
 	 */
-	String getDBPassword();
+	String gainDBPassword();
 
 	/**获取SQL语句
 	 * @return
@@ -249,11 +249,11 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	String getNamespace();
 	SQLConfig<T, M, L> setNamespace(String namespace);
 
-	String getSQLCatalog();
+	String gainSQLCatalog();
 	String getCatalog();
 	SQLConfig<T, M, L> setCatalog(String catalog);
 
-	String getSQLSchema();
+	String gainSQLSchema();
 	String getSchema();
 	SQLConfig<T, M, L> setSchema(String schema);
 
@@ -267,7 +267,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 
 	/**请求传进来的Table名
 	 * @return
-	 * @see {@link #getSQLTable()}
+	 * @see {@link #gainSQLTable()}
 	 */
 	String getTable();
 
@@ -277,9 +277,9 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	 * 通过 {@link AbstractSQLConfig.TABLE_KEY_MAP} 映射
 	 * @return
 	 */
-	String getSQLTable();
+	String gainSQLTable();
 
-	String getTablePath();
+	String gainTablePath();
 
 	Map<String, String> getKeyMap();
 	SQLConfig<T, M, L> setKeyMap(Map<String, String> keyMap);

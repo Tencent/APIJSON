@@ -158,10 +158,10 @@ public class CommonException extends Exception {
       // msg != null && msg.contains(Log.KEY_SYSTEM_INFO_DIVIDER) == false) {
       try {
         String db = config == null ? AbstractSQLConfig.DEFAULT_DATABASE : (config instanceof AbstractSQLConfig
-          ? ((AbstractSQLConfig<?, ?, ?>) config).getSQLDatabase() : config.getDatabase()
+          ? ((AbstractSQLConfig<?, ?, ?>) config).gainSQLDatabase() : config.getDatabase()
         );
 
-        String dbVersion = config == null ? null : config.getDBVersion();
+        String dbVersion = config == null ? null : config.gainDBVersion();
         if (StringUtil.isEmpty(dbVersion)) {
           dbVersion = "<!-- 请填写版本号，例如 8.0 -->";
         }

@@ -428,7 +428,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 							SQLConfig<T, M, L> curConfig = curJoin == null || ! curJoin.isSQLJoin() ? null : curJoin.getCacheConfig();
 							List<String> curColumn = curConfig == null ? null : curConfig.getColumn();
-							String sqlTable = curConfig == null ? null : curConfig.getSQLTable();
+							String sqlTable = curConfig == null ? null : curConfig.gainSQLTable();
 							String sqlAlias = curConfig == null ? null : curConfig.getAlias();
 
 							List<String> column = config.getColumn();
@@ -473,7 +473,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 													List<String> c = cfg == null ? null : cfg.getColumn();
 
 													if (cfg != null) {
-														sqlTable = cfg.getSQLTable();
+														sqlTable = cfg.gainSQLTable();
 														sqlAlias = cfg.getAlias();
 														lastViceTableStart = j;  // 避免后面的空 @column 表内字段被放到之前的空 @column 表
 														lastViceColumnStart = i + 1;
@@ -511,7 +511,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 													)
 											);
 											if (i < nextViceColumnStart) { // 导致只 JOIN 一张副表时主表数据放到副表 || j >= joinCount - 1) {
-												sqlTable = cfg.getSQLTable();
+												sqlTable = cfg.gainSQLTable();
 												sqlAlias = cfg.getAlias();
 												lastViceTableStart = j;  // 避免后面的空 @column 表内字段被放到之前的空 @column 表
 
@@ -547,7 +547,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 										Join join = joinList.get(j);
 										SQLConfig<T, M, L> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
 
-										if (cfg != null && StringUtil.equalsIgnoreCase(sqlTable, cfg.getSQLTable())
+										if (cfg != null && StringUtil.equalsIgnoreCase(sqlTable, cfg.gainSQLTable())
 										) {  // FIXME 导致副表字段错放到主表 && StringUtil.equals(sqlAlias, cfg.getAlias())) {
 											lastViceTableStart = j;  // 避免后面的空 @column 表内字段被放到之前的空 @column 表
 
@@ -831,7 +831,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 				}
 
 				String sql2 = null;
-				if (childCount > 0 && isOne2Many && (jc.isMySQL() == false || jc.getDBVersionNums()[0] >= 8)) {
+				if (childCount > 0 && isOne2Many && (jc.isMySQL() == false || jc.gainDBVersionNums()[0] >= 8)) {
 					//          加 row_number 字段并不会导致 count 等聚合函数统计出错，结果偏大，SQL JOIN 才会，之前没发现是因为缓存失效 bug
 					//          boolean noAggrFun = true;
 					//          List<String> column = jc.getColumn();
@@ -1285,7 +1285,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 			// PostgreSQL 不允许 cross-database
-			connection = DriverManager.getConnection(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
+			connection = DriverManager.getConnection(config.gainDBUri(), config.gainDBAccount(), config.gainDBPassword());
 			connectionMap.put(connectionKey, connection);
 		}
 

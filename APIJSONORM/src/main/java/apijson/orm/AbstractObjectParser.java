@@ -899,7 +899,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		if (parser.getSQLExecutor() == null) {
 			parser.createSQLExecutor();
 		}
-		if (parser != null && config.getParser() == null) {
+		if (parser != null && config.gainParser() == null) {
 			config.setParser(parser);
 		}
 		return parser.getSQLExecutor().execute(config, isProcedure);
