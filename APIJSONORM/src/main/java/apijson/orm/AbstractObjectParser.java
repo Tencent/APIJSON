@@ -262,7 +262,10 @@ public abstract class AbstractObjectParser<T extends Object> implements ObjectPa
 							break;
 						}
 
-						String key = entry == null ? null : entry.getKey();
+            // key可能为JSONArray，需要进行手动转换（fastjson为低版本时允许自动转换，如1.2.21）
+            // 例如request json为 "{[]:{"page": 2, "table1":{}}}"
+						Object field = entry == null ? null : entry.getKey();
+            String key = field instanceof JSONArray ? ((JSONArray) field).toJSONString() : field.toString();
 						Object value = key == null ? null : entry.getValue();
 						if (value == null) {
 							continue;
