@@ -495,7 +495,8 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
             return invokeScript(parser, methodName, parameterTypes, args, returnType, current, scriptExecutor);
         }
 
-        Method m = parser.getClass().getMethod(methodName, parameterTypes); // 不用判空，拿不到就会抛异常
+		Class<? extends AbstractFunctionParser> cls = parser.getClass();
+        Method m = cls.getMethod(methodName, parameterTypes); // 不用判空，拿不到就会抛异常
 
         if (Log.DEBUG) {
             String rt = Log.DEBUG && m.getReturnType() != null ? m.getReturnType().getSimpleName() : null;
@@ -656,6 +657,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 		}
 		else {
 			types = new Class<?>[length + 1];
+			//types[0] = Object.class; // 泛型擦除 JSON.JSON_OBJECT_CLASS;
 			types[0] = JSON.JSON_OBJECT_CLASS;
 
 			values = new Object[length + 1];

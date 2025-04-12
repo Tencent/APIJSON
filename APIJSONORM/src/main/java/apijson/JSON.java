@@ -32,8 +32,8 @@ public class JSON {
 			}
 
 			@Override
-			public String toJSONString(Object obj) {
-				return JSON.toJSONString(obj);
+			public String toJSONString(Object obj, boolean format) {
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
@@ -182,7 +182,17 @@ public class JSON {
 	 * @param obj
 	 * @return
 	 */
+	public static String format(Object obj) {
+		return toJSONString(obj, true);
+	}
+	/**
+	 * @param obj
+	 * @return
+	 */
 	public static String toJSONString(Object obj) {
+		return toJSONString(obj, false);
+	}
+	public static String toJSONString(Object obj, boolean format) {
 		if (obj == null) {
 			return null;
 		}
@@ -235,7 +245,7 @@ public class JSON {
 		//	return sb.toString();
 		//}
 
-		return DEFAULT_JSON_PARSER.toJSONString(obj);
+		return DEFAULT_JSON_PARSER.toJSONString(obj, format);
 	}
 
 

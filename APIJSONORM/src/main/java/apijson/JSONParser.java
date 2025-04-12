@@ -23,5 +23,11 @@ public interface JSONParser<M extends Map<String, Object>, L extends List<Object
 
     <T> List<T> parseArray(Object json, Class<T> clazz);
 
-    String toJSONString(Object obj);
+    default String format(Object obj) {
+        return toJSONString(obj, true);
+    }
+    default String toJSONString(Object obj) {
+        return toJSONString(obj, false);
+    }
+    String toJSONString(Object obj, boolean format);
 }
