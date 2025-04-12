@@ -5,10 +5,8 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 /**use this class instead of com.alibaba.fastjson.JSONObject
  * @author Lemon
@@ -16,41 +14,55 @@ import java.util.Map;
  * @see #puts
  * @see #putsAll
  */
-public class JSONObject extends com.alibaba.fastjson.JSONObject {
-	private static final long serialVersionUID = 1L;
-
+public class JSONObject extends JSON implements Map<String, Object> {
 	private static final String TAG = "JSONObject";
 
+	private final LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
 	/**ordered
 	 */
 	public JSONObject() {
-		super(true);
+		super();
 	}
 	/**transfer Object to JSONObject
 	 * @param object
 	 * @see {@link #JSONObject(Object)}
 	 */
 	public JSONObject(Object object) {
-		this(toJSONString(object));
+		this();
+		if (object instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>) object;
+			putAll(map);
+		} else if (object != null) {
+			String json = JSON.toJSONString(object);
+			if (json != null) {
+				Map<String, Object> map = JSON.parseObject(json);
+				if (map != null) {
+					putAll(map);
+				}
+			}
+		}
 	}
 	/**parse JSONObject with JSON String
 	 * @param json
 	 * @see {@link #JSONObject(String)}
 	 */
 	public JSONObject(String json) {
-		this(parseObject(json));
+		this();
+		Map<String, Object> map = JSON.parseObject(json);
+		if (map != null) {
+			putAll(map);
+		}
 	}
 	/**transfer com.alibaba.fastjson.JSONObject to JSONObject
 	 * @param object
 	 * @see {@link #putsAll(Map<? extends String, ? extends Object>)}
 	 */
-	public JSONObject(com.alibaba.fastjson.JSONObject object) {
+	public JSONObject(Map<String, Object> object) {
 		this();
 		putsAll(object);
 	}
-
-
 
 
 	//judge <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -613,25 +625,6 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 
 	//Request >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
-
-	/**puts key-value in object into this
-	 * @param map
-	 * @return this
-	 */
-	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
-		putAll(map);
-		return this;
-	}
-	@Override
-	public void putAll(Map<? extends String, ? extends Object> map) {
-		if (map != null && map.isEmpty() == false) {
-			super.putAll(map);
-		}
-	}
-
-
-
 	/**put and return this
 	 * @param value  must be annotated by {@link MethodAccess}
 	 * @return {@link #puts(String, Object)}
@@ -679,9 +672,178 @@ public class JSONObject extends com.alibaba.fastjson.JSONObject {
 			}
 			key = value.getClass().getSimpleName();
 		}
-		return super.put(key, value);
+
+		return map.put(key, value);
+	}
+
+	/**puts key-value in object into this
+	 * @param map
+	 * @return this
+	 */
+	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
+		putAll(map);
+		return this;
 	}
 
 
+	/**
+	 * Get a boolean value from the JSONObject
+	 * @param key the key
+	 * @return the boolean value or false if not found
+	 */
+	public boolean getBooleanValue(String key) {
+		try {
+			return JSON.getBooleanValue(this, key);
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Get an integer value from the JSONObject
+	 * @param key the key
+	 * @return the integer value or 0 if not found
+	 */
+	public int getIntValue(String key) {
+		try {
+			return JSON.getIntValue(this, key);
+		} catch (IllegalArgumentException e) {
+			return 0;
+		}
+	}
+	
+	/**
+	 * Get a long value from the JSONObject
+	 * @param key the key
+	 * @return the long value or 0 if not found
+	 */
+	public long getLongValue(String key) {
+		try {
+			return JSON.getLongValue(this, key);
+		} catch (IllegalArgumentException e) {
+			return 0L;
+		}
+	}
+	
+	/**
+	 * Get a double value from the JSONObject
+	 * @param key the key
+	 * @return the double value or 0 if not found
+	 */
+	public double getDoubleValue(String key) {
+		try {
+			return JSON.getDoubleValue(this, key);
+		} catch (IllegalArgumentException e) {
+			return 0.0;
+		}
+	}
+	
+	/**
+	 * Get a string value from the JSONObject
+	 * @param key the key
+	 * @return the string value or null if not found
+	 */
+	public String getString(String key) {
+		Object value = get(key);
+		return value != null ? value.toString() : null;
+	}
+	
+	/**
+	 * Get a JSONObject value from the JSONObject
+	 * @param key the key
+	 * @return the JSONObject value or null if not found
+	 */
+	public JSONObject getJSONObject(String key) {
+		try {
+			Map<String, Object> map = JSON.getMap(this, key);
+			return map != null ? new JSONObject(map) : null;
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get a JSONArray value from the JSONObject
+	 * @param key the key
+	 * @return the JSONArray value or null if not found
+	 */
+	public JSONArray getJSONArray(String key) {
+		try {
+			List<Object> list = JSON.getList(this, key);
+			return list != null ? new JSONArray(list) : null;
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public int size() {
+		return map.size();
+	}
+
+	/**
+	 * Check if the JSONObject is empty or has no values other than null
+	 * @return true if empty
+	 */
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
+	@Override
+	public boolean containsKey(Object key) {
+		return map.containsKey(key);
+	}
+
+	@Override
+	public boolean containsValue(Object value) {
+		return map.containsValue(value);
+	}
+
+	@Override
+	public Object get(Object key) {
+		return map.get(key);
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> map) {
+		Set<? extends Entry<? extends String, ?>> set = map == null ? null : map.entrySet();
+		if (set != null || set.isEmpty()) {
+			return;
+		}
+
+		for (Entry<? extends String, ?> entry : set) {
+			put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	@Override
+	public Object remove(Object key) {
+		return map.remove(key);
+	}
+
+	@Override
+	public void clear() {
+		map.clear();
+	}
+
+	@Override
+	public Set<String> keySet() {
+		return map.keySet();
+	}
+
+	@Override
+	public Collection<Object> values() {
+		return map.values();
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		return map.entrySet();
+	}
+
+	@Override
+	public String toString() {
+		return JSON.toJSONString(map);
+	}
 
 }

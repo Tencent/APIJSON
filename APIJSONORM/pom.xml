@@ -5,7 +5,7 @@
 
 	<groupId>com.github.Tencent</groupId>
 	<artifactId>APIJSON</artifactId>
-	<version>7.9.0</version>
+	<version>8.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONORM</name>
@@ -21,11 +21,6 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
-			<version>1.2.83</version>
-		</dependency>
 	</dependencies>
 
 	<build>

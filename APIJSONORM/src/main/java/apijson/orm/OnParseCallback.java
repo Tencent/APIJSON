@@ -5,13 +5,13 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lemon
  */
-public abstract class OnParseCallback {
+public abstract class OnParseCallback<T, M extends Map<String, Object>, L extends List<Object>> {
 
 
 	/**
@@ -43,7 +43,7 @@ public abstract class OnParseCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	protected JSONObject onParseJSONObject(String key, JSONObject tobj, JSONObject robj) throws Exception {
+	protected M onParseJSONObject(String key, M tobj, M robj) throws Exception {
 		return robj;
 	}
 
@@ -54,7 +54,7 @@ public abstract class OnParseCallback {
 	 * @return
 	 * @throws Exception
 	 */
-	protected JSONArray onParseJSONArray(String key, JSONArray tarray, JSONArray rarray) throws Exception {
+	protected L onParseJSONArray(String key, L tarray, L rarray) throws Exception {
 		return rarray;
 	}
 

@@ -1,6 +1,7 @@
 package apijson.orm.script;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,20 +12,18 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 
-import com.alibaba.fastjson.JSONObject;
-
 import apijson.orm.AbstractFunctionParser;
 
 /**
  * JSR223 script engine的统一实现抽象类
  */
-public abstract class JSR223ScriptExecutor implements ScriptExecutor {
+public abstract class JSR223ScriptExecutor<T, M extends Map<String, Object>, L extends List<Object>> implements ScriptExecutor<T, M, L> {
 	protected ScriptEngine scriptEngine;
 
 	private final Map<String, CompiledScript> compiledScriptMap = new ConcurrentHashMap<>();
 	
 	@Override
-	public ScriptExecutor init() {
+	public ScriptExecutor<T, M, L> init() {
 		ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
 		scriptEngine = scriptEngineManager.getEngineByName(scriptEngineName());
 		return this;
@@ -32,7 +31,7 @@ public abstract class JSR223ScriptExecutor implements ScriptExecutor {
 
 	protected abstract String scriptEngineName();
 	
-	protected abstract Object extendParameter(AbstractFunctionParser parser, JSONObject currentObject, String methodName, Object[] args);
+	protected abstract Object extendParameter(AbstractFunctionParser<T, M, L> parser, Map<String, Object> currentObject, String methodName, Object[] args);
 
 	protected abstract boolean isLockScript(String methodName);
 
@@ -52,7 +51,7 @@ public abstract class JSR223ScriptExecutor implements ScriptExecutor {
 	}
 
 	@Override
-	public Object execute(AbstractFunctionParser parser, JSONObject currentObject, String methodName, Object[] args) throws Exception {
+	public Object execute(AbstractFunctionParser<T, M, L> parser, Map<String, Object> currentObject, String methodName, Object[] args) throws Exception {
 		CompiledScript compiledScript = compiledScriptMap.get(methodName);
 		Bindings bindings = new SimpleBindings();
 		// 往脚本上下文里放入元数据

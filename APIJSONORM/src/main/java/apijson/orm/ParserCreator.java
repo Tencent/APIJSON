@@ -7,14 +7,17 @@ package apijson.orm;
 
 import apijson.NotNull;
 
+import java.util.List;
+import java.util.Map;
+
 /**SQL相关创建器
  * @author Lemon
  */
-public interface ParserCreator<T extends Object> {
+public interface ParserCreator<T, M extends Map<String, Object>, L extends List<Object>> {
 	
 	@NotNull
-	Parser<T> createParser();
+	Parser<T, M, L> createParser();
 	
 	@NotNull
-	FunctionParser createFunctionParser();
+	FunctionParser<T, M, L> createFunctionParser();
 }

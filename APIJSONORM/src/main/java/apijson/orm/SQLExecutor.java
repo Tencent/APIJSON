@@ -12,31 +12,30 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 
-import com.alibaba.fastjson.JSONObject;
-
-import apijson.NotNull;
+import apijson.*;
 
 /**executor for query(read) or update(write) MySQL database
  * @author Lemon
  */
-public interface SQLExecutor<T extends Object> {
-	Parser<T> getParser();
-	SQLExecutor<T> setParser(Parser<T> parser);
+public interface SQLExecutor<T, M extends Map<String, Object>, L extends List<Object>> {
+	Parser<T, M, L> getParser();
+	SQLExecutor<T, M, L> setParser(Parser<T, M, L> parser);
 
 	/**保存缓存
 	 * @param sql
 	 * @param list
 	 * @param config
 	 */
-	void putCache(String sql, List<JSONObject> list, SQLConfig<T> config);
+	void putCache(String sql, List<M> list, SQLConfig<T, M, L> config);
 
 	/**获取缓存
 	 * @param sql
 	 * @param config
 	 * @return
 	 */
-	List<JSONObject> getCache(String sql, SQLConfig<T> config);
+	List<M> getCache(String sql, SQLConfig<T, M, L> config);
 
 	/**获取缓存
 	 * @param sql
@@ -44,13 +43,13 @@ public interface SQLExecutor<T extends Object> {
 	 * @param config
 	 * @return
 	 */
-	JSONObject getCacheItem(String sql, int position, SQLConfig<T> config);
+	M getCacheItem(String sql, int position, SQLConfig<T, M, L> config);
 
 	/**移除缓存
 	 * @param sql
 	 * @param config
 	 */
-	void removeCache(String sql, SQLConfig<T> config);
+	void removeCache(String sql, SQLConfig<T, M, L> config);
 
 	/**执行SQL
 	 * @param config
@@ -58,7 +57,7 @@ public interface SQLExecutor<T extends Object> {
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject execute(@NotNull SQLConfig<T> config, boolean unknownType) throws Exception;
+	M execute(@NotNull SQLConfig<T, M, L> config, boolean unknownType) throws Exception;
 
 	//executeQuery和executeUpdate这两个函数因为返回类型不同，所以不好合并
 	/**执行查询
@@ -66,37 +65,37 @@ public interface SQLExecutor<T extends Object> {
 	 * @return
 	 * @throws SQLException
 	 */
-	default ResultSet executeQuery(@NotNull SQLConfig<T> config) throws Exception {
+	default ResultSet executeQuery(@NotNull SQLConfig<T, M, L> config) throws Exception {
 		return executeQuery(config, null);
 	}
-	ResultSet executeQuery(@NotNull SQLConfig<T> config, String sql) throws Exception;
+	ResultSet executeQuery(@NotNull SQLConfig<T, M, L> config, String sql) throws Exception;
 
 	/**执行增、删、改
 	 * @param config
 	 * @return
 	 * @throws SQLException
 	 */
-	default int executeUpdate(@NotNull SQLConfig<T> config) throws Exception {
+	default int executeUpdate(@NotNull SQLConfig<T, M, L> config) throws Exception {
 		return executeUpdate(config, null);
 	}
-	int executeUpdate(@NotNull SQLConfig<T> config, String sql) throws Exception;
+	int executeUpdate(@NotNull SQLConfig<T, M, L> config, String sql) throws Exception;
 
 
 	/**判断是否为JSON类型
 	* @param config
 	* @param rsmd
 	* @param position
-	* @param lable
+	* @param label
 	* @return
 	*/
-	boolean isJSONType(@NotNull SQLConfig<T> config, ResultSetMetaData rsmd, int position, String lable);
+	boolean isJSONType(@NotNull SQLConfig<T, M, L> config, ResultSetMetaData rsmd, int position, String label);
 
 
-	Connection getConnection(@NotNull SQLConfig<T> config) throws Exception;
-	default Statement getStatement(@NotNull SQLConfig<T> config) throws Exception {
+	Connection getConnection(@NotNull SQLConfig<T, M, L> config) throws Exception;
+	default Statement getStatement(@NotNull SQLConfig<T, M, L> config) throws Exception {
 		return getStatement(config, null);
 	}
-	Statement getStatement(@NotNull SQLConfig<T> config, String sql) throws Exception;
+	Statement getStatement(@NotNull SQLConfig<T, M, L> config, String sql) throws Exception;
 
 	int getTransactionIsolation();
 	void setTransactionIsolation(int transactionIsolation);

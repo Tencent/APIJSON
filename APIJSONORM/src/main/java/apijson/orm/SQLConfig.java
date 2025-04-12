@@ -15,7 +15,7 @@ import apijson.StringUtil;
 /**SQL配置
  * @author Lemon
  */
-public interface SQLConfig<T extends Object> {
+public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Object>> {
 
 	String DATABASE_MYSQL = "MYSQL"; // https://www.mysql.com
 	String DATABASE_POSTGRESQL = "POSTGRESQL"; // https://www.postgresql.org
@@ -62,21 +62,21 @@ public interface SQLConfig<T extends Object> {
 	int TYPE_ITEM = 1;
 	int TYPE_ITEM_CHILD_0 = 2;
 
-	Parser<T> getParser();
+	Parser<T, M, L> gainParser();
 
-	SQLConfig<T> setParser(Parser<T> parser);
+	SQLConfig<T, M, L> setParser(Parser<T, M, L> parser);
 
-	ObjectParser getObjectParser();
+	ObjectParser<T, M, L> gainObjectParser();
 
-	SQLConfig<T> setObjectParser(ObjectParser objectParser);
+	SQLConfig<T, M, L> setObjectParser(ObjectParser<T, M, L> objectParser);
 
 	int getVersion();
 
-	SQLConfig<T> setVersion(int version);
+	SQLConfig<T, M, L> setVersion(int version);
 
 	String getTag();
 
-	SQLConfig<T> setTag(String tag);
+	SQLConfig<T, M, L> setTag(String tag);
 
 	boolean isTSQL();
 	boolean isMSQL();
@@ -147,11 +147,11 @@ public interface SQLConfig<T extends Object> {
 	 * MYSQL: 8.0, 5.7, 5.6 等； PostgreSQL: 11, 10, 9.6 等
 	 * @return
 	 */
-	String getDBVersion();
+	String gainDBVersion();
 
 	@NotNull
-	default int[] getDBVersionNums() {
-		String dbVersion = StringUtil.noBlank(getDBVersion());
+	default int[] gainDBVersionNums() {
+		String dbVersion = StringUtil.noBlank(gainDBVersion());
 		if (dbVersion.isEmpty()) {
 			return new int[]{0};
 		}
@@ -173,170 +173,170 @@ public interface SQLConfig<T extends Object> {
 	/**获取数据库地址
 	 * @return
 	 */
-	String getDBUri();
+	String gainDBUri();
 
 	/**获取数据库账号
 	 * @return
 	 */
-	String getDBAccount();
+	String gainDBAccount();
 
 	/**获取数据库密码
 	 * @return
 	 */
-	String getDBPassword();
+	String gainDBPassword();
 
 	/**获取SQL语句
 	 * @return
 	 * @throws Exception
 	 */
-	String getSQL(boolean prepared) throws Exception;
+	String gainSQL(boolean prepared) throws Exception;
 
 
 
 	boolean isTest();
-	SQLConfig<T> setTest(boolean test);
+	SQLConfig<T, M, L> setTest(boolean test);
 
 	int getType();
-	SQLConfig<T> setType(int type);
+	SQLConfig<T, M, L> setType(int type);
 
 	int getCount();
-	SQLConfig<T> setCount(int count);
+	SQLConfig<T, M, L> setCount(int count);
 
 	int getPage();
-	SQLConfig<T> setPage(int page);
+	SQLConfig<T, M, L> setPage(int page);
 
 	int getQuery();
-	SQLConfig<T> setQuery(int query);
+	SQLConfig<T, M, L> setQuery(int query);
 
 	Boolean getCompat();
-	SQLConfig<T> setCompat(Boolean compat);
+	SQLConfig<T, M, L> setCompat(Boolean compat);
 
 	int getPosition();
-	SQLConfig<T> setPosition(int position);
+	SQLConfig<T, M, L> setPosition(int position);
 
 	int getCache();
-	SQLConfig<T> setCache(int cache);
+	SQLConfig<T, M, L> setCache(int cache);
 
 	boolean isExplain();
-	SQLConfig<T> setExplain(boolean explain);
+	SQLConfig<T, M, L> setExplain(boolean explain);
 
 
 	RequestMethod getMethod();
-	SQLConfig<T> setMethod(RequestMethod method);
+	SQLConfig<T, M, L> setMethod(RequestMethod method);
 
 	Object getId();
-	SQLConfig<T> setId(Object id);
+	SQLConfig<T, M, L> setId(Object id);
 
 	Object getIdIn();
-	SQLConfig<T> setIdIn(Object idIn);
+	SQLConfig<T, M, L> setIdIn(Object idIn);
 
 	Object getUserId();
-	SQLConfig<T> setUserId(Object userId);
+	SQLConfig<T, M, L> setUserId(Object userId);
 
 	Object getUserIdIn();
-	SQLConfig<T> setUserIdIn(Object userIdIn);
+	SQLConfig<T, M, L> setUserIdIn(Object userIdIn);
 
 	String getRole();
-	SQLConfig<T> setRole(String role);
+	SQLConfig<T, M, L> setRole(String role);
 
 	public boolean isDistinct();
-	public SQLConfig<T> setDistinct(boolean distinct);
+	public SQLConfig<T, M, L> setDistinct(boolean distinct);
 
 	String getDatabase();
-	SQLConfig<T> setDatabase(String database);
+	SQLConfig<T, M, L> setDatabase(String database);
 
 	String getSQLNamespace();
 	String getNamespace();
-	SQLConfig<T> setNamespace(String namespace);
+	SQLConfig<T, M, L> setNamespace(String namespace);
 
-	String getSQLCatalog();
+	String gainSQLCatalog();
 	String getCatalog();
-	SQLConfig<T> setCatalog(String catalog);
+	SQLConfig<T, M, L> setCatalog(String catalog);
 
-	String getSQLSchema();
+	String gainSQLSchema();
 	String getSchema();
-	SQLConfig<T> setSchema(String schema);
+	SQLConfig<T, M, L> setSchema(String schema);
 
 	String getDatasource();
-	SQLConfig<T> setDatasource(String datasource);
+	SQLConfig<T, M, L> setDatasource(String datasource);
 
 	String getQuote();
 
 	List<String> getJson();
-	SQLConfig<T> setJson(List<String> json);
+	SQLConfig<T, M, L> setJson(List<String> json);
 
 	/**请求传进来的Table名
 	 * @return
-	 * @see {@link #getSQLTable()}
+	 * @see {@link #gainSQLTable()}
 	 */
 	String getTable();
 
-	SQLConfig<T> setTable(String table);
+	SQLConfig<T, M, L> setTable(String table);
 
 	/**数据库里的真实Table名
 	 * 通过 {@link AbstractSQLConfig.TABLE_KEY_MAP} 映射
 	 * @return
 	 */
-	String getSQLTable();
+	String gainSQLTable();
 
-	String getTablePath();
+	String gainTablePath();
 
 	Map<String, String> getKeyMap();
-	SQLConfig<T> setKeyMap(Map<String, String> keyMap);
+	SQLConfig<T, M, L> setKeyMap(Map<String, String> keyMap);
 
 	List<String> getRaw();
-	SQLConfig<T> setRaw(List<String> raw);
+	SQLConfig<T, M, L> setRaw(List<String> raw);
 
-	Subquery getFrom();
-	SQLConfig<T> setFrom(Subquery from);
+	Subquery<T, M, L> getFrom();
+	SQLConfig<T, M, L> setFrom(Subquery<T, M, L> from);
 
 	List<String> getColumn();
-	SQLConfig<T> setColumn(List<String> column);
+	SQLConfig<T, M, L> setColumn(List<String> column);
 
 	List<List<Object>> getValues();
-	SQLConfig<T> setValues(List<List<Object>> values);
+	SQLConfig<T, M, L> setValues(List<List<Object>> values);
 
 	Map<String, Object> getContent();
-	SQLConfig<T> setContent(Map<String, Object> content);
+	SQLConfig<T, M, L> setContent(Map<String, Object> content);
 
 	Map<String, List<String>> getCombineMap();
-	SQLConfig<T> setCombineMap(Map<String, List<String>> combineMap);
+	SQLConfig<T, M, L> setCombineMap(Map<String, List<String>> combineMap);
 
 	String getCombine();
-	SQLConfig<T> setCombine(String combine);
+	SQLConfig<T, M, L> setCombine(String combine);
 
 	Map<String, String> getCast();
-	SQLConfig<T> setCast(Map<String, String> cast);
+	SQLConfig<T, M, L> setCast(Map<String, String> cast);
 
 	List<String> getNull();
-	SQLConfig<T> setNull(List<String> nulls);
+	SQLConfig<T, M, L> setNull(List<String> nulls);
 
 	Map<String, Object> getWhere();
-	SQLConfig<T> setWhere(Map<String, Object> where);
+	SQLConfig<T, M, L> setWhere(Map<String, Object> where);
 
 	String getGroup();
-	SQLConfig<T> setGroup(String group);
+	SQLConfig<T, M, L> setGroup(String group);
 
 	Map<String, Object> getHaving();
-	SQLConfig<T> setHaving(Map<String, Object> having);
+	SQLConfig<T, M, L> setHaving(Map<String, Object> having);
 
 	String getHavingCombine();
-	SQLConfig<T> setHavingCombine(String havingCombine);
+	SQLConfig<T, M, L> setHavingCombine(String havingCombine);
 
 	String getSample();
-	SQLConfig<T> setSample(String order);
+	SQLConfig<T, M, L> setSample(String order);
 
 	String getLatest();
-	SQLConfig<T> setLatest(String latest);
+	SQLConfig<T, M, L> setLatest(String latest);
 
 	String getPartition();
-	SQLConfig<T> setPartition(String partition);
+	SQLConfig<T, M, L> setPartition(String partition);
 
 	String getFill();
-	SQLConfig<T> setFill(String fill);
+	SQLConfig<T, M, L> setFill(String fill);
 
 	String getOrder();
-	SQLConfig<T> setOrder(String order);
+	SQLConfig<T, M, L> setOrder(String order);
 
 	/**
 	 * exactMatch = false
@@ -355,65 +355,62 @@ public interface SQLConfig<T extends Object> {
 	 * @param value
 	 * @return
 	 */
-	SQLConfig<T> putWhere(String key, Object value, boolean prior);
+	SQLConfig<T, M, L> putWhere(String key, Object value, boolean prior);
 
 
 	boolean isPrepared();
 
-	SQLConfig<T> setPrepared(boolean prepared);
+	SQLConfig<T, M, L> setPrepared(boolean prepared);
 
 	boolean isMain();
 
-	SQLConfig<T> setMain(boolean main);
+	SQLConfig<T, M, L> setMain(boolean main);
 
 
 	List<Object> getPreparedValueList();
-	SQLConfig<T> setPreparedValueList(List<Object> preparedValueList);
+	SQLConfig<T, M, L> setPreparedValueList(List<Object> preparedValueList);
 
 
 	String getAlias();
 
-	SQLConfig<T> setAlias(String alias);
+	SQLConfig<T, M, L> setAlias(String alias);
 
-	default String getTableKey() {
+	default String gainTableKey() {
 		String alias = getAlias();
 		return getTable() + (StringUtil.isEmpty(alias) ? "" : ":" + alias);
 	}
 
-	default String getSQLAlias() {
-		return getSQLAlias(getTable(), getAlias());
+	default String gainSQLAlias() {
+		return gainSQLAlias(getTable(), getAlias());
 	}
-	static String getSQLAlias(@NotNull String table, String alias) {
+	static String gainSQLAlias(@NotNull String table, String alias) {
 		// 这里不用 : $ 等符号，因为部分数据库/引擎似乎不支持 `key`, "key", [key] 等避免关键词冲突的方式，只能使用符合变量命名的表别名
 		return StringUtil.isEmpty(alias) ? table : table + "__" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
 	}
 
 
-	String getWhereString(boolean hasPrefix) throws Exception;
+	String gainWhereString(boolean hasPrefix) throws Exception;
 
-	String getRawSQL(String key, Object value) throws Exception;
-	String getRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception;
+	String gainRawSQL(String key, Object value) throws Exception;
+	String gainRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception;
 
 	boolean isKeyPrefix();
 
-	SQLConfig<T> setKeyPrefix(boolean keyPrefix);
+	SQLConfig<T, M, L> setKeyPrefix(boolean keyPrefix);
 
-
-	List<Join> getJoinList();
-
-	SQLConfig<T> setJoinList(List<Join> joinList);
+	List<Join<T, M, L>> getJoinList();
+	SQLConfig<T, M, L> setJoinList(List<Join<T, M, L>> joinList);
 
 	boolean hasJoin();
 
 
-	String getSubqueryString(Subquery subquery) throws Exception;
+	String gainSubqueryString(Subquery<T, M, L> subquery) throws Exception;
 
-	SQLConfig<T> setProcedure(String procedure);
-
+	SQLConfig<T, M, L> setProcedure(String procedure);
 
 
 	List<Object> getWithAsExprPreparedValueList();
-	SQLConfig<T> setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
+	SQLConfig<T, M, L> setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
 
 	boolean isFakeDelete();
 

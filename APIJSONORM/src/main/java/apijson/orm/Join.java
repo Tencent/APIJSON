@@ -6,8 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import java.util.List;
-
-import com.alibaba.fastjson.JSONObject;
+import java.util.Map;
 
 import apijson.NotNull;
 import apijson.StringUtil;
@@ -15,7 +14,7 @@ import apijson.StringUtil;
 /**连表 配置
  * @author Lemon
  */
-public class Join {
+public class Join<T, M extends Map<String, Object>, L extends List<Object>> {
 
 	private String path;  // /User/id@
 
@@ -25,12 +24,12 @@ public class Join {
 	private int count = 1;	// 当app join子表，需要返回子表的行数，默认1行；
 	private List<On> onList;  // ON User.id = Moment.userId AND ...
 
-	private JSONObject request;  // { "id@":"/Moment/userId" }
-	private JSONObject outer;  // "join": { "</User": { "@order":"id-", "@group":"id", "name~":"a", "tag$":"%a%", "@combine": "name~,tag$" } } 中的 </User 对应值
+	private M request;  // { "id@":"/Moment/userId" }
+	private M outer;  // "join": { "</User": { "@order":"id-", "@group":"id", "name~":"a", "tag$":"%a%", "@combine": "name~,tag$" } } 中的 </User 对应值
 
-	private SQLConfig joinConfig;
-	private SQLConfig cacheConfig;
-	private SQLConfig outerConfig;
+	private SQLConfig<T, M, L> joinConfig;
+	private SQLConfig<T, M, L> cacheConfig;
+	private SQLConfig<T, M, L> outerConfig;
 
 
 	public String getPath() {
@@ -73,35 +72,35 @@ public class Join {
 		this.onList = onList;
 	}
 
-	public JSONObject getRequest() {
+	public M getRequest() {
 		return request;
 	}
-	public void setRequest(JSONObject request) {
+	public void setRequest(M request) {
 		this.request = request;
 	}
-	public JSONObject getOuter() {
+	public M getOuter() {
 		return outer;
 	}
-	public void setOuter(JSONObject outer) {
+	public void setOuter(M outer) {
 		this.outer = outer;
 	}
 
-	public SQLConfig getJoinConfig() {
+	public SQLConfig<T, M, L> getJoinConfig() {
 		return joinConfig;
 	}
-	public void setJoinConfig(SQLConfig joinConfig) {
+	public void setJoinConfig(SQLConfig<T, M, L> joinConfig) {
 		this.joinConfig = joinConfig;
 	}
-	public SQLConfig getCacheConfig() {
+	public SQLConfig<T, M, L> getCacheConfig() {
 		return cacheConfig;
 	}
-	public void setCacheConfig(SQLConfig cacheConfig) {
+	public void setCacheConfig(SQLConfig<T, M, L> cacheConfig) {
 		this.cacheConfig = cacheConfig;
 	}
-	public SQLConfig getOuterConfig() {
+	public SQLConfig<T, M, L> getOuterConfig() {
 		return outerConfig;
 	}
-	public void setOuterConfig(SQLConfig outerConfig) {
+	public void setOuterConfig(SQLConfig<T, M, L> outerConfig) {
 		this.outerConfig = outerConfig;
 	}
 
@@ -162,15 +161,15 @@ public class Join {
 		return ! isAppJoin();
 	}
 
-	public static boolean isSQLJoin(Join j) {
+	public static boolean isSQLJoin(Join<?, ?, ?> j) {
 		return j != null && j.isSQLJoin();
 	}
 
-	public static boolean isAppJoin(Join j) {
+	public static boolean isAppJoin(Join<?, ?, ?> j) {
 		return j != null && j.isAppJoin();
 	}
 
-	public static boolean isLeftOrRightJoin(Join j) {
+	public static boolean isLeftOrRightJoin(Join<?, ?, ?> j) {
 		return j != null && j.isLeftOrRightJoin();
 	}
 
