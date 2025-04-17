@@ -85,7 +85,8 @@ public class JSONRequest extends apijson.JSONRequest {
         try {
             target = JSON.parseJSON(value);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            // nothing
+			e.printStackTrace();
         }
         //		if (target == null) { // "tag":"User" 报错
 		//			return null;

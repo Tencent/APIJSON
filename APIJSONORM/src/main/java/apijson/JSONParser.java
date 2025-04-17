@@ -8,7 +8,7 @@ package apijson;
 import java.util.List;
 import java.util.Map;
 
-/**SQL相关创建器
+/**JSON 相关解析器
  * @author Lemon
  */
 public interface JSONParser<M extends Map<String, Object>, L extends List<Object>> extends JSONCreator<M, L> {

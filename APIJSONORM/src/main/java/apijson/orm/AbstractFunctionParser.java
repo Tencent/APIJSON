@@ -488,7 +488,8 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
      * @throws Exception
      */
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static <T, M extends Map<String, Object>, L extends List<Object>> Object invoke(@NotNull AbstractFunctionParser<T, M, L> parser, @NotNull String methodName
+	public static <T, M extends Map<String, Object>, L extends List<Object>> Object invoke(
+			@NotNull AbstractFunctionParser<T, M, L> parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType
             , Map<String, Object> current, ScriptExecutor scriptExecutor) throws Exception {
         if (scriptExecutor != null) {

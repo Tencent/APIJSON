@@ -5,8 +5,6 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import apijson.JSONField;
-
 import java.util.List;
 import java.util.Map;
 

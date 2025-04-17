@@ -100,7 +100,11 @@ public class JSON {
 			return parseArray(json, DEFAULT_JSON_PARSER);
 		}
 
-		throw new IllegalArgumentException("JSON 格式错误！" + s);
+		try {
+			return DEFAULT_JSON_PARSER.parseJSON(json);
+		} catch (Throwable e) {
+			throw new IllegalArgumentException("JSON 格式错误！" + e.getMessage() + "! " + s);
+		}
 	}
 
 	/**
