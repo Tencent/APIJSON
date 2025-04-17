@@ -199,6 +199,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		DATABASE_LIST.add(DATABASE_DUCKDB);
 		DATABASE_LIST.add(DATABASE_SURREALDB);
 		DATABASE_LIST.add(DATABASE_OPENGAUSS);
+		DATABASE_LIST.add(DATABASE_DORIS);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -298,6 +299,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		RAW_MAP.put("BY", "");
 		RAW_MAP.put("DESC", "");
 		RAW_MAP.put("ASC", "");
+		RAW_MAP.put("PRECEDING", ""); // 往前
 		RAW_MAP.put("FOLLOWING", ""); // 往后
 		RAW_MAP.put("BETWEEN", "");
 		RAW_MAP.put("ROWS", "");
@@ -1380,11 +1382,19 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	}
 
 	@Override
+	public boolean isDoris() {
+		return isDoris(gainSQLDatabase());
+	}
+	public static boolean isDoris(String db) {
+		return DATABASE_DORIS.equals(db);
+	}
+
+	@Override
 	public String getQuote() { // MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
 		if(isElasticsearch() || isManticore() || isIoTDB() || isSurrealDB()) {
 			return "";
 		}
-		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() ? "`" : "\"";
+		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() || isDoris() ? "`" : "\"";
 	}
 
 	public String quote(String s) {

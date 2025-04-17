@@ -247,6 +247,9 @@ public class CommonException extends Exception {
         else if (config.isTrino()) {
           db = SQLConfig.DATABASE_TRINO + " " + dbVersion;
         }
+        else if (config.isDoris()) {
+          db = SQLConfig.DATABASE_DORIS + " " + dbVersion;
+        }
         else if (config.isSnowflake()) {
           db = SQLConfig.DATABASE_SNOWFLAKE + " " + dbVersion;
         }

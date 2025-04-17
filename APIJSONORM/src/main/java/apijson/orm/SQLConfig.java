@@ -33,6 +33,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	String DATABASE_HIVE = "HIVE"; // https://hive.apache.org
 	String DATABASE_PRESTO = "PRESTO"; // Facebook PrestoDB  https://prestodb.io
 	String DATABASE_TRINO = "TRINO"; // PrestoSQL  https://trino.io
+	String DATABASE_DORIS = "DORIS"; // https://doris.apache.org
 	String DATABASE_SNOWFLAKE = "SNOWFLAKE"; // https://www.snowflake.com
 	String DATABASE_DATABRICKS = "DATABRICKS"; // https://www.databricks.com
 	String DATABASE_CASSANDRA = "CASSANDRA"; // https://cassandra.apache.org
@@ -115,6 +116,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	boolean isDuckDB();
 	boolean isSurrealDB();
 	boolean isOpenGauss();
+	boolean isDoris();
 
 
 	// 暂时只兼容以上几种
