@@ -559,14 +559,13 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @param maxUpdateCount
 	* @param database
 	* @param schema
-	* @param creator
 	* @return
 	* @throws Exception
 	*/
 	@Override
 	public M verifyRequest(@NotNull final RequestMethod method, final String name, final M target, final M request, final int maxUpdateCount
-			, final String database, final String schema, final SQLCreator<T, M, L> creator) throws Exception {
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, this, creator);
+			, final String database, final String schema) throws Exception {
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, this, getParser());
 	}
 
 	/**从request提取target指定的内容
@@ -574,14 +573,14 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param name
 	 * @param target
 	 * @param request
-	 * @param creator
+	 * @param parser
 	 * @return
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
 			@NotNull final RequestMethod method, final String name, final M target, final M request
-			, final SQLCreator<T, M, L> creator) throws Exception {
-		return verifyRequest(method, name, target, request, AbstractParser.MAX_UPDATE_COUNT, creator);
+			, @NotNull Parser<T, M, L> parser) throws Exception {
+		return verifyRequest(method, name, target, request, AbstractParser.MAX_UPDATE_COUNT, parser);
 	}
 	/**从request提取target指定的内容
 	 * @param method
@@ -589,15 +588,15 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param target
 	 * @param request
 	 * @param maxUpdateCount
-	 * @param creator
+	 * @param parser
 	 * @return
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
 			@NotNull final RequestMethod method, final String name, final M target, final M request
-            , final int maxUpdateCount, final SQLCreator<T, M, L> creator) throws Exception {
+            , final int maxUpdateCount, @NotNull Parser<T, M, L> parser) throws Exception {
 
-		return verifyRequest(method, name, target, request, maxUpdateCount, null, null, null, creator);
+		return verifyRequest(method, name, target, request, maxUpdateCount, null, null, null, parser);
 	}
 
 	/**从request提取target指定的内容
@@ -609,17 +608,16 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @param database
 	* @param schema
 	* @param idCallback
-	* @param creator
+	* @param parser
 	* @return
 	* @param <T>
 	* @throws Exception
 	*/
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
-			@NotNull final RequestMethod method, final String name, final M target, final M request
-            , final int maxUpdateCount, final String database, final String schema
-            , final IdCallback<T> idCallback, final SQLCreator<T, M, L> creator) throws Exception {
+			@NotNull RequestMethod method, String name, M target, M request, int maxUpdateCount, String database
+			, String schema, IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser) throws Exception {
 
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, null, idCallback, creator);
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, null, idCallback, parser);
 	}
 	/**从request提取target指定的内容
 	* @param method
@@ -631,7 +629,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @param schema
 	* @param datasource
 	* @param idCallback
-	* @param creator
+	* @param parser
 	* @return
 	* @param <T>
 	* @throws Exception
@@ -639,7 +637,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
 			@NotNull final RequestMethod method, final String name, final M target, final M request
             , final int maxUpdateCount, final String database, final String schema, final String datasource
-            , final IdCallback<T> idCallback, final SQLCreator<T, M, L> creator) throws Exception {
+            , final IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (ENABLE_VERIFY_CONTENT == false) {
 			throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_CONTENT == false" +
                     " 时不支持校验请求传参内容！如需支持则设置 AbstractVerifier.ENABLE_VERIFY_CONTENT = true ！");
@@ -662,7 +660,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 
 		//解析
-		return parse(method, name, target, request, database, schema, idCallback, creator, new OnParseCallback<T, M, L>() {
+		return parse(method, name, target, request, database, schema, idCallback, parser, new OnParseCallback<T, M, L>() {
 
 			@Override
 			public M onParseJSONObject(String key, M tobj, M robj) throws Exception {
@@ -705,7 +703,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 				}
 
-				return verifyRequest(method, key, tobj, robj, maxUpdateCount, database, schema, idCallback, creator);
+				return verifyRequest(method, key, tobj, robj, maxUpdateCount, database, schema, idCallback, parser);
 			}
 
 			@Override
@@ -805,15 +803,15 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @param response
 	* @param database
 	* @param schema
-	* @param creator
+	* @param parser
 	* @param callback
 	* @return
 	* @throws Exception
 	*/
 	@Override
 	public M verifyResponse(@NotNull final RequestMethod method, final String name, final M target, final M response
-			, final String database, final String schema, SQLCreator<T, M, L> creator, OnParseCallback<T, M, L> callback) throws Exception {
-		return verifyResponse(method, name, target, response, database, schema, this, creator, callback);
+			, final String database, final String schema, @NotNull Parser<T, M, L> parser, OnParseCallback<T, M, L> callback) throws Exception {
+		return verifyResponse(method, name, target, response, database, schema, this, parser, callback);
 	}
 
 	/**校验并将response转换为指定的内容和结构
@@ -821,14 +819,14 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @param name
 	* @param target
 	* @param response
-	* @param creator
+	* @param parser
 	* @param callback
 	* @return
 	* @throws Exception
 	*/
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyResponse(@NotNull final RequestMethod method, final String name
-			, final M target, final M response, SQLCreator<T, M, L> creator, OnParseCallback<T, M, L> callback) throws Exception {
-		return verifyResponse(method, name, target, response, null, null, null, creator, callback);
+			, final M target, final M response, @NotNull Parser<T, M, L> parser, OnParseCallback<T, M, L> callback) throws Exception {
+		return verifyResponse(method, name, target, response, null, null, null, parser, callback);
 	}
 	/**校验并将response转换为指定的内容和结构
 	* @param method
@@ -838,7 +836,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @param database
 	* @param schema
 	* @param idKeyCallback
-	* @param creator
+	* @param parser
 	* @param callback
 	* @return
 	* @param <T>
@@ -846,7 +844,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	*/
 	public static <T, M extends Map<String, Object>, L extends List<Object>>  M verifyResponse(@NotNull final RequestMethod method
 			, final String name, final M target, final M response, final String database, final String schema
-			, final IdCallback<T> idKeyCallback, SQLCreator<T, M, L> creator, OnParseCallback<T, M, L> callback) throws Exception {
+			, final IdCallback<T> idKeyCallback, @NotNull Parser<T, M, L> parser, OnParseCallback<T, M, L> callback) throws Exception {
 
 		Log.i(TAG, "verifyResponse  method = " + method  + "; name = " + name
 				+ "; target = \n" + JSON.toJSONString(target)
@@ -859,10 +857,10 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		//解析
 		return parse(method, name, target, response, database, schema
-                , idKeyCallback, creator, callback != null ? callback : new OnParseCallback<T, M, L>() {
+                , idKeyCallback, parser, callback != null ? callback : new OnParseCallback<T, M, L>() {
 			@Override
 			protected M onParseJSONObject(String key, M tobj, M robj) throws Exception {
-				return verifyResponse(method, key, tobj, robj, database, schema, idKeyCallback, creator, callback);
+				return verifyResponse(method, key, tobj, robj, database, schema, idKeyCallback, parser, callback);
 			}
 		});
 	}
@@ -873,14 +871,14 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param name
 	 * @param target
 	 * @param real
-	 * @param creator
+	 * @param parser
 	 * @param callback
 	 * @return
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(@NotNull final RequestMethod method
-			, String name, M target, M real, SQLCreator<T, M, L> creator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
-		return parse(method, name, target, real, null, null, null, creator, callback);
+			, String name, M target, M real, @NotNull Parser<T, M, L> parser, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
+		return parse(method, name, target, real, null, null, null, parser, callback);
 	}
 	/**对request和response不同的解析用callback返回
 	 * @param method
@@ -890,15 +888,15 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param database
 	 * @param schema
 	 * @param idCallback
-	 * @param creator
+	 * @param parser
 	 * @param callback
 	 * @return
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(
 			@NotNull final RequestMethod method, String name, M target, M real, final String database, final String schema
-            , final IdCallback<T> idCallback, SQLCreator<T, M, L> creator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
-		return parse(method, name, target, real, database, schema, null, idCallback, creator, callback);
+            , final IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
+		return parse(method, name, target, real, database, schema, null, idCallback, parser, callback);
 	}
 	/**对request和response不同的解析用callback返回
 	 * @param method
@@ -909,14 +907,14 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param schema
 	 * @param datasource
 	 * @param idCallback
-	 * @param creator
+	 * @param parser
 	 * @param callback
 	 * @return
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(@NotNull final RequestMethod method
 			, String name, M target, M real, final String database, final String schema, final String datasource
-            , final IdCallback<T> idCallback, SQLCreator<T, M, L> creator, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
+            , final IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
 		if (target == null) {
 			return null;
 		}
@@ -1131,11 +1129,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		// 校验与修改Request<<<<<<<<<<<<<<<<<
 		// 在tableKeySet校验后操作，避免 导致put/add进去的Table 被当成原Request的内容
-		real = operate(TYPE, type, real, creator);
-		real = operate(VERIFY, verify, real, creator);
-		real = operate(INSERT, insert, real, creator);
-		real = operate(UPDATE, update, real, creator);
-		real = operate(REPLACE, replace, real, creator);
+		real = operate(TYPE, type, real, parser);
+		real = operate(VERIFY, verify, real, parser);
+		real = operate(INSERT, insert, real, parser);
+		real = operate(UPDATE, update, real, parser);
+		real = operate(REPLACE, replace, real, parser);
 		// 校验与修改Request>>>>>>>>>>>>>>>>>
 
 
@@ -1163,7 +1161,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			for (String e : exists) {
 				map.put(e,real.get(e));
 			}
-			verifyExist(name, map, exceptId, creator);
+			verifyExist(name, map, exceptId, parser);
 		}
 		// 校验存在>>>>>>>>>>>>>>>>>>>
 
@@ -1176,7 +1174,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			for (String u : uniques) {
 				map.put(u, real.get(u));
 			}
-			verifyRepeat(name, map, exceptId, finalIdKey, creator);
+			verifyRepeat(name, map, exceptId, finalIdKey, parser);
 		}
 		// 校验重复>>>>>>>>>>>>>>>>>>>
 
@@ -1284,7 +1282,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 
 					if (nkl.contains(k) || real.get(k) != null) {
-						real = parse(method, name, (M) v, real, database, schema, datasource, idCallback, creator, callback);
+						real = parse(method, name, (M) v, real, database, schema, datasource, idCallback, parser, callback);
 					}
 				}
 			}
@@ -1309,12 +1307,12 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param opt
 	 * @param targetChild
 	 * @param real
-	 * @param creator
+	 * @param parser
 	 * @return
 	 * @throws Exception
 	 */
 	private static <T, M extends Map<String, Object>, L extends List<Object>> M operate(Operation opt, M targetChild
-            , M real, SQLCreator<T, M, L> creator) throws Exception {
+            , M real, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (targetChild == null) {
 			return real;
 		}
@@ -1335,7 +1333,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				verifyType(tk, tv, real);
 			}
 			else if (opt == VERIFY) {
-				verifyValue(tk, tv, real, creator);
+				verifyValue(tk, tv, real, parser);
 			}
 			else if (opt == UPDATE) {
 				real.put(tk, tv);
@@ -1501,11 +1499,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param tk
 	 * @param tv
 	 * @param real
-	 * @param creator
+	 * @param parser
 	 * @throws Exception
 	 */
 	private static <T, M extends Map<String, Object>, L extends List<Object>> void verifyValue(@NotNull String tk
-			, @NotNull Object tv, @NotNull M real, SQLCreator<T, M, L> creator) throws Exception {
+			, @NotNull Object tv, @NotNull M real, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (tv == null) {
 			throw new IllegalArgumentException("operate  operate == VERIFY " + tk + ":" + tv + " ,  >> tv == null!!!");
 		}
@@ -1514,7 +1512,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		Object rv;
 		Logic logic;
 		if (tk.endsWith("$")) {  // 模糊搜索
-			verifyCondition("$", real, tk, tv, creator);
+			verifyCondition("$", real, tk, tv, parser);
 		}
 		else if (tk.endsWith("~")) {  // 正则匹配
 			logic = new Logic(tk.substring(0, tk.length() - 1));
@@ -1559,7 +1557,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 		else if (tk.endsWith("{}")) { //rv符合tv条件或在tv内
 			if (tv instanceof String) {//TODO  >= 0, < 10
-				verifyCondition("{}", real, tk, tv, creator);
+				verifyCondition("{}", real, tk, tv, parser);
 			}
 			else if (tv instanceof List<?>) {
 				logic = new Logic(tk.substring(0, tk.length() - 2));
@@ -1681,12 +1679,12 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param real
 	 * @param tk
 	 * @param tv
-	 * @param creator
+	 * @param parser
 	 * @throws Exception
 	 */
 	private static <T, M extends Map<String, Object>, L extends List<Object>> void verifyCondition(
 			@NotNull String funChar, @NotNull M real, @NotNull String tk, @NotNull Object tv
-			, @NotNull SQLCreator<T, M, L> creator) throws Exception {
+			, @NotNull Parser<T, M, L> parser) throws Exception {
 		//不能用Parser, 0 这种不符合 StringUtil.isName !
 		Logic logic = new Logic(tk.substring(0, tk.length() - funChar.length()));
 		String rk = logic.getKey();
@@ -1699,7 +1697,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			throw new IllegalArgumentException(rk + ":value 中value不合法！value 中不允许有单引号 ' ！");
 		}
 
-		SQLConfig<T, M, L> config = creator.createSQLConfig().setMethod(RequestMethod.GET).setCount(1).setPage(0);
+		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(RequestMethod.GET).setCount(1).setPage(0);
 		config.setTest(true);
 		//		config.setTable(Test.class.getSimpleName());
 		//		config.setColumn(rv + logic.getChar() + funChar)
@@ -1707,15 +1705,16 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		config.putWhere(rv + logic.getChar() + funChar, tv, false);
 		config.setCount(1);
 
-		SQLExecutor<T, M, L> executor = creator.createSQLExecutor();
-		M result = null;
+		SQLExecutor<T, M, L> executor = parser.createSQLExecutor(); // close 后复用导致不好修复的 NPE getSQLExecutor();
+		executor.setParser(parser);
+		M result;
 		try {
 			result = executor.execute(config, false);
 		} finally {
 			executor.close();
 		}
 
-		if (result != null && JSONResponse.isExist(getIntValue(result, JSONResponse.KEY_COUNT)) == false) {
+		if (result != null && JSONResponse.isExist(result) == false) {
 			throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 '" + tk + "': '" + tv + "' ！");
 		}
 	}
@@ -1728,7 +1727,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>>void verifyExist(String table, String key
-			, Object value, long exceptId, @NotNull SQLCreator<T, M, L> creator) throws Exception {
+			, Object value, long exceptId, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (key == null || value == null) {
 			Log.e(TAG, "verifyExist  key == null || value == null >> return;");
 			return;
@@ -1738,7 +1737,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 		Map<String,Object> map = new HashMap<>();
 		map.put(key,value);
-		verifyExist(table,map,exceptId,creator);
+		verifyExist(table,map,exceptId,parser);
 	}
 
 	/**验证是否存在
@@ -1747,17 +1746,17 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> void verifyExist(String table
-			, Map<String,Object> param, long exceptId, @NotNull SQLCreator<T, M, L> creator) throws Exception {
+			, Map<String,Object> param, long exceptId, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (param.isEmpty()) {
 			Log.e(TAG, "verifyExist is empty >> return;");
 			return;
 		}
 
-		SQLConfig<T, M, L> config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
+		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		param.forEach((key,value) -> config.putWhere(key, value, false));
 
-		SQLExecutor<T, M, L> executor = creator.createSQLExecutor();
+		SQLExecutor<T, M, L> executor = parser.getSQLExecutor();
 		try {
 			M result = executor.execute(config, false);
 			if (result == null) {
@@ -1780,8 +1779,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> void verifyRepeat(String table, String key
-			, Object value, @NotNull SQLCreator<T, M, L> creator) throws Exception {
-		verifyRepeat(table, key, value, 0, creator);
+			, Object value, @NotNull Parser<T, M, L> parser) throws Exception {
+		verifyRepeat(table, key, value, 0, parser);
 	}
 
 	/**验证是否重复
@@ -1792,8 +1791,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> void verifyRepeat(String table, String key
-			, Object value, long exceptId, @NotNull SQLCreator <T, M, L> creator) throws Exception {
-		verifyRepeat(table, key, value, exceptId, null, creator);
+			, Object value, long exceptId, @NotNull Parser<T, M, L> parser) throws Exception {
+		verifyRepeat(table, key, value, exceptId, null, parser);
 	}
 
 	/**验证是否重复
@@ -1803,11 +1802,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param value
 	 * @param exceptId 不包含id
 	 * @param idKey
-	 * @param creator
+	 * @param parser
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>>void verifyRepeat(String table, String key
-			, Object value, long exceptId, String idKey, @NotNull SQLCreator<T, M, L> creator) throws Exception {
+			, Object value, long exceptId, String idKey, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (key == null || value == null) {
 			Log.e(TAG, "verifyRepeat  key == null || value == null >> return;");
 			return;
@@ -1817,7 +1816,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 		Map<String,Object> map = new HashMap<>();
 		map.put(key,value);
-		verifyRepeat(table,map,exceptId,idKey,creator);
+		verifyRepeat(table, map, exceptId, idKey, parser);
 	}
 
 	/**验证是否重复
@@ -1826,11 +1825,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param param
 	 * @param exceptId 不包含id
 	 * @param idKey
-	 * @param creator
+	 * @param parser
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> void verifyRepeat(String table
-			, Map<String,Object> param, long exceptId, String idKey, @NotNull SQLCreator<T, M, L> creator) throws Exception {
+			, Map<String,Object> param, long exceptId, String idKey, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (param.isEmpty()) {
 			Log.e(TAG, "verifyRepeat is empty >> return;");
 			return;
@@ -1838,14 +1837,14 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		String finalIdKey = StringUtil.isEmpty(idKey, false) ? JSONMap.KEY_ID : idKey;
 
-		SQLConfig<T, M, L> config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
+		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		if (exceptId > 0) { //允许修改自己的属性为该属性原来的值
 			config.putWhere(finalIdKey + "!", exceptId, false);
 		}
 		param.forEach((key,value) -> config.putWhere(key,value, false));
 
-		SQLExecutor<T, M, L> executor = creator.createSQLExecutor();
+		SQLExecutor<T, M, L> executor = parser.getSQLExecutor();
 		try {
 			M result = executor.execute(config, false);
 			if (result == null) {

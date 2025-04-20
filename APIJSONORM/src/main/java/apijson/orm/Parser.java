@@ -15,7 +15,8 @@ import apijson.*;
 /**解析器
  * @author Lemon
  */
-public interface Parser<T, M extends Map<String, Object>, L extends List<Object>> {
+public interface Parser<T, M extends Map<String, Object>, L extends List<Object>>
+		extends ParserCreator<T, M, L>, VerifierCreator<T, M, L>, SQLCreator<T, M, L> {
 
 	@NotNull
 	Visitor<T> getVisitor();

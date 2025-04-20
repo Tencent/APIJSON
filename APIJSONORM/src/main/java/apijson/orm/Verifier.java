@@ -76,7 +76,7 @@ public interface Verifier<T, M extends Map<String, Object>, L extends List<Objec
 	 * @throws Exception
 	 */
 	M verifyRequest(RequestMethod method, String name, M target, M request,
-			int maxUpdateCount, String globalDatabase, String globalSchema, SQLCreator<T, M, L> creator) throws Exception;
+			int maxUpdateCount, String globalDatabase, String globalSchema) throws Exception;
 
 	/**验证返回结果的数据和结构
 	 * @param method
@@ -92,12 +92,15 @@ public interface Verifier<T, M extends Map<String, Object>, L extends List<Objec
 	 */
 	M verifyResponse(
 		RequestMethod method, String name, M target, M response,
-		String database, String schema, SQLCreator<T, M, L> creator, OnParseCallback<T, M, L> callback
+		String database, String schema, @NotNull Parser<T, M, L> parser, OnParseCallback<T, M, L> callback
 	) throws Exception;
 
 
 	@NotNull
 	Parser<T, M, L> createParser();
+
+	Parser<T, M, L> getParser();
+	Verifier<T, M, L> setParser(AbstractParser<T, M, L> parser);
 
 	@NotNull
 	Visitor<T> getVisitor();

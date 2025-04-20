@@ -892,16 +892,17 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 	public M parseResponse(RequestMethod method, String table, String alias
             , M request, List<Join<T, M, L>> joinList, boolean isProcedure) throws Exception {
 		SQLConfig<T, M, L> config = newSQLConfig(method, table, alias, request, joinList, isProcedure)
-				.setParser(parser)
+				.setParser(getParser())
 				.setObjectParser(this);
 		return parseResponse(config, isProcedure);
 	}
 	@Override
 	public M parseResponse(SQLConfig<T, M, L> config, boolean isProcedure) throws Exception {
+		parser = getParser();
 		if (parser.getSQLExecutor() == null) {
 			parser.createSQLExecutor();
 		}
-		if (parser != null && config.gainParser() == null) {
+		if (config.gainParser() == null) {
 			config.setParser(parser);
 		}
 		return parser.getSQLExecutor().execute(config, isProcedure);

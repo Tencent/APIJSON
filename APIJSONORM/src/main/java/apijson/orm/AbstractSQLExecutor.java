@@ -127,8 +127,6 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 
 
-
-
 	/**移除缓存
 	 * @param sql  key
 	 * @param config
@@ -174,6 +172,9 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 			Log.e(TAG, "execute  StringUtil.isEmpty(sql, true) >> return null;");
 			return null;
 		}
+
+		Parser<T, M, L> parser2 = config.gainParser();
+		parser = parser2 != null ? parser2 : getParser();;
 
 		boolean isExplain = config.isExplain();
 		boolean isHead = RequestMethod.isHeadMethod(config.getMethod(), true);
@@ -237,7 +238,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					}
 
 					// updateCount>0时收集结果。例如更新操作成功时，返回count(affected rows)、id字段
-					result = getParser().newSuccessResult();  // TODO 对 APIAuto 及其它现有的前端/客户端影响比较大，暂时还是返回 code 和 msg，5.0 再移除  JSON.createJSONObject();
+					result = parser.newSuccessResult();  // TODO 对 APIAuto 及其它现有的前端/客户端影响比较大，暂时还是返回 code 和 msg，5.0 再移除  JSON.createJSONObject();
 
 					//id,id{}至少一个会有，一定会返回，不用抛异常来阻止关联写操作时前面错误导致后面无条件执行！
 					result.put(JSONResponse.KEY_COUNT, updateCount);//返回修改的记录数
@@ -293,13 +294,12 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 				}
 			}
 
-
 			if (isExplain == false && isHead) {
 				if (rs.next() == false) {
-					return getParser().newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
+					return parser.newErrorResult(new SQLException("数据库错误, rs.next() 失败！"));
 				}
 
-				result = getParser().newSuccessResult();
+				result = parser.newSuccessResult();
 				// 兼容nosql,比如 elasticSearch-sql
 				if(config.isElasticsearch()) {
 					result.put(JSONResponse.KEY_COUNT, rs.getObject(1));
@@ -1276,17 +1276,24 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 	}
 
 	protected Map<String, Connection> connectionMap = new HashMap<>();
+	public Map<String, Connection> getConnectionMap() {
+		if (connectionMap == null) {
+			connectionMap = new HashMap<>();
+		}
+		return connectionMap;
+	}
+
 	protected Connection connection;
 	@NotNull
 	@Override
 	public Connection getConnection(@NotNull SQLConfig<T, M, L> config) throws Exception {
 		String connectionKey = getConnectionKey(config);
-		connection = connectionMap.get(connectionKey);
+		connection = getConnectionMap().get(connectionKey);
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 			// PostgreSQL 不允许 cross-database
 			connection = DriverManager.getConnection(config.gainDBUri(), config.gainDBAccount(), config.gainDBPassword());
-			connectionMap.put(connectionKey, connection);
+			getConnectionMap().put(connectionKey, connection);
 		}
 
 		// TDengine 驱动内部事务处理方法都是空实现，手动 commit 无效
@@ -1326,7 +1333,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		//		}
 
 		// 将所有连接设置隔离级别，且禁止自动提交，需要以下代码来 commit/rollback
-		Collection<Connection> connections = connectionMap.values();
+		Collection<Connection> connections = connectionMap == null ? null : connectionMap.values();
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
@@ -1356,7 +1363,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 //		}
 
 		// 将所有连接进行回滚
-		Collection<Connection> connections = connectionMap.values();
+		Collection<Connection> connections = connectionMap == null ? null : connectionMap.values();
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
@@ -1388,7 +1395,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 //		}
 
 		// 将所有连接进行回滚
-		Collection<Connection> connections = connectionMap.values();
+		Collection<Connection> connections = connectionMap == null ? null : connectionMap.values();
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
@@ -1415,7 +1422,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 //		}
 		
 		// 将所有连接进行提交
-		Collection<Connection> connections = connectionMap.values();
+		Collection<Connection> connections = connectionMap == null ? null : connectionMap.values();
 		if (connections != null) {
 			for (Connection connection : connections) {
 				try {
@@ -1444,7 +1451,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		cachedSQLCount = 0;
 		executedSQLCount = 0;
 
-		if (connectionMap == null) {
+		if (connectionMap == null || connectionMap.isEmpty()) {
 			return;
 		}
 

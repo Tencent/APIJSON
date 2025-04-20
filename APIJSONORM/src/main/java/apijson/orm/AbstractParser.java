@@ -37,7 +37,7 @@ import static apijson.RequestMethod.GET;
  * @author Lemon
  */
 public abstract class AbstractParser<T, M extends Map<String, Object>, L extends List<Object>>
-		implements Parser<T, M, L>, ParserCreator<T, M, L>, VerifierCreator<T, M, L>, SQLCreator<T, M, L> {
+		implements Parser<T, M, L> {
 	protected static final String TAG = "AbstractParser";
 	
 	/**
@@ -411,7 +411,6 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		return this;
 	}
 
-
 	protected SQLExecutor<T, M, L> sqlExecutor;
 	protected Verifier<T, M, L> verifier;
 	protected Map<String, Object> queryResultMap;//path-result
@@ -420,8 +419,8 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	public SQLExecutor<T, M, L> getSQLExecutor() {
 		if (sqlExecutor == null) {
 			sqlExecutor = createSQLExecutor();
-			sqlExecutor.setParser(this);
 		}
+		sqlExecutor.setParser(this);
 		return sqlExecutor;
 	}
 	@Override
@@ -429,6 +428,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		if (verifier == null) {
 			verifier = createVerifier().setVisitor(getVisitor());
 		}
+		verifier.setParser(this);
 		return verifier;
 	}
 
@@ -437,13 +437,14 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	 * @return
 	 * @throws Exception
 	 */
-	@NotNull
 	public static <M extends Map<String, Object>> M parseRequest(String request) throws Exception {
-		M obj = JSON.parseObject(request);
-		if (obj == null) {
-			throw new UnsupportedEncodingException("JSON格式不合法！");
+		try {
+			M req = JSON.parseObject(request);
+			Objects.requireNonNull(req);
+			return req;
+		} catch (Throwable e) {
+			throw new UnsupportedEncodingException("JSON格式不合法！" + e.getMessage() + "! " + request);
 		}
-		return obj;
 	}
 
 	/**解析请求json并获取对应结果
@@ -569,7 +570,6 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
 
-
 		queryResultMap = new HashMap<String, Object>();
 
 		Exception error = null;
@@ -608,7 +608,8 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		res.putIfAbsent("time", endTime);
 		if (Log.DEBUG) {
-			res.put("sql:generate|cache|execute|maxExecute", getSQLExecutor().getGeneratedSQLCount() + "|" + getSQLExecutor().getCachedSQLCount() + "|" + getSQLExecutor().getExecutedSQLCount() + "|" + getMaxSQLCount());
+			sqlExecutor = getSQLExecutor();
+			res.put("sql:generate|cache|execute|maxExecute", sqlExecutor.getGeneratedSQLCount() + "|" + sqlExecutor.getCachedSQLCount() + "|" + sqlExecutor.getExecutedSQLCount() + "|" + getMaxSQLCount());
 			res.put("depth:count|max", queryDepth + "|" + getMaxQueryDepth());
 
 			executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
@@ -639,6 +640,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			Log.fd(TAG, requestMethod + "/parseResponse  endTime = " + endTime + ";  duration = " + duration);
 			Log.sl("", '>', "\n\n\n");
 		}
+
 		return res;
 	}
 
@@ -1085,6 +1087,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 			// 获取指定的JSON结构 <<<<<<<<<<<<<<
 			SQLConfig<T, M, L> config = createSQLConfig().setMethod(GET).setTable(table);
+			config.setParser(this);
 			config.setPrepared(false);
 			config.setColumn(Arrays.asList("structure"));
 
@@ -2105,8 +2108,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				}
 			}
 			else {
-				sqlExecutor = getSQLExecutor();
-				result = sqlExecutor.execute(config, false);
+				result = getSQLExecutor().execute(config, false);
 				// FIXME 改为直接在 sqlExecutor 内加好，最后 Parser<T, M, L> 取结果，可以解决并发执行导致内部计算出错
 //				executedSQLDuration += sqlExecutor.getExecutedSQLDuration() + sqlExecutor.getSqlResultDuration();
 			}
@@ -2531,7 +2533,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		// 获取指定的JSON结构 >>>>>>>>>>>>>>
 		M target = wrapRequest(method, tag, object, true);
 		// Map<String, Object> clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
-		return getVerifier().verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema(), creator);
+		return getVerifier().setParser(this).verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema());
 	}
 
 	/***
