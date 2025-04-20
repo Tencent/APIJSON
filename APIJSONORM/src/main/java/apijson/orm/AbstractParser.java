@@ -594,6 +594,13 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		requestObject = error == null ? extendSuccessResult(requestObject, warn, isRoot) : extendErrorResult(requestObject, error, requestMethod, getRequestURL(), isRoot);
 
+		// FIXME 暂时先直接移除，后续排查是在哪里 put 进来
+		requestObject.remove(KEY_DATABASE);
+		requestObject.remove(KEY_DATASOURCE);
+		requestObject.remove(KEY_NAMESPACE);
+		requestObject.remove(KEY_CATALOG);
+		requestObject.remove(KEY_SCHEMA);
+
 		M res = (globalFormat != null && globalFormat) && JSONResponse.isSuccess(requestObject) ? JSONResponse.format(requestObject) : requestObject;
 
 		long endTime = System.currentTimeMillis();

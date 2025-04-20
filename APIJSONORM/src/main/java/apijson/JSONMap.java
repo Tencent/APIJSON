@@ -155,8 +155,8 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 	String KEY_DROP = "@drop"; //丢弃，不返回，TODO 应该通过 fastjson 的 ignore 之类的机制来处理，避免导致下面的对象也不返回
 	//	String KEY_KEEP = "@keep"; //一定会返回，为 null 或 空对象时，会使用默认值(非空)，解决其它对象因为不关联的第一个对为空导致也不返回
 	String KEY_DEFULT = "@default"; //TODO 自定义默认值 { "@default":true }，@default 可完全替代 @keep
-	String KEY_NULL = "@null"; //TODO 值为 null 的键值对 "@null":"tag,pictureList"，允许 is NULL 条件判断， SET tag = NULL 修改值为 NULL 等
-	String KEY_CAST = "@cast"; //TODO 类型转换 cast(date AS DATE)
+	String KEY_NULL = "@null"; //值为 null 的键值对 "@null":"tag,pictureList"，允许 is NULL 条件判断， SET tag = NULL 修改值为 NULL 等
+	String KEY_CAST = "@cast"; //类型转换 cast(date AS DATE)
 
 	String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
 	String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
