@@ -31,7 +31,7 @@ public interface Verifier<T, M extends Map<String, Object>, L extends List<Objec
 	 * @param role
 	 * @return
 	 * @throws Exception 
-	 * @see {@link apijson.JSONObject#KEY_ROLE} 
+	 * @see {@link JSONMap#KEY_ROLE}
 	 */
 	void verifyRole(SQLConfig<T, M, L> config, String table, RequestMethod method, String role) throws Exception;
 

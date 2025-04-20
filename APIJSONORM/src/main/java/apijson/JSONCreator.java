@@ -5,13 +5,11 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
-import apijson.orm.SQLConfig;
-import apijson.orm.SQLExecutor;
-
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/**SQL相关创建器
+/**JSON相关创建器
  * @author Lemon
  */
 public interface JSONCreator<M extends Map<String, Object>, L extends List<Object>> {
@@ -46,10 +44,10 @@ public interface JSONCreator<M extends Map<String, Object>, L extends List<Objec
     }
 
     @NotNull
-    default L createJSONArray(List<?> l){
+    default L createJSONArray(Collection<?> list){
         L arr = createJSONArray();
-        if (l != null && ! l.isEmpty()) {
-            arr.addAll(l);
+        if (list != null && ! list.isEmpty()) {
+            arr.addAll(list);
         }
         return arr;
     }

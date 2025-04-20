@@ -32,7 +32,7 @@ import apijson.orm.model.TestRecord;
 
 import static apijson.JSON.getBoolean;
 import static apijson.JSON.getString;
-import static apijson.JSONObject.*;
+import static apijson.JSONMap.*;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.POST;
@@ -958,7 +958,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	private int page; //Table所在页码
 	private int position; //Table在[]中的位置
 	private int query; //apijson.JSONRequest.QUERY
-	private Boolean compat; //apijson.JSONObject.compat  query total
+	private Boolean compat; //apijson.JSONMap.compat  query total
 	private int type; //ObjectParser.type
 	private int cache;
 	private boolean explain;
@@ -2189,7 +2189,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 							+ "对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
 				}
 
-				putWarnIfNeed(apijson.JSONObject.KEY_RAW, "@raw:value 的 value 中 "
+				putWarnIfNeed(JSONMap.KEY_RAW, "@raw:value 的 value 中 "
 							+ key + " 不合法！对应的 " + key + ":value 中 value 值 " + value + " 未在后端 RAW_MAP 中配置 ！");
 			}
 			else if (rawSQL.isEmpty()) {
@@ -2951,28 +2951,28 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	public static int getCache(String cache) {
 		int cache2;
 		if (cache == null) {
-			cache2 = apijson.JSONObject.CACHE_ALL;
+			cache2 = JSONMap.CACHE_ALL;
 		}
 		else {
 			//			if (isSubquery) {
-			//				throw new IllegalArgumentException("子查询内不支持传 " + apijson.JSONObject.KEY_CACHE + "!");
+			//				throw new IllegalArgumentException("子查询内不支持传 " + apijson.JSONMap.KEY_CACHE + "!");
 			//			}
 
 			switch (cache) {
 			case "0":
-			case apijson.JSONObject.CACHE_ALL_STRING:
-				cache2 = apijson.JSONObject.CACHE_ALL;
+			case JSONMap.CACHE_ALL_STRING:
+				cache2 = JSONMap.CACHE_ALL;
 				break;
 			case "1":
-			case apijson.JSONObject.CACHE_ROM_STRING:
-				cache2 = apijson.JSONObject.CACHE_ROM;
+			case JSONMap.CACHE_ROM_STRING:
+				cache2 = JSONMap.CACHE_ROM;
 				break;
 			case "2":
-			case apijson.JSONObject.CACHE_RAM_STRING:
-				cache2 = apijson.JSONObject.CACHE_RAM;
+			case JSONMap.CACHE_RAM_STRING:
+				cache2 = JSONMap.CACHE_RAM;
 				break;
 			default:
-				throw new IllegalArgumentException(apijson.JSONObject.KEY_CACHE
+				throw new IllegalArgumentException(JSONMap.KEY_CACHE
 						+ ":value 中 value 的值不合法！必须在 [0,1,2] 或 [ALL, ROM, RAM] 内 !");
 			}
 		}
@@ -4566,7 +4566,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			for (int i = 0; i < childs.length; i++) {
 				Object c = childs[i];
 				if (c instanceof Collection) {
-					throw new IllegalArgumentException(key + ":value 中 value 类型不能为 [JSONArray, Collection] 中的任何一个 ！");
+					throw new IllegalArgumentException(key + ":value 中 value 类型不能为 [JSONList, Collection] 中的任何一个 ！");
 				}
 
 				Object path = "";
@@ -4580,7 +4580,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					c = ((Map<?, ?>) c).get("value");
 					if (c instanceof Collection || c instanceof Map) {
 						throw new IllegalArgumentException(key + ":{ path:path, value:value } 中 value 类型" +
-								"不能为 [JSONObject, JSONArray, Collection, Map] 中的任何一个 ！");
+								"不能为 [JSONMap, JSONList, Collection, Map] 中的任何一个 ！");
 					}
 				}
 
@@ -4773,20 +4773,8 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	 * @return
 	 */
 	@NotNull
-	public L newJSONArray(Object obj) {
+	public static <L extends List<Object>> L newJSONArray(Object obj) {
 		L array = JSON.createJSONArray();
-		if (obj != null) {
-			if (obj instanceof Collection) {
-				array.addAll((Collection<?>) obj);
-			} else {
-				array.add(obj);
-			}
-		}
-		return array;
-	}
-	@NotNull
-	public static <M extends Map<String, Object>, L extends List<Object>> L newJSONArray(Object obj, @NotNull JSONCreator<M, L> creator) {
-		L array = creator.createJSONArray();
 		if (obj != null) {
 			if (obj instanceof Collection) {
 				array.addAll((Collection<?>) obj);
@@ -4991,16 +4979,16 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					//When config's database is oracle,Using subquery since Oracle12 below does not support OFFSET FETCH paging syntax.
 					//针对oracle分组后条数的统计
 					if (StringUtil.isNotEmpty(config.getGroup(),true) && RequestMethod.isHeadMethod(config.getMethod(), true)){
-						return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == apijson.JSONObject.CACHE_RAM
+						return explain + "SELECT count(*) FROM (SELECT " + (config.getCache() == JSONMap.CACHE_RAM
 								? "SQL_NO_CACHE " : "") + column + " FROM " + gainConditionString(tablePath, config) + ") " + config.gainLimitString();
 					}
 
-					String sql = "SELECT " + (config.getCache() == apijson.JSONObject.CACHE_RAM
+					String sql = "SELECT " + (config.getCache() == JSONMap.CACHE_RAM
 							? "SQL_NO_CACHE " : "") + column + " FROM " + gainConditionString(tablePath, config);
 					return explain + config.gainOraclePageSQL(sql);
 				}
 
-				cSql = "SELECT " + (config.getCache() == apijson.JSONObject.CACHE_RAM ? "SQL_NO_CACHE " : "")
+				cSql = "SELECT " + (config.getCache() == JSONMap.CACHE_RAM ? "SQL_NO_CACHE " : "")
 						+ column + " FROM " + gainConditionString(tablePath, config) + config.gainLimitString();
 				cSql = buildWithAsExprSql(config, cSql);
 				if(config.isElasticsearch()) { // elasticSearch 不支持 explain
@@ -5932,7 +5920,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 					if (key.endsWith("<>") == false && value instanceof Map) { // 只允许常规 Object
 						throw new IllegalArgumentException(table + ":{ " + key + ":value } 中 value 类型错误！除了 key<>:{} 外，不允许 "
-								+ key + " 等其它任何 key 对应 value 的类型为 JSONObject {} !");
+								+ key + " 等其它任何 key 对应 value 的类型为 JSONMap {} !");
 					}
 
 					// 兼容 PUT @combine
@@ -6087,10 +6075,10 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			else if (newHaving instanceof Map<?, ?>) {
 				if (isHavingAnd) {
 					throw new IllegalArgumentException(table + ":{ " + havingKey +  ":value } 里的 value 类型不合法！"
-							+ "@having&:value 中 value 只能是 String，@having:value 中 value 只能是 String 或 JSONObject ！");
+							+ "@having&:value 中 value 只能是 String，@having:value 中 value 只能是 String 或 JSONMap ！");
 				}
 
-				JSONObject havingObj = new JSONObject(newHaving);
+				M havingObj = JSON.createJSONObject((Map<? extends String, ?>) newHaving);
 				Set<Entry<String, Object>> havingSet = havingObj.entrySet();
 				for (Entry<String, Object> entry : havingSet) {
 					String k = entry == null ? null : entry.getKey();
@@ -6120,7 +6108,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			}
 			else if (newHaving != null) {
 				throw new IllegalArgumentException(table + ":{ " + havingKey +  ":value } 里的 value 类型不合法！"
-						+ "@having:value 中 value 只能是 String 或 JSONObject，@having&:value 中 value 只能是 String ！");
+						+ "@having:value 中 value 只能是 String 或 JSONMap，@having&:value 中 value 只能是 String ！");
 			}
 			// @having, @haivng& >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -6142,7 +6130,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				}
 			}
 			else if (keyMap != null) {
-				throw new UnsupportedDataTypeException("@key:value 中 value 错误，只能是 String, JSONObject 中的一种！");
+				throw new UnsupportedDataTypeException("@key:value 中 value 错误，只能是 String, JSONMap 中的一种！");
 			}
 
 
@@ -6383,8 +6371,8 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	public static String gainRealKey(RequestMethod method, String originKey
 			, boolean isTableKey, boolean saveLogic, boolean verifyName) throws Exception {
 		Log.i(TAG, "getRealKey  saveLogic = " + saveLogic + "; originKey = " + originKey);
-		if (originKey == null || apijson.JSONObject.isArrayKey(originKey)) {
-			Log.w(TAG, "getRealKey  originKey == null || apijson.JSONObject.isArrayKey(originKey) >>  return originKey;");
+		if (originKey == null || JSONMap.isArrayKey(originKey)) {
+			Log.w(TAG, "getRealKey  originKey == null || apijson.JSONMap.isArrayKey(originKey) >>  return originKey;");
 			return originKey;
 		}
 

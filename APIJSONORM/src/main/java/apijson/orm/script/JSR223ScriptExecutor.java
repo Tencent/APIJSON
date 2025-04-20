@@ -55,7 +55,7 @@ public abstract class JSR223ScriptExecutor<T, M extends Map<String, Object>, L e
 		CompiledScript compiledScript = compiledScriptMap.get(methodName);
 		Bindings bindings = new SimpleBindings();
 		// 往脚本上下文里放入元数据
-		// 把 RequestMethod method, String tag, int version, @NotNull JSONObject request,
+		// 把 RequestMethod method, String tag, int version, @NotNull JSONMap request,
 		// HttpSession session 等参数作为全局参数传进去供脚本使用
 		
 		// 加载扩展属性

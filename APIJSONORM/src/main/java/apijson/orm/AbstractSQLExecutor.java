@@ -1135,7 +1135,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		}
 		if (castToJson) {
 			try {
-				value = JSON.parseJSON(value);
+				value = JSON.parse(value);
 			} catch (Exception e) {
 				Log.e(TAG, "getValue  try { value = parseJSON((String) value); } catch (Exception e) { \n" + e.getMessage());
 			}
@@ -1265,7 +1265,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 	}
 
 	public PreparedStatement setArgument(@NotNull SQLConfig<T, M, L> config, @NotNull PreparedStatement statement, int index, Object value) throws SQLException {
-		//JSON.isBooleanOrNumberOrString(v) 解决 PostgreSQL: Can't infer the SQL type to use for an instance of com.alibaba.fastjson.JSONArray
+		//JSON.isBooleanOrNumberOrString(v) 解决 PostgreSQL: Can't infer the SQL type to use for an instance of com.alibaba.fastjson.JSONList
 		if (apijson.JSON.isBoolOrNumOrStr(value)) {
 			statement.setObject(index + 1, value); //PostgreSQL JDBC 不支持隐式类型转换 tinyint = varchar 报错
 		}

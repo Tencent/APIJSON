@@ -4,6 +4,8 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,60 +13,68 @@ import java.util.Map;
  * @author Lemon
  */
 public class JSON {
-	public static Class<?> JSON_OBJECT_CLASS = JSONObject.class;
-	public static Class<?> JSON_ARRAY_CLASS = JSONArray.class;
 
 	static final String TAG = "JSON";
 
 	public static JSONParser<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_PARSER;
 
 	static {
-		DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
+		//DEFAULT_JSON_PARSER = new JSONParser<LinkedHashMap<String, Object>, List<Object>>() {
+		//
+		//	@Override
+		//	public LinkedHashMap<String, Object> createJSONObject() {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//	@Override
+		//	public List<Object> createJSONArray() {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//	@Override
+		//	public String toJSONString(Object obj, boolean format) {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//	@Override
+		//	public Object parse(Object json) {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//	@Override
+		//	public LinkedHashMap<String, Object> parseObject(Object json) {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//	@Override
+		//	public <T> T parseObject(Object json, Class<T> clazz) {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//	@Override
+		//	public List<Object> parseArray(Object json) {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//	@Override
+		//	public <T> List<T> parseArray(Object json, Class<T> clazz) {
+		//		throw new UnsupportedOperationException();
+		//	}
+		//
+		//};
 
-			@Override
-			public JSONObject createJSONObject() {
-				return new JSONObject();
-			}
-
-			@Override
-			public JSONArray createJSONArray() {
-				return new JSONArray();
-			}
-
-			@Override
-			public String toJSONString(Object obj, boolean format) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public Object parseJSON(Object json) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public JSONObject parseObject(Object json) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public <T> T parseObject(Object json, Class<T> clazz) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public JSONArray parseArray(Object json) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public <T> List<T> parseArray(Object json, Class<T> clazz) {
-				throw new UnsupportedOperationException();
-			}
-
-		};
 	}
 
 //	public static JSONCreator<? extends Map<String, Object>, ? extends List<Object>> DEFAULT_JSON_CREATOR = DEFAULT_JSON_PARSER;
+//	public static <M extends Map<String, Object>> M newObj() {
+//		return createJSONObject();
+//	}
+//	public static <M extends Map<String, Object>> M newObj(String key, Object value) {
+//		return createJSONObject(key, value);
+//	}
+//	public static <M extends Map<String, Object>> M newObj(Map<? extends String, ?> map) {
+//		return createJSONObject(map);
+//	}
 
 	public static <M extends Map<String, Object>> M createJSONObject() {
 		return (M) DEFAULT_JSON_PARSER.createJSONObject();
@@ -76,69 +86,47 @@ public class JSON {
 		return (M) DEFAULT_JSON_PARSER.createJSONObject(map);
 	}
 
+	//public static <L extends List<Object>> L newArr() {
+	//	return createJSONArray();
+	//}
+	//public static <L extends List<Object>> L newArr(Object obj) {
+	//	return createJSONArray(obj);
+	//}
+	//public static <L extends List<Object>> L newArr(List<?> list) {
+	//	return createJSONArray(list);
+	//}
+
 	public static <L extends List<Object>> L createJSONArray() {
 		return (L) DEFAULT_JSON_PARSER.createJSONArray();
 	}
 	public static <L extends List<Object>> L createJSONArray(Object obj) {
 		return (L) DEFAULT_JSON_PARSER.createJSONArray(obj);
 	}
-	public static <L extends List<Object>> L createJSONArray(List<?> list) {
+	public static <L extends List<Object>> L createJSONArray(Collection<?> list) {
 		return (L) DEFAULT_JSON_PARSER.createJSONArray(list);
 	}
 
-	public static Object parseJSON(Object json) {
-		if (json instanceof Boolean || json instanceof Number || json instanceof Enum<?>) {
-			return json;
-		}
-
-		String s = StringUtil.trim(toJSONString(json));
-		if (s.startsWith("{")) {
-			return parseObject(json, DEFAULT_JSON_PARSER);
-		}
-
-		if (s.startsWith("[")) {
-			return parseArray(json, DEFAULT_JSON_PARSER);
-		}
-
-		try {
-			return DEFAULT_JSON_PARSER.parseJSON(json);
-		} catch (Throwable e) {
-			throw new IllegalArgumentException("JSON 格式错误！" + e.getMessage() + "! " + s);
-		}
+	public static Object parse(Object json) {
+		return DEFAULT_JSON_PARSER.parse(json);
 	}
 
-	/**
-	 * @param json
-	 * @return
-	 */
+
 	public static <M extends Map<String, Object>> M parseObject(Object json) {
-		return (M) parseObject(json, DEFAULT_JSON_PARSER);
-	}
-
-	public static <M extends Map<String, Object>, L extends List<Object>> M parseObject(Object json, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
 			return null;
 		}
 
-		return parser.parseObject(s);
+		return (M) DEFAULT_JSON_PARSER.parseObject(s);
 	}
 
 	public static <T> T parseObject(Object json, Class<T> clazz) {
-		return parseObject(json, clazz, DEFAULT_JSON_PARSER);
-	}
-
-	public static <T, M extends Map<String, Object>, L extends List<Object>> T parseObject(Object json, Class<T> clazz, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
 			return null;
 		}
 
-		if (parser == null) {
-			parser = (JSONParser<M, L>) DEFAULT_JSON_PARSER;
-		}
-
-		return parser.parseObject(s, clazz);
+		return DEFAULT_JSON_PARSER.parseObject(s, clazz);
 	}
 
 	/**
@@ -146,17 +134,13 @@ public class JSON {
 	 * @return
 	 */
 	public static <L extends List<Object>> L parseArray(Object json) {
-		return (L) parseArray(json, DEFAULT_JSON_PARSER);
-	}
-
-	public static <M extends Map<String, Object>, L extends List<Object>> L parseArray(Object json, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
 			return null;
 		}
 
 		try {
-			L arr = parser.parseArray(s);
+			L arr = (L) DEFAULT_JSON_PARSER.parseArray(s);
 			return arr;
 		} catch (Exception e) {
 			Log.i(TAG, "parseArray catch \n" + e.getMessage());
@@ -165,17 +149,13 @@ public class JSON {
 	}
 
 	public static <T> List<T> parseArray(Object json, Class<T> clazz) {
-		return parseArray(json, clazz, DEFAULT_JSON_PARSER);
-	}
-
-	public static <T, M extends Map<String, Object>, L extends List<Object>> List<T> parseArray(Object json, Class<T> clazz, JSONParser<M, L> parser) {
 		String s = toJSONString(json);
 		if (StringUtil.isEmpty(s, true)) {
 			return null;
 		}
 
 		try {
-			return parser.parseArray(s, clazz);
+			return DEFAULT_JSON_PARSER.parseArray(s, clazz);
 		} catch (Exception e) {
 			Log.i(TAG, "parseArray catch \n" + e.getMessage());
 		}
@@ -347,14 +327,14 @@ public class JSON {
 	 * @throws IllegalArgumentException If value is not a Map and cannot be converted
 	 */
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> getMap(Map<String, Object> map, String key) throws IllegalArgumentException {
+	public static <K, V> Map<K, V> getMap(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
 		}
 
 		if (value instanceof Map) {
-			return (Map<String, Object>) value;
+			return (Map<K, V>) value;
 		}
 
 		throw new IllegalArgumentException("Value for key '" + key + "' is not a Map: " + value.getClass().getName());
@@ -368,14 +348,14 @@ public class JSON {
 	 * @throws IllegalArgumentException If value is not a List and cannot be converted
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Object> getList(Map<String, Object> map, String key) throws IllegalArgumentException {
+	public static <T> List<T> getList(Map<String, Object> map, String key) throws IllegalArgumentException {
 		Object value = map == null || key == null ? null : map.get(key);
 		if (value == null) {
 			return null;
 		}
 
 		if (value instanceof List) {
-			return (List<Object>) value;
+			return (List<T>) value;
 		}
 
 		throw new IllegalArgumentException("Value for key '" + key + "' is not a List: " + value.getClass().getName());

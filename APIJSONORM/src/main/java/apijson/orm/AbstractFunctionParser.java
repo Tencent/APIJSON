@@ -35,7 +35,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
      */
     public static boolean ENABLE_SCRIPT_FUNCTION = true;
 
-	// <methodName, JSONObject>
+	// <methodName, JSONMap>
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
     public static Map<String, ScriptExecutor<?, ? extends Map<String, Object>, ? extends List<Object>>> SCRIPT_EXECUTOR_MAP;
 	public static Map<String, Map<String, Object>> FUNCTION_MAP;
@@ -234,7 +234,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 		return JSON.toJSONString(obj);
 	}
 
-	/**根据路径取 JSONObject 值
+	/**根据路径取 JSONMap 值
 	 * @param path
 	 * @return
 	 */
@@ -242,7 +242,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 		return getArgVal(path, Map.class);
 	}
 
-	/**根据路径取 JSONArray 值
+	/**根据路径取 JSONList 值
 	 * @param path
 	 * @return
 	 */
@@ -639,12 +639,12 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 				else if (v instanceof String) {
 					types[i] = String.class;
 				}
-				else if (v instanceof Map) { // 泛型兼容？ // JSONObject
+				else if (v instanceof Map) { // 泛型兼容？ // JSONMap
 					types[i] = Map.class;
 					//性能比较差
                     //values[i] = TypeUtils.cast(v, Map.class, ParserConfig.getGlobalInstance());
 				}
-				else if (v instanceof Collection) { // 泛型兼容？ // JSONArray
+				else if (v instanceof Collection) { // 泛型兼容？ // JSONList
 					types[i] = List.class;
 					//性能比较差
 					List list = new ArrayList<>((Collection) v);
@@ -652,14 +652,15 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 				}
 				else {
 					throw new UnsupportedDataTypeException(keys[i] + ":value 中value不合法！远程函数 key():"
-                            + function + " 中的 arg 对应的值类型只能是 [Boolean, Number, String, JSONObject, JSONArray] 中的一种！");
+                            + function + " 中的 arg 对应的值类型只能是 [Boolean, Number, String, JSONMap, JSONList] 中的一种！");
 				}
 			}
 		}
 		else {
+			Class<? extends Map> cls = JSON.createJSONObject().getClass();
 			types = new Class<?>[length + 1];
 			//types[0] = Object.class; // 泛型擦除 JSON.JSON_OBJECT_CLASS;
-			types[0] = JSON.JSON_OBJECT_CLASS;
+			types[0] = cls;
 
 			values = new Object[length + 1];
 			values[0] = request;
@@ -726,7 +727,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 	 * @return
 	 */
 	public static String getFunction(String method, String[] keys) {
-		String f = method + "(JSONObject request";
+		String f = method + "(JSONMap request";
 
 		if (keys != null) {
 			for (int i = 0; i < keys.length; i++) {
@@ -893,7 +894,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 	 * @throws Exception
 	 */
 	public <V> V getArgVal(@NotNull M req, String key, Class<V> clazz) throws Exception {
-		// Convert to JSONObject for backward compatibility, replace with proper implementation later
+		// Convert to JSONMap for backward compatibility, replace with proper implementation later
 		return getArgVal(req, key, clazz, false);
 	}
 
@@ -906,7 +907,7 @@ public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L
 	 * @throws Exception 
 	 */
 	public <V> V getArgVal(String key, Class<V> clazz, boolean defaultValue) throws Exception {
-		Object obj = parser != null && apijson.JSONObject.isArrayKey(key) ? AbstractParser.getValue(request, key.split("\\,")) : request.get(key);
+		Object obj = parser != null && JSONMap.isArrayKey(key) ? AbstractParser.getValue(request, key.split("\\,")) : request.get(key);
 		
 		if (clazz == null) {
 			return (V) obj;

@@ -224,11 +224,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 	@Override
 	public String getIdKey(String database, String schema, String datasource, String table) {
-		return apijson.JSONObject.KEY_ID;
+		return JSONMap.KEY_ID;
 	}
 	@Override
 	public String getUserIdKey(String database, String schema, String datasource, String table) {
-		return apijson.JSONObject.KEY_USER_ID;
+		return JSONMap.KEY_USER_ID;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -313,7 +313,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param role
 	 * @return
 	 * @throws Exception
-	 * @see {@link apijson.JSONObject#KEY_ROLE}
+	 * @see {@link JSONMap#KEY_ROLE}
 	 */
 	public void verifyAllowRole(SQLConfig<T, M, L> config, String table, RequestMethod method, String role) throws Exception {
 		Log.d(TAG, "verifyAllowRole  table = " + table + "; method = " + method + "; role = " + role);
@@ -344,7 +344,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param role
 	 * @return
 	 * @throws Exception
-	 * @see {@link apijson.JSONObject#KEY_ROLE}
+	 * @see {@link JSONMap#KEY_ROLE}
 	 */
 	public void verifyUseRole(SQLConfig<T, M, L> config, String table, RequestMethod method, String role) throws Exception {
 		Log.d(TAG, "verifyUseRole  table = " + table + "; method = " + method + "; role = " + role);
@@ -533,7 +533,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		M tblObj = JSON.createJSONObject();
 		tblObj.put(key, value);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
-			tblObj.put(apijson.JSONObject.KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
+			tblObj.put(JSONMap.KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
 		}
 
 		M req = JSON.createJSONObject();
@@ -655,9 +655,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 
 		//已在 Verifier 中处理
-		//		if (get(getString(request, apijson.JSONObject.KEY_ROLE)) == ADMIN) {
+		//		if (get(getString(request, apijson.JSONMap.KEY_ROLE)) == ADMIN) {
 		//			throw new IllegalArgumentException("角色设置错误！不允许在写操作Request中传 " + name +
-		//					":{ " + apijson.JSONObject.KEY_ROLE + ":admin } ！");
+		//					":{ " + apijson.JSONMap.KEY_ROLE + ":admin } ！");
 		//		}
 
 
@@ -672,10 +672,10 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					if (tobj != null) {//不允许不传Target中指定的Table
 						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":{} ！");
 					}
-				} else if (apijson.JSONObject.isTableKey(key)) {
-					String db = getString(request, apijson.JSONObject.KEY_DATABASE);
-					String sh = getString(request, apijson.JSONObject.KEY_SCHEMA);
-					String ds = getString(request, apijson.JSONObject.KEY_DATASOURCE);
+				} else if (JSONMap.isTableKey(key)) {
+					String db = getString(request, JSONMap.KEY_DATABASE);
+					String sh = getString(request, JSONMap.KEY_SCHEMA);
+					String ds = getString(request, JSONMap.KEY_DATASOURCE);
 					if (StringUtil.isEmpty(db, false)) {
 						db = database;
 					}
@@ -687,7 +687,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 
 					String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, key);
-					String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
+					String finalIdKey = StringUtil.isEmpty(idKey, false) ? JSONMap.KEY_ID : idKey;
 
 					if (method == RequestMethod.POST) {
 						if (robj.containsKey(finalIdKey)) {
@@ -699,7 +699,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, atLeastOne != null ? atLeastOne : IS_UPDATE_MUST_HAVE_ID_CONDITION);
 
 							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, ds, key);
-							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? apijson.JSONObject.KEY_USER_ID : userIdKey;
+							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? JSONMap.KEY_USER_ID : userIdKey;
 							verifyId(method.name(), name, key, robj, finalUserIdKey, maxUpdateCount, false);
 						}
 					}
@@ -710,7 +710,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 			@Override
 			protected L onParseJSONArray(String key, L tarray, L rarray) throws Exception {
-				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && apijson.JSONObject.isArrayKey(key)) {
+				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONMap.isArrayKey(key)) {
 					if (rarray == null || rarray.isEmpty()) {
 						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":[{ ... }] "
 								+ "，批量新增 Table[]:value 中 value 必须是包含表对象的非空数组！其中每个子项 { ... } 都是"
@@ -937,7 +937,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		Object _if = target.get(IF.name());
 		boolean ifIsStr = _if instanceof String && StringUtil.isNotEmpty(_if, true);
 		M ifObj = ifIsStr == false && _if instanceof Map<?,?> ? (M) _if : null;
-//				: (_if instanceof String ? new apijson.JSONObject((String) _if, "" /* "throw new Error('')" */ ) : null);
+//				: (_if instanceof String ? new apijson.JSONMap((String) _if, "" /* "throw new Error('')" */ ) : null);
 		if (ifObj == null && _if != null && ifIsStr == false) {
 //			if (_if instanceof List<?>) {
 //			}
@@ -1006,7 +1006,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 					tvalue = callback.onParseJSONArray(key, (L) tvalue, (L) rvalue);
 
-					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && apijson.JSONObject.isArrayKey(key)) {
+					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONMap.isArrayKey(key)) {
 						objKeySet.add(key);
 					}
 				} else { // 其它Object
@@ -1114,7 +1114,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
                             + name + " 里面不允许传 " + rk + ":{} ！");
 				}
 				if ((method == RequestMethod.POST || method == RequestMethod.PUT)
-                        && rv instanceof List<?> && apijson.JSONObject.isArrayKey(rk)) {
+                        && rv instanceof List<?> && JSONMap.isArrayKey(rk)) {
 					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 "
                             + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
 				}
@@ -1139,9 +1139,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		// 校验与修改Request>>>>>>>>>>>>>>>>>
 
 
-		String db = getString(real, apijson.JSONObject.KEY_DATABASE);
-		String sh = getString(real, apijson.JSONObject.KEY_SCHEMA);
-		String ds = getString(real, apijson.JSONObject.KEY_DATASOURCE);
+		String db = getString(real, JSONMap.KEY_DATABASE);
+		String sh = getString(real, JSONMap.KEY_SCHEMA);
+		String ds = getString(real, JSONMap.KEY_DATASOURCE);
 		if (StringUtil.isEmpty(db, false)) {
 			db = database;
 		}
@@ -1152,7 +1152,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			ds = datasource;
 		}
 		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, name);
-		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
+		String finalIdKey = StringUtil.isEmpty(idKey, false) ? JSONMap.KEY_ID : idKey;
 
 		// TODO 放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
 		// 校验存在<<<<<<<<<<<<<<<<<<<
@@ -1184,7 +1184,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		String[] partialFails = StringUtil.split(allowPartialUpdateFail);
 		if (partialFails != null && partialFails.length > 0) {
 			for (String key : partialFails) {
-                if (apijson.JSONObject.isArrayKey(key) == false) {
+                if (JSONMap.isArrayKey(key) == false) {
                     throw new IllegalArgumentException("后端 Request 表中 " + ALLOW_PARTIAL_UPDATE_FAIL.name()
                             + ":value 中 " + key + " 不合法！必须以 [] 结尾！");
                 }
@@ -1207,15 +1207,15 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		// 校验并配置允许部分批量增删改失败>>>>>>>>>>>>>>>>>>>
 
 
-		String[] nks = ifObj == null ? null : StringUtil.split(getString(real, apijson.JSONObject.KEY_NULL));
+		String[] nks = ifObj == null ? null : StringUtil.split(getString(real, JSONMap.KEY_NULL));
 		Collection<?> nkl = nks == null || nks.length <= 0 ? new HashSet<>() : Arrays.asList(nks);
 
 		Set<Map.Entry<String, Object>> ifSet = ifObj == null ? null : ifObj.entrySet();
 		if (ifIsStr || (ifSet != null && ifSet.isEmpty() == false)) {
 			// 没必要限制，都是后端配置的，安全可控，而且可能确实有特殊需求，需要 id, @column 等
-//			List<String> condKeys = new ArrayList<>(Arrays.asList(apijson.JSONObject.KEY_ID, apijson.JSONObject.KEY_ID_IN
-//					, apijson.JSONObject.KEY_USER_ID, apijson.JSONObject.KEY_USER_ID_IN));
-//			condKeys.addAll(apijson.JSONObject.TABLE_KEY_LIST);
+//			List<String> condKeys = new ArrayList<>(Arrays.asList(apijson.JSONMap.KEY_ID, apijson.JSONMap.KEY_ID_IN
+//					, apijson.JSONMap.KEY_USER_ID, apijson.JSONMap.KEY_USER_ID_IN));
+//			condKeys.addAll(apijson.JSONMap.TABLE_KEY_LIST);
 
 			String preCode = "var curObj = " + JSON.toJSONString(real) + ";";
 
@@ -1409,7 +1409,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		//这里不抽取 enum，因为 enum 不能满足扩展需求，子类需要可以自定义，而且 URL[] 这种也不符合命名要求，得用 constructor + getter + setter
 		switch (tv) {
 		case "BOOLEAN": //Boolean.parseBoolean(getString(real, tk)); 只会判断null和true
-			if (rv instanceof Boolean == false) { //apijson.JSONObject.getBoolean 可转换Number类型
+			if (rv instanceof Boolean == false) { //apijson.JSONMap.getBoolean 可转换Number类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！类型必须是 BOOLEAN" + (isInArray ? "[] !" : " !"));
 			}
 			break;
@@ -1429,7 +1429,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 			break;
 		case "STRING":
-			if (rv instanceof String == false) { //apijson.JSONObject.getString 可转换任何类型
+			if (rv instanceof String == false) { //apijson.JSONMap.getString 可转换任何类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
                         "类型必须是 STRING" + (isInArray ? "[] !" : " !"));
 			}
@@ -1467,13 +1467,13 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 			break;
 		case "OBJECT":
-			if (rv instanceof Map == false) { //apijson.JSONObject.getJSONObject 可转换String类型
+			if (rv instanceof Map == false) { //apijson.JSONMap.getJSONObject 可转换String类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
                         "类型必须是 OBJECT" + (isInArray ? "[] !" : " !") + " OBJECT 结构为 {} !");
 			}
 			break;
 		case "ARRAY":
-			if (rv instanceof Collection == false) { //apijson.JSONObject.getJSONArray 可转换String类型
+			if (rv instanceof Collection == false) { //apijson.JSONMap.getJSONArray 可转换String类型
 				throw new UnsupportedDataTypeException(tk + ":value 的value不合法！" +
                         "类型必须是 ARRAY" + (isInArray ? "[] !" : " !") + " ARRAY 结构为 [] !");
 			}
@@ -1524,17 +1524,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				return;
 			}
 
-			L array = AbstractSQLConfig.newJSONArray(tv, new JSONCreator<M, L>() {
-				@Override
-				public M createJSONObject() {
-					return JSON.createJSONObject();
-				}
-
-				@Override
-				public L createJSONArray() {
-					return JSON.createJSONArray();
-				}
-			});
+			L array = AbstractSQLConfig.newJSONArray(tv);
 
 			boolean m;
 			boolean isOr = false;
@@ -1619,17 +1609,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
 			}
 
-			L array = AbstractSQLConfig.newJSONArray(tv, new JSONCreator<Map<String, Object>, L>() {
-				@Override
-				public M createJSONObject() {
-					return JSON.createJSONObject();
-				}
-
-				@Override
-				public L createJSONArray() {
-					return JSON.createJSONArray();
-				}
-			});
+			L array = AbstractSQLConfig.newJSONArray(tv);
 
 			boolean isOr = false;
 			for (Object o : array) {
@@ -1856,7 +1836,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			return;
 		}
 
-		String finalIdKey = StringUtil.isEmpty(idKey, false) ? apijson.JSONObject.KEY_ID : idKey;
+		String finalIdKey = StringUtil.isEmpty(idKey, false) ? JSONMap.KEY_ID : idKey;
 
 		SQLConfig<T, M, L> config = creator.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
 		config.setTable(table);

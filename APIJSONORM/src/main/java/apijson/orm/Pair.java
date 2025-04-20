@@ -34,8 +34,8 @@ public class Pair extends Entry<String, String> {
 		CLASS_MAP.put(String.class.getSimpleName(), String.class);
 		CLASS_MAP.put(Collection.class.getSimpleName(), Collection.class);//不允许指定<T>
 		CLASS_MAP.put(Map.class.getSimpleName(), Map.class);//不允许指定<T>
-//		CLASS_MAP.put(JSONObject.class.getSimpleName(), JSONObject.class);//必须有，Map中没有getLongValue等方法
-//		CLASS_MAP.put(JSONArray.class.getSimpleName(), JSONArray.class);//必须有，Collection中没有getJSONObject等方法
+//		CLASS_MAP.put(JSONMap.class.getSimpleName(), JSONMap.class);//必须有，Map中没有getLongValue等方法
+//		CLASS_MAP.put(JSONList.class.getSimpleName(), JSONList.class);//必须有，Collection中没有getJSONObject等方法
 	}
 
 

@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public interface JSONParser<M extends Map<String, Object>, L extends List<Object>> extends JSONCreator<M, L> {
 
-    Object parseJSON(Object json);
+    Object parse(Object json);
 
     M parseObject(Object json);
 

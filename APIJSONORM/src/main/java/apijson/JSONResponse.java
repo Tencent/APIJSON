@@ -7,8 +7,6 @@ package apijson;
 
 import java.util.*;
 
-import static apijson.JSON.parseObject;
-
 /**parser for response
  * @author Lemon
  * @see #getObject
@@ -17,8 +15,8 @@ import static apijson.JSON.parseObject;
  * <br> User user = response.getObject(User.class);//not a must
  * <br> List<Comment> commenntList = response.getList("Comment[]", Comment.class);//not a must
  */
-public class JSONResponse<M extends Map<String, Object>, L extends List<Object>> extends apijson.JSONObject implements Map<String, Object> {
-	private static final long serialVersionUID = 1L;
+public interface JSONResponse<M extends Map<String, Object>, L extends List<Object>> extends JSONMap<M, L> {
+	static final String TAG = "JSONResponse";
 
 	// 节约性能和减少 bug，除了关键词 @key ，一般都符合变量命名规范，不符合也原样返回便于调试
 	/**格式化带 - 中横线的单词
@@ -31,23 +29,22 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 */
 	public static boolean IS_FORMAT_DOLLAR = false;
 
-	private static final String TAG = "JSONResponse";
 
-	public JSONResponse() {
-		super();
-	}
-	public JSONResponse(Object json) {
-		this(parseObject(json));
-	}
-	public JSONResponse(Object json, JSONParser<M, L> parser) {
-		this(parseObject(json, parser));
-	}
-	public JSONResponse(Map<String, Object> object) {
-		super(format(object));
-	}
-	public JSONResponse(M object, JSONCreator<M, L> creator) {
-		super(format(object, creator));
-	}
+	//default JSONResponse() {
+	//	super();
+	//}
+	//default JSONResponse(Object json) {
+	//	this(parseObject(json));
+	//}
+	//default JSONResponse(Object json, JSONParser<M, L> parser) {
+	//	this(parseObject(json, parser));
+	//}
+	//default JSONResponse(Map<String, Object> object) {
+	//	super(format(object));
+	//}
+	//default JSONResponse(M object, JSONCreator<M, L> creator) {
+	//	super(format(object, creator));
+	//}
 
 	//状态信息，非GET请求获得的信息<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -85,9 +82,9 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	/**获取状态
 	 * @return
 	 */
-	public int getCode() {
+	default int getCode() {
 		try {
-			return getIntValue(KEY_CODE);
+			return JSON.getIntValue(this, KEY_CODE);
 		} catch (Exception e) {
 			//empty
 		}
@@ -107,8 +104,8 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	/**获取状态描述
 	 * @return
 	 */
-	public String getMsg() {
-		return getString(KEY_MSG);
+	default String getMsg() {
+		return JSON.getString(this, KEY_MSG);
 	}
 	/**获取状态描述
 	 * @param response
@@ -120,9 +117,9 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	/**获取id
 	 * @return
 	 */
-	public long getId() {
+	default long getId() {
 		try {
-			return getLongValue(KEY_ID);
+			return JSON.getLongValue(this, KEY_ID);
 		} catch (Exception e) {
 			//empty
 		}
@@ -131,9 +128,9 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	/**获取数量
 	 * @return
 	 */
-	public int getCount() {
+	default int getCount() {
 		try {
-			return getIntValue(KEY_COUNT);
+			return JSON.getIntValue(this, KEY_COUNT);
 		} catch (Exception e) {
 			//empty
 		}
@@ -142,9 +139,9 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	/**获取总数
 	 * @return
 	 */
-	public int getTotal() {
+	default int getTotal() {
 		try {
-			return getIntValue(KEY_TOTAL);
+			return JSON.getIntValue(this, KEY_TOTAL);
 		} catch (Exception e) {
 			//empty
 		}
@@ -155,7 +152,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	/**是否成功
 	 * @return
 	 */
-	public boolean isSuccess() {
+	default boolean isSuccess() {
 		return isSuccess(getCode());
 	}
 	/**是否成功
@@ -177,17 +174,13 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @return
 	 */
 	public static boolean isSuccess(Map<String, Object> response) {
-        try {
-            return response != null && isSuccess(JSON.getIntValue(response, KEY_CODE));
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+		return response != null && isSuccess(JSON.getIntValue(response, KEY_CODE));
     }
 
 	/**校验服务端是否存在table
 	 * @return
 	 */
-	public boolean isExist() {
+	default boolean isExist() {
 		return isExist(getCount());
 	}
 	/**校验服务端是否存在table
@@ -204,21 +197,18 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	public static boolean isExist(JSONResponse<?, ?> response) {
 		return response != null && response.isExist();
 	}
+	public static boolean isExist(Map<String, Object> response) {
+		return response != null && isExist(JSON.getIntValue(response, KEY_COUNT));
+	}
 
 	/**获取内部的JSONResponse
 	 * @param key
 	 * @return
 	 */
-	public JSONResponse<M, L> getJSONResponse(String key) {
-		return getObject(key, JSONResponse.class, null);
+	default JSONResponse<M, L> getJSONResponse(String key) {
+		return getObject(key, JSONResponse.class);
 	}
-	/**获取内部的JSONResponse
-	 * @param key
-	 * @return
-	 */
-	public JSONResponse<M, L> getJSONResponse(String key, JSONParser<M, L> parser) {
-		return getObject(key, JSONResponse.class, parser);
-	}
+
 	//cannot get javaBeanDeserizer
 	//	/**获取内部的JSONResponse
 	//	 * @param response
@@ -236,32 +226,16 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param clazz
 	 * @return
 	 */
-	public <T> T getObject(Class<T> clazz) {
-		return getObject(clazz == null ? "" : clazz.getSimpleName(), clazz, (JSONParser<M, L>) DEFAULT_JSON_PARSER);
-	}
-	/**
-	 * key = clazz.getSimpleName()
-	 * @param clazz
-	 * @return
-	 */
-	public <T> T getObject(Class<T> clazz, JSONParser<M, L> parser) {
-		return getObject(clazz == null ? "" : clazz.getSimpleName(), clazz, parser);
+	default <T> T getObject(Class<T> clazz) {
+		return getObject(clazz == null ? "" : clazz.getSimpleName(), clazz);
 	}
 	/**
 	 * @param key
 	 * @param clazz
 	 * @return
 	 */
-	public <T> T getObject(String key, Class<T> clazz) {
-		return getObject(this, key, clazz, (JSONParser<M, L>) DEFAULT_JSON_PARSER);
-	}
-	/**
-	 * @param key
-	 * @param clazz
-	 * @return
-	 */
-	public <T> T getObject(String key, Class<T> clazz, JSONParser<M, L> parser) {
-		return getObject(this, key, clazz, parser);
+	default <T> T getObject(String key, Class<T> clazz) {
+		return getObject(this, key, clazz);
 	}
 	/**
 	 * @param object
@@ -269,64 +243,47 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param clazz
 	 * @return
 	 */
-	public static <T, M extends Map<String, Object>, L extends List<Object>> T getObject(
-			Map<String, Object> object, String key, Class<T> clazz, JSONParser<M, L> parser) {
-		return toObject(object == null ? null : JSON.get(object, formatObjectKey(key)), clazz, parser);
+	public static <T> T getObject(
+			Map<String, Object> object, String key, Class<T> clazz) {
+		return toObject(object == null ? null : JSON.get(object, formatObjectKey(key)), clazz);
 	}
 
 	/**
 	 * @param clazz
 	 * @return
 	 */
-	public <T> T toObject(Class<T> clazz) {
-		return toObject(clazz, null);
+	default <T> T toObject(Class<T> clazz) {
+		return toObject(this, clazz);
 	}
-	/**
-	 * @param clazz
-	 * @return
-	 */
-	public <T> T toObject(Class<T> clazz, JSONParser<M, L> parser) {
-		return toObject(this, clazz, parser);
-	}
+
 	/**
 	 * @param object
 	 * @param clazz
 	 * @return
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> T toObject(
-			Map<String, Object> object, Class<T> clazz, JSONParser<M, L> parser) {
-		return parseObject(object, clazz, parser);
+			Map<String, Object> object, Class<T> clazz) {
+		return JSON.parseObject(object, clazz);
 	}
 
 
 
-
-	/**
-	 * key = KEY_ARRAY
-	 * @param clazz
-	 * @return
-	 */
-	public <T> List<T> getList(Class<T> clazz, JSONParser<M, List<Object>> parser) {
-		return getList(KEY_ARRAY, clazz, parser);
-	}
 	/**
 	 * arrayObject = this
 	 * @param key
-	 * @param clazz
 	 * @return
 	 */
-	public <T> List<T> getList(String key, Class<T> clazz, JSONParser<M, List<Object>> parser) {
-		return getList(this, key, clazz, parser);
+	default <T> List<T> getList(String key) {
+		return JSON.getList(this, key);
 	}
 
 	/**
 	 * key = KEY_ARRAY
 	 * @param object
-	 * @param clazz
 	 * @return
 	 */
-	public static <T, M extends Map<String, Object>> List<T> getList(Map<String, Object> object, Class<T> clazz, JSONParser<M, List<Object>> parser) {
-		return getList(object, KEY_ARRAY, clazz, parser);
+	public static <T> List<T> getList(Map<String, Object> object) {
+		return JSON.getList(object, KEY_ARRAY);
 	}
 	/**
 	 * @param object
@@ -334,29 +291,29 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param clazz
 	 * @return
 	 */
-	public static <T, M extends Map<String, Object>> List<T> getList(Map<String, Object> object, String key, Class<T> clazz, JSONParser<M, List<Object>> parser) {
-		return object == null ? null : JSON.parseArray(JSON.getString(object, formatArrayKey(key)), clazz, parser);
+	public static <T, M extends Map<String, Object>> List<T> getList(Map<String, Object> object, String key, Class<T> clazz) {
+		return object == null ? null : JSON.parseArray(JSON.getString(object, formatArrayKey(key)), clazz);
 	}
 
 	/**
 	 * key = KEY_ARRAY
 	 * @return
 	 */
-	public JSONArray getArray() {
+	default <L extends List<Object>> L getArray() {
 		return getArray(KEY_ARRAY);
 	}
 	/**
 	 * @param key
 	 * @return
 	 */
-	public JSONArray getArray(String key) {
+	default <L extends List<Object>> L getArray(String key) {
 		return getArray(this, key);
 	}
 	/**
 	 * @param object
 	 * @return
 	 */
-	public static JSONArray getArray(Map<String, Object> object) {
+	public static <L extends List<Object>> L getArray(Map<String, Object> object) {
 		return getArray(object, KEY_ARRAY);
 	}
 	/**
@@ -365,7 +322,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param key
 	 * @return
 	 */
-	public static JSONArray getArray(Map<String, Object> object, String key) {
+	public static <L extends List<Object>> L getArray(Map<String, Object> object, String key) {
 		return object == null ? null : JSON.get(object, formatArrayKey(key));
 	}
 
@@ -373,40 +330,21 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	//	/**
 	//	 * @return
 	//	 */
-	//	public JSONRequest format() {
+	//	default JSONRequest format() {
 	//		return format(this);
 	//	}
 	/**格式化key名称
 	 * @param object
 	 * @return
 	 */
-	public static JSONObject format(final Map<String, Object> object) {
-		//		return format(object, JSON.DEFAULT_JSON_CREATOR);
-		JSONObject obj = new JSONObject(object);
-		return format(obj, new JSONCreator<JSONObject, JSONArray>() {
-			@Override
-			public JSONObject createJSONObject() {
-				return new JSONObject();
-			}
-
-			@Override
-			public JSONArray createJSONArray() {
-				return new JSONArray();
-			}
-		});
-	}
-	/**格式化key名称
-	 * @param object
-	 * @return
-	 */
-	public static <M extends Map<String, Object>, L extends List<Object>> M format(final M object, @NotNull JSONCreator<M, L> creator) {
+	public static <M extends Map<String, Object>, L extends List<Object>> M format(final M object) {
 		//太长查看不方便，不如debug	 Log.i(TAG, "format  object = \n" + JSON.toJSONString(object));
 		if (object == null || object.isEmpty()) {
 			Log.i(TAG, "format  object == null || object.isEmpty() >> return object;");
 			return object;
 		}
 
-		M formatedObject = creator.createJSONObject();
+		M formatedObject = JSON.createJSONObject();
 
 		Set<String> set = object.keySet();
 		if (set != null) {
@@ -415,11 +353,11 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 			for (String key : set) {
 				value = object.get(key);
 
-				if (value instanceof List<?>) {//JSONArray，遍历来format内部项
-					formatedObject.put(formatArrayKey(key), format((L) value, creator));
+				if (value instanceof List<?>) {//JSONList，遍历来format内部项
+					formatedObject.put(formatArrayKey(key), format((L) value));
 				}
 				else if (value instanceof Map<?, ?>) {//JSONRequest，往下一级提取
-					formatedObject.put(formatObjectKey(key), format((M) value, creator));
+					formatedObject.put(formatObjectKey(key), format((M) value));
 				}
 				else {//其它Object，直接填充
 					formatedObject.put(formatOtherKey(key), value);
@@ -435,45 +373,30 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @param array
 	 * @return
 	 */
-	public static JSONArray format(final List<Object> array) {
-		//		return format(array, JSON.DEFAULT_JSON_CREATOR);
-		JSONArray arr = new JSONArray(array);
-		return format(arr, new JSONCreator<JSONObject, JSONArray>() {
-			@Override
-			public JSONObject createJSONObject() {
-				return new JSONObject();
-			}
-
-			@Override
-			public JSONArray createJSONArray() {
-				return new JSONArray();
-			}
-		});
-	}
-	public static <M extends Map<String, Object>, L extends List<Object>> L format(final L array, @NotNull JSONCreator<M, L> creator) {
+	public static <M extends Map<String, Object>, L extends List<Object>> L format(final L array) {
 		//太长查看不方便，不如debug	 Log.i(TAG, "format  array = \n" + JSON.toJSONString(array));
 		if (array == null || array.isEmpty()) {
 			Log.i(TAG, "format  array == null || array.isEmpty() >> return array;");
 			return array;
 		}
-		L formatedArray = creator.createJSONArray();
+		L formattedArray = JSON.createJSONArray();
 
 		Object value;
 		for (int i = 0; i < array.size(); i++) {
 			value = array.get(i);
-			if (value instanceof List<?>) {//JSONArray，遍历来format内部项
-				formatedArray.add(format((L) value, creator));
+			if (value instanceof List<?>) {//JSONList，遍历来format内部项
+				formattedArray.add(format((L) value));
 			}
 			else if (value instanceof Map<?, ?>) {//JSONRequest，往下一级提取
-				formatedArray.add(format((M) value, creator));
+				formattedArray.add(format((M) value));
 			}
 			else {//其它Object，直接填充
-				formatedArray.add(value);
+				formattedArray.add(value);
 			}
 		}
 
-		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formatedArray = " + JSON.toJSONString(formatedArray));
-		return formatedArray;
+		//太长查看不方便，不如debug	 Log.i(TAG, "format  return formattedArray = " + JSON.toJSONString(formattedArray));
+		return formattedArray;
 	}
 
 
@@ -492,7 +415,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, Boolean)} formatColon = true, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String getVariableName(String fullName) {
-		if (isArrayKey(fullName)) {
+		if (JSONMap.isArrayKey(fullName)) {
 			fullName = StringUtil.addSuffix(fullName.substring(0, fullName.length() - 2), "list");
 		}
 		return formatKey(fullName, true, true, true, true, false, true);
@@ -503,7 +426,7 @@ public class JSONResponse<M extends Map<String, Object>, L extends List<Object>>
 	 * @return {@link #formatKey(String, boolean, boolean, boolean, boolean, boolean, Boolean)} formatColon = false, formatAt = true, formatHyphen = true, firstCase = true
 	 */
 	public static String formatArrayKey(String key) {
-		if (isArrayKey(key)) {
+		if (JSONMap.isArrayKey(key)) {
 			key = StringUtil.addSuffix(key.substring(0, key.length() - 2), "list");
 		}
 		int index = key == null ? -1 : key.indexOf(":");

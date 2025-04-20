@@ -17,9 +17,9 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static apijson.JSON.*;
-import static apijson.JSONObject.KEY_COMBINE;
-import static apijson.JSONObject.KEY_DROP;
-import static apijson.JSONObject.KEY_TRY;
+import static apijson.JSONMap.KEY_COMBINE;
+import static apijson.JSONMap.KEY_DROP;
+import static apijson.JSONMap.KEY_TRY;
 import static apijson.JSONRequest.*;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
@@ -79,7 +79,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		this.arrayTable = arrayConfig == null ? null : arrayConfig.getTable();
 		this.joinList = arrayConfig == null ? null : arrayConfig.getJoinList();
 
-		this.isTable = isTable; // apijson.JSONObject.isTableKey(table);
+		this.isTable = isTable; // apijson.JSONMap.isTableKey(table);
 		this.isArrayMainTable = isArrayMainTable; // isSubquery == false && this.isTable && this.type == SQLConfig.TYPE_ITEM_CHILD_0 && RequestMethod.isGetMethod(method, true);
 		//		this.isReuse = isReuse; // isArrayMainTable && arrayConfig != null && arrayConfig.getPosition() > 0;
 
@@ -100,7 +100,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		}
 
         if (isTable) {
-            String raw = getString(request, apijson.JSONObject.KEY_RAW);
+            String raw = getString(request, JSONMap.KEY_RAW);
             String[] rks = StringUtil.split(raw);
             rawKeyList = rks == null || rks.length <= 0 ? null : Arrays.asList(rks);
         }
@@ -240,10 +240,10 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 						}
 						// Arrays.asList() 返回值不支持 add 方法！
 						whereList = new ArrayList<String>(Arrays.asList(combine != null ? combine : new String[]{}));
-						whereList.add(apijson.JSONObject.KEY_ID);
-						whereList.add(apijson.JSONObject.KEY_ID_IN);
-						//						whereList.add(apijson.JSONObject.KEY_USER_ID);
-						//						whereList.add(apijson.JSONObject.KEY_USER_ID_IN);
+						whereList.add(JSONMap.KEY_ID);
+						whereList.add(JSONMap.KEY_ID_IN);
+						//						whereList.add(apijson.JSONMap.KEY_USER_ID);
+						//						whereList.add(apijson.JSONMap.KEY_USER_ID_IN);
 					}
 					// 条件>>>>>>>>>>>>>>>>>>>
 
@@ -256,7 +256,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 							break;
 						}
 
-						// key 可能为 JSONArray，需要进行手动转换（fastjson 为低版本时允许自动转换，如 1.2.21）
+						// key 可能为 JSONList，需要进行手动转换（fastjson 为低版本时允许自动转换，如 1.2.21）
 						// 例如 request json为 "{[]:{"page": 2, "table1":{}}}"
 						Object field = entry == null ? null : entry.getKey();
 						String key = field instanceof Map ? toJSONString(field) : field.toString();
@@ -271,7 +271,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
 						Object obj = key.endsWith("@") ? request.get(key) : null;
 						if (obj instanceof Map<?, ?>) {
-							((Map<String, Object>) obj).put(apijson.JSONObject.KEY_METHOD, GET);
+							((Map<String, Object>) obj).put(JSONMap.KEY_METHOD, GET);
 						}
 
 						try {
@@ -302,7 +302,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 								}
 							}
 							else if ((_method == POST || _method == PUT) && value instanceof List<?>
-									&& apijson.JSONObject.isTableArray(key)) {  // L，批量新增或修改，往下一级提取
+									&& JSONMap.isTableArray(key)) {  // L，批量新增或修改，往下一级提取
 								onTableArrayParse(key, (L) value);
 							}
 							else if (_method == PUT && value instanceof List<?> && (whereList == null || whereList.contains(key) == false)
@@ -329,38 +329,38 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
 					String db = parser.getGlobalDatabase();
 					if (db != null) {
-						sqlRequest.putIfAbsent(apijson.JSONObject.KEY_DATABASE, db);
+						sqlRequest.putIfAbsent(JSONMap.KEY_DATABASE, db);
 					}
 
 					String ds = parser.getGlobalDatasource();
 					if (ds != null) {
-						sqlRequest.putIfAbsent(apijson.JSONObject.KEY_DATASOURCE, ds);
+						sqlRequest.putIfAbsent(JSONMap.KEY_DATASOURCE, ds);
 					}
 
 					String ns = parser.getGlobalNamespace();
 					if (ns != null) {
-						sqlRequest.putIfAbsent(apijson.JSONObject.KEY_NAMESPACE, ns);
+						sqlRequest.putIfAbsent(JSONMap.KEY_NAMESPACE, ns);
 					}
 
 					String cl = parser.getGlobalCatalog();
 					if (cl != null) {
-						sqlRequest.putIfAbsent(apijson.JSONObject.KEY_CATALOG, cl);
+						sqlRequest.putIfAbsent(JSONMap.KEY_CATALOG, cl);
 					}
 
 					String sch = parser.getGlobalSchema();
 					if (sch != null) {
-						sqlRequest.putIfAbsent(apijson.JSONObject.KEY_SCHEMA, sch);
+						sqlRequest.putIfAbsent(JSONMap.KEY_SCHEMA, sch);
 					}
 
 					if (isSubquery == false) { // 解决 SQL 语法报错，子查询不能 EXPLAIN
 						Boolean exp = parser.getGlobalExplain();
 						if (sch != null) {
-							sqlRequest.putIfAbsent(apijson.JSONObject.KEY_EXPLAIN, exp);
+							sqlRequest.putIfAbsent(JSONMap.KEY_EXPLAIN, exp);
 						}
 
 						String cache = parser.getGlobalCache();
 						if (cache != null) {
-							sqlRequest.putIfAbsent(apijson.JSONObject.KEY_CACHE, cache);
+							sqlRequest.putIfAbsent(JSONMap.KEY_CACHE, cache);
 						}
 					}
 				}
@@ -419,7 +419,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 					for (Entry<String, Object> e : set) {
 						String k = e == null ? null : e.getKey();
 						Object v = k == null ? null : e.getValue();
-						if (v instanceof Map<?, ?> && apijson.JSONObject.isTableKey(k)) {
+						if (v instanceof Map<?, ?> && JSONMap.isTableKey(k)) {
 							from = k;
 							arrObj = (M) v;
 							break;
@@ -470,9 +470,9 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 					}
 
 					// 非查询关键词 @key 不影响查询，直接跳过
-					if (isTable && (key.startsWith("@") == false || apijson.JSONObject.TABLE_KEY_LIST.contains(key))) {
+					if (isTable && (key.startsWith("@") == false || JSONMap.TABLE_KEY_LIST.contains(key))) {
 						Log.e(TAG, "onParse  isTable && (key.startsWith(@) == false"
-								+ " || apijson.JSONObject.TABLE_KEY_LIST.contains(key)) >>  return null;");
+								+ " || apijson.JSONMap.TABLE_KEY_LIST.contains(key)) >>  return null;");
 						// FIXME getCache() != null 时 return true，解决 RIGHT/OUTER/FOREIGN JOIN 主表无数据导致副表数据也不返回
 						return false; // 获取不到就不用再做无效的 query 了。不考虑 Table:{Table:{}} 嵌套
 					}
@@ -493,9 +493,9 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 //					Log.d(TAG, "onParse  targetPath.equals(target)  >>");
 //
 //					//非查询关键词 @key 不影响查询，直接跳过
-//					if (isTable && (key.startsWith("@") == false || apijson.JSONObject.TABLE_KEY_LIST.contains(key))) {
+//					if (isTable && (key.startsWith("@") == false || apijson.JSONMap.TABLE_KEY_LIST.contains(key))) {
 //						Log.e(TAG, "onParse  isTable && (key.startsWith(@) == false"
-//								+ " || apijson.JSONObject.TABLE_KEY_LIST.contains(key)) >>  return null;");
+//								+ " || apijson.JSONMap.TABLE_KEY_LIST.contains(key)) >>  return null;");
 //						return false;//获取不到就不用再做无效的query了。不考虑 Table:{Table:{}}嵌套
 //					} else {
 //						Log.d(TAG, "onParse  isTable(table) == false >> return true;");
@@ -550,7 +550,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 				functionMap.put(type, map);
 			}
 		}
-		else if (isTable && key.startsWith("@") && apijson.JSONObject.TABLE_KEY_LIST.contains(key) == false) {
+		else if (isTable && key.startsWith("@") && JSONMap.TABLE_KEY_LIST.contains(key) == false) {
             customMap.put(key, value);
 		}
 		else {
@@ -578,7 +578,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		Object child;
 		boolean isEmpty;
 
-		if (apijson.JSONObject.isArrayKey(key)) { // APIJSON Array
+		if (JSONMap.isArrayKey(key)) { // APIJSON Array
 			if (isMain) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中第一个 key:{} 必须是主表 TableKey:{} ！不能为 arrayKey[]:{} ！");
@@ -615,7 +615,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 			}
 		}
 		else { //APIJSON Object
-			boolean isTableKey = apijson.JSONObject.isTableKey(Pair.parseEntry(key, true).getKey());
+			boolean isTableKey = JSONMap.isTableKey(Pair.parseEntry(key, true).getKey());
 			if (type == TYPE_ITEM && isTableKey == false) {
 				throw new IllegalArgumentException(parentPath + "/" + key + ":{} 不合法！"
 						+ "数组 []:{} 中每个 key:{} 都必须是表 TableKey:{} 或 数组 arrayKey[]:{} ！");
@@ -675,8 +675,8 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
 		//GET <<<<<<<<<<<<<<<<<<<<<<<<<
 		M rq = JSON.createJSONObject();
-		rq.put(apijson.JSONObject.KEY_ID, request.get(apijson.JSONObject.KEY_ID));
-		rq.put(apijson.JSONObject.KEY_COLUMN, realKey);
+		rq.put(JSONMap.KEY_ID, request.get(JSONMap.KEY_ID));
+		rq.put(JSONMap.KEY_COLUMN, realKey);
 		M rp = parseResponse(RequestMethod.GET, table, null, rq, null, false);
 		//GET >>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -685,7 +685,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		Object target = rp == null ? null : rp.get(realKey);
 		if (target instanceof String) {
 			try {
-				target = parseJSON((String) target);
+				target = JSON.parse(target);
 			} catch (Throwable e) {
 				if (Log.DEBUG) {
 					Log.e(TAG, "try {\n" +
@@ -768,7 +768,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
 	@Override
 	public void onTableArrayParse(String key, L valueArray) throws Exception {
-		String childKey = key.substring(0, key.length() - apijson.JSONObject.KEY_ARRAY.length());
+		String childKey = key.substring(0, key.length() - JSONMap.KEY_ARRAY.length());
 
 		int allCount = 0;
 		L ids = JSON.createJSONArray();
@@ -911,7 +911,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
 	@Override
 	public SQLConfig<T, M, L> newSQLConfig(boolean isProcedure) throws Exception {
-		String raw = Log.DEBUG == false || sqlRequest == null ? null : getString(sqlRequest, apijson.JSONObject.KEY_RAW);
+		String raw = Log.DEBUG == false || sqlRequest == null ? null : getString(sqlRequest, JSONMap.KEY_RAW);
 		String[] keys = raw == null ? null : StringUtil.split(raw);
 		if (keys != null && keys.length > 0) {
 			boolean allow = AbstractSQLConfig.ALLOW_MISSING_KEY_4_COMBINE;
@@ -929,7 +929,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 				}
 
 				if (parser instanceof AbstractParser) {
-					((AbstractParser) parser).putWarnIfNeed(apijson.JSONObject.KEY_RAW, msg);
+					((AbstractParser) parser).putWarnIfNeed(JSONMap.KEY_RAW, msg);
 				}
 				break;
 			}
