@@ -4001,7 +4001,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 		String sqlKey;
 		if (expression == null) {
-			sqlKey = getSQLKey(key);
+			sqlKey = gainSQLKey(key);
 		}
 		else {
 			// (name,tag) left(date,4) 等
@@ -4011,7 +4011,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 		return lenFun.isEmpty() ? sqlKey : lenFun + "(" + sqlKey + ")";
 	}
-	public String getSQLKey(String key) {
+	public String gainSQLKey(String key) {
 		String q = getQuote();
 		return (isKeyPrefix() ? q + gainSQLAlias() + q + "." : "") + q + key + q;
 	}
