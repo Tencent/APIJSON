@@ -626,6 +626,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON：17.4k Star！腾讯开源的零代码接口与文档协议及ORM库](https://mp.weixin.qq.com/s/gr84DmWKs4O6lcoT-iaV5w)
 
+[APIJSON腾讯开源的后端开发神器！！！](https://cloud.tencent.com/developer/article/2372220)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
