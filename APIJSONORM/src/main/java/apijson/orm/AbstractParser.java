@@ -28,8 +28,7 @@ import apijson.orm.exception.CommonException;
 import apijson.orm.exception.UnsupportedDataTypeException;
 
 import static apijson.JSON.*;
-import static apijson.JSONMap.KEY_COMBINE;
-import static apijson.JSONMap.KEY_EXPLAIN;
+import static apijson.JSONMap.*;
 import static apijson.JSONRequest.KEY_TAG;
 import static apijson.RequestMethod.CRUD;
 import static apijson.RequestMethod.GET;
@@ -532,32 +531,32 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		//必须在parseCorrectRequest后面，因为parseCorrectRequest可能会添加 @role
 		if (isNeedVerifyRole() && globalRole == null) {
 			try {
-				setGlobalRole(getString(requestObject, JSONMap.KEY_ROLE));
-				requestObject.remove(JSONMap.KEY_ROLE);
+				setGlobalRole(getString(requestObject, KEY_ROLE));
+				requestObject.remove(KEY_ROLE);
 			} catch (Exception e) {
 				return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 			}
 		}
 
 		try {
-			setGlobalDatabase(getString(requestObject, JSONMap.KEY_DATABASE));
-			setGlobalDatasource(getString(requestObject, JSONMap.KEY_DATASOURCE));
-			setGlobalNamespace(getString(requestObject, JSONMap.KEY_NAMESPACE));
-			setGlobalCatalog(getString(requestObject, JSONMap.KEY_CATALOG));
-			setGlobalSchema(getString(requestObject, JSONMap.KEY_SCHEMA));
+			setGlobalDatabase(getString(requestObject, KEY_DATABASE));
+			setGlobalDatasource(getString(requestObject, KEY_DATASOURCE));
+			setGlobalNamespace(getString(requestObject, KEY_NAMESPACE));
+			setGlobalCatalog(getString(requestObject, KEY_CATALOG));
+			setGlobalSchema(getString(requestObject, KEY_SCHEMA));
 
-			setGlobalExplain(getBoolean(requestObject, JSONMap.KEY_EXPLAIN));
-			setGlobalCache(getString(requestObject, JSONMap.KEY_CACHE));
+			setGlobalExplain(getBoolean(requestObject, KEY_EXPLAIN));
+			setGlobalCache(getString(requestObject, KEY_CACHE));
 			setGlobalFormat(getBoolean(requestObject, apijson.JSONRequest.KEY_FORMAT));
 
-			requestObject.remove(JSONMap.KEY_DATABASE);
-			requestObject.remove(JSONMap.KEY_DATASOURCE);
-			requestObject.remove(JSONMap.KEY_NAMESPACE);
-			requestObject.remove(JSONMap.KEY_CATALOG);
-			requestObject.remove(JSONMap.KEY_SCHEMA);
+			requestObject.remove(KEY_DATABASE);
+			requestObject.remove(KEY_DATASOURCE);
+			requestObject.remove(KEY_NAMESPACE);
+			requestObject.remove(KEY_CATALOG);
+			requestObject.remove(KEY_SCHEMA);
 
-			requestObject.remove(JSONMap.KEY_EXPLAIN);
-			requestObject.remove(JSONMap.KEY_CACHE);
+			requestObject.remove(KEY_EXPLAIN);
+			requestObject.remove(KEY_CACHE);
 			requestObject.remove(apijson.JSONRequest.KEY_FORMAT);
 		} catch (Exception e) {
 			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
@@ -695,11 +694,11 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		}
 
 		boolean isDiffArrayKey = tag.endsWith(":[]");
-		boolean isArrayKey = isDiffArrayKey || JSONMap.isArrayKey(tag);
+		boolean isArrayKey = isDiffArrayKey || isArrayKey(tag);
 		String key = isArrayKey ? tag.substring(0, tag.length() - (isDiffArrayKey ? 3 : 2)) : tag;
 
 		M target = object;
-		if (JSONMap.isTableKey(key)) {
+		if (isTableKey(key)) {
 			if (isDiffArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对为 { "Comment[]":[], "TYPE": { "Comment[]": "OBJECT[]" } ... }
 				if (isStructure && (method == RequestMethod.POST || method == RequestMethod.PUT)) {
 					String arrKey = key + "[]";
@@ -1145,7 +1144,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		String table = entry.getKey(); //Comment
 		// String alias = entry.getValue(); //to
 
-		boolean isTable = JSONMap.isTableKey(table);
+		boolean isTable = isTableKey(table);
 		boolean isArrayMainTable = isSubquery == false && isTable && type == SQLConfig.TYPE_ITEM_CHILD_0 && arrayConfig != null && RequestMethod.isGetMethod(arrayConfig.getMethod(), true);
 		boolean isReuse = isArrayMainTable && position > 0;
 
@@ -1294,7 +1293,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		}
 
 		//不能允许GETS，否则会被通过"[]":{"@role":"ADMIN"},"Table":{},"tag":"Table"绕过权限并能批量查询
-		RequestMethod _method = request.get(JSONMap.KEY_METHOD) == null ? requestMethod : RequestMethod.valueOf(getString(request, JSONMap.KEY_METHOD));
+		RequestMethod _method = request.get(KEY_METHOD) == null ? requestMethod : RequestMethod.valueOf(getString(request, KEY_METHOD));
 		if (isSubquery == false && RequestMethod.isGetMethod(_method, true) == false) {
 			throw new UnsupportedOperationException("key[]:{} 只支持 GET, GETS 方法！其它方法不允许传 " + name + ":{} 等这种 key[]:{} 格式！");
 		}
@@ -1378,7 +1377,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			if (childKeys == null || childKeys.length <= 0 || request.containsKey(childKeys[0]) == false) {
 				childKeys = null;
 			}
-			else if (childKeys.length == 1 && JSONMap.isTableKey(childKeys[0])) {  // 可能无需提取，直接返回 rawList 即可
+			else if (childKeys.length == 1 && isTableKey(childKeys[0])) {  // 可能无需提取，直接返回 rawList 即可
 				arrTableKey = childKeys[0];
 			}
 
@@ -1484,26 +1483,26 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	private static final List<String> JOIN_COPY_KEY_LIST;
 	static {  // TODO 不全
 		JOIN_COPY_KEY_LIST = new ArrayList<String>();
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_ROLE);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_DATABASE);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_NAMESPACE);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_CATALOG);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_SCHEMA);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_DATASOURCE);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_COLUMN);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_NULL);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_CAST);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_COMBINE);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_GROUP);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_HAVING);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_HAVING_AND);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_SAMPLE);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_LATEST);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_PARTITION);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_FILL);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_ORDER);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_KEY);
-		JOIN_COPY_KEY_LIST.add(JSONMap.KEY_RAW);
+		JOIN_COPY_KEY_LIST.add(KEY_ROLE);
+		JOIN_COPY_KEY_LIST.add(KEY_DATABASE);
+		JOIN_COPY_KEY_LIST.add(KEY_NAMESPACE);
+		JOIN_COPY_KEY_LIST.add(KEY_CATALOG);
+		JOIN_COPY_KEY_LIST.add(KEY_SCHEMA);
+		JOIN_COPY_KEY_LIST.add(KEY_DATASOURCE);
+		JOIN_COPY_KEY_LIST.add(KEY_COLUMN);
+		JOIN_COPY_KEY_LIST.add(KEY_NULL);
+		JOIN_COPY_KEY_LIST.add(KEY_CAST);
+		JOIN_COPY_KEY_LIST.add(KEY_COMBINE);
+		JOIN_COPY_KEY_LIST.add(KEY_GROUP);
+		JOIN_COPY_KEY_LIST.add(KEY_HAVING);
+		JOIN_COPY_KEY_LIST.add(KEY_HAVING_AND);
+		JOIN_COPY_KEY_LIST.add(KEY_SAMPLE);
+		JOIN_COPY_KEY_LIST.add(KEY_LATEST);
+		JOIN_COPY_KEY_LIST.add(KEY_PARTITION);
+		JOIN_COPY_KEY_LIST.add(KEY_FILL);
+		JOIN_COPY_KEY_LIST.add(KEY_ORDER);
+		JOIN_COPY_KEY_LIST.add(KEY_KEY);
+		JOIN_COPY_KEY_LIST.add(KEY_RAW);
 	}
 
 	/**JOIN 多表同时筛选
@@ -1564,7 +1563,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			String tableKey = index < 0 ? path : path.substring(0, index); // User:owner
 			int index2 = tableKey.lastIndexOf("/");
 			String arrKey = index2 < 0 ? null : tableKey.substring(0, index2);
-			if (arrKey != null && JSONMap.isArrayKey(arrKey) == false) {
+			if (arrKey != null && isArrayKey(arrKey) == false) {
 				throw new IllegalArgumentException(apijson.JSONRequest.KEY_JOIN + ":'" + e.getKey() + "' 对应的 " + arrKey + " 不是合法的数组 key[] ！" +
 						"@ APP JOIN 最多允许跨 1 层，只能是子数组，且数组对象中不能有 join: value 键值对！");
 			}
@@ -1667,7 +1666,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 						apijson.orm.Entry<String, String> te = tk == null || p.substring(ind2 + 1).indexOf("/") >= 0 ? null : Pair.parseEntry(tk, true);
 
-						if (te != null && JSONMap.isTableKey(te.getKey()) && request.get(tk) instanceof Map<?, ?>) {
+						if (te != null && isTableKey(te.getKey()) && request.get(tk) instanceof Map<?, ?>) {
 							if (isAppJoin) {
 								if (refObj.size() >= 1) {
 									throw new IllegalArgumentException(apijson.JSONRequest.KEY_JOIN + ":" + e.getKey() + " 中 " + k + " 不合法！"
@@ -2218,7 +2217,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	}
 
 	private void setOpMethod(Map<String, Object> request, ObjectParser<T, M, L> op, String key) {
-		String _method = key == null ? null : getString(request, JSONMap.KEY_METHOD);
+		String _method = key == null ? null : getString(request, KEY_METHOD);
 		if (_method != null) {
 			RequestMethod method = RequestMethod.valueOf(_method); // 必须精准匹配，避免缓存命中率低
 			this.setMethod(method);
@@ -2242,6 +2241,18 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		return object;
 	}
 
+	public static final Map<String, RequestMethod> KEY_METHOD_ENUM_MAP;
+	static {
+		KEY_METHOD_ENUM_MAP = new LinkedHashMap<>();
+		KEY_METHOD_ENUM_MAP.put(KEY_GET, RequestMethod.GET);
+		KEY_METHOD_ENUM_MAP.put(KEY_GETS, RequestMethod.GETS);
+		KEY_METHOD_ENUM_MAP.put(KEY_HEAD, RequestMethod.HEAD);
+		KEY_METHOD_ENUM_MAP.put(KEY_HEADS, RequestMethod.HEADS);
+		KEY_METHOD_ENUM_MAP.put(KEY_POST, RequestMethod.POST);
+		KEY_METHOD_ENUM_MAP.put(KEY_PUT, RequestMethod.PUT);
+		KEY_METHOD_ENUM_MAP.put(KEY_DELETE, RequestMethod.DELETE);
+	}
+
 	protected M batchVerify(RequestMethod method, String tag, int version, String name, @NotNull M request, int maxUpdateCount, SQLCreator<T, M, L> creator) throws Exception {
 		M correctRequest = JSON.createJSONObject();
 		List<String> removeTmpKeys = new ArrayList<>(); // 请求json里面的临时变量,不需要带入后面的业务中,比如 @post、@get等
@@ -2253,14 +2264,14 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		for (String key : reqSet) {
 			// key 重复直接抛错(xxx:alias, xxx:alias[])
-			if (correctRequest.containsKey(key) || correctRequest.containsKey(key + JSONMap.KEY_ARRAY)) {
+			if (correctRequest.containsKey(key) || correctRequest.containsKey(key + KEY_ARRAY)) {
 				throw new IllegalArgumentException("对象名重复,请添加别名区分 ! 重复对象名为: " + key);
 			}
 
-			boolean isPost = JSONMap.KEY_POST.equals(key);
+			boolean isPost = KEY_POST.equals(key);
 			// @post、@get 等 RequestMethod
 			try {
-				RequestMethod keyMethod = isPost ? RequestMethod.POST : RequestMethod.valueOf(key.substring(1).toUpperCase());
+				RequestMethod keyMethod = isPost ? RequestMethod.POST : KEY_METHOD_ENUM_MAP.get(key);
 				if (keyMethod != null) {
 					// 如果不匹配,异常不处理即可
 					removeTmpKeys.add(key);
@@ -2278,7 +2289,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 										throw new ConflictException(key + ": value 中 " + tbl + " 已经存在，不能重复！");
 									}
 
-									obj.put(tbl, isPost && JSONMap.isTableArray(tbl)
+									obj.put(tbl, isPost && isTableArray(tbl)
 											? tbl.substring(0, tbl.length() - 2) + ":[]" : "");
 								}
 							}
@@ -2297,7 +2308,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 						}
 
 						Map<String, Object> objAttrMap = new HashMap<>();
-						objAttrMap.put(JSONMap.KEY_METHOD, keyMethod);
+						objAttrMap.put(KEY_METHOD, keyMethod);
 						keyObjectAttributesMap.put(objKey, objAttrMap);
 
 						Object objVal = objEntry.getValue();
@@ -2321,11 +2332,11 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 								}
 
 								switch (objAttrKey) {
-									case JSONMap.KEY_DATASOURCE:
-									case JSONMap.KEY_SCHEMA:
-									case JSONMap.KEY_DATABASE:
+									case KEY_DATASOURCE:
+									case KEY_SCHEMA:
+									case KEY_DATABASE:
 									case apijson.JSONRequest.KEY_VERSION:
-									case JSONMap.KEY_ROLE:
+									case KEY_ROLE:
 										objAttrMap.put(objAttrKey, entry.getValue());
 										break;
 									case KEY_TAG:
@@ -2338,7 +2349,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 							}
 
 							if (hasTag == false) {
-								objAttrMap.put(KEY_TAG, isPost && JSONMap.isTableArray(objKey)
+								objAttrMap.put(KEY_TAG, isPost && isTableArray(objKey)
 										? objKey.substring(0, objKey.length() - 2) + ":[]" : objKey);
 							}
 						}
@@ -2357,33 +2368,33 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 					if (attrMap == null) {
 						// 数组会解析为对象进行校验,做一下兼容
-						if (keyObjectAttributesMap.get(key + JSONMap.KEY_ARRAY) == null) {
+						if (keyObjectAttributesMap.get(key + KEY_ARRAY) == null) {
 							if (method == RequestMethod.CRUD || key.endsWith("@")) {
-								((Map<String, Object>) obj).put(JSONMap.KEY_METHOD, GET);
+								((Map<String, Object>) obj).put(KEY_METHOD, GET);
 								Map<String, Object> objAttrMap = new HashMap<>();
-								objAttrMap.put(JSONMap.KEY_METHOD, GET);
+								objAttrMap.put(KEY_METHOD, GET);
 								keyObjectAttributesMap.put(key, objAttrMap);
 							} else {
-								((Map<String, Object>) obj).put(JSONMap.KEY_METHOD, method);
+								((Map<String, Object>) obj).put(KEY_METHOD, method);
 								Map<String, Object> objAttrMap = new HashMap<>();
-								objAttrMap.put(JSONMap.KEY_METHOD, method);
+								objAttrMap.put(KEY_METHOD, method);
 								keyObjectAttributesMap.put(key, objAttrMap);
 							}
 						} else {
-							setRequestAttribute(key, true, JSONMap.KEY_METHOD, request);
-							setRequestAttribute(key, true, JSONMap.KEY_DATASOURCE, request);
-							setRequestAttribute(key, true, JSONMap.KEY_SCHEMA, request);
-							setRequestAttribute(key, true, JSONMap.KEY_DATABASE, request);
+							setRequestAttribute(key, true, KEY_METHOD, request);
+							setRequestAttribute(key, true, KEY_DATASOURCE, request);
+							setRequestAttribute(key, true, KEY_SCHEMA, request);
+							setRequestAttribute(key, true, KEY_DATABASE, request);
 							setRequestAttribute(key, true, apijson.JSONRequest.KEY_VERSION, request);
-							setRequestAttribute(key, true, JSONMap.KEY_ROLE, request);
+							setRequestAttribute(key, true, KEY_ROLE, request);
 						}
 					} else {
-						setRequestAttribute(key, false, JSONMap.KEY_METHOD, request);
-						setRequestAttribute(key, false, JSONMap.KEY_DATASOURCE, request);
-						setRequestAttribute(key, false, JSONMap.KEY_SCHEMA, request);
-						setRequestAttribute(key, false, JSONMap.KEY_DATABASE, request);
+						setRequestAttribute(key, false, KEY_METHOD, request);
+						setRequestAttribute(key, false, KEY_DATASOURCE, request);
+						setRequestAttribute(key, false, KEY_SCHEMA, request);
+						setRequestAttribute(key, false, KEY_DATABASE, request);
 						setRequestAttribute(key, false, apijson.JSONRequest.KEY_VERSION, request);
-						setRequestAttribute(key, false, JSONMap.KEY_ROLE, request);
+						setRequestAttribute(key, false, KEY_ROLE, request);
 					}
 				}
 
@@ -2396,7 +2407,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 					RequestMethod  _method;
 					if (obj instanceof Map<?, ?>) {
 						Map<String, Object> tblObj = JSON.getMap(request, key);
-						String mn = tblObj == null ? null : getString(tblObj, JSONMap.KEY_METHOD);
+						String mn = tblObj == null ? null : getString(tblObj, KEY_METHOD);
 						_method = mn == null ? null : RequestMethod.valueOf(mn);
 						String combine = _method == null ? null : getString(tblObj, KEY_COMBINE);
 						if (combine != null && RequestMethod.isPublicMethod(_method) == false) {
@@ -2409,16 +2420,16 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 							if (method == RequestMethod.CRUD) {
 								_method = GET;
 								Map<String, Object> objAttrMap = new HashMap<>();
-								objAttrMap.put(JSONMap.KEY_METHOD, GET);
+								objAttrMap.put(KEY_METHOD, GET);
 								keyObjectAttributesMap.put(key, objAttrMap);
 							} else {
 								_method = method;
 								Map<String, Object> objAttrMap = new HashMap<>();
-								objAttrMap.put(JSONMap.KEY_METHOD, method);
+								objAttrMap.put(KEY_METHOD, method);
 								keyObjectAttributesMap.put(key, objAttrMap);
 							}
 						} else {
-							_method = (RequestMethod) attrMap.get(JSONMap.KEY_METHOD);
+							_method = (RequestMethod) attrMap.get(KEY_METHOD);
 						}
 					}
 
@@ -2479,7 +2490,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
     }
 
 	protected void setRequestAttribute(String key, boolean isArray, String attrKey, @NotNull Map<String, Object> request) {
-		Map<String, Object> attrMap = keyObjectAttributesMap.get(isArray ? key + JSONMap.KEY_ARRAY : key);
+		Map<String, Object> attrMap = keyObjectAttributesMap.get(isArray ? key + KEY_ARRAY : key);
 		Object attrVal = attrMap == null ? null : attrMap.get(attrKey);
 		Map<String, Object> obj = attrVal == null ? null : JSON.get(request, key);
 
@@ -2520,7 +2531,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	public RequestMethod getRealMethod(RequestMethod method, String key, Object value) {
 		if (method == CRUD && (value instanceof Map<?, ?> || value instanceof List<?>)) {
 			Map<String, Object> attrMap = keyObjectAttributesMap.get(key);
-			Object _method = attrMap == null ? null : attrMap.get(JSONMap.KEY_METHOD);
+			Object _method = attrMap == null ? null : attrMap.get(KEY_METHOD);
 			if (_method instanceof RequestMethod) {
 				return (RequestMethod) _method;
 			}
