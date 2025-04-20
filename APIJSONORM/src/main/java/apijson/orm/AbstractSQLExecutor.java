@@ -1285,15 +1285,23 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 	protected Connection connection;
 	@NotNull
+	public Connection getConnection(String key) throws Exception {
+		return getConnectionMap().get(key);
+	}
+	public Connection putConnection(String key, Connection connection) throws Exception {
+		return getConnectionMap().put(key, connection);
+	}
+
+	@NotNull
 	@Override
 	public Connection getConnection(@NotNull SQLConfig<T, M, L> config) throws Exception {
 		String connectionKey = getConnectionKey(config);
-		connection = getConnectionMap().get(connectionKey);
+		connection = getConnection(connectionKey);
 		if (connection == null || connection.isClosed()) {
 			Log.i(TAG, "select  connection " + (connection == null ? " = null" : ("isClosed = " + connection.isClosed()))) ;
 			// PostgreSQL 不允许 cross-database
 			connection = DriverManager.getConnection(config.gainDBUri(), config.gainDBAccount(), config.gainDBPassword());
-			getConnectionMap().put(connectionKey, connection);
+			putConnection(connectionKey, connection);
 		}
 
 		// TDengine 驱动内部事务处理方法都是空实现，手动 commit 无效
