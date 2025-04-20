@@ -807,8 +807,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 			}
 
             Object id = item.get(idKey);
-			M req = JSON.createJSONObject();
-			req.put(childKey, item);
+			M req = JSON.createJSONObject(childKey, item);
 
             M result = null;
             try {

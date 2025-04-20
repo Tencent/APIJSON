@@ -29,7 +29,7 @@ import apijson.orm.exception.UnsupportedDataTypeException;
 
 import static apijson.JSON.*;
 import static apijson.JSONMap.*;
-import static apijson.JSONRequest.KEY_TAG;
+import static apijson.JSONRequest.*;
 import static apijson.RequestMethod.CRUD;
 import static apijson.RequestMethod.GET;
 
@@ -475,7 +475,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				+ requestMethod + "/parseResponse  request = \n" + request + "\n\n");
 
 		try {
-			requestObject = (M) JSON.parseObject(request);
+			requestObject = JSON.parseObject(request);
 			if (requestObject == null) {
 				throw new UnsupportedEncodingException("JSON格式不合法！");
 			}
@@ -502,8 +502,15 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		requestObject = request;
 		try {
-			setVersion(getIntValue(requestObject, apijson.JSONRequest.KEY_VERSION));
-			requestObject.remove(apijson.JSONRequest.KEY_VERSION);
+			setGlobalFormat(getBoolean(requestObject, KEY_FORMAT));
+			requestObject.remove(KEY_FORMAT);
+		} catch (Exception e) {
+			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
+		}
+
+		try {
+			setVersion(getIntValue(requestObject, KEY_VERSION));
+			requestObject.remove(KEY_VERSION);
 
 			if (getMethod() != RequestMethod.CRUD) {
 				setTag(getString(requestObject, KEY_TAG));
@@ -547,7 +554,6 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 			setGlobalExplain(getBoolean(requestObject, KEY_EXPLAIN));
 			setGlobalCache(getString(requestObject, KEY_CACHE));
-			setGlobalFormat(getBoolean(requestObject, apijson.JSONRequest.KEY_FORMAT));
 
 			requestObject.remove(KEY_DATABASE);
 			requestObject.remove(KEY_DATASOURCE);
@@ -557,7 +563,6 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 			requestObject.remove(KEY_EXPLAIN);
 			requestObject.remove(KEY_CACHE);
-			requestObject.remove(apijson.JSONRequest.KEY_FORMAT);
 		} catch (Exception e) {
 			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 		}
@@ -995,7 +1000,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		  	//      }
 
 		  	String msg = CommonException.getMsg(e);
-			Integer code = CommonException.getCode(e);
+			int code = CommonException.getCode(e);
 
 			return newResult(code, msg, null, isRoot);
 		}
@@ -1081,10 +1086,10 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			where.put(KEY_TAG, tag);
 
 			if (version > 0) {
-				where.put(apijson.JSONRequest.KEY_VERSION + ">=", version);
+				where.put(KEY_VERSION + ">=", version);
 			}
 			config.setWhere(where);
-			config.setOrder(apijson.JSONRequest.KEY_VERSION + (version > 0 ? "+" : "-"));
+			config.setOrder(KEY_VERSION + (version > 0 ? "+" : "-"));
 			config.setCount(1);
 
 			// too many connections error: 不try-catch，可以让客户端看到是服务器内部异常
@@ -2335,7 +2340,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 									case KEY_DATASOURCE:
 									case KEY_SCHEMA:
 									case KEY_DATABASE:
-									case apijson.JSONRequest.KEY_VERSION:
+									case KEY_VERSION:
 									case KEY_ROLE:
 										objAttrMap.put(objAttrKey, entry.getValue());
 										break;
@@ -2385,7 +2390,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 							setRequestAttribute(key, true, KEY_DATASOURCE, request);
 							setRequestAttribute(key, true, KEY_SCHEMA, request);
 							setRequestAttribute(key, true, KEY_DATABASE, request);
-							setRequestAttribute(key, true, apijson.JSONRequest.KEY_VERSION, request);
+							setRequestAttribute(key, true, KEY_VERSION, request);
 							setRequestAttribute(key, true, KEY_ROLE, request);
 						}
 					} else {
@@ -2393,7 +2398,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 						setRequestAttribute(key, false, KEY_DATASOURCE, request);
 						setRequestAttribute(key, false, KEY_SCHEMA, request);
 						setRequestAttribute(key, false, KEY_DATABASE, request);
-						setRequestAttribute(key, false, apijson.JSONRequest.KEY_VERSION, request);
+						setRequestAttribute(key, false, KEY_VERSION, request);
 						setRequestAttribute(key, false, KEY_ROLE, request);
 					}
 				}
