@@ -628,6 +628,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON腾讯开源的后端开发神器！！！](https://cloud.tencent.com/developer/article/2372220)
 
+[apijson 快速上手](https://blog.csdn.net/qq_16381291/article/details/147110737)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
