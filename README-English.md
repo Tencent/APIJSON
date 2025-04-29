@@ -14,6 +14,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/Tencent/APIJSON/blob/master/Document-English.md">&nbsp;Document&nbsp;</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">&nbsp;Video&nbsp;</a>
   <a href="http://apijson.cn/api">&nbsp;Test&nbsp;</a>
+  <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
