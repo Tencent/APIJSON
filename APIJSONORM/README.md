@@ -1,4 +1,4 @@
-# APIJSONORM  [![](https://jitpack.io/v/Tencent/APIJSON.svg)](https://jitpack.io/#Tencent/APIJSON)
+# APIJSONORM  [![](https://jitpack.io/v/Tencent/APIJSON.svg)](https://jitpack.io/#Tencent/APIJSON) [<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/Tencent/APIJSON)
 腾讯 [APIJSON](https://github.com/Tencent/APIJSON) ORM 库，可通过 Maven, Gradle 等远程依赖。<br />
 Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dependencies with Maven, Gradle, etc.
 
