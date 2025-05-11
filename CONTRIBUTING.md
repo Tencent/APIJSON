@@ -64,6 +64,13 @@
 - [komiblog](https://github.com/komiblog)
 - [ostrichManX](https://github.com/ostrichManX)
 - [jia199807](https://github.com/jia199807)
+- [zxcwindy](https://github.com/zxcwindy)
+- [afumu](https://github.com/afumu)(gorm-plus 作者)
+- [alittle-yu](https://github.com/alittle-yu)
+- [Damon Nicola](https://github.com/Reynold3D)
+- [calmcc](https://github.com/calmcc)
+- [lindaifeng](https://github.com/lindaifeng)
+- [DenineLu](https://github.com/DenineLu)(小红书工程师）
 
 #### 其中特别致谢: <br/>
 cloudAndMonkey 提交的 11 个 Commits, 对 APIJSON 做出了 1,496 增加和 845 处删减(截止 2022/12/15 日)； <br/>
