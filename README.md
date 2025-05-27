@@ -633,6 +633,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON快速入门-零后端代码，接口所见即所得](https://www.toutiao.com/article/7503844050689376783)
 
+[腾讯开源！零代码，全自动万能API接口](https://mp.weixin.qq.com/s/WWndAa68BqBfflWgL5592A)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
