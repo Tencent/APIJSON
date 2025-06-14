@@ -1213,14 +1213,15 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 			sql = config.gainSQL(config.isPrepared());
 		}
 
+		Connection conn = getConnection(config);
 		PreparedStatement statement; //创建Statement对象
 		if (config.getMethod() == RequestMethod.POST && config.getId() == null) { //自增id
 			if (config.isOracle()) {
 				// 解决 oracle 使用自增主键 插入获取不到id问题
 				String[] generatedColumns = {config.getIdKey()};
-				statement = getConnection(config).prepareStatement(sql, generatedColumns);
+				statement = conn.prepareStatement(sql, generatedColumns);
 			} else {
-				statement = getConnection(config).prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+				statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			}
 		}
 		else if (RequestMethod.isGetMethod(config.getMethod(), true)) {
@@ -1234,13 +1235,13 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
             if (config.isMySQL() || config.isTiDB() || config.isMariaDB() || config.isOracle() || config.isSQLServer() || config.isDb2()
 					|| config.isPostgreSQL() || config.isCockroachDB() || config.isOpenGauss() || config.isTimescaleDB() || config.isQuestDB()
 			) {
-                statement = getConnection(config).prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                statement = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             } else {
-                statement = getConnection(config).prepareStatement(sql);
+                statement = conn.prepareStatement(sql);
             }
 		}
 		else {
-			statement = getConnection(config).prepareStatement(sql);
+			statement = conn.prepareStatement(sql);
 		}
 
 		List<Object> valueList = config.isPrepared() ? config.getPreparedValueList() : null;

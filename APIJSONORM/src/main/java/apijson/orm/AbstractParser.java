@@ -62,6 +62,12 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	 */
 	public static boolean IS_PRINT_REQUEST_ENDTIME_LOG = false;
 
+	/**
+	 * 可以通过切换该变量来控制返回 trace:stack 字段，如果是 gson 则不设置为 false，避免序列化报错。
+	 * 与 {@link Log#DEBUG} 任何一个为 true 返回 trace:stack 字段。
+	 */
+	public static boolean IS_RETURN_STACK_TRACE = true;
+
 
 	/**
 	 * 分页页码是否从 1 开始，默认为从 0 开始
@@ -622,7 +628,10 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
                 //        }
                 Throwable t = error instanceof CommonException && error.getCause() != null ? error.getCause() : error;
 				res.put("trace:throw", t.getClass().getName());
-				res.put("trace:stack", t.getStackTrace());
+
+				if (IS_RETURN_STACK_TRACE) {
+					res.put("trace:stack", t.getStackTrace());
+				}
 			}
 		}
 
