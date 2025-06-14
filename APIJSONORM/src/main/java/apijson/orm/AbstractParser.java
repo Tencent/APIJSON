@@ -630,7 +630,16 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				res.put("trace:throw", t.getClass().getName());
 
 				if (IS_RETURN_STACK_TRACE) {
-					res.put("trace:stack", t.getStackTrace());
+					L list = JSON.createJSONArray();
+
+					StackTraceElement[] traces = t.getStackTrace();
+					if (traces != null) { // && traces.length > 0) {
+						for (StackTraceElement trace : traces) {
+							list.add(trace == null ? null : trace.toString());
+						}
+					}
+
+					res.put("trace:stack", list);
 				}
 			}
 		}
