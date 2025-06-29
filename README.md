@@ -559,7 +559,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
 
-[APIJSON对接分布式HTAP数据库TiDB](https://asktug.com/t/htap-tidb/395)
+[APIJSON对接分布式HTAP数据库TiDB](https://my.oschina.net/tommylemon/blog/3081913)
 
 [APIJSON教程（一）：上手apijson项目，学习apijson语法，并实现持久层配置](https://zhuanlan.zhihu.com/p/375681893)
 
@@ -572,13 +572,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
 
 [APIJSON 接口调试实践](https://github.com/Tencent/APIJSON/issues/189)
-  
-[关于APIJSON远程函数](https://mp.weixin.qq.com/s?__biz=Mzg3NTc1NDUyNA==&mid=2247483950&idx=1&sn=b11e70bdf083c55d72238e107449ae2e&chksm=cf3de75df84a6e4b3a4acd0846531b0bd12bc90379523fbaf6b4f900fc3cdc1b1ce3eff97fd9&scene=178&cur_album_id=2548737392338354178#rd)
-  
-[APIJSON新增方法实例](https://cloud.tencent.com/developer/article/2098890)
-  
-[APIJSON-APIJSON的那些事儿](https://cloud.tencent.com/developer/article/2098888)
-
+    
 [APIJSON-零代码接口和文档 JSON 协议 与 ORM 库](https://cloud.tencent.com/developer/article/2077042)
 
 [APIJSON使用例子总结](https://blog.csdn.net/weixin_41077841/article/details/110518007)
@@ -588,8 +582,6 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [APIJSON在mac电脑环境下配置去连接SQL Server](https://juejin.im/post/5e16d21ef265da3e2e4f4956)
 
 [APIJSON复杂业务深入实践（类似12306订票系统）](https://blog.csdn.net/aa330233789/article/details/105309571)
-
-[全国行政区划数据抓取与处理](https://www.xlongwei.com/detail/21032616)
 
 [新手搭建 APIJSON 项目指北](https://github.com/jerrylususu/apijson_todo_demo/blob/master/FULLTEXT.md)  
 
@@ -634,6 +626,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 [APIJSON快速入门-零后端代码，接口所见即所得](https://www.toutiao.com/article/7503844050689376783)
 
 [腾讯开源！零代码，全自动万能API接口](https://mp.weixin.qq.com/s/WWndAa68BqBfflWgL5592A)
+
+[APIJSON项目实战教程：零代码实现高效JSON接口开发](https://blog.csdn.net/gitblog_00682/article/details/148375065)
 
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
