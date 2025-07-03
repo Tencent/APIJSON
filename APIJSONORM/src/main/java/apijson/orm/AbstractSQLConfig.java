@@ -6322,12 +6322,15 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			if (RequestMethod.isHeadMethod(method, true)) {
 				List<On> onList = join.getOnList();
 				List<String> column = onList == null ? null : new ArrayList<>(onList.size());
-				if (column != null) {
-					for (On on : onList) {
-						//解决 pg  如果只查询关联键，会报找不到column的错误
-						///* SELECT  count(*)  AS count  FROM sys.Moment AS Moment
-						//			   LEFT JOIN ( SELECT *  FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
-						//column.add(on.getKey());
+				//解决 pg  如果只查询关联键，会报找不到column的错误
+				///* SELECT  count(*)  AS count  FROM sys.Moment AS Moment
+				//			   LEFT JOIN ( SELECT *  FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
+				if (joinConfig.isMySQL()) {
+					if (column != null) {
+						for (On on : onList) {
+							column.add(on.getKey());
+						}
+
 					}
 				}
 
