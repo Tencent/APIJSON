@@ -190,6 +190,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		DATABASE_LIST.add(DATABASE_QUESTDB);
 		DATABASE_LIST.add(DATABASE_IOTDB);
 		DATABASE_LIST.add(DATABASE_SNOWFLAKE);
+		DATABASE_LIST.add(DATABASE_DATABEND);
 		DATABASE_LIST.add(DATABASE_DATABRICKS);
 		DATABASE_LIST.add(DATABASE_REDIS);
 		DATABASE_LIST.add(DATABASE_MONGODB);
@@ -1250,6 +1251,14 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	}
 	public static boolean isSnowflake(String db) {
 		return DATABASE_SNOWFLAKE.equals(db);
+	}
+
+	@Override
+	public boolean isDatabend() {
+		return isDatabend(gainSQLDatabase());
+	}
+	public static boolean isDatabend(String db) {
+		return DATABASE_DATABEND.equals(db);
 	}
 
 	@Override

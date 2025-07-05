@@ -35,6 +35,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	String DATABASE_TRINO = "TRINO"; // PrestoSQL  https://trino.io
 	String DATABASE_DORIS = "DORIS"; // https://doris.apache.org
 	String DATABASE_SNOWFLAKE = "SNOWFLAKE"; // https://www.snowflake.com
+	String DATABASE_DATABEND = "DATABEND"; // https://www.databend.com
 	String DATABASE_DATABRICKS = "DATABRICKS"; // https://www.databricks.com
 	String DATABASE_CASSANDRA = "CASSANDRA"; // https://cassandra.apache.org
 	String DATABASE_MILVUS = "MILVUS"; // https://milvus.io
@@ -100,6 +101,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	boolean isPresto();
 	boolean isTrino();
 	boolean isSnowflake();
+	boolean isDatabend();
 	boolean isDatabricks();
 	boolean isCassandra();
 	boolean isMilvus();
