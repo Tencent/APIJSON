@@ -253,6 +253,9 @@ public class CommonException extends Exception {
         else if (config.isSnowflake()) {
           db = SQLConfig.DATABASE_SNOWFLAKE + " " + dbVersion;
         }
+        else if (config.isDatabend()) {
+          db = SQLConfig.DATABASE_DATABEND + " " + dbVersion;
+        }
         else if (config.isDatabricks()) {
           db = SQLConfig.DATABASE_DATABRICKS + " " + dbVersion;
         }

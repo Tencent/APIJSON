@@ -190,6 +190,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		DATABASE_LIST.add(DATABASE_QUESTDB);
 		DATABASE_LIST.add(DATABASE_IOTDB);
 		DATABASE_LIST.add(DATABASE_SNOWFLAKE);
+		DATABASE_LIST.add(DATABASE_DATABEND);
 		DATABASE_LIST.add(DATABASE_DATABRICKS);
 		DATABASE_LIST.add(DATABASE_REDIS);
 		DATABASE_LIST.add(DATABASE_MONGODB);
@@ -1250,6 +1251,14 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	}
 	public static boolean isSnowflake(String db) {
 		return DATABASE_SNOWFLAKE.equals(db);
+	}
+
+	@Override
+	public boolean isDatabend() {
+		return isDatabend(gainSQLDatabase());
+	}
+	public static boolean isDatabend(String db) {
+		return DATABASE_DATABEND.equals(db);
 	}
 
 	@Override
@@ -6322,12 +6331,12 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			if (RequestMethod.isHeadMethod(method, true)) {
 				List<On> onList = join.getOnList();
 				List<String> column = onList == null ? null : new ArrayList<>(onList.size());
-				if (column != null) {
+				//解决 pg  如果只查询关联键，会报找不到column的错误
+				///* SELECT  count(*)  AS count  FROM sys.Moment AS Moment
+				//			   LEFT JOIN ( SELECT *  FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
+				if (column != null && joinConfig.isMSQL()) { // 暂时这样兼容 PostgreSQL 等不支持 SELECT 中不包含对应 key 的隐式 ON 关联字段的数据库
 					for (On on : onList) {
-						//解决 pg  如果只查询关联键，会报找不到column的错误
-						///* SELECT  count(*)  AS count  FROM sys.Moment AS Moment
-						//			   LEFT JOIN ( SELECT *  FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
-						//column.add(on.getKey());
+						column.add(on.getKey()); // TODO PostgreSQL 等需要找到具体的 targetTable 对应 targetKey 来加到 SELECT，比直接 SELECT * 性能更好
 					}
 				}
 
