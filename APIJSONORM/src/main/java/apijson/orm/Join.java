@@ -25,12 +25,14 @@ public class Join<T, M extends Map<String, Object>, L extends List<Object>> {
 	private List<On> onList;  // ON User.id = Moment.userId AND ...
 
 	private M request;  // { "id@":"/Moment/userId" }
-	private M outer;  // "join": { "</User": { "@order":"id-", "@group":"id", "name~":"a", "tag$":"%a%", "@combine": "name~,tag$" } } 中的 </User 对应值
+	private M on;  // "join": { "</User": { "@order":"id-", "@group":"id", "name~":"a", "tag$":"%a%", "@combine": "name~,tag$" } } 中的 </User 对应值
 
+	private M outer; // "join": { "</User": { "key2": value2, "@column": "key2,key3","@group": "key2+" }}
 	private SQLConfig<T, M, L> joinConfig;
 	private SQLConfig<T, M, L> cacheConfig;
-	private SQLConfig<T, M, L> outerConfig;
+	private SQLConfig<T, M, L> onConfig;
 
+	private SQLConfig<T, M, L> outerConfig;
 
 	public String getPath() {
 		return path;
@@ -78,11 +80,27 @@ public class Join<T, M extends Map<String, Object>, L extends List<Object>> {
 	public void setRequest(M request) {
 		this.request = request;
 	}
+	public M getOn() {
+		return on;
+	}
+	public void setOn(M on) {
+		this.on = on;
+	}
+
+	public void setOuter(M outer) {
+		this.outer = outer;
+	}
+
 	public M getOuter() {
 		return outer;
 	}
-	public void setOuter(M outer) {
-		this.outer = outer;
+
+	public SQLConfig<T, M, L> getOuterConfig() {
+		return outerConfig;
+	}
+
+	public void setOuterConfig(SQLConfig<T, M, L> outerConfig) {
+		this.outerConfig = outerConfig;
 	}
 
 	public SQLConfig<T, M, L> getJoinConfig() {
@@ -97,11 +115,11 @@ public class Join<T, M extends Map<String, Object>, L extends List<Object>> {
 	public void setCacheConfig(SQLConfig<T, M, L> cacheConfig) {
 		this.cacheConfig = cacheConfig;
 	}
-	public SQLConfig<T, M, L> getOuterConfig() {
-		return outerConfig;
+	public SQLConfig<T, M, L> getOnConfig() {
+		return onConfig;
 	}
-	public void setOuterConfig(SQLConfig<T, M, L> outerConfig) {
-		this.outerConfig = outerConfig;
+	public void setOnConfig(SQLConfig<T, M, L> onConfig) {
+		this.onConfig = onConfig;
 	}
 
 	public boolean isOne2One() {
