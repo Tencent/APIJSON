@@ -6350,12 +6350,9 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				//解决 pg  如果只查询关联键，会报找不到column的错误
 				///* SELECT  count(*)  AS count  FROM sys.Moment AS Moment
 				//			   LEFT JOIN ( SELECT *  FROM sys.Comment ) AS Comment ON Comment.momentId = Moment.id LIMIT 1 OFFSET 0 */
-				if (joinConfig.isMySQL()) {
-					if (column != null) {
-						for (On on : onList) {
-							column.add(on.getKey());
-						}
-
+				if (column != null && joinConfig.isMSQL()) { // 暂时这样兼容 PostgreSQL 等不支持 SELECT 中不包含对应 key 的隐式 ON 关联字段的数据库
+					for (On on : onList) {
+						column.add(on.getKey()); // TODO PostgreSQL 等需要找到具体的 targetTable 对应 targetKey 来加到 SELECT，比直接 SELECT * 性能更好
 					}
 				}
 
