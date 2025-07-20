@@ -1563,7 +1563,39 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			throw new UnsupportedDataTypeException(TAG + ".onJoinParse  join 只能是 String 或 Map<String, Object> 类型！");
 		}
 
-		Set<Entry<String, Object>> set = joinMap == null ? null : joinMap.entrySet();
+		List<Entry<String, Object>> slashKeys = new ArrayList<>();
+		List<Entry<String, Object>> nonSlashKeys = new ArrayList<>();
+		Set<Entry<String, Object>> entries = joinMap == null ? null : joinMap.entrySet();
+
+		if (entries == null || entries.isEmpty()) {
+			Log.e(TAG, "onJoinParse  set == null || set.isEmpty() >> return null;");
+			return null;
+		}
+		for (Entry<String, Object> e : entries) {
+			String path = e.getKey();
+			if (path != null && path.indexOf("/") > 0) {
+				slashKeys.add(e);  // 以 / 开头的 key，例如 </Table/key@
+			} else {
+				nonSlashKeys.add(e);  // 普通 key，例如 Table: {}
+			}
+		}
+
+		Map<String, Object> whereJoinMap = new LinkedHashMap<>();
+
+		for (Entry<String, Object> e : nonSlashKeys) {
+			String tableKey = e.getKey(); // 如 "Location_info"
+			Object tableObj = e.getValue(); // value 是 Map
+
+			if (request.containsKey(tableKey)) {
+				whereJoinMap.put(tableKey, tableObj);
+			} else {
+				Log.w(TAG, "跳过 join 中 key = " + tableKey + "，因为它不在 request 中");
+			}
+		}
+
+
+		Set<Entry<String, Object>> set = joinMap == null ? null : new LinkedHashSet<>(slashKeys);
+
 		if (set == null || set.isEmpty()) {
 			Log.e(TAG, "onJoinParse  set == null || set.isEmpty() >> return null;");
 			return null;
@@ -1759,8 +1791,14 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			j.setAlias(alias);
 
 			M outerObj = (M) JSON.createJSONObject((Map<String, Object>) outer);
-			j.setOuter(outerObj);
+            j.setOn(outerObj);
 			j.setRequest(requestObj);
+
+            if (whereJoinMap.containsKey(table)) {
+                Object rawOuter = whereJoinMap.get(table);
+                M outerObj1 = (M) JSON.createJSONObject((Map<String, Object>) rawOuter);
+                j.setOuter(outerObj1);
+            }
 
 			if (arrKey != null) {
 				Integer count = getInteger(parentPathObj, apijson.JSONRequest.KEY_COUNT);

@@ -5,42 +5,21 @@ This source code is licensed under the Apache License Version 2.0.*/
 
 package apijson.orm;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
-
 import apijson.*;
 import apijson.orm.Join.On;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.UnsupportedDataTypeException;
-import apijson.orm.model.Access;
-import apijson.orm.model.AllColumn;
-import apijson.orm.model.AllColumnComment;
-import apijson.orm.model.AllTable;
-import apijson.orm.model.AllTableComment;
-import apijson.orm.model.Column;
-import apijson.orm.model.Document;
-import apijson.orm.model.ExtendedProperty;
-import apijson.orm.model.Function;
-import apijson.orm.model.PgAttribute;
-import apijson.orm.model.PgClass;
-import apijson.orm.model.Request;
-import apijson.orm.model.SysColumn;
-import apijson.orm.model.SysTable;
-import apijson.orm.model.Table;
-import apijson.orm.model.TestRecord;
+import apijson.orm.model.*;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import static apijson.JSON.getBoolean;
 import static apijson.JSON.getString;
 import static apijson.JSONMap.*;
-import static apijson.RequestMethod.DELETE;
-import static apijson.RequestMethod.GET;
-import static apijson.RequestMethod.POST;
-import static apijson.RequestMethod.PUT;
-import static apijson.SQL.AND;
-import static apijson.SQL.NOT;
-import static apijson.SQL.ON;
-import static apijson.SQL.OR;
+import static apijson.RequestMethod.*;
+import static apijson.SQL.*;
 
 /**config sql for JSON Request
  * @author Lemon
@@ -1583,7 +1562,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> ocfg = join.getOnConfig();
 				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getGroup() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
@@ -1598,6 +1577,23 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 						first = false;
 					}
 				}
+
+				////先处理左/右关联，内关联忽略
+				//SQLConfig<T, M, L> outerConfig = join.getOuterConfig();
+				//SQLConfig<T, M, L> outerConfig2 = (outerConfig != null && outerConfig.getGroup() != null) || join.isLeftOrRightJoin() ? outerConfig : null;
+				//
+				//if (outerConfig2 != null) {
+				//	outerConfig2.setMain(false).setKeyPrefix(true);
+				//	//if (StringUtil.isEmpty(cfg.getAlias(), true)) {
+				//	//	cfg.setAlias(cfg.getTable());
+				//	//}
+				//	String c = ((AbstractSQLConfig<?, ?, ?>) outerConfig2).gainGroupString(false);
+				//
+				//	if (StringUtil.isNotEmpty(c, true)) {
+				//		joinGroup += (first ? "" : ", ") + c;
+				//		first = false;
+				//	}
+				//}
 			}
 		}
 
@@ -1659,7 +1655,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> ocfg = join.getOnConfig();
 				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getHaving() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
@@ -1772,7 +1768,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> ocfg = join.getOnConfig();
 				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getSample() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
@@ -1842,7 +1838,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> ocfg = join.getOnConfig();
 				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getLatest() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
@@ -1907,7 +1903,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> ocfg = join.getOnConfig();
 				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getPartition() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
@@ -1972,7 +1968,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> ocfg = join.getOnConfig();
 				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getFill() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
@@ -2038,6 +2034,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	public String gainOrderString(boolean hasPrefix) {
 		//加上子表的 order
 		String joinOrder = "";
+		String joinOuterOrder = "";
 		if (joinList != null) {
 			boolean first = true;
 			for (Join<T, M, L> join : joinList) {
@@ -2045,7 +2042,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					continue;
 				}
 
-				SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+				SQLConfig<T, M, L> ocfg = join.getOnConfig();
 				SQLConfig<T, M, L> cfg = (ocfg != null && ocfg.getOrder() != null) || join.isLeftOrRightJoin() ? ocfg : join.getJoinConfig();
 
 				if (cfg != null) {
@@ -2354,7 +2351,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 						continue;
 					}
 
-					SQLConfig<T, M, L> ocfg = join.getOuterConfig();
+					SQLConfig<T, M, L> ocfg = join.getOnConfig();
 					boolean isEmpty = ocfg == null || ocfg.getColumn() == null;
 					boolean isLeftOrRightJoin = join.isLeftOrRightJoin();
 
@@ -3738,8 +3735,9 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			List<Object> pvl = new ArrayList<>(getPreparedValueList());
 
 			SQLConfig<T, M, L> jc;
+			SQLConfig<T, M, L> outerConfig;
 			String js;
-
+			boolean isWsEmpty = StringUtil.isEmpty(ws, true);
 			boolean changed = false;
 			// 各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
 			for (Join<T, M, L> j : joinList) {
@@ -3750,6 +3748,24 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 				case "@": // APP JOIN
 				case "<": // LEFT JOIN
 				case ">": // RIGHT JOIN
+					outerConfig = j.getOuterConfig();
+					if (outerConfig == null){
+						break;
+					}
+					boolean isMain1 = outerConfig.isMain();
+					outerConfig.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
+					String outerWhere = outerConfig.gainWhereString(false);
+
+					int logic1 = Logic.getType(jt);
+					newWs += " ( "
+							+ gainCondition(
+							Logic.isNot(logic1),
+							ws
+									+ ( isWsEmpty ? "" : (Logic.isAnd(logic1) ? AND : OR) )
+									+ " ( " + outerWhere + " ) "
+					)
+							+ " ) ";
+					changed = true;
 					break;
 
 				case "&": // INNER JOIN: A & B
@@ -3770,7 +3786,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					boolean isSideJoin = "^".equals(jt);
 					boolean isAntiJoin = "(".equals(jt);
 					boolean isForeignJoin = ")".equals(jt);
-					boolean isWsEmpty = StringUtil.isEmpty(ws, true);
+					//boolean isWsEmpty = StringUtil.isEmpty(ws, true);
 
 					if (isWsEmpty) {
 						if (isOuterJoin) { // ! OUTER JOIN: ! (A | B)
@@ -5211,7 +5227,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 							);
 				}
 
-				SQLConfig<T, M, L> oc = j.getOuterConfig();
+				SQLConfig<T, M, L> oc = j.getOnConfig();
 				String ow = null;
 				if (oc != null) {
 					oc.setPrepared(isPrepared());
@@ -6314,13 +6330,22 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 				joinConfig.setMain(false).setKeyPrefix(true);
 
+				if (join.getOn() != null) {
+					SQLConfig<T, M, L> onConfig = newSQLConfig(method, table, alias, join.getOn(), null, false, callback);
+					onConfig.setMain(false)
+							.setKeyPrefix(true)
+							.setDatabase(joinConfig.getDatabase())
+							.setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
+
+					join.setOnConfig(onConfig);
+				}
+
 				if (join.getOuter() != null) {
 					SQLConfig<T, M, L> outerConfig = newSQLConfig(method, table, alias, join.getOuter(), null, false, callback);
 					outerConfig.setMain(false)
 							.setKeyPrefix(true)
 							.setDatabase(joinConfig.getDatabase())
 							.setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
-
 					join.setOuterConfig(outerConfig);
 				}
 			}
