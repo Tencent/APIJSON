@@ -744,7 +744,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [apijson-nutz](https://github.com/vincent109/apijson-nutz) APIJSON + Nutz 框架 + NutzBoot 的 Demo
 
-[apijson-spring-boot](https://gitee.com/yunjiao-source/apijson-spring-boot) Springboot3 for APIJSON
+[apijson-spring-boot](https://gitee.com/yunjiao-source/apijson-spring-boot) Springboot3 for APIJSON，用 YAML 简化代码配置
 
 感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
 
