@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -252,6 +252,9 @@ public class CommonException extends Exception {
         }
         else if (config.isSnowflake()) {
           db = SQLConfig.DATABASE_SNOWFLAKE + " " + dbVersion;
+        }
+        else if (config.isDatabend()) {
+          db = SQLConfig.DATABASE_DATABEND + " " + dbVersion;
         }
         else if (config.isDatabricks()) {
           db = SQLConfig.DATABASE_DATABRICKS + " " + dbVersion;

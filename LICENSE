@@ -1,18 +1,18 @@
 Tencent is pleased to support the open source community by making APIJSON available.  
 
-Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+Copyright (C) 2020 Tencent.  All rights reserved.
 
 APIJSON is licensed under the Apache License Version 2.0.
 A copy of the Apache License Version 2.0 is included in this file.
 
+The copyright notice pertaining to the Tencent code in this repo was previously in the name of “THL A29 Limited.”
+That entity has now been de-registered.
+You should treat all previously distributed copies of the code as if the copyright notice was in the name of “Tencent.”
 
 Other dependencies and licenses:
 
 Open Source Software Licensed under the Apache License Version 2.0:
 --------------------------------------------------------------------
-1.  fastjson
-Copyright 1999-2019 Alibaba Group Holding Ltd.
-
 
 
 Terms of  Apache License Version 2.0
