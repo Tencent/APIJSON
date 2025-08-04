@@ -3765,6 +3765,9 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 									+ " ( " + outerWhere + " ) "
 					)
 							+ " ) ";
+					newPvl.addAll(pvl);
+					newPvl.addAll(outerConfig.getPreparedValueList());
+
 					changed = true;
 					break;
 
