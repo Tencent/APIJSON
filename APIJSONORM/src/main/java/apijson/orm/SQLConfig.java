@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -15,29 +15,45 @@ import apijson.StringUtil;
 /**SQL配置
  * @author Lemon
  */
-public interface SQLConfig<T extends Object> {
+public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Object>> {
 
 	String DATABASE_MYSQL = "MYSQL"; // https://www.mysql.com
 	String DATABASE_POSTGRESQL = "POSTGRESQL"; // https://www.postgresql.org
 	String DATABASE_SQLSERVER = "SQLSERVER"; // https://www.microsoft.com/en-us/sql-server
 	String DATABASE_ORACLE = "ORACLE"; // https://www.oracle.com/database
 	String DATABASE_DB2 = "DB2"; // https://www.ibm.com/products/db2
-    String DATABASE_MARIADB = "MARIADB"; // https://mariadb.org
-    String DATABASE_TIDB = "TIDB"; // https://www.pingcap.com/tidb
-    String DATABASE_DAMENG = "DAMENG"; // https://www.dameng.com
-    String DATABASE_KINGBASE = "KINGBASE"; // https://www.kingbase.com.cn
-    String DATABASE_ELASTICSEARCH = "ELASTICSEARCH"; // https://www.elastic.co/guide/en/elasticsearch/reference/7.4/xpack-sql.html
-    String DATABASE_CLICKHOUSE = "CLICKHOUSE"; // https://clickhouse.com
+	String DATABASE_MARIADB = "MARIADB"; // https://mariadb.org
+	String DATABASE_TIDB = "TIDB"; // https://www.pingcap.com/tidb
+	String DATABASE_COCKROACHDB = "COCKROACHDB"; // https://www.cockroachlabs.com
+	String DATABASE_DAMENG = "DAMENG"; // https://www.dameng.com
+	String DATABASE_KINGBASE = "KINGBASE"; // https://www.kingbase.com.cn
+	String DATABASE_ELASTICSEARCH = "ELASTICSEARCH"; // https://www.elastic.co/guide/en/elasticsearch/reference/7.4/xpack-sql.html
+	String DATABASE_MANTICORE = "MANTICORE"; // https://manticoresearch.com
+	String DATABASE_CLICKHOUSE = "CLICKHOUSE"; // https://clickhouse.com
 	String DATABASE_HIVE = "HIVE"; // https://hive.apache.org
 	String DATABASE_PRESTO = "PRESTO"; // Facebook PrestoDB  https://prestodb.io
 	String DATABASE_TRINO = "TRINO"; // PrestoSQL  https://trino.io
+	String DATABASE_DORIS = "DORIS"; // https://doris.apache.org
 	String DATABASE_SNOWFLAKE = "SNOWFLAKE"; // https://www.snowflake.com
+	String DATABASE_DATABEND = "DATABEND"; // https://www.databend.com
 	String DATABASE_DATABRICKS = "DATABRICKS"; // https://www.databricks.com
 	String DATABASE_CASSANDRA = "CASSANDRA"; // https://cassandra.apache.org
+	String DATABASE_MILVUS = "MILVUS"; // https://milvus.io
 	String DATABASE_INFLUXDB = "INFLUXDB"; // https://www.influxdata.com/products/influxdb-overview
 	String DATABASE_TDENGINE = "TDENGINE"; // https://tdengine.com
-	String DATABASE_REDIS = "REDIS";
-	String DATABASE_MQ = "MQ";
+	String DATABASE_TIMESCALEDB = "TIMESCALEDB"; // https://www.timescale.com
+	String DATABASE_QUESTDB = "QUESTDB"; // https://questdb.com
+	String DATABASE_IOTDB = "IOTDB"; // https://iotdb.apache.org/zh/UserGuide/latest/API/Programming-JDBC.html
+
+	String DATABASE_REDIS = "REDIS"; // https://redisql.com
+	String DATABASE_MONGODB = "MONGODB"; // https://www.mongodb.com/docs/atlas/data-federation/query/query-with-sql
+	String DATABASE_KAFKA = "KAFKA"; // https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka
+	String DATABASE_SQLITE = "SQLITE"; // https://www.sqlite.org
+	String DATABASE_DUCKDB = "DUCKDB"; // https://duckdb.org
+	String DATABASE_SURREALDB = "SURREALDB"; // https://surrealdb.com
+	String DATABASE_OPENGAUSS = "OPENGAUSS"; // https://opengauss.org
+
+	String DATABASE_MQ = "MQ"; //
 
 	String SCHEMA_INFORMATION = "information_schema";  //MySQL, PostgreSQL, SQL Server 都有的系统模式
 	String SCHEMA_SYS = "sys";  //SQL Server 系统模式
@@ -48,21 +64,25 @@ public interface SQLConfig<T extends Object> {
 	int TYPE_ITEM = 1;
 	int TYPE_ITEM_CHILD_0 = 2;
 
-	Parser<T> getParser();
+	Parser<T, M, L> gainParser();
 
-	SQLConfig setParser(Parser<T> parser);
+	SQLConfig<T, M, L> setParser(Parser<T, M, L> parser);
 
-	ObjectParser getObjectParser();
+	ObjectParser<T, M, L> gainObjectParser();
 
-	SQLConfig setObjectParser(ObjectParser objectParser);
+	SQLConfig<T, M, L> setObjectParser(ObjectParser<T, M, L> objectParser);
 
 	int getVersion();
 
-	SQLConfig setVersion(int version);
+	SQLConfig<T, M, L> setVersion(int version);
 
 	String getTag();
 
-	SQLConfig setTag(String tag);
+	SQLConfig<T, M, L> setTag(String tag);
+
+	boolean isTSQL();
+	boolean isMSQL();
+	boolean isPSQL();
 
 	boolean isMySQL();
 	boolean isPostgreSQL();
@@ -71,31 +91,45 @@ public interface SQLConfig<T extends Object> {
 	boolean isDb2();
 	boolean isMariaDB();
 	boolean isTiDB();
+	boolean isCockroachDB();
 	boolean isDameng();
 	boolean isKingBase();
 	boolean isElasticsearch();
+	boolean isManticore();
 	boolean isClickHouse();
 	boolean isHive();
 	boolean isPresto();
+	boolean isTrino();
 	boolean isSnowflake();
+	boolean isDatabend();
 	boolean isDatabricks();
 	boolean isCassandra();
-	boolean isTrino();
+	boolean isMilvus();
 	boolean isInfluxDB();
 	boolean isTDengine();
+	boolean isTimescaleDB();
+	boolean isQuestDB();
+	boolean isIoTDB();
 	boolean isRedis();
+	boolean isMongoDB();
+	boolean isKafka();
 	boolean isMQ();
+	boolean isSQLite();
+	boolean isDuckDB();
+	boolean isSurrealDB();
+	boolean isOpenGauss();
+	boolean isDoris();
 
 
-	//暂时只兼容以上几种
+	// 暂时只兼容以上几种
 	//	boolean isSQL();
 	//	boolean isTSQL();
 	//	boolean isPLSQL();
 	//	boolean isAnsiSQL();
 
-    /**用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
-     * @return
-     */
+	/**用来给 Table, Column 等系统属性表来绕过 MAX_SQL_COUNT 等限制
+	 * @return
+	 */
 	boolean limitSQLCount();
 
 	/**是否开启 WITH AS 表达式来简化 SQL 和提升性能
@@ -103,11 +137,11 @@ public interface SQLConfig<T extends Object> {
 	 */
 	boolean isWithAsEnable();
 	/**允许增删改部分失败
-     * @return
-     */
-    boolean allowPartialUpdateFailed();
+	 * @return
+	 */
+	boolean allowPartialUpdateFailed();
 
-    @NotNull
+	@NotNull
 	String getIdKey();
 	@NotNull
 	String getUserIdKey();
@@ -117,11 +151,11 @@ public interface SQLConfig<T extends Object> {
 	 * MYSQL: 8.0, 5.7, 5.6 等； PostgreSQL: 11, 10, 9.6 等
 	 * @return
 	 */
-	String getDBVersion();
+	String gainDBVersion();
 
 	@NotNull
-	default int[] getDBVersionNums() {
-		String dbVersion = StringUtil.getNoBlankString(getDBVersion());
+	default int[] gainDBVersionNums() {
+		String dbVersion = StringUtil.noBlank(gainDBVersion());
 		if (dbVersion.isEmpty()) {
 			return new int[]{0};
 		}
@@ -143,149 +177,170 @@ public interface SQLConfig<T extends Object> {
 	/**获取数据库地址
 	 * @return
 	 */
-	String getDBUri();
+	String gainDBUri();
 
 	/**获取数据库账号
 	 * @return
 	 */
-	String getDBAccount();
+	String gainDBAccount();
 
 	/**获取数据库密码
 	 * @return
 	 */
-	String getDBPassword();
+	String gainDBPassword();
 
 	/**获取SQL语句
 	 * @return
 	 * @throws Exception
 	 */
-	String getSQL(boolean prepared) throws Exception;
+	String gainSQL(boolean prepared) throws Exception;
 
 
 
 	boolean isTest();
-	SQLConfig setTest(boolean test);
+	SQLConfig<T, M, L> setTest(boolean test);
 
 	int getType();
-	SQLConfig setType(int type);
+	SQLConfig<T, M, L> setType(int type);
 
 	int getCount();
-	SQLConfig setCount(int count);
+	SQLConfig<T, M, L> setCount(int count);
 
 	int getPage();
-	SQLConfig setPage(int page);
+	SQLConfig<T, M, L> setPage(int page);
 
 	int getQuery();
-	SQLConfig setQuery(int query);
+	SQLConfig<T, M, L> setQuery(int query);
 
 	Boolean getCompat();
-	SQLConfig setCompat(Boolean compat);
+	SQLConfig<T, M, L> setCompat(Boolean compat);
 
 	int getPosition();
-	SQLConfig setPosition(int position);
+	SQLConfig<T, M, L> setPosition(int position);
 
 	int getCache();
-	SQLConfig setCache(int cache);
+	SQLConfig<T, M, L> setCache(int cache);
 
 	boolean isExplain();
-	SQLConfig setExplain(boolean explain);
+	SQLConfig<T, M, L> setExplain(boolean explain);
 
 
 	RequestMethod getMethod();
-	SQLConfig setMethod(RequestMethod method);
+	SQLConfig<T, M, L> setMethod(RequestMethod method);
 
 	Object getId();
-	SQLConfig setId(Object id);
+	SQLConfig<T, M, L> setId(Object id);
 
 	Object getIdIn();
-	SQLConfig setIdIn(Object idIn);
+	SQLConfig<T, M, L> setIdIn(Object idIn);
 
 	Object getUserId();
-	SQLConfig setUserId(Object userId);
+	SQLConfig<T, M, L> setUserId(Object userId);
 
 	Object getUserIdIn();
-	SQLConfig setUserIdIn(Object userIdIn);
+	SQLConfig<T, M, L> setUserIdIn(Object userIdIn);
 
 	String getRole();
-	SQLConfig setRole(String role);
+	SQLConfig<T, M, L> setRole(String role);
 
 	public boolean isDistinct();
-	public SQLConfig setDistinct(boolean distinct);
+	public SQLConfig<T, M, L> setDistinct(boolean distinct);
 
 	String getDatabase();
-	SQLConfig setDatabase(String database);
+	SQLConfig<T, M, L> setDatabase(String database);
 
+	String getSQLNamespace();
+	String getNamespace();
+	SQLConfig<T, M, L> setNamespace(String namespace);
+
+	String gainSQLCatalog();
+	String getCatalog();
+	SQLConfig<T, M, L> setCatalog(String catalog);
+
+	String gainSQLSchema();
 	String getSchema();
-	SQLConfig setSchema(String schema);
+	SQLConfig<T, M, L> setSchema(String schema);
 
 	String getDatasource();
-	SQLConfig setDatasource(String datasource);
+	SQLConfig<T, M, L> setDatasource(String datasource);
 
 	String getQuote();
 
 	List<String> getJson();
-	SQLConfig setJson(List<String> json);
+	SQLConfig<T, M, L> setJson(List<String> json);
 
 	/**请求传进来的Table名
 	 * @return
-	 * @see {@link #getSQLTable()}
+	 * @see {@link #gainSQLTable()}
 	 */
 	String getTable();
 
-	SQLConfig setTable(String table);
+	SQLConfig<T, M, L> setTable(String table);
 
 	/**数据库里的真实Table名
 	 * 通过 {@link AbstractSQLConfig.TABLE_KEY_MAP} 映射
 	 * @return
 	 */
-	String getSQLTable();
+	String gainSQLTable();
 
-	String getTablePath();
+	String gainTablePath();
 
 	Map<String, String> getKeyMap();
-	SQLConfig setKeyMap(Map<String, String> keyMap);
+	SQLConfig<T, M, L> setKeyMap(Map<String, String> keyMap);
 
 	List<String> getRaw();
-	SQLConfig setRaw(List<String> raw);
+	SQLConfig<T, M, L> setRaw(List<String> raw);
 
-	Subquery getFrom();
-	SQLConfig setFrom(Subquery from);
+	Subquery<T, M, L> getFrom();
+	SQLConfig<T, M, L> setFrom(Subquery<T, M, L> from);
 
 	List<String> getColumn();
-	SQLConfig setColumn(List<String> column);
+	SQLConfig<T, M, L> setColumn(List<String> column);
 
 	List<List<Object>> getValues();
-	SQLConfig setValues(List<List<Object>> values);
+	SQLConfig<T, M, L> setValues(List<List<Object>> values);
 
 	Map<String, Object> getContent();
-	SQLConfig setContent(Map<String, Object> content);
+	SQLConfig<T, M, L> setContent(Map<String, Object> content);
 
 	Map<String, List<String>> getCombineMap();
-	SQLConfig setCombineMap(Map<String, List<String>> combineMap);
+	SQLConfig<T, M, L> setCombineMap(Map<String, List<String>> combineMap);
 
 	String getCombine();
-	SQLConfig setCombine(String combine);
+	SQLConfig<T, M, L> setCombine(String combine);
 
 	Map<String, String> getCast();
-	SQLConfig setCast(Map<String, String> cast);
+	SQLConfig<T, M, L> setCast(Map<String, String> cast);
 
 	List<String> getNull();
-	SQLConfig setNull(List<String> nulls);
+	SQLConfig<T, M, L> setNull(List<String> nulls);
 
 	Map<String, Object> getWhere();
-	SQLConfig setWhere(Map<String, Object> where);
+	SQLConfig<T, M, L> setWhere(Map<String, Object> where);
 
 	String getGroup();
-	SQLConfig setGroup(String group);
+	SQLConfig<T, M, L> setGroup(String group);
 
 	Map<String, Object> getHaving();
-	SQLConfig setHaving(Map<String, Object> having);
+	SQLConfig<T, M, L> setHaving(Map<String, Object> having);
 
 	String getHavingCombine();
-	SQLConfig setHavingCombine(String havingCombine);
+	SQLConfig<T, M, L> setHavingCombine(String havingCombine);
+
+	String getSample();
+	SQLConfig<T, M, L> setSample(String order);
+
+	String getLatest();
+	SQLConfig<T, M, L> setLatest(String latest);
+
+	String getPartition();
+	SQLConfig<T, M, L> setPartition(String partition);
+
+	String getFill();
+	SQLConfig<T, M, L> setFill(String fill);
 
 	String getOrder();
-	SQLConfig setOrder(String order);
+	SQLConfig<T, M, L> setOrder(String order);
 
 	/**
 	 * exactMatch = false
@@ -304,53 +359,65 @@ public interface SQLConfig<T extends Object> {
 	 * @param value
 	 * @return
 	 */
-	SQLConfig putWhere(String key, Object value, boolean prior);
+	SQLConfig<T, M, L> putWhere(String key, Object value, boolean prior);
 
 
 	boolean isPrepared();
 
-	SQLConfig setPrepared(boolean prepared);
+	SQLConfig<T, M, L> setPrepared(boolean prepared);
 
 	boolean isMain();
 
-	SQLConfig setMain(boolean main);
+	SQLConfig<T, M, L> setMain(boolean main);
 
 
 	List<Object> getPreparedValueList();
-	SQLConfig setPreparedValueList(List<Object> preparedValueList);
+	SQLConfig<T, M, L> setPreparedValueList(List<Object> preparedValueList);
 
 
 	String getAlias();
 
-	SQLConfig setAlias(String alias);
+	SQLConfig<T, M, L> setAlias(String alias);
 
-	String getWhereString(boolean hasPrefix) throws Exception;
+	default String gainTableKey() {
+		String alias = getAlias();
+		return getTable() + (StringUtil.isEmpty(alias) ? "" : ":" + alias);
+	}
 
-	String getRawSQL(String key, Object value) throws Exception;
-	String getRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception;
+	default String gainSQLAlias() {
+		return gainSQLAlias(getTable(), getAlias());
+	}
+	static String gainSQLAlias(@NotNull String table, String alias) {
+		// 这里不用 : $ 等符号，因为部分数据库/引擎似乎不支持 `key`, "key", [key] 等避免关键词冲突的方式，只能使用符合变量命名的表别名
+		return StringUtil.isEmpty(alias) ? table : table + "__" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
+	}
+
+
+	String gainWhereString(boolean hasPrefix) throws Exception;
+
+	String gainRawSQL(String key, Object value) throws Exception;
+	String gainRawSQL(String key, Object value, boolean throwWhenMissing) throws Exception;
 
 	boolean isKeyPrefix();
 
-	SQLConfig setKeyPrefix(boolean keyPrefix);
+	SQLConfig<T, M, L> setKeyPrefix(boolean keyPrefix);
 
-
-	List<Join> getJoinList();
-
-	SQLConfig setJoinList(List<Join> joinList);
+	List<Join<T, M, L>> getJoinList();
+	SQLConfig<T, M, L> setJoinList(List<Join<T, M, L>> joinList);
 
 	boolean hasJoin();
 
 
-	String getSubqueryString(Subquery subquery) throws Exception;
+	String gainSubqueryString(Subquery<T, M, L> subquery) throws Exception;
 
-	SQLConfig setProcedure(String procedure);
-
+	SQLConfig<T, M, L> setProcedure(String procedure);
 
 
 	List<Object> getWithAsExprPreparedValueList();
-	SQLConfig setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
+	SQLConfig<T, M, L> setWithAsExprPreparedValueList(List<Object> withAsExprePreparedValueList);
 
 	boolean isFakeDelete();
 
 	Map<String, Object> onFakeDelete(Map<String, Object> map);
+
 }

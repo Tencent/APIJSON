@@ -6,13 +6,23 @@ https://github.com/Tencent/APIJSON/issues/468
 
 #### 使用说明
 
-json支持多种方式定义method
+json 支持多种方式定义 method
 
-第一种:
+#### 第一种:
 
- "@post","@put","@delete","@head","@get","@gets","@head","@heads"
+"@post","@put","@delete","@head","@get","@gets","@head","@heads"
 
-"@post": ["Moment","Comment[]"] , 值为数组格式,  每个value = key
+"@post": "Moment,Comment[]" , 值为 String 或 JSONObject 格式,  为 String 时每个 value = key，为 JSONObject 时：
+```json
+"@post": { 
+   "Moment": "Moment", // 只指定 tag，为 "" 则和 key 一致
+   "Comment[]": { // 同时指定多个全局关键词
+      "tag": "Comment[]",
+      "version": 2
+      // 其它全局关键词
+   }
+}
+```
 
 需要保证每个key唯一, 唯一判断标准:
 
@@ -24,7 +34,7 @@ key= Moment[]
 
 ```
 {
-   "@post": ["Moment","Comment:cArray[]","User:u"], // 分发到 POST 请求对应的解析处理
+   "@post": "Moment,Comment:cArray[],User:u", // 分发到 POST 请求对应的解析处理
    "Moment": {
      // TODO 其它字段
    },
@@ -33,7 +43,7 @@ key= Moment[]
         // TODO 其它字段
       }
    ],
-   "@get": ["User"], // 分发到 GET 请求对应的解析处理
+   "@get": "User", // 分发到 GET 请求对应的解析处理
    "User:u": {
      // TODO 其它字段
    },
@@ -46,19 +56,19 @@ key= Moment[]
 
 ```
 
-第二种:
+#### 第二种: @Deprecated 即将弃用，请使用第一种
 
 对象内定义"@method": "GET", value大写
 
 ```
 {
-	"sql@": {
+    "sql@": {
     	"@method": "GET",
         "with": true,
         "from": "Sys_role",
         "Sys_role": {
-          "@column": "id",
-          "role_name": "角色1"
+            "@column": "id",
+            "role_name": "角色1"
         }
     },
     "Sys_user_role:sur[]": {
@@ -152,14 +162,14 @@ Comment:cArray[]
 
 并将method 添加到 json对象属性中.
 
-```
+```json
 "Sys_role": {
-    	"@method": "PUT",
-		"id": "6aedce0d-2a29-4fbe-aeed-0ba935ca6b41",
-        "id{}@": "sql",
-        "role_code": "code-subrange-4",
-        "role_name": "角色-subrange-4"
-    }
+    "@method": "PUT",
+    "id": "6aedce0d-2a29-4fbe-aeed-0ba935ca6b41",
+    "id{}@": "sql",
+    "role_code": "code-subrange-4",
+    "role_name": "角色-subrange-4"
+}
 ```
 
 2、对象解析
@@ -741,6 +751,7 @@ AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = true; // true: 必须有
 
 ```
 // 条件删除
+```json
 {
     "User:del": {
         "username": "test3"
@@ -748,8 +759,10 @@ AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = true; // true: 必须有
     "tag": "User",
     "explain": true
 }
+```
 
 // 引用id{}@删除
+```json
 {
 	"sql@": {
 		"@method": "GET",
@@ -766,8 +779,11 @@ AbstractVerifier.IS_UPDATE_MUST_HAVE_ID_CONDITION = true; // true: 必须有
     },
     "explan": true
 }
+```
+
 // 子查询条件删除
 http://localhost:8675/lowCodePlatform/forms/api/delete
+```json
 {
 	"sql@": {
 		"@method": "GET",
@@ -783,8 +799,10 @@ http://localhost:8675/lowCodePlatform/forms/api/delete
     },
     "explan": true
 }
+```
 
 第二种写法:
+```json
 {
 	"@get": ["sql@"],
 	"sql@": {
@@ -800,23 +818,21 @@ http://localhost:8675/lowCodePlatform/forms/api/delete
     },
     "explan": true
 }
-
-
 ```
 
 
 
 开启id删除, 删除失败:
 
-```
+```json
 {
-	"@get": ["sql@"],
-	"sql@": {
+    "@get": ["sql@"],
+    "sql@": {
         "with": true,
         "from": "User",
         "User": {
-          "@column": "username",
-		  "username": "test4"
+            "@column": "username",
+            "username": "test4"
         }
     },
     "User": {
@@ -830,7 +846,7 @@ http://localhost:8675/lowCodePlatform/forms/api/delete
 
 开启id删除、id引用 删除成功
 
-```
+```json
 {
 	"sql@": {
 		"@method": "GET",
@@ -848,19 +864,20 @@ http://localhost:8675/lowCodePlatform/forms/api/delete
     "explan": true
 }
 ```
+
 ![image](https://user-images.githubusercontent.com/12228225/204080050-e6f04fe6-319e-45b7-b1b2-bf4cda4ab2db.png)
 
 PUT 子查询 修改
 
-```
+```json
 {
    "sql@": {
-		"@method": "GET",
+	"@method": "GET",
         "with": true,
         "from": "Sys_role_permission",
         "Sys_role_permission": {
-          "@column": "role_id",
-		  "id{}": ["ba2634f8-0bdc-4b50-9c5e-47786b1536ef"]
+             "@column": "role_id",
+	     "id{}": ["ba2634f8-0bdc-4b50-9c5e-47786b1536ef"]
         }
     },
     "Sys_role": {
@@ -892,15 +909,15 @@ WHERE ( (`username` IN (SELECT * FROM (SELECT `username` FROM `housekeeping`.`Us
 
 ### must、refuses判断、delete、PUT支持 ref
 
-```
+```json
 {
-	"sql@": {
-		"@method": "GET",
+    "sql@": {
+	"@method": "GET",
         "with": true,
         "from": "Sys_role_permission",
         "Sys_role_permission": {
-          "@column": "id",
-		  "role_id{}": ["94f79f0b-331b-4cc5-bfc0-ebfc47d00f13"]
+            "@column": "id",
+	    "role_id{}": ["94f79f0b-331b-4cc5-bfc0-ebfc47d00f13"]
         }
     },
     "Sys_role_permission": {

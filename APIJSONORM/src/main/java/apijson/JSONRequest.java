@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -6,6 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -15,35 +16,40 @@ import static apijson.StringUtil.PATTERN_ALPHA_BIG;
  * @author Lemon
  * @see #puts
  * @see #toArray
- * @use JSONRequest request = new JSONRequest(...);
+ * @use JSONRequest<M, L> request = JSON.createJSONObject(...);
  * <br> request.puts(...);//not a must
  * <br> request.toArray(...);//not a must
  */
-public class JSONRequest extends JSONObject {
-	private static final long  serialVersionUID = 1L;
+public interface JSONRequest<M extends Map<String, Object>, L extends List<Object>> extends JSONMap<M, L> {
 
-	public JSONRequest() {
-		super();
-	}
-	/**
-	 * @param object must be annotated by {@link MethodAccess}
-	 * @see	{@link #JSONRequest(String, Object)}
-	 */
-	public JSONRequest(Object object) {
-		this(null, object);
-	}
-	/**
-	 * @param name
-	 * @param object
-	 * @see {@link #puts(String, Object)}
-	 */
-	public JSONRequest(String name, Object object) {
-		this();
-		puts(name, object);
-	}
+	//default JSONRequest() {
+	//	super();
+	//}
+	///**
+	// * @param object must be annotated by {@link MethodAccess}
+	// * @see	{@link #JSONRequest(String, Object)}
+	// */
+	//default JSONRequest(Object object) {
+	//	this(null, object);
+	//}
+	///**
+	// * @param name
+	// * @param object
+	// * @see {@link #puts(String, Object)}
+	// */
+	//default JSONRequest(String name, Object object) {
+	//	this();
+	//	puts(name, object);
+	//}
 
-
-
+	//public static JSONRequest<M, L> valueOf(Object obj) {
+	//	JSONRequest<M, L> req = new JSONRequest() {};
+	//	Map<String, Object> m = JSON.parseObject(obj);
+	//	if (m != null && ! m.isEmpty()) {
+	//		req.map.putAll(m);
+	//	}
+	//	return req;
+	//}
 
 	public static final String KEY_TAG = "tag";//只在最外层，最外层用JSONRequest
 	public static final String KEY_VERSION = "version";//只在最外层，最外层用JSONRequest
@@ -54,23 +60,25 @@ public class JSONRequest extends JSONObject {
 	 * @param tag
 	 * @return
 	 */
-	public JSONRequest setTag(String tag) {
+	default JSONRequest<M, L> setTag(String tag) {
 		return puts(KEY_TAG, tag);
 	}
+
 	/**set "version":version in outermost layer
 	 * for target version of request
 	 * @param version
 	 * @return
 	 */
-	public JSONRequest setVersion(Integer version) {
+	default JSONRequest<M, L> setVersion(Integer version) {
 		return puts(KEY_VERSION, version);
 	}
+
 	/**set "format":format in outermost layer
 	 * for format APIJSON special keys to normal keys of response
 	 * @param format
 	 * @return
 	 */
-	public JSONRequest setFormat(Boolean format) {
+	default JSONRequest<M, L> setFormat(Boolean format) {
 		return puts(KEY_FORMAT, format);
 	}
 
@@ -80,14 +88,14 @@ public class JSONRequest extends JSONObject {
 	public static final int QUERY_TABLE = 0;
 	public static final int QUERY_TOTAL = 1;
 	public static final int QUERY_ALL = 2;
-	
+
 	public static final String QUERY_TABLE_STRING = "TABLE";
 	public static final String QUERY_TOTAL_STRING = "TOTAL";
 	public static final String QUERY_ALL_STRING = "ALL";
 
 	public static final String SUBQUERY_RANGE_ALL = "ALL";
 	public static final String SUBQUERY_RANGE_ANY = "ANY";
-	
+
 	public static final String KEY_QUERY = "query";
 	public static final String KEY_COMPAT = "compat";
 	public static final String KEY_COUNT = "count";
@@ -96,17 +104,9 @@ public class JSONRequest extends JSONObject {
 	public static final String KEY_SUBQUERY_RANGE = "range";
 	public static final String KEY_SUBQUERY_FROM = "from";
 
-	public static final List<String> ARRAY_KEY_LIST;
-	static {
-		ARRAY_KEY_LIST = new ArrayList<String>();
-		ARRAY_KEY_LIST.add(KEY_QUERY);
-		ARRAY_KEY_LIST.add(KEY_COMPAT);
-		ARRAY_KEY_LIST.add(KEY_COUNT);
-		ARRAY_KEY_LIST.add(KEY_PAGE);
-		ARRAY_KEY_LIST.add(KEY_JOIN);
-		ARRAY_KEY_LIST.add(KEY_SUBQUERY_RANGE);
-		ARRAY_KEY_LIST.add(KEY_SUBQUERY_FROM);
-	}
+	public static final List<String> ARRAY_KEY_LIST = new ArrayList<>(Arrays.asList(
+        KEY_QUERY, KEY_COMPAT ,KEY_COUNT, KEY_PAGE, KEY_JOIN, KEY_SUBQUERY_RANGE, KEY_SUBQUERY_FROM
+	));
 
 	/**set what to query in Array layer
 	 * @param query what need to query, Table,total,ALL?
@@ -115,86 +115,95 @@ public class JSONRequest extends JSONObject {
 	 * @see {@link #QUERY_TOTAL}
 	 * @see {@link #QUERY_ALL}
 	 */
-	public JSONRequest setQuery(int query) {
+	default JSONRequest<M, L> setQuery(int query) {
 		return puts(KEY_QUERY, query);
 	}
+
 	/**set maximum count of Tables to query in Array layer
 	 * @param count <= 0 || >= max ? max : count
 	 * @return
 	 */
-	public JSONRequest setCount(int count) {
+	default JSONRequest<M, L> setCount(int count) {
 		return puts(KEY_COUNT, count);
 	}
+
 	/**set page of Tables to query in Array layer
 	 * @param page <= 0 ? 0 : page
 	 * @return
 	 */
-	public JSONRequest setPage(int page) {
+	default JSONRequest<M, L> setPage(int page) {
 		return puts(KEY_PAGE, page);
 	}
-	
+
 	/**set joins of Main Table and it's Vice Tables in Array layer
 	 * @param joins "@/User/id@", "&/User/id@,>/Comment/momentId@" ...
 	 * @return
 	 */
-	public JSONRequest setJoin(String... joins) {
-		return puts(KEY_JOIN, StringUtil.getString(joins));
+	default JSONRequest<M, L> setJoin(String... joins) {
+		return setJson(this, StringUtil.get(joins));
 	}
-	
+
+	public static <M extends Map<String, Object>> M setJson(M m, String... joins) {
+		m.put(KEY_JOIN, StringUtil.get(joins));
+		return m;
+	}
+
 	/**set range for Subquery
 	 * @param range
 	 * @return
 	 * @see {@link #SUBQUERY_RANGE_ALL}
 	 * @see {@link #SUBQUERY_RANGE_ANY}
 	 */
-	public JSONRequest setSubqueryRange(String range) {
+	default JSONRequest<M, L> setSubqueryRange(String range) {
 		return puts(KEY_SUBQUERY_RANGE, range);
 	}
-	
+
 	/**set from for Subquery
-	 * @param range
+	 * @param from
 	 * @return
 	 */
-	public JSONRequest setSubqueryFrom(String from) {
+	default JSONRequest<M, L> setSubqueryFrom(String from) {
 		return puts(KEY_SUBQUERY_FROM, from);
 	}
-	
+
 	//array object >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-
-	/**create a parent JSONObject named KEY_ARRAY
+	/**create a parent JSONMap named KEY_ARRAY
 	 * @param count
 	 * @param page
 	 * @return {@link #toArray(int, int)}
 	 */
-	public JSONRequest toArray(int count, int page) {
+	default M toArray(int count, int page) {
 		return toArray(count, page, null);
 	}
-	/**create a parent JSONObject named name+KEY_ARRAY.
+
+	/**create a parent JSONMap named name+KEY_ARRAY.
 	 * @param count
 	 * @param page
 	 * @param name
 	 * @return {name+KEY_ARRAY : this}. if needs to be put, use {@link #putsAll(Map<? extends String, ? extends Object>)} instead
 	 */
-	public JSONRequest toArray(int count, int page, String name) {
-		return new JSONRequest(StringUtil.getString(name) + KEY_ARRAY, this.setCount(count).setPage(page));
+	default M toArray(int count, int page, String name) {
+		return JSON.createJSONObject(StringUtil.get(name) + KEY_ARRAY, this.setCount(count).setPage(page));
 	}
 
 
 	@Override
-	public JSONObject putsAll(Map<? extends String, ? extends Object> map) {
-		super.putsAll(map);
+	default JSONRequest<M, L> putsAll(Map<? extends String, ? extends Object> map) {
+		putAll(map);
 		return this;
 	}
 
 	@Override
-	public JSONRequest puts(Object value) {
-		return puts(null, value);
+	default JSONRequest<M, L> puts(Object value) {
+		put(value);
+		return this;
 	}
+
 	@Override
-	public JSONRequest puts(String key, Object value) {
-		super.puts(key, value);
+	default JSONRequest<M, L> puts(String key, Object value) {
+		put(key, value);
 		return this;
 	}
 

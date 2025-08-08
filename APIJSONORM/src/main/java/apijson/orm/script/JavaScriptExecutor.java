@@ -1,13 +1,14 @@
 package apijson.orm.script;
 
-import com.alibaba.fastjson.JSONObject;
+import java.util.List;
+import java.util.Map;
 
 import apijson.orm.AbstractFunctionParser;
 
 /**
  * JavaScript脚本语言的执行器实现
  */
-public class JavaScriptExecutor extends JSR223ScriptExecutor {
+public class JavaScriptExecutor<T, M extends Map<String, Object>, L extends List<Object>> extends JSR223ScriptExecutor<T, M, L> {
 
     @Override
     protected String scriptEngineName() {
@@ -15,7 +16,7 @@ public class JavaScriptExecutor extends JSR223ScriptExecutor {
     }
 
 	@Override
-	protected Object extendParameter(AbstractFunctionParser parser, JSONObject currentObject, String methodName, Object[] args) {
+	protected Object extendParameter(AbstractFunctionParser<T, M, L> parser, Map<String, Object> currentObject, String methodName, Object[] args) {
 		return null;
 	}
 

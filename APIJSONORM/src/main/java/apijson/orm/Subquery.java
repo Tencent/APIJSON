@@ -1,83 +1,74 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
 
 package apijson.orm;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import java.util.List;
+import java.util.Map;
 
 /**子查询 配置
  * @author Lemon
  */
-public class Subquery {
+public class Subquery<T, M extends Map<String, Object>, L extends List<Object>> {
 	
 	private String path; // []/0/User
 	private String originKey; //id{}@
-	private JSONObject originValue; // { "from": "Comment", "Comment": {...} }
+	private M originValue; // { "from": "Comment", "Comment": {...} }
 
 	private String from; // Comment
 	private String range; // ANY, ALL
 	private String key; //id{}
-	private SQLConfig config;
+	private SQLConfig<T, M, L> config;
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
-	public String getPath() {
+	public String gainPath() {
 		return path;
 	}
 	public void setPath(String path) {
 		this.path = path;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
-	public String getOriginKey() {
+	public String gainOriginKey() {
 		return originKey;
 	}
 	public void setOriginKey(String originKey) {
 		this.originKey = originKey;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
-	public JSONObject getOriginValue() {
+	public M gainOriginValue() {
 		return originValue;
 	}
-	public void setOriginValue(JSONObject originValue) {
+	public void setOriginValue(M originValue) {
 		this.originValue = originValue;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
-	public String getFrom() {
+	public String gainFrom() {
 		return from;
 	}
 	public void setFrom(String from) {
 		this.from = from;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
-	public String getRange() {
+	public String gainRange() {
 		return range;
 	}
 	public void setRange(String range) {
 		this.range = range;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
-	public String getKey() {
+	public String gainKey() {
 		return key;
 	}
 	public void setKey(String key) {
 		this.key = key;
 	}
 	
-	@JSONField(serialize = false) //解决泄漏 SQLConfig 里的 dbPassword 等
-	public SQLConfig getConfig() {
+	public SQLConfig<T, M, L> gainConfig() {
 		return config;
 	}
-	public void setConfig(SQLConfig config) {
+	public void setConfig(SQLConfig<T, M, L> config) {
 		this.config = config;
 	}
-
-	
 
 }

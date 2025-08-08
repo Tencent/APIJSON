@@ -1,19 +1,19 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
 
 package apijson.orm;
 
-import com.alibaba.fastjson.JSONObject;
+import java.util.List;
+import java.util.Map;
 
-import apijson.NotNull;
-import apijson.RequestMethod;
+import apijson.*;
 
 /**校验器(权限、请求参数、返回结果等)
  * @author Lemon
  */
-public interface Verifier<T> {
+public interface Verifier<T, M extends Map<String, Object>, L extends List<Object>> {
 
 
 	/**验证权限是否通过
@@ -21,7 +21,7 @@ public interface Verifier<T> {
 	 * @return
 	 * @throws Exception
 	 */
-	boolean verifyAccess(SQLConfig config) throws Exception;
+	boolean verifyAccess(SQLConfig<T, M, L> config) throws Exception;
 
 
 	/**校验请求使用的角色，角色不好判断，让访问者发过来角色名，OWNER,CONTACT,ADMIN等
@@ -31,9 +31,9 @@ public interface Verifier<T> {
 	 * @param role
 	 * @return
 	 * @throws Exception 
-	 * @see {@link apijson.JSONObject#KEY_ROLE} 
+	 * @see {@link JSONMap#KEY_ROLE}
 	 */
-	void verifyRole(SQLConfig config, String table, RequestMethod method, String role) throws Exception;
+	void verifyRole(SQLConfig<T, M, L> config, String table, RequestMethod method, String role) throws Exception;
 
 	/**登录校验
 	 * @throws Exception
@@ -75,8 +75,8 @@ public interface Verifier<T> {
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject verifyRequest(RequestMethod method, String name, JSONObject target, JSONObject request,
-			int maxUpdateCount, String globalDatabase, String globalSchema, SQLCreator creator) throws Exception;
+	M verifyRequest(RequestMethod method, String name, M target, M request,
+			int maxUpdateCount, String globalDatabase, String globalSchema) throws Exception;
 
 	/**验证返回结果的数据和结构
 	 * @param method
@@ -90,20 +90,22 @@ public interface Verifier<T> {
 	 * @return
 	 * @throws Exception
 	 */
-	JSONObject verifyResponse(
-		RequestMethod method, String name, JSONObject target, JSONObject response,
-		String database, String schema, SQLCreator creator, OnParseCallback callback
+	M verifyResponse(
+		RequestMethod method, String name, M target, M response,
+		String database, String schema, @NotNull Parser<T, M, L> parser, OnParseCallback<T, M, L> callback
 	) throws Exception;
 
 
 	@NotNull
-	Parser<T> createParser();
+	Parser<T, M, L> createParser();
+
+	Parser<T, M, L> getParser();
+	Verifier<T, M, L> setParser(AbstractParser<T, M, L> parser);
 
 	@NotNull
 	Visitor<T> getVisitor();
-	Verifier<T> setVisitor(@NotNull Visitor<T> visitor);
+	Verifier<T, M, L> setVisitor(@NotNull Visitor<T> visitor);
 	
-	String getVisitorIdKey(SQLConfig config);
-
+	String getVisitorIdKey(SQLConfig<T, M, L> config);
 
 }

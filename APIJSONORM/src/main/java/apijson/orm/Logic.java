@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -42,7 +42,7 @@ public class Logic {
 	}
 	public Logic(String key) {
 		this.originKey = key;
-		key = StringUtil.getString(key);
+		key = StringUtil.get(key);
 
 		int type = getType(key.isEmpty() ? "" : key.substring(key.length() - 1));
 

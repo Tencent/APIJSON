@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -115,6 +115,13 @@ public class SQL {
 	 */
 	public static String length(String s) {
 		return "length(" + s + ")";
+	}
+	/**
+	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
+	 * @return "json_length(" + s + ")"
+	 */
+	public static String json_length(String s) {
+		return "json_length(" + s + ")";
 	}
 	/**
 	 * @param s 因为POWER(x,y)等函数含有不只一个key，所以需要客户端添加进去，服务端检测到条件中有'('和')'时就不转换，直接当SQL语句查询
@@ -235,7 +242,7 @@ public class SQL {
 	 * @return column.isEmpty() ? "*" : column;
 	 */
 	public static String column(String column) {
-		column = StringUtil.getTrimedString(column);
+		column = StringUtil.trim(column);
 		return column.isEmpty() ? "*" : column;
 	}
 	/**有别名的字段

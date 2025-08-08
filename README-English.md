@@ -1,5 +1,5 @@
 Tencent is pleased to support the open source community by making APIJSON available.   <br/>
-Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved. <br/>
+Copyright (C) 2020 Tencent.  All rights reserved. <br/>
 This source code is licensed under the Apache License Version 2.0 <br/>
 
 <h1 align="center" style="text-align:center;">
@@ -7,18 +7,19 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 </h1>
 
 
-<p align="center">🏆 Tencent Top 8 Open Source Project, Achieved 5 Awards Inside & Outside Tencent 🚀 <br />A JSON Transmission Protocol and an ORM Library for providing APIs and Documents without writing any code. </p>
+<p align="center">🏆 Tencent Top 6 Open Source Project, Achieved 5 Awards Inside & Outside Tencent 🚀 <br />A JSON Transmission Protocol and an ORM Library for providing APIs and Documents without writing any code. </p>
 
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README.md">&nbsp;中文版&nbsp;</a>
   <a href="https://github.com/Tencent/APIJSON/blob/master/Document-English.md">&nbsp;Document&nbsp;</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">&nbsp;Video&nbsp;</a>
   <a href="http://apijson.cn/api">&nbsp;Test&nbsp;</a>
+  <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/SQLServer"><img src="https://img.shields.io/badge/SQLServer-2012%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostgreSQL-9.5%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/SQLServer"><img src="https://img.shields.io/badge/SQLServer-2012%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-12C%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/DB2"><img src="https://img.shields.io/badge/DB2-7.1%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TiDB-2.1%2B-brightgreen.svg?style=flat"></a>
@@ -42,21 +43,21 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server"><img src="https://img.shields.io/badge/Java-1.8%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/glennliao/apijson-go"><img src="https://img.shields.io/badge/Go-1.18%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/j2go/apijson-go"><img src="https://img.shields.io/badge/Go-1.16%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://img.shields.io/badge/CSharp-2.1%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/kvnZero/hyperf-APIJSON"><img src="https://img.shields.io/badge/PHP-8.0%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/kevinaskin/apijson-node"><img src="https://img.shields.io/badge/Node.js-ES6%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/liaozb/APIJSON.NET"><img src="https://img.shields.io/badge/CSharp-2.1%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/kvnZero/hyperf-APIJSON"><img src="https://img.shields.io/badge/PHP-8.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/kevinaskin/apijson-node"><img src="https://img.shields.io/badge/Node.js-ES6%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://img.shields.io/badge/Python-3%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Script"><img src="https://img.shields.io/badge/Lua-5.2%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L48-L52"><img src="https://img.shields.io/badge/Spring-4.3.2%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L48-L52"><img src="https://img.shields.io/badge/SpringBoot-1.4.0%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONFinal/pom.xml#L59-L68"><img src="https://img.shields.io/badge/JFinal-3.5%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L48-L52"><img src="https://img.shields.io/badge/SpringBoot-1.4.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONFinal/pom.xml#L59-L68"><img src="https://img.shields.io/badge/JFinal-3.5%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
 
 <p align="center" >
@@ -179,7 +180,7 @@ See https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/READ
 
 ## <h2 id="3">3. Frontend usage<h2/> 
 You can skip this step and use [APIAuto](https://github.com/TommyLemon/APIAuto) or download App.<br />
-See [Android](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Android/README-English.md), [iOS](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-iOS/README-English.md) or [JavaScript](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-JavaScript/README-English.md)<br />
+See [Android](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Android/README-English.md), [iOS](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-iOS/README-English.md) or [JavaScript](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-JavaScript/README-English.md)<br />
 
 ### Download App
 

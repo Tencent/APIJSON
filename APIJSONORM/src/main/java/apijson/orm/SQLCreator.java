@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -7,14 +7,17 @@ package apijson.orm;
 
 import apijson.NotNull;
 
+import java.util.List;
+import java.util.Map;
+
 /**SQL相关创建器
  * @author Lemon
  */
-public interface SQLCreator {
+public interface SQLCreator<T, M extends Map<String, Object>, L extends List<Object>> {
 	
 	@NotNull
-	SQLConfig createSQLConfig();
+	SQLConfig<T, M, L> createSQLConfig();
 
 	@NotNull
-	SQLExecutor createSQLExecutor();
+	SQLExecutor<T, M, L> createSQLExecutor();
 }

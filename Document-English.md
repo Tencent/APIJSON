@@ -4,7 +4,7 @@
 Request:
 <pre><code class="language-json">{
   "User":{
-  }
+  }
 }
 </code></pre>
 
@@ -44,10 +44,10 @@ Response:
 Request:
 <pre><code class="language-json">{
   "[]":{
-    "count":3,             //just get 3 results
-    "User":{
-      "@column":"id,name"  //just get ids and names
-    }
+    "count":3, //just get 3 results
+    "User":{
+      "@column":"id,name" //just get ids and names
+    }
   }
 }
 </code></pre>
@@ -134,13 +134,13 @@ Response:
 Request:
 <pre><code class="language-json">{
   "[]":{                             //get an array
-    "page":0,                        //pagination
+    "page":0,                        //pagination
     "count":2,
-    "Moment":{                       //get a Moment
-      "content$":"%a%"               //filter condition: content contains 'a'
+    "Moment":{                       //get a Moment
+      "content$":"%a%"               //filter condition: content contains 'a'
     },
     "User":{
-      "id@":"/Moment/userId",        //User.id = Moment.userId, short reference path，starts from grandparents path
+      "id@":"/Moment/userId",        //User.id = Moment.userId, short reference path，starts from grandparents path
       "@column":"id,name,head"       //get specified keys with the written order 
     },
     "Comment[]":{                    //get a Comment array, and unwrap Comment object
@@ -163,7 +163,7 @@ Response:
         "id":15,
         "userId":70793,
         "date":1486541171000,
-        "content":"APIJSON is a JSON Transmission Structure Protocol…",
+        "content":"APIJSON is a JSON Transmission Protocol…",
         "praiseUserIdList":[
           82055,
           82002,
@@ -288,14 +288,14 @@ Response:
 
 ### 1. Methods and API endpoints
 
-  Methods | URL | Request | Response
+ Methods | URL | Request | Response
 ------------ | ------------ | ------------ | ------------
-**GET**: <br /> A general way to get data.<br /> You can use dev tools to make edits in a web browser. | base_url/get/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; //Add contiditions here.<br /> &nbsp;&nbsp; }<br />} <br /> <br /> Eg. To get a Moment with `id = 235`：<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":235<br /> &nbsp;&nbsp; }<br />} | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; ...<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />}<br />Eg.<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":235,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "userId":38710,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "content":"APIJSON,let interfaces and documents go to hell !"<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br /> }
+**GET**: <br /> A general way to get data.<br /> You can use dev tools to make edits in a web browser. | base_url/get/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; //Add contiditions here.<br /> &nbsp;&nbsp; }<br />} <br /> <br /> Eg. To get a Moment with `id = 235`：<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":235<br /> &nbsp;&nbsp; }<br />} | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; ...<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />}<br />Eg.<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":235,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "userId":38710,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "content":"APIJSON is the real-time coding-free, powerful and secure ORM"<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br /> }
 **HEAD**: <br /> A general way to get counts.<br /> You can use dev tools to make edits in a web browser. | base_url/head/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; …<br /> &nbsp;&nbsp; }<br /> } <br /> {…} are conditions. <br /><br /> Eg. Get the number of Moments posted by the user with `id = 38710`：<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "userId":38710<br /> &nbsp;&nbsp; }<br />} | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "msg":"success",<br /> &nbsp;&nbsp;&nbsp;&nbsp; "count":10<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />} <br /> Eg.<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "msg":"success",<br /> &nbsp;&nbsp;&nbsp;&nbsp; "count":10<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;  "msg":"success"<br />}
 **GETS**: <br /> Get data with high security and confidentiality.<br /> Eg. bank accounts, birth date. | base_url/gets/ | You need to add `"tag":tag` with the same level of `Moment:{}`. Others are the same as **GET**. | Same as **GET**.
 **HEADS**: <br /> Get counts of confidential data(eg. bank account).| base_url/heads/ | You need to add  `"tag":tag` with the same level of `Moment:{}`. Others are the same as **HEAD**. | Same as **HEAD**.
-**POST**: <br /> Add new data. | base_url/post/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; …<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":tag<br />} <br /> The id in {...} is generated automatically when table is built and can’t be set by the user. <br /><br />Eg. A user with `id = 38710` posts a new Moment：<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "userId":38710,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "content":"APIJSON,let interfaces and documents go to hell !"<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":"Moment"<br />} | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "msg":"success",<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":38710<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />}<br />Eg.<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "msg":"success",<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":120<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />}
-**PUT**: <br /> Make changes to a specific item.<br /> Only change the part sent to server. | base_url/put/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":id,<br /> &nbsp;&nbsp;&nbsp;&nbsp; …<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":tag<br />} <br />  You can also add multiple id as `id{}`.<br /><br />Eg. Make changes to Moment's content with id= 235:<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":235,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "content":"APIJSON,let interfaces and documents go to hell !"<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":"Moment"<br />} | Same as **POST**.
+**POST**: <br /> Add new data. | base_url/post/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; …<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":tag<br />} <br /> The id in {...} is generated automatically when table is built and can’t be set by the user. <br /><br />Eg. A user with `id = 38710` posts a new Moment：<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "userId":38710,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "content":"APIJSON is the real-time coding-free, powerful and secure ORM"<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":"Moment"<br />} | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "msg":"success",<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":38710<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />}<br />Eg.<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "msg":"success",<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":120<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />}
+**PUT**: <br /> Make changes to a specific item.<br /> Only change the part sent to server. | base_url/put/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":id,<br /> &nbsp;&nbsp;&nbsp;&nbsp; …<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":tag<br />} <br />  You can also add multiple id as `id{}`.<br /><br />Eg. Make changes to Moment's content with id= 235:<br />{<br /> &nbsp;&nbsp; "Moment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":235,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "content":"APIJSON is the real-time coding-free, powerful and secure ORM"<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":"Moment"<br />} | Same as **POST**.
 **DELETE**: <br /> Delete data. | base_url/delete/ | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id":id<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":tag<br />} <br /> You can also add multiple id as `id{}`. <br /><br /> Or Delete contents with multiple id：<br />{<br /> &nbsp;&nbsp; "Comment":{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id{}":[100,110,120]<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "tag":"Comment[]"<br />} | {<br /> &nbsp;&nbsp; TableName:{<br /> &nbsp;&nbsp;&nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp;&nbsp;&nbsp; "msg":"success",<br /> &nbsp;&nbsp;&nbsp;&nbsp; "id[]":[100,110,120]<br />&nbsp;&nbsp; &nbsp;&nbsp; "count":3<br /> &nbsp;&nbsp; },<br /> &nbsp;&nbsp; "code":200,<br /> &nbsp;&nbsp; "msg":"success"<br />}<br />Eg.<br />{<br />&nbsp;&nbsp; "Comment":{<br />&nbsp;&nbsp; &nbsp;&nbsp; "code":200,<br />&nbsp;&nbsp; &nbsp;&nbsp; "msg":"success",<br />&nbsp;&nbsp; &nbsp;&nbsp; "id[]":[100,110,120],<br />&nbsp;&nbsp; &nbsp;&nbsp; "count":3<br />&nbsp;&nbsp; },<br />&nbsp;&nbsp; "code":200,<br />&nbsp;&nbsp; "msg":"success"<br />}
 
 **Note**:<br />

@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -6,8 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import java.util.List;
-
-import com.alibaba.fastjson.JSONObject;
+import java.util.Map;
 
 import apijson.NotNull;
 import apijson.StringUtil;
@@ -15,23 +14,25 @@ import apijson.StringUtil;
 /**连表 配置
  * @author Lemon
  */
-public class Join {
+public class Join<T, M extends Map<String, Object>, L extends List<Object>> {
 
 	private String path;  // /User/id@
 
-	private String joinType;  // "@" - APP, "<" - LEFT, ">" - RIGHT, "*" - CROSS, "&" - INNER, "|" - FULL, "!" - OUTER, "^" - SIDE, "(" - ANTI, ")" - FOREIGN
+	private String joinType;  // "@" - APP, "<" - LEFT, ">" - RIGHT, "*" - CROSS, "&" - INNER, "|" - FULL, "!" - OUTER, "^" - SIDE, "(" - ANTI, ")" - FOREIGN, "~" ASOF
 	private String table;  // User
 	private String alias;  // owner
 	private int count = 1;	// 当app join子表，需要返回子表的行数，默认1行；
 	private List<On> onList;  // ON User.id = Moment.userId AND ...
 
-	private JSONObject request;  // { "id@":"/Moment/userId" }
-	private JSONObject outer;  // "join": { "</User": { "@order":"id-", "@group":"id", "name~":"a", "tag$":"%a%", "@combine": "name~,tag$" } } 中的 </User 对应值
+	private M request;  // { "id@":"/Moment/userId" }
+	private M on;  // "join": { "</User": { "@order":"id-", "@group":"id", "name~":"a", "tag$":"%a%", "@combine": "name~,tag$" } } 中的 </User 对应值
 
-	private SQLConfig joinConfig;
-	private SQLConfig cacheConfig;
-	private SQLConfig outerConfig;
+	private M outer; // "join": { "</User": { "key2": value2, "@column": "key2,key3","@group": "key2+" }}
+	private SQLConfig<T, M, L> joinConfig;
+	private SQLConfig<T, M, L> cacheConfig;
+	private SQLConfig<T, M, L> onConfig;
 
+	private SQLConfig<T, M, L> outerConfig;
 
 	public String getPath() {
 		return path;
@@ -73,36 +74,52 @@ public class Join {
 		this.onList = onList;
 	}
 
-	public JSONObject getRequest() {
+	public M getRequest() {
 		return request;
 	}
-	public void setRequest(JSONObject request) {
+	public void setRequest(M request) {
 		this.request = request;
 	}
-	public JSONObject getOuter() {
-		return outer;
+	public M getOn() {
+		return on;
 	}
-	public void setOuter(JSONObject outer) {
+	public void setOn(M on) {
+		this.on = on;
+	}
+
+	public void setOuter(M outer) {
 		this.outer = outer;
 	}
 
-	public SQLConfig getJoinConfig() {
-		return joinConfig;
+	public M getOuter() {
+		return outer;
 	}
-	public void setJoinConfig(SQLConfig joinConfig) {
-		this.joinConfig = joinConfig;
-	}
-	public SQLConfig getCacheConfig() {
-		return cacheConfig;
-	}
-	public void setCacheConfig(SQLConfig cacheConfig) {
-		this.cacheConfig = cacheConfig;
-	}
-	public SQLConfig getOuterConfig() {
+
+	public SQLConfig<T, M, L> getOuterConfig() {
 		return outerConfig;
 	}
-	public void setOuterConfig(SQLConfig outerConfig) {
+
+	public void setOuterConfig(SQLConfig<T, M, L> outerConfig) {
 		this.outerConfig = outerConfig;
+	}
+
+	public SQLConfig<T, M, L> getJoinConfig() {
+		return joinConfig;
+	}
+	public void setJoinConfig(SQLConfig<T, M, L> joinConfig) {
+		this.joinConfig = joinConfig;
+	}
+	public SQLConfig<T, M, L> getCacheConfig() {
+		return cacheConfig;
+	}
+	public void setCacheConfig(SQLConfig<T, M, L> cacheConfig) {
+		this.cacheConfig = cacheConfig;
+	}
+	public SQLConfig<T, M, L> getOnConfig() {
+		return onConfig;
+	}
+	public void setOnConfig(SQLConfig<T, M, L> onConfig) {
+		this.onConfig = onConfig;
 	}
 
 	public boolean isOne2One() {
@@ -143,6 +160,9 @@ public class Join {
 	public boolean isForeignJoin() {
 		return ")".equals(getJoinType());
 	}
+	public boolean isAsofJoin() {
+		return "~".equals(getJoinType());
+	}
 
 	public boolean isLeftOrRightJoin() {
 		String jt = getJoinType();
@@ -159,15 +179,15 @@ public class Join {
 		return ! isAppJoin();
 	}
 
-	public static boolean isSQLJoin(Join j) {
+	public static boolean isSQLJoin(Join<?, ?, ?> j) {
 		return j != null && j.isSQLJoin();
 	}
 
-	public static boolean isAppJoin(Join j) {
+	public static boolean isAppJoin(Join<?, ?, ?> j) {
 		return j != null && j.isAppJoin();
 	}
 
-	public static boolean isLeftOrRightJoin(Join j) {
+	public static boolean isLeftOrRightJoin(Join<?, ?, ?> j) {
 		return j != null && j.isLeftOrRightJoin();
 	}
 
@@ -181,6 +201,7 @@ public class Join {
 		private Logic logic; // & | !
 		private String relateType;  // "" - 一对一, "{}" - 一对多, "<>" - 多对一, > , <= , !=
 		private String key;  // id
+		private String targetTableKey;  // Moment:main
 		private String targetTable;  // Moment
 		private String targetAlias;  // main
 		private String targetKey;  // userId
@@ -218,6 +239,14 @@ public class Join {
 		public void setKey(String key) {
 			this.key = key;
 		}
+
+		public void setTargetTableKey(String targetTableKey) {
+			this.targetTableKey = targetTableKey;
+		}
+		public String getTargetTableKey() {
+			return targetTableKey;
+		}
+
 		public void setTargetTable(String targetTable) {
 			this.targetTable = targetTable;
 		}

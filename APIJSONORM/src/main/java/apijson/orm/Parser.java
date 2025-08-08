@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -7,68 +7,67 @@ package apijson.orm;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.List;
+import java.util.Map;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import apijson.NotNull;
-import apijson.RequestMethod;
+import apijson.*;
 
 /**解析器
  * @author Lemon
  */
-public interface Parser<T extends Object> {
+public interface Parser<T, M extends Map<String, Object>, L extends List<Object>>
+		extends ParserCreator<T, M, L>, VerifierCreator<T, M, L>, SQLCreator<T, M, L> {
 
 	@NotNull
 	Visitor<T> getVisitor();
-	Parser<T> setVisitor(@NotNull Visitor<T> visitor);
+	Parser<T, M, L> setVisitor(@NotNull Visitor<T> visitor);
 
 	@NotNull
 	RequestMethod getMethod();
-	Parser<T> setMethod(@NotNull RequestMethod method);
+	Parser<T, M, L> setMethod(@NotNull RequestMethod method);
 
 	int getVersion();
-	Parser<T> setVersion(int version);
+	Parser<T, M, L> setVersion(int version);
 	
 	String getTag();
-	Parser<T> setTag(String tag);
+	Parser<T, M, L> setTag(String tag);
 
-	JSONObject getRequest();
-	Parser<T> setRequest(JSONObject request);
+	M getRequest();
+	Parser<T, M, L> setRequest(M request);
 
-	Parser<T> setNeedVerify(boolean needVerify);
+	Parser<T, M, L> setNeedVerify(boolean needVerify);
 	
 	boolean isNeedVerifyLogin();
-	Parser<T> setNeedVerifyLogin(boolean needVerifyLogin);
+	Parser<T, M, L> setNeedVerifyLogin(boolean needVerifyLogin);
 
 	boolean isNeedVerifyRole();
-	Parser<T> setNeedVerifyRole(boolean needVerifyRole);
+	Parser<T, M, L> setNeedVerifyRole(boolean needVerifyRole);
 
 	boolean isNeedVerifyContent();
-	Parser<T> setNeedVerifyContent(boolean needVerifyContent);
+	Parser<T, M, L> setNeedVerifyContent(boolean needVerifyContent);
 
 	
 	String parse(String request);
-	String parse(JSONObject request);
+	String parse(M request);
 
-	JSONObject parseResponse(String request);
-	JSONObject parseResponse(JSONObject request);
+	M parseResponse(String request);
+	M parseResponse(M request);
 
-	// 没必要性能还差 JSONObject parseCorrectResponse(String table, JSONObject response) throws Exception;
+	// 没必要性能还差 JSONRequest parseCorrectResponse(String table, JSONRequest response) throws Exception;
 
 
-	JSONObject parseCorrectRequest() throws Exception;
+	M parseCorrectRequest() throws Exception;
 	
-	JSONObject parseCorrectRequest(RequestMethod method, String tag, int version, String name, JSONObject request,
-			int maxUpdateCount, SQLCreator creator) throws Exception;
-	
-	
-	JSONObject getStructure(String table, String method, String tag, int version) throws Exception;
+	M parseCorrectRequest(RequestMethod method, String tag, int version, String name, M request,
+			int maxUpdateCount, SQLCreator<T, M, L> creator) throws Exception;
 
 
-	JSONObject onObjectParse(JSONObject request, String parentPath, String name, SQLConfig<T> arrayConfig, boolean isSubquery) throws Exception;
+	Map<String, Object> getStructure(String table, String method, String tag, int version) throws Exception;
 
-	JSONArray onArrayParse(JSONObject request, String parentPath, String name, boolean isSubquery) throws Exception;
+
+	M onObjectParse(M request, String parentPath, String name, SQLConfig<T, M, L> arrayConfig, boolean isSubquery, M cache) throws Exception;
+
+	L onArrayParse(M request, String parentPath, String name, boolean isSubquery, L cache) throws Exception;
 
 	/**解析远程函数
 	 * @param key
@@ -79,12 +78,13 @@ public interface Parser<T extends Object> {
 	 * @return
 	 * @throws Exception
 	 */
-	Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject, boolean containRaw) throws Exception;
+	Object onFunctionParse(String key, String function, String parentPath, String currentName, M currentObject, boolean containRaw) throws Exception;
 	
-	ObjectParser<T> createObjectParser(JSONObject request, String parentPath, SQLConfig<T> arrayConfig, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception;
+	ObjectParser<T, M, L> createObjectParser(M request, String parentPath, SQLConfig<T, M, L> arrayConfig, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception;
 
-	int getDefaultQueryCount();
+	int getMinQueryPage();
 	int getMaxQueryPage();
+	int getDefaultQueryCount();
 	int getMaxQueryCount();
 	int getMaxUpdateCount();
 	int getMaxSQLCount();
@@ -100,19 +100,21 @@ public interface Parser<T extends Object> {
 
 	void onVerifyLogin() throws Exception;
 	void onVerifyContent() throws Exception;
-	void onVerifyRole(SQLConfig<T> config) throws Exception;
+	void onVerifyRole(SQLConfig<T, M, L> config) throws Exception;
 	
-	JSONObject executeSQL(SQLConfig<T> config, boolean isSubquery) throws Exception;
+	M executeSQL(SQLConfig<T, M, L> config, boolean isSubquery) throws Exception;
 	
-	SQLExecutor<T> getSQLExecutor();
-	Verifier<T> getVerifier();
+	SQLExecutor<T, M, L> getSQLExecutor();
+	Verifier<T, M, L> getVerifier();
 	
 	
 	Boolean getGlobalFormat();
 	String getGlobalRole();
 	String getGlobalDatabase();
-	String getGlobalSchema();
 	String getGlobalDatasource();
+	String getGlobalNamespace();
+	String getGlobalCatalog();
+	String getGlobalSchema();
 	Boolean getGlobalExplain();
 	String getGlobalCache();
 
@@ -126,5 +128,7 @@ public interface Parser<T extends Object> {
 	void commit() throws SQLException;
 	void close();
 
+	M newSuccessResult();
+	M newErrorResult(Exception e);
 
 }

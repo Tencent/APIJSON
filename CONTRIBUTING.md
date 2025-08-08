@@ -27,7 +27,7 @@
 - [gdjs2](https://github.com/gdjs2)(University of California, Riverside)
 - [Rkyzzy](https://github.com/Rkyzzy)(SUSTech, University of California, Berkeley)
 - [kxlv2000](https://github.com/kxlv2000)(SUSTech)
-- [caohao-php](https://github.com/caohao-php)(腾讯工程师)
+- [caohao-go](https://github.com/caohao-go)(腾讯工程师，曾在华为、恒生担任C/C++开发工程师，在wps担任项目经理，在360担任技术专家)
 - [Wscats](https://github.com/Wscats)(腾讯工程师、腾讯 AlloyTeam 成员、Tencent Creation Camp 成员、知名技术博主)
 - [jun0315](https://github.com/jun0315)(腾讯工程师)
 - [JieJo](https://github.com/JieJo)
@@ -56,6 +56,21 @@
 - [cnscoo](https://github.com/cnscoo)(阿里云工程师）
 - [aninZz](https://github.com/aninZz)
 - [leomiaomiao](https://github.com/leomiaomiao)
+- [YqxLzx](https://github.com/YqxLzx)
+- [hiteshbedre](https://github.com/hiteshbedre)
+- [wahowaho](https://github.com/wahowaho)
+- [jarrodquan](https://github.com/jarrodquan)
+- [gemufeng](https://github.com/gemufeng)(上海麦市工程师)
+- [komiblog](https://github.com/komiblog)
+- [ostrichManX](https://github.com/ostrichManX)
+- [jia199807](https://github.com/jia199807)
+- [zxcwindy](https://github.com/zxcwindy)
+- [afumu](https://github.com/afumu)(gorm-plus 作者)
+- [alittle-yu](https://github.com/alittle-yu)
+- [Damon Nicola](https://github.com/Reynold3D)
+- [calmcc](https://github.com/calmcc)
+- [lindaifeng](https://github.com/lindaifeng)
+- [DenineLu](https://github.com/DenineLu)(小红书工程师）
 
 #### 其中特别致谢: <br/>
 cloudAndMonkey 提交的 11 个 Commits, 对 APIJSON 做出了 1,496 增加和 845 处删减(截止 2022/12/15 日)； <br/>

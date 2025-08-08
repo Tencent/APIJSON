@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 THL A29 Limited, a Tencent company.  All rights reserved.
+/*Copyright (C) 2020 Tencent.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -8,10 +8,6 @@ package apijson.orm;
 import apijson.*;
 import apijson.orm.exception.UnsupportedDataTypeException;
 import apijson.orm.script.ScriptExecutor;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.util.TypeUtils;
 
 import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.InvocationTargetException;
@@ -20,12 +16,12 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static apijson.orm.AbstractSQLConfig.PATTERN_SCHEMA;
-import static apijson.orm.SQLConfig.TYPE_ITEM;
 
 /**可远程调用的函数类
  * @author Lemon
  */
-public class AbstractFunctionParser<T extends Object> implements FunctionParser<T> {
+public abstract class AbstractFunctionParser<T, M extends Map<String, Object>, L extends List<Object>>
+		implements FunctionParser<T, M, L> {
     private static final String TAG = "AbstractFunctionParser";
 
     /**是否解析参数 key 的对应的值，不用手动编码 curObj.getString(key)
@@ -39,52 +35,57 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
      */
     public static boolean ENABLE_SCRIPT_FUNCTION = true;
 
-	// <methodName, JSONObject>
+	// <methodName, JSONMap>
 	// <isContain, <arguments:"array,key", tag:null, methods:null>>
-    public static Map<String, ScriptExecutor> SCRIPT_EXECUTOR_MAP;
-	public static Map<String, JSONObject> FUNCTION_MAP;
+    public static Map<String, ScriptExecutor<?, ? extends Map<String, Object>, ? extends List<Object>>> SCRIPT_EXECUTOR_MAP;
+	public static Map<String, Map<String, Object>> FUNCTION_MAP;
 
 	static {
 		FUNCTION_MAP = new HashMap<>();
 		SCRIPT_EXECUTOR_MAP = new HashMap<>();
 	}
 
+	private Parser<T, M, L> parser;
 	private RequestMethod method;
 	private String tag;
 	private int version;
-	private JSONObject request;
+	private String key;
+	private String parentPath;
+	private String currentName;
+	private M request;
+	private M current;
 
 	public AbstractFunctionParser() {
 		this(null, null, 0, null);
 	}
 
-	public AbstractFunctionParser(RequestMethod method, String tag, int version, @NotNull JSONObject request) {
+	public AbstractFunctionParser(RequestMethod method, String tag, int version, @NotNull M request) {
 		setMethod(method == null ? RequestMethod.GET : method);
 		setTag(tag);
 		setVersion(version);
 		setRequest(request);
 	}
 
-	private Parser<T> parser;
-
+	@NotNull
 	@Override
-	public Parser<T> getParser() {
+	public Parser<T, M, L> getParser() {
 		return parser;
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setParser(Parser<T> parser) {
+	public AbstractFunctionParser<T, M, L> setParser(Parser<T, M, L> parser) {
 		this.parser = parser;
 		return this;
 	}
 
+	@NotNull
 	@Override
 	public RequestMethod getMethod() {
-		return method;
+		return method == null ? RequestMethod.GET : method;
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setMethod(RequestMethod method) {
+	public AbstractFunctionParser<T, M, L> setMethod(RequestMethod method) {
 		this.method = method;
 		return this;
 	}
@@ -95,7 +96,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setTag(String tag) {
+	public AbstractFunctionParser<T, M, L> setTag(String tag) {
 		this.tag = tag;
 		return this;
 	}
@@ -106,12 +107,10 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setVersion(int version) {
+	public AbstractFunctionParser<T, M, L> setVersion(int version) {
 		this.version = version;
 		return this;
 	}
-
-	private String key;
 
 	@Override
 	public String getKey() {
@@ -119,12 +118,10 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setKey(String key) {
+	public AbstractFunctionParser<T, M, L> setKey(String key) {
 		this.key = key;
 		return this;
 	}
-
-	private String parentPath;
 
 	@Override
 	public String getParentPath() {
@@ -132,12 +129,10 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setParentPath(String parentPath) {
+	public AbstractFunctionParser<T, M, L> setParentPath(String parentPath) {
 		this.parentPath = parentPath;
 		return this;
 	}
-
-	private String currentName;
 
 	@Override
 	public String getCurrentName() {
@@ -145,34 +140,32 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setCurrentName(String currentName) {
+	public AbstractFunctionParser<T, M, L> setCurrentName(String currentName) {
 		this.currentName = currentName;
 		return this;
 	}
 
 	@NotNull
 	@Override
-	public JSONObject getRequest() {
+	public M getRequest() {
 		return request;
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setRequest(@NotNull JSONObject request) {
+	public AbstractFunctionParser<T, M, L> setRequest(@NotNull M request) {
 		this.request = request;
 		return this;
 	}
 
-	private JSONObject currentObject;
-
 	@NotNull
 	@Override
-	public JSONObject getCurrentObject() {
-		return currentObject;
+	public M getCurrentObject() {
+		return current;
 	}
 
 	@Override
-	public AbstractFunctionParser<T> setCurrentObject(@NotNull JSONObject currentObject) {
-		this.currentObject = currentObject;
+	public AbstractFunctionParser<T, M, L> setCurrentObject(@NotNull M current) {
+		this.current = current;
 		return this;
 	}
 
@@ -241,20 +234,20 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 		return JSON.toJSONString(obj);
 	}
 
-	/**根据路径取 JSONObject 值
+	/**根据路径取 JSONMap 值
 	 * @param path
 	 * @return
 	 */
-	public JSONObject getArgObj(String path) {
-		return getArgVal(path, JSONObject.class);
+	public Map<String, Object> getArgObj(String path) {
+		return getArgVal(path, Map.class);
 	}
 
-	/**根据路径取 JSONArray 值
+	/**根据路径取 JSONList 值
 	 * @param path
 	 * @return
 	 */
-	public JSONArray getArgArr(String path) {
-		return getArgVal(path, JSONArray.class);
+	public List<Object> getArgArr(String path) {
+		return getArgVal(path, List.class);
 	}
 
 	/**根据路径取 List<T> 值
@@ -289,22 +282,22 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	 * @param <T>
 	 */
 	public <T extends Object> T getArgVal(String path, Class<T> clazz) {
-		return getArgVal(path, clazz, true);
+		return getArgVal(getCurrentObject(), path, clazz, true);
 	}
 	/**根据路径取值
 	 * @param path
 	 * @param clazz
-	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser<T> 缓存值
+	 * @param tryAll false-仅当前对象，true-本次请求的全局对象以及 Parser<T, M, L> 缓存值
 	 * @return
 	 * @param <T>
 	 */
-	public <T extends Object> T getArgVal(String path, Class<T> clazz, boolean tryAll) {
-		T val = getArgVal(getCurrentObject(), path, clazz);
+	public <T extends Object> T getArgVal(@NotNull M req, String path, Class<T> clazz, boolean tryAll) {
+		T val = getArgValue(req, path, clazz);
 		if (tryAll == false || val != null) {
 			return val;
 		}
 
-		Parser<?> p = getParser();
+		Parser<?, ?, ?> p = getParser();
 		String targetPath = AbstractParser.getValuePath(getParentPath(), path);
 		return p == null ? null : (T) p.getValueByPath(targetPath);
 	}
@@ -314,55 +307,110 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	 * @return
 	 * @param <T>
 	 */
-	public static <T extends Object> T getArgVal(JSONObject obj, String path) {
-		return getArgVal(obj, path, null);
+	public static <T extends Object> T getArgVal(Map<String, Object> obj, String path) {
+		return getArgValue(obj, path, null);
 	}
-	public static <T extends Object> T getArgVal(JSONObject obj, String path, Class<T> clazz) {
+
+	public static <T extends Object> T getArgValue(Map<String, Object> obj, String path, Class<T> clazz) {
 		Object v = AbstractParser.getValue(obj, StringUtil.splitPath(path));
-		return clazz == null ? (T) v : TypeUtils.cast(v, clazz, ParserConfig.getGlobalInstance());
+
+		if (clazz == null) {
+			return (T) v;
+		}
+
+		// Simple type conversion
+		try {
+			if (v == null) {
+				return null;
+			}
+			if (clazz.isInstance(v)) {
+				return (T) v;
+			}
+			if (clazz == String.class) {
+				return (T) String.valueOf(v);
+			}
+			if (clazz == Boolean.class || clazz == boolean.class) {
+				return (T) Boolean.valueOf(String.valueOf(v));
+			}
+			if (clazz == Integer.class || clazz == int.class) {
+				return (T) Integer.valueOf(String.valueOf(v));
+			}
+			if (clazz == Long.class || clazz == long.class) {
+				return (T) Long.valueOf(String.valueOf(v));
+			}
+			if (clazz == Double.class || clazz == double.class) {
+				return (T) Double.valueOf(String.valueOf(v));
+			}
+			if (clazz == Float.class || clazz == float.class) {
+				return (T) Float.valueOf(String.valueOf(v));
+			}
+			if (Map.class.isAssignableFrom(clazz)) {
+				if (v instanceof Map) {
+					return (T) v;
+				}
+				return (T) JSON.parseObject(v);
+			}
+			if (List.class.isAssignableFrom(clazz)) {
+				if (v instanceof List) {
+					return (T) v;
+				}
+				return (T) JSON.parseArray(v);
+			}
+			// Fallback to string conversion
+			return (T) v;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 
 	/**反射调用
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
-	 * @param currentObject 不作为第一个参数，就不能远程调用invoke，避免死循环
-	 * @return {@link #invoke(String, JSONObject, boolean)}
+	 * @param current 不作为第一个参数，就不能远程调用invoke，避免死循环
+	 * @return {@link #invoke(String, M, boolean)}
 	 */
 	@Override
-	public Object invoke(@NotNull String function, @NotNull JSONObject currentObject) throws Exception {
-        return invoke(function, currentObject, false);
-    }
+	public Object invoke(@NotNull String function, @NotNull M current) throws Exception {
+		return invoke(function, current, false);
+	}
 	/**反射调用
 	 * @param function 例如get(object,key)，参数只允许引用，不能直接传值
-	 * @param currentObject 不作为第一个参数，就不能远程调用invoke，避免死循环
+	 * @param current 不作为第一个参数，就不能远程调用invoke，避免死循环
 	 * @param containRaw 包含原始 SQL 片段
-	 * @return {@link #invoke(AbstractFunctionParser, String, JSONObject, boolean)}
+	 * @return {@link #invoke(AbstractFunctionParser, String, M, boolean)}
 	 */
 	@Override
-	public Object invoke(@NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception {
-		return invoke(this, function, currentObject, containRaw);
+	public Object invoke(@NotNull String function, @NotNull M current, boolean containRaw) throws Exception {
+		if (StringUtil.isEmpty(function, true)) {
+			throw new IllegalArgumentException("字符 " + function + " 不合法！");
+		}
+
+		return invoke(this, function, current, containRaw);
 	}
 
 	/**反射调用
 	 * @param parser
 	 * @param function 例如get(Map:map,key)，参数只允许引用，不能直接传值
-     * @param currentObject
+     * @param current
      * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
 	 */
-	public static <T extends Object> Object invoke(@NotNull AbstractFunctionParser<T> parser, @NotNull String function, @NotNull JSONObject currentObject, boolean containRaw) throws Exception {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static <T, M extends Map<String, Object>, L extends List<Object>> Object invoke(
+			@NotNull AbstractFunctionParser<T, M, L> parser, @NotNull String function
+			, @NotNull Map<String, Object> current, boolean containRaw) throws Exception {
         if (ENABLE_REMOTE_FUNCTION == false) {
             throw new UnsupportedOperationException("AbstractFunctionParser.ENABLE_REMOTE_FUNCTION" +
                     " == false 时不支持远程函数！如需支持则设置 AbstractFunctionParser.ENABLE_REMOTE_FUNCTION = true ！");
         }
 
-		FunctionBean fb = parseFunction(function, currentObject, false, containRaw);
+		FunctionBean fb = parseFunction(function, current, false, containRaw);
 
-		JSONObject row = FUNCTION_MAP.get(fb.getMethod()); //FIXME  fb.getSchema() + "." + fb.getMethod()
+		Map<String, Object> row = FUNCTION_MAP.get(fb.getMethod()); //FIXME  fb.getSchema() + "." + fb.getMethod()
 		if (row == null) {
 			throw new UnsupportedOperationException("不允许调用远程函数 " + fb.getMethod() + " !");
 		}
 
-        String language = row.getString("language");
+        String language = (String) row.get("language");
         String lang = "java".equalsIgnoreCase(language) ? null : language;
 
         if (ENABLE_SCRIPT_FUNCTION == false && lang != null) {
@@ -371,25 +419,25 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
         }
 
 		if (lang != null && SCRIPT_EXECUTOR_MAP.get(lang) == null) {
-			throw new ClassNotFoundException("找不到脚本语言 " + lang + " 对应的执行引擎！请先依赖相关库并在后端 APIJSONFunctionParser<T> 中注册！");
+			throw new ClassNotFoundException("找不到脚本语言 " + lang + " 对应的执行引擎！请先依赖相关库并在后端 APIJSONFunctionParser<T, M, L> 中注册！");
 		}
 
-		int version = row.getIntValue("version");
+		int version = row.get("version") != null ? Integer.parseInt(row.get("version").toString()) : 0;
 		if (parser.getVersion() < version) {
 			throw new UnsupportedOperationException("不允许 version = " + parser.getVersion() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 version >= " + version + " !");
 		}
-		String tag = row.getString("tag");  // TODO 改为 tags，类似 methods 支持多个 tag。或者干脆不要？因为目前非开放请求全都只能后端指定
+		String tag = (String) row.get("tag");  // TODO 改为 tags，类似 methods 支持多个 tag。或者干脆不要？因为目前非开放请求全都只能后端指定
 		if (tag != null && tag.equals(parser.getTag()) == false) {
 			throw new UnsupportedOperationException("不允许 tag = " + parser.getTag() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 tag = " + tag + " !");
 		}
-		String[] methods = StringUtil.split(row.getString("methods"));
+		String[] methods = StringUtil.split((String) row.get("methods"));
 		List<String> ml = methods == null || methods.length <= 0 ? null : Arrays.asList(methods);
 		if (ml != null && ml.contains(parser.getMethod().toString()) == false) {
 			throw new UnsupportedOperationException("不允许 method = " + parser.getMethod() + " 的请求调用远程函数 " + fb.getMethod() + " ! 必须满足 method 在 " + Arrays.toString(methods) + "内 !");
 		}
 
 		try {
-            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), row.getString("returnType"), currentObject, SCRIPT_EXECUTOR_MAP.get(lang));
+            return invoke(parser, fb.getMethod(), fb.getTypes(), fb.getValues(), (String) row.get("returnType"), current, SCRIPT_EXECUTOR_MAP.get(lang));
 		}
         catch (Exception e) {
 			if (e instanceof NoSuchMethodException) {
@@ -419,10 +467,12 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
      * @param methodName
      * @param parameterTypes
      * @param args
-     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[], String, JSONObject, ScriptExecutor)}
+     * @return {@link #invoke(AbstractFunctionParser, String, Class[], Object[])}
      * @throws Exception
      */
-	public static <T extends Object> Object invoke(@NotNull AbstractFunctionParser<T> parser, @NotNull String methodName
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static <T, M extends Map<String, Object>, L extends List<Object>> Object invoke(
+			@NotNull AbstractFunctionParser<T, M, L> parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args) throws Exception {
         return invoke(parser, methodName, parameterTypes, args, null, null, null);
     }
@@ -432,19 +482,22 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
      * @param parameterTypes
      * @param args
      * @param returnType
-     * @param currentObject
+     * @param current
      * @param scriptExecutor
      * @return
      * @throws Exception
      */
-	public static <T extends Object> Object invoke(@NotNull AbstractFunctionParser<T> parser, @NotNull String methodName
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static <T, M extends Map<String, Object>, L extends List<Object>> Object invoke(
+			@NotNull AbstractFunctionParser<T, M, L> parser, @NotNull String methodName
             , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType
-            , JSONObject currentObject, ScriptExecutor scriptExecutor) throws Exception {
+            , Map<String, Object> current, ScriptExecutor scriptExecutor) throws Exception {
         if (scriptExecutor != null) {
-            return invokeScript(parser, methodName, parameterTypes, args, returnType, currentObject, scriptExecutor);
+            return invokeScript(parser, methodName, parameterTypes, args, returnType, current, scriptExecutor);
         }
 
-        Method m = parser.getClass().getMethod(methodName, parameterTypes); // 不用判空，拿不到就会抛异常
+		Class<? extends AbstractFunctionParser> cls = parser.getClass();
+        Method m = cls.getMethod(methodName, parameterTypes); // 不用判空，拿不到就会抛异常
 
         if (Log.DEBUG) {
             String rt = Log.DEBUG && m.getReturnType() != null ? m.getReturnType().getSimpleName() : null;
@@ -470,13 +523,16 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
      * @param parameterTypes
      * @param args
      * @param returnType
-     * @param currentObject
+     * @param current
      * @return
      * @throws Exception
      */
-    public static <T extends Object> Object invokeScript(@NotNull AbstractFunctionParser<T> parser, @NotNull String methodName
-            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType, JSONObject currentObject, ScriptExecutor scriptExecutor) throws Exception {
-    	Object result = scriptExecutor.execute(parser, currentObject, methodName, args);
+	@SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T, M extends Map<String, Object>, L extends List<Object>> Object invokeScript(
+			@NotNull AbstractFunctionParser<T, M, L> parser, @NotNull String methodName
+            , @NotNull Class<?>[] parameterTypes, @NotNull Object[] args, String returnType
+			, Map<String, Object> current, ScriptExecutor scriptExecutor) throws Exception {
+    	Object result = scriptExecutor.execute(parser, current, methodName, args);
         if (Log.DEBUG && result != null) {
             Class<?> rt = result.getClass(); // 作为远程函数的 js 类型应该只有 JSON 的几种类型
             String fullReturnType = (StringUtil.isSmallName(returnType)
@@ -516,7 +572,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
      * @throws Exception
      */
 	@NotNull
-	public static FunctionBean parseFunction(@NotNull String function, @NotNull JSONObject request, boolean isSQLFunction) throws Exception {
+	public static FunctionBean parseFunction(@NotNull String function, @NotNull Map<String, Object> request, boolean isSQLFunction) throws Exception {
         return parseFunction(function, request, isSQLFunction, false);
     }
     /**解析函数，自动解析的值类型只支持 Boolean, Number, String, Map, List
@@ -527,7 +583,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
      * @return
      * @throws Exception
      */
-	public static FunctionBean parseFunction(@NotNull String function, @NotNull JSONObject request, boolean isSQLFunction, boolean containRaw) throws Exception {
+	public static FunctionBean parseFunction(@NotNull String function, @NotNull Map<String, Object> request, boolean isSQLFunction, boolean containRaw) throws Exception {
 
 		int start = function.indexOf("(");
 		int end = function.lastIndexOf(")");
@@ -572,7 +628,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 				}
 
 				if (v instanceof Boolean) {
-					types[i] = Boolean.class; //只支持JSON的几种类型 
+					types[i] = Boolean.class; //只支持JSON的几种类型
 				} // 怎么都有 bug，如果是引用的值，很多情况下无法指定  //  用 1L 指定为 Long ？ 其它的默认按长度分配为 Integer 或 Long？
 				//else if (v instanceof Long || v instanceof Integer || v instanceof Short) {
 				//	types[i] = Long.class;
@@ -583,25 +639,28 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 				else if (v instanceof String) {
 					types[i] = String.class;
 				}
-				else if (v instanceof Map) { // 泛型兼容？ // JSONObject
+				else if (v instanceof Map) { // 泛型兼容？ // JSONMap
 					types[i] = Map.class;
 					//性能比较差
                     //values[i] = TypeUtils.cast(v, Map.class, ParserConfig.getGlobalInstance());
 				}
-				else if (v instanceof Collection) { // 泛型兼容？ // JSONArray
+				else if (v instanceof Collection) { // 泛型兼容？ // JSONList
 					types[i] = List.class;
 					//性能比较差
-                    values[i] = TypeUtils.cast(v, List.class, ParserConfig.getGlobalInstance());
+					List list = new ArrayList<>((Collection) v);
+                    values[i] = list; // TypeUtils.cast(v, List.class, ParserConfig.getGlobalInstance());
 				}
 				else {
 					throw new UnsupportedDataTypeException(keys[i] + ":value 中value不合法！远程函数 key():"
-                            + function + " 中的 arg 对应的值类型只能是 [Boolean, Number, String, JSONObject, JSONArray] 中的一种！");
+                            + function + " 中的 arg 对应的值类型只能是 [Boolean, Number, String, JSONMap, JSONList] 中的一种！");
 				}
 			}
 		}
 		else {
+			Class<? extends Map> cls = JSON.createJSONObject().getClass();
 			types = new Class<?>[length + 1];
-			types[0] = JSONObject.class;
+			//types[0] = Object.class; // 泛型擦除 JSON.JSON_OBJECT_CLASS;
+			types[0] = cls;
 
 			values = new Object[length + 1];
 			values[0] = request;
@@ -668,7 +727,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 	 * @return
 	 */
 	public static String getFunction(String method, String[] keys) {
-		String f = method + "(JSONObject request";
+		String f = method + "(JSONMap request";
 
 		if (keys != null) {
 			for (int i = 0; i < keys.length; i++) {
@@ -681,17 +740,17 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 		return f;
 	}
 
-    public static <T> T getArgValue(@NotNull JSONObject currentObject, String keyOrValue) {
-        return getArgValue(currentObject, keyOrValue, false);
+    public static <T> T getArgValue(@NotNull Map<String, Object> current, String keyOrValue) {
+        return getArgValue(current, keyOrValue, false);
     }
-    public static <T> T getArgValue(@NotNull JSONObject currentObject, String keyOrValue, boolean containRaw) {
+    public static <T> T getArgValue(@NotNull Map<String, Object> current, String keyOrValue, boolean containRaw) {
         if (keyOrValue == null) {
             return null;
         }
 
 
         if (keyOrValue.endsWith("`") && keyOrValue.substring(1).indexOf("`") == keyOrValue.length() - 2) {
-            return (T) currentObject.get(keyOrValue.substring(1, keyOrValue.length() - 1));
+            return (T) current.get(keyOrValue.substring(1, keyOrValue.length() - 1));
         }
 
         if (keyOrValue.endsWith("'") && keyOrValue.substring(1).indexOf("'") == keyOrValue.length() - 2) {
@@ -705,7 +764,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
         }
 
         if (StringUtil.isName(keyOrValue.startsWith("@") ? keyOrValue.substring(1) : keyOrValue)) {
-            return (T) currentObject.get(keyOrValue);
+            return (T) current.get(keyOrValue);
         }
 
         if ("true".equals(keyOrValue)) {
@@ -717,7 +776,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 
         // 性能更好，但居然非法格式也不报错
         //try {
-        //    val = Boolean.valueOf(keyOrValue); // JSON.parse(keyOrValue);
+        //    val = Boolean.valueOf(keyOrValue); // parseJSON(keyOrValue);
         //    return (T) val;
         //}
         //catch (Throwable e) {
@@ -727,7 +786,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
         //}
 
         try {
-            val = Double.valueOf(keyOrValue); // JSON.parse(keyOrValue);
+            val = Double.valueOf(keyOrValue); // parseJSON(keyOrValue);
             return (T) val;
         }
         catch (Throwable e) {
@@ -736,7 +795,7 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
                     "} catch (Throwable e) = " + e.getMessage());
         }
 
-        return (T) currentObject.get(keyOrValue);
+        return (T) current.get(keyOrValue);
     }
 
 	public static class FunctionBean {
@@ -823,6 +882,83 @@ public class AbstractFunctionParser<T extends Object> implements FunctionParser<
 			return s + ")";
 		}
 
+	}
+
+	/**
+	 * 获取JSON对象
+	 * @param <V>  TODO
+	 * @param req
+	 * @param key
+	 * @param clazz
+	 * @return
+	 * @throws Exception
+	 */
+	public <V> V getArgVal(@NotNull M req, String key, Class<V> clazz) throws Exception {
+		// Convert to JSONMap for backward compatibility, replace with proper implementation later
+		return getArgVal(req, key, clazz, false);
+	}
+
+	/**
+	 * 获取参数值
+	 * @param key
+	 * @param clazz 如果有clazz就返回对应的类型，否则返回原始类型
+	 * @param defaultValue
+	 * @return
+	 * @throws Exception 
+	 */
+	public <V> V getArgVal(String key, Class<V> clazz, boolean defaultValue) throws Exception {
+		Object obj = parser != null && JSONMap.isArrayKey(key) ? AbstractParser.getValue(request, key.split("\\,")) : request.get(key);
+		
+		if (clazz == null) {
+			return (V) obj;
+		}
+		
+		// Replace TypeUtils with appropriate casting method
+		try {
+			if (obj == null) {
+				return null;
+			}
+			if (clazz.isInstance(obj)) {
+				return (V) obj;
+			}
+			if (clazz == String.class) {
+				return (V) String.valueOf(obj);
+			}
+			if (clazz == Boolean.class || clazz == boolean.class) {
+				return (V) Boolean.valueOf(String.valueOf(obj));
+			}
+			if (clazz == Integer.class || clazz == int.class) {
+				return (V) Integer.valueOf(String.valueOf(obj));
+			}
+			if (clazz == Long.class || clazz == long.class) {
+				return (V) Long.valueOf(String.valueOf(obj));
+			}
+			if (clazz == Double.class || clazz == double.class) {
+				return (V) Double.valueOf(String.valueOf(obj));
+			}
+			if (clazz == Float.class || clazz == float.class) {
+				return (V) Float.valueOf(String.valueOf(obj));
+			}
+			if (Map.class.isAssignableFrom(clazz)) {
+				if (obj instanceof Map) {
+					return (V) obj;
+				}
+				return (V) JSON.parseObject(obj);
+			}
+			if (List.class.isAssignableFrom(clazz)) {
+				if (obj instanceof List) {
+					return (V) obj;
+				}
+				return (V) JSON.parseArray(obj);
+			}
+			// Fallback to string conversion
+			return (V) obj;
+		} catch (Exception e) {
+			if (defaultValue) {
+				return null;
+			}
+			throw e;
+		}
 	}
 
 }
