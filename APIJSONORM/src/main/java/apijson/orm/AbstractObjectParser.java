@@ -1171,7 +1171,9 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
                 // APP JOIN 副表时副表返回了这个字段   rawList = (List<JSONRequest>) result.remove(AbstractSQLExecutor.KEY_RAW_LIST);
                 String arrayPath = parentPath.substring(0, parentPath.lastIndexOf("[]") + 2);
 
-                if (isSimpleArray == false) {
+                if (isSimpleArray) {
+					parser.putQueryResult(arrayPath, rawList); // 从数组外部引用该数组内值需要
+				} else {
                     long startTime = System.currentTimeMillis();
 
                     for (int i = 1; i < rawList.size(); i++) {  // 从 1 开始，0 已经处理过
@@ -1196,7 +1198,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
             if (isSubquery == false && result != null) {
                 parser.putQueryResult(path, result);  // 解决获取关联数据时requestObject里不存在需要的关联数据
 
-                if (isSimpleArray && rawList != null) {
+                if (isSimpleArray) { // FIXME 改为从缓存获取，而不是 result 查
                     result.put(AbstractSQLExecutor.KEY_RAW_LIST, rawList);
                 }
             }
