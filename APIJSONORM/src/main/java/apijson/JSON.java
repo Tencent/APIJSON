@@ -674,4 +674,18 @@ public class JSON {
 		return value.toString();
 	}
 
+
+	public static Object getFromObjOrArr(Object parent, String k) {
+		if (parent instanceof Map<?, ?>) {
+			return ((Map<String, Object>) parent).get(k);
+		}
+
+		if (parent instanceof List<?>) {
+			int j = Integer.valueOf(k);
+			return ((List<?>) parent).get(j);
+		}
+
+		return null;
+	}
+
 }

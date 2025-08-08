@@ -39,7 +39,7 @@ import static apijson.RequestMethod.GET;
 public abstract class AbstractParser<T, M extends Map<String, Object>, L extends List<Object>>
 		implements Parser<T, M, L> {
 	protected static final String TAG = "AbstractParser";
-	
+
 	/**
 	 * JSON 对象、数组对应的数据源、版本、角色、method等
 	 */
@@ -706,7 +706,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		return batchVerify(method, tag, version, name, request, maxUpdateCount, creator);
 	}
-	
+
 	/**自动根据 tag 是否为 TableKey 及是否被包含在 object 内来决定是否包装一层，改为 { tag: object, "tag": tag }
 	 * @param object
 	 * @param tag
@@ -1902,24 +1902,32 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	 * @param pathKeys
 	 * @return
 	 */
-	public static <V extends Object> V getValue(Map<String, Object> parent, String[] pathKeys) {
-		if (parent == null || pathKeys == null || pathKeys.length <= 0) {
+	public static <V extends Object> V getValue(Object parent, String[] pathKeys) {
+		int len = parent == null || pathKeys == null ? 0 : pathKeys.length;
+		if (len <= 0) {
 			Log.w(TAG, "getChild  parent == null || pathKeys == null || pathKeys.length <= 0 >> return parent;");
 			return (V) parent;
 		}
 
-		//逐层到达child的直接容器JSONObject parent
-		int last = pathKeys.length - 1;
-		for (int i = 0; i < last; i++) {//一步一步到达指定位置
-			if (parent == null) {//不存在或路径错误(中间的key对应value不是JSONObject)
+		// 逐层到达child的直接容器JSONObject parent
+		Object v = parent;
+		for (int i = 0; i < len; i++) { // 一步一步到达指定位置
+			if (v == null) { // 不存在或路径错误(中间的key对应value不是JSONObject)
 				break;
 			}
 
 			String k = getDecodedKey(pathKeys[i]);
-			parent = JSON.get(parent, k);
+			try {
+				v = getFromObjOrArr(v, k);
+			} catch (Throwable e) {
+				if (IS_PRINT_BIG_LOG) {
+					e.printStackTrace();
+				}
+				v = null;
+			}
 		}
 
-		return parent == null ? null : (V) parent.get(getDecodedKey(pathKeys[last]));
+		return (V) v;
 	}
 
 
@@ -2025,13 +2033,13 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		}
 
 		//取出key被valuePath包含的result，再从里面获取key对应的value
-		Map<String, Object> parent = null;
+		Object parent = null;
 		String[] keys = null;
 		for (Entry<String, Object> entry : queryResultMap.entrySet()){
 			String path = entry.getKey();
 			if (valuePath.startsWith(path + "/")) {
 				try {
-					parent = (M) entry.getValue();
+					parent = entry.getValue();
 				} catch (Exception e) {
 					Log.e(TAG, "getValueByPath  try { parent = (Map<String>) queryResultMap.get(path); } catch { "
 							+ "\n parent not instanceof Map<String>!");
@@ -2044,39 +2052,13 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			}
 		}
 
-		//逐层到达targetKey的直接容器JSONObject parent
-		int last = keys == null ? -1 : keys.length - 1;
-		if (last >= 1) {
-			for (int i = 0; i < last; i++) {//一步一步到达指定位置parentPath
-				if (parent == null) {//不存在或路径错误(中间的key对应value不是JSONObject)
-					break;
-				}
-
-				String k = getDecodedKey(keys[i]);
-				Object p = parent.get(k);
-				parent = p instanceof Map<?, ?> ? (Map<String, Object>) p : null;
-			}
+		target = getValue(parent, keys); // 逐层到达targetKey的直接容器JSONObject parent
+		if (target == null) { //从requestObject中取值
+			target = getValue(requestObject, StringUtil.splitPath(valuePath));
 		}
 
-		if (parent != null) {
-			Log.i(TAG, "getValueByPath >> get from queryResultMap >> return  parent.get(keys[keys.length - 1]);");
-			target = last < 0 ? parent : parent.get(getDecodedKey(keys[last])); //值为null应该报错NotExistExeption，一般都是id关联，不可为null，否则可能绕过安全机制
-			if (target != null) {
-				Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
-				return target;
-			}
-		}
-
-
-		//从requestObject中取值
-		target = getValue(requestObject, StringUtil.splitPath(valuePath));
-		if (target != null) {
-			Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
-			return target;
-		}
-
-		Log.i(TAG, "getValueByPath  return null;");
-		return null;
+		Log.i(TAG, "getValueByPath >> getValue >> return target = " + target);
+		return target;
 	}
 
 	/**解码 引用赋值 路径中的 key，支持把 URL encode 后的值，转为 decode 后的原始值，例如 %2Fuser%2Flist -> /user/list ; %7B%7D -> []
