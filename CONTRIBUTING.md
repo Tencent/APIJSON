@@ -25,7 +25,7 @@
 - [403f](https://github.com/403f)
 - [gujiachun](https://github.com/gujiachun)
 - [gdjs2](https://github.com/gdjs2)(University of California, Riverside)
-- [Rkyzzy](https://github.com/Rkyzzy)(SUSTech, University of California, Berkeley)
+- [Rkyzzy](https://github.com/Rkyzzy)(理想汽车工程师, SUSTech, University of California, Berkeley)
 - [kxlv2000](https://github.com/kxlv2000)(SUSTech)
 - [caohao-go](https://github.com/caohao-go)(腾讯工程师，曾在华为、恒生担任C/C++开发工程师，在wps担任项目经理，在360担任技术专家)
 - [Wscats](https://github.com/Wscats)(腾讯工程师、腾讯 AlloyTeam 成员、Tencent Creation Camp 成员、知名技术博主)
@@ -36,7 +36,7 @@
 - [andream7](https://github.com/andream7)(微软工程师，还开源了 apijson-db2)
 - [qiujunlin](https://github.com/qiujunlin)(字节跳动工程师，还开源了 APIJSONDemo)
 - [HANXU2018](https://github.com/HANXU2018)(网易工程师，还开源了 APIJSON-DOC)
-- [hclown9804](https://github.com/hclown9804)
+- [hclown9804](https://github.com/hclown9804)(Datawhale)
 - [chenyanlann](https://github.com/chenyanlann)(还开源了 APIJSONDemo_ClickHouse)
 - [haolingzhang1](https://github.com/haolingzhang1)(腾讯工程师，还开源了 APIJson--demo)
 - [jerrylususu](https://github.com/jerrylususu)(还开源了 apijson_todo_demo 和 apijson_role_extend)
@@ -57,7 +57,7 @@
 - [aninZz](https://github.com/aninZz)
 - [leomiaomiao](https://github.com/leomiaomiao)
 - [YqxLzx](https://github.com/YqxLzx)
-- [hiteshbedre](https://github.com/hiteshbedre)
+- [hiteshbedre](https://github.com/hiteshbedre)(privado.ai 印裔工程师)
 - [wahowaho](https://github.com/wahowaho)
 - [jarrodquan](https://github.com/jarrodquan)
 - [gemufeng](https://github.com/gemufeng)(上海麦市工程师)
@@ -71,6 +71,10 @@
 - [calmcc](https://github.com/calmcc)
 - [lindaifeng](https://github.com/lindaifeng)
 - [DenineLu](https://github.com/DenineLu)(小红书工程师）
+- [wz11wz](https://github.com/wz11wz)
+- [GeXin97](https://github.com/GeXin97)
+- [yunjiao-source](https://github.com/yunjiao-source)(还开源了 [apijson-spring-boot](https://gitee.com/yunjiao-source/apijson-spring-boot))
+- [moxixi527](https://github.com/moxixi527)(热门技术博主)
 
 #### 其中特别致谢: <br/>
 cloudAndMonkey 提交的 11 个 Commits, 对 APIJSON 做出了 1,496 增加和 845 处删减(截止 2022/12/15 日)； <br/>
