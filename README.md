@@ -704,7 +704,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [apijson-examples](https://gitee.com/drone/apijson-examples) APIJSON 的前端、业务后端、管理后端 Demo
 
-[apijson-ruoyi](https://gitee.com/yxiedd/apijson-ruoyi) APIJSON 和 RuoYi 框架整合，实现零代码生成页面模板接口，在线维护 APIJSON 数据库配置等
+[apijson-ruoyi](https://github.com/daodol/apijson-ruoyi) APIJSON 和 RuoYi 框架整合，实现零代码生成页面模板接口，在线维护 APIJSON 数据库配置等
 
 [light4j](https://github.com/xlongwei/light4j) 整合 APIJSON 和微服务框架 light-4j 的 Demo，同时接入了 Redis
 
