@@ -629,6 +629,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON项目实战教程：零代码实现高效JSON接口开发](https://blog.csdn.net/gitblog_00682/article/details/148375065)
 
+[springboot整合APIJSON——零代码万能通用 API（附源码）](https://blog.csdn.net/longzhutengyue/article/details/150579233)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
