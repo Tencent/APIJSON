@@ -6,6 +6,8 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import static apijson.JSON.*;
+import static apijson.JSONMap.KEY_COMBINE;
+import static apijson.JSONMap.KEY_KEY;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.GETS;
@@ -219,7 +221,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 	@Override
 	public String getVisitorIdKey(SQLConfig<T, M, L> config) {
-		return config.getUserIdKey();
+		return config == null ? getUserIdKey(null, null, null, null) : config.getUserIdKey();
 	}
 
 	@Override
@@ -346,20 +348,22 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @throws Exception
 	 * @see {@link JSONMap#KEY_ROLE}
 	 */
-	public void verifyUseRole(SQLConfig<T, M, L> config, String table, RequestMethod method, String role) throws Exception {
+	public void verifyUseRole(@NotNull SQLConfig<T, M, L> config, String table, RequestMethod method, String role) throws Exception {
 		Log.d(TAG, "verifyUseRole  table = " + table + "; method = " + method + "; role = " + role);
+		Objects.requireNonNull(config);
 		//验证角色，假定真实强制匹配<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		String visitorIdKey = getVisitorIdKey(config);
 		if (table == null) {
-			table = config == null ? null : config.getTable();
+			table = config.getTable();
 		}
 		if (method == null) {
-			method = config == null ? GET : config.getMethod();
+			method = config.getMethod();
 		}
 		if (role == null) {
-			role = config == null ? UNKNOWN : config.getRole();
+			role = config.getRole();
 		}
+
+		String visitorIdKey = getVisitorIdKey(config);
 
 		Object requestId;
 		switch (role) {
@@ -1087,14 +1091,23 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		// 判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
+			if (rk == null) { // 无效的key
+				real.remove(rk);
+				continue;
+			}
+
 			if (refuseSet.contains(rk)) { // 不允许的字段
 				throw new IllegalArgumentException(method + "请求，" + name
 						+ " 里面不允许传 " + rk + " 等" + StringUtil.get(refuseSet) + "内的任何字段！");
 			}
 
-			if (rk == null) { // 无效的key
-				real.remove(rk);
-				continue;
+			if (KEY_COMBINE.equals(rk)) {
+				throw new UnsupportedOperationException(method + " 请求，" + rk + " 不合法！" +
+						"非开放请求不允许传 " + KEY_COMBINE + ":value ！");
+			}
+			if (KEY_KEY.equals(rk)) {
+				throw new UnsupportedOperationException(method + " 请求，" + rk + " 不合法！" +
+						"非开放请求不允许传 " + KEY_KEY + ":value ！");
 			}
 
 			Object rv = real.get(rk);
