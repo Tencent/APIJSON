@@ -1315,7 +1315,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 	}
 
 	public String getConnectionKey(@NotNull SQLConfig<T, M, L> config) {
-		return getConnectionKey(config.getNamespace(), config.getCatalog(), config.getDatasource(), config.getDatabase());
+		return getConnectionKey(config.getDatabase(), config.getDatasource(), config.getNamespace(), config.getCatalog());
 	}
 	public String getConnectionKey(String database, String datasource, String namespace, String catalog) {
 		return database + "-" + datasource + "-" + namespace + "-" + catalog;
@@ -1541,3 +1541,4 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 
 
 }
+
