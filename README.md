@@ -643,9 +643,11 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
   
 [apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
 
-[apijson-gson](https://github.com/APIJSON/apijson-gson) APIJSON 的 gson 插件，简化使用
+[apijson-jackson](https://github.com/APIJSON/apijson-jackson) APIJSON 的 jackson 插件，简化使用
 
 [apijson-fastjson2](https://github.com/APIJSON/apijson-fastjson2) APIJSON 的 fastjson2 插件，简化使用
+
+[apijson-gson](https://github.com/APIJSON/apijson-gson) APIJSON 的 gson 插件，简化使用
 
 [apijson-milvus](https://github.com/APIJSON/apijson-milvus) APIJSON 的 Milvus AI 向量数据库插件
 
