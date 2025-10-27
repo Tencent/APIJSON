@@ -689,6 +689,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite 等
 
+[panda-base](https://gitee.com/digithub/panda-base) APIJSON 的 Rust 版，一个优雅、高性能的 Rust 多数据源管理系统，支持 MySQL 和 PostgreSQL
+
 [APIJSONParser](https://github.com/Zerounary/APIJSONParser) 第三方 APIJSON 解析器，将 JSON 动态解析成 SQL
 
 [FfApiJson](https://gitee.com/own_3_0/ff-api-json) 用 JSON 格式直接生成 SQL，借鉴 APIJSON 支持多数据源
