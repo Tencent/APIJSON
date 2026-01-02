@@ -119,7 +119,7 @@ public interface JSONResponse<M extends Map<String, Object>, L extends List<Obje
 	 */
 	default long getId() {
 		try {
-			return JSON.getLongValue(this, KEY_ID);
+			return JSON.getLongValue(this, getIdKey());
 		} catch (Exception e) {
 			//empty
 		}

@@ -6,8 +6,7 @@ This source code is licensed under the Apache License Version 2.0.*/
 package apijson.orm;
 
 import static apijson.JSON.*;
-import static apijson.JSONMap.KEY_COMBINE;
-import static apijson.JSONMap.KEY_KEY;
+import static apijson.JSONMap.*;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.GETS;
@@ -923,6 +922,16 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			return null;
 		}
 
+		Object _if = target.get(IF.name());
+		boolean ifIsStr = _if instanceof String && StringUtil.isNotEmpty(_if, true);
+		M ifObj = ifIsStr == false && _if instanceof Map<?,?> ? (M) _if : null;
+//				: (_if instanceof String ? new apijson.JSONMap((String) _if, "" /* "throw new Error('')" */ ) : null);
+		if (ifObj == null && _if != null && ifIsStr == false) {
+//			if (_if instanceof List<?>) {
+//			}
+			throw new IllegalArgumentException(name + ": { " + IF.name() + ": value } 中 value 类型错误！只允许 String, JSONRequest！");
+		}
+
 		// 获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		M type = JSON.get(target, TYPE.name());
 		M verify = JSON.get(target, VERIFY.name());
@@ -936,20 +945,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		String must = StringUtil.get(getString(target, MUST.name()));
 		String refuse = StringUtil.get(getString(target, REFUSE.name()));
 
-		Object _if = target.get(IF.name());
-		boolean ifIsStr = _if instanceof String && StringUtil.isNotEmpty(_if, true);
-		M ifObj = ifIsStr == false && _if instanceof Map<?,?> ? (M) _if : null;
-//				: (_if instanceof String ? new apijson.JSONMap((String) _if, "" /* "throw new Error('')" */ ) : null);
-		if (ifObj == null && _if != null && ifIsStr == false) {
-//			if (_if instanceof List<?>) {
-//			}
-			throw new IllegalArgumentException(name + ": { " + IF.name() + ": value } 中 value 类型错误！只允许 String, JSONRequest！");
-		}
-
 //		Object code = target.get(CODE.name());
-
-		String allowPartialUpdateFail = StringUtil.get(getString(target, ALLOW_PARTIAL_UPDATE_FAIL.name()));
-
 
 		// 移除字段<<<<<<<<<<<<<<<<<<<
 		String[] removes = StringUtil.split(remove);
@@ -976,6 +972,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 		// 判断必要字段是否都有>>>>>>>>>>>>>>>>>>>
 
+		String[] sks = StringUtil.split(getString(real, KEY_STRING));
+		List<String> stringKeyList = sks == null || sks.length <= 0 ? null : Arrays.asList(sks);
 
 		Set<String> objKeySet = new HashSet<String>(); // 不能用tableKeySet，仅判断 Table:{} 会导致 key:{ Table:{} } 绕过判断
 
@@ -991,6 +989,10 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				}
                 Object tvalue = entry.getValue();
                 Object rvalue = real.get(key);
+				if (rvalue != null && stringKeyList != null && stringKeyList.contains(key)) {
+					rvalue = JSON.toJSONString(rvalue);
+				}
+
 				if (callback.onParse(key, tvalue, rvalue) == false) {
 					continue;
 				}
@@ -1091,8 +1093,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		// 判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
-			if (rk == null) { // 无效的key
-				real.remove(rk);
+			if (rk == null || KEY_STRING.equals(rk)) {
+				// ConcurrentModificationException  real.remove(rk);
 				continue;
 			}
 
@@ -1111,6 +1113,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 
 			Object rv = real.get(rk);
+			if (rv != null && stringKeyList != null && stringKeyList.contains(rk)) {
+				rv = JSON.toJSONString(rv);
+			}
 
 			// 不允许传远程函数，只能后端配置
 			if (rk.endsWith("()") && rv instanceof String) {
@@ -1192,6 +1197,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		// 校验重复>>>>>>>>>>>>>>>>>>>
 
 		// 校验并配置允许批量增删改部分失败<<<<<<<<<<<<<<<<<<<
+		String allowPartialUpdateFail = StringUtil.get(getString(target, ALLOW_PARTIAL_UPDATE_FAIL.name()));
 		String[] partialFails = StringUtil.split(allowPartialUpdateFail);
 		if (partialFails != null && partialFails.length > 0) {
 			for (String key : partialFails) {
@@ -1300,6 +1306,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 				}
 			}
 		}
+
 		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
 		return real;
 	}

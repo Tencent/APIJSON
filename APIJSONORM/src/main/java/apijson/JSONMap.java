@@ -109,19 +109,32 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 	public static String KEY_USER_ID = "userId";
 	public static String KEY_USER_ID_IN = KEY_USER_ID + "{}";
 
+	default String getIdKey() {
+		return KEY_ID;
+	}
+	default String getIdInKey() {
+		return KEY_ID_IN;
+	}
+	default String getUserIdKey() {
+		return KEY_USER_ID;
+	}
+	default String getUserIdInKey() {
+		return KEY_USER_ID_IN;
+	}
+
 	/**set "id":id in Table layer
 	 * @param id
 	 * @return
 	 */
 	default JSONMap<M, L> setId(Long id) {
-		return puts(KEY_ID, id);
+		return puts(getIdKey(), id);
 	}
 	/**set "id{}":[] in Table layer
 	 * @param list
 	 * @return
 	 */
 	default JSONMap<M, L> setIdIn(List<Object> list) {
-		return puts(KEY_ID_IN, list);
+		return puts(getIdInKey(), list);
 	}
 
 	/**set "userId":userId in Table layer
@@ -129,14 +142,14 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 	 * @return
 	 */
 	default JSONMap<M, L> setUserId(Long id) {
-		return puts(KEY_USER_ID, id);
+		return puts(getUserIdKey(), id);
 	}
 	/**set "userId{}":[] in Table layer
 	 * @param list
 	 * @return
 	 */
 	default JSONMap<M, L> setUserIdIn(List<Object> list) {
-		return puts(KEY_USER_ID_IN, list);
+		return puts(getUserIdInKey(), list);
 	}
 
 
@@ -150,36 +163,37 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 
 
 	//@key关键字都放这个类 <<<<<<<<<<<<<<<<<<<<<<
-	String KEY_TRY = "@try"; //尝试，忽略异常
-	String KEY_CATCH = "@catch"; //TODO 捕捉到异常后，处理方式  null-不处理；DEFAULT-返回默认值；ORIGIN-返回请求里的原始值
-	String KEY_DROP = "@drop"; //丢弃，不返回，TODO 应该通过 fastjson 的 ignore 之类的机制来处理，避免导致下面的对象也不返回
-	//	String KEY_KEEP = "@keep"; //一定会返回，为 null 或 空对象时，会使用默认值(非空)，解决其它对象因为不关联的第一个对为空导致也不返回
-	String KEY_DEFULT = "@default"; //TODO 自定义默认值 { "@default":true }，@default 可完全替代 @keep
-	String KEY_NULL = "@null"; //值为 null 的键值对 "@null":"tag,pictureList"，允许 is NULL 条件判断， SET tag = NULL 修改值为 NULL 等
-	String KEY_CAST = "@cast"; //类型转换 cast(date AS DATE)
+	String KEY_TRY = "@try"; // 尝试，忽略异常
+	String KEY_CATCH = "@catch"; // TODO 捕捉到异常后，处理方式  null-不处理；DEFAULT-返回默认值；ORIGIN-返回请求里的原始值
+	String KEY_DROP = "@drop"; // 丢弃，不返回，TODO 应该通过 fastjson 的 ignore 之类的机制来处理，避免导致下面的对象也不返回
+	//	String KEY_KEEP = "@keep"; // 一定会返回，为 null 或 空对象时，会使用默认值(非空)，解决其它对象因为不关联的第一个对为空导致也不返回
+	String KEY_DEFAULT = "@default"; // TODO 自定义默认值 { "@default":true }，@default 可完全替代 @keep
+	String KEY_NULL = "@null"; // 值为 null 的键值对 "@null":"tag,pictureList"，允许 is NULL 条件判断， SET tag = NULL 修改值为 NULL 等
+	String KEY_CAST = "@cast"; // 类型转换 cast(date AS DATE)
 
-	String KEY_ROLE = "@role"; //角色，拥有对某些数据的某些操作的权限
-	String KEY_DATABASE = "@database"; //数据库类型，默认为MySQL
-	String KEY_DATASOURCE = "@datasource"; //数据源
-	String KEY_NAMESPACE = "@namespace"; //命名空间，Table 在非默认 namespace 内时需要声明
-	String KEY_CATALOG = "@catalog"; //目录，Table 在非默认 catalog 内时需要声明
-	String KEY_SCHEMA = "@schema"; //数据库，Table 在非默认 schema 内时需要声明
-	String KEY_EXPLAIN = "@explain"; //分析 true/false
-	String KEY_CACHE = "@cache"; //缓存 RAM/ROM/ALL
-	String KEY_COLUMN = "@column"; //查询的Table字段或SQL函数
-	String KEY_FROM = "@from"; //FROM语句
-	String KEY_COMBINE = "@combine"; //条件组合，每个条件key前面可以放&,|,!逻辑关系  "id!{},&sex,!name&$"
-	String KEY_GROUP = "@group"; //分组方式
-	String KEY_HAVING = "@having"; //聚合函数条件，一般和@group一起用
-	String KEY_HAVING_AND = "@having&"; //聚合函数条件，一般和@group一起用
-	String KEY_SAMPLE = "@sample"; //取样方式
-	String KEY_LATEST = "@latest"; //最近方式
-	String KEY_PARTITION = "@partition"; //分区方式
-	String KEY_FILL = "@fill"; //填充方式
-	String KEY_ORDER = "@order"; //排序方式
+	String KEY_ROLE = "@role"; // 角色，拥有对某些数据的某些操作的权限
+	String KEY_DATABASE = "@database"; // 数据库类型，默认为MySQL
+	String KEY_DATASOURCE = "@datasource"; // 数据源
+	String KEY_NAMESPACE = "@namespace"; // 命名空间，Table 在非默认 namespace 内时需要声明
+	String KEY_CATALOG = "@catalog"; // 目录，Table 在非默认 catalog 内时需要声明
+	String KEY_SCHEMA = "@schema"; // 数据库，Table 在非默认 schema 内时需要声明
+	String KEY_EXPLAIN = "@explain"; // 分析 true/false
+	String KEY_CACHE = "@cache"; // 缓存 RAM/ROM/ALL
+	String KEY_COLUMN = "@column"; // 查询的 Table 字段或 SQL 函数
+	String KEY_FROM = "@from"; // FROM语句
+	String KEY_COMBINE = "@combine"; // 条件组合，每个条件 key 前面可以放 &,|,! 逻辑关系  "id!{},&sex,!name&$"
+	String KEY_GROUP = "@group"; // 分组方式
+	String KEY_HAVING = "@having"; // 聚合函数条件，一般和 @group 一起用
+	String KEY_HAVING_AND = "@having&"; // 聚合函数条件，一般和 @group 一起用
+	String KEY_SAMPLE = "@sample"; // 取样方式
+	String KEY_LATEST = "@latest"; // 最近方式
+	String KEY_PARTITION = "@partition"; // 分区方式
+	String KEY_FILL = "@fill"; // 填充方式
+	String KEY_ORDER = "@order"; // 排序方式
 	String KEY_KEY = "@key"; // key 映射，year:left(date,4);name_tag:(name,tag)
 	String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
-	String KEY_JSON = "@json"; //SQL Server 把字段转为 JSON 输出
+	String KEY_JSON = "@json"; // 把字段转为 JSON 输出
+	String KEY_STRING = "@string"; // 把字段转为 String 输入
 	String KEY_METHOD = "@method"; // json 对象配置操作方法
 	String KEY_GET = "@get"; // json 对象配置操作方法
 	String KEY_GETS = "@gets"; // json 对象配置操作方法
@@ -214,6 +228,7 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 			KEY_KEY,
 			KEY_RAW,
 			KEY_JSON,
+			KEY_STRING,
 			KEY_METHOD,
 			KEY_GET,
 			KEY_GETS,
@@ -255,7 +270,7 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 	 * @return this
 	 */
 	default JSONMap<M, L> setDefault(Boolean hasDefault) {
-		return puts(KEY_DEFULT, hasDefault);
+		return puts(KEY_DEFAULT, hasDefault);
 	}
 
 
@@ -523,6 +538,14 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 	 */
 	default JSONMap<M, L> setJson(String keys) {
 		return puts(KEY_JSON, keys);
+	}
+
+	/**set keys to cast to string
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	default JSONMap<M, L> setString(String keys) {
+		return puts(KEY_STRING, keys);
 	}
 
 	//JSONObject内关键词 key >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

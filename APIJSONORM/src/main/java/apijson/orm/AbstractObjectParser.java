@@ -61,6 +61,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 	 * TODO Parser内要不因为 非 TYPE_ITEM_CHILD_0 的Table 为空导致后续中断。
 	 */
 	protected final boolean drop;
+	private List<String> stringKeyList;
 
 	/**for single object
 	 */
@@ -103,7 +104,12 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
             String raw = getString(request, JSONMap.KEY_RAW);
             String[] rks = StringUtil.split(raw);
             rawKeyList = rks == null || rks.length <= 0 ? null : Arrays.asList(rks);
-        }
+
+			String str = getString(request, KEY_STRING);
+			String[] sks = StringUtil.split(str);
+			stringKeyList = sks == null || sks.length <= 0 ? null : Arrays.asList(sks);
+			request.remove(KEY_STRING);
+		}
     }
 
 	@Override
@@ -280,7 +286,13 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
                             //     hasOtherKeyNotFun = true;
                             // }
 
-							if (startsWithAt || key.endsWith("@") || (key.endsWith("<>") && value instanceof Map<?, ?>)) {
+							if (stringKeyList != null && stringKeyList.contains(key)) {
+								// 统一格式 String val = value == null || value instanceof String ? (String) value : JSON.toJSONString(value);
+								if (onParse(key, JSON.toJSONString(value)) == false) {
+									invalidate();
+								}
+							}
+							else if (startsWithAt || key.endsWith("@") || (key.endsWith("<>") && value instanceof Map<?, ?>)) {
 								if (onParse(key, value) == false) {
 									invalidate();
 								}
@@ -1227,7 +1239,9 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		if (drop) {
 			request.put(KEY_DROP, drop);
 		}
-
+		if (stringKeyList != null) { // 避免被全局关键词覆盖 && ! stringKeyList.isEmpty()) {
+			request.put(KEY_STRING, StringUtil.get(stringKeyList.toArray()));
+		}
 
 		method = null;
 		parentPath = null;
