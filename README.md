@@ -638,6 +638,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [API自动生成这么爽？实测腾讯APIJSON，零代码就能玩转后端接口！](https://mp.weixin.qq.com/s/DmMIGHHcZ783KobGecMxGg)
 
+[腾讯开源的 APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
