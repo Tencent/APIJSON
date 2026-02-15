@@ -84,8 +84,6 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 
 ---
 
-#### A better online document is available at https://apijsondocs.readthedocs.io/
-
 * ### [1.About](#1)
 * ### [2.Backend usage](#2)
 * ### [3.Frontend usage](#3)
@@ -228,8 +226,8 @@ See the latest release [here](https://github.com/Tencent/APIJSON/releases/tag/5.
 
 ## <h2 id="6">6. Author<h2/> 	
 	
-Check out the author's [github account](https://github.com/TommyLemon) to see more related projects.<br>
-<img width="1279" alt="image" src="https://user-images.githubusercontent.com/5738175/196243428-da8abbbb-9622-4f26-a109-db5d17ab8b40.png">
+https://github.com/TommyLemon <br />
+<img width="960" height="676" alt="Screenshot 2026-02-15 at 17 16 46" src="https://github.com/user-attachments/assets/cef2bd45-b20d-469e-8781-1d647cf0477f" />
 
 If you have any questions or suggestions, you can [create an issue](https://github.com/Tencent/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
 
