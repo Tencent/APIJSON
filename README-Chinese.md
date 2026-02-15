@@ -9,8 +9,8 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <p align="center"> 🏆 实时 零代码、全功能、强安全 ORM 库 🚀 <br />后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
-  <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
-  <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/README-Chinese.md">English</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/Document-Chinese.md">通用文档</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">视频教程</a>
   <a href="http://apijson.cn/api">测试用例</a>
   <a href="https://deepwiki.com/Tencent/APIJSON">AI 问答</a>
