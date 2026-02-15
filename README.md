@@ -89,7 +89,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 * ### [3.Frontend usage](#3)
 * ### [4.Contributing](#4)
 * ### [5.Releases](#5)
-* ### [6.Author](#6)
+* ### [6.Creator](#6)
 * ### [7.Donating](#7)
 
 <br />
@@ -224,7 +224,7 @@ See the latest release [here](https://github.com/Tencent/APIJSON/releases)
 
 <br />
 
-## <h2 id="6">6. Author<h2/> 	
+## <h2 id="6">6. Creator<h2/> 	
 	
 https://github.com/TommyLemon <br />
 <img width="960" height="676" alt="Screenshot 2026-02-15 at 17 16 46" src="https://github.com/user-attachments/assets/cef2bd45-b20d-469e-8781-1d647cf0477f" />
