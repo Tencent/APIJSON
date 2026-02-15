@@ -220,7 +220,7 @@ Please also ⭐Star the project!
 
 ## <h2 id="5">5. Releases<h2/> 
 	
-See the latest release [here](https://github.com/Tencent/APIJSON/releases/tag/5.2.0).
+See the latest release [here](https://github.com/Tencent/APIJSON/releases)
 
 <br />
 
