@@ -426,7 +426,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 						// 为什么 isExplain == false 不用判断？因为所有字段都在一张 Query Plan 表
 						if (index <= 0 && columnIndexAndJoinMap != null) { // && viceColumnStart > length) {
 
-							SQLConfig<T, M, L> curConfig = curJoin == null || ! curJoin.isSQLJoin() ? null : curJoin.getCacheConfig();
+							SQLConfig<T, M, L> curConfig = curJoin == null || curJoin.getJoinType() == null || ! curJoin.isSQLJoin() ? null : curJoin.getCacheConfig();
 							List<String> curColumn = curConfig == null ? null : curConfig.getColumn();
 							String sqlTable = curConfig == null ? null : curConfig.gainSQLTable();
 							String sqlAlias = curConfig == null ? null : curConfig.getAlias();
@@ -469,7 +469,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 											else if (isMain) {
 												for (int j = 0; j < joinList.size(); j++) {
 													Join<T, M, L> join = joinList.get(j);
-													SQLConfig<T, M, L> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
+													SQLConfig<T, M, L> cfg = join == null || join.getJoinType() == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
 													List<String> c = cfg == null ? null : cfg.getColumn();
 
 													if (cfg != null) {
@@ -501,7 +501,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 										int joinCount = joinList.size();
 										for (int j = lastViceTableStart; j < joinCount; j++) {  // 查找副表 @column，定位字段所在表
 											Join<T, M, L> join = joinList.get(j);
-											SQLConfig<T, M, L> cfg = join == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
+											SQLConfig<T, M, L> cfg = join == null || join.getJoinType() == null || ! join.isSQLJoin() ? null : join.getJoinConfig();
 											List<String> c = cfg == null ? null : cfg.getColumn();
 
 											nextViceColumnStart += (c != null && ! c.isEmpty() ?
@@ -574,7 +574,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 								}
 
 								if (curColumn == null) {
-									curConfig = curJoin == null || ! curJoin.isSQLJoin() ? null : curJoin.getJoinConfig();
+									curConfig = curJoin == null || curJoin.getJoinType() == null || ! curJoin.isSQLJoin() ? null : curJoin.getJoinConfig();
 									curColumn = curConfig == null ? null : curConfig.getColumn();
 								}
 
@@ -590,7 +590,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 						// 如果是主表则直接用主表对应的 item，否则缓存副表数据到 childMap
 						Join prevJoin = columnIndexAndJoinMap == null || i < 2 ? null : columnIndexAndJoinMap[i - 2];
 						if (curJoin != prevJoin) {  // 前后字段不在同一个表对象，即便后面出现 null，也不该是主表数据，而是逻辑 bug 导致
-							SQLConfig<T, M, L> viceConfig = curJoin != null && curJoin.isSQLJoin() ? curJoin.getCacheConfig() : null;
+							SQLConfig<T, M, L> viceConfig = curJoin != null && curJoin.isSQLJoin() && curJoin.getJoinType() == null ? curJoin.getCacheConfig() : null;
 							boolean hasPK = false;
 							if (viceConfig != null) {  //FIXME 只有和主表关联才能用 item，否则应该从 childMap 查其它副表数据
 								List<On> onList = curJoin.getOnList();
@@ -991,7 +991,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 		Object value = getValue(config, rs, rsmd, row, table, columnIndex, label, childMap, keyMap);
 
 		// 主表必须 put 至少一个 null 进去，否则全部字段为 null 都不 put 会导致中断后续正常返回值
-		if (value != null || ENABLE_OUTPUT_NULL_COLUMN || (join == null && table.isEmpty())) {
+		if (value != null || ENABLE_OUTPUT_NULL_COLUMN || ((join == null || join.getJoinType() == null) && table.isEmpty())) {
 			table.put(label, value);
 		}
 

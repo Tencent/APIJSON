@@ -2347,6 +2347,16 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			if (joinList != null) {
 				boolean first = true;
 				for (Join<T, M, L> join : joinList) {
+					if (join == null) {
+						continue;
+					}
+					if (join.getJoinType() == null) {
+						SQLConfig<T, M, L> cfg = join.getJoinConfig();
+						List<String> col = cfg == null ? null : cfg.getColumn();
+						column = col == null ? column : col;
+						continue;
+					}
+
 					if (join.isAppJoin()) {
 						continue;
 					}
@@ -3315,11 +3325,23 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	 */
 	@Override
 	public String gainWhereString(boolean hasPrefix) throws Exception {
-		String combineExpr = getCombine();
+		Join<T, M, L> join = joinList == null || joinList.isEmpty() ? null : joinList.get(0);
+		SQLConfig<T, M, L> cfg = join == null || join.getJoinType() != null ? null : join.getJoinConfig();
+		Map<String, Object> joinWhere = cfg == null ? null : cfg.getWhere();
+		//String ws = cfg == null ? null : cfg.gainWhereString(hasPrefix);
+		//if (StringUtil.isNotEmpty(ws, true)) {
+		//	return ws;
+		//}
+
+		String joinCombine = cfg == null ? null : cfg.getCombine();
+		Map<String, Object> where = joinWhere == null ? getWhere() : joinWhere;
+		String combineExpr = StringUtil.isEmpty(joinCombine, true) ? getCombine() : joinCombine;
 		if (StringUtil.isEmpty(combineExpr, false)) {
-			return getWhereString(hasPrefix, getMethod(), getWhere(), getCombineMap(), getJoinList(), ! isTest());
+			Map<String, List<String>> joinCombineMap = cfg == null ? null : cfg.getCombineMap();
+			Map<String, List<String>> combineMap = joinCombineMap == null ? getCombineMap() : joinCombineMap;
+			return getWhereString(hasPrefix, getMethod(), where, combineMap, getJoinList(), ! isTest());
 		}
-		return getWhereString(hasPrefix, getMethod(), getWhere(), combineExpr, getJoinList(), ! isTest());
+		return getWhereString(hasPrefix, getMethod(), where, combineExpr, getJoinList(), ! isTest());
 	}
 	/**获取WHERE
 	 * @param method
@@ -3741,7 +3763,10 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			boolean changed = false;
 			// 各种 JOIN 没办法统一用 & | ！连接，只能按优先级，和 @combine 一样?
 			for (Join<T, M, L> j : joinList) {
-				String jt = j.getJoinType();
+				String jt = j == null ? null : j.getJoinType();
+				if (jt == null) {
+					continue;
+				}
 
 				switch (jt) {
 				case "*": // CROSS JOIN
@@ -3752,7 +3777,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					if (outerConfig == null){
 						break;
 					}
-					boolean isMain1 = outerConfig.isMain();
+
 					outerConfig.setMain(false).setPrepared(isPrepared()).setPreparedValueList(new ArrayList<Object>());
 					String outerWhere = outerConfig.gainWhereString(false);
 
@@ -4021,7 +4046,10 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			return gainSQLValue(key).toString();
 		}
 
-		Map<String, String> keyMap = getKeyMap();
+		Join<T, M, L> join = joinList == null || joinList.isEmpty() ? null : joinList.get(0);
+		SQLConfig<T, M, L> cfg = join == null || join.getJoinType() != null ? null : join.getJoinConfig();
+		Map<String, String> joinKeyMap = cfg == null ? null : cfg.getKeyMap();
+		Map<String, String> keyMap = joinKeyMap == null ? getKeyMap() : joinKeyMap;
 		String expression = keyMap == null ? null : keyMap.get(key);
 		if (expression == null) {
 			expression = COLUMN_KEY_MAP == null ? null : COLUMN_KEY_MAP.get(key);
@@ -5162,13 +5190,23 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 			List<Object> pvl = getPreparedValueList();  // new ArrayList<>();
 			//boolean changed = false;
 
-			//  主表不用别名			String ta;
-			for (Join j : joinList) {
+			//  主表不用别名	String ta;
+			boolean first = true;
+			for (Join<T, M, L> j : joinList) {
+				if (j == null) {
+					continue;
+				}
+				if (first) {
+					first = false;
+					continue;
+				}
+
 				onGainJoinString(j);
 
 				if (j.isAppJoin()) { // APP JOIN，只是作为一个标记，执行完主表的查询后自动执行副表的查询 User.id IN($commentIdList)
 					continue;
 				}
+
 				String type = j.getJoinType();
 
 				//LEFT JOIN sys.apijson_user AS User ON User.id = Moment.userId， 都是用 = ，通过relateType处理缓存
@@ -5490,7 +5528,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		String catalog = getString(request, KEY_CATALOG);
 		String schema = getString(request, KEY_SCHEMA);
 
-		SQLConfig<T, M, L> config = (SQLConfig<T, M, L>) callback.getSQLConfig(method, database, schema, datasource, table);
+		SQLConfig<T, M, L> config = callback.getSQLConfig(method, database, schema, datasource, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); // 不删，后面表对象还要用的，必须放在 parseJoin 前
@@ -6306,6 +6344,11 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		for (Join<T, M, L> join : joinList) {
 			table = join.getTable();
 			alias = join.getAlias();
+
+			if (table == null && join.getJoinType() == null) {
+				table = config.getTable();
+			}
+
 			//JOIN子查询不能设置LIMIT，因为ON关系是在子查询后处理的，会导致结果会错误
 			SQLConfig<T, M, L> joinConfig = newSQLConfig(method, table, alias, join.getRequest(), null, false, callback);
 			SQLConfig<T, M, L> cacheConfig = join.canCacheViceTable() == false ? null : newSQLConfig(method, table, alias
@@ -6319,6 +6362,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					throw new IllegalArgumentException("主表 " + config.getTable() + " 的 @database:" + config.getDatabase()
 							+ " 和它 SQL JOIN 的副表 " + table + " 的 @database:" + joinConfig.getDatabase() + " 不一致！");
 				}
+
 				if (joinConfig.getSchema() == null) {
 					joinConfig.setSchema(config.getSchema()); //主表 JOIN 副表，默认 schema 一致
 				}
@@ -6327,16 +6371,17 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 					cacheConfig.setDatabase(joinConfig.getDatabase()).setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 				}
 
-				if (isQuery) {
-					config.setKeyPrefix(true);
+				if (join.getJoinType() != null) {
+					if (isQuery) {
+						config.setKeyPrefix(true);
+					}
+					joinConfig.setMain(false).setKeyPrefix(true);
 				}
-
-				joinConfig.setMain(false).setKeyPrefix(true);
 
 				if (join.getOn() != null) {
 					SQLConfig<T, M, L> onConfig = newSQLConfig(method, table, alias, join.getOn(), null, false, callback);
-					onConfig.setMain(false)
-							.setKeyPrefix(true)
+					onConfig.setMain(joinConfig.isMain())
+							.setKeyPrefix(joinConfig.isKeyPrefix())
 							.setDatabase(joinConfig.getDatabase())
 							.setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 
@@ -6345,8 +6390,8 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 				if (join.getOuter() != null) {
 					SQLConfig<T, M, L> outerConfig = newSQLConfig(method, table, alias, join.getOuter(), null, false, callback);
-					outerConfig.setMain(false)
-							.setKeyPrefix(true)
+					outerConfig.setMain(joinConfig.isMain())
+							.setKeyPrefix(joinConfig.isKeyPrefix())
 							.setDatabase(joinConfig.getDatabase())
 							.setSchema(joinConfig.getSchema()); //解决主表 JOIN 副表，引号不一致
 					join.setOuterConfig(outerConfig);

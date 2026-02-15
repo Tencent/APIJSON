@@ -392,7 +392,10 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 		return StringUtil.isEmpty(alias) ? table : table + "__" + alias; // 带上原表名，避免 alias 和其它表名/字段名冲突
 	}
 
-
+	default String gainColumnString() throws Exception {
+		return gainColumnString(false);
+	}
+	String gainColumnString(boolean inSQLJoin) throws Exception;
 	String gainWhereString(boolean hasPrefix) throws Exception;
 
 	String gainRawSQL(String key, Object value) throws Exception;

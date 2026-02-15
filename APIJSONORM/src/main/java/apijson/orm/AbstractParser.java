@@ -1563,20 +1563,34 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			throw new UnsupportedDataTypeException(TAG + ".onJoinParse  join 只能是 String 或 Map<String, Object> 类型！");
 		}
 
-		List<Entry<String, Object>> slashKeys = new ArrayList<>();
-		List<Entry<String, Object>> nonSlashKeys = new ArrayList<>();
 		Set<Entry<String, Object>> entries = joinMap == null ? null : joinMap.entrySet();
 
 		if (entries == null || entries.isEmpty()) {
 			Log.e(TAG, "onJoinParse  set == null || set.isEmpty() >> return null;");
 			return null;
 		}
-		for (Entry<String, Object> e : entries) {
+
+		M mainOuter = JSON.createJSONObject();
+		Join<T, M, L> mainJoin = new Join<>();
+		mainJoin.setRequest(mainOuter);
+
+		List<Entry<String, Object>> slashKeys = new ArrayList<>();
+		List<Entry<String, Object>> nonSlashKeys = new ArrayList<>();
+		// https://github.com/Tencent/APIJSON/issues/824#issuecomment-3038316490
+		for (Entry<String, Object> e : entries) { // https://github.com/Tencent/APIJSON/pull/829
 			String path = e.getKey();
-			if (path != null && path.indexOf("/") > 0) {
-				slashKeys.add(e);  // 以 / 开头的 key，例如 </Table/key@
+			Object value = e.getValue();
+			if (value instanceof Map<?, ?>) {
+				if (path != null && path.indexOf("/") > 0) {
+					slashKeys.add(e);  // 以 / 开头的 key，例如 </Table/key@
+				} else if (isTableKey(path)) {
+					nonSlashKeys.add(e);  // 普通 key，例如 Table: {}
+				} else {
+					throw new IllegalArgumentException(apijson.JSONRequest.KEY_JOIN + ":value 中value不合法！"
+							+ "必须为 &/Table0/key0,</Table1/key1,... 或 { '&/Table0/key0':{}, '</Table1/key1':{},... } 这种形式！");
+				}
 			} else {
-				nonSlashKeys.add(e);  // 普通 key，例如 Table: {}
+				mainOuter.put(path, value);
 			}
 		}
 
@@ -1586,22 +1600,22 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			String tableKey = e.getKey(); // 如 "Location_info"
 			Object tableObj = e.getValue(); // value 是 Map
 
-			if (request.containsKey(tableKey)) {
+			if (request.get(tableKey) instanceof Map<?, ?>) {
 				whereJoinMap.put(tableKey, tableObj);
 			} else {
-				Log.w(TAG, "跳过 join 中 key = " + tableKey + "，因为它不在 request 中");
+				throw new IllegalArgumentException(apijson.JSONRequest.KEY_JOIN + ":'" + tableKey + "' 不是 JOIN 副表的名称 ！");
 			}
 		}
 
+		List<Join<T, M, L>> joinList = new ArrayList<>();
+		joinList.add(mainJoin);
 
 		Set<Entry<String, Object>> set = joinMap == null ? null : new LinkedHashSet<>(slashKeys);
 
 		if (set == null || set.isEmpty()) {
 			Log.e(TAG, "onJoinParse  set == null || set.isEmpty() >> return null;");
-			return null;
+			return joinList;
 		}
-
-		List<Join<T, M, L>> joinList = new ArrayList<>();
 
 		for (Entry<String, Object> e : set) {  // { &/User:{}, </Moment/id@":{}, @/Comment/toId@:{} }
 			// 分割 /Table/key
@@ -1611,10 +1625,14 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			if (outer instanceof Map<?, ?> == false) {
 				throw new IllegalArgumentException(apijson.JSONRequest.KEY_JOIN + ":value 中value不合法！"
 						+ "必须为 &/Table0/key0,</Table1/key1,... 或 { '&/Table0/key0':{}, '</Table1/key1':{},... } 这种形式！");
+				//mainOuter.put(path, outer);
+				//continue;
 			}
 
 			int index = path == null ? -1 : path.indexOf("/");
 			if (index < 0) {
+				//if (isTableKey(path)) {
+				//}
 				throw new IllegalArgumentException(apijson.JSONRequest.KEY_JOIN + ":value 中 value 值 " + path + " 不合法！"
 						+ "必须为 &/Table0,</Table1/key1,@/Table1:alias2/key2,... 或 { '&/Table0':{}, '</Table1/key1':{},... } 这种形式！");
 			}
@@ -1790,13 +1808,13 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			j.setTable(table);
 			j.setAlias(alias);
 
-			M outerObj = (M) JSON.createJSONObject((Map<String, Object>) outer);
+			M outerObj = JSON.createJSONObject((Map<String, Object>) outer);
             j.setOn(outerObj);
 			j.setRequest(requestObj);
 
-            if (whereJoinMap.containsKey(table)) {
-                Object rawOuter = whereJoinMap.get(table);
-                M outerObj1 = (M) JSON.createJSONObject((Map<String, Object>) rawOuter);
+			Object rawOuter = whereJoinMap.get(table);
+			if (rawOuter instanceof Map<?, ?>) {
+                M outerObj1 = JSON.createJSONObject((Map<String, Object>) rawOuter);
                 j.setOuter(outerObj1);
             }
 
