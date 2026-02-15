@@ -6,14 +6,15 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   APIJSON
 </h1>
 
-<p align="center"> 🏆 实时 零代码、全功能、强安全 ORM 库 🚀 <br />后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
+
+<p align="center">🏆 Tencent Top 6 Open Source Project, Achieved 5 Awards Inside & Outside Tencent 🚀 <br />A JSON Transmission Protocol and an ORM Library for providing APIs and Documents without writing any code. </p>
 
 <p align="center" >
-  <a href="https://github.com/Tencent/APIJSON/blob/master/README-English.md">English</a>
-  <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">通用文档</a>
-  <a href="https://search.bilibili.com/all?keyword=APIJSON">视频教程</a>
-  <a href="http://apijson.cn/api">测试用例</a>
-  <a href="https://deepwiki.com/Tencent/APIJSON">AI 问答</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/README.md">&nbsp;中文版&nbsp;</a>
+  <a href="https://github.com/Tencent/APIJSON/blob/master/Document-English.md">&nbsp;Document&nbsp;</a>
+  <a href="https://search.bilibili.com/all?keyword=APIJSON">&nbsp;Video&nbsp;</a>
+  <a href="http://apijson.cn/api">&nbsp;Test&nbsp;</a>
+  <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MySQL-5.7%2B-brightgreen.svg?style=flat"></a>
@@ -21,36 +22,22 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/SQLServer"><img src="https://img.shields.io/badge/SQLServer-2012%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Oracle"><img src="https://img.shields.io/badge/Oracle-12C%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/DB2"><img src="https://img.shields.io/badge/DB2-7.1%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/MariaDB-10.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TiDB-2.1%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/CockroachDB-25.1%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/openGauss-5.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Dameng"><img src="https://img.shields.io/badge/Dameng-7.6%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/Kingbase-8.6%2B-brightgreen.svg?style=flat"></a>
-  <a ><img src="https://img.shields.io/badge/Milvus-2.2.0%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/DuckDB"><img src="https://img.shields.io/badge/DuckDB-1.1%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource"><img src="https://img.shields.io/badge/SurrealDB-2.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/ClickHouse"><img src="https://img.shields.io/badge/ClickHouse-21.1%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/PostGIS-3.5%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Elasticsearch"><img src="https://img.shields.io/badge/Elasticsearch-7.17%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Manticore"><img src="https://img.shields.io/badge/ManticoreSearch-7.4%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Elasticsearch"><img src="https://img.shields.io/badge/Elasticsearch-7.17.5%2B-brightgreen.svg?style=flat"></a>
+  <a ><img src="https://img.shields.io/badge/Cassandra-4.0.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Presto"><img src="https://img.shields.io/badge/Presto-0.277%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/Trino"><img src="https://img.shields.io/badge/Trino-400%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TDSQL-cloud-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/MySQL"><img src="https://img.shields.io/badge/TencentDB-cloud-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Redis"><img src="https://img.shields.io/badge/Redis-5.0%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka"><img src="https://img.shields.io/badge/Kafka-3.2%2B-brightgreen.svg?style=flat"></a>
   <a ><img src="https://img.shields.io/badge/Snowflake-7.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hive-3.1.2%2B-brightgreen.svg?style=flat"></a>  
+  <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hadoop-3.1.3%2B-brightgreen.svg?style=flat"></a>
   <a ><img src="https://img.shields.io/badge/Databricks-13.0%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hive-3.1%2B-brightgreen.svg?style=flat"></a>  
-  <a href="https://github.com/chenyanlann/APIJSONBoot_Hive"><img src="https://img.shields.io/badge/Hadoop-3.1%2B-brightgreen.svg?style=flat"></a>
-  <a ><img src="https://img.shields.io/badge/MongoDB-Altlas%2B-brightgreen.svg?style=flat"></a>
-  <a ><img src="https://img.shields.io/badge/Cassandra-2.1%2B-brightgreen.svg?style=flat"></a>
-  <a ><img src="https://img.shields.io/badge/InfluxDB-2.6%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/TDengine"><img src="https://img.shields.io/badge/TDengine-2.6%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/PostgreSQL"><img src="https://img.shields.io/badge/TimescaleDB-17.1%2B-brightgreen.svg?style=flat"></a>
-  <a ><img src="https://img.shields.io/badge/IoTDB-1.3%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource" ><img src="https://img.shields.io/badge/DataBend-1.2%2B-brightgreen.svg?style=flat"></a>
+  <a ><img src="https://img.shields.io/badge/InfluxDB-2.6.1%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/TDengine"><img src="https://img.shields.io/badge/TDengine-2.6.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Redis"><img src="https://img.shields.io/badge/Redis-5.0%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka"><img src="https://img.shields.io/badge/Kafka-3.2.1%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server"><img src="https://img.shields.io/badge/Java-1.8%2B-brightgreen.svg?style=flat"></a>
@@ -60,15 +47,12 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://github.com/kvnZero/hyperf-APIJSON"><img src="https://img.shields.io/badge/PHP-8.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/kevinaskin/apijson-node"><img src="https://img.shields.io/badge/Node.js-ES6%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/zhangchunlin/uliweb-apijson"><img src="https://img.shields.io/badge/Python-3%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://gitee.com/APIJSON/panda-base"><img src="https://img.shields.io/badge/Rust-1.90%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Script"><img src="https://img.shields.io/badge/Lua-5.2%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L48-L52"><img src="https://img.shields.io/badge/Spring-4.3.2%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/pom.xml#L48-L52"><img src="https://img.shields.io/badge/SpringBoot-1.4.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONFinal/pom.xml#L59-L68"><img src="https://img.shields.io/badge/JFinal-3.5%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/vincent109/apijson-nutz"><img src="https://img.shields.io/badge/Nutz-2.4.2%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere"><img src="https://img.shields.io/badge/ShardingSphere-5.4.1%2B-brightgreen.svg?style=flat"></a>
 </p>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
@@ -82,48 +66,77 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 
 ---
 
-<b >导航目录：</b> 项目简介 [上手使用](#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B) [社区生态](#%E6%8A%80%E6%9C%AF%E4%BA%A4%E6%B5%81)  &nbsp;&nbsp;&nbsp;&nbsp;  完整详细的导航目录 [点这里查看](/Navigation.md) <br />
+#### A better online document is available at https://apijsondocs.readthedocs.io/
 
-
-APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这套协议实现的 ORM 库。<br />
-为各种增删改查提供了完全自动化的万能通用接口，零代码实时满足千变万化的各种新增和变更需求。<br />
-能大幅降低开发和沟通成本，简化开发流程，缩短开发周期。<br />
-适合中小型前后端分离的项目，尤其是 创业项目、内部项目、低代码/零代码、小程序、BaaS、Serverless 等。<br />
-
-通过万能通用接口，前端可以定制任何数据、任何结构。<br />
-大部分 HTTP 请求后端再也不用写接口了，更不用写文档了。<br />
-前端再也不用和后端沟通接口或文档问题了。再也不会被文档各种错误坑了。<br />
-后端再也不用为了兼容旧接口写新版接口和文档了。再也不会被前端随时随地没完没了地烦了。
-
-### 特点功能
-
-#### 对于后端
-* 提供万能通用接口，大部分 HTTP API 不用再写
-* 零代码增删改查、各种跨库连表、JOIN 嵌套子查询等
-* 自动生成文档，不用再编写和维护，且自动静态检查
-* 自动校验权限、自动管理版本、自动防 SQL 注入
-* 开放 HTTP API 无需划分版本，始终保持兼容
-
-#### 对于前端
-* 不用再向后端催接口、求文档
-* 数据和结构完全定制，要啥有啥
-* 看请求知结果，所求即所得
-* 可一次获取任何数据、任何结构
-* 能去除多余数据，节省流量提高速度
+* ### [1.About](#1)
+* ### [2.Backend usage](#2)
+* ### [3.Frontend usage](#3)
+* ### [4.Contributing](#4)
+* ### [5.Releases](#5)
+* ### [6.Author](#6)
+* ### [7.Donating](#7)
 
 <br />
 
-### APIJSON 接口展示
-#### Postman 展示 APIJSON
+## <h2 id= "1">1. About <h2/>
+
+APIJSON is a JSON based internet communication protocol and an ORM library  <br />
+that largely simplifies the process of back-end API development.  <br />
+It also allows users to get data more quickly with self-defined form and fewer endpoints requests.
+
+### Features:
+#### For getting data:
+You can get any data by defining the specific information you want and send it to the server. <br />
+You can get different types of data by making just one request to the server. <br />
+It's very convenient and flexible, and dosen't require different API endpoints with multiple requests. <br />
+It provides CRUD(read and write), Fuzzy Search, Remote Function Calls, etc. <br />
+You can also save duplicate data, see request history, etc. <br />
+
+#### For API design:
+APIJSON largely reduces API developers' workload by reducing most api design and documentation work. <br />
+With APIJSON, client developers will no longer be suffered from possible errors in documents, <br />
+and it saves communication between server developers and client developers about APIs or documentations. <br />
+Server developers no longer need to worry about compatibility of APIs and documents with legacy apps. <br />
+
+![0F85206E116CCEE74DB68E5B9A3AEDAE](https://user-images.githubusercontent.com/5738175/196148099-d3a9e0ba-93e5-4e1a-a4f8-a714083c6f7e.jpg)
+#### Song Firework-Katy Parry(Modified for APIJSON)
+Do you ever feel like a backend slave <br />
+Repeating CRUD, wanting to make a change? <br />
+Do you ever feel, APIs' so paper thin <br />
+Like a house of cards, one blow from cavin' in? <br />
+Do you ever feel they always complain? <br />
+Urging doc and feedback bugs, even ask your refactoring <br />
+Do you know that there's still a chance for you? <br />
+'Cause there's a powerful tool <br />
+You just gotta depend and configure <br />
+And let it init <br />
+Just start APIs <br />
+They are so easy to try <br />
+'Cause baby, you're a firework <br />
+Come on, show 'em what you're worth <br />
+Make 'em go, "Oh, oh, oh" <br />
+As you give 'em an A-T-M <br />
+Baby, you're a firework <br />
+Come on, let them serve themselves <br />
+Make 'em go, "Oh, oh, oh" <br />
+You're gonna leave 'em all in awe, awe, awe. <br />
+
+<br/>
+
+**Tired with endless arguments about HTTP API dev or use?** <br/>
+**Use APIJSON-the ORM for providing infinity codeless CRUD APIs that fit almost all your needs.** <br />
+**Unfold the Power(In Your Soul) with ⭐Star & Clone.**
+
+### APIJSON Show
+#### Postman test APIJSON
 ![](https://static.oschina.net/uploads/img/201711/12230359_f7fQ.jpg)
 <br/>
 
-#### APIAuto 展示 APIJSON
-**使用 APIAuto-机器学习接口工具 来管理和测试 HTTP API 可大幅 减少传参错误、提升联调效率** <br/>
-(注意网页工具界面是 APIAuto，里面的 URL+JSON 才是 APIJSON 的 HTTP API)： <br/>
+#### APIAuto test APIJSON
+Note: The UI is APIAuto, the URL+JSON is APIJSON<br/>
 <br />
 <p align="center" >
-  <a >APIJSON 多表关联查询、结构自由组合，APIAuto 多个测试账号、一键共享测试用例</a>
+  <a >APIJSON: query multi related tables, flexible data structures. APIAuto: multi test accounts, easily share test cases</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-bbbec4fc5edc472be127c02a4f3cd8f4ec2.JPEG) 
@@ -131,171 +144,82 @@ APIJSON 是一种专为 API 而生的 JSON 网络传输协议 以及 基于这�
 
 <br />
 <p align="center" >
-  <a >APIAuto 自动生成前端(客户端)请求代码 和 Python 测试用例代码，一键下载</a>
+  <a >APIAuto: generate request code for frontend/clients or Python test cases, easily download code</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-637193bbd89b41c3264827786319e842aee.JPEG) 
 
 <br />
 <p align="center" >
-  <a >APIAuto 自动保存请求记录、自动生成接口文档，可添加常用请求、快捷查看一键恢复</a>
+  <a >APIAuto: auto save test records, auto generate API doc, requests shortcut, easily replay</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-7dcb4ae71bd3892a909e4ffa37ba7c1d92a.JPEG) 
 
 <br />
 <p align="center" >
-  <a >APIAuto 一键自动接口回归测试，不需要写任何代码(注解、注释等全都不要)</a>
+  <a >APIAuto: auto regression test without code, annotation, comment, etc.)</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-c1ba774f8e7fcc5adcdb05cad5bd414d766.JPEG) 
 
 <br />
 <p align="center" >
-  <a >一图胜千言 - APIJSON 部分基础功能概览</a>
+  <a >A picture is worth a thousand words - some basic features show for APIJSON</a>
 </p> 
 
 ![](https://oscimg.oschina.net/oscnet/up-e21240ef3770326ee6015e052226d0da184.JPEG) 
 ![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON/APIJSON_query_summary.gif) 
 
 
-<br /><br />
-
-### APIJSON App 演示
-使用 APIJSON + ZBLibrary 开发的 Android 客户端 Demo (以下 Gif 图看起来比较卡，实际上运行很流畅)：
-<br />
-![](https://oscimg.oschina.net/oscnet/up-a3f167e593080e8a3fc09c3d5fc09330c98.gif) 
-![](https://oscimg.oschina.net/oscnet/up-141abcb5dabc01c890d70c461bd1fdc751f.gif) 
-![](https://oscimg.oschina.net/oscnet/up-58aecc2701c2c4ea33e53f246e427773b09.gif)
+## <h2 id="2">2.Backend usage<h2/>
+You can skip this step and use 'apijson.cn:8080'. <br />
+See https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/README-English.md
 
 <br />
 
-### APIJSON 分享演讲
-#### APIJSON-零代码接口与文档 ORM 库（国际开源谷 Gitee Meetup）
+## <h2 id="3">3. Frontend usage<h2/> 
+You can skip this step and use [APIAuto](https://github.com/TommyLemon/APIAuto) or download App.<br />
+See [Android](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Android/README-English.md), [iOS](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-iOS/README-English.md) or [JavaScript](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-JavaScript/README-English.md)<br />
 
-https://www.bilibili.com/video/BV1Tv411t74v
+### Download App
 
-![image](http://apijson.cn/images/comparison/APIJSON_vs_PreviousWays.jpg)
-
-
-#### APIJSON 和 APIAuto-零代码开发和测试（QECon 全球软件质量&效能大会）
-
-https://www.bilibili.com/video/BV1yv411p7Y4
-
-<img width="1360" alt="wecom-temp-377bbd0daf5aed716baf7ebcb003d94c" src="https://user-images.githubusercontent.com/5738175/121370207-1b35de00-c96f-11eb-840e-cc2ff2995888.png">
-
-
-<br />
-
-### 为什么选择 APIJSON？
-前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
-https://github.com/Tencent/APIJSON/wiki
-
-* **解决十大痛点** (可帮前后端开发大幅提振开发效率、强力杜绝联调扯皮、巧妙规避文档缺陷、非常节省流量带宽)
-* **开发提速很大** (CRUD 零代码热更新全自动，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
-* **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
-* **社区影响力大** (GitHub 18K+ Star 在 400W Java 项目排名前 100，远超 FLAG, BAT 等国内外绝大部分开源项目)
-* **各项荣誉成就** (腾讯内外 5 个奖项、腾讯开源前五、腾讯后端 Star 第一、Trending 日周月榜大满贯 等)
-* **多样用户案例** (腾讯内有互娱、音乐、微信、云与智慧，外部有华为、华能、百度、快手、中兴、圆通、传音等)
-* **适用场景广泛** (社交聊天、阅读资讯、影音娱乐、办公学习 等各种 App、网站、小程序、公众号 等非金融类项目)
-* **周边生态丰富** (Android, iOS, Web 等各种 Demo、继承 JSON 的海量生态、零代码 接口测试 和 单元测试 工具等)
-* **文档视频齐全** (项目介绍、快速上手、安装部署 等后端、前端、客户端的 图文解说、视频教程、代码注释 等)
-* **功能丰富强大** (增删改查、分页排序、分组聚合、各种条件、各种 JOIN、各种子查询、跨库连表 等零代码实现)
-* **使用安全简单** (自动增删改查、自动生成文档、自动管理版本、自动控制权限、自动校验参数、自动防 SQL 注入)
-* **灵活定制业务** (在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象 等，然后自定义处理)
-* **高质可靠代码** (代码严谨规范，蚂蚁集团源伞 Pinpoint 代码扫描分析报告平均每行代码 Bug 率低至 0.15%)
-* **兼容各种项目** (协议不限 HTTP，与其它库无冲突，对各类 Web 框架集成友好且提供 SpringBoot, JFinal 的示例)
-* **工程轻量小巧** (无第三方依赖，Jar 仅 263KB，Java 文件仅 68 个共 14864 行代码，例如 APIJSONORM 8.1.0)
-* **多年持续迭代** (自 2016 年起已连续维护 8 年多，70+ 贡献者、100+ 发版、3000+ 提交，不断更新迭代中...)
-
-**按照一般互联网中小型项目情况可得出以下对比表格：**
-
-表数量 T | 平均每表字段数 C |         SSMH 按快估计     | APIJSONBoot 按慢估计 | APIJSONBoot 提速倍数
---------  |   ---------  |  ---------------------  |  ------------------ |  -----------
-1         |    3         |  179 min(约一上午)        | 11 min(约十分钟)     |  15.27
-5         |    4         |  1935 min(约朝九晚六一周)  | 70 min(约一小时)     |  26.64
-10        |    10        |  8550 min(大小周超半个月)  | 320 min(约一下午)    |  25.72
-20        |    15        |  31900 min(约 996 两个月) | 940 min(约上班两天)  |  32.94
-50        |    20        |  176750 min(11117 超半年) | 3100 min(约上班一周) |  56.02             
- 
-### 用户反馈
-**腾讯 IEG 数据产品开发组负责人 xinlin：**
-“腾讯的 APIJSON 开源方案，它可以做到零代码生成接口和文档，并且整个生成过程是自动化。当企业有元数据的时候，马上就可以获得接口”
-
-**腾讯科技 后台开发高级工程师 雷大锤：**
-“可以抽出时间来看apijson了，这个可以为T10做准备，也是业界很火的东西，可以提升个人影响力！”
-
-**腾讯 bodian520：**
-“在调试GET、POST、PUT接口时遇到了一些问题，把个人的摸索经验分享一下，希望作者能梳理下文档，方便我们更好的接入”
-
-**华为 minshiwu：**
-“demo工程，默认使用apijson-framework，可以做到无任何配置即可体验apijson的各种能力。”
-
-**字节跳动 qiujunlin：**
-“初次见到这个项目，觉得太惊艳了，眼前一亮。给我的感受是，项目大大简化了开发流程，开发效率提升了很多倍。”
-
-**百度智慧城市研发 lpeng：**
-“很兴奋的发现APIJSON很适合我们的一个开发场景，作为我们协议定义的一部分” 
-
-**中兴 duyijiang：**
-“感谢腾讯大大提供的框架，很好用”
-
-https://github.com/Tencent/APIJSON/issues/132#issuecomment-1106669540
-
-<br />
-
-### 常见问题
-#### 1.如何定制业务逻辑？
-在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 <br />
-https://github.com/Tencent/APIJSON/issues/101
-
-#### 2.如何控制权限？
-在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度细分到行级 <br />
-https://github.com/Tencent/APIJSON/issues/12
-
-#### 3.如何校验参数？
-在 Request 表配置校验规则 structure，提供 MUST、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 <br />
-https://github.com/Tencent/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
-
-更多常见问题及提问前必看 <br />
-https://github.com/Tencent/APIJSON/issues/36
-<br />
-
-### 注意事项
-**请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感， <br />
-大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](https://github.com/Tencent/APIJSON/blob/master/Document.md#3) 来调用 API ！**
-[#181](https://github.com/Tencent/APIJSON/issues/181)
-<br />
-<br />
-<br />
-<br />
-
-<b >导航目录：</b> [项目简介](#--apijson) 上手使用 [社区生态](#%E6%8A%80%E6%9C%AF%E4%BA%A4%E6%B5%81)  &nbsp;&nbsp;&nbsp;&nbsp;  完整详细的导航目录 [点这里查看](/Navigation.md) <br />
-
-### 快速上手
-
-#### 1.后端上手
-可以跳过这个步骤，直接用APIJSON服务器IP地址 apijson.cn:8080 来测试接口。<br />
-见&nbsp; [APIJSON后端上手 - Java](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)<br />
-
-#### 2.前端上手
-可以跳过这个步骤，直接使用 [APIAuto-机器学习HTTP接口工具](https://github.com/TommyLemon/APIAuto) 或 下载客户端App。<br />
-见&nbsp; [Android](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android) &nbsp;或&nbsp; [iOS](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS) &nbsp;或&nbsp; [JavaScript](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript)<br />
-
-
-### 下载客户端 App
-
-仿微信朋友圈动态实战项目<br />
+Simple demo App for testing APIJSON<br />
+[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
+	
+Complex production App like Twitter tweets<br />
 [APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
-测试及自动生成代码工具<br />
-[APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
+<br />
+	
+## <h2 id="4">4. Contributing<h2/> 
+	
+We are always looking for more developers to help implementing new features, fix bugs, etc. <br />
+Please have a look at the [open issues](https://github.com/Tencent/APIJSON/issues) before opening a new one. <br />
 
-### 开源许可
-使用 [Apache License 2.0](/LICENSE)，对 公司、团队、个人 等 商用、非商用 都自由免费且非常友好，请放心使用和登记
+Fork the project and send a pull request.<br />
 
-### 使用登记
-如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(新的按登记顺序排列、专群优先答疑解惑)：<br />
+Please also ⭐Star the project!
+<br />
+
+## <h2 id="5">5. Releases<h2/> 
+	
+See the latest release [here](https://github.com/Tencent/APIJSON/releases/tag/5.2.0).
+
+<br />
+
+## <h2 id="6">6. Author<h2/> 	
+	
+Check out the author's [github account](https://github.com/TommyLemon) to see more related projects.<br>
+<img width="1279" alt="image" src="https://user-images.githubusercontent.com/5738175/196243428-da8abbbb-9622-4f26-a109-db5d17ab8b40.png">
+
+If you have any questions or suggestions, you can [create an issue](https://github.com/Tencent/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
+
+<br />
+<br />
+
+### Users of APIJSON:
+
 https://github.com/Tencent/APIJSON/issues/187 
 <div style="float:left">
   <img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75">
@@ -353,28 +277,13 @@ https://github.com/Tencent/APIJSON/issues/187
   <img src="https://github.com/Tencent/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
   <img src="https://github.com/Tencent/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
   <img src="https://github.com/Tencent/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
-  <img src="https://gitee.com/linksame-ivan/APIJSON/blob/master/assets/logo-name.9f99700f.png" height="75">
-<br />
-  
- * [腾讯科技有限公司](https://www.tencent.com)
- * [腾讯音乐娱乐集团](https://www.tencentmusic.com)
- * [深圳市传音通讯有限公司](https://www.transsion.com)
- * [社宝信息科技（上海）有限公司](https://shebaochina.com)
- * [华能贵诚信托有限公司](https://www.hngtrust.com)
- * [投投科技](https://www.toutou.com.cn)
- * [圆通速递](https://www.yto.net.cn)
- * [乐拼科技](https://www.lepinyongche.com)
- * [珠海采筑电子商务有限公司](https://www.aupup.com)
- * [爱投斯智能技术（深圳）有限公司](http://www.aiotos.net)
- * [邻盛科技（武汉）有限公司](http://www.linksame.com)
- * [上海麦市信息科技有限公司](https://www.masscms.com)
- * [上海翊丞互联网科技有限公司](http://www.renrencjl.com/home)
- * [上海直真君智科技有限公司](http://www.zzjunzhi.com)
- * [北明软件有限公司](https://www.bmsoft.com.cn/)
- * [上海钰亿环保科技有限公司](#)
 
-### 贡献者们
-主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、gorm-plus 作者、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
+<br />
+	
+[More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
+
+### Contributers of APIJSON:
+Contributers for the APIJSON core project(6 Tencent engineers, 1 Microsoft engineer, 1 Zhihu architect, 1 Bytedance(TikTok) engineer, 1 NetEase engineer, 1 Zoom engineer, 1 YTO Express engineer, 1 Zhilian engineer, 1 UC student、3 SUSTech students, etc.): <br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <div style="float:left">
   <a href="https://github.com/TommyLemon"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4" 
@@ -416,29 +325,10 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
   <a href="https://github.com/Tencent/APIJSON/pull/311"><img src="https://avatars.githubusercontent.com/u/22066942?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/325"><img src="https://avatars.githubusercontent.com/u/33931153?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/Tencent/APIJSON/pull/443"><img src="https://avatars.githubusercontent.com/u/95326431?s=40&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/447"><img src="https://avatars.githubusercontent.com/u/46688?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/452"><img src="https://avatars.githubusercontent.com/u/45644893?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/456"><img src="https://avatars.githubusercontent.com/u/14543369?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/472"><img src="https://avatars.githubusercontent.com/u/22633385?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/480"><img src="https://avatars.githubusercontent.com/u/35208417?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/481"><img src="https://avatars.githubusercontent.com/u/12228225?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/483"><img src="https://avatars.githubusercontent.com/u/46614808?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/489"><img src="https://avatars.githubusercontent.com/u/3324416?s=60&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/498"><img src="https://avatars.githubusercontent.com/u/41458196?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/505"><img src="https://avatars.githubusercontent.com/u/30490359?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/535"><img src="https://avatars.githubusercontent.com/u/68573559?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/543"><img src="https://avatars.githubusercontent.com/u/32206192?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/545"><img src="https://avatars.githubusercontent.com/u/28621460?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/610"><img src="https://avatars.githubusercontent.com/u/33263203?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/616"><img src="https://avatars.githubusercontent.com/u/42954433?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/668"><img src="https://avatars.githubusercontent.com/u/102006886?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/684"><img src="https://avatars.githubusercontent.com/u/159116925?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/685"><img src="https://avatars.githubusercontent.com/u/44639807?s=96&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/Tencent/APIJSON/pull/691"><img src="https://avatars.githubusercontent.com/u/19484446?s=96&v=4"  height="54" width="54" ></a>
 </div>
 <br />
-
-生态周边项目的作者们(2 个腾讯工程师、1 个 BAT 技术专家、1 个微软工程师、2 个字节跳动工程师、1 个神州数码工程师&Apache dubbo2js 作者 等)：<br />
+	
+Authors of other projects for ecosystem of APIJSON(2 Tencent engineers, 1 BAT(Baidu/Alibaba/Tencent) specialist, 1 Microsoft engineer, 2 Bytedance(TikTok) engineers,  1 Digital China engineer & Apache dubbo2js author, etc.): <br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">
@@ -482,373 +372,22 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
   <a href="https://github.com/kenlig/apijsondocs"><img src="https://avatars.githubusercontent.com/u/28685375?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/APIJSON/apijson.org"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/pengxianggui/apijson-builder"><img src="https://avatars2.githubusercontent.com/u/16299169?s=460&v=4"  height="54" width="54" ></a>
-  <a href="https://github.com/creasy2010/apijson-docker"><img src="https://avatars.githubusercontent.com/u/1592277?v=4"  height="54" width="54" ></a>
   <a href="https://github.com/APIJSON/AbsGrade"><img src="https://avatars.githubusercontent.com/u/41146037?s=200&v=4"  height="54" width="54" ></a>
   <a href="https://github.com/TommyLemon/Android-ZBLibrary"><img src="https://avatars1.githubusercontent.com/u/5738175?s=400&u=5b2f372f0c03fae8f249d2d754e38971c2e17b92&v=4"  height="54" width="54" ></a>
 </div>
 <br />
 
-还有为 APIJSON 扫描代码贡献 Issue 的 [蚂蚁集团源伞](https://www.sourcebrella.com) 和 [奇安信代码卫士](https://github.com/QiAnXinCodeSafe)
-<div style="float:left">
-  <a href="https://www.sourcebrella.com" style="padding: 5px"><img src="https://github.com/user-attachments/assets/2d580664-9df9-4275-8346-5ba2d04936b9" height="90" ></a>
-  <a href="https://github.com/QiAnXinCodeSafe" style="margin-right: 20px"><img src="https://avatars.githubusercontent.com/u/39950310?s=460&u=8c4ad8c2174ba78c0604614a6e2feced07521ce6&v=4"  height="90" ></a>
-</div>
+Thanks to all contributers of APIJSON!
+
 <br />
 
-感谢大家的贡献。
-
-### 统计分析 
-腾讯、华为、阿里巴巴、美团、字节跳动、百度、京东、网易、快手等和 Google, Apple, Microsoft, Amazon, Paypal, IBM, Shopee 等 <br >
-数百名知名大厂员工点了 Star，也有腾讯、华为、字节跳动、Microsoft、Zoom 等不少知名大厂员工提了 PR/Issue，感谢大家的支持~ <br >
+### Statistics
+Hundreds of employees from big famous companies(Tencent, Google, Apple, Microsoft, Amazon, Huawei, Alibaba, Paypal, Meituan, Bytedance(TikTok), IBM, Baidu, JD, NetEase, Kuaishou, Shopee, etc.) starred, <br >
+a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, etc.) created PR/Issue, thank you all~ <br >
 [![Stargazers over time](https://starchart.cc/Tencent/APIJSON.svg)](https://starchart.cc/Tencent/APIJSON)
 <img width="948" alt="image" src="https://github.com/Tencent/APIJSON/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
-根据开源指南针报告，APIJSON Java 版已经是国内顶级、国际一流的 Java 开源项目了 [#518](https://github.com/Tencent/APIJSON/issues/518) <br >
-<img width="1495" alt="image" src="https://user-images.githubusercontent.com/5738175/227158515-4e8bab65-a4b9-402b-b60b-29c08b4d930d.png">
 
-### 规划及路线图
-新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
-https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
-
-理论上所有支持 SQL 与 JDBC/ODBC 的软件，都可以用本项目对接 CRUD，待测试: <br />
-[OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
-
-### 我要赞赏
-创作不易，坚持更难，右上角点 ⭐Star 来支持/收藏下吧，谢谢 ^_^ <br />
-https://github.com/Tencent/APIJSON
-  
 <br />
-<br />
-<br />
-
-<b >导航目录：</b> [项目简介](#--apijson) [上手使用](#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B) 社区生态  &nbsp;&nbsp;&nbsp;&nbsp;  完整详细的导航目录 [点这里查看](/Navigation.md)<br />
-
-### 技术交流
-如果有什么问题或建议可以 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)，交流技术，分享经验。 <br >
-如果你解决了某些 bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
-https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
-  
-**开发者也是人，也需要工作、休息、恋爱、陪伴家人、走亲会友等，也有心情不好和身体病痛，** <br > 
-**往往没有额外的时间精力顾及一些小问题，请理解和支持，开源要大家参与贡献才会更美好~** <br >
-**少数个人的热情终有被耗尽的一天，只有大家共同建设和繁荣社区，才能让开源可持续发展！** <br >  
-
-**开发者时间精力有限，原则上优先解决 登记用户 和 贡献者 的问题，** <br >
-**不解决 文档/视频/常见问题 已明确说明、描述简陋 或 态度无礼 的问题！** <br >
-**如果你已经多次得到帮助，却仍然只索取不贡献，那就别指望大家再帮你！** <br >
-**私聊作者请教技术问题 或者 频繁在互助群 @ 作者 可能会被拉黑/禁言/踢群，请尊重和理解，谢谢！** <br >
-
-如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
-作者只有解答完了这个专群里的全部问题，才看情况解答 Issue/问卷 里的问题(对 Issue/问卷 不保证解答、更不保证及时)；<br >
-之前的几个互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
-甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)。<br >
-
-如果你为 APIJSON 做出了以下任何一个贡献，我们将优先为你答疑解惑： <br >
-[提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
-Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任职企业的用户 > 其他用户。
-  
-
-### 相关推荐
-[APIJSON, 接口和文档的终结者！](https://my.oschina.net/tommylemon/blog/805459)
-
-[腾讯业务百万数据 6s 响应，APIJSON 性能优化背后的故事](https://my.oschina.net/tommylemon/blog/5375645)  
-
-[仿QQ空间和微信朋友圈，高解耦高复用高灵活](https://my.oschina.net/tommylemon/blog/885787)
-
-[后端开挂:3行代码写出8个接口！](https://my.oschina.net/tommylemon/blog/1574430)
-
-[后端自动化版本管理，再也不用改URL了！](https://my.oschina.net/tommylemon/blog/1576587)
-
-[3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
-
-[APIJSON对接分布式HTAP数据库TiDB](https://my.oschina.net/tommylemon/blog/3081913)
-
-[APIJSON教程（一）：上手apijson项目，学习apijson语法，并实现持久层配置](https://zhuanlan.zhihu.com/p/375681893)
-
-[apijson简单demo](https://blog.csdn.net/dmw412724/article/details/113558115)
-
-[apijson简单使用](https://www.cnblogs.com/greyzeng/p/14311995.html)
-
-[APIJSON简单部署和使用](https://blog.csdn.net/m450744192/article/details/108462611)
-
-[学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
-
-[APIJSON 接口调试实践](https://github.com/Tencent/APIJSON/issues/189)
-    
-[APIJSON-零代码接口和文档 JSON 协议 与 ORM 库](https://cloud.tencent.com/developer/article/2077042)
-
-[APIJSON使用例子总结](https://blog.csdn.net/weixin_41077841/article/details/110518007)
-
-[APIJSON 自动化接口和文档的快速开发神器 （一）](https://blog.csdn.net/qq_41829492/article/details/88670940)
-
-[APIJSON在mac电脑环境下配置去连接SQL Server](https://juejin.im/post/5e16d21ef265da3e2e4f4956)
-
-[APIJSON复杂业务深入实践（类似12306订票系统）](https://blog.csdn.net/aa330233789/article/details/105309571)
-
-[新手搭建 APIJSON 项目指北](https://github.com/jerrylususu/apijson_todo_demo/blob/master/FULLTEXT.md)  
-
-[使用APIJSON写低代码Crud接口](https://blog.csdn.net/weixin_42375862/article/details/121654264)
-  
-[apijson在同一个接口调用中 使用远程函数写入更新时间和创建时间](https://blog.csdn.net/qietingfengsong/article/details/124097229)
-
-[APIJSON（一：综述）](https://blog.csdn.net/qq_50861917/article/details/120556168)
-
-[APIJSON 代码分析（三：demo主体代码）](https://blog.csdn.net/qq_50861917/article/details/120751630)
-
-[APIJSON 代码分析（二）AbstractParser类(解析器)](https://blog.csdn.net/weixin_45767055/article/details/120815927)
-
-[APIJSON 代码分析（四：AbstractObjectParser源码阅读）](https://blog.csdn.net/qq_50861917/article/details/120896381)
-
-[APIJSON 代码分析 AbstractSQLConfig 第二篇](https://blog.csdn.net/csascscascd/article/details/120684889)
-
-[APIJSON 代码分析（六）APIJSON—Verifier检查类](https://blog.csdn.net/weixin_45767055/article/details/121321731)
-
-[APIJSON 代码分析（四）AbstractSQLExecutor—SQL执行器](https://blog.csdn.net/weixin_45767055/article/details/121069887)
-
-[APIJSON使用](https://juejin.cn/post/7148253873478565902)
-
-[apijson 初探](https://www.cnblogs.com/x3d/p/apijson-lowcode.html)
-
-[APIJSON使用介绍](http://api.flyrise.cn:9099/docs/open-docs//1459)
-
-[MassCMS With APIJSON最佳实践](https://zhuanlan.zhihu.com/p/655826966)
-
-[APIJSON语法使用，超详细](https://blog.csdn.net/qq_36565607/article/details/139167040)
-
-[wend看源码-ORM-APIJSON](https://itwend.blog.csdn.net/article/details/143980281)
-
-[APIJSON – The No-Code API Revolution That Puts Developers in the Fast Lane](https://medevel.com/apijson)
-
-[APIJSON：17.4k Star！腾讯开源的零代码接口与文档协议及ORM库](https://mp.weixin.qq.com/s/gr84DmWKs4O6lcoT-iaV5w)
-
-[APIJSON腾讯开源的后端开发神器！！！](https://cloud.tencent.com/developer/article/2372220)
-
-[apijson 快速上手](https://blog.csdn.net/qq_16381291/article/details/147110737)
-
-[APIJSON快速入门-零后端代码，接口所见即所得](https://www.toutiao.com/article/7503844050689376783)
-
-[腾讯开源！零代码，全自动万能API接口](https://mp.weixin.qq.com/s/WWndAa68BqBfflWgL5592A)
-
-[APIJSON项目实战教程：零代码实现高效JSON接口开发](https://blog.csdn.net/gitblog_00682/article/details/148375065)
-
-[springboot整合APIJSON——零代码万能通用 API（附源码）](https://blog.csdn.net/longzhutengyue/article/details/150579233)
-
-[APIJSON：重新定义后端开发体验的零代码ORM框架](https://blog.csdn.net/gitblog_01177/article/details/155216163)
-
-[API自动生成这么爽？实测腾讯APIJSON，零代码就能玩转后端接口！](https://mp.weixin.qq.com/s/DmMIGHHcZ783KobGecMxGg)
-
-[腾讯开源的 APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
-
-### 生态项目
-[APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
-
-[apijson-orm](https://github.com/APIJSON/apijson-orm) APIJSON ORM 库，可通过 Maven, Gradle 等远程依赖
-
-[apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON 服务端框架，通过数据库表配置角色权限、参数校验等，简化使用
-
-[apijson-router](https://github.com/APIJSON/apijson-router) APIJSON 的路由插件，可控地对公网暴露类 RESTful 简单接口，内部转成 APIJSON 格式请求来执行
-  
-[apijson-column](https://github.com/APIJSON/apijson-column) APIJSON 的字段插件，支持 字段名映射 和 !key 反选字段
-
-[apijson-jackson](https://github.com/APIJSON/apijson-jackson) APIJSON 的 jackson 插件，简化使用
-
-[apijson-fastjson2](https://github.com/APIJSON/apijson-fastjson2) APIJSON 的 fastjson2 插件，简化使用
-
-[apijson-gson](https://github.com/APIJSON/apijson-gson) APIJSON 的 gson 插件，简化使用
-
-[apijson-milvus](https://github.com/APIJSON/apijson-milvus) APIJSON 的 Milvus AI 向量数据库插件
-
-[apijson-influxdb](https://github.com/APIJSON/apijson-influxdb) APIJSON 的 InfluxDB 物联网时序数据库插件
-
-[apijson-mongodb](https://github.com/APIJSON/apijson-mongodb) APIJSON 的 MongoDB NoSQL 数据库插件
-
-[apijson-cassandra](https://github.com/APIJSON/apijson-cassandra) APIJSON 的 Cassandra NoSQL 数据库插件
-
-[APIAuto](https://github.com/TommyLemon/APIAuto) ☔ 敏捷开发最强大易用的接口工具，零代码测试与 AI 问答、生成代码与静态检查、生成文档与光标悬浮注释，腾讯、SHEIN、传音 等使用
-
-[CVAuto](https://github.com/TommyLemon/CVAuto) 👁 零代码零标注 CV AI 自动化测试平台 🚀 免除大量人工画框和打标签等，直接快速测试 CV 计算机视觉 AI 图像识别算法
-
-[UnitAuto](https://github.com/TommyLemon/UnitAuto) 最先进、最省事、ROI 最高的单元测试，机器学习 零代码、全方位、自动化 测试 方法/函数，用户包含腾讯、快手、某 500 强巨头等
-
-[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 数据库工具，任意增删改查、任意 SQL 模板变量、一键批量生成参数组合、快速构造大量测试数据
-
-[UIGO](https://github.com/TommyLemon/UIGO) 📱 零代码快准稳 UI 智能录制回放平台 🚀 3 像素内自动精准定位，2 毫秒内自动精准等待，用户包含腾讯，微信团队邀请分享
-
-[apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 官方文档，提供排版清晰、搜索方便的文档内容展示，包括设计规范、图文教程等
-
-[APIJSONdocs](https://github.com/ruoranw/APIJSONdocs) APIJSON 英文文档，提供排版清晰的文档内容展示，包括详细介绍、设计规范、使用方式等
-
-[apijson.org](https://github.com/APIJSON/apijson.org) APIJSON 官方网站，提供 APIJSON 的 功能简介、登记用户、作者与贡献者、相关链接 等
-
-[APIJSON.NET](https://github.com/liaozb/APIJSON.NET) C# 版 APIJSON ，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite
-
-[apijson-go](https://github.com/glennliao/apijson-go) Go 版 APIJSON ， 基于Go(>=1.18) + GoFrame2, 支持查询、单表增删改、权限管理等
-  
-[apijson-go](https://gitee.com/tiangao/apijson-go) Go 版 APIJSON ，支持单表查询、数组查询、多表一对一关联查询、多表一对多关联查询 等
-
-[apijson-hyperf](https://github.com/kvnZero/hyperf-APIJSON.git) PHP 版 APIJSON，基于 Hyperf 支持 MySQL
-
-[APIJSON-php](https://github.com/xianglong111/APIJSON-php) PHP 版 APIJSON，基于 ThinkPHP，支持 MySQL, PostgreSQL, SQL Server, Oracle 等
-
-[apijson-php](https://github.com/qq547057827/apijson-php) PHP 版 APIJSON，基于 ThinkPHP，支持 MySQL, PostgreSQL, SQL Server, Oracle 等
-
-[apijson-node](https://github.com/kevinaskin/apijson-node) 字节跳动工程师开源的 Node.ts 版 APIJSON，提供 nestjs 和 typeorm 的 Demo 及后台管理
-
-[uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite 等
-
-[apijson-rust](https://gitee.com/APIJSON/panda-base) APIJSON 的 Rust 版，一个优雅、高性能的 Rust 多数据源管理系统，支持 MySQL 和 PostgreSQL
-
-[APIJSONParser](https://github.com/Zerounary/APIJSONParser) 第三方 APIJSON 解析器，将 JSON 动态解析成 SQL
-
-[FfApiJson](https://gitee.com/own_3_0/ff-api-json) 用 JSON 格式直接生成 SQL，借鉴 APIJSON 支持多数据源
-
-[APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) 一个简单的 todo 示例项目，精简数据，简化上手流程，带自定义鉴权逻辑 
-
-[apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON 学习笔记和源码解析
-
-[apijson-practice](https://github.com/vcoolwind/apijson-practice) BAT 技术专家开源的 APIJSON 参数校验注解 Library 及相关 Demo
-
-[apijson-db2](https://github.com/andream7/apijson-db2) 微软工程师接入 IBM 数据库 DB2 的 APIJSON 使用 Demo
-
-[APIJSONDemo](https://github.com/qiujunlin/APIJSONDemo) 字节跳动工程师接入 ClickHouse 的 APIJSON 使用 Demo
-  
-[APIJSONDemo_ClickHouse](https://github.com/chenyanlann/APIJSONDemo_ClickHouse) APIJSON + SpringBoot 连接 ClickHouse 使用的 Demo
-
-[APIJSONBoot_Hive](https://github.com/chenyanlann/APIJSONBoot_Hive) APIJSON + SpringBoot 连接 Hive 使用的 Demo
-
-[apijson-sample](https://gitee.com/greyzeng/apijson-sample) APIJSON 简单使用 Demo 及教程
-
-[apijson-examples](https://gitee.com/drone/apijson-examples) APIJSON 的前端、业务后端、管理后端 Demo
-
-[apijson-ruoyi](https://github.com/daodol/apijson-ruoyi) APIJSON 和 RuoYi 框架整合，实现零代码生成页面模板接口，在线维护 APIJSON 数据库配置等
-
-[light4j](https://github.com/xlongwei/light4j) 整合 APIJSON 和微服务框架 light-4j 的 Demo，同时接入了 Redis
-
-[SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) 智慧党建服务器端，提供 上传 和 下载 文件的接口
-
-[apijson_template](https://github.com/abliger/apijson_template) APIJSON Java 模版，使用 gradle 管理依赖和构建应用
-  
-[api-json-demo](https://gitee.com/hxdwd/api-json-demo) 基于 APIJSON，实现低代码写 CURD 代码，代替传统 ORM 框架，适配 Oracle 事务
-
-[ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) 整合 APIJSON 和 JFinal 的 Demo
-
-[apijson-go-demo](https://github.com/glennliao/apijson-go-demo) apijson-go demos，提供 3 个从简单到复杂的不同场景 Demo
-
-[apijson-builder](https://github.com/pengxianggui/apijson-builder) 一个方便为 APIJSON 构建 RESTful 请求的 JavaScript 库
-
-[apijson-go-ui](https://github.com/glennliao/apijson-go-ui) apijson-go UI 界面配置, 支持权限管理、请求规则配置等
-
-[AbsGrade](https://github.com/APIJSON/AbsGrade) 列表级联算法，支持微信朋友圈单层评论、QQ空间双层评论、百度网盘多层(无限层)文件夹等
-
-[APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) 仿微信朋友圈动态实战项目，ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
-
-[Android-ZBLibrary](https://github.com/TommyLemon/Android-ZBLibrary) Android MVP 快速开发框架，Demo 全面，注释详细，使用简单，代码严谨
-  
-[apijson-dynamic-datasource](https://github.com/wb04307201/apijson-dynamic-datasource) 基于APIJSON，动态切换数据源、同一数据源批量操作事务一致性DEMO
-  
-[xyerp](https://gitee.com/yinjg1997/xyerp) 基于ApiJson的低代码ERP
-  
-[quick-boot](https://github.com/csx-bill/quick-boot) 基于 Spring Cloud 2022、Spring Boot 3、AMIS 和 APIJSON 的低代码系统。
-
-[apijson-query-spring-boot-starter](https://gitee.com/mingbaobaba/apijson-query-spring-boot-starter) 一个快速构建 APIJSON 查询条件的插件
-
-[apijson-builder](https://github.com/yeli19950109/apijson-builder) 简单包装 APIJSON，相比直接构造查询 JSON 更好记，ts 编写，调整了一些参数和使用方式
-
-[lanmuc](https://gitee.com/element-admin/lanmuc) 后端低代码生产接口的平台，兼容配置式接口和编写式接口，可做到快速生产接口，上线项目
-
-[review_plan](https://gitee.com/PPXcodeTry/review_plan) 复习提醒Web版（Java技术练习项目）
-
-[apijson-nutz](https://github.com/vincent109/apijson-nutz) APIJSON + Nutz 框架 + NutzBoot 的 Demo
-
-[apijson-spring-boot](https://gitee.com/yunjiao-source/apijson-spring-boot) Springboot3 for APIJSON，用 YAML 简化代码配置
-
-感谢热心的作者们的贡献，点 ⭐Star 支持下他们吧~
-
-  
-### 腾讯犀牛鸟开源人才培养计划
-https://github.com/Tencent/APIJSON/issues/229
-
-
-####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
-
-APIJSON 接入 clickhouse 使用demo <br />
-https://github.com/qiujunlin/APIJSONDemo
-
-#### zhangshukun 2.接入 presto/hive/clickhouse/db2 任意一个 
-APIJSON-Demo接入db2 <br />
-https://github.com/andream7/apijson-db2
-
-#### hanxu 1.完善入门介绍视频 
-重构 APIJSON 文档 <br /> 
-https://hanxu2018.github.io/APIJSON-DOC/ <br /> 
-文档源码  <br /> 
-https://github.com/HANXU2018/APIJSON-DOC  <br /> 
-配套评论区 apijson-doc-Comment  <br /> 
-https://github.com/HANXU2018/apijson-doc-Comment
-
-#### chenyanlan 2.接入 presto/hive/clickhouse/db2 任意一个 
-APIJSON + SpringBoot连接ClickHouse使用的Demo <br /> 
-https://github.com/chenyanlann/APIJSONDemo_ClickHouse
-
-#### zhaoqiming 1.完善入门介绍视频  
-APIJSON 后端教程（1）：简介
-https://www.bilibili.com/video/BV1vL411W7yd
-
-APIJSON 后端教程（2）：数据库 
-https://www.bilibili.com/video/BV1eB4y1N77s
-
-APIJSON 后端教程（3）：Demo
-https://www.bilibili.com/video/BV1FX4y1c7ug
-
-APIJSON 后端教程（4）：Boot
-https://www.bilibili.com/video/BV18h411z7FK
-
-APIJSON 后端教程（5）：Final
-https://www.bilibili.com/video/BV1GM4y1N7XJ
-
-APIJSON 后端教程（6）：uliweb_apijson
-https://www.bilibili.com/video/BV1yb4y1S79v/
-
-APIJSON 后端教程（7）：问题答疑
-https://www.bilibili.com/video/BV1dQ4y1h7Df
-  
-APIJSON配套文档：
-https://github.com/kenlig/apijsondocs
-
-#### huwen 2.接入 presto/hive/clickhouse/db2 任意一个
-APIJSON-Demo 接入presto
-https://github.com/hclown9804/APIJSONDemo_presto
-
-#### zhanghaoling 1.完善入门介绍视频
-APIJSON结合已有项目，简化开发流程
-https://github.com/haolingzhang1/APIJson--demo
-
-说明文档
-https://github.com/haolingzhang1/APIJson--demo/tree/main/APIJson集成项目说明
-  
-(1)官方demo
-https://github.com/haolingzhang1/APIJson--demo/blob/main/APIJson集成项目说明/APIJson集成现有项目（1）-%20官方demo.pdf
-  
-(2)单表配置
-https://github.com/haolingzhang1/APIJson--demo/blob/main/APIJson集成项目说明/APIJson集成现有项目（2）-%20单表配置.pdf 
-  
-#### zhoukaile 1.完善入门介绍视频
-
-视频链接：https://www.bilibili.com/video/BV1Uh411z7kZ/
-
-文档链接：https://gitee.com/funkiz/apijson_camp
-
-#### lintao 1.完善入门介绍视频
-
-APIJSON 上手教程：https://www.bilibili.com/video/BV1Pq4y1n7rJ
-
-### 持续更新
-
-https://github.com/Tencent/APIJSON/commits/master
-
-### 工蜂主页
-https://git.code.tencent.com/Tencent_Open_Source/APIJSON
-
-### 码云主页
-https://gitee.com/Tencent/APIJSON
