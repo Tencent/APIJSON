@@ -1,3 +1,5 @@
+#### A better online document is available at https://apijsondocs.readthedocs.io
+
 ### Examples:
 
 #### Get a User
