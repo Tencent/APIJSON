@@ -12,6 +12,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 
+import apijson.Log;
 import apijson.orm.AbstractFunctionParser;
 
 /**
@@ -45,7 +46,7 @@ public abstract class JSR223ScriptExecutor<T, M extends Map<String, Object>, L e
 			CompiledScript compiledScript = ((Compilable) scriptEngine).compile(convertScript(script));
 			compiledScriptMap.put(name, compiledScript);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(TAG, "compile script failed: " + name, e);
 		}
 
 	}

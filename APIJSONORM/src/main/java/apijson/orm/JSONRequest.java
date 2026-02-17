@@ -99,7 +99,7 @@ public class JSONRequest implements apijson.JSONRequest<LinkedHashMap<String, Ob
             target = JSON.parse(value);
         } catch (Exception e) {
             // nothing
-			e.printStackTrace();
+			Log.e(TAG, "JSON.parse failed for key: " + key, e);
         }
         //		if (target == null) { // "tag":"User" 报错
 		//			return null;

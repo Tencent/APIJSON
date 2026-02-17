@@ -676,7 +676,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					rs.close();
 				}
 				catch (Exception e) {
-					e.printStackTrace();
+					Log.e(TAG, "close ResultSet failed", e);
 				}
 			}
 		}
@@ -947,7 +947,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 							rs.close();
 						}
 						catch (Exception e) {
-							e.printStackTrace();
+							Log.e(TAG, "close ResultSet failed in executeAppJoin", e);
 						}
 					}
 				}
@@ -1125,7 +1125,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 				br.close();
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				Log.e(TAG, "close BufferedReader failed", e);
 			}
 		}
 
@@ -1194,7 +1194,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 				return true;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Log.e(TAG, "isJsonColumn failed", e);
 		}
 		//		List<String> json = config.getJson();
 		//		return json != null && json.contains(label);
@@ -1357,7 +1357,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					}
 				}
 				catch (SQLException e) {
-					e.printStackTrace();
+					Log.e(TAG, "setAutoCommit failed in rollback", e);
 				}
 			}
 		}
@@ -1384,7 +1384,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					}
 				}
 				catch (SQLException e) {
-					e.printStackTrace();
+					Log.e(TAG, "rollback failed", e);
 				}
 			}
 		}
@@ -1416,7 +1416,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					}
 				}
 				catch (SQLException e) {
-					e.printStackTrace();
+					Log.e(TAG, "rollback with savepoint failed", e);
 				}
 			}
 		}
@@ -1442,7 +1442,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					}
 				}
 				catch (SQLException e) {
-					e.printStackTrace();
+					Log.e(TAG, "commit failed", e);
 				}
 			}
 		}
@@ -1473,7 +1473,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 					}
 				}
 				catch (SQLException e) {
-					e.printStackTrace();
+					Log.e(TAG, "close connection failed", e);
 				}
 			}
 		}
