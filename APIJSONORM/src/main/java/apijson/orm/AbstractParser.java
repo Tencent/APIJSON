@@ -590,7 +590,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			onCommit();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			Log.e(TAG, "onObjectParse failed", e);
 			error = e;
 
 			onRollback();
@@ -1022,9 +1022,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 	 */
 	public M newErrorResult(Exception e, boolean isRoot) {
 		if (e != null) {
-		  	//      if (Log.DEBUG) {
-		  	e.printStackTrace();
-		  	//      }
+		  	Log.e(TAG, "newErrorResult", e);
 
 		  	String msg = CommonException.getMsg(e);
 			int code = CommonException.getCode(e);
@@ -1921,7 +1919,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				v = getFromObjOrArr(v, k);
 			} catch (Throwable e) {
 				if (IS_PRINT_BIG_LOG) {
-					e.printStackTrace();
+					Log.e(TAG, "getFromObjOrArr failed", e);
 				}
 				v = null;
 			}
@@ -2230,7 +2228,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			commit();
 		}
 		catch (SQLException e) {
-			e.printStackTrace();
+			Log.e(TAG, "onCommit failed", e);
 		}
 	}
 	/**回滚事务
@@ -2245,12 +2243,12 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			rollback();
 		}
 		catch (SQLException e1) {
-			e1.printStackTrace();
+			Log.e(TAG, "onRollback failed", e1);
 			try {
 				rollback(null);
 			}
 			catch (SQLException e2) {
-				e2.printStackTrace();
+				Log.e(TAG, "onRollback with null failed", e2);
 			}
 		}
 	}
@@ -2517,7 +2515,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 					correctRequest.put(key, obj);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(TAG, "parseCorrectRequest failed", e);
 				throw new Exception(e); // 包装一层只是为了打印日志？看起来没必要
 			}
 		}
