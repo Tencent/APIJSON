@@ -7,14 +7,21 @@ package apijson;
 
 import java.text.SimpleDateFormat;
 
-/**测试用Log
+/**测试用日志
  * @modifier Lemon
  */
 public class Log {
+	public static boolean DEBUG = false;
 
-	public static boolean DEBUG = true;
+	public static final String LEVEL_VERBOSE = "VERBOSE";
+	public static final String LEVEL_INFO = "INFO";
+	public static final String LEVEL_DEBUG = "DEBUG";
+	public static final String LEVEL_WARN = "WARN";
+	public static final String LEVEL_ERROR = "ERROR";
 
-	public static final String VERSION = "8.1.3";
+	public static String LEVEL = LEVEL_WARN;
+
+	public static final String VERSION = "8.1.5";
 	public static final String KEY_SYSTEM_INFO_DIVIDER = "\n---|-----APIJSON SYSTEM INFO-----|---\n";
 
 	public static final String OS_NAME;
@@ -46,15 +53,18 @@ public class Log {
 	 * @param msg
 	 * @param level
 	 */
-	public static void logInfo(String TAG, String msg, String level){
-	    if(level.equals("DEBUG") || level .equals("ERROR") ||level.equals("WARN")){
-			System.err.println(DATE_FORMAT.format(System.currentTimeMillis()) + ": " + TAG + "." + level + ": " + msg);
+	public static void logInfo(String TAG, String msg, String level) {
+		if (level == null || level.isEmpty()) {
+			level = LEVEL;
 		}
-	    else if(level.equals("VERBOSE") || level .equals("INFO") ){
+
+		if (level.equals(LEVEL_VERBOSE) || level.equals(LEVEL_INFO)) {
 			System.out.println(DATE_FORMAT.format(System.currentTimeMillis()) + ": " + TAG + "." + level + ": " + msg);
 		}
+		else if (level.equals(LEVEL_DEBUG) || level.equals(LEVEL_ERROR) || level.equals(LEVEL_WARN)) {
+			System.err.println(DATE_FORMAT.format(System.currentTimeMillis()) + ": " + TAG + "." + level + ": " + msg);
+		}
 	}
-
 
 	/**
 	 * @param TAG
@@ -62,7 +72,7 @@ public class Log {
 	 */
 	public static void d(String TAG, String msg) {
 		if (DEBUG) {
-			logInfo(TAG,msg,"DEBUG");
+			logInfo(TAG, msg, LEVEL_DEBUG);
 		}
 	}
 
@@ -72,7 +82,7 @@ public class Log {
 	 * @param msg debug messages
 	 */
 	public static void fd(String TAG, String msg) {
-		logInfo(TAG,msg,"DEBUG");
+		logInfo(TAG, msg, LEVEL_DEBUG);
 	}
 
 	/**
@@ -81,8 +91,8 @@ public class Log {
 	 * @param symbol used for generating separation line
 	 * @param post postfix
 	 */
-	public static void sl(String pre,char symbol ,String post) {
-		System.err.println(pre+new String(new char[48]).replace('\u0000', symbol)+post);
+	public static void sl(String pre, char symbol, String post) {
+		System.err.println(pre + new String(new char[48]).replace('\u0000', symbol) + post);
 	}
 
 	/**
@@ -91,7 +101,7 @@ public class Log {
 	 */
 	public static void v(String TAG, String msg) {
 		if (DEBUG) {
-			logInfo(TAG,msg,"VERBOSE");
+			logInfo(TAG, msg, LEVEL_VERBOSE);
 		}
 	}
 
@@ -101,7 +111,7 @@ public class Log {
 	 */
 	public static void i(String TAG, String msg) {
 		if (DEBUG) {
-			logInfo(TAG,msg,"INFO");
+			logInfo(TAG, msg, LEVEL_INFO);
 		}
 	}
 
@@ -111,7 +121,20 @@ public class Log {
 	 */
 	public static void e(String TAG, String msg) {
 		if (DEBUG) {
-			logInfo(TAG,msg,"ERROR");
+			logInfo(TAG, msg, LEVEL_ERROR);
+		}
+	}
+
+	/**
+	 * @param TAG
+	 * @param msg
+	 */
+	public static void e(String TAG, String msg, Throwable e) {
+		if (DEBUG) {
+			if (e != null) {
+				e.printStackTrace();
+			}
+			logInfo(TAG, msg, LEVEL_ERROR);
 		}
 	}
 
@@ -121,7 +144,7 @@ public class Log {
 	 */
 	public static void w(String TAG, String msg) {
 		if (DEBUG) {
-			logInfo(TAG,msg,"WARN");
+			logInfo(TAG, msg, LEVEL_WARN);
 		}
 	}
 
