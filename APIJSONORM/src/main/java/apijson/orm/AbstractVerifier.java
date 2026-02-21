@@ -14,18 +14,7 @@ import static apijson.RequestMethod.HEAD;
 import static apijson.RequestMethod.HEADS;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
-import static apijson.orm.Operation.ALLOW_PARTIAL_UPDATE_FAIL;
-import static apijson.orm.Operation.EXIST;
-import static apijson.orm.Operation.INSERT;
-import static apijson.orm.Operation.MUST;
-import static apijson.orm.Operation.REFUSE;
-import static apijson.orm.Operation.REMOVE;
-import static apijson.orm.Operation.REPLACE;
-import static apijson.orm.Operation.TYPE;
-import static apijson.orm.Operation.UNIQUE;
-import static apijson.orm.Operation.UPDATE;
-import static apijson.orm.Operation.VERIFY;
-import static apijson.orm.Operation.IF;
+import static apijson.orm.Operation.*;
 //import static apijson.orm.Operation.CODE;
 
 import java.net.URL;
@@ -225,11 +214,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 	@Override
 	public String getIdKey(String database, String schema, String datasource, String table) {
-		return JSONMap.KEY_ID;
+		return KEY_ID;
 	}
 	@Override
 	public String getUserIdKey(String database, String schema, String datasource, String table) {
-		return JSONMap.KEY_USER_ID;
+		return KEY_USER_ID;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -384,13 +373,13 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			Collection<Object> requestIdArray = (Collection<Object>) config.getWhere(visitorIdKey + "{}", true); // 不能是 &{}， |{} 不要传，直接 {}
 			if (requestId != null) {
 				if (requestIdArray == null) {
-					requestIdArray = JSON.createJSONArray();
+					requestIdArray = createJSONArray();
 				}
 				requestIdArray.add(requestId);
 			}
 
 			if (requestIdArray == null) { // 可能是 @ 得到 || requestIdArray.isEmpty()) { // 请求未声明 key:id 或 key{}:[...] 条件，自动补全
-				config.putWhere(visitorIdKey+"{}", JSON.parseArray(list), true); // key{}:[] 有效，SQLConfig<T, M, L> 里 throw NotExistException
+				config.putWhere(visitorIdKey+"{}", parseArray(list), true); // key{}:[] 有效，SQLConfig<T, M, L> 里 throw NotExistException
 			}
 			else { // 请求已声明 key:id 或 key{}:[] 条件，直接验证
 				for (Object id : requestIdArray) {
@@ -417,7 +406,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 			break;
 		case OWNER:
-			if (config.getMethod() == RequestMethod.POST) {
+			if (config.getMethod() == POST) {
 				List<String> c = config.getColumn();
 				List<List<Object>> ovs = config.getValues();
 				if ( (c == null || c.isEmpty()) || (ovs == null || ovs.isEmpty()) ) {
@@ -533,17 +522,17 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			throw new UnsupportedDataTypeException(key + ":value 中value的类型不能为JSON！");
 		}
 
-		M tblObj = JSON.createJSONObject();
+		M tblObj = createJSONObject();
 		tblObj.put(key, value);
 		if (exceptId > 0) {//允许修改自己的属性为该属性原来的值
-			tblObj.put(JSONMap.KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
+			tblObj.put(KEY_ID + "!", exceptId);  // FIXME 这里 id 写死了，不支持自定义
 		}
 
-		M req = JSON.createJSONObject();
+		M req = createJSONObject();
 		req.put(table, tblObj);
 		Map<String, Object> repeat = createParser().setMethod(HEAD).setNeedVerify(true).parseResponse(req);
 
-		repeat = repeat == null ? null : JSON.get(repeat, table);
+		repeat = repeat == null ? null : get(repeat, table);
 		if (repeat == null) {
 			throw new Exception("服务器内部错误  verifyRepeat  repeat == null");
 		}
@@ -647,8 +636,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 
 		Log.i(TAG, "verifyRequest  method = " + method  + "; name = " + name
-				+ "; target = \n" + JSON.toJSONString(target)
-				+ "\n request = \n" + JSON.toJSONString(request));
+				+ "; target = \n" + toJSONString(target)
+				+ "\n request = \n" + toJSONString(request));
 
 		if (target == null || request == null) {// || request.isEmpty()) {
 			Log.i(TAG, "verifyRequest  target == null || request == null >> return null;");
@@ -673,10 +662,10 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					if (tobj != null) {//不允许不传Target中指定的Table
 						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":{} ！");
 					}
-				} else if (JSONMap.isTableKey(key)) {
-					String db = getString(request, JSONMap.KEY_DATABASE);
-					String sh = getString(request, JSONMap.KEY_SCHEMA);
-					String ds = getString(request, JSONMap.KEY_DATASOURCE);
+				} else if (isTableKey(key)) {
+					String db = getString(request, KEY_DATABASE);
+					String sh = getString(request, KEY_SCHEMA);
+					String ds = getString(request, KEY_DATASOURCE);
 					if (StringUtil.isEmpty(db, false)) {
 						db = database;
 					}
@@ -688,9 +677,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 
 					String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, key);
-					String finalIdKey = StringUtil.isEmpty(idKey, false) ? JSONMap.KEY_ID : idKey;
+					String finalIdKey = StringUtil.isEmpty(idKey, false) ? KEY_ID : idKey;
 
-					if (method == RequestMethod.POST) {
+					if (method == POST) {
 						if (robj.containsKey(finalIdKey)) {
 							throw new IllegalArgumentException(method + "请求，" + name + "/" + key + " 不能传 " + finalIdKey + " ！");
 						}
@@ -700,7 +689,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, atLeastOne != null ? atLeastOne : IS_UPDATE_MUST_HAVE_ID_CONDITION);
 
 							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, ds, key);
-							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? JSONMap.KEY_USER_ID : userIdKey;
+							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? KEY_USER_ID : userIdKey;
 							verifyId(method.name(), name, key, robj, finalUserIdKey, maxUpdateCount, false);
 						}
 					}
@@ -711,7 +700,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 			@Override
 			protected L onParseJSONArray(String key, L tarray, L rarray) throws Exception {
-				if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONMap.isArrayKey(key)) {
+				if ((method == POST || method == PUT) && isArrayKey(key)) {
 					if (rarray == null || rarray.isEmpty()) {
 						throw new IllegalArgumentException(method + "请求，请在 " + name + " 内传 " + key + ":[{ ... }] "
 								+ "，批量新增 Table[]:value 中 value 必须是包含表对象的非空数组！其中每个子项 { ... } 都是"
@@ -753,7 +742,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		String idRefInKey = getString(robj, idKey + "{}@");
 		L idIn = null;
 		try {
-			idIn = JSON.get(robj, idInKey); //如果必须传 id{} ，可在Request表中配置NECESSARY
+			idIn = get(robj, idInKey); //如果必须传 id{} ，可在Request表中配置NECESSARY
 		} catch (Exception e) {
 			throw new IllegalArgumentException(method + "请求，" + name + "/" + key
 					+ " 里面的 " + idInKey + ":value 中value的类型只能是 [Long] ！");
@@ -850,8 +839,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			, final IdCallback<T> idKeyCallback, @NotNull Parser<T, M, L> parser, OnParseCallback<T, M, L> callback) throws Exception {
 
 		Log.i(TAG, "verifyResponse  method = " + method  + "; name = " + name
-				+ "; target = \n" + JSON.toJSONString(target)
-				+ "\n response = \n" + JSON.toJSONString(response));
+				+ "; target = \n" + toJSONString(target)
+				+ "\n response = \n" + toJSONString(response));
 
 		if (target == null || response == null) {// || target.isEmpty() {
 			Log.i(TAG, "verifyResponse  target == null || response == null >> return response;");
@@ -933,11 +922,11 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 
 		// 获取配置<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		M type = JSON.get(target, TYPE.name());
-		M verify = JSON.get(target, VERIFY.name());
-		M insert = JSON.get(target, INSERT.name());
-		M update = JSON.get(target, UPDATE.name());
-		M replace = JSON.get(target, REPLACE.name());
+		M type = get(target, TYPE.name());
+		M verify = get(target, VERIFY.name());
+		M insert = get(target, INSERT.name());
+		M update = get(target, UPDATE.name());
+		M replace = get(target, REPLACE.name());
 
 		String exist = StringUtil.get(getString(target, EXIST.name()));
 		String unique = StringUtil.get(getString(target, UNIQUE.name()));
@@ -973,7 +962,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		// 判断必要字段是否都有>>>>>>>>>>>>>>>>>>>
 
 		String[] sks = StringUtil.split(getString(real, KEY_STRING));
+		String[] trims = StringUtil.split(getString(real, KEY_TRIM));
 		List<String> stringKeyList = sks == null || sks.length <= 0 ? null : Arrays.asList(sks);
+		List<String> trimKeyList = trims == null || trims.length <= 0 ? null : Arrays.asList(trims);
 
 		Set<String> objKeySet = new HashSet<String>(); // 不能用tableKeySet，仅判断 Table:{} 会导致 key:{ Table:{} } 绕过判断
 
@@ -990,7 +981,10 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
                 Object tvalue = entry.getValue();
                 Object rvalue = real.get(key);
 				if (rvalue != null && stringKeyList != null && stringKeyList.contains(key)) {
-					rvalue = JSON.toJSONString(rvalue);
+					rvalue = toJSONString(rvalue);
+				}
+				if (rvalue != null && trimKeyList != null && trimKeyList.contains(key)) {
+					rvalue = StringUtil.trim(rvalue);
 				}
 
 				if (callback.onParse(key, tvalue, rvalue) == false) {
@@ -1010,7 +1004,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 					tvalue = callback.onParseJSONArray(key, (L) tvalue, (L) rvalue);
 
-					if ((method == RequestMethod.POST || method == RequestMethod.PUT) && JSONMap.isArrayKey(key)) {
+					if ((method == POST || method == PUT) && isArrayKey(key)) {
 						objKeySet.add(key);
 					}
 				} else { // 其它Object
@@ -1093,7 +1087,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		// 判断不允许传的key<<<<<<<<<<<<<<<<<<<<<<<<<
 		for (String rk : rkset) {
-			if (rk == null || KEY_STRING.equals(rk)) {
+			if (rk == null || KEY_STRING.equals(rk) || KEY_TRIM.equals(rk)) {
 				// ConcurrentModificationException  real.remove(rk);
 				continue;
 			}
@@ -1114,7 +1108,10 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 			Object rv = real.get(rk);
 			if (rv != null && stringKeyList != null && stringKeyList.contains(rk)) {
-				rv = JSON.toJSONString(rv);
+				rv = toJSONString(rv);
+			}
+			if (rv != null && trimKeyList != null && trimKeyList.contains(rk)) {
+				rv = StringUtil.trim(rv);
 			}
 
 			// 不允许传远程函数，只能后端配置
@@ -1129,8 +1126,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					throw new UnsupportedOperationException(method + " 请求，"
                             + name + " 里面不允许传 " + rk + ":{} ！");
 				}
-				if ((method == RequestMethod.POST || method == RequestMethod.PUT)
-                        && rv instanceof List<?> && JSONMap.isArrayKey(rk)) {
+				if ((method == POST || method == PUT)
+                        && rv instanceof List<?> && isArrayKey(rk)) {
 					throw new UnsupportedOperationException(method + " 请求，" + name + " 里面不允许 "
                             + rk + ":[] 等未定义的 Table[]:[{}] 批量操作键值对！");
 				}
@@ -1155,9 +1152,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		// 校验与修改Request>>>>>>>>>>>>>>>>>
 
 
-		String db = getString(real, JSONMap.KEY_DATABASE);
-		String sh = getString(real, JSONMap.KEY_SCHEMA);
-		String ds = getString(real, JSONMap.KEY_DATASOURCE);
+		String db = getString(real, KEY_DATABASE);
+		String sh = getString(real, KEY_SCHEMA);
+		String ds = getString(real, KEY_DATASOURCE);
 		if (StringUtil.isEmpty(db, false)) {
 			db = database;
 		}
@@ -1168,7 +1165,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			ds = datasource;
 		}
 		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, name);
-		String finalIdKey = StringUtil.isEmpty(idKey, false) ? JSONMap.KEY_ID : idKey;
+		String finalIdKey = StringUtil.isEmpty(idKey, false) ? KEY_ID : idKey;
 
 		// TODO 放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
 		// 校验存在<<<<<<<<<<<<<<<<<<<
@@ -1201,7 +1198,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		String[] partialFails = StringUtil.split(allowPartialUpdateFail);
 		if (partialFails != null && partialFails.length > 0) {
 			for (String key : partialFails) {
-                if (JSONMap.isArrayKey(key) == false) {
+                if (isArrayKey(key) == false) {
                     throw new IllegalArgumentException("后端 Request 表中 " + ALLOW_PARTIAL_UPDATE_FAIL.name()
                             + ":value 中 " + key + " 不合法！必须以 [] 结尾！");
                 }
@@ -1224,7 +1221,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		// 校验并配置允许部分批量增删改失败>>>>>>>>>>>>>>>>>>>
 
 
-		String[] nks = ifObj == null ? null : StringUtil.split(getString(real, JSONMap.KEY_NULL));
+		String[] nks = ifObj == null ? null : StringUtil.split(getString(real, KEY_NULL));
 		Collection<?> nkl = nks == null || nks.length <= 0 ? new HashSet<>() : Arrays.asList(nks);
 
 		Set<Map.Entry<String, Object>> ifSet = ifObj == null ? null : ifObj.entrySet();
@@ -1234,7 +1231,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 //					, apijson.JSONMap.KEY_USER_ID, apijson.JSONMap.KEY_USER_ID_IN));
 //			condKeys.addAll(apijson.JSONMap.TABLE_KEY_LIST);
 
-			String preCode = "var curObj = " + JSON.toJSONString(real) + ";";
+			String preCode = "var curObj = " + toJSONString(real) + ";";
 
 			// 未传的 key 在后面 eval 时总是报错 undefined，而且可能有冲突，例如对象里有 "curObj": val 键值对，就会覆盖当前对象定义，还不如都是 curObj.sex 这样取值
 //			Set<Map.Entry<String, Object>> rset = real.entrySet();
@@ -1307,7 +1304,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 		}
 
-		Log.i(TAG, "parse  return real = " + JSON.toJSONString(real));
+		Log.i(TAG, "parse  return real = " + toJSONString(real));
 		return real;
 	}
 
@@ -1722,7 +1719,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			throw new IllegalArgumentException(rk + ":value 中value不合法！value 中不允许有单引号 ' ！");
 		}
 
-		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(RequestMethod.GET).setCount(1).setPage(0);
+		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(GET).setCount(1).setPage(0);
 		config.setTest(true);
 		//		config.setTable(Test.class.getSimpleName());
 		//		config.setColumn(rv + logic.getChar() + funChar)
@@ -1777,7 +1774,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			return;
 		}
 
-		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
+		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		param.forEach((key,value) -> config.putWhere(key, value, false));
 
@@ -1860,9 +1857,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			return;
 		}
 
-		String finalIdKey = StringUtil.isEmpty(idKey, false) ? JSONMap.KEY_ID : idKey;
+		String finalIdKey = StringUtil.isEmpty(idKey, false) ? KEY_ID : idKey;
 
-		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(RequestMethod.HEAD).setCount(1).setPage(0);
+		SQLConfig<T, M, L> config = parser.createSQLConfig().setMethod(HEAD).setCount(1).setPage(0);
 		config.setTable(table);
 		if (exceptId > 0) { //允许修改自己的属性为该属性原来的值
 			config.putWhere(finalIdKey + "!", exceptId, false);

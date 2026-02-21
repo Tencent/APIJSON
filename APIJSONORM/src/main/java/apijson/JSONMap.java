@@ -194,6 +194,7 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 	String KEY_RAW = "@raw"; // 自定义原始 SQL 片段
 	String KEY_JSON = "@json"; // 把字段转为 JSON 输出
 	String KEY_STRING = "@string"; // 把字段转为 String 输入
+	String KEY_TRIM = "@trim"; // 去除首位空格等空白字符
 	String KEY_METHOD = "@method"; // json 对象配置操作方法
 	String KEY_GET = "@get"; // json 对象配置操作方法
 	String KEY_GETS = "@gets"; // json 对象配置操作方法
@@ -229,6 +230,7 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 			KEY_RAW,
 			KEY_JSON,
 			KEY_STRING,
+			KEY_TRIM,
 			KEY_METHOD,
 			KEY_GET,
 			KEY_GETS,
@@ -546,6 +548,14 @@ public interface JSONMap<M extends Map<String, Object>, L extends List<Object>> 
 	 */
 	default JSONMap<M, L> setString(String keys) {
 		return puts(KEY_STRING, keys);
+	}
+
+	/**set keys to cast to string
+	 * @param keys  "key0,key1,key2..."
+	 * @return
+	 */
+	default JSONMap<M, L> setTrim(String keys) {
+		return puts(KEY_TRIM, keys);
 	}
 
 	//JSONObject内关键词 key >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

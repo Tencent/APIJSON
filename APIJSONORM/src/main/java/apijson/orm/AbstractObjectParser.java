@@ -62,6 +62,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 	 */
 	protected final boolean drop;
 	private List<String> stringKeyList;
+	private List<String> trimKeyList;
 
 	/**for single object
 	 */
@@ -109,6 +110,11 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 			String[] sks = StringUtil.split(str);
 			stringKeyList = sks == null || sks.length <= 0 ? null : Arrays.asList(sks);
 			request.remove(KEY_STRING);
+
+			String trim = getString(request, KEY_TRIM);
+			String[] trims = StringUtil.split(trim);
+			trimKeyList = trims == null || trims.length <= 0 ? null : Arrays.asList(trims);
+			request.remove(KEY_TRIM);
 		}
     }
 
@@ -286,13 +292,16 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
                             //     hasOtherKeyNotFun = true;
                             // }
 
-							if (stringKeyList != null && stringKeyList.contains(key)) {
-								// 统一格式 String val = value == null || value instanceof String ? (String) value : JSON.toJSONString(value);
-								if (onParse(key, JSON.toJSONString(value)) == false) {
-									invalidate();
-								}
+							boolean isTrim = (trimKeyList != null && trimKeyList.contains(key));
+							boolean toStr = isTrim || (stringKeyList != null && stringKeyList.contains(key));
+							if (toStr) {
+								value = JSON.toJSONString(value);
 							}
-							else if (startsWithAt || key.endsWith("@") || (key.endsWith("<>") && value instanceof Map<?, ?>)) {
+							if (isTrim && value != null) {
+								value = StringUtil.trim(value);
+							}
+
+							if (startsWithAt || key.endsWith("@") || (key.endsWith("<>") && value instanceof Map<?, ?>)) {
 								if (onParse(key, value) == false) {
 									invalidate();
 								}
@@ -1241,6 +1250,9 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		}
 		if (stringKeyList != null) { // 避免被全局关键词覆盖 && ! stringKeyList.isEmpty()) {
 			request.put(KEY_STRING, StringUtil.get(stringKeyList.toArray()));
+		}
+		if (trimKeyList != null) { // 避免被全局关键词覆盖 && ! trimKeyList.isEmpty()) {
+			request.put(KEY_TRIM, StringUtil.get(trimKeyList.toArray()));
 		}
 
 		method = null;
