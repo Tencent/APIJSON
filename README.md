@@ -344,7 +344,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 </div>
 <br />
 	
-Authors of other projects for ecosystem of APIJSON(2 Tencent engineers, 1 BAT(Baidu/Alibaba/Tencent) specialist, 1 Microsoft engineer, 2 Bytedance(TikTok) engineers,  1 Digital China engineer & Apache dubbo2js author, etc.): <br />
+Authors of other projects for ecosystem of APIJSON(2 Tencent engineers, 1 BAT(Baidu/Alibaba/Tencent) expert, 1 Microsoft engineer, 2 Bytedance(TikTok) engineers,  1 Digital China engineer & Apache dubbo2js author, etc.): <br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <div style="float:left">
