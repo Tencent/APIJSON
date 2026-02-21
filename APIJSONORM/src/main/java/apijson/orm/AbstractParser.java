@@ -2516,7 +2516,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "parseCorrectRequest failed", e);
-				throw new Exception(e); // 包装一层只是为了打印日志？看起来没必要
+				throw e;
 			}
 		}
 

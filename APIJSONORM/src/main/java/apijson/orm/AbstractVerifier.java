@@ -1331,7 +1331,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @return
 	 * @throws Exception
 	 */
-	private static <T, M extends Map<String, Object>, L extends List<Object>> M operate(Operation opt, M targetChild
+	public static <T, M extends Map<String, Object>, L extends List<Object>> M operate(Operation opt, M targetChild
             , M real, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (targetChild == null) {
 			return real;
@@ -1522,7 +1522,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param parser
 	 * @throws Exception
 	 */
-	private static <T, M extends Map<String, Object>, L extends List<Object>> void verifyValue(@NotNull String tk
+	public static <T, M extends Map<String, Object>, L extends List<Object>> void verifyValue(@NotNull String tk
 			, @NotNull Object tv, @NotNull M real, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (tv == null) {
 			throw new IllegalArgumentException("operate  operate == VERIFY " + tk + ":" + tv + " ,  >> tv == null!!!");
@@ -1576,7 +1576,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			}
 		}
 		else if (tk.endsWith("{}")) { //rv符合tv条件或在tv内
-			if (tv instanceof String) {//TODO  >= 0, < 10
+			if (tv instanceof String) { //TODO  >= 0, < 10
 				verifyCondition("{}", real, tk, tv, parser);
 			}
 			else if (tv instanceof List<?>) {
@@ -1589,26 +1589,6 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 				if (((L) tv).contains(rv) == logic.isNot()) {
 					throw new IllegalArgumentException(rk + ":value 中value不合法！必须匹配 " + tk + ":" + tv + " !");
-				}
-			}
-			else {
-				throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
-			}
-		}
-		else if (tk.endsWith("{L}")) { //字符串长度
-			if (tv instanceof String) {
-				logic = new Logic(tk.substring(0, tk.length() - 3));
-
-				rk = logic.getKey();
-				rv = real.get(rk);
-				if (rv == null) {
-					return;
-				}
-				String[] tvs = tv.toString().split(",");
-				for (String tvItem : tvs) {
-					if (!verifyRV(tvItem,rv.toString())) {
-						throw new IllegalArgumentException(rk + ":value 中value长度不合法！必须匹配 " + tk + ":" + tv + " !");
-					}
 				}
 			}
 			else {
@@ -1655,41 +1635,39 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 	}
 
-	/**
-	 * 校验字符串长度
-	 *
+	/**校验字符串长度
 	 * @param rule	规则
-	 * @param content	内容
+	 * @param len	长度
 	 * @return
 	 * @throws UnsupportedDataTypeException
 	 */
-	private static boolean verifyRV(String rule,String content) throws UnsupportedDataTypeException {
+	public static boolean verifyLength(String rule, int len) throws UnsupportedDataTypeException {
 		String first = null;
 		String second = null;
 		Matcher matcher = VERIFY_LENGTH_PATTERN.matcher(rule);
 		while (matcher.find()) {
-			first = StringUtil.isEmpty(first)?matcher.group("first"):first;
-			second = StringUtil.isEmpty(second)?matcher.group("second"):second;
+			first = StringUtil.isEmpty(first) ? matcher.group("first") : first;
+			second = StringUtil.isEmpty(second) ? matcher.group("second") : second;
 		}
 		// first和second为空表示规则不合法
-		if(StringUtil.isEmpty(first) || StringUtil.isEmpty(second)){
+		if (StringUtil.isEmpty(first) || StringUtil.isEmpty(second)) {
 			throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
 		}
 
 		int secondNum = Integer.parseInt(second);
-		switch (Objects.requireNonNull(first)){
+		switch (Objects.requireNonNull(first)) {
 			case ">":
-				return content.length() > secondNum;
+				return len > secondNum;
 			case ">=":
-				return content.length() >= secondNum;
+				return len >= secondNum;
 			case "<":
-				return content.length() < secondNum;
+				return len < secondNum;
 			case "<=":
-				return content.length() <= secondNum;
+				return len <= secondNum;
 			case "<>":
-				return content.length() != secondNum;
-			default:
+				return len != secondNum;
 		}
+
 		// 出现不能识别的符号也认为规则不合法
 		throw new UnsupportedDataTypeException("服务器Request表verify配置错误！");
 	}
@@ -1702,13 +1680,40 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param parser
 	 * @throws Exception
 	 */
-	private static <T, M extends Map<String, Object>, L extends List<Object>> void verifyCondition(
+	public static <T, M extends Map<String, Object>, L extends List<Object>> void verifyCondition(
 			@NotNull String funChar, @NotNull M real, @NotNull String tk, @NotNull Object tv
 			, @NotNull Parser<T, M, L> parser) throws Exception {
-		//不能用Parser, 0 这种不符合 StringUtil.isName !
-		Logic logic = new Logic(tk.substring(0, tk.length() - funChar.length()));
+		// 不能用Parser, 0 这种不符合 StringUtil.isName !
+
+		boolean isRange = "{}".equals(funChar);
+
+		String k = tk.substring(0, tk.length() - funChar.length());
+		Logic logic = new Logic(k);
 		String rk = logic.getKey();
-		Object rv = real.get(rk);
+		boolean isLen = isRange && k.endsWith("[");
+		boolean isJSOnLen = isRange && k.endsWith("{");
+		k = isLen || isJSOnLen ? rk.substring(0, rk.length() - 1) : rk;
+		Object rv = real.get(k);
+		int len = 0;
+		if (isLen) {
+			len = StringUtil.length(rv, false);
+		}
+		else if (isJSOnLen) {
+			rv = rv instanceof Map ? ((Map<?, ?>) rv) : (rv instanceof Collection ? ((Collection<?>) rv) : JSON.parse(rv));
+			len = rv instanceof Map ? ((Map<?, ?>) rv).size() : (rv instanceof Collection ? ((Collection<?>) rv).size() : StringUtil.length(rv, false));
+		}
+
+		if (isLen || isJSOnLen) {
+			String[] tvs = tv.toString().split(",");
+			for (String tvItem : tvs) {
+				if (! verifyLength(tvItem, len)) {
+					throw new IllegalArgumentException(k + ":value 中value长度不合法！必须匹配 " + tk + ":" + tv + " !");
+				}
+			}
+
+			return;
+		}
+
 		if (rv == null) {
 			return;
 		}
