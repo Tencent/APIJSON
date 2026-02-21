@@ -1653,16 +1653,18 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 		int secondNum = Integer.parseInt(second);
 		switch (Objects.requireNonNull(first)) {
-			case ">":
-				return len > secondNum;
 			case ">=":
 				return len >= secondNum;
-			case "<":
-				return len < secondNum;
 			case "<=":
 				return len <= secondNum;
-			case "<>":
+			case "!=":
 				return len != secondNum;
+			case ">":
+				return len > secondNum;
+			case "<":
+				return len < secondNum;
+			case "=":
+				return len == secondNum;
 		}
 
 		// 出现不能识别的符号也认为规则不合法
