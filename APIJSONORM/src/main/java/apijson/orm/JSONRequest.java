@@ -8,6 +8,7 @@ package apijson.orm;
 import java.util.*;
 
 import apijson.JSON;
+import apijson.Log;
 import apijson.StringUtil;
 
 /**JSONRequest for Server to replace apijson.JSONMap,

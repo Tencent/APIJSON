@@ -19,6 +19,8 @@ import apijson.orm.AbstractFunctionParser;
  * JSR223 script engine的统一实现抽象类
  */
 public abstract class JSR223ScriptExecutor<T, M extends Map<String, Object>, L extends List<Object>> implements ScriptExecutor<T, M, L> {
+	private static final String TAG = "JSR223ScriptExecutor";
+
 	protected ScriptEngine scriptEngine;
 
 	private final Map<String, CompiledScript> compiledScriptMap = new ConcurrentHashMap<>();
