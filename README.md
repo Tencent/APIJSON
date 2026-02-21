@@ -7,7 +7,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 </h1>
 
 
-<p align="center">🏆 Real-Time coding-free, powerful and secure ORM 🚀 <br />providing APIs and Docs without coding by Backend, and the response JSON can be customized by Frontend(Client) users</p>
+<p align="center">🏆 Real-Time coding-free, powerful and secure ORM 🚀 <br />providing APIs and Docs without coding by Backend, and Frontend can customize response JSONs</p>
 
 <p align="center" >
   <a href="https://github.com/Tencent/APIJSON/blob/master/README-Chinese.md">&nbsp;中文版&nbsp;</a>
