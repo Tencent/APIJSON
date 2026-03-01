@@ -640,6 +640,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [腾讯开源的 APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
 
+[3分钟掌握APIJSON搜索黑科技：从模糊匹配到智能检索](https://blog.csdn.net/gitblog_00009/article/details/152403741)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
