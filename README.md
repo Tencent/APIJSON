@@ -227,7 +227,7 @@ See the latest release [here](https://github.com/Tencent/APIJSON/releases)
 ## <h2 id="6">6. Creator<h2/> 	
 	
 https://github.com/TommyLemon <br />
-<img width="960" height="676" alt="Screenshot 2026-02-15 at 17 16 46" src="https://github.com/user-attachments/assets/cef2bd45-b20d-469e-8781-1d647cf0477f" />
+![](https://github.com/user-attachments/assets/cef2bd45-b20d-469e-8781-1d647cf0477f)
 
 If you have any questions or suggestions, you can [create an issue](https://github.com/Tencent/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
 
