@@ -1,3 +1,5 @@
+## English | [中文](/blob/master/README-Chinese.md)
+
 #### A better online document is available at https://apijsondocs.readthedocs.io
 
 ### Examples:
