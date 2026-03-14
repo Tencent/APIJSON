@@ -1,4 +1,4 @@
-## 中文 | [English](https://github.com/Tencent/APIJSON/blob/master/Document-English.md)
+## 中文 | [English](https://github.com/Tencent/APIJSON/blob/master/Document.md)
 
 # APIJSON 通用文档 
 本文是通用文档，只和 APIJSON 协议有关，和 C#, Go, Java, JavaScript, PHP, Python, TypeScript 等开发语言无关。 <br />
