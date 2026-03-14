@@ -1,4 +1,4 @@
-## English | [中文](/blob/master/README-Chinese.md)
+## English | [中文](https://github.com/Tencent/APIJSON/blob/master/Document-Chinese.md)
 
 #### A better online document is available at https://apijsondocs.readthedocs.io
 
