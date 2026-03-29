@@ -356,7 +356,7 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 								Map<String, Object> having = config.getHaving();
 								int havingCount = having == null ? 0 : having.size();
 
-								double cap = capacity / Math.pow(1.5, Math.log10(capacity)
+								double cap = capacity / Math.pow(1.5, Math.log10(capacity)/8 // LIMIT 10^9 = 1 亿 以内无任何条件时 最多扩容 1 次
 										+ andCondCount
 										+ ((orCondCount <= 0 ? 0 : 2.0d/orCondCount)  // 1: 2.3, 2: 1.5, 3: 1.3, 4: 1.23, 5: 1.18
 										+ (notCondCount/5.0d)  // 1: 1.08, 2: 1.18, 3: 1.28, 4: 1.38, 1.50
