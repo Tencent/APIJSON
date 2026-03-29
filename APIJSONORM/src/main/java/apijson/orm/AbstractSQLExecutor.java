@@ -360,10 +360,10 @@ public abstract class AbstractSQLExecutor<T, M extends Map<String, Object>, L ex
 										+ andCondCount
 										+ ((orCondCount <= 0 ? 0 : 2.0d/orCondCount)  // 1: 2.3, 2: 1.5, 3: 1.3, 4: 1.23, 5: 1.18
 										+ (notCondCount/5.0d)  // 1: 1.08, 2: 1.18, 3: 1.28, 4: 1.38, 1.50
-										+ (groupCount <= 0 ? 0 : 10.0d/groupCount))  // 1: 57.7, 7.6, 3: 3.9, 4: 2.8, 5: 2.3
+										+ (groupCount <= 0 ? 0 : 10.0d/Math.min(5, groupCount)))  // 1: 57.7, 7.6, 3: 3.9, 4: 2.8, 5: 2.3
 										+ havingCount
 										);
-								cap = Math.max(MIN_OPTIMIZE_CAPACITY, Math.max(cap, capacity/Math.pow(1.5, 5))); // 1/(1.5^5) = 0.13
+								cap = groupCount > 0 ? cap : Math.max(MIN_OPTIMIZE_CAPACITY, Math.max(cap, capacity/Math.pow(1.5, 5))); // 1/(1.5^5) = 0.13
 								capacity = (int) (cap + 1);  // 避免正好比需要容量少一点点导致多一次扩容，大量数据 System.arrayCopy
 							}
 						}
