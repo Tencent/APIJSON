@@ -557,7 +557,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	@Override
 	public M verifyRequest(@NotNull RequestMethod method, String name, M target, M request, int maxUpdateCount
 			, String database, String datasource, String namespace, String catalog, String schema) throws Exception {
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, datasource, null, null, schema, this, getParser());
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, datasource, namespace, catalog, schema, this, getParser());
 	}
 
 	/**从request提取target指定的内容
