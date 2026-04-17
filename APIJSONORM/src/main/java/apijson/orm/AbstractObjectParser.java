@@ -720,7 +720,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 		if (apijson.JSON.isBoolOrNumOrStr(target)) {
 			throw new NullPointerException("PUT " + path + ", " + realKey + " 类型为 " + target.getClass().getSimpleName() + "，"
 					+ "不支持 Boolean, String, Number 等类型字段使用 'key+': [] 或 'key-': [] ！"
-					+ "对应字段在数据库的值必须为 L, JSONRequest 中的一种！"
+					+ "对应字段在数据库的值必须为 JSONArray, JSONObject 中的一种！"
 					+ "值为 JSONRequest 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
 			);
 		}
@@ -734,7 +734,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 			if (isAdd == false) {
 				throw new NullPointerException("PUT " + path + ", " + realKey + (target == null ? " 值为 null，不支持移除！"
 						: " 类型为 " + target.getClass().getSimpleName() + "，不支持这样移除！")
-						+ "对应字段在数据库的值必须为 L, JSONRequest 中的一种，且 key- 移除时，本身的值不能为 null！"
+						+ "对应字段在数据库的值必须为 JSONArray, JSONObject 中的一种，且 key- 移除时，本身的值不能为 null！"
 						+ "值为 JSONRequest 类型时传参必须是 'key+': [{'key': value, 'key2': value2}] 或 'key-': ['key', 'key2'] ！"
 				);
 			}

@@ -527,6 +527,28 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 		}
 
+		try {
+			setGlobalDatabase(getString(requestObject, KEY_DATABASE));
+			setGlobalDatasource(getString(requestObject, KEY_DATASOURCE));
+			setGlobalNamespace(getString(requestObject, KEY_NAMESPACE));
+			setGlobalCatalog(getString(requestObject, KEY_CATALOG));
+			setGlobalSchema(getString(requestObject, KEY_SCHEMA));
+
+			setGlobalExplain(getBoolean(requestObject, KEY_EXPLAIN));
+			setGlobalCache(getString(requestObject, KEY_CACHE));
+
+			requestObject.remove(KEY_DATABASE);
+			requestObject.remove(KEY_DATASOURCE);
+			requestObject.remove(KEY_NAMESPACE);
+			requestObject.remove(KEY_CATALOG);
+			requestObject.remove(KEY_SCHEMA);
+
+			requestObject.remove(KEY_EXPLAIN);
+			requestObject.remove(KEY_CACHE);
+		} catch (Exception e) {
+			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
+		}
+
 		verifier = createVerifier().setVisitor(getVisitor());
 
 		if (RequestMethod.isPublicMethod(requestMethod) == false) {
@@ -550,28 +572,6 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 			} catch (Exception e) {
 				return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 			}
-		}
-
-		try {
-			setGlobalDatabase(getString(requestObject, KEY_DATABASE));
-			setGlobalDatasource(getString(requestObject, KEY_DATASOURCE));
-			setGlobalNamespace(getString(requestObject, KEY_NAMESPACE));
-			setGlobalCatalog(getString(requestObject, KEY_CATALOG));
-			setGlobalSchema(getString(requestObject, KEY_SCHEMA));
-
-			setGlobalExplain(getBoolean(requestObject, KEY_EXPLAIN));
-			setGlobalCache(getString(requestObject, KEY_CACHE));
-
-			requestObject.remove(KEY_DATABASE);
-			requestObject.remove(KEY_DATASOURCE);
-			requestObject.remove(KEY_NAMESPACE);
-			requestObject.remove(KEY_CATALOG);
-			requestObject.remove(KEY_SCHEMA);
-
-			requestObject.remove(KEY_EXPLAIN);
-			requestObject.remove(KEY_CACHE);
-		} catch (Exception e) {
-			return extendErrorResult(requestObject, e, requestMethod, getRequestURL(), isRoot);
 		}
 
 		final String requestString = JSON.toJSONString(request);//request传进去解析后已经变了
