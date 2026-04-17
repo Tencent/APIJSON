@@ -5490,7 +5490,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		String catalog = getString(request, KEY_CATALOG);
 		String schema = getString(request, KEY_SCHEMA);
 
-		SQLConfig<T, M, L> config = (SQLConfig<T, M, L>) callback.getSQLConfig(method, database, schema, datasource, table);
+		SQLConfig<T, M, L> config = (SQLConfig<T, M, L>) callback.getSQLConfig(method, database, datasource, namespace, catalog, schema, table);
 		config.setAlias(alias);
 
 		config.setDatabase(database); // 不删，后面表对象还要用的，必须放在 parseJoin 前
@@ -5511,9 +5511,9 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 		// 对 id, id{}, userId, userId{} 处理，这些只要不为 null 就一定会作为 AND 条件 <<<<<<<<<<<<<<<<<<<<<<<<<
 
-		String idKey = callback.getIdKey(datasource, database, schema, table);
+		String idKey = callback.getIdKey(database, datasource, namespace, catalog, schema, table);
 		String idInKey = idKey + "{}";
-		String userIdKey = callback.getUserIdKey(datasource, database, schema, table);
+		String userIdKey = callback.getUserIdKey(database, datasource, namespace, catalog, schema, table);
 		String userIdInKey = userIdKey + "{}";
 
 		Object idIn = request.get(idInKey); // 可能是 id{}:">0"
@@ -5539,7 +5539,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 		Object id = request.get(idKey);
 		if (id == null && method == POST) {
-			id = callback.newId(method, database, schema, datasource, table); // null 表示数据库自增 id
+			id = callback.newId(method, database, datasource, namespace, catalog, schema, table); // null 表示数据库自增 id
 		}
 
 		if (id != null) { // null 无效
@@ -6532,44 +6532,59 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		/**为 post 请求新建 id， 只能是 Long 或 String
 		 * @param method
 		 * @param database
+		 * @param datasource
+		 * @param namespace
+		 * @param catalog
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		T newId(RequestMethod method, String database, String schema, String datasource, String table);
+		T newId(RequestMethod method, String database, String datasource, String namespace, String catalog, String schema, String table);
 
 
 		/**获取主键名
 		 * @param database
+		 * @param datasource
+		 * @param namespace
+		 * @param catalog
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		String getIdKey(String database, String schema, String datasource, String table);
+		String getIdKey(String database, String datasource, String namespace, String catalog, String schema, String table);
 
 		/**获取 User 的主键名
 		 * @param database
+		 * @param datasource
+		 * @param namespace
+		 * @param catalog
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		String getUserIdKey(String database, String schema, String datasource, String table);
+		String getUserIdKey(String database, String datasource, String namespace, String catalog, String schema, String table);
 	}
 
 	public static interface Callback<T, M extends Map<String, Object>, L extends List<Object>> extends IdCallback<T> {
 		/**获取 SQLConfig<T, M, L> 的实例
 		 * @param method
 		 * @param database
+		 * @param datasource
+		 * @param namespace
+		 * @param catalog
 		 * @param schema
 		 * @param table
 		 * @return
 		 */
-		SQLConfig<T, M, L> getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table);
+		SQLConfig<T, M, L> getSQLConfig(RequestMethod method, String database, String datasource, String namespace, String catalog, String schema, String table);
 
 		/**combine 里的 key 在 request 中 value 为 null 或不存在，即 request 中缺少用来作为 combine 条件的 key: value
-		 * @param combine
-		 * @param key
+		 * @param name
 		 * @param request
+		 * @param combine
+		 * @param item
+		 * @param key
+		 * @throws Exception
 		 */
 		void onMissingKey4Combine(String name, M request, String combine, String item, String key) throws Exception;
 	}
@@ -6583,7 +6598,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T newId(RequestMethod method, String database, String schema, String datasource, String table) {
+		public T newId(RequestMethod method, String database, String datasource, String namespace, String catalog, String schema, String table) {
 			Long id = System.currentTimeMillis();
 			if (id <= LAST_ID) {
 				id = LAST_ID + 1; // 解决高并发下 id 冲突导致新增记录失败
@@ -6594,12 +6609,12 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		}
 
 		@Override
-		public String getIdKey(String database, String schema, String datasource, String table) {
+		public String getIdKey(String database, String datasource, String namespace, String catalog, String schema, String table) {
 			return KEY_ID;
 		}
 
 		@Override
-		public String getUserIdKey(String database, String schema, String datasource, String table) {
+		public String getUserIdKey(String database, String datasource, String namespace, String catalog, String schema, String table) {
 			return KEY_USER_ID;
 		}
 

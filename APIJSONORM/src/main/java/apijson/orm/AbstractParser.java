@@ -1516,10 +1516,10 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		JOIN_COPY_KEY_LIST = new ArrayList<String>();
 		JOIN_COPY_KEY_LIST.add(KEY_ROLE);
 		JOIN_COPY_KEY_LIST.add(KEY_DATABASE);
+		JOIN_COPY_KEY_LIST.add(KEY_DATASOURCE);
 		JOIN_COPY_KEY_LIST.add(KEY_NAMESPACE);
 		JOIN_COPY_KEY_LIST.add(KEY_CATALOG);
 		JOIN_COPY_KEY_LIST.add(KEY_SCHEMA);
-		JOIN_COPY_KEY_LIST.add(KEY_DATASOURCE);
 		JOIN_COPY_KEY_LIST.add(KEY_COLUMN);
 		JOIN_COPY_KEY_LIST.add(KEY_NULL);
 		JOIN_COPY_KEY_LIST.add(KEY_CAST);
@@ -2382,9 +2382,11 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 								}
 
 								switch (objAttrKey) {
-									case KEY_DATASOURCE:
-									case KEY_SCHEMA:
 									case KEY_DATABASE:
+									case KEY_DATASOURCE:
+									case KEY_NAMESPACE:
+									case KEY_CATALOG:
+									case KEY_SCHEMA:
 									case KEY_VERSION:
 									case KEY_ROLE:
 										objAttrMap.put(objAttrKey, entry.getValue());
@@ -2432,17 +2434,21 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 							}
 						} else {
 							setRequestAttribute(key, true, KEY_METHOD, request);
-							setRequestAttribute(key, true, KEY_DATASOURCE, request);
-							setRequestAttribute(key, true, KEY_SCHEMA, request);
 							setRequestAttribute(key, true, KEY_DATABASE, request);
+							setRequestAttribute(key, true, KEY_DATASOURCE, request);
+							setRequestAttribute(key, true, KEY_NAMESPACE, request);
+							setRequestAttribute(key, true, KEY_CATALOG, request);
+							setRequestAttribute(key, true, KEY_SCHEMA, request);
 							setRequestAttribute(key, true, KEY_VERSION, request);
 							setRequestAttribute(key, true, KEY_ROLE, request);
 						}
 					} else {
 						setRequestAttribute(key, false, KEY_METHOD, request);
-						setRequestAttribute(key, false, KEY_DATASOURCE, request);
-						setRequestAttribute(key, false, KEY_SCHEMA, request);
 						setRequestAttribute(key, false, KEY_DATABASE, request);
+						setRequestAttribute(key, false, KEY_DATASOURCE, request);
+						setRequestAttribute(key, false, KEY_NAMESPACE, request);
+						setRequestAttribute(key, false, KEY_CATALOG, request);
+						setRequestAttribute(key, false, KEY_SCHEMA, request);
 						setRequestAttribute(key, false, KEY_VERSION, request);
 						setRequestAttribute(key, false, KEY_ROLE, request);
 					}
@@ -2569,7 +2575,9 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		// 获取指定的JSON结构 >>>>>>>>>>>>>>
 		M target = wrapRequest(method, tag, object, true);
 		// Map<String, Object> clone 浅拷贝没用，Structure.parse 会导致 structure 里面被清空，第二次从缓存里取到的就是 {}
-		return getVerifier().setParser(this).verifyRequest(method, name, target, request, maxUpdateCount, getGlobalDatabase(), getGlobalSchema());
+		return getVerifier().setParser(this).verifyRequest(method, name, target, request, maxUpdateCount
+				, getGlobalDatabase(), getGlobalDatasource(), getGlobalNamespace(), getGlobalCatalog(), getGlobalSchema()
+		);
 	}
 
 	/***

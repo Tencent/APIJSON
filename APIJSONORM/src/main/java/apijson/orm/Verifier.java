@@ -69,14 +69,17 @@ public interface Verifier<T, M extends Map<String, Object>, L extends List<Objec
 	 * @param target
 	 * @param request
 	 * @param maxUpdateCount
-	 * @param globalDatabase
-	 * @param globalSchema
-	 * @param creator
+	 * @param database
+	 * @param datasource
+	 * @param namespace
+	 * @param catalog
+	 * @param schema
 	 * @return
 	 * @throws Exception
 	 */
-	M verifyRequest(RequestMethod method, String name, M target, M request,
-			int maxUpdateCount, String globalDatabase, String globalSchema) throws Exception;
+	M verifyRequest(RequestMethod method, String name, M target, M request, int maxUpdateCount
+		, String database, String datasource, String namespace, String catalog, String schema
+	) throws Exception;
 
 	/**验证返回结果的数据和结构
 	 * @param method
@@ -85,7 +88,7 @@ public interface Verifier<T, M extends Map<String, Object>, L extends List<Objec
 	 * @param response
 	 * @param database
 	 * @param schema
-	 * @param creator
+	 * @param parser
 	 * @param callback
 	 * @return
 	 * @throws Exception

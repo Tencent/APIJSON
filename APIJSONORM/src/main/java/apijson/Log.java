@@ -21,7 +21,7 @@ public class Log {
 
 	public static String LEVEL = LEVEL_WARN;
 
-	public static final String VERSION = "8.1.5";
+	public static final String VERSION = "8.1.6";
 	public static final String KEY_SYSTEM_INFO_DIVIDER = "\n---|-----APIJSON SYSTEM INFO-----|---\n";
 
 	public static final String OS_NAME;

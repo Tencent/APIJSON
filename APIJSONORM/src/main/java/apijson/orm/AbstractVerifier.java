@@ -209,21 +209,21 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 	@Override
 	public String getVisitorIdKey(SQLConfig<T, M, L> config) {
-		return config == null ? getUserIdKey(null, null, null, null) : config.getUserIdKey();
+		return config == null ? getUserIdKey(null, null, null, null, null, null) : config.getUserIdKey();
 	}
 
 	@Override
-	public String getIdKey(String database, String schema, String datasource, String table) {
+	public String getIdKey(String database, String datasource, String namespace, String catalog, String schema, String table) {
 		return KEY_ID;
 	}
 	@Override
-	public String getUserIdKey(String database, String schema, String datasource, String table) {
+	public String getUserIdKey(String database, String datasource, String namespace, String catalog, String schema, String table) {
 		return KEY_USER_ID;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public T newId(RequestMethod method, String database, String schema, String datasource, String table) {
+	public T newId(RequestMethod method, String database, String datasource, String namespace, String catalog, String schema, String table) {
 		return (T) Long.valueOf(System.currentTimeMillis());
 	}
 
@@ -555,9 +555,9 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	* @throws Exception
 	*/
 	@Override
-	public M verifyRequest(@NotNull final RequestMethod method, final String name, final M target, final M request, final int maxUpdateCount
-			, final String database, final String schema) throws Exception {
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, this, getParser());
+	public M verifyRequest(@NotNull RequestMethod method, String name, M target, M request, int maxUpdateCount
+			, String database, String datasource, String namespace, String catalog, String schema) throws Exception {
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, datasource, null, null, schema, this, getParser());
 	}
 
 	/**从request提取target指定的内容
@@ -609,27 +609,32 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 			@NotNull RequestMethod method, String name, M target, M request, int maxUpdateCount, String database
 			, String schema, IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser) throws Exception {
 
-		return verifyRequest(method, name, target, request, maxUpdateCount, database, schema, null, idCallback, parser);
+		return verifyRequest(method, name, target, request, maxUpdateCount, database, null, null, null, schema, idCallback, parser);
 	}
 	/**从request提取target指定的内容
-	* @param method
-	* @param name
-	* @param target
-	* @param request
-	* @param maxUpdateCount
-	* @param database
-	* @param schema
-	* @param datasource
-	* @param idCallback
-	* @param parser
-	* @return
-	* @param <T>
-	* @throws Exception
-	*/
+	 * @param method
+	 * @param name
+	 * @param target
+	 * @param request
+	 * @param maxUpdateCount
+	 * @param database
+	 * @param datasource
+	 * @param namespace
+	 * @param catalog
+	 * @param schema
+	 * @param idCallback
+	 * @param parser
+	 * @return
+	 * @param <T>
+	 * @param <M>
+	 * @param <L>
+	 * @throws Exception
+	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M verifyRequest(
 			@NotNull final RequestMethod method, final String name, final M target, final M request
-            , final int maxUpdateCount, final String database, final String schema, final String datasource
-            , final IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser) throws Exception {
+            , final int maxUpdateCount, final String database, final String datasource, final String namespace
+			, final String catalog, final String schema, final IdCallback<T> idCallback
+			, @NotNull Parser<T, M, L> parser) throws Exception {
 		if (ENABLE_VERIFY_CONTENT == false) {
 			throw new UnsupportedOperationException("AbstractVerifier.ENABLE_VERIFY_CONTENT == false" +
                     " 时不支持校验请求传参内容！如需支持则设置 AbstractVerifier.ENABLE_VERIFY_CONTENT = true ！");
@@ -652,7 +657,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 
 		//解析
-		return parse(method, name, target, request, database, schema, idCallback, parser, new OnParseCallback<T, M, L>() {
+		return parse(method, name, target, request, database, datasource, namespace, catalog, schema, idCallback, parser, new OnParseCallback<T, M, L>() {
 
 			@Override
 			public M onParseJSONObject(String key, M tobj, M robj) throws Exception {
@@ -664,19 +669,27 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 				} else if (isTableKey(key)) {
 					String db = getString(request, KEY_DATABASE);
-					String sh = getString(request, KEY_SCHEMA);
 					String ds = getString(request, KEY_DATASOURCE);
+					String ns = getString(request, KEY_NAMESPACE);
+					String cl = getString(request, KEY_CATALOG);
+					String sh = getString(request, KEY_SCHEMA);
 					if (StringUtil.isEmpty(db, false)) {
 						db = database;
-					}
-					if (StringUtil.isEmpty(sh, false)) {
-						sh = schema;
 					}
 					if (StringUtil.isEmpty(ds, false)) {
 						ds = datasource;
 					}
+					if (StringUtil.isEmpty(ns, false)) {
+						ns = namespace;
+					}
+					if (StringUtil.isEmpty(cl, false)) {
+						cl = catalog;
+					}
+					if (StringUtil.isEmpty(sh, false)) {
+						sh = schema;
+					}
 
-					String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, key);
+					String idKey = idCallback == null ? null : idCallback.getIdKey(db, ds, ns, cl, sh, key);
 					String finalIdKey = StringUtil.isEmpty(idKey, false) ? KEY_ID : idKey;
 
 					if (method == POST) {
@@ -688,14 +701,14 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 						if (Boolean.TRUE.equals(atLeastOne) || RequestMethod.isUpdateMethod(method)) {
 							verifyId(method.name(), name, key, robj, finalIdKey, maxUpdateCount, atLeastOne != null ? atLeastOne : IS_UPDATE_MUST_HAVE_ID_CONDITION);
 
-							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, sh, ds, key);
+							String userIdKey = idCallback == null ? null : idCallback.getUserIdKey(db, ds, ns, cl, sh, key);
 							String finalUserIdKey = StringUtil.isEmpty(userIdKey, false) ? KEY_USER_ID : userIdKey;
 							verifyId(method.name(), name, key, robj, finalUserIdKey, maxUpdateCount, false);
 						}
 					}
 				}
 
-				return verifyRequest(method, key, tobj, robj, maxUpdateCount, database, schema, idCallback, parser);
+				return verifyRequest(method, key, tobj, robj, maxUpdateCount, database, datasource, namespace, catalog, schema, idCallback, parser);
 			}
 
 			@Override
@@ -888,7 +901,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(
 			@NotNull final RequestMethod method, String name, M target, M real, final String database, final String schema
             , final IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
-		return parse(method, name, target, real, database, schema, null, idCallback, parser, callback);
+		return parse(method, name, target, real, database, null, null, null, schema, idCallback, parser, callback);
 	}
 	/**对request和response不同的解析用callback返回
 	 * @param method
@@ -896,16 +909,21 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 	 * @param target
 	 * @param real
 	 * @param database
-	 * @param schema
 	 * @param datasource
+	 * @param namespace
+	 * @param catalog
+	 * @param schema
 	 * @param idCallback
 	 * @param parser
 	 * @param callback
 	 * @return
+	 * @param <T>
+	 * @param <M>
+	 * @param <L>
 	 * @throws Exception
 	 */
 	public static <T, M extends Map<String, Object>, L extends List<Object>> M parse(@NotNull final RequestMethod method
-			, String name, M target, M real, final String database, final String schema, final String datasource
+			, String name, M target, M real, String database, String datasource, String namespace, String catalog, String schema
             , final IdCallback<T> idCallback, @NotNull Parser<T, M, L> parser, @NotNull OnParseCallback<T, M, L> callback) throws Exception {
 		if (target == null) {
 			return null;
@@ -1153,18 +1171,26 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 
 
 		String db = getString(real, KEY_DATABASE);
-		String sh = getString(real, KEY_SCHEMA);
 		String ds = getString(real, KEY_DATASOURCE);
+		String ns = getString(real, KEY_NAMESPACE);
+		String cl = getString(real, KEY_CATALOG);
+		String sh = getString(real, KEY_SCHEMA);
 		if (StringUtil.isEmpty(db, false)) {
 			db = database;
-		}
-		if (StringUtil.isEmpty(sh, false)) {
-			sh = schema;
 		}
 		if (StringUtil.isEmpty(ds, false)) {
 			ds = datasource;
 		}
-		String idKey = idCallback == null ? null : idCallback.getIdKey(db, sh, ds, name);
+		if (StringUtil.isEmpty(ns, false)) {
+			ns = namespace;
+		}
+		if (StringUtil.isEmpty(cl, false)) {
+			cl = catalog;
+		}
+		if (StringUtil.isEmpty(sh, false)) {
+			sh = schema;
+		}
+		String idKey = idCallback == null ? null : idCallback.getIdKey(db, ds, ns, cl, sh, name);
 		String finalIdKey = StringUtil.isEmpty(idKey, false) ? KEY_ID : idKey;
 
 		// TODO 放在operate前？考虑性能、operate修改后再验证的值是否和原来一样
@@ -1298,7 +1324,7 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 					}
 
 					if (nkl.contains(k) || real.get(k) != null) {
-						real = parse(method, name, (M) v, real, database, schema, datasource, idCallback, parser, callback);
+						real = parse(method, name, (M) v, real, database, datasource, namespace, catalog, schema, idCallback, parser, callback);
 					}
 				}
 			}
