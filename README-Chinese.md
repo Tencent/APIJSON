@@ -377,11 +377,13 @@ https://github.com/Tencent/APIJSON/issues/187
 主项目 APIJSON 的贡献者们(6 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、gorm-plus 作者、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
 https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
 <br />
+<img width="815" height="181" alt="Screenshot 2026-04-18 at 05 28 48" src="https://github.com/user-attachments/assets/7a5a76f4-b1a2-4ac0-b7ee-901611adeab6" />
 
 生态周边项目的作者们(2 个腾讯工程师、1 个 BAT 技术专家、1 个微软工程师、2 个字节跳动工程师、1 个神州数码工程师&Apache dubbo2js 作者 等)：<br />
 https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories <br />
 https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <br />
 <br />
+<img width="816" height="182" alt="Screenshot 2026-04-18 at 05 29 36" src="https://github.com/user-attachments/assets/5bd53109-88e6-40b5-b343-7e653992f80d" />
 
 还有为 APIJSON 扫描代码贡献 Issue 的 [蚂蚁集团源伞](https://www.sourcebrella.com) 和 [奇安信代码卫士](https://github.com/QiAnXinCodeSafe)
 <div style="float:left">
