@@ -27,9 +27,32 @@ public abstract class JSR223ScriptExecutor<T, M extends Map<String, Object>, L e
 	
 	@Override
 	public ScriptExecutor<T, M, L> init() {
-		ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
-		scriptEngine = scriptEngineManager.getEngineByName(scriptEngineName());
+		scriptEngine = createScriptEngine();
 		return this;
+	}
+
+	protected ScriptEngine createScriptEngine() {
+		String name = scriptEngineName();
+		if ("nashorn".equalsIgnoreCase(name) || "javascript".equalsIgnoreCase(name)
+				|| "js".equalsIgnoreCase(name) || "ecmascript".equalsIgnoreCase(name)) {
+			try {
+				Class<?> factoryClass = Class.forName("jdk.nashorn.api.scripting.NashornScriptEngineFactory");
+				Class<?> filterClass = Class.forName("jdk.nashorn.api.scripting.ClassFilter");
+				Object filter = java.lang.reflect.Proxy.newProxyInstance(
+						filterClass.getClassLoader(),
+						new Class<?>[]{filterClass},
+						(proxy, method, methodArgs) -> isClassExposureAllowed((String) methodArgs[0]));
+				Object factory = factoryClass.getDeclaredConstructor().newInstance();
+				return (ScriptEngine) factoryClass.getMethod("getScriptEngine", filterClass).invoke(factory, filter);
+			} catch (Throwable e) {
+				Log.e(TAG, "create sandboxed Nashorn engine failed, falling back: " + e);
+			}
+		}
+		return new ScriptEngineManager().getEngineByName(name);
+	}
+
+	protected boolean isClassExposureAllowed(String className) {
+		return false;
 	}
 
 	protected abstract String scriptEngineName();
