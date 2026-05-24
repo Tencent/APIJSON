@@ -21,7 +21,7 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 	<dependency>
 	    <groupId>com.github.Tencent</groupId>
 	    <artifactId>APIJSON</artifactId>
-	    <version>LATEST</version>
+	    <version>8.1.8</version>
 	</dependency>
 ```
 
@@ -45,7 +45,7 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 #### 2. Add the APIJSON dependency in one of your modules(such as `app`)
 ```gradle
 	dependencies {
-	        implementation 'com.github.Tencent:APIJSON:latest'
+	        implementation 'com.github.Tencent:APIJSON:8.1.8'
 	}
 ```
 
