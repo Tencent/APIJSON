@@ -375,7 +375,7 @@ public abstract class AbstractObjectParser<T, M extends Map<String, Object>, L e
 
 					if (isSubquery == false) { // 解决 SQL 语法报错，子查询不能 EXPLAIN
 						Boolean exp = parser.getGlobalExplain();
-						if (sch != null) {
+						if (exp != null) {
 							sqlRequest.putIfAbsent(JSONMap.KEY_EXPLAIN, exp);
 						}
 
