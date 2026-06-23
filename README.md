@@ -141,7 +141,7 @@ You're gonna leave 'em all in awe, awe, awe. <br />
 
 **Tired with endless arguments about HTTP API dev or use?** <br/>
 **Use APIJSON-the ORM for providing infinity codeless CRUD APIs that fit almost all your needs.** <br />
-**Unfold the Power(In Your Soul) with ⭐Star & Clone.**
+**Unfold the Power(In Your Soul) with ⭐ Star & Clone.**
 
 ### APIJSON Show
 #### Postman test APIJSON
@@ -215,7 +215,7 @@ Please have a look at the [open issues](https://github.com/Tencent/APIJSON/issue
 
 Fork the project and send a pull request.<br />
 
-Please also ⭐Star the project!
+### Please also ⭐ Star(on the top right) this project!
 <br />
 
 ## <h2 id="5">5. Releases<h2/> 
@@ -322,5 +322,136 @@ a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, e
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
+### Ecosystem
+[APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) Demo projects with document and SQL files for APIJSON with different programming languages and different frameworks
+
+[apijson-orm](https://github.com/APIJSON/apijson-orm) APIJSON ORM library, Maven, Gradle, etc can be used for dependencies
+
+[apijson-framework](https://github.com/APIJSON/apijson-framework) APIJSON Server Framework for configuring access of roles and validation of arguments in database tables, then using APIJSON easier
+
+[apijson-router](https://github.com/APIJSON/apijson-router) A router plugin for APIJSON, expose undercontrolled RESTful-like HTTP API to public network, transfer to APIJSON request and execute
+  
+[apijson-column](https://github.com/APIJSON/apijson-column) A column plugin for Tencent APIJSON, supports Column Inverse and Column Mapping
+
+[apijson-jackson](https://github.com/APIJSON/apijson-jackson) A jackson plugin for APIJSON
+
+[apijson-fastjson2](https://github.com/APIJSON/apijson-fastjson2) A fastjson2 plugin for APIJSON
+
+[apijson-gson](https://github.com/APIJSON/apijson-gson) A gson plugin for APIJSON
+
+[apijson-milvus](https://github.com/APIJSON/apijson-milvus) An APIJSON plugin for Milvus - An AI vector database
+
+[apijson-influxdb](https://github.com/APIJSON/apijson-influxdb) An APIJSON plugin for InfluxDB - An IoT time-series database
+
+[apijson-mongodb](https://github.com/APIJSON/apijson-mongodb) An APIJSON plugin for MongoDB - A NoSQL database
+
+[apijson-cassandra](https://github.com/APIJSON/apijson-cassandra) An APIJSON plugin for Cassandra - A NoSQL database
+
+[APIAuto](https://github.com/TommyLemon/APIAuto) ☔ The most advanced tool for HTTP API. Machine learning no-code testing and AI assistant, generating codes and static analysis, generating comments and floating hints. Used by Tencent, SHEIN, TRANSSION, etc
+
+[CVAuto](https://github.com/TommyLemon/CVAuto) 👁 No-code, zero-annotation CV(Computer Vision) AI automated testing tool 🚀 Eliminates the need for extensive manual tasks such as drawing bounding boxes and labeling for image recognition algorithms
+
+[UnitAuto](https://github.com/TommyLemon/UnitAuto) ☀️ The most advanced unit testing way powered by machine learning. Coding-free, comprehensive and automatic testing for methods/functions. Used by Tencent, Kwai, a Fortune 500 company, etc
+
+[SQLAuto](https://github.com/TommyLemon/SQLAuto) 🔍 A smart SQL testing automation tool for databases, supports any CRUD, any template variables, generating argument combinations, generating lots of data rows
+
+[UIGO](https://github.com/TommyLemon/UIGO) 📱 Coding-free, fast, accurate and stable UI replayer 🚀 Incredible ±3px auto locating and ±2ms auto waiting. Used by Tencent, invited by WeChat team to share
+
+[APIJSONdocs](https://github.com/ruoranw/APIJSONdocs) APIJSON English documentation, provided a website to view
+
+[apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON Chinese documentation, provided a website to view
+
+[apijson.org](https://github.com/APIJSON/apijson.org) APIJSON official website
+
+[APIJSON.NET](https://github.com/liaozb/APIJSON.NET) APIJSON for C#, supports CRUD for MySQL, PostgreSQL, SQL Server, Oracle, SQLite
+
+[apijson-go](https://github.com/glennliao/apijson-go) APIJSON for Go, based on Go(>=1.18) + GoFrame2, support CRUD
+  
+[apijson-go](https://gitee.com/tiangao/apijson-go) APIJSON for Go, support CRUD, can directly run in Docker
+
+[apijson-hyperf](https://github.com/kvnZero/hyperf-APIJSON.git) APIJSON for PHP, based on Hyperf, supports MySQL
+
+[APIJSON-php](https://github.com/xianglong111/APIJSON-php) APIJSON for PHP, based on ThinkPHP，supports MySQL, PostgreSQL, SQL Server, Oracle, etc
+
+[apijson-php](https://github.com/qq547057827/apijson-php) APIJSON for PHP, based on ThinkPHP，supports MySQL, PostgreSQL, SQL Server, Oracle, etc
+
+[apijson-node](https://github.com/kevinaskin/apijson-node) APIJSON for Node.js, developed by a ByteDance engineer, provides demos for NestJS and Typeorm, as well as backend management
+
+[nestjs-apijson](https://github.com/yangzhouQS/nestjs-apijson) APIJSON for NestJS, supports CRUD, Joins for MySQL, PostgreSQL, SQLite (AI assisted)
+
+[uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) APIJSON for Python, supports CRUD for MySQL, PostgreSQL, SQL Server, Oracle, SQLite, etc
+
+[apijson-rust](https://github.com/APIJSON/apijson-rust) APIJSON for Rust, supports CRUD for MySQL and PostgreSQL (AI assisted)
+
+[APIJSONParser](https://github.com/Zerounary/APIJSONParser) An APIJSON Parser, dynamically parses JSON to SQL
+
+[FfApiJson](https://gitee.com/own_3_0/ff-api-json) An APIJSON Parser, parses JSON to SQL, supports multiple data sources
+
+[APIJSON-ToDo-Demo](https://github.com/jerrylususu/apijson_todo_demo) A simple TODO demo for APIJSON with customized authorization and authentication
+
+[apijson-learn](https://github.com/rainboy-learn/apijson-learn) APIJSON study note and analysis for source code
+
+[apijson-practice](https://github.com/vcoolwind/apijson-practice) A library for APIJSON parameter validation annotations and related demos, open-sourced by a BAT expert
+
+[apijson-db2](https://github.com/andream7/apijson-db2) Demo of APIJSON + IBM DB2 database, open-sourced by a Microsoft engineer
+
+[APIJSONDemo](https://github.com/qiujunlin/APIJSONDemo) Demo of APIJSON + ClickHouse database, open-sourced by a ByteDance engineer
+  
+[APIJSONDemo_ClickHouse](https://github.com/chenyanlann/APIJSONDemo_ClickHouse) Demo for APIJSON + SpringBoot + ClickHouse
+
+[APIJSONBoot_Hive](https://github.com/chenyanlann/APIJSONBoot_Hive) Demo for APIJSON + SpringBoot + Hive
+
+[apijson-sample](https://gitee.com/greyzeng/apijson-sample) Simple demo and tutorial for using APIJSON
+
+[apijson-examples](https://gitee.com/drone/apijson-examples) Demo for APIJSON with frontend web page, backend server and management system
+
+[apijson-ruoyi](https://github.com/daodol/apijson-ruoyi) APIJSON + RuoYi, provides online maintenance for database configuration, etc
+
+[light4j](https://github.com/xlongwei/light4j) Demo for APIJSON + Redis + light-4j - a microservices framework
+
+[SpringServer1.2-APIJSON](https://github.com/Airforce-1/SpringServer1.2-APIJSON) The smart Party building server provides interfaces for uploading and downloading files
+
+[apijson_template](https://github.com/abliger/apijson_template) APIJSON Java template, using Gradle to manage dependencie and building apps
+  
+[api-json-demo](https://gitee.com/hxdwd/api-json-demo) Demo for APIJSON to replace traditional ORM, compated Oracle transactions
+
+[ApiJsonByJFinal](https://gitee.com/zhiyuexin/ApiJsonByJFinal) Demo for APIJSON + JFinal - a popular web framework
+
+[bookmark](https://github.com/glennliao/bookmark) Online bookmark using goframe + apijson-go + vue3 + antd vue 4
+
+[apijson-go-demo](https://github.com/APIJSON/apijson-go-demo) Demo for apijson-go
+
+[apijson-go-ui](https://github.com/glennliao/apijson-go-ui) apijson-go UI config, supports access control, request rule configuration, etc
+
+[apijson-builder](https://github.com/pengxianggui/apijson-builder) A JavaScript client library providing RESTful-like functions for APIJSON
+
+[AbsGrade](https://github.com/APIJSON/AbsGrade) List cascading algorithm supports single-level comments in WeChat Moments, double-level comments in QQ Space, and multi-level (unlimited-level) folders in Baidu Cloud
+
+[APIJSON-Android-RxJava](https://github.com/TommyLemon/APIJSON-Android-RxJava) Practical project mimicking WeChat Moments updates, based on ZBLibrary(UI) + APIJSON(HTTP) + RxJava(Data)
+
+[Android-ZBLibrary](https://github.com/TommyLemon/Android-ZBLibrary) 🔥 An Android MVP Framework with many demos, detailed documents, simple usages and strict codes
+  
+[apijson-dynamic-datasource](https://github.com/wb04307201/apijson-dynamic-datasource) Based on APIJSON, this demo demonstrates dynamic data source switching and batch operations on the same data source to ensure transaction consistency
+  
+[xyerp](https://gitee.com/yinjg1997/xyerp) Low-code ERP based on APIJSON
+  
+[quick-boot](https://github.com/csx-bill/quick-boot/tree/master) Low-code system based on Spring Cloud 2022 + Spring Boot 3 + AMIS + APIJSON
+
+[apijson-query-spring-boot-starter](https://gitee.com/mingbaobaba/apijson-query-spring-boot-starter) A plugin for quickly building APIJSON query conditions
+
+[apijson-builder](https://github.com/yeli19950109/apijson-builder) A simplified TypeScript wrapper for APIJSON, easier to remember than directly constructing query JSON
+
+[lanmuc](https://gitee.com/element-admin/lanmuc) A platform for producing low-code backend APIs, compatible with both configuration-based and code-based APIs, enabling rapid API production and project deployment
+
+[review_plan](https://gitee.com/PPXcodeTry/review_plan) Review Reminder Web Version (Java Technology Practice Project)
+
+[apijson-nutz](https://github.com/vincent109/apijson-nutz) Demo for APIJSON + Nutz + NutzBoot
+
+[apijson-spring-boot](https://gitee.com/yunjiao-source/apijson-spring-boot) Springboot3 for APIJSON, using YAML to simplify configuration
+
+[APIJSONServer](https://github.com/cyber2jie/APIJSONServer) Data server based on APIJSON
+
+Thank you to all the enthusiastic authors for the contributions~ <br />
+### Please give them a ⭐ Star(on the top right) to support their hard works!
 
 <br />
