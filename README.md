@@ -15,6 +15,9 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">&nbsp;Video&nbsp;</a>
   <a href="http://apijson.cn/api">&nbsp;Test&nbsp;</a>
   <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
+  <a href="https://context7.com/tencent/apijson">Skills</a>
+  <a href="https://yro.ai/agents/apijson">MCP</a>
+  <a href="https://yro.ai/agents/apijson">A2A</a>
 </p>
 
 <p align="center" >
@@ -75,7 +78,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
 <p align="center" >
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android"><img src="https://img.shields.io/badge/Android-4.0%2B-brightgreen.svg?style=flat"></a>
   <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS"><img src="https://img.shields.io/badge/iOS-7%2B-brightgreen.svg?style=flat"></a>
-  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/JavaScript-ES6%2B-brightgreen.svg?style=flat"></a>
+  <a href="https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript"><img src="https://img.shields.io/badge/Web-ES6%2B-brightgreen.svg?style=flat"></a>
 </p>
 
 <p align="center" >
