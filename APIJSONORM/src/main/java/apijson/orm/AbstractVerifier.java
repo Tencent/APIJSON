@@ -1814,7 +1814,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		config.setTable(table);
 		param.forEach((key,value) -> config.putWhere(key, value, false));
 
-		SQLExecutor<T, M, L> executor = parser.getSQLExecutor();
+		SQLExecutor<T, M, L> executor = parser.createSQLExecutor();
+		executor.setParser(parser);
 		try {
 			M result = executor.execute(config, false);
 			if (result == null) {
@@ -1902,7 +1903,8 @@ public abstract class AbstractVerifier<T, M extends Map<String, Object>, L exten
 		}
 		param.forEach((key,value) -> config.putWhere(key,value, false));
 
-		SQLExecutor<T, M, L> executor = parser.getSQLExecutor();
+		SQLExecutor<T, M, L> executor = parser.createSQLExecutor();
+		executor.setParser(parser);
 		try {
 			M result = executor.execute(config, false);
 			if (result == null) {
