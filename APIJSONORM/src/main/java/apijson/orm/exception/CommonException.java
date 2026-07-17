@@ -250,6 +250,9 @@ public class CommonException extends Exception {
         else if (config.isDoris()) {
           db = SQLConfig.DATABASE_DORIS + " " + dbVersion;
         }
+        else if (config.isStarRocks()) {
+          db = SQLConfig.DATABASE_STARROCKS + " " + dbVersion;
+        }
         else if (config.isSnowflake()) {
           db = SQLConfig.DATABASE_SNOWFLAKE + " " + dbVersion;
         }

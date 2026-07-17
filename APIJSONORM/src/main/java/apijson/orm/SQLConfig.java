@@ -52,6 +52,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	String DATABASE_DUCKDB = "DUCKDB"; // https://duckdb.org
 	String DATABASE_SURREALDB = "SURREALDB"; // https://surrealdb.com
 	String DATABASE_OPENGAUSS = "OPENGAUSS"; // https://opengauss.org
+	String DATABASE_STARROCKS = "STARROCKS"; // https://docs.starrocks.io/zh/docs/quick_start/shared-nothing
 
 	String DATABASE_MQ = "MQ"; //
 
@@ -119,6 +120,7 @@ public interface SQLConfig<T, M extends Map<String, Object>, L extends List<Obje
 	boolean isSurrealDB();
 	boolean isOpenGauss();
 	boolean isDoris();
+	boolean isStarRocks();
 
 
 	// 暂时只兼容以上几种

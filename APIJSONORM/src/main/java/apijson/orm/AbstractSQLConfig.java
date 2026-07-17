@@ -178,6 +178,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 		DATABASE_LIST.add(DATABASE_SURREALDB);
 		DATABASE_LIST.add(DATABASE_OPENGAUSS);
 		DATABASE_LIST.add(DATABASE_DORIS);
+		DATABASE_LIST.add(DATABASE_STARROCKS);
 
 
 		RAW_MAP = new LinkedHashMap<>();  // 保证顺序，避免配置冲突等意外情况
@@ -1376,11 +1377,19 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	}
 
 	@Override
+	public boolean isStarRocks() {
+		return isStarRocks(gainSQLDatabase());
+	}
+	public static boolean isStarRocks(String db) {
+		return DATABASE_STARROCKS.equals(db);
+	}
+
+	@Override
 	public String getQuote() { // MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
 		if(isElasticsearch() || isManticore() || isIoTDB() || isSurrealDB()) {
 			return "";
 		}
-		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() || isDoris() ? "`" : "\"";
+		return isMySQL() || isMariaDB() || isTiDB() || isClickHouse() || isTDengine() || isMilvus() || isDoris() || isStarRocks() ? "`" : "\"";
 	}
 
 	public String quote(String s) {
