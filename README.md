@@ -18,6 +18,7 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://context7.com/tencent/apijson">Skills</a>
   <a href="https://yro.ai/agents/apijson">MCP</a>
   <a href="https://yro.ai/agents/apijson">A2A</a>
+  <a href="https://github.com/TommyLemon/A2API">A2API</a>
 </p>
 
 <p align="center" >
@@ -327,6 +328,8 @@ a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, e
 
 ### Ecosystem
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) Demo projects with document and SQL files for APIJSON with different programming languages and different frameworks
+
+[A2API](https://github.com/TommyLemon/A2API) AI generate UI once, API view/edit data everytime safely, quickly and stably. Chat agent to HTTP API to safely, quickly and stably add, view, edit or remove data in tables, forms or charts together with A2UI. 
 
 [apijson-orm](https://github.com/APIJSON/apijson-orm) APIJSON ORM library, Maven, Gradle, etc can be used for dependencies
 
