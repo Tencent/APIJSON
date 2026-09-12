@@ -197,9 +197,8 @@ https://github.com/Tencent/APIJSON/wiki
 
 * **解决十大痛点** (可帮前后端开发大幅提振开发效率、强力杜绝联调扯皮、巧妙规避文档缺陷、非常节省流量带宽)
 * **开发提速很大** (CRUD 零代码热更新全自动，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
-* **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
 * **社区影响力大** (GitHub 18K+ Star 在 400W Java 项目排名前 100，远超 FLAG, BAT 等国内外绝大部分开源项目)
-* **各项荣誉成就** (腾讯内外 5 个奖项、腾讯开源前五、腾讯后端 Star 第一、Trending 日周月榜大满贯 等)
+* **各项荣誉成就** (腾讯内外 5 个奖项、QECon 大会和 Gitee Meetup 分享、GitHub Trending 日周月榜大满贯 等)
 * **多样用户案例** (腾讯内有互娱、音乐、微信、云与智慧，外部有华为、华能、百度、快手、中兴、圆通、传音等)
 * **适用场景广泛** (社交聊天、阅读资讯、影音娱乐、办公学习 等各种 App、网站、小程序、公众号 等非金融类项目)
 * **周边生态丰富** (Android, iOS, Web 等各种 Demo、继承 JSON 的海量生态、零代码 接口测试 和 单元测试 工具等)
@@ -210,7 +209,7 @@ https://github.com/Tencent/APIJSON/wiki
 * **高质可靠代码** (代码严谨规范，蚂蚁集团源伞 Pinpoint 代码扫描分析报告平均每行代码 Bug 率低至 0.15%)
 * **兼容各种项目** (协议不限 HTTP，与其它库无冲突，对各类 Web 框架集成友好且提供 SpringBoot, JFinal 的示例)
 * **工程轻量小巧** (无第三方依赖，Jar 仅 263KB，Java 文件仅 68 个共 14864 行代码，例如 APIJSONORM 8.1.0)
-* **多年持续迭代** (自 2016 年起已连续维护 9 年多，80+ 贡献者、100+ 发版、3000+ 提交，不断更新迭代中...)
+* **十年持续迭代** (自 2016 年起已连续维护 9 年多，80+ 贡献者、100+ 发版、3000+ 提交，不断更新迭代中...)
 
 **按照一般互联网中小型项目情况可得出以下对比表格：**
 
@@ -402,7 +401,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 ### 统计分析 
 腾讯、华为、阿里巴巴、美团、字节跳动、百度、京东、网易、快手等和 Google, Apple, Microsoft, Amazon, Paypal, IBM, Shopee 等 <br >
 数百名知名大厂员工点了 Star，也有腾讯、华为、字节跳动、Microsoft、Zoom 等不少知名大厂员工提了 PR/Issue，感谢大家的支持~ <br >
-[![Stargazers over time](https://starchart.cc/Tencent/APIJSON.svg)](https://starchart.cc/Tencent/APIJSON)
+
 <img width="948" alt="image" src="https://github.com/Tencent/APIJSON/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
