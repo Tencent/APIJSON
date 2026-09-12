@@ -243,31 +243,28 @@ https://github.com/Tencent/APIJSON/wiki
 **中兴 duyijiang：**
 “感谢腾讯大大提供的框架，很好用”
 
-https://github.com/Tencent/APIJSON/issues/132#issuecomment-1106669540
+https://github.com/APIJSON/APIJSON/issues/132#issuecomment-1106669540
 
 <br />
 
 ### 常见问题
 #### 1.如何定制业务逻辑？
-在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 <br />
-https://github.com/Tencent/APIJSON/issues/101
+在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 [issues#101](https://github.com/APIJSON/APIJSON/issues/101)<br />
 
 #### 2.如何控制权限？
-在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度细分到行级 <br />
-https://github.com/Tencent/APIJSON/issues/12
+在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度细分到行级 [issues#12](https://github.com/APIJSON/APIJSON/issues/12) <br />
 
 #### 3.如何校验参数？
-在 Request 表配置校验规则 structure，提供 MUST、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 <br />
-https://github.com/Tencent/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
+在 Request 表配置校验规则 structure，提供 MUST、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 [Wiki](/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86) <br />
 
 更多常见问题及提问前必看 <br />
-https://github.com/Tencent/APIJSON/issues/36
+https://github.com/APIJSON/APIJSON/issues/36
 <br />
 
 ### 注意事项
 **请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感， <br />
 大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](/Document.md#3) 来调用 API ！**
-[#181](https://github.com/Tencent/APIJSON/issues/181)
+[#181](https://github.com/APIJSON/APIJSON/issues/181)
 <br />
 <br />
 <br />
@@ -299,7 +296,7 @@ https://github.com/Tencent/APIJSON/issues/36
 
 ### 使用登记
 如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(新的按登记顺序排列、专群优先答疑解惑)：<br />
-https://github.com/Tencent/APIJSON/issues/187 
+https://github.com/APIJSON/APIJSON/issues/187 
 <div style="float:left">
   <img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75">
@@ -401,11 +398,11 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 腾讯、华为、阿里巴巴、美团、字节跳动、百度、京东、网易、快手等和 Google, Apple, Microsoft, Amazon, Paypal, IBM, Shopee 等 <br >
 数百名知名大厂员工点了 Star，也有腾讯、华为、字节跳动、Microsoft、Zoom 等不少知名大厂员工提了 PR/Issue，感谢大家的支持~ <br >
 
-<img width="948" alt="image" src="https://github.com/Tencent/APIJSON/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
+<img width="948" alt="image" src="/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
-根据开源指南针报告，APIJSON Java 版已经是国内顶级、国际一流的 Java 开源项目了 [#518](https://github.com/Tencent/APIJSON/issues/518) <br >
+根据开源指南针报告，APIJSON Java 版已经是国内顶级、国际一流的 Java 开源项目了 [#518](https://github.com/APIJSON/APIJSON/issues/518) <br >
 <img width="1495" alt="image" src="https://user-images.githubusercontent.com/5738175/227158515-4e8bab65-a4b9-402b-b60b-29c08b4d930d.png">
 
 ### 规划及路线图
@@ -425,7 +422,7 @@ https://github.com/Tencent/APIJSON
 <b >导航目录：</b> [项目简介](#--apijson) [上手使用](#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B) 社区生态  &nbsp;&nbsp;&nbsp;&nbsp;  完整详细的导航目录 [点这里查看](/Navigation.md)<br />
 
 ### 技术交流
-如果有什么问题或建议可以 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)，交流技术，分享经验。 <br >
+如果有什么问题或建议可以 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/APIJSON/APIJSON/issues/36)，交流技术，分享经验。 <br >
 如果你解决了某些 bug，或者新增了一些功能，欢迎 [贡献代码](/CONTRIBUTING.md)，感激不尽~ <br >
   
 **开发者也是人，也需要工作、休息、恋爱、陪伴家人、走亲会友等，也有心情不好和身体病痛，** <br > 
@@ -440,10 +437,10 @@ https://github.com/Tencent/APIJSON
 如果你 [提 PR 登记了自己使用 APIJSON 的公司](/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
 作者只有解答完了这个专群里的全部问题，才看情况解答 Issue/问卷 里的问题(对 Issue/问卷 不保证解答、更不保证及时)；<br >
 之前的几个互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
-甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)。<br >
+甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/APIJSON/APIJSON/issues/36)。<br >
 
 如果你为 APIJSON 做出了以下任何一个贡献，我们将优先为你答疑解惑： <br >
-[提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
+[提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/APIJSON/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
 Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任职企业的用户 > 其他用户。
   
 
@@ -472,7 +469,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
 
-[APIJSON 接口调试实践](https://github.com/Tencent/APIJSON/issues/189)
+[APIJSON 接口调试实践](https://github.com/APIJSON/APIJSON/issues/189)
     
 [APIJSON-零代码接口和文档 JSON 协议 与 ORM 库](https://cloud.tencent.com/developer/article/2077042)
 
