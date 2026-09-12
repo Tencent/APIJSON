@@ -214,7 +214,7 @@ Complex production App like Twitter tweets<br />
 ## <h2 id="4">4. Contributing<h2/> 
 	
 We are always looking for more developers to help implementing new features, fix bugs, etc. <br />
-Please have a look at the [open issues](https://github.com/Tencent/APIJSON/issues) before opening a new one. <br />
+Please have a look at the [open issues](https://github.com/APIJSON/APIJSON/issues) before opening a new one. <br />
 
 Fork the project and send a pull request.<br />
 
@@ -223,7 +223,7 @@ Fork the project and send a pull request.<br />
 
 ## <h2 id="5">5. Releases<h2/> 
 	
-See the latest release [here](https://github.com/Tencent/APIJSON/releases)
+See the latest release [here](https://github.com/APIJSON/APIJSON/releases)
 
 <br />
 
@@ -232,14 +232,14 @@ See the latest release [here](https://github.com/Tencent/APIJSON/releases)
 https://github.com/TommyLemon <br />
 ![](https://github.com/user-attachments/assets/cef2bd45-b20d-469e-8781-1d647cf0477f)
 
-If you have any questions or suggestions, you can [create an issue](https://github.com/Tencent/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
+If you have any questions or suggestions, you can [create an issue](https://github.com/APIJSON/APIJSON/issues) or [send me an e-mail](mailto:tommylemon@qq.com).
 
 <br />
 <br />
 
 ### Users of APIJSON:
 
-https://github.com/Tencent/APIJSON/issues/187 
+[issues/187](https://github.com/APIJSON/APIJSON/issues/187)
 <div style="float:left">
   <img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75">
@@ -277,7 +277,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <img src="https://user-images.githubusercontent.com/5738175/195759031-bdcf4146-34cb-470c-a576-37d4e8fdca24.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759040-c7db99ff-3404-411d-b9ba-23547aaf1509.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759093-927fd5c3-9e1e-4648-8a35-c9d97630d086.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/10636d69-1d54-4666-aa8a-472c4ecb9413" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/10636d69-1d54-4666-aa8a-472c4ecb9413" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759079-ffc4483e-46a6-4e28-a0e0-25186ea008ab.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759186-a90a04db-0bd4-47bc-bab0-c160dcf48e53.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759204-7bdb09f5-2194-41c1-8e59-1461bd5ff4c1.png" height="75">
@@ -288,18 +288,18 @@ https://github.com/Tencent/APIJSON/issues/187
   <img src="https://user-images.githubusercontent.com/5738175/195759292-baa3924c-cf56-49cf-820c-d1e0a88cac3b.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652404-927a945e-22f5-42f8-99da-3a0863a5a3b5.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226653817-fcc57051-53e2-4c8d-bda6-3effba4032ee.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/7c71b8f9-f1cc-4305-8e97-c212f476e377" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/7c71b8f9-f1cc-4305-8e97-c212f476e377" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652405-561963cb-73e4-4d65-986c-ebfafcfe7b73.jpeg" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652403-92546c06-6dc4-4f46-b697-02a4073833f8.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226657098-d63c0dd1-24d0-4819-9045-b8213ab2e31f.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226657183-b6bbf284-3eb4-431e-8549-6356b7929e45.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
 
 <br />
 	
-[More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
+[More APIJSON Users](https://github.com/APIJSON/APIJSON/issues/73)
 
 ### Contributers of APIJSON:
 [Contributers](/CONTRIBUTING.md) for the APIJSON core project(7 Tencent engineers, 1 Microsoft engineer, 1 Zhihu architect, 1 Bytedance(TikTok) engineer, 1 NetEase engineer, 1 Zoom engineer, 1 YTO Express engineer, 1 Zhilian engineer, 1 UC student、3 SUSTech students, etc.): <br />
@@ -328,7 +328,7 @@ Thanks to all contributers of APIJSON!
 Hundreds of employees from big famous companies(Tencent, Google, Apple, Microsoft, Amazon, Huawei, Alibaba, Paypal, Meituan, Bytedance(TikTok), IBM, Baidu, JD, NetEase, Kuaishou, Shopee, etc.) starred, <br >
 a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, etc.) created PR/Issue, thank you all~ <br >
 
-<img width="948" alt="image" src="https://github.com/Tencent/APIJSON/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
+<img width="948" alt="image" src="https://github.com/APIJSON/APIJSON/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
@@ -343,7 +343,7 @@ a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, e
 
 [apijson-router](https://github.com/APIJSON/apijson-router) A router plugin for APIJSON, expose undercontrolled RESTful-like HTTP API to public network, transfer to APIJSON request and execute
   
-[apijson-column](https://github.com/APIJSON/apijson-column) A column plugin for Tencent APIJSON, supports Column Inverse and Column Mapping
+[apijson-column](https://github.com/APIJSON/apijson-column) A column plugin for APIJSON, supports Column Inverse and Column Mapping
 
 [apijson-jackson](https://github.com/APIJSON/apijson-jackson) A jackson plugin for APIJSON
 
