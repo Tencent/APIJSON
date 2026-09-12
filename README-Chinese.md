@@ -5,8 +5,8 @@
 <p align="center"> 🏆 实时 零代码、全功能、强安全 ORM 库 🚀 <br />后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
-  <a href="https://github.com/Tencent/APIJSON/blob/master/README.md">English</a>
-  <a href="https://github.com/Tencent/APIJSON/blob/master/Document-Chinese.md">通用文档</a>
+  <a href="/README.md">English</a>
+  <a href="/Document-Chinese.md">通用文档</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">视频教程</a>
   <a href="http://apijson.cn/api">测试用例</a>
   <a href="https://deepwiki.com/Tencent/APIJSON">AI 问答</a>
@@ -521,15 +521,15 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON – The No-Code API Revolution That Puts Developers in the Fast Lane](https://medevel.com/apijson)
 
-[APIJSON：17.4k Star！腾讯开源的零代码接口与文档协议及ORM库](https://mp.weixin.qq.com/s/gr84DmWKs4O6lcoT-iaV5w)
+[APIJSON：17.4k Star！零代码接口与文档协议及ORM库](https://mp.weixin.qq.com/s/gr84DmWKs4O6lcoT-iaV5w)
 
-[APIJSON腾讯开源的后端开发神器！！！](https://cloud.tencent.com/developer/article/2372220)
+[APIJSON-后端开发神器！！！](https://cloud.tencent.com/developer/article/2372220)
 
 [apijson 快速上手](https://blog.csdn.net/qq_16381291/article/details/147110737)
 
 [APIJSON快速入门-零后端代码，接口所见即所得](https://www.toutiao.com/article/7503844050689376783)
 
-[腾讯开源！零代码，全自动万能API接口](https://mp.weixin.qq.com/s/WWndAa68BqBfflWgL5592A)
+[零代码，全自动万能API接口](https://mp.weixin.qq.com/s/WWndAa68BqBfflWgL5592A)
 
 [APIJSON项目实战教程：零代码实现高效JSON接口开发](https://blog.csdn.net/gitblog_00682/article/details/148375065)
 
@@ -539,7 +539,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [API自动生成这么爽？实测腾讯APIJSON，零代码就能玩转后端接口！](https://mp.weixin.qq.com/s/DmMIGHHcZ783KobGecMxGg)
 
-[腾讯开源的 APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
+[APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
 
 [3分钟掌握APIJSON搜索黑科技：从模糊匹配到智能检索](https://blog.csdn.net/gitblog_00009/article/details/152403741)
 
@@ -681,11 +681,11 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 感谢热心的作者们的贡献，点亮 ⭐ Star 收藏/支持下他们吧~
 
   
-### 腾讯犀牛鸟开源人才培养计划
-https://github.com/Tencent/APIJSON/issues/229
+### 犀牛鸟开源人才培养计划
+https://github.com/APIJSON/APIJSON/issues/229
 
 
-####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
+#### qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
 
 APIJSON 接入 clickhouse 使用demo <br />
 https://github.com/qiujunlin/APIJSONDemo
@@ -761,9 +761,3 @@ APIJSON 上手教程：https://www.bilibili.com/video/BV1Pq4y1n7rJ
 ### 持续更新
 
 https://github.com/Tencent/APIJSON/commits/master
-
-### 工蜂主页
-https://git.code.tencent.com/Tencent_Open_Source/APIJSON
-
-### 码云主页
-https://gitee.com/Tencent/APIJSON
