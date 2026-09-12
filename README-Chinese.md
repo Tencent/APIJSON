@@ -266,7 +266,7 @@ https://github.com/Tencent/APIJSON/issues/36
 
 ### 注意事项
 **请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感， <br />
-大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](https://github.com/Tencent/APIJSON/blob/master/Document.md#3) 来调用 API ！**
+大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](/Document.md#3) 来调用 API ！**
 [#181](https://github.com/Tencent/APIJSON/issues/181)
 <br />
 <br />
@@ -377,8 +377,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [上海钰亿环保科技有限公司](#)
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(7 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、gorm-plus 作者、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
-https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
+[主项目 APIJSON 的贡献者们](/CONTRIBUTING.md)(7 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、gorm-plus 作者、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
 <br />
 <img width="815" height="181" alt="Screenshot 2026-04-18 at 05 28 48" src="https://github.com/user-attachments/assets/7a5a76f4-b1a2-4ac0-b7ee-901611adeab6" />
 
@@ -410,8 +409,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 <img width="1495" alt="image" src="https://user-images.githubusercontent.com/5738175/227158515-4e8bab65-a4b9-402b-b60b-29c08b4d930d.png">
 
 ### 规划及路线图
-新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
-https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
+[新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用](/Roadmap.md) <br />
 
 理论上所有支持 SQL 与 JDBC/ODBC 的软件，都可以用本项目对接 CRUD，待测试: <br />
 [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
@@ -428,8 +426,7 @@ https://github.com/Tencent/APIJSON
 
 ### 技术交流
 如果有什么问题或建议可以 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)，交流技术，分享经验。 <br >
-如果你解决了某些 bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
-https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
+如果你解决了某些 bug，或者新增了一些功能，欢迎 [贡献代码](/CONTRIBUTING.md)，感激不尽~ <br >
   
 **开发者也是人，也需要工作、休息、恋爱、陪伴家人、走亲会友等，也有心情不好和身体病痛，** <br > 
 **往往没有额外的时间精力顾及一些小问题，请理解和支持，开源要大家参与贡献才会更美好~** <br >
@@ -440,7 +437,7 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 **如果你已经多次得到帮助，却仍然只索取不贡献，那就别指望大家再帮你！** <br >
 **私聊作者请教技术问题 或者 频繁在互助群 @ 作者 可能会被拉黑/禁言/踢群，请尊重和理解，谢谢！** <br >
 
-如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
+如果你 [提 PR 登记了自己使用 APIJSON 的公司](/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
 作者只有解答完了这个专群里的全部问题，才看情况解答 Issue/问卷 里的问题(对 Issue/问卷 不保证解答、更不保证及时)；<br >
 之前的几个互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
 甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)。<br >
