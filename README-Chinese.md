@@ -192,14 +192,13 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 <br />
 
 ### 为什么选择 APIJSON？
-前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
-https://github.com/Tencent/APIJSON/wiki
+前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 [Wiki](https://github.com/APIJSON/APIJSON/wiki) <br />
 
 * **解决十大痛点** (可帮前后端开发大幅提振开发效率、强力杜绝联调扯皮、巧妙规避文档缺陷、非常节省流量带宽)
 * **开发提速很大** (CRUD 零代码热更新全自动，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
 * **社区影响力大** (GitHub 18K+ Star 在 400W Java 项目排名前 100，远超 FLAG, BAT 等国内外绝大部分开源项目)
 * **各项荣誉成就** (腾讯内外 5 个奖项、QECon 大会和 Gitee Meetup 分享、GitHub Trending 日周月榜大满贯 等)
-* **多样用户案例** (腾讯内有互娱、音乐、微信、云与智慧，外部有华为、华能、百度、快手、中兴、圆通、传音等)
+* **多样用户案例** (腾讯内有互娱、音乐、微信、云与智慧等，外部有华为、华能、百度、快手、中兴、圆通、传音等)
 * **适用场景广泛** (社交聊天、阅读资讯、影音娱乐、办公学习 等各种 App、网站、小程序、公众号 等非金融类项目)
 * **周边生态丰富** (Android, iOS, Web 等各种 Demo、继承 JSON 的海量生态、零代码 接口测试 和 单元测试 工具等)
 * **文档视频齐全** (项目介绍、快速上手、安装部署 等后端、前端、客户端的 图文解说、视频教程、代码注释 等)
@@ -257,14 +256,14 @@ https://github.com/APIJSON/APIJSON/issues/132#issuecomment-1106669540
 #### 3.如何校验参数？
 在 Request 表配置校验规则 structure，提供 MUST、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 [Wiki](/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86) <br />
 
-更多常见问题及提问前必看 <br />
-https://github.com/APIJSON/APIJSON/issues/36
+更多常见问题及提问前必看 [issues#36](https://github.com/APIJSON/APIJSON/issues/36) <br />
+
 <br />
 
 ### 注意事项
 **请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感， <br />
 大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](/Document.md#3) 来调用 API ！**
-[#181](https://github.com/APIJSON/APIJSON/issues/181)
+[issues#181](https://github.com/APIJSON/APIJSON/issues/181)
 <br />
 <br />
 <br />
@@ -334,7 +333,7 @@ https://github.com/APIJSON/APIJSON/issues/187
   <img src="https://user-images.githubusercontent.com/5738175/195759031-bdcf4146-34cb-470c-a576-37d4e8fdca24.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759040-c7db99ff-3404-411d-b9ba-23547aaf1509.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759093-927fd5c3-9e1e-4648-8a35-c9d97630d086.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/10636d69-1d54-4666-aa8a-472c4ecb9413" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/10636d69-1d54-4666-aa8a-472c4ecb9413" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759079-ffc4483e-46a6-4e28-a0e0-25186ea008ab.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759186-a90a04db-0bd4-47bc-bab0-c160dcf48e53.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759204-7bdb09f5-2194-41c1-8e59-1461bd5ff4c1.png" height="75">
@@ -345,14 +344,14 @@ https://github.com/APIJSON/APIJSON/issues/187
   <img src="https://user-images.githubusercontent.com/5738175/195759292-baa3924c-cf56-49cf-820c-d1e0a88cac3b.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652404-927a945e-22f5-42f8-99da-3a0863a5a3b5.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226653817-fcc57051-53e2-4c8d-bda6-3effba4032ee.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/7c71b8f9-f1cc-4305-8e97-c212f476e377" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/7c71b8f9-f1cc-4305-8e97-c212f476e377" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652405-561963cb-73e4-4d65-986c-ebfafcfe7b73.jpeg" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652403-92546c06-6dc4-4f46-b697-02a4073833f8.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226657098-d63c0dd1-24d0-4819-9045-b8213ab2e31f.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226657183-b6bbf284-3eb4-431e-8549-6356b7929e45.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
   <img src="https://gitee.com/linksame-ivan/APIJSON/blob/master/assets/logo-name.9f99700f.png" height="75">
 <br />
   
@@ -413,7 +412,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 
 ### 我要赞赏
 创作不易，坚持更难，右上角点亮 ⭐ Star 来收藏/支持下吧，谢谢 ^_^ <br />
-https://github.com/Tencent/APIJSON
+https://github.com/APIJSON/APIJSON
   
 <br />
 <br />
@@ -440,7 +439,7 @@ https://github.com/Tencent/APIJSON
 甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/APIJSON/APIJSON/issues/36)。<br >
 
 如果你为 APIJSON 做出了以下任何一个贡献，我们将优先为你答疑解惑： <br >
-[提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/APIJSON/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
+[提交了 PR 且被合并](https://github.com/APIJSON/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/APIJSON/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
 Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任职企业的用户 > 其他用户。
   
 
@@ -531,7 +530,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON：重新定义后端开发体验的零代码ORM框架](https://blog.csdn.net/gitblog_01177/article/details/155216163)
 
-[API自动生成这么爽？实测腾讯APIJSON，零代码就能玩转后端接口！](https://mp.weixin.qq.com/s/DmMIGHHcZ783KobGecMxGg)
+[API自动生成这么爽？实测 APIJSON，零代码就能玩转后端接口！](https://mp.weixin.qq.com/s/DmMIGHHcZ783KobGecMxGg)
 
 [APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
 
