@@ -1,6 +1,6 @@
-# APIJSONORM  [![](https://jitpack.io/v/Tencent/APIJSON.svg)](https://jitpack.io/#Tencent/APIJSON) [<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/Tencent/APIJSON)
-腾讯 [APIJSON](https://github.com/Tencent/APIJSON) ORM 库，可通过 Maven, Gradle 等远程依赖。<br />
-Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dependencies with Maven, Gradle, etc.
+# APIJSONORM  [![](https://jitpack.io/v/APIJSON/APIJSON.svg)](https://jitpack.io/#APIJSON/APIJSON) [<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/APIJSON/APIJSON)
+[APIJSON](https://github.com/APIJSON/APIJSON) ORM 库，可通过 Maven, Gradle 等远程依赖。<br />
+[APIJSON](https://github.com/APIJSON/APIJSON) ORM library for remote dependencies with Maven, Gradle, etc.
 
 ### Maven
 #### 1. 在 pom.xml 中添加 JitPack 仓库
@@ -19,9 +19,9 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 #### 2. Add the APIJSON dependency to pom.xml
 ```xml
 	<dependency>
-	    <groupId>com.github.Tencent</groupId>
+	    <groupId>com.github.APIJSON</groupId>
 	    <artifactId>APIJSON</artifactId>
-	    <version>8.1.8</version>
+	    <version>latest</version>
 	</dependency>
 ```
 
@@ -45,7 +45,7 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 #### 2. Add the APIJSON dependency in one of your modules(such as `app`)
 ```gradle
 	dependencies {
-	        implementation 'com.github.Tencent:APIJSON:8.1.8'
+	        implementation 'com.github.APIJSON:APIJSON:latest'
 	}
 ```
 
@@ -54,7 +54,7 @@ Tencent [APIJSON](https://github.com/Tencent/APIJSON) ORM library for remote dep
 
 ### FASTJSON 2
 #### Code
-https://github.com/Tencent/APIJSON/tree/fastjson2
+https://github.com/APIJSON/APIJSON/tree/fastjson2
 
 #### Maven
 https://mvnrepository.com/artifact/com.github.linushp/zikai-apijson/1.0

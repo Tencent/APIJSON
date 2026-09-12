@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 Tencent.  All rights reserved.
+/*Copyright (C) 2026 the APIJSON group.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -114,7 +114,7 @@ public class StringUtil {
 	public static String get(Object[] arr, String split) {
 		return get(arr, split, false);
 	}
-	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
+	//CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/182
 	/**获取string,为null则返回""
 	 * @param arr -the str arr given
 	 * @param split -the token used to split
@@ -192,7 +192,7 @@ public class StringUtil {
 	public static String getString(Object[] array, String split) {
 		return get(array, split, false);
 	}
-	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
+	//CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/182
 	/**FIXME 用 get 替代
 	 * @param array -the str array given
 	 * @param split -the token used to split
@@ -755,7 +755,7 @@ public class StringUtil {
 		return getNumber(s, false);
 	}
 
-	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
+	//CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/182
 	/**去掉string内所有非数字类型字符
 	 * @param s -string passed in
 	 * @param onlyStart 中间有非数字时只获取前面的数字
@@ -858,7 +858,7 @@ public class StringUtil {
 	public static String getPrice(String price) {
 		return getPrice(price, PRICE_FORMAT_DEFAULT);
 	}
-	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/182
+	//CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/182
 	/**获取价格，保留两位小数
 	 * @param price -price passed in
 	 * @param formatType 添加单位（元）

@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 Tencent.  All rights reserved.
+/*Copyright (C) 2026 the APIJSON group.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
