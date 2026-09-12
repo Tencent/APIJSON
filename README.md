@@ -1,7 +1,3 @@
-Tencent is pleased to support the open source community by making APIJSON available.   <br/>
-Copyright (C) 2020 Tencent.  All rights reserved. <br/>
-This source code is licensed under the Apache License Version 2.0 <br/>
-
 <h1 align="center" style="text-align:center;">
   APIJSON
 </h1>
@@ -17,7 +13,6 @@ This source code is licensed under the Apache License Version 2.0 <br/>
   <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
   <a href="https://context7.com/tencent/apijson">Skills</a>
   <a href="https://context7.com/tencent/apijson">MCP</a>
-  <a href="https://github.com/TommyLemon/A2API">A2API</a>
 </p>
 
 <p align="center" >
