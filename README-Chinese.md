@@ -398,7 +398,7 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 腾讯、华为、阿里巴巴、美团、字节跳动、百度、京东、网易、快手等和 Google, Apple, Microsoft, Amazon, Paypal, IBM, Shopee 等 <br >
 数百名知名大厂员工点了 Star，也有腾讯、华为、字节跳动、Microsoft、Zoom 等不少知名大厂员工提了 PR/Issue，感谢大家的支持~ <br >
 
-<img width="948" alt="image" src="/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
+<img width="948" alt="image" src="https://github.com/user-attachments/assets/e94428c8-c462-4a92-9447-0370098ad8ac" />
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
