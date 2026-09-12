@@ -6,8 +6,8 @@
 <p align="center">🏆 Real-Time no-code, powerful and secure ORM 🚀 <br />providing APIs and Docs without coding by Backend, and Frontend can customize response JSONs</p>
 
 <p align="center" >
-  <a href="https://github.com/Tencent/APIJSON/blob/master/README-Chinese.md">&nbsp;中文版&nbsp;</a>
-  <a href="https://github.com/Tencent/APIJSON/blob/master/Document.md">&nbsp;Document&nbsp;</a>
+  <a href="/README-Chinese.md">&nbsp;中文版&nbsp;</a>
+  <a href="/Document.md">&nbsp;Document&nbsp;</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">&nbsp;Video&nbsp;</a>
   <a href="http://apijson.cn/api">&nbsp;Test&nbsp;</a>
   <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
@@ -302,8 +302,7 @@ https://github.com/Tencent/APIJSON/issues/187
 [More APIJSON Users](https://github.com/Tencent/APIJSON/issues/73)
 
 ### Contributers of APIJSON:
-Contributers for the APIJSON core project(7 Tencent engineers, 1 Microsoft engineer, 1 Zhihu architect, 1 Bytedance(TikTok) engineer, 1 NetEase engineer, 1 Zoom engineer, 1 YTO Express engineer, 1 Zhilian engineer, 1 UC student、3 SUSTech students, etc.): <br />
-https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
+[Contributers](/CONTRIBUTING.md) for the APIJSON core project(7 Tencent engineers, 1 Microsoft engineer, 1 Zhihu architect, 1 Bytedance(TikTok) engineer, 1 NetEase engineer, 1 Zoom engineer, 1 YTO Express engineer, 1 Zhilian engineer, 1 UC student、3 SUSTech students, etc.): <br />
 <br />
 <img width="815" height="181" alt="Screenshot 2026-04-18 at 05 28 48" src="https://github.com/user-attachments/assets/7a5a76f4-b1a2-4ac0-b7ee-901611adeab6" />
 
