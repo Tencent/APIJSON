@@ -122,7 +122,7 @@ APIJSON 作为腾讯开源的知名热门项目，贡献代码除了可以给简
 
 ### 如果有比较大的改动
 
-以下是具体步骤：(如果使用本步骤，GitHub 可能不会把贡献者添加到 Contributors 中，推荐用以下 [详细的图文步骤](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md#%E8%AF%A6%E7%BB%86%E7%9A%84%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4%E5%8F%AF%E5%8F%82%E8%80%83%E4%BB%A5%E4%B8%8B%E4%BB%BB%E6%84%8F%E4%B8%80%E7%AF%87))
+以下是具体步骤：(如果使用本步骤，GitHub 可能不会把贡献者添加到 Contributors 中，推荐用以下 [详细的图文步骤](/CONTRIBUTING.md#%E8%AF%A6%E7%BB%86%E7%9A%84%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4%E5%8F%AF%E5%8F%82%E8%80%83%E4%BB%A5%E4%B8%8B%E4%BB%BB%E6%84%8F%E4%B8%80%E7%AF%87))
 
 #### Fork 仓库
 
@@ -143,7 +143,7 @@ $ git clone git@github.com:<yourname>/APIJSON.git
 ```bash
 $ git remote add <name> <url>
 # 例如：
-$ git remote add APIJSON git@github.com:Tencent/APIJSON.git
+$ git remote add APIJSON git@github.com:APIJSON/APIJSON.git
 ```
 
 #### 保持与 APIJSON 仓库的同步
