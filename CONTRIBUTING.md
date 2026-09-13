@@ -37,7 +37,7 @@
 - [qiujunlin](https://github.com/qiujunlin)(字节跳动工程师，还开源了 APIJSONDemo)
 - [HANXU2018](https://github.com/HANXU2018)(网易工程师，还开源了 APIJSON-DOC)
 - [hclown9804](https://github.com/hclown9804)(Datawhale)
-- [chenyanlann](https://github.com/chenyanlann)(还开源了 APIJSONDemo_ClickHouse)
+- [chenyanlann](https://github.com/chenyanlann)(还开源了 APIJSONDemo_ClickHouse, APIJSONBoot_Hive)
 - [haolingzhang1](https://github.com/haolingzhang1)(腾讯工程师，还开源了 APIJson--demo)
 - [jerrylususu](https://github.com/jerrylususu)(还开源了 apijson_todo_demo 和 apijson_role_extend)
 - [Dalezee](https://github.com/Dalezee)(还开源了 apijson_camp)
