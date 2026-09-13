@@ -1,13 +1,13 @@
-Tencent is pleased to support the open source community by making APIJSON available.  
+Copyright (C) 2026 the APIJSON group.  All rights reserved.
 
-Copyright (C) 2020 Tencent.  All rights reserved.
+## 💖 Acknowledgments
+
+This project has traveled a remarkable path of growth, shaped by individual passion and corporate recognition:
+*   **Corporate Sponsorship (2020–2026):** We extend our deepest gratitude to the project's former corporate sponsor and its open-source program office. During this period, the organization provided invaluable resources, internal and external advocacy, and official recognition—including a prestigious **Open Source Contribution Award** and grants awarded to the core maintainers. Their structured backing laid a rock-solid foundation for the project’s maturity.
+*   **The Open Source Community:** To all individual contributors, issue-reporters, and stagers—thank you for carrying the torch forward as we transition back to an independent, community-driven governance model.
 
 APIJSON is licensed under the Apache License Version 2.0.
 A copy of the Apache License Version 2.0 is included in this file.
-
-The copyright notice pertaining to the Tencent code in this repo was previously in the name of “THL A29 Limited.”
-That entity has now been de-registered.
-You should treat all previously distributed copies of the code as if the copyright notice was in the name of “Tencent.”
 
 Other dependencies and licenses:
 

@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 Tencent.  All rights reserved.
+/*Copyright (C) 2026 the APIJSON group.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -3253,7 +3253,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	public Object getWhere(String key) {
 		return getWhere(key, false);
 	}
-	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
+	//CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/48
 	/**
 	 * @param key - the key passed in
 	 * @param exactMatch - whether it is exact match
@@ -4886,7 +4886,7 @@ public abstract class AbstractSQLConfig<T, M extends Map<String, Object>, L exte
 	public String gainSetString() throws Exception {
 		return gainSetString(getMethod(), getContent(), ! isTest());
 	}
-	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
+	//CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/48
 	/**获取SET
 	 * @param method -the method used
 	 * @param content -the content map

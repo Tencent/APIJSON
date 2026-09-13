@@ -5,8 +5,8 @@
 <p align="center"> 🏆 实时 零代码、全功能、强安全 ORM 库 🚀 <br />后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构</p>
 
 <p align="center" >
-  <a href="https://github.com/Tencent/APIJSON/blob/master/README.md">English</a>
-  <a href="https://github.com/Tencent/APIJSON/blob/master/Document-Chinese.md">通用文档</a>
+  <a href="/README.md">English</a>
+  <a href="/Document-Chinese.md">通用文档</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">视频教程</a>
   <a href="http://apijson.cn/api">测试用例</a>
   <a href="https://deepwiki.com/Tencent/APIJSON">AI 问答</a>
@@ -191,15 +191,13 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 <br />
 
 ### 为什么选择 APIJSON？
-前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 <br />
-https://github.com/Tencent/APIJSON/wiki
+前后端 关于接口的 开发、文档、联调 等 10 大痛点解析 [Wiki](https://github.com/APIJSON/APIJSON/wiki) <br />
 
 * **解决十大痛点** (可帮前后端开发大幅提振开发效率、强力杜绝联调扯皮、巧妙规避文档缺陷、非常节省流量带宽)
 * **开发提速很大** (CRUD 零代码热更新全自动，APIJSONBoot 对比 SSM、SSH 等保守估计可提速 20 倍以上)
-* **腾讯官方开源** (使用 GitHub、Gitee、工蜂 等平台的官方账号开源，微信公众号、腾讯云+社区 等官方公告)
 * **社区影响力大** (GitHub 18K+ Star 在 400W Java 项目排名前 100，远超 FLAG, BAT 等国内外绝大部分开源项目)
-* **各项荣誉成就** (腾讯内外 5 个奖项、腾讯开源前五、腾讯后端 Star 第一、Trending 日周月榜大满贯 等)
-* **多样用户案例** (腾讯内有互娱、音乐、微信、云与智慧，外部有华为、华能、百度、快手、中兴、圆通、传音等)
+* **各项荣誉成就** (腾讯内外 5 个奖项、QECon 大会和 Gitee Meetup 演讲、GitHub Trending 日周月榜大满贯 等)
+* **多样用户案例** (腾讯内有互娱、音乐、微信、云与智慧等，外部有华为、华能、百度、快手、中兴、圆通、传音等)
 * **适用场景广泛** (社交聊天、阅读资讯、影音娱乐、办公学习 等各种 App、网站、小程序、公众号 等非金融类项目)
 * **周边生态丰富** (Android, iOS, Web 等各种 Demo、继承 JSON 的海量生态、零代码 接口测试 和 单元测试 工具等)
 * **文档视频齐全** (项目介绍、快速上手、安装部署 等后端、前端、客户端的 图文解说、视频教程、代码注释 等)
@@ -209,7 +207,7 @@ https://github.com/Tencent/APIJSON/wiki
 * **高质可靠代码** (代码严谨规范，蚂蚁集团源伞 Pinpoint 代码扫描分析报告平均每行代码 Bug 率低至 0.15%)
 * **兼容各种项目** (协议不限 HTTP，与其它库无冲突，对各类 Web 框架集成友好且提供 SpringBoot, JFinal 的示例)
 * **工程轻量小巧** (无第三方依赖，Jar 仅 263KB，Java 文件仅 68 个共 14864 行代码，例如 APIJSONORM 8.1.0)
-* **多年持续迭代** (自 2016 年起已连续维护 9 年多，80+ 贡献者、100+ 发版、3000+ 提交，不断更新迭代中...)
+* **十年持续迭代** (自 2016 年起已连续维护 9 年多，80+ 贡献者、100+ 发版、3000+ 提交，不断更新迭代中...)
 
 **按照一般互联网中小型项目情况可得出以下对比表格：**
 
@@ -223,7 +221,7 @@ https://github.com/Tencent/APIJSON/wiki
  
 ### 用户反馈
 **腾讯 IEG 数据产品开发组负责人 xinlin：**
-“腾讯的 APIJSON 开源方案，它可以做到零代码生成接口和文档，并且整个生成过程是自动化。当企业有元数据的时候，马上就可以获得接口”
+“APIJSON 开源方案，它可以做到零代码生成接口和文档，并且整个生成过程是自动化。当企业有元数据的时候，马上就可以获得接口”
 
 **腾讯科技 后台开发高级工程师 雷大锤：**
 “可以抽出时间来看apijson了，这个可以为T10做准备，也是业界很火的东西，可以提升个人影响力！”
@@ -243,31 +241,28 @@ https://github.com/Tencent/APIJSON/wiki
 **中兴 duyijiang：**
 “感谢腾讯大大提供的框架，很好用”
 
-https://github.com/Tencent/APIJSON/issues/132#issuecomment-1106669540
+https://github.com/APIJSON/APIJSON/issues/132#issuecomment-1106669540
 
 <br />
 
 ### 常见问题
 #### 1.如何定制业务逻辑？
-在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 <br />
-https://github.com/Tencent/APIJSON/issues/101
+在后端编写 远程函数，可以拿到 session、version、当前 JSON 对象、参数名称 等，然后对查到的数据自定义处理 [issues#101](https://github.com/APIJSON/APIJSON/issues/101)<br />
 
 #### 2.如何控制权限？
-在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度细分到行级 <br />
-https://github.com/Tencent/APIJSON/issues/12
+在 Access 表配置校验规则，默认不允许访问，需要对 每张表、每种角色、每种操作 做相应的配置，粒度细分到行级 [issues#12](https://github.com/APIJSON/APIJSON/issues/12) <br />
 
 #### 3.如何校验参数？
-在 Request 表配置校验规则 structure，提供 MUST、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 <br />
-https://github.com/Tencent/APIJSON/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
+在 Request 表配置校验规则 structure，提供 MUST、TYPE、VERIFY 等通用方法，可通过 远程函数 来完全自定义 [Wiki](/wiki#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86) <br />
 
-更多常见问题及提问前必看 <br />
-https://github.com/Tencent/APIJSON/issues/36
+更多常见问题及提问前必看 [issues#36](https://github.com/APIJSON/APIJSON/issues/36) <br />
+
 <br />
 
 ### 注意事项
 **请求参数 JSON 中表名、字段名、关键词及对应的值都是大小写敏感、逗号敏感、分号敏感、空格敏感、换行敏感， <br />
-大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](https://github.com/Tencent/APIJSON/blob/master/Document.md#3) 来调用 API ！**
-[#181](https://github.com/Tencent/APIJSON/issues/181)
+大部分情况都不允许空格和换行，表名以大写字母开头，不要想当然，请严格按照 [设计规范](/Document.md#3) 来调用 API ！**
+[issues#181](https://github.com/APIJSON/APIJSON/issues/181)
 <br />
 <br />
 <br />
@@ -299,7 +294,7 @@ https://github.com/Tencent/APIJSON/issues/36
 
 ### 使用登记
 如果您在使用 APIJSON，请让我们知道，您的使用对我们非常重要(新的按登记顺序排列、专群优先答疑解惑)：<br />
-https://github.com/Tencent/APIJSON/issues/187 
+https://github.com/APIJSON/APIJSON/issues/187 
 <div style="float:left">
   <img src="https://user-images.githubusercontent.com/5738175/126525534-461c3e33-57b1-4630-af7f-f1238ca4ab98.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/126525251-c05e64c6-6b60-4457-a46e-dea7dcfb80cd.png" height="75">
@@ -337,7 +332,7 @@ https://github.com/Tencent/APIJSON/issues/187
   <img src="https://user-images.githubusercontent.com/5738175/195759031-bdcf4146-34cb-470c-a576-37d4e8fdca24.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759040-c7db99ff-3404-411d-b9ba-23547aaf1509.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759093-927fd5c3-9e1e-4648-8a35-c9d97630d086.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/10636d69-1d54-4666-aa8a-472c4ecb9413" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/10636d69-1d54-4666-aa8a-472c4ecb9413" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759079-ffc4483e-46a6-4e28-a0e0-25186ea008ab.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759186-a90a04db-0bd4-47bc-bab0-c160dcf48e53.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/195759204-7bdb09f5-2194-41c1-8e59-1461bd5ff4c1.png" height="75">
@@ -348,14 +343,14 @@ https://github.com/Tencent/APIJSON/issues/187
   <img src="https://user-images.githubusercontent.com/5738175/195759292-baa3924c-cf56-49cf-820c-d1e0a88cac3b.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652404-927a945e-22f5-42f8-99da-3a0863a5a3b5.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226653817-fcc57051-53e2-4c8d-bda6-3effba4032ee.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/7c71b8f9-f1cc-4305-8e97-c212f476e377" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/7c71b8f9-f1cc-4305-8e97-c212f476e377" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652405-561963cb-73e4-4d65-986c-ebfafcfe7b73.jpeg" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226652403-92546c06-6dc4-4f46-b697-02a4073833f8.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226657098-d63c0dd1-24d0-4819-9045-b8213ab2e31f.png" height="75">
   <img src="https://user-images.githubusercontent.com/5738175/226657183-b6bbf284-3eb4-431e-8549-6356b7929e45.png" height="75">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
-  <img src="https://github.com/Tencent/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/9de7c199-4f29-44ed-9cb6-ad5e4fa44dfa" height="90">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/d7155a65-22f7-49c6-8354-c309f36e4065" height="60">
+  <img src="https://github.com/APIJSON/APIJSON/assets/5738175/f5a6ec8d-d9a8-49d0-a284-c50f1376647e" height="75">
   <img src="https://gitee.com/linksame-ivan/APIJSON/blob/master/assets/logo-name.9f99700f.png" height="75">
 <br />
   
@@ -377,8 +372,7 @@ https://github.com/Tencent/APIJSON/issues/187
  * [上海钰亿环保科技有限公司](#)
 
 ### 贡献者们
-主项目 APIJSON 的贡献者们(7 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、gorm-plus 作者、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
-https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md <br />
+[主项目 APIJSON 的贡献者们](/CONTRIBUTING.md)(7 个腾讯工程师、1 个微软工程师、1 个阿里云工程师、1 个字节跳动工程师、1 个网易工程师、1 个 Zoom 工程师、1 个圆通工程师、1 个知乎基础研发架构师、1 个智联招聘工程师、gorm-plus 作者、1 个美国加州大学学生、3 个 SUSTech 学生等)：<br />
 <br />
 <img width="815" height="181" alt="Screenshot 2026-04-18 at 05 28 48" src="https://github.com/user-attachments/assets/7a5a76f4-b1a2-4ac0-b7ee-901611adeab6" />
 
@@ -401,24 +395,23 @@ https://search.gitee.com/?skin=rec&type=repository&q=apijson&sort=stars_count <b
 ### 统计分析 
 腾讯、华为、阿里巴巴、美团、字节跳动、百度、京东、网易、快手等和 Google, Apple, Microsoft, Amazon, Paypal, IBM, Shopee 等 <br >
 数百名知名大厂员工点了 Star，也有腾讯、华为、字节跳动、Microsoft、Zoom 等不少知名大厂员工提了 PR/Issue，感谢大家的支持~ <br >
-[![Stargazers over time](https://starchart.cc/Tencent/APIJSON.svg)](https://starchart.cc/Tencent/APIJSON)
-<img width="948" alt="image" src="https://github.com/Tencent/APIJSON/assets/5738175/2784e399-11c8-4eeb-8257-44533df61827">
+
+<img width="948" alt="image" src="https://github.com/user-attachments/assets/e94428c8-c462-4a92-9447-0370098ad8ac" />
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
-根据开源指南针报告，APIJSON Java 版已经是国内顶级、国际一流的 Java 开源项目了 [#518](https://github.com/Tencent/APIJSON/issues/518) <br >
+根据开源指南针报告，APIJSON Java 版已经是国内顶级、国际一流的 Java 开源项目了 [#518](https://github.com/APIJSON/APIJSON/issues/518) <br >
 <img width="1495" alt="image" src="https://user-images.githubusercontent.com/5738175/227158515-4e8bab65-a4b9-402b-b60b-29c08b4d930d.png">
 
 ### 规划及路线图
-新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用 <br />
-https://github.com/Tencent/APIJSON/blob/master/Roadmap.md
+[新增功能、强化安全、提高性能、增强稳定、完善文档、丰富周边、推广使用](/Roadmap.md) <br />
 
 理论上所有支持 SQL 与 JDBC/ODBC 的软件，都可以用本项目对接 CRUD，待测试: <br />
 [OceanBase](https://www.oceanbase.com/docs/oceanbase/V2.2.50/ss-sr-select_daur3l), [Spark](https://spark.apache.org/docs/3.3.0/sql-ref-syntax-qry-select.html)(可用 Hive 对接), [Phoenix](http://phoenix.apache.org/language/index.html#select)(延伸支持 HBase)
 
 ### 我要赞赏
 创作不易，坚持更难，右上角点亮 ⭐ Star 来收藏/支持下吧，谢谢 ^_^ <br />
-https://github.com/Tencent/APIJSON
+https://github.com/APIJSON/APIJSON
   
 <br />
 <br />
@@ -427,9 +420,8 @@ https://github.com/Tencent/APIJSON
 <b >导航目录：</b> [项目简介](#--apijson) [上手使用](#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B) 社区生态  &nbsp;&nbsp;&nbsp;&nbsp;  完整详细的导航目录 [点这里查看](/Navigation.md)<br />
 
 ### 技术交流
-如果有什么问题或建议可以 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)，交流技术，分享经验。 <br >
-如果你解决了某些 bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/Tencent/APIJSON/pulls)，感激不尽~ <br >
-https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
+如果有什么问题或建议可以 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/APIJSON/APIJSON/issues/36)，交流技术，分享经验。 <br >
+如果你解决了某些 bug，或者新增了一些功能，欢迎 [贡献代码](/CONTRIBUTING.md)，感激不尽~ <br >
   
 **开发者也是人，也需要工作、休息、恋爱、陪伴家人、走亲会友等，也有心情不好和身体病痛，** <br > 
 **往往没有额外的时间精力顾及一些小问题，请理解和支持，开源要大家参与贡献才会更美好~** <br >
@@ -440,13 +432,13 @@ https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md
 **如果你已经多次得到帮助，却仍然只索取不贡献，那就别指望大家再帮你！** <br >
 **私聊作者请教技术问题 或者 频繁在互助群 @ 作者 可能会被拉黑/禁言/踢群，请尊重和理解，谢谢！** <br >
 
-如果你 [提 PR 登记了自己使用 APIJSON 的公司](https://github.com/Tencent/APIJSON/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
+如果你 [提 PR 登记了自己使用 APIJSON 的公司](/issues/187)，可以加 **企业用户支持专群**，作者亲自且优先答疑，<br >
 作者只有解答完了这个专群里的全部问题，才看情况解答 Issue/问卷 里的问题(对 Issue/问卷 不保证解答、更不保证及时)；<br >
 之前的几个互助群，由于大多数问题 在文档/Issue 已有答案却反复提 或者 缺少必要信息要来来回回沟通问清细节 已浪费太多时间，<br >
-甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/Tencent/APIJSON/issues/36)。<br >
+甚至有白嫖还把自己当大爷的自私自利伸手党输出情绪，我们不再支持，建议未登记企业的用户 [填问卷](https://wj.qq.com/s2/10971431/2a09) 或 [提 Issue](https://github.com/APIJSON/APIJSON/issues/36)。<br >
 
 如果你为 APIJSON 做出了以下任何一个贡献，我们将优先为你答疑解惑： <br >
-[提交了 PR 且被合并](https://github.com/Tencent/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/Tencent/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
+[提交了 PR 且被合并](https://github.com/APIJSON/APIJSON/pull/92)、[提交了优质 Issue](https://github.com/APIJSON/APIJSON/issues/189)、[发表了优质文章](https://blog.csdn.net/qq_41829492/article/details/88670940)、[开发了可用的生态项目](https://github.com/zhangchunlin/uliweb-apijson)， <br >
 Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任职企业的用户 > 其他用户。
   
 
@@ -475,7 +467,7 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [学习自动化接口APIJSON](https://www.jianshu.com/p/981a2a630c7b)
 
-[APIJSON 接口调试实践](https://github.com/Tencent/APIJSON/issues/189)
+[APIJSON 接口调试实践](https://github.com/APIJSON/APIJSON/issues/189)
     
 [APIJSON-零代码接口和文档 JSON 协议 与 ORM 库](https://cloud.tencent.com/developer/article/2077042)
 
@@ -521,15 +513,15 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON – The No-Code API Revolution That Puts Developers in the Fast Lane](https://medevel.com/apijson)
 
-[APIJSON：17.4k Star！腾讯开源的零代码接口与文档协议及ORM库](https://mp.weixin.qq.com/s/gr84DmWKs4O6lcoT-iaV5w)
+[APIJSON：17.4k Star！零代码接口与文档协议及ORM库](https://mp.weixin.qq.com/s/gr84DmWKs4O6lcoT-iaV5w)
 
-[APIJSON腾讯开源的后端开发神器！！！](https://cloud.tencent.com/developer/article/2372220)
+[APIJSON-后端开发神器！！！](https://cloud.tencent.com/developer/article/2372220)
 
 [apijson 快速上手](https://blog.csdn.net/qq_16381291/article/details/147110737)
 
 [APIJSON快速入门-零后端代码，接口所见即所得](https://www.toutiao.com/article/7503844050689376783)
 
-[腾讯开源！零代码，全自动万能API接口](https://mp.weixin.qq.com/s/WWndAa68BqBfflWgL5592A)
+[零代码，全自动万能API接口](https://mp.weixin.qq.com/s/WWndAa68BqBfflWgL5592A)
 
 [APIJSON项目实战教程：零代码实现高效JSON接口开发](https://blog.csdn.net/gitblog_00682/article/details/148375065)
 
@@ -537,9 +529,9 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [APIJSON：重新定义后端开发体验的零代码ORM框架](https://blog.csdn.net/gitblog_01177/article/details/155216163)
 
-[API自动生成这么爽？实测腾讯APIJSON，零代码就能玩转后端接口！](https://mp.weixin.qq.com/s/DmMIGHHcZ783KobGecMxGg)
+[API自动生成这么爽？实测 APIJSON，零代码就能玩转后端接口！](https://mp.weixin.qq.com/s/DmMIGHHcZ783KobGecMxGg)
 
-[腾讯开源的 APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
+[APIJSON：后端接口不用写了？](https://mp.weixin.qq.com/s/zhkfG4AQEsg0N87lhStwvw)
 
 [3分钟掌握APIJSON搜索黑科技：从模糊匹配到智能检索](https://blog.csdn.net/gitblog_00009/article/details/152403741)
 
@@ -681,11 +673,11 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 感谢热心的作者们的贡献，点亮 ⭐ Star 收藏/支持下他们吧~
 
   
-### 腾讯犀牛鸟开源人才培养计划
-https://github.com/Tencent/APIJSON/issues/229
+### 犀牛鸟开源人才培养计划
+https://github.com/APIJSON/APIJSON/issues/229
 
 
-####  qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
+#### qiujunlin **2.接入 presto/hive/clickhouse/db2 任意一个**
 
 APIJSON 接入 clickhouse 使用demo <br />
 https://github.com/qiujunlin/APIJSONDemo
@@ -761,9 +753,3 @@ APIJSON 上手教程：https://www.bilibili.com/video/BV1Pq4y1n7rJ
 ### 持续更新
 
 https://github.com/Tencent/APIJSON/commits/master
-
-### 工蜂主页
-https://git.code.tencent.com/Tencent_Open_Source/APIJSON
-
-### 码云主页
-https://gitee.com/Tencent/APIJSON

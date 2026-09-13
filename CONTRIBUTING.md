@@ -37,7 +37,7 @@
 - [qiujunlin](https://github.com/qiujunlin)(字节跳动工程师，还开源了 APIJSONDemo)
 - [HANXU2018](https://github.com/HANXU2018)(网易工程师，还开源了 APIJSON-DOC)
 - [hclown9804](https://github.com/hclown9804)(Datawhale)
-- [chenyanlann](https://github.com/chenyanlann)(还开源了 APIJSONDemo_ClickHouse)
+- [chenyanlann](https://github.com/chenyanlann)(还开源了 APIJSONDemo_ClickHouse, APIJSONBoot_Hive)
 - [haolingzhang1](https://github.com/haolingzhang1)(腾讯工程师，还开源了 APIJson--demo)
 - [jerrylususu](https://github.com/jerrylususu)(还开源了 apijson_todo_demo 和 apijson_role_extend)
 - [Dalezee](https://github.com/Dalezee)(还开源了 apijson_camp)
@@ -83,6 +83,7 @@
 - [014-code](https://github.com/014-code)(东信时代、用友、福州市榕智 工程师)
 - [Ziran Fu](https://github.com/fuziran)
 - [xiaoaozz](https://github.com/xiaoaozz)
+- [Henrique](https://github.com/henriquejsza)
 
 
 #### 其中特别致谢: <br/>
@@ -122,7 +123,7 @@ APIJSON 作为腾讯开源的知名热门项目，贡献代码除了可以给简
 
 ### 如果有比较大的改动
 
-以下是具体步骤：(如果使用本步骤，GitHub 可能不会把贡献者添加到 Contributors 中，推荐用以下 [详细的图文步骤](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md#%E8%AF%A6%E7%BB%86%E7%9A%84%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4%E5%8F%AF%E5%8F%82%E8%80%83%E4%BB%A5%E4%B8%8B%E4%BB%BB%E6%84%8F%E4%B8%80%E7%AF%87))
+以下是具体步骤：(如果使用本步骤，GitHub 可能不会把贡献者添加到 Contributors 中，推荐用以下 [详细的图文步骤](/CONTRIBUTING.md#%E8%AF%A6%E7%BB%86%E7%9A%84%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4%E5%8F%AF%E5%8F%82%E8%80%83%E4%BB%A5%E4%B8%8B%E4%BB%BB%E6%84%8F%E4%B8%80%E7%AF%87))
 
 #### Fork 仓库
 
@@ -143,7 +144,7 @@ $ git clone git@github.com:<yourname>/APIJSON.git
 ```bash
 $ git remote add <name> <url>
 # 例如：
-$ git remote add APIJSON git@github.com:Tencent/APIJSON.git
+$ git remote add APIJSON git@github.com:APIJSON/APIJSON.git
 ```
 
 #### 保持与 APIJSON 仓库的同步

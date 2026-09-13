@@ -1,11 +1,9 @@
-## 中文 | [English](https://github.com/Tencent/APIJSON/blob/master/Document.md)
+## 中文 | [English](/Document.md)
 
 # APIJSON 通用文档 
 本文是通用文档，只和 APIJSON 协议有关，和 C#, Go, Java, JavaScript, PHP, Python, TypeScript 等开发语言无关。 <br />
-具体开发语言相关的 配置、运行、部署 等文档见各个相关项目的文档，可以在首页点击对应语言的入口来查看。<br />
-https://github.com/Tencent/APIJSON
-![image](https://user-images.githubusercontent.com/5738175/134520081-a63d3817-321c-4e7b-9e03-73c6827a19c1.png)
-
+具体开发语言相关的 配置、运行、部署 等文档见各个相关项目的文档，可以在[首页](/README.md)点击对应语言的入口来查看。<br />
+![](https://github.com/user-attachments/assets/cc085b42-8678-4fa0-8ccc-b59f8322f28c)
 
 后端开发者可以先看 [图文入门教程1](http://apijson.cn/doc/zh/) 或 [图文入门教程2](https://hanxu2018.github.io/APIJSON-DOC/) （和本文档有出入的点以本文档为准。例如正则匹配 key? 已废弃，用 key~ 替代；例如 "@column":"store_id,sum(amt):totAmt" 中逗号 , 有误，应该用分号 ; 隔开 SQL 函数，改为 "@column":"store_id;sum(amt):totAmt"）
 

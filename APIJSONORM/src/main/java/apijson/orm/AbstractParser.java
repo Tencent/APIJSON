@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 Tencent.  All rights reserved.
+/*Copyright (C) 2026 the APIJSON group.  All rights reserved.
 
 This source code is licensed under the Apache License Version 2.0.*/
 
@@ -646,7 +646,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
 		onClose();
 
-		// CS304 Issue link: https://github.com/Tencent/APIJSON/issues/232
+		// CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/232
 		if (IS_PRINT_REQUEST_STRING_LOG || Log.DEBUG || error != null) {
 			Log.sl("\n\n\n", '<', "");
 			Log.fd(TAG, requestMethod + "/parseResponse  request = \n" + requestString + "\n\n");
@@ -829,8 +829,8 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 				+ " \n数据库: DEFAULT_DATABASE = " + AbstractSQLConfig.DEFAULT_DATABASE
 				+ " \nJDK: " + Log.JAVA_VERSION + " " + Log.OS_ARCH
 				+ " \nAPIJSON: " + Log.VERSION
-				+ " \n   \n【常见问题】：https://github.com/Tencent/APIJSON/issues/36"
-				+ " \n【通用文档】：https://github.com/Tencent/APIJSON/blob/master/Document.md"
+				+ " \n   \n【常见问题】：https://github.com/APIJSON/APIJSON/issues/36"
+				+ " \n【通用文档】：https://github.com/APIJSON/APIJSON/blob/master/Document.md"
 				+ " \n【视频教程】：https://search.bilibili.com/all?keyword=APIJSON");
 
 		msg = index >= 0 ? msg.substring(0, index) : msg;
@@ -985,11 +985,11 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 
                 msg += Log.KEY_SYSTEM_INFO_DIVIDER + "    浏览器打开以下链接查看解答"
                         + (isSQLException ? "" : apiatuoAndGitHubLink)
-                        //	GitHub Issue 搜索貌似是精准包含，不易找到答案 	+ "        \n\nGitHub： \n https://github.com/Tencent/APIJSON/issues?q=is%3Aissue+" + encodedMsg
+                        //	GitHub Issue 搜索貌似是精准包含，不易找到答案 	+ "        \n\nGitHub： \n https://github.com/APIJSON/APIJSON/issues?q=is%3Aissue+" + encodedMsg
                         + "        \n\n【Google】：\n https://www.google.com/search?q=" + encodedMsg
                         + "        \n\n【百度】：\n https://www.baidu.com/s?ie=UTF-8&wd=" + encodedMsg
                         + (isSQLException ? apiatuoAndGitHubLink : "")
-                        + "        \n\n都没找到答案？打开这个链接 \n https://github.com/Tencent/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
+                        + "        \n\n都没找到答案？打开这个链接 \n https://github.com/APIJSON/APIJSON/issues/new?assignees=&labels=&template=--bug.md  "
                         + " \n然后提交问题，推荐用以下模板修改，注意要换行保持清晰可读。"
                         + " \n【标题】：" + msg
                         + " \n【内容】：" + env + "\n\n**问题描述**\n" + msg
@@ -2012,7 +2012,7 @@ public abstract class AbstractParser<T, M extends Map<String, Object>, L extends
 		queryResultMap.put(path, result);
 		//		}
 	}
-	//CS304 Issue link: https://github.com/Tencent/APIJSON/issues/48
+	//CS304 Issue link: https://github.com/APIJSON/APIJSON/issues/48
 	/**根据路径获取值
 	 * @param valuePath -the path need to get value
 	 * @return parent == null ? valuePath : parent.get(keys[keys.length - 1])
