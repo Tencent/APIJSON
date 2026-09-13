@@ -83,6 +83,7 @@
 - [014-code](https://github.com/014-code)(东信时代、用友、福州市榕智 工程师)
 - [Ziran Fu](https://github.com/fuziran)
 - [xiaoaozz](https://github.com/xiaoaozz)
+- [Henrique](https://github.com/henriquejsza)
 
 
 #### 其中特别致谢: <br/>
