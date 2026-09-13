@@ -332,7 +332,7 @@ a lot of employees from big famous companies(Tencent, Huawei, Microsoft, Zoom, e
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752839-554d0204-aa5d-48d8-b838-d1a0cb0e8690.png">
 <img width="948" alt="image" src="https://user-images.githubusercontent.com/5738175/195752907-a09d9505-beb3-47a6-b7b9-079b58964b4d.png">
 
-APIJSON was shown as a top open source Java projects on OSSCompass [#518](https://github.com/APIJSON/APIJSON/issues/518) <br >
+APIJSON was shown as a top open source Java projects on OSS Compass [#518](https://github.com/APIJSON/APIJSON/issues/518) <br >
 <img width="1495" alt="image" src="https://user-images.githubusercontent.com/5738175/227158515-4e8bab65-a4b9-402b-b60b-29c08b4d930d.png">
 
 ### Ecosystem
