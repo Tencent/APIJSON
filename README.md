@@ -13,6 +13,7 @@
   <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
   <a href="https://context7.com/tencent/apijson">Skills</a>
   <a href="https://context7.com/tencent/apijson">MCP</a>
+  <a href="https://github.com/open-doubao-ai/OpenDoubao/tree/main/a2api">A2API</a>
 </p>
 
 <p align="center" >
