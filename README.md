@@ -10,9 +10,9 @@
   <a href="/Document.md">&nbsp;Document&nbsp;</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">&nbsp;Video&nbsp;</a>
   <a href="http://apijson.cn/api">&nbsp;Test&nbsp;</a>
-  <a href="https://deepwiki.com/Tencent/APIJSON">Ask AI</a>
-  <a href="https://context7.com/tencent/apijson">Skills</a>
-  <a href="https://context7.com/tencent/apijson">MCP</a>
+  <a href="https://deepwiki.com/APIJSON/APIJSON">Ask AI</a>
+  <a href="https://context7.com/apijson/apijson">Skills</a>
+  <a href="https://context7.com/apijson/apijson">MCP</a>
 </p>
 
 <p align="center" >
