@@ -538,6 +538,8 @@ Issue/问卷 一般解答顺序：贡献者 > 帮助他人的用户 > 提供任�
 
 [省心省力的后端神器——APIJSON.NET](https://mp.weixin.qq.com/s/8-E-a18NttdA0AAqasE0AQ)
 
+[APIJSON 三：demo 主体代码拆解与 TaoToken 统一 Key 接入实践](https://blog.csdn.net/weixin_35755823/article/details/166828717)
+
 ### 生态项目
 [APIJSON-Demo](https://github.com/APIJSON/APIJSON-Demo) APIJSON 各种语言、各种框架 的 使用示例项目、上手文档、测试数据 SQL 文件 等
 
