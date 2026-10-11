@@ -9,9 +9,9 @@
   <a href="/Document-Chinese.md">通用文档</a>
   <a href="https://search.bilibili.com/all?keyword=APIJSON">视频教程</a>
   <a href="http://apijson.cn/api">测试用例</a>
-  <a href="https://deepwiki.com/Tencent/APIJSON">AI 问答</a>
-  <a href="https://context7.com/tencent/apijson">Skills</a>
-  <a href="https://context7.com/tencent/apijson">MCP</a>
+  <a href="https://deepwiki.com/APIJSON/APIJSON">AI 问答</a>
+  <a href="https://context7.com/apijson/apijson">Skills</a>
+  <a href="https://context7.com/apijson/apijson">MCP</a>
   <a href="https://github.com/TommyLemon/A2API">A2API</a>
 </p>
 <p align="center" >
